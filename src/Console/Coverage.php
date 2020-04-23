@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Console;
 
+use Pest\Exceptions\ShouldNotHappen;
 use SebastianBergmann\CodeCoverage\Node\File;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
@@ -31,7 +32,7 @@ final class Coverage
             throw ShouldNotHappen::fromMessage(sprintf('Coverage not found in path: %s.', $reportPath));
         }
 
-        /** @var CodeCoverage $codeCoverage */
+        /** @var \SebastianBergmann\CodeCoverage\CodeCoverage $codeCoverage */
         $codeCoverage = require $reportPath;
         unlink($reportPath);
 
@@ -48,9 +49,9 @@ final class Coverage
 
         $output->writeln('');
 
-        /** @var Directory $report */
+        /** @var \SebastianBergmann\CodeCoverage\Node\Directory $report */
         $report = $codeCoverage->getReport();
-        /** @var File|Directory $file */
+        /** @var \SebastianBergmann\CodeCoverage\Node\File|\SebastianBergmann\CodeCoverage\Node\Directory $file */
         foreach ($report->getIterator() as $file) {
             if (!$file instanceof File) {
                 continue;

@@ -106,4 +106,4 @@
   ✓ visual snapshot of test suite on success
 
   Tests:  58 passed
-  Time:   1.87s
+  Time:   1.89s

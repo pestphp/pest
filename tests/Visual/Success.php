@@ -1,11 +1,15 @@
 <?php
 
 test('visual snapshot of test suite on success', function () {
-    $rootPath = dirname(__DIR__, 2);
-    $snapshot = implode(DIRECTORY_SEPARATOR, [$rootPath, '.temp', 'success.txt']);
+    $testsPath = dirname(__DIR__);
+    $snapshot = implode(DIRECTORY_SEPARATOR, [
+        $testsPath,
+        '.snapshots',
+        'success.txt',
+    ]);
 
-    $output = function () use ($rootPath) {
-        $process = (new Symfony\Component\Process\Process(['./bin/pest'], $rootPath, ['EXCLUDE' => 'integration', 'REBUILD_SNAPSHOTS' => false]));
+    $output = function () use ($testsPath) {
+        $process = (new Symfony\Component\Process\Process(['./bin/pest'], dirname($testsPath), ['EXCLUDE' => 'integration', 'REBUILD_SNAPSHOTS' => false]));
 
         $process->run();
 
