@@ -9,7 +9,7 @@
 .gitignore         export-ignore
 .travis.yml        export-ignore
 phpstan.neon       export-ignore
-reac               export-ignore
+rector.yaml        export-ignore
 phpunit.xml        export-ignore
 CHANGELOG.md       export-ignore
 CONTRIBUTING.md    export-ignore
