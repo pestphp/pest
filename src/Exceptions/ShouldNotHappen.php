@@ -17,7 +17,17 @@ final class ShouldNotHappen extends RuntimeException
      */
     public function __construct(Exception $exception)
     {
-        parent::__construct(sprintf('This should not happen - please create an new issue here: https://github.com/pestphp/pest.'), 1, $exception);
+        $message = $exception->getMessage();
+
+        parent::__construct(sprintf(<<<EOF
+
+This should not happen - please create an new issue here: https://github.com/pestphp/pest.
+
+- Issue: %s
+- PHP version: %s
+- Operating system: %s
+EOF
+            , $message, phpversion(), PHP_OS), 1, $exception);
     }
 
     /**

@@ -20,8 +20,8 @@ final class Coverage
     public static function getPath(): string
     {
         return implode(DIRECTORY_SEPARATOR, [
-            dirname(__DIR__, 1),
-            'temp',
+            dirname(__DIR__, 2),
+            '.temp',
             'coverage.php',
         ]);
     }
