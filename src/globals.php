@@ -98,7 +98,7 @@ function it(string $description, Closure $closure = null)
     return new TestCall(TestSuite::getInstance(), $filename, sprintf('it %s', $description), $closure);
 }
 
-function afterEach(Closure $closure): AfterEachCall
+function afterEach(Closure $closure = null): AfterEachCall
 {
     $filename = Backtrace::file();
 
@@ -108,7 +108,7 @@ function afterEach(Closure $closure): AfterEachCall
 /**
  * Runs the given `$closure` after all of the tests in current file.
  */
-function afterAll(Closure $closure): void
+function afterAll(Closure $closure = null): void
 {
     TestSuite::getInstance()->afterAll->set($closure);
 }

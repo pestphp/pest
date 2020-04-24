@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\PendingObjects;
 
 use Closure;
+use Pest\Support\Backtrace;
 use Pest\Support\ChainableClosure;
 use Pest\Support\HigherOrderMessageCollection;
 use Pest\Support\NullClosure;
@@ -60,5 +61,16 @@ final class BeforeEachCall
                 $proxies->chain($this);
             }, $this->closure)
         );
+    }
+
+    /**
+     * Saves the calls to be used on the target.
+     */
+    public function __call(string $name, array $arguments): self
+    {
+        $this->proxies
+            ->add(Backtrace::file(), Backtrace::line(), $name, $arguments);
+
+        return $this;
     }
 }

@@ -16,7 +16,7 @@
         }
     ],
     "require": {
-        "php": "^7.3",
+        "php": "^7.4",
         "nunomaduro/collision": "dev-stable",
         "phpunit/phpunit": "^9.1"
     },
