@@ -86,6 +86,7 @@
   ✓ it removes warnings
 
    PASS  Tests\Unit\Actions\ValidatesConfiguration
+  ✓ it throws exception when configuration not found
   ✓ it throws exception when `process isolation` is true
   ✓ it do not throws exception when `process isolation` is false
 
@@ -105,5 +106,5 @@
    PASS  Tests\Visual\Success
   ✓ visual snapshot of test suite on success
 
-  Tests:  58 passed
-  Time:   1.89s
+  Tests:  59 passed
+  Time:   1.93s

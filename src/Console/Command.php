@@ -11,7 +11,6 @@ use Pest\Actions\LoadStructure;
 use Pest\Actions\ValidatesConfiguration;
 use Pest\TestSuite;
 use PHPUnit\TextUI\Command as BaseCommand;
-use PHPUnit\TextUI\Configuration\Registry;
 use PHPUnit\TextUI\TestRunner;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -58,7 +57,7 @@ final class Command extends BaseCommand
          * Finally, let's validate the configuration. Making
          * sure all options are yet supported by Pest.
          */
-        ValidatesConfiguration::in(Registry::getInstance()->get($this->arguments['configuration'])->phpunit());
+        ValidatesConfiguration::in($this->arguments);
     }
 
     /**

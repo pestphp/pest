@@ -2,27 +2,41 @@
 
 use Pest\Actions\ValidatesConfiguration;
 use Pest\Exceptions\AttributeNotSupportedYet;
+use Pest\Exceptions\FileNotFound;
+
+it('throws exception when configuration not found', function () {
+    $this->expectException(FileNotFound::class);
+
+    ValidatesConfiguration::in([
+        'configuration' => 'foo',
+    ]);
+});
 
 it('throws exception when `process isolation` is true', function () {
     $this->expectException(AttributeNotSupportedYet::class);
     $this->expectExceptionMessage('The PHPUnit attribute `processIsolation` with value `true` is not supported yet.');
 
-    /* @var \PHPUnit\Framework\MockObject\MockObject $configuration */
-    ValidatesConfiguration::in(new class() {
-        public function processIsolation()
-        {
-            return true;
-        }
-    });
+    $filename = implode(DIRECTORY_SEPARATOR, [
+        dirname(__DIR__, 2),
+        'Fixtures',
+        'phpunit-in-isolation.xml',
+    ]);
+
+    ValidatesConfiguration::in([
+        'configuration' => $filename,
+    ]);
 });
 
 it('do not throws exception when `process isolation` is false', function () {
-    ValidatesConfiguration::in(new class() {
-        public function processIsolation()
-        {
-            return false;
-        }
-    });
+    $filename = implode(DIRECTORY_SEPARATOR, [
+        dirname(__DIR__, 2),
+        'Fixtures',
+        'phpunit-not-in-isolation.xml',
+    ]);
+
+    ValidatesConfiguration::in([
+        'configuration' => $filename,
+    ]);
 
     assertTrue(true);
 });
