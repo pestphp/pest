@@ -33,7 +33,9 @@ final class LoadStructure
     {
         $testsPath = $rootPath . DIRECTORY_SEPARATOR . 'tests';
 
-        $load = fn ($filename) => file_exists($filename) && (bool) FileLoader::checkAndLoad($filename);
+        $load = function ($filename): bool {
+            return file_exists($filename) && (bool) FileLoader::checkAndLoad($filename);
+        };
 
         foreach (self::STRUCTURE as $filename) {
             $filename = sprintf('%s%s%s', $testsPath, DIRECTORY_SEPARATOR, $filename);

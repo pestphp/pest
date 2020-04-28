@@ -18,23 +18,31 @@ final class AfterEachCall
 {
     /**
      * Holds the test suite.
+     *
+     * @var TestSuite
      */
-    private TestSuite $testSuite;
+    private $testSuite;
 
     /**
      * Holds the filename.
+     *
+     * @var string
      */
-    private string $filename;
+    private $filename;
 
     /**
      * Holds the before each closure.
+     *
+     * @var Closure
      */
-    private Closure $closure;
+    private $closure;
 
     /**
      * Holds calls that should be proxied.
+     *
+     * @var HigherOrderMessageCollection
      */
-    private HigherOrderMessageCollection $proxies;
+    private $proxies;
 
     /**
      * Creates a new instance of before each call.

@@ -17,43 +17,59 @@ final class TestSuite
 {
     /**
      * Holds the tests repository.
+     *
+     * @var TestRepository
      */
-    public TestRepository $tests;
+    public $tests;
 
     /**
      * Wether should show the coverage or not.
+     *
+     * @var bool
      */
-    public bool $coverage = false;
+    public $coverage = false;
 
     /**
      * Holds the before each repository.
+     *
+     * @var BeforeEachRepository
      */
-    public BeforeEachRepository $beforeEach;
+    public $beforeEach;
 
     /**
      * Holds the before all repository.
+     *
+     * @var BeforeAllRepository
      */
-    public BeforeAllRepository $beforeAll;
+    public $beforeAll;
 
     /**
      * Holds the after each repository.
+     *
+     * @var AfterEachRepository
      */
-    public AfterEachRepository $afterEach;
+    public $afterEach;
 
     /**
      * Holds the after all repository.
+     *
+     * @var AfterAllRepository
      */
-    public AfterAllRepository $afterAll;
+    public $afterAll;
 
     /**
      * Holds the root path.
+     *
+     * @var string
      */
-    public string $rootPath;
+    public $rootPath;
 
     /**
      * Holds an instance of the test suite.
+     *
+     * @var TestSuite
      */
-    private static TestSuite $instance;
+    private static $instance;
 
     /**
      * Creates a new instance of the test suite.

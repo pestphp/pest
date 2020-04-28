@@ -18,8 +18,10 @@ final class TestCall
      * Holds the test case factory.
      *
      * @readonly
+     *
+     * @var TestCaseFactory
      */
-    private TestCaseFactory $testCaseFactory;
+    private $testCaseFactory;
 
     /**
      * Creates a new instance of a pending test call.

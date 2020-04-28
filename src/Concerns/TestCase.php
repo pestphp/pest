@@ -19,13 +19,17 @@ trait TestCase
     /**
      * The test case description. Contains the first
      * argument of global functions like `it` and `test`.
+     *
+     * @var string
      */
-    private string $__description;
+    private $__description;
 
     /**
      * Holds the test closure function.
+     *
+     * @var Closure
      */
-    private Closure $__test;
+    private $__test;
 
     /**
      * Creates a new instance of the test case.

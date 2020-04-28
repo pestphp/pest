@@ -13,22 +13,28 @@ final class HigherOrderMessage
      * The filename where the function was originally called.
      *
      * @readonly
+     *
+     * @var string
      */
-    public string $filename;
+    public $filename;
 
     /**
      * The line where the function was originally called.
      *
      * @readonly
+     *
+     * @var int
      */
-    public int $line;
+    public $line;
 
     /**
      * The method name.
      *
      * @readonly
+     *
+     * @var string
      */
-    public string $methodName;
+    public $methodName;
 
     /**
      * The arguments.
@@ -37,7 +43,7 @@ final class HigherOrderMessage
      *
      * @readonly
      */
-    public array $arguments;
+    public $arguments;
 
     /**
      * Creates a new higher order message.

@@ -3,7 +3,9 @@
 use Pest\Support\Backtrace;
 
 it('gets file name from called file', function () {
-    $a = fn () => Backtrace::file();
+    $a = function () {
+        return Backtrace::file();
+    };
 
     assertEquals(__FILE__, $a());
 });

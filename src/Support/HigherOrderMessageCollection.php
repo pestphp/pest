@@ -17,7 +17,7 @@ final class HigherOrderMessageCollection
     /**
      * @var array<int, HigherOrderMessage>
      */
-    private array $messages = [];
+    private $messages = [];
 
     /**
      * Adds a new higher order message to the collection.

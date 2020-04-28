@@ -2,8 +2,13 @@
 
 $state = new stdClass();
 
-beforeEach(fn () => $this->state = $state);
-afterEach(fn () => $this->state->bar = 2);
+beforeEach(function () use ($state) {
+    $this->state = $state;
+});
+
+afterEach(function () use ($state) {
+    $this->state->bar = 2;
+});
 
 it('does not get executed before the test', function () {
     assertFalse(property_exists($this->state, 'bar'));

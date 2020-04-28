@@ -17,19 +17,21 @@ final class UsesCall
      *
      * @var array<int, string>
      */
-    private array $classAndTraits;
+    private $classAndTraits;
 
     /**
      * Holds the base dirname here the uses call was performed.
+     *
+     * @var string
      */
-    private string $filename;
+    private $filename;
 
     /**
      * Holds the targets of the uses.
      *
      * @var array<int, string>
      */
-    private array $targets;
+    private $targets;
 
     /**
      * Creates a new instance of a pending test uses.
@@ -51,10 +53,14 @@ final class UsesCall
      */
     public function in(string ...$targets): void
     {
-        $targets = array_map(fn ($path) => $path[0] === DIRECTORY_SEPARATOR ? $path : implode(DIRECTORY_SEPARATOR, [
-            dirname($this->filename),
-            $path,
-        ]), $targets);
+        $targets = array_map(function ($path): string {
+            return $path[0] === DIRECTORY_SEPARATOR
+                ? $path
+                : implode(DIRECTORY_SEPARATOR, [
+                    dirname($this->filename),
+                    $path,
+                ]);
+        }, $targets);
 
         $this->targets = array_map(function ($target): string {
             $realTarget = realpath($target);

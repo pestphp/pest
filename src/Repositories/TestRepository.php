@@ -19,12 +19,12 @@ final class TestRepository
     /**
      * @var array<string, TestCaseFactory>
      */
-    private array $state = [];
+    private $state = [];
 
     /**
      * @var array<string, array<int, string>>
      */
-    private array $uses = [];
+    private $uses = [];
 
     /**
      * Counts the number of test cases.
@@ -39,7 +39,9 @@ final class TestRepository
      */
     public function build(TestSuite $testSuite, callable $each): void
     {
-        $startsWith = fn ($target, $directory) => Str::startsWith($target, $directory . DIRECTORY_SEPARATOR);
+        $startsWith = function (string $target, string $directory): bool {
+            return Str::startsWith($target, $directory . DIRECTORY_SEPARATOR);
+        };
 
         foreach ($this->uses as $path => $classOrTraits) {
             $setClassName = function (TestCaseFactory $testCase, string $key) use ($path, $classOrTraits, $startsWith): void {

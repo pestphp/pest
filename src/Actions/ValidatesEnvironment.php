@@ -29,7 +29,9 @@ final class ValidatesEnvironment
     {
         $rootPath = $testSuite->rootPath;
 
-        $exists = fn ($neededFile) => file_exists(sprintf('%s%s%s', $rootPath, DIRECTORY_SEPARATOR, $neededFile));
+        $exists = function ($neededFile) use ($rootPath): bool {
+            return file_exists(sprintf('%s%s%s', $rootPath, DIRECTORY_SEPARATOR, $neededFile));
+        };
 
         foreach (self::NEEDED_FILES as $neededFile) {
             if (!$exists($neededFile)) {

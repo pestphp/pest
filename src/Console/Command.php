@@ -21,13 +21,17 @@ final class Command extends BaseCommand
 {
     /**
      * Holds the current testing suite.
+     *
+     * @var TestSuite
      */
-    private TestSuite $testSuite;
+    private $testSuite;
 
     /**
      * Holds the current console output.
+     *
+     * @var OutputInterface
      */
-    private OutputInterface $output;
+    private $output;
 
     /**
      * Creates a new instance of the command class.

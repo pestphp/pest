@@ -20,7 +20,7 @@ final class Datasets
      *
      * @var array<string, \Closure|iterable>
      */
-    private static array $datasets = [];
+    private static $datasets = [];
 
     /**
      * Sets the given.
@@ -69,7 +69,7 @@ final class Datasets
         }
 
         if ($data instanceof Traversable) {
-            $data = [...$data];
+            $data = iterator_to_array($data);
         }
 
         $namedData = [];

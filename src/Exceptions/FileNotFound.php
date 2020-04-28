@@ -17,6 +17,6 @@ final class FileNotFound extends InvalidArgumentException implements ExceptionIn
      */
     public function __construct(string $filename)
     {
-        parent::__construct(sprintf('The file or folder with the name `%s` not found.`.', $filename));
+        parent::__construct(sprintf('The file or folder with the name `%s` not found.', $filename));
     }
 }

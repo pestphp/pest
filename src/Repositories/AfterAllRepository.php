@@ -17,7 +17,7 @@ final class AfterAllRepository
     /**
      * @var array<string, Closure>
      */
-    private array $state = [];
+    private $state = [];
 
     /**
      * Runs the given closure for each after all.

@@ -22,22 +22,28 @@ final class TestCaseFactory
      * Holds the test filename.
      *
      * @readonly
+     *
+     * @var string
      */
-    public string $filename;
+    public $filename;
 
     /**
      * Holds the test description.
      *
      * @readonly
+     *
+     * @var string
      */
-    public string $description;
+    public $description;
 
     /**
      * Holds the test closure.
      *
      * @readonly
+     *
+     * @var Closure
      */
-    public Closure $test;
+    public $test;
 
     /**
      * Holds the dataset, if any.
@@ -48,35 +54,43 @@ final class TestCaseFactory
 
     /**
      * The FQN of the test case class.
+     *
+     * @var string
      */
-    public string $class = TestCase::class;
+    public $class = TestCase::class;
 
     /**
      * An array of FQN of the class traits.
      *
      * @var array <int, string>
      */
-    public array $traits = [
+    public $traits = [
         Concerns\TestCase::class,
     ];
 
     /**
      * Holds the higher order messages
      *  for the factory that are proxyble.
+     *
+     * @var HigherOrderMessageCollection
      */
-    public HigherOrderMessageCollection $factoryProxies;
+    public $factoryProxies;
 
     /**
      * Holds the higher order
      * messages that are proxyble.
+     *
+     * @var HigherOrderMessageCollection
      */
-    public HigherOrderMessageCollection $proxies;
+    public $proxies;
 
     /**
      * Holds the higher order
      * messages that are chainable.
+     *
+     * @var HigherOrderMessageCollection
      */
-    public HigherOrderMessageCollection $chains;
+    public $chains;
 
     /**
      * Creates a new anonymous test case pending object.
@@ -144,7 +158,9 @@ final class TestCaseFactory
         }
 
         $hasPrintableTestCaseClassFQN = sprintf('\%s', HasPrintableTestCaseName::class);
-        $traitsCode                   = sprintf('use %s;', implode(', ', array_map(fn ($trait) => sprintf('\%s', $trait), $this->traits)));
+        $traitsCode                   = sprintf('use %s;', implode(', ', array_map(function ($trait): string {
+            return sprintf('\%s', $trait);
+        }, $this->traits)));
 
         $partsFQN  = explode('\\', $classFQN);
         $className = array_pop($partsFQN);
@@ -157,7 +173,7 @@ final class TestCaseFactory
             final class $className extends $baseClass implements $hasPrintableTestCaseClassFQN {
                 $traitsCode
 
-                private static string \$__filename = '$filename';
+                private static \$__filename = '$filename';
             }
         ");
 
