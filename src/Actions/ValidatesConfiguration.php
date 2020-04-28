@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pest\Actions;
 
 use Pest\Exceptions\AttributeNotSupportedYet;
-use Pest\Exceptions\FileNotFound;
+use Pest\Exceptions\FileOrFolderNotFound;
 use PHPUnit\TextUI\Configuration\Configuration;
 use PHPUnit\TextUI\Configuration\Registry;
 
@@ -22,7 +22,7 @@ final class ValidatesConfiguration
     public static function in($arguments): void
     {
         if (!array_key_exists('configuration', $arguments) || !file_exists($arguments['configuration'])) {
-            throw new FileNotFound('phpunit.xml');
+            throw new FileOrFolderNotFound('phpunit.xml');
         }
 
         $configuration = Registry::getInstance()

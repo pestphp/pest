@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Actions;
 
-use Pest\Exceptions\FileNotFound;
+use Pest\Exceptions\FileOrFolderNotFound;
 use Pest\TestSuite;
 
 /**
@@ -35,7 +35,7 @@ final class ValidatesEnvironment
 
         foreach (self::NEEDED_FILES as $neededFile) {
             if (!$exists($neededFile)) {
-                throw new FileNotFound($neededFile);
+                throw new FileOrFolderNotFound($neededFile);
             }
         }
     }

@@ -10,7 +10,7 @@ use Symfony\Component\Console\Exception\ExceptionInterface;
 /**
  * @internal
  */
-final class FileNotFound extends InvalidArgumentException implements ExceptionInterface
+final class FileOrFolderNotFound extends InvalidArgumentException implements ExceptionInterface
 {
     /**
      * Creates a new instance of file not found.

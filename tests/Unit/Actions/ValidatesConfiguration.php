@@ -2,10 +2,10 @@
 
 use Pest\Actions\ValidatesConfiguration;
 use Pest\Exceptions\AttributeNotSupportedYet;
-use Pest\Exceptions\FileNotFound;
+use Pest\Exceptions\FileOrFolderNotFound;
 
 it('throws exception when configuration not found', function () {
-    $this->expectException(FileNotFound::class);
+    $this->expectException(FileOrFolderNotFound::class);
 
     ValidatesConfiguration::in([
         'configuration' => 'foo',

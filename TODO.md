@@ -1,4 +1,3 @@
-- Lower to PHP 7.3
 - Pest\Exceptions\FileNotFound to Pest\Exceptions\FileOrFolderNotFound
-- Move phpunit file exists to the validates enviroment ...
+- Move phpunit file exists to the validates enviroment
 - Create a default phpunit.xml
