@@ -1,2 +1,0 @@
-- Move phpunit file exists to the validates enviroment
-- Create a default phpunit.xml
