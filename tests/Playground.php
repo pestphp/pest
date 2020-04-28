@@ -1,5 +1,5 @@
 <?php
 
-test('test', function () {
+test('basic', function () {
     assertTrue(true);
 });

@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Pest\Exceptions;
 
 use InvalidArgumentException;
+use Symfony\Component\Console\Exception\ExceptionInterface;
 
 /**
  * @internal
  */
-final class TestCaseClassOrTraitNotFound extends InvalidArgumentException
+final class TestCaseClassOrTraitNotFound extends InvalidArgumentException implements ExceptionInterface
 {
     /**
      * Creates a new instance of after each already exist exception.

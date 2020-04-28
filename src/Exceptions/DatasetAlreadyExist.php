@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Pest\Exceptions;
 
 use InvalidArgumentException;
+use Symfony\Component\Console\Exception\ExceptionInterface;
 
 /**
  * @internal
  */
-final class DatasetAlreadyExist extends InvalidArgumentException
+final class DatasetAlreadyExist extends InvalidArgumentException implements ExceptionInterface
 {
     /**
      * Creates a new instance of dataset already exist.

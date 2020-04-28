@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Pest\Exceptions;
 
 use InvalidArgumentException;
+use Symfony\Component\Console\Exception\ExceptionInterface;
 
 /**
  * @internal
  */
-final class FileNotFound extends InvalidArgumentException
+final class FileNotFound extends InvalidArgumentException implements ExceptionInterface
 {
     /**
      * Creates a new instance of file not found.

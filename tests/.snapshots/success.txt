@@ -72,7 +72,7 @@
   ✓ trait applied in this file
 
    PASS  Tests\Playground
-  ✓ 
+  ✓ basic
 
    PASS  Tests\Unit\Actions\AddsCoverage
   ✓ it adds coverage if --coverage exist
@@ -107,4 +107,4 @@
   ✓ visual snapshot of test suite on success
 
   Tests:  59 passed
-  Time:   1.93s
+  Time:   1.99s
