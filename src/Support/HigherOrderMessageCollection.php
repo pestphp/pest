@@ -12,7 +12,7 @@ use Throwable;
  */
 final class HigherOrderMessageCollection
 {
-    public const UNDEFINED_METHOD = 'Call to undefined method class@anonymous';
+    public const UNDEFINED_METHOD = 'Method %s does not exist';
 
     /**
      * @var array<int, HigherOrderMessage>
@@ -60,7 +60,7 @@ final class HigherOrderMessageCollection
             Reflection::setPropertyValue($throwable, 'file', $message->filename);
             Reflection::setPropertyValue($throwable, 'line', $message->line);
 
-            if ((substr($throwable->getMessage(), 0, strlen(self::UNDEFINED_METHOD)) === self::UNDEFINED_METHOD)) {
+            if ($throwable->getMessage() === sprintf(self::UNDEFINED_METHOD, $message->methodName)) {
                 /** @var \ReflectionClass $reflection */
                 $reflection = (new ReflectionClass($target))->getParentClass();
                 Reflection::setPropertyValue($throwable, 'message', sprintf('Call to undefined method %s::%s()', $reflection->getName(), $message->methodName));
