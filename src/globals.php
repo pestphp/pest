@@ -11,7 +11,7 @@ use Pest\Support\Backtrace;
 use Pest\TestSuite;
 
 /**
- * Runs the given `$closure` before all of the tests in current file.
+ * Runs the given closure after all tests in the current file.
  */
 function beforeAll(Closure $closure): void
 {
@@ -19,7 +19,7 @@ function beforeAll(Closure $closure): void
 }
 
 /**
- * Runs the given `$closure` before each tests in current file.
+ * Runs the given closure before each test in the current file.
  */
 function beforeEach(Closure $closure = null): BeforeEachCall
 {
@@ -29,14 +29,8 @@ function beforeEach(Closure $closure = null): BeforeEachCall
 }
 
 /**
- * Registers the given `$dataset` on Pest.
+ * Registers the given dataset.
  *
- * @usage
- * ```
- * dataset('emails', ['enunomaduro@gmail.com', 'freek@spatie.be']);
- * ```
- *
- * @param string           $name    The name of the dataset
  * @param Closure|iterable $dataset
  */
 function dataset(string $name, $dataset): void
@@ -45,24 +39,8 @@ function dataset(string $name, $dataset): void
 }
 
 /**
- * Registers the given `$class` as base test in the given directory.
- *
- * @usage
- * ```
- * // Uses a class in the current file.
- * uses(Tests\TestCase::class);
- *
- * // Uses a trait in the current file.
- * uses(Tests\TestCase::class);
- *
- * // Uses a class and a trait in a specific dir.
- * uses(Tests\TestCase::class)->in('Feature');
- *
- * // Uses a class and a trait in the current dir.
- * uses([Tests\TestCase::class, RefreshDatabase::class])->in(__DIR__);
- * ```
- *
- * @param string ...$classAndTraits
+ * The uses function adds the binds the
+ * given arguments to test closures.
  */
 function uses(...$classAndTraits): UsesCall
 {
@@ -72,14 +50,9 @@ function uses(...$classAndTraits): UsesCall
 }
 
 /**
- * Creates a new test.
- *
- * @usage
- * ```
- * test('foo', function () {
- *     assertTrue(true);
- * });
- * ```
+ * Adds the given closure as a test. The first argument
+ * is the test description; the second argument is
+ * a closure that contains the test expectations.
  */
 function test(string $description, Closure $closure = null): TestCall
 {
@@ -89,15 +62,20 @@ function test(string $description, Closure $closure = null): TestCall
 }
 
 /**
- * @return TestCall
+ * Adds the given closure as a test. The first argument
+ * is the test description; the second argument is
+ * a closure that contains the test expectations.
  */
-function it(string $description, Closure $closure = null)
+function it(string $description, Closure $closure = null): TestCall
 {
     $filename = Backtrace::file();
 
     return new TestCall(TestSuite::getInstance(), $filename, sprintf('it %s', $description), $closure);
 }
 
+/**
+ * Runs the given closure after each test in the current file.
+ */
 function afterEach(Closure $closure = null): AfterEachCall
 {
     $filename = Backtrace::file();
@@ -106,7 +84,7 @@ function afterEach(Closure $closure = null): AfterEachCall
 }
 
 /**
- * Runs the given `$closure` after all of the tests in current file.
+ * Runs the given closure after all tests in the current file.
  */
 function afterAll(Closure $closure = null): void
 {
