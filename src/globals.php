@@ -44,7 +44,7 @@ function dataset(string $name, $dataset): void
  * The uses function adds the binds the
  * given arguments to test closures.
  */
-function uses(...$classAndTraits): UsesCall
+function uses(string ...$classAndTraits): UsesCall
 {
     $filename = Backtrace::file();
 

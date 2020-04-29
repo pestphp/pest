@@ -47,9 +47,8 @@ final class UsesCall
     }
 
     /**
-     * @var array<int, string> ...$targets
-     *
-     * @todo Consider using Symfony's finder component here.
+     * The directories or file where the
+     * class or trais should be used.
      */
     public function in(string ...$targets): void
     {
