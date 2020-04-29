@@ -20,6 +20,8 @@ function beforeAll(Closure $closure): void
 
 /**
  * Runs the given closure before each test in the current file.
+ *
+ * @return BeforeEachCall|mixed
  */
 function beforeEach(Closure $closure = null): BeforeEachCall
 {
@@ -53,6 +55,8 @@ function uses(...$classAndTraits): UsesCall
  * Adds the given closure as a test. The first argument
  * is the test description; the second argument is
  * a closure that contains the test expectations.
+ *
+ * @return TestCall|mixed
  */
 function test(string $description, Closure $closure = null): TestCall
 {
@@ -65,6 +69,8 @@ function test(string $description, Closure $closure = null): TestCall
  * Adds the given closure as a test. The first argument
  * is the test description; the second argument is
  * a closure that contains the test expectations.
+ *
+ * @return TestCall|mixed
  */
 function it(string $description, Closure $closure = null): TestCall
 {
@@ -75,6 +81,8 @@ function it(string $description, Closure $closure = null): TestCall
 
 /**
  * Runs the given closure after each test in the current file.
+ *
+ * @return TestCall|mixed
  */
 function afterEach(Closure $closure = null): AfterEachCall
 {
