@@ -62,7 +62,7 @@ function dataset(string $name, $dataset): void
  * uses([Tests\TestCase::class, RefreshDatabase::class])->in(__DIR__);
  * ```
  *
- * @param array<int, string> ...$classAndTraits
+ * @param string ...$classAndTraits
  */
 function uses(...$classAndTraits): UsesCall
 {

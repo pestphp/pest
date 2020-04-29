@@ -6,7 +6,7 @@ use Pest\Exceptions\DatasetDoesNotExist;
 
 it('throws exception if dataset does not exist', function () {
     $this->expectException(DatasetDoesNotExist::class);
-    $this->expectExceptionMessage("A dataset with the name `first` does not exist. You can create it using `dataset('name', ['a', 'b']);`.");
+    $this->expectExceptionMessage("A dataset with the name `first` does not exist. You can create it using `dataset('first', ['a', 'b']);`.");
     Datasets::get('first');
 });
 
