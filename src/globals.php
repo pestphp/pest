@@ -9,6 +9,7 @@ use Pest\PendingObjects\TestCall;
 use Pest\PendingObjects\UsesCall;
 use Pest\Support\Backtrace;
 use Pest\TestSuite;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Runs the given closure after all tests in the current file.
@@ -21,7 +22,7 @@ function beforeAll(Closure $closure): void
 /**
  * Runs the given closure before each test in the current file.
  *
- * @return BeforeEachCall|mixed
+ * @return BeforeEachCall|TestCase|mixed
  */
 function beforeEach(Closure $closure = null): BeforeEachCall
 {
@@ -56,7 +57,7 @@ function uses(string ...$classAndTraits): UsesCall
  * is the test description; the second argument is
  * a closure that contains the test expectations.
  *
- * @return TestCall|mixed
+ * @return TestCall|TestCase|mixed
  */
 function test(string $description, Closure $closure = null): TestCall
 {
@@ -70,7 +71,7 @@ function test(string $description, Closure $closure = null): TestCall
  * is the test description; the second argument is
  * a closure that contains the test expectations.
  *
- * @return TestCall|mixed
+ * @return TestCall|TestCase|mixed
  */
 function it(string $description, Closure $closure = null): TestCall
 {
@@ -82,7 +83,7 @@ function it(string $description, Closure $closure = null): TestCall
 /**
  * Runs the given closure after each test in the current file.
  *
- * @return TestCall|mixed
+ * @return AfterEachCall|TestCase|mixed
  */
 function afterEach(Closure $closure = null): AfterEachCall
 {
