@@ -10,8 +10,10 @@ use Pest\Actions\AddsTests;
 use Pest\Actions\LoadStructure;
 use Pest\Actions\ValidatesConfiguration;
 use Pest\TestSuite;
+use PHPUnit\Framework\TestSuite as BaseTestSuite;
 use PHPUnit\TextUI\Command as BaseCommand;
 use PHPUnit\TextUI\TestRunner;
+use SebastianBergmann\FileIterator\Facade as FileIteratorFacade;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -75,11 +77,28 @@ final class Command extends BaseCommand
          */
         $this->arguments = AddsDefaults::to($this->arguments);
 
-        $testRunner = new TestRunner($this->arguments['loader']);
-        $testSuite  = $this->arguments['test'];
+        $testRunner      = new TestRunner($this->arguments['loader']);
+        $testSuite       = $this->arguments['test'];
+
+        if (is_string($testSuite)) {
+            if (\is_dir($testSuite)) {
+                /** @var string[] $files */
+                $files = (new FileIteratorFacade())->getFilesAsArray(
+                    $testSuite,
+                    $this->arguments['testSuffixes']
+                );
+            } else {
+                $files = [$testSuite];
+            }
+
+            $testSuite = new BaseTestSuite($testSuite);
+
+            $testSuite->addTestFiles($files);
+
+            $this->arguments['test'] = $testSuite;
+        }
 
         LoadStructure::in($this->testSuite->rootPath);
-
         AddsTests::to($testSuite, $this->testSuite);
 
         return $testRunner;

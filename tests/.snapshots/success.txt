@@ -61,6 +61,12 @@
   ✓ a test
   ✓ higher order message test
 
+   PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest
+  ✓ it example
+
+   PASS  Tests\Fixtures\ExampleTest
+  ✓ it example
+
    PASS  Tests\PHPUnit\CustomTestCase\UsesPerDirectory
   ✓ closure was bound to  custom test case
 
@@ -103,8 +109,12 @@
    PASS  Tests\Unit\TestSuite
   ✓ it does not allow to add the same test description twice
 
+   PASS  Tests\Visual\SingleTestOrDirectory
+  ✓ allows to run a single test
+  ✓ allows to run a directory
+
    PASS  Tests\Visual\Success
   ✓ visual snapshot of test suite on success
 
-  Tests:  59 passed
-  Time:   1.99s
+  Tests:  63 passed
+  Time:   2.37s
