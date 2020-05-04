@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest;
 
+use Pest\Exceptions\InvalidPestCommand;
 use Pest\Repositories\AfterAllRepository;
 use Pest\Repositories\AfterEachRepository;
 use Pest\Repositories\BeforeAllRepository;
@@ -92,6 +93,10 @@ final class TestSuite
     {
         if (is_string($rootPath)) {
             return self::$instance ?? self::$instance = new TestSuite($rootPath);
+        }
+
+        if (self::$instance === null) {
+            throw new InvalidPestCommand();
         }
 
         return self::$instance;
