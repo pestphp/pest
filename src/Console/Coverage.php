@@ -26,7 +26,11 @@ final class Coverage
         ]);
     }
 
-    public static function show(OutputInterface $output): void
+    /**
+     * Reports the code coverage report to the
+     * console and returns the result in float.
+     */
+    public static function report(OutputInterface $output): float
     {
         if (!file_exists($reportPath = self::getPath())) {
             throw ShouldNotHappen::fromMessage(sprintf('Coverage not found in path: %s.', $reportPath));
@@ -40,10 +44,12 @@ final class Coverage
 
         $dottedLineLength = $totalWidth <= 70 ? $totalWidth : 70;
 
+        $totalCoverage = $codeCoverage->getReport()->getLineExecutedPercent();
+
         $output->writeln(
             sprintf(
                 '  <fg=white;options=bold>Cov:    </><fg=default>%s</>',
-                $codeCoverage->getReport()->getLineExecutedPercent()
+                $totalCoverage
             )
         );
 
@@ -81,7 +87,7 @@ final class Coverage
                 $percentage = number_format((float) $file->getLineExecutedPercent(), 1, '.', '');
             }
 
-            $takenSize  = strlen($rawName . $percentage) + 4 + $linesExecutedTakenSize; // adding 3 space and percent sign
+            $takenSize = strlen($rawName . $percentage) + 4 + $linesExecutedTakenSize; // adding 3 space and percent sign
 
             $percentage = sprintf(
                 '<fg=%s>%s</>',
@@ -95,6 +101,8 @@ final class Coverage
                 $percentage
             ));
         }
+
+        return (float) $totalCoverage;
     }
 
     /**

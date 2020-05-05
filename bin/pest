@@ -8,15 +8,15 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
 (static function () {
     // Used when Pest is required using composer
-    $vendorPath = __DIR__ . '/../../../../vendor/autoload.php';
+    $vendorPath = realpath(__DIR__ . '/../../../../vendor/autoload.php');
 
     // Used when Pest maintainers are running Pest tests
-    $localPath = __DIR__ . '/../vendor/autoload.php';
+    $localPath = realpath(__DIR__ . '/../vendor/autoload.php');
 
-    if (file_exists($vendorPath)) {
-        require $vendorPath;
+    if ($vendorPath) {
+        include_once $vendorPath;
     } else {
-        require $localPath;
+        include_once $localPath;
     }
 
     (new \NunoMaduro\Collision\Provider)->register();

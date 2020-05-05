@@ -77,8 +77,8 @@ final class Command extends BaseCommand
          */
         $this->arguments = AddsDefaults::to($this->arguments);
 
-        $testRunner      = new TestRunner($this->arguments['loader']);
-        $testSuite       = $this->arguments['test'];
+        $testRunner = new TestRunner($this->arguments['loader']);
+        $testSuite  = $this->arguments['test'];
 
         if (is_string($testSuite)) {
             if (\is_dir($testSuite)) {
@@ -112,7 +112,16 @@ final class Command extends BaseCommand
         $result = parent::run($argv, false);
 
         if ($result === 0 && $this->testSuite->coverage) {
-            Coverage::show($this->output);
+            $result = Coverage::report($this->output);
+
+            $result = (int) ($result < $this->testSuite->coverageMin);
+
+            if ($result === 1) {
+                $this->output->writeln(sprintf(
+                    "\n  <fg=white;bg=red;options=bold> FAIL </> Code coverage below expectations:<fg=red;options=bold> %s%%</>",
+                    $this->testSuite->coverageMin
+                ));
+            }
         }
 
         exit($result);

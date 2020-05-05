@@ -82,6 +82,7 @@
 
    PASS  Tests\Unit\Actions\AddsCoverage
   ✓ it adds coverage if --coverage exist
+  ✓ it adds coverage if --min exist
 
    PASS  Tests\Unit\Actions\AddsDefaults
   ✓ it sets defaults
@@ -116,5 +117,5 @@
    PASS  Tests\Visual\Success
   ✓ visual snapshot of test suite on success
 
-  Tests:  63 passed
-  Time:   2.37s
+  Tests:  64 passed
+  Time:   2.32s

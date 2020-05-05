@@ -24,11 +24,18 @@ final class TestSuite
     public $tests;
 
     /**
-     * Wether should show the coverage or not.
+     * Whether should show the coverage or not.
      *
      * @var bool
      */
     public $coverage = false;
+
+    /**
+     * The minimum coverage.
+     *
+     * @var float
+     */
+    public $coverageMin = 0.0;
 
     /**
      * Holds the before each repository.
