@@ -7,6 +7,7 @@ namespace Pest\PendingObjects;
 use Closure;
 use Pest\Factories\TestCaseFactory;
 use Pest\Support\Backtrace;
+use Pest\Support\NullClosure;
 use Pest\TestSuite;
 
 /**
@@ -72,6 +73,36 @@ final class TestCall
         $this->testCaseFactory
              ->factoryProxies
              ->add(Backtrace::file(), Backtrace::line(), 'addGroups', [$groups]);
+
+        return $this;
+    }
+
+    /**
+     * Skips the current test.
+     *
+     * @param Closure|bool|string $conditionOrMessage
+     */
+    public function skip($conditionOrMessage = true, string $message = ''): TestCall
+    {
+        $condition = is_string($conditionOrMessage)
+            ? NullClosure::create()
+            : $conditionOrMessage;
+
+        $condition = is_callable($condition)
+            ? $condition
+            : function () use ($condition) { /* @phpstan-ignore-line */
+                return $condition;
+            };
+
+        $message = is_string($conditionOrMessage)
+            ? $conditionOrMessage
+            : $message;
+
+        if ($condition() !== false) {
+            $this->testCaseFactory
+                 ->chains
+                 ->add(Backtrace::file(), Backtrace::line(), 'markTestSkipped', [$message]);
+        }
 
         return $this;
     }
