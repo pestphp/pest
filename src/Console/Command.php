@@ -112,14 +112,15 @@ final class Command extends BaseCommand
         $result = parent::run($argv, false);
 
         if ($result === 0 && $this->testSuite->coverage) {
-            $result = Coverage::report($this->output);
+            $coverage = Coverage::report($this->output);
 
-            $result = (int) ($result < $this->testSuite->coverageMin);
+            $result = (int) ($coverage < $this->testSuite->coverageMin);
 
             if ($result === 1) {
                 $this->output->writeln(sprintf(
-                    "\n  <fg=white;bg=red;options=bold> FAIL </> Code coverage below expectations:<fg=red;options=bold> %s%%</>",
-                    $this->testSuite->coverageMin
+                    "\n  <fg=white;bg=red;options=bold> FAIL </> Code coverage below expected:<fg=red;options=bold> %s %%</>. Minimum:<fg=white;options=bold> %s %%</>.",
+                    number_format($coverage, 1),
+                    number_format($this->testSuite->coverageMin, 1)
                 ));
             }
         }
