@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Actions;
 
-use Illuminate\Support\Str;
+use Pest\Support\Str;
 use Pest\Console\Coverage;
 use Pest\TestSuite;
 use Symfony\Component\Console\Input\ArgvInput;
