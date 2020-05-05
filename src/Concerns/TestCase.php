@@ -43,6 +43,16 @@ trait TestCase
     }
 
     /**
+     * Adds the groups to the current test case.
+     */
+    public function addGroups(array $groups): void
+    {
+        $groups = array_unique(array_merge($this->getGroups(), $groups));
+
+        $this->setGroups($groups);
+    }
+
+    /**
      * Returns the test case name. Note that, in Pest
      * we ignore withDataset argument as the description
      * already contains the dataset description.

@@ -22,7 +22,7 @@ final class TestRepository
     private $state = [];
 
     /**
-     * @var array<string, array<int, string>>
+     * @var array<string, array<int, array<int, string>>>
      */
     private $uses = [];
 
@@ -43,8 +43,9 @@ final class TestRepository
             return Str::startsWith($target, $directory . DIRECTORY_SEPARATOR);
         };
 
-        foreach ($this->uses as $path => $classOrTraits) {
-            $setClassName = function (TestCaseFactory $testCase, string $key) use ($path, $classOrTraits, $startsWith): void {
+        foreach ($this->uses as $path => $uses) {
+            [$classOrTraits, $groups] = $uses;
+            $setClassName             = function (TestCaseFactory $testCase, string $key) use ($path, $classOrTraits, $groups, $startsWith): void {
                 [$filename] = explode('@', $key);
 
                 if ((!is_dir($path) && $filename === $path) || (is_dir($path) && $startsWith($filename, $path))) {
@@ -59,6 +60,11 @@ final class TestRepository
                             $testCase->traits[] = $class;
                         }
                     }
+
+                    $testCase
+                         ->factoryProxies
+                         // Consider set the real line here.
+                         ->add($filename, 0, 'addGroups', [$groups]);
                 }
             };
 
@@ -80,22 +86,19 @@ final class TestRepository
      * Uses the given `$testCaseClass` on the given `$paths`.
      *
      * @param array<int, string> $classOrTraits
+     * @param array<int, string> $groups
      * @param array<int, string> $paths
      */
-    public function use(array $classOrTraits, array $paths): void
+    public function use(array $classOrTraits, array $groups, array $paths): void
     {
         foreach ($classOrTraits as $classOrTrait) {
             if (!class_exists($classOrTrait) && !trait_exists($classOrTrait)) {
                 throw new TestCaseClassOrTraitNotFound($classOrTrait);
             }
+        }
 
-            foreach ($paths as $path) {
-                if (!array_key_exists($path, $this->uses)) {
-                    $this->uses[$path] = [];
-                }
-
-                $this->uses[$path][] = $classOrTrait;
-            }
+        foreach ($paths as $path) {
+            $this->uses[$path] = [$classOrTraits, $groups];
         }
     }
 

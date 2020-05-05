@@ -17,7 +17,7 @@ test('allows to run a single test', function () use ($run) {
 
   Tests:  1 passed
 EOF, $run('tests/Fixtures/DirectoryWithTests/ExampleTest.php'));
-})->group('integration');
+});
 
 test('allows to run a directory', function () use ($run) {
     assertStringContainsString(<<<EOF
@@ -29,4 +29,4 @@ test('allows to run a directory', function () use ($run) {
 
   Tests:  2 passed
 EOF, $run('tests/Fixtures'));
-})->group('integration');
+});

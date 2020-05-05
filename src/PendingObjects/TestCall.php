@@ -65,25 +65,15 @@ final class TestCall
     }
 
     /**
-     * Sets the test groups.
-     *
-     * @var array<int, string>
+     * Sets the test groups(s).
      */
-    public function groups(array $groups): TestCall
+    public function group(string ...$groups): TestCall
     {
         $this->testCaseFactory
              ->factoryProxies
-             ->add(Backtrace::file(), Backtrace::line(), 'setGroups', [$groups]);
+             ->add(Backtrace::file(), Backtrace::line(), 'addGroups', [$groups]);
 
         return $this;
-    }
-
-    /**
-     * Sets the test groups.
-     */
-    public function group(string $group): TestCall
-    {
-        return $this->groups([$group]);
     }
 
     /**

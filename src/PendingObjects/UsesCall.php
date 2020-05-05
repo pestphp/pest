@@ -34,6 +34,13 @@ final class UsesCall
     private $targets;
 
     /**
+     * Holds the groups of the uses.
+     *
+     * @var array<int, string>
+     */
+    private $groups = [];
+
+    /**
      * Creates a new instance of a pending test uses.
      *
      * @var array<int, string>
@@ -72,10 +79,20 @@ final class UsesCall
     }
 
     /**
+     * Sets the test group(s).
+     */
+    public function group(string ...$groups): UsesCall
+    {
+        $this->groups = $groups;
+
+        return $this;
+    }
+
+    /**
      * Dispatch the creation of uses.
      */
     public function __destruct()
     {
-        TestSuite::getInstance()->tests->use($this->classAndTraits, $this->targets);
+        TestSuite::getInstance()->tests->use($this->classAndTraits, $this->groups, $this->targets);
     }
 }

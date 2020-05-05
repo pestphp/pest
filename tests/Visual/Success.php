@@ -26,4 +26,4 @@ test('visual snapshot of test suite on success', function () {
     } else {
         assertTrue(true);
     }
-})->group('integration');
+});
