@@ -66,6 +66,16 @@ final class TestCall
     }
 
     /**
+     * Makes the test suite only this test case.
+     */
+    public function only(): TestCall
+    {
+        $this->testCaseFactory->only = true;
+
+        return $this;
+    }
+
+    /**
      * Sets the test groups(s).
      */
     public function group(string ...$groups): TestCall

@@ -73,7 +73,13 @@ final class TestRepository
             }
         }
 
-        foreach ($this->state as $testFactory) {
+        $onlyState = array_filter($this->state, function ($testFactory): bool {
+            return $testFactory->only;
+        });
+
+        $state = count($onlyState) > 0 ? $onlyState : $this->state;
+
+        foreach ($state as $testFactory) {
             /* @var TestCaseFactory $testFactory */
             $tests = $testFactory->build($testSuite);
             foreach ($tests as $test) {

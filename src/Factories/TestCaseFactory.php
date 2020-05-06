@@ -28,6 +28,15 @@ final class TestCaseFactory
     public $filename;
 
     /**
+     * Marks this test case as only.
+     *
+     * @readonly
+     *
+     * @var bool
+     */
+    public $only = false;
+
+    /**
      * Holds the test description.
      *
      * @readonly
