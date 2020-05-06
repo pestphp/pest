@@ -124,7 +124,7 @@
   ✓ allows to run a directory
 
    WARN  Tests\Visual\Success
-  r visual snapshot of test suite on success → This test did not perform any assertions  /Users/nunomaduro/Work/pest/src/Factories/TestCaseFactory.php(185) : eval()'d code:4
+  s visual snapshot of test suite on success
 
-  Tests:  1 risked, 5 skipped, 65 passed
-  Time:   2.54s
+  Tests:  6 skipped, 65 passed
+  Time:   2.50s
