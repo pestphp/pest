@@ -18,7 +18,8 @@
     "require": {
         "php": "^7.3",
         "nunomaduro/collision": "dev-stable",
-        "phpunit/phpunit": "^9.1.3"
+        "phpunit/phpunit": "^9.1.3",
+        "sebastian/environment": "^5.1"
     },
     "autoload": {
         "psr-4": {

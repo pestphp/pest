@@ -6,6 +6,7 @@ namespace Pest\Console;
 
 use Pest\Exceptions\ShouldNotHappen;
 use SebastianBergmann\CodeCoverage\Node\File;
+use SebastianBergmann\Environment\Runtime;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 
@@ -24,6 +25,15 @@ final class Coverage
             '.temp',
             'coverage.php',
         ]);
+    }
+
+    /**
+     * Runs true there is any code
+     * coverage driver available.
+     */
+    public static function isAvailable(): bool
+    {
+        return (new Runtime())->canCollectCodeCoverage();
     }
 
     /**

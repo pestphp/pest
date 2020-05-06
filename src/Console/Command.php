@@ -9,6 +9,7 @@ use Pest\Actions\AddsDefaults;
 use Pest\Actions\AddsTests;
 use Pest\Actions\LoadStructure;
 use Pest\Actions\ValidatesConfiguration;
+use Pest\Exceptions\CodeCoverageDriverNotAvailable;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestSuite as BaseTestSuite;
 use PHPUnit\TextUI\Command as BaseCommand;
@@ -112,6 +113,10 @@ final class Command extends BaseCommand
         $result = parent::run($argv, false);
 
         if ($result === 0 && $this->testSuite->coverage) {
+            if (!Coverage::isAvailable()) {
+                throw new CodeCoverageDriverNotAvailable();
+            }
+
             $coverage = Coverage::report($this->output);
 
             $result = (int) ($coverage < $this->testSuite->coverageMin);
