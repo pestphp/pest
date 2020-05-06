@@ -23,7 +23,5 @@ test('visual snapshot of test suite on success', function () {
         array_pop($output);
         array_pop($output);
         assertStringContainsString(implode("\n", $output), file_get_contents($snapshot));
-    } else {
-        assertTrue(true);
     }
-});
+})->skip(getenv('REBUILD_SNAPSHOTS') && getenv('EXCLUDE'));

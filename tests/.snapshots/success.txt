@@ -123,8 +123,8 @@
   ✓ allows to run a single test
   ✓ allows to run a directory
 
-   PASS  Tests\Visual\Success
-  ✓ visual snapshot of test suite on success
+   WARN  Tests\Visual\Success
+  r visual snapshot of test suite on success → This test did not perform any assertions  /Users/nunomaduro/Work/pest/src/Factories/TestCaseFactory.php(185) : eval()'d code:4
 
-  Tests:  5 skipped, 66 passed
-  Time:   2.48s
+  Tests:  1 risked, 5 skipped, 65 passed
+  Time:   2.54s
