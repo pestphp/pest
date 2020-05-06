@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Concerns;
 
 use Closure;
+use Pest\Support\ExceptionTrace;
 use Pest\TestSuite;
 use PHPUnit\Util\Test;
 
@@ -95,7 +96,7 @@ trait TestCase
 
         $beforeEach = TestSuite::getInstance()->beforeEach->get(self::$__filename);
 
-        call_user_func(Closure::bind($beforeEach, $this, get_class($this)));
+        $this->__callClosure($beforeEach, func_get_args());
     }
 
     /**
@@ -105,7 +106,7 @@ trait TestCase
     {
         $afterEach = TestSuite::getInstance()->afterEach->get(self::$__filename);
 
-        call_user_func(Closure::bind($afterEach, $this, get_class($this)));
+        $this->__callClosure($afterEach, func_get_args());
 
         parent::tearDown();
     }
@@ -127,7 +128,14 @@ trait TestCase
      */
     public function __test(): void
     {
-        call_user_func(Closure::bind($this->__test, $this, get_class($this)), ...func_get_args());
+        $this->__callClosure($this->__test, func_get_args());
+    }
+
+    private function __callClosure(Closure $closure, array $arguments): void
+    {
+        ExceptionTrace::ensure(function () use ($closure, $arguments) {
+            call_user_func_array(Closure::bind($closure, $this, get_class($this)), $arguments);
+        });
     }
 
     public function getPrintableTestCaseName(): string
