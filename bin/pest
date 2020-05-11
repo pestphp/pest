@@ -1,0 +1,31 @@
+#!/usr/bin/env php
+<?php declare(strict_types=1);
+
+use Pest\Actions\ValidatesEnvironment;
+use Pest\Console\Command;
+use Pest\TestSuite;
+use Symfony\Component\Console\Output\ConsoleOutput;
+
+(static function () {
+    // Used when Pest is required using composer.
+    $vendorPath = realpath(__DIR__ . '/../../../../vendor/autoload.php');
+
+    // Used when Pest maintainers are running Pest tests.
+    $localPath = realpath(__DIR__ . '/../vendor/autoload.php');
+
+    if ($vendorPath) {
+        include_once $vendorPath;
+    } else {
+        include_once $localPath;
+    }
+
+    (new \NunoMaduro\Collision\Provider)->register();
+
+    $rootPath = getcwd();
+
+    $testSuite = TestSuite::getInstance($rootPath);
+
+    ValidatesEnvironment::in($testSuite);
+
+    exit((new Command($testSuite, new ConsoleOutput()))->run($_SERVER['argv']));
+})();

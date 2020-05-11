@@ -1,0 +1,130 @@
+
+   PASS  Tests\CustomTestCase\PhpunitTest
+  ✓ that gets executed
+
+   PASS  Tests\Features\AfterAll
+  ✓ deletes file after all
+
+   PASS  Tests\Features\AfterEach
+  ✓ it does not get executed before the test
+  ✓ it gets executed after the test
+
+   PASS  Tests\Features\BeforeAll
+  ✓ it gets executed before tests
+  ✓ it do not get executed before each test
+
+   PASS  Tests\Features\BeforeEach
+  ✓ it gets executed before each test
+  ✓ it gets executed before each test once again
+
+   PASS  Tests\Features\Datasets
+  ✓ it throws exception if dataset does not exist
+  ✓ it throws exception if dataset already exist
+  ✓ it sets closures
+  ✓ it sets arrays
+  ✓ it gets bound to test case object with ('a')
+  ✓ it gets bound to test case object with ('b')
+  ✓ it truncates the description with (' fooo fooo fooo fooo fooo fooo fooo f...oo fooo')
+  ✓ lazy datasets with (1)
+  ✓ lazy datasets with (2)
+  ✓ lazy datasets did the job right
+  ✓ eager datasets with (1)
+  ✓ eager datasets with (2)
+  ✓ eager datasets did the job right
+  ✓ lazy registered datasets with (1)
+  ✓ lazy registered datasets with (2)
+  ✓ lazy registered datasets did the job right
+  ✓ eager registered datasets with (1)
+  ✓ eager registered datasets with (2)
+  ✓ eager registered datasets did the job right
+  ✓ eager wrapped registered datasets with (1)
+  ✓ eager wrapped registered datasets with (2)
+  ✓ eager registered wrapped datasets did the job right
+  ✓ lazy named datasets with ( bar  object (...))
+
+   PASS  Tests\Features\Exceptions
+  ✓ it gives access the the underlying expect exception
+  ✓ it catch exceptions
+  ✓ it catch exceptions and messages
+
+   PASS  Tests\Features\HigherOrderMessages
+  ✓ it proxies calls to object
+
+   PASS  Tests\Features\It
+  ✓ it is a test
+  ✓ it is a higher order message test
+
+   PASS  Tests\Features\Mocks
+  ✓ it has bar
+
+   WARN  Tests\Features\Skip
+  ✓ it do not skips
+  s it skips with truthy
+  s it skips with truthy condition by default
+  s it skips with message → skipped because bar
+  s it skips with truthy closure condition
+  ✓ it do not skips with falsy closure condition
+  s it skips with condition and messsage → skipped because foo
+
+   PASS  Tests\Features\Test
+  ✓ a test
+  ✓ higher order message test
+
+   PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest
+  ✓ it example
+
+   PASS  Tests\Fixtures\ExampleTest
+  ✓ it example
+
+   PASS  Tests\PHPUnit\CustomTestCase\UsesPerDirectory
+  ✓ closure was bound to  custom test case
+
+   PASS  Tests\PHPUnit\CustomTestCaseInSubFolders\SubFolder\SubFolder\UsesPerSubDirectory
+  ✓ closure was bound to  custom test case
+
+   PASS  Tests\PHPUnit\CustomTestCaseInSubFolders\SubFolder2\UsesPerFile
+  ✓ custom traits can be used
+  ✓ trait applied in this file
+
+   PASS  Tests\Playground
+  ✓ basic
+
+   PASS  Tests\Unit\Actions\AddsCoverage
+  ✓ it adds coverage if --coverage exist
+  ✓ it adds coverage if --min exist
+
+   PASS  Tests\Unit\Actions\AddsDefaults
+  ✓ it sets defaults
+  ✓ it does not override options
+
+   PASS  Tests\Unit\Actions\AddsTests
+  ✓ default php unit tests
+  ✓ it removes warnings
+
+   PASS  Tests\Unit\Actions\ValidatesConfiguration
+  ✓ it throws exception when configuration not found
+  ✓ it throws exception when `process isolation` is true
+  ✓ it do not throws exception when `process isolation` is false
+
+   PASS  Tests\Unit\Console\Coverage
+  ✓ it generates coverage based on file input
+
+   PASS  Tests\Unit\Support\Backtrace
+  ✓ it gets file name from called file
+
+   PASS  Tests\Unit\Support\Reflection
+  ✓ it gets file name from closure
+  ✓ it gets property values
+
+   PASS  Tests\Unit\TestSuite
+  ✓ it does not allow to add the same test description twice
+
+   PASS  Tests\Visual\SingleTestOrDirectory
+  ✓ allows to run a single test
+  ✓ allows to run a directory
+
+   WARN  Tests\Visual\Success
+  s visual snapshot of test suite on success
+
+  Tests:  6 skipped, 65 passed
+  Time:   2.50s

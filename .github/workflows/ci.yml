@@ -1,0 +1,51 @@
+name: Continuous Integration
+
+on: ['push', 'pull_request']
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+      matrix:
+        php: [7.3, 7.4]
+        dependency-version: [prefer-lowest, prefer-stable]
+
+    name: CI - PHP ${{ matrix.php }} (${{ matrix.dependency-version }})
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Cache dependencies
+      uses: actions/cache@v1
+      with:
+        path: ~/.composer/cache/files
+        key: dependencies-php-${{ matrix.php }}-composer-${{ hashFiles('composer.json') }}
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php }}
+        extensions: mbstring, zip
+        tools: prestissimo
+        coverage: pcov
+
+    - name: Install Composer dependencies
+      run: composer update --${{ matrix.dependency-version }} --no-interaction --prefer-dist
+
+    - name: Coding Style Checks
+      run: |
+           vendor/bin/rector process src --dry-run
+           vendor/bin/php-cs-fixer fix -v --dry-run
+
+    - name: Type Checks
+      run: vendor/bin/phpstan analyse --ansi
+
+    - name: Unit Tests
+      run: bin/pest --colors=always --exclude-group=integration
+
+    - name: Integration Tests
+      run: bin/pest --colors=always --group=integration
