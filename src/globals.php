@@ -8,6 +8,7 @@ use Pest\PendingObjects\BeforeEachCall;
 use Pest\PendingObjects\TestCall;
 use Pest\PendingObjects\UsesCall;
 use Pest\Support\Backtrace;
+use Pest\Support\HigherOrderTapProxy;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestCase;
 
@@ -59,8 +60,12 @@ function uses(string ...$classAndTraits): UsesCall
  *
  * @return TestCall|TestCase|mixed
  */
-function test(string $description, Closure $closure = null): TestCall
+function test(string $description = null, Closure $closure = null)
 {
+    if ($description === null && TestSuite::getInstance()->test) {
+        return new HigherOrderTapProxy(TestSuite::getInstance()->test);
+    }
+
     $filename = Backtrace::file();
 
     return new TestCall(TestSuite::getInstance(), $filename, $description, $closure);

@@ -92,6 +92,8 @@ trait TestCase
      */
     protected function setUp(): void
     {
+        TestSuite::getInstance()->test = $this;
+
         parent::setUp();
 
         $beforeEach = TestSuite::getInstance()->beforeEach->get(self::$__filename);
@@ -109,6 +111,8 @@ trait TestCase
         $this->__callClosure($afterEach, func_get_args());
 
         parent::tearDown();
+
+        TestSuite::getInstance()->test = null;
     }
 
     /**

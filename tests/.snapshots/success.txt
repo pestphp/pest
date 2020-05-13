@@ -47,6 +47,12 @@
   ✓ it catch exceptions
   ✓ it catch exceptions and messages
 
+   PASS  Tests\Features\Helpers
+  ✓ it can set/get properties on $this
+  ✓ it throws error if property do not exist
+  ✓ it allows to call underlying protected/private methods
+  ✓ it throws error if method do not exist
+
    PASS  Tests\Features\HigherOrderMessages
   ✓ it proxies calls to object
 
@@ -126,5 +132,5 @@
    WARN  Tests\Visual\Success
   s visual snapshot of test suite on success
 
-  Tests:  6 skipped, 65 passed
-  Time:   2.50s
+  Tests:  6 skipped, 69 passed
+  Time:   2.63s

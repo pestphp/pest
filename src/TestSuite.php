@@ -17,6 +17,13 @@ use Pest\Repositories\TestRepository;
 final class TestSuite
 {
     /**
+     * Holds the current test case.
+     *
+     * @var \PHPUnit\Framework\TestCase|null
+     */
+    public $test;
+
+    /**
      * Holds the tests repository.
      *
      * @var TestRepository
