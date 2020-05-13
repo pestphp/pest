@@ -1,18 +1,18 @@
 <?php
 
-function addName()
+function addUser()
 {
     test()->user = 'nuno';
 }
 
 it('can set/get properties on $this', function () {
-    addName();
-    assertEquals('nuno', $this->name);
+    addUser();
+    assertEquals('nuno', $this->user);
 });
 
 it('throws error if property do not exist', function () {
     test()->user;
-})->throws(\Whoops\Exception\ErrorException::class, 'Undefined property PHPUnit\Framework\TestCase::$name');
+})->throws(\Whoops\Exception\ErrorException::class, 'Undefined property PHPUnit\Framework\TestCase::$user');
 
 class User
 {
