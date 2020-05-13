@@ -4,16 +4,11 @@ declare(strict_types=1);
 
 namespace Pest\Support;
 
-use ReflectionClass;
-use Throwable;
-
 /**
  * @internal
  */
 final class HigherOrderMessageCollection
 {
-    public const UNDEFINED_METHOD = 'Method %s does not exist';
-
     /**
      * @var array<int, HigherOrderMessage>
      */
@@ -35,7 +30,7 @@ final class HigherOrderMessageCollection
     public function chain(object $target): void
     {
         foreach ($this->messages as $message) {
-            $target = $this->attempt($target, $message);
+            $target = $message->call($target);
         }
     }
 
@@ -45,30 +40,7 @@ final class HigherOrderMessageCollection
     public function proxy(object $target): void
     {
         foreach ($this->messages as $message) {
-            $this->attempt($target, $message);
-        }
-    }
-
-    /**
-     * Re-throws the given `$throwable` with the good line and filename.
-     *
-     * @return mixed
-     */
-    private function attempt(object $target, HigherOrderMessage $message)
-    {
-        try {
-            return Reflection::call($target, $message->methodName, $message->arguments);
-        } catch (Throwable $throwable) {
-            Reflection::setPropertyValue($throwable, 'file', $message->filename);
-            Reflection::setPropertyValue($throwable, 'line', $message->line);
-
-            if ($throwable->getMessage() === sprintf(self::UNDEFINED_METHOD, $message->methodName)) {
-                /** @var \ReflectionClass $reflection */
-                $reflection = (new ReflectionClass($target))->getParentClass();
-                Reflection::setPropertyValue($throwable, 'message', sprintf('Call to undefined method %s::%s()', $reflection->getName(), $message->methodName));
-            }
-
-            throw $throwable;
+            $message->call($target);
         }
     }
 }
