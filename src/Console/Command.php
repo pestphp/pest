@@ -9,7 +9,6 @@ use Pest\Actions\AddsDefaults;
 use Pest\Actions\AddsTests;
 use Pest\Actions\LoadStructure;
 use Pest\Actions\ValidatesConfiguration;
-use Pest\Exceptions\CodeCoverageDriverNotAvailable;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestSuite as BaseTestSuite;
 use PHPUnit\TextUI\Command as BaseCommand;
