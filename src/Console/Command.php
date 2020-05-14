@@ -122,7 +122,10 @@ final class Command extends BaseCommand
 
         if ($result === 0 && $this->testSuite->coverage) {
             if (!Coverage::isAvailable()) {
-                throw new CodeCoverageDriverNotAvailable();
+                $this->output->writeln(
+                    "\n  <fg=white;bg=red;options=bold> ERROR </> No code coverage driver is available.</>",
+                );
+                exit(1);
             }
 
             $coverage = Coverage::report($this->output);
