@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [v0.1.2 (2020-05-15)](https://github.com/pestphp/pest/compare/v0.1.1...v0.1.2)
+### Added
+- Support to custom helpers ([#7](https://github.com/pestphp/pest/pull/7))
+
 ## [v0.1.1 (2020-05-14)](https://github.com/pestphp/pest/compare/v0.1.0...v0.1.1)
 ### Added
 - `test` function without any arguments returns the current test case ([6fc55be](https://github.com/pestphp/pest/commit/6fc55becc8aecff685a958617015be1a4c118b01))
