@@ -12,6 +12,6 @@
 **Pest** it's an elegant PHP Testing Framework with a focus on simplicity. It was carefully crafted to bring the joy of testing to PHP.
 
 - Explore the docs: **[pestphp.com »](https://pestphp.com)**
-- Join the Discord Server: **[discord.gg/4UMHUb5 »](https://discord.gg/4UMHUb5)**
+- Join the Discord Server: **[discord.gg/bMAJv82 »](https://discord.gg/bMAJv82)**
 
 Pest was created by **[Nuno Maduro](https://twitter.com/enunomaduro)** and is open-sourced software licensed under the **[MIT license](https://opensource.org/licenses/MIT)**.
