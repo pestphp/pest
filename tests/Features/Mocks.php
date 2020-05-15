@@ -6,7 +6,7 @@ interface Foo
 }
 
 it('has bar', function () {
-    $mock = Mockery::mock(Foo::class);
+    $mock = mock(Foo::class);
     $mock->shouldReceive('bar')
         ->times(1)
         ->andReturn(2);

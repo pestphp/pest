@@ -33,18 +33,29 @@ final class PestInstallCommand extends Command
     public function handle(): void
     {
         /* @phpstan-ignore-next-line */
-        $target = base_path('tests/Pest.php');
+        $pest    = base_path('tests/Pest.php');
+        /* @phpstan-ignore-next-line */
+        $helpers = base_path('tests/Helpers.php');
 
-        if (File::exists($target)) {
-            throw new InvalidConsoleArgument(sprintf('%s already exist', $target));
+        foreach ([$pest, $helpers] as $file) {
+            if (File::exists($file)) {
+                throw new InvalidConsoleArgument(sprintf('%s already exist', $file));
+            }
         }
 
         File::copy(implode(DIRECTORY_SEPARATOR, [
             dirname(__DIR__, 3),
             'stubs',
             'Pest.php',
-        ]), $target);
+        ]), $pest);
+
+        File::copy(implode(DIRECTORY_SEPARATOR, [
+            dirname(__DIR__, 3),
+            'stubs',
+            'Helpers.php',
+        ]), $helpers);
 
         $this->output->success('`tests/Pest.php` created successfully.');
+        $this->output->success('`tests/Helpers.php` created successfully.');
     }
 }

@@ -22,6 +22,7 @@ final class LoadStructure
      */
     private const STRUCTURE = [
         'Datasets.php',
+        'Helpers.php',
         'Pest.php',
         'Datasets',
     ];
