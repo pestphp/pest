@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://next.pestphp.com/assets/img/og.png" width="600" alt="PEST Preview">
+    <img src="https://raw.githubusercontent.com/pestphp/art/master/readme.png" width="600" alt="PEST">
     <p align="center">
         <a href="https://github.com/pestphp/pest/actions"><img src="https://github.com/pest/pestphp/workflows/tests/badge.svg" alt="Build Status"></a>
         <a href="https://packagist.org/packages/pestphp/pest"><img src="https://poser.pugx.org/pestphp/pest/d/total.svg" alt="Total Downloads"></a>
