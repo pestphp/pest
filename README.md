@@ -15,4 +15,4 @@
 - Join the Discord Server: **[discord.gg/bMAJv82 »](https://discord.gg/bMAJv82)**
 - Follow us on Twitter: **[@pestphp »](https://twitter.com/pestphp)**
 
-Pest was created by **[Nuno Maduro](https://twitter.com/enunomaduro)** under the **[sponsorware](https://github.com/sponsorware/docs)** license. It got open-sourced and is now licensed under the **[MIT license](https://opensource.org/licenses/MIT)**.
+Pest was created by **[Nuno Maduro](https://twitter.com/enunomaduro)** under the **[Sponsorware license](https://github.com/sponsorware/docs)**. It got open-sourced and is now licensed under the **[MIT license](https://opensource.org/licenses/MIT)**.
