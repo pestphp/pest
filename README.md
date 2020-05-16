@@ -13,5 +13,6 @@
 
 - Explore the docs: **[pestphp.com »](https://pestphp.com)**
 - Join the Discord Server: **[discord.gg/bMAJv82 »](https://discord.gg/bMAJv82)**
+- Follow us on Twitter: **[@pestphp »](https://twitter.com/pestphp)**
 
 Pest was created by **[Nuno Maduro](https://twitter.com/enunomaduro)** and is open-sourced software licensed under the **[MIT license](https://opensource.org/licenses/MIT)**.
