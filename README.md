@@ -1,10 +1,10 @@
 <p align="center">
     <img src="https://raw.githubusercontent.com/pestphp/art/master/readme.png" width="600" alt="PEST">
     <p align="center">
-        <a href="https://github.com/pestphp/pest/actions"><img src="https://github.com/pest/pestphp/workflows/tests/badge.svg" alt="Build Status"></a>
-        <a href="https://packagist.org/packages/pestphp/pest"><img src="https://poser.pugx.org/pestphp/pest/d/total.svg" alt="Total Downloads"></a>
-        <a href="https://packagist.org/packages/pestphp/pest"><img src="https://poser.pugx.org/pestphp/pest/v/stable.svg" alt="Latest Version"></a>
-        <a href="https://packagist.org/packages/pestphp/pest"><img src="https://poser.pugx.org/pestphp/pest/license.svg" alt="License"></a>
+        <a href="https://github.com/pestphp/pest/actions"><img alt="GitHub Workflow Status (master)" src="https://img.shields.io/github/workflow/status/pestphp/pest/Continuous Integration/master"></a>
+        <a href="https://packagist.org/packages/pestphp/pest"><img alt="Total Downloads" src="https://img.shields.io/packagist/dt/pestphp/pest"></a>
+        <a href="https://packagist.org/packages/pestphp/pest"><img alt="Latest Version" src="https://img.shields.io/packagist/v/pestphp/pest"></a>
+        <a href="https://packagist.org/packages/pestphp/pest"><img alt="License" src="https://img.shields.io/packagist/l/pestphp/pest"></a>
     </p>
 </p>
 
