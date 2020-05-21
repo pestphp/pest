@@ -4,15 +4,16 @@ on: ['push', 'pull_request']
 
 jobs:
   ci:
-    runs-on: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: true
       matrix:
+        os: [ubuntu-latest, windows-latest]
         php: [7.3, 7.4]
         dependency-version: [prefer-lowest, prefer-stable]
 
-    name: CI - PHP ${{ matrix.php }} (${{ matrix.dependency-version }})
+    name: CI - PHP ${{ matrix.php }} (${{ matrix.dependency-version }}) - ${{ matrix.os }}
 
     steps:
 
