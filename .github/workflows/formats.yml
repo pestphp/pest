@@ -9,11 +9,11 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        php: [7.3, 7.4]
+        os: [ubuntu-latest]
+        php: [7.4]
         dependency-version: [prefer-lowest, prefer-stable]
 
-    name: CI - PHP ${{ matrix.php }} (${{ matrix.dependency-version }}) - ${{ matrix.os }}
+    name: Formats ${{ matrix.php }} (${{ matrix.dependency-version }}) - ${{ matrix.os }}
 
     steps:
 
@@ -44,9 +44,3 @@ jobs:
 
     - name: Type Checks
       run: vendor/bin/phpstan analyse --ansi
-
-    - name: Unit Tests
-      run: bin/pest --colors=always --exclude-group=integration
-
-    - name: Integration Tests
-      run: bin/pest --colors=always --group=integration
