@@ -5,7 +5,6 @@ on: ['push', 'pull_request']
 jobs:
   ci:
     runs-on: ${{ matrix.os }}
-
     strategy:
       fail-fast: true
       matrix:
@@ -13,7 +12,7 @@ jobs:
         php: [7.3, 7.4]
         dependency-version: [prefer-lowest, prefer-stable]
 
-    name: Tests ${{ matrix.php }} (${{ matrix.dependency-version }}) - ${{ matrix.os }}
+    name: Tests P${{ matrix.php }} - ${{ matrix.dependency-version }} - ${{ matrix.os }}
 
     steps:
 
@@ -31,8 +30,7 @@ jobs:
       with:
         php-version: ${{ matrix.php }}
         extensions: mbstring, zip
-        tools: prestissimo
-        coverage: pcov
+        coverage: none
 
     - name: Install Composer dependencies
       run: composer update --${{ matrix.dependency-version }} --no-interaction --prefer-dist

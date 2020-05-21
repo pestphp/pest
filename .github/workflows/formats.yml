@@ -13,7 +13,7 @@ jobs:
         php: [7.4]
         dependency-version: [prefer-lowest, prefer-stable]
 
-    name: Formats ${{ matrix.php }} (${{ matrix.dependency-version }}) - ${{ matrix.os }}
+    name: Formats P${{ matrix.php }} (${{ matrix.dependency-version }}) - ${{ matrix.os }}
 
     steps:
 
