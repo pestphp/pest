@@ -34,7 +34,10 @@
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/PHPUnit/"
-        }
+        },
+        "files": [
+            "tests/Autoload.php"
+        ]
     },
     "require-dev": {
         "ergebnis/phpstan-rules": "^0.14.4",

@@ -106,7 +106,13 @@ final class TestSuite
     public static function getInstance(string $rootPath = null): TestSuite
     {
         if (is_string($rootPath)) {
-            return self::$instance ?? self::$instance = new TestSuite($rootPath);
+            self::$instance = new TestSuite($rootPath);
+
+            foreach (Plugin::$callables as $callable) {
+                $callable();
+            }
+
+            return self::$instance;
         }
 
         if (self::$instance === null) {
