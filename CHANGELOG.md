@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [v0.1.3 (2020-05-21)](https://github.com/pestphp/pest/compare/v0.1.2...v0.1.3)
+### Added
+- `Plugin::uses()` method for making traits globally available ([6c4be01](https://github.com/pestphp/pest/commit/6c4be0190e9493702a976b996bbbf5150cc6bb53))
+
 ## [v0.1.2 (2020-05-15)](https://github.com/pestphp/pest/compare/v0.1.1...v0.1.2)
 ### Added
 - Support to custom helpers ([#7](https://github.com/pestphp/pest/pull/7))
