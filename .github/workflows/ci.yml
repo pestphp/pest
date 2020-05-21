@@ -4,7 +4,7 @@ on: ['push', 'pull_request']
 
 jobs:
   ci:
-    runs-on: ubuntu-latest
+    runs-on: [ubuntu-latest, windows-latest]
 
     strategy:
       fail-fast: true
