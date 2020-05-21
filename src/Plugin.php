@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Pest;
 
-use Pest\TestSuite;
-
 final class Plugin
 {
     /**
@@ -21,9 +19,9 @@ final class Plugin
     /**
      * Lazy loads an `uses` call on the context of plugins.
      */
-    public static function uses(...$traits): void
+    public static function uses(string ...$traits): void
     {
-        self::$callables[] = function () use ($traits) {
+        self::$callables[] = function () use ($traits): void {
             uses(...$traits)->in(TestSuite::getInstance()->rootPath . DIRECTORY_SEPARATOR . 'tests');
         };
     }

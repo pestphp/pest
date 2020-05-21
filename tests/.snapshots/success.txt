@@ -95,6 +95,9 @@
    PASS  Tests\Playground
   ✓ basic
 
+   PASS  Tests\Plugins\Traits
+  ✓ it allows global uses
+
    PASS  Tests\Unit\Actions\AddsCoverage
   ✓ it adds coverage if --coverage exist
   ✓ it adds coverage if --min exist
@@ -132,5 +135,5 @@
    WARN  Tests\Visual\Success
   s visual snapshot of test suite on success
 
-  Tests:  6 skipped, 69 passed
-  Time:   2.63s
+  Tests:  6 skipped, 70 passed
+  Time:   2.68s

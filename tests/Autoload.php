@@ -6,7 +6,7 @@ if (class_exists(NunoMaduro\Collision\Provider::class)) {
 
 trait PluginTrait
 {
-    function assertPluginTraitGotRegistered(): void
+    public function assertPluginTraitGotRegistered(): void
     {
         assertTrue(true);
     }
