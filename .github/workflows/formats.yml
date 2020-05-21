@@ -1,4 +1,4 @@
-name: Continuous Integration
+name: Formats
 
 on: ['push', 'pull_request']
 
@@ -13,7 +13,7 @@ jobs:
         php: [7.4]
         dependency-version: [prefer-lowest, prefer-stable]
 
-    name: Formats P${{ matrix.php }} (${{ matrix.dependency-version }}) - ${{ matrix.os }}
+    name: Formats P${{ matrix.php }} - ${{ matrix.os }} - ${{ matrix.dependency-version }}
 
     steps:
 
