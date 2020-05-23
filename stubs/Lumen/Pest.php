@@ -1,0 +1,3 @@
+<?php
+
+uses(TestCase::class);
