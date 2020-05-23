@@ -37,8 +37,7 @@ final class PestInstallCommand extends Command
         $pest    = base_path('tests/Pest.php');
         /* @phpstan-ignore-next-line */
         $helpers = base_path('tests/Helpers.php');
-        /* @phpstan-ignore-next-line */
-        $stubs = $this->isLumen() ? 'stubs/Lumen' : 'stubs/Laravel';
+        $stubs   = $this->isLumen() ? 'stubs/Lumen' : 'stubs/Laravel';
 
         foreach ([$pest, $helpers] as $file) {
             if (File::exists($file)) {
@@ -65,8 +64,9 @@ final class PestInstallCommand extends Command
     /**
      * Determine if this is a Lumen application.
      */
-    protected function isLumen(): bool
+    private function isLumen(): bool
     {
+        /* @phpstan-ignore-next-line */
         return Str::startsWith(app()->version(), 'Lumen');
     }
 }
