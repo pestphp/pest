@@ -13,7 +13,7 @@ use Pest\TestSuite;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Runs the given closure after all tests in the current file.
+ * Runs the given closure before all tests in the current file.
  */
 function beforeAll(Closure $closure): void
 {
