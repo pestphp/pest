@@ -7,6 +7,7 @@ namespace Pest\Laravel\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Pest\Exceptions\InvalidConsoleArgument;
+use Pest\Support\Str;
 
 /**
  * @internal
@@ -36,6 +37,7 @@ final class PestInstallCommand extends Command
         $pest    = base_path('tests/Pest.php');
         /* @phpstan-ignore-next-line */
         $helpers = base_path('tests/Helpers.php');
+        $stubs   = $this->isLumen() ? 'stubs/Lumen' : 'stubs/Laravel';
 
         foreach ([$pest, $helpers] as $file) {
             if (File::exists($file)) {
@@ -45,17 +47,26 @@ final class PestInstallCommand extends Command
 
         File::copy(implode(DIRECTORY_SEPARATOR, [
             dirname(__DIR__, 3),
-            'stubs',
+            $stubs,
             'Pest.php',
         ]), $pest);
 
         File::copy(implode(DIRECTORY_SEPARATOR, [
             dirname(__DIR__, 3),
-            'stubs',
+            $stubs,
             'Helpers.php',
         ]), $helpers);
 
         $this->output->success('`tests/Pest.php` created successfully.');
         $this->output->success('`tests/Helpers.php` created successfully.');
+    }
+
+    /**
+     * Determine if this is a Lumen application.
+     */
+    private function isLumen(): bool
+    {
+        /* @phpstan-ignore-next-line */
+        return Str::startsWith(app()->version(), 'Lumen');
     }
 }
