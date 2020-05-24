@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [v0.1.5 (2020-05-24)](https://github.com/pestphp/pest/compare/v0.1.4...v0.1.5)
+### Fixed
+- Missing default decorated output on coverage ([88d2391(https://github.com/pestphp/pest/commit/88d2391d2e6fe9c9416462734b9b523cb418f469))
+
 ## [v0.1.4 (2020-05-24)](https://github.com/pestphp/pest/compare/v0.1.3...v0.1.4)
 ### Added
 - Support to Lumen on artisan commands ([#18](https://github.com/pestphp/pest/pull/18))
