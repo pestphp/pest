@@ -27,5 +27,5 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
     ValidatesEnvironment::in($testSuite);
 
-    exit((new Command($testSuite, new ConsoleOutput()))->run($_SERVER['argv']));
+    exit((new Command($testSuite, new ConsoleOutput(ConsoleOutput::VERBOSITY_NORMAL, true)))->run($_SERVER['argv']));
 })();
