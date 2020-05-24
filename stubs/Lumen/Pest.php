@@ -1,3 +1,3 @@
 <?php
 
-uses(TestCase::class);
+uses(TestCase::class)->in(__DIR__);
