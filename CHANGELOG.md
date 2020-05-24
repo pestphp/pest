@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [v0.1.4 (2020-05-24)](https://github.com/pestphp/pest/compare/v0.1.3...v0.1.4)
+### Added
+- Support to Lumen on artisan commands ([#18](https://github.com/pestphp/pest/pull/18))
+
+### Fixed
+- Mockery tests without assertions being considered risky ([415f571](https://github.com/pestphp/pest/commit/415f5719101b30c11d87f74810a71686ef2786c6))
+
 ## [v0.1.3 (2020-05-21)](https://github.com/pestphp/pest/compare/v0.1.2...v0.1.3)
 ### Added
 - `Plugin::uses()` method for making traits globally available ([6c4be01](https://github.com/pestphp/pest/commit/6c4be0190e9493702a976b996bbbf5150cc6bb53))
