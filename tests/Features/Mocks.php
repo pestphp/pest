@@ -11,5 +11,5 @@ it('has bar', function () {
         ->times(1)
         ->andReturn(2);
 
-    assertEquals(2, $mock->bar());
+    $mock->bar();
 });
