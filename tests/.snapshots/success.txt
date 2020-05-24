@@ -70,7 +70,7 @@
   s it skips with message → skipped because bar
   s it skips with truthy closure condition
   ✓ it do not skips with falsy closure condition
-  s it skips with condition and messsage → skipped because foo
+  s it skips with condition and message → skipped because foo
 
    PASS  Tests\Features\Test
   ✓ a test
