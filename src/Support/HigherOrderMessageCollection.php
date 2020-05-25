@@ -29,8 +29,14 @@ final class HigherOrderMessageCollection
      */
     public function chain(object $target): void
     {
+        $originalTarget = $target;
+
         foreach ($this->messages as $message) {
             $target = $message->call($target);
+
+            if ($target === null) {
+                $target = $originalTarget;
+            }
         }
     }
 
