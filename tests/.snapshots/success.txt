@@ -55,6 +55,7 @@
 
    PASS  Tests\Features\HigherOrderMessages
   ✓ it proxies calls to object
+  ✓ it proxies multiple calls to object
 
    PASS  Tests\Features\It
   ✓ it is a test
@@ -135,5 +136,5 @@
    WARN  Tests\Visual\Success
   s visual snapshot of test suite on success
 
-  Tests:  6 skipped, 70 passed
-  Time:   2.68s
+  Tests:  6 skipped, 71 passed
+  Time:   2.92s
