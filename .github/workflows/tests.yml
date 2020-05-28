@@ -36,7 +36,7 @@ jobs:
       run: composer update --${{ matrix.dependency-version }} --no-interaction --prefer-dist
 
     - name: Unit Tests
-      run: bin/pest --colors=always --exclude-group=integration
+      run: php bin/pest --colors=always --exclude-group=integration
 
     - name: Integration Tests
-      run: bin/pest --colors=always --group=integration
+      run: php bin/pest --colors=always --group=integration
