@@ -59,7 +59,17 @@ final class UsesCall
     public function in(string ...$targets): void
     {
         $targets = array_map(function ($path): string {
-            return $path[0] === DIRECTORY_SEPARATOR
+            $startChar = DIRECTORY_SEPARATOR;
+
+            if ('\\' === DIRECTORY_SEPARATOR) {
+                $path = (string) preg_replace_callback('~^(?P<drive>[a-z]+:\\\)~i', function ($match): string {
+                    return strtolower($match['drive']);
+                }, $path);
+
+                $startChar = strtolower((string) preg_replace('~^([a-z]+:\\\).*$~i', '$1', __DIR__));
+            }
+
+            return 0 === strpos($path, $startChar)
                 ? $path
                 : implode(DIRECTORY_SEPARATOR, [
                     dirname($this->filename),
@@ -68,12 +78,12 @@ final class UsesCall
         }, $targets);
 
         $this->targets = array_map(function ($target): string {
-            $realTarget = realpath($target);
-            if ($realTarget === false) {
-                throw new InvalidUsesPath($target);
+            $isValid = is_dir($target) || file_exists($target);
+            if (!$isValid) {
+                throw new InvalidUsesPath($target . "\n");
             }
 
-            return $realTarget;
+            return $target;
         }, $targets);
     }
 
