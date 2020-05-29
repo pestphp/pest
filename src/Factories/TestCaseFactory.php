@@ -168,7 +168,7 @@ final class TestCaseFactory
         // Limit to A-Z, a-z, 0-9, '_', '-'.
         $relativePath = (string) preg_replace('/[^A-Za-z0-9.\/]/', '', $relativePath);
 
-        $classFQN     = 'P\\' . basename(ucfirst(str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath)), '.php');
+        $classFQN     = 'P\\' . preg_replace('~\.php$~i', '', ucfirst(str_replace('/', '\\', $relativePath)));
 
         if (class_exists($classFQN)) {
             return $classFQN;
