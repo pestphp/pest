@@ -133,7 +133,7 @@ final class Command extends BaseCommand
 
         /** @var AddsOutput $plugin */
         foreach ($plugins as $plugin) {
-            $plugin->addOutput($this->testSuite, $this->output, $result);
+            $result = $plugin->addOutput($this->testSuite, $this->output, $result);
         }
 
         exit($result);
