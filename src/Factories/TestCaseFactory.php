@@ -152,10 +152,18 @@ final class TestCaseFactory
      */
     public function makeClassFromFilename(string $filename): string
     {
+        if ('\\' === DIRECTORY_SEPARATOR) {
+            // In case Windows, strtolower drive name, like in UsesCall.
+            $filename = (string) preg_replace_callback('~^(?P<drive>[a-z]+:\\\)~i', function ($match): string {
+                return strtolower($match['drive']);
+            }, $filename);
+        }
+
         $rootPath     = TestSuite::getInstance()->rootPath;
         $relativePath = str_replace($rootPath . DIRECTORY_SEPARATOR, '', $filename);
         // Strip out any %-encoded octets.
         $relativePath = (string) preg_replace('|%[a-fA-F0-9][a-fA-F0-9]|', '', $relativePath);
+        $relativePath = str_replace('\\', '/', $relativePath);
 
         // Limit to A-Z, a-z, 0-9, '_', '-'.
         $relativePath = (string) preg_replace('/[^A-Za-z0-9.\/]/', '', $relativePath);
