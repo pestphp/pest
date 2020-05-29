@@ -19,6 +19,7 @@
     "require": {
         "php": "^7.3",
         "nunomaduro/collision": "^5.0",
+        "pestphp/pest-plugin": "@dev",
         "phpunit/phpunit": "^9.1.4",
         "sebastian/environment": "^5.1"
     },
@@ -81,5 +82,11 @@
                 "Pest\\Laravel\\PestServiceProvider"
             ]
         }
-    }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/fetzi/pest-plugin.git"
+        }
+    ]
 }
