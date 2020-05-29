@@ -98,10 +98,6 @@
    PASS  Tests\Plugins\Traits
   ✓ it allows global uses
 
-   PASS  Tests\Unit\Actions\AddsCoverage
-  ✓ it adds coverage if --coverage exist
-  ✓ it adds coverage if --min exist
-
    PASS  Tests\Unit\Actions\AddsDefaults
   ✓ it sets defaults
   ✓ it does not override options
@@ -114,9 +110,6 @@
   ✓ it throws exception when configuration not found
   ✓ it throws exception when `process isolation` is true
   ✓ it do not throws exception when `process isolation` is false
-
-   PASS  Tests\Unit\Console\Coverage
-  ✓ it generates coverage based on file input
 
    PASS  Tests\Unit\Support\Backtrace
   ✓ it gets file name from called file
@@ -135,5 +128,5 @@
    WARN  Tests\Visual\Success
   s visual snapshot of test suite on success
 
-  Tests:  6 skipped, 70 passed
-  Time:   2.68s
+  Tests:  6 skipped, 67 passed
+  Time:   2.67s
