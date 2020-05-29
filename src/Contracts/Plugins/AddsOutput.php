@@ -15,5 +15,5 @@ interface AddsOutput
     /**
      * Allows to add custom output after the test suite was executed.
      */
-    public function addOutput(TestSuite $testSuite, OutputInterface $output, int $testReturnCode): void;
+    public function addOutput(TestSuite $testSuite, OutputInterface $output, int $testReturnCode): int;
 }
