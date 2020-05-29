@@ -20,6 +20,7 @@
         "php": "^7.3",
         "nunomaduro/collision": "^5.0",
         "pestphp/pest-plugin": "dev-master",
+        "pestphp/pest-plugin-coverage": "dev-master",
         "phpunit/phpunit": "^9.1.4",
         "sebastian/environment": "^5.1"
     },
