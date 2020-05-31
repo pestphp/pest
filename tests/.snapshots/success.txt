@@ -124,9 +124,11 @@
    PASS  Tests\Visual\SingleTestOrDirectory
   ✓ allows to run a single test
   ✓ allows to run a directory
+  ✓ it has ascii chars (decorated printer)
+  ✓ it disable decorating printer when colors is set to never
 
    WARN  Tests\Visual\Success
   s visual snapshot of test suite on success
 
-  Tests:  6 skipped, 67 passed
-  Time:   2.67s
+  Tests:  6 skipped, 69 passed
+  Time:   2.34s
