@@ -62,5 +62,4 @@ it('disable decorating printer when colors is set to never', function () {
 
   Tests:  1 passed
 EOF, $output);
-
 });
