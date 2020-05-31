@@ -21,7 +21,7 @@ final class AddsDefaults
     public static function to(array $arguments): array
     {
         if (!array_key_exists('printer', $arguments)) {
-            $arguments['printer'] = new Printer();
+            $arguments['printer'] = new Printer(null, $arguments['verbose'] ?? false, $arguments['colors'] ?? 'always');
         }
 
         return $arguments;
