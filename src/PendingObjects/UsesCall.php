@@ -59,7 +59,7 @@ final class UsesCall
     public function in(string ...$targets): void
     {
         $targets = array_map(function ($path): string {
-            return $path[0] === DIRECTORY_SEPARATOR
+            return $path[0] === DIRECTORY_SEPARATOR || preg_match('~\A[A-Z]:(?![^/\\\\])~i',$path) > 0
                 ? $path
                 : implode(DIRECTORY_SEPARATOR, [
                     dirname($this->filename),
