@@ -81,10 +81,10 @@
   ✓ higher order message test
 
    PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest
-  ✓ it example
+  ✓ it example 1
 
    PASS  Tests\Fixtures\ExampleTest
-  ✓ it example
+  ✓ it example 2
 
    PASS  Tests\PHPUnit\CustomTestCase\UsesPerDirectory
   ✓ closure was bound to  custom test case
