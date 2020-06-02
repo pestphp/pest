@@ -61,7 +61,7 @@ final class UsesCall
         $targets = array_map(function ($path): string {
             $startChar = DIRECTORY_SEPARATOR;
 
-            if ('\\' === DIRECTORY_SEPARATOR) {
+            if ('\\' === DIRECTORY_SEPARATOR || preg_match('~\A[A-Z]:(?![^/\\\\])~i', $path) > 0) {
                 $path = (string) preg_replace_callback('~^(?P<drive>[a-z]+:\\\)~i', function ($match): string {
                     return strtolower($match['drive']);
                 }, $path);
