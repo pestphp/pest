@@ -165,6 +165,7 @@ final class TestCaseFactory
             }, $filename);
         }
 
+        $filename = realpath($filename);
         $rootPath     = TestSuite::getInstance()->rootPath;
         $relativePath = str_replace($rootPath . DIRECTORY_SEPARATOR, '', $filename);
         // Strip out any %-encoded octets.
