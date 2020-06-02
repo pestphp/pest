@@ -33,6 +33,7 @@ EOF, $run('tests/Fixtures'));
 
 it('has ascii chars (decorated printer)', function () {
     $process = new Process([
+        'php',
         './bin/pest',
         'tests/Fixtures/DirectoryWithTests/ExampleTest.php',
     ], dirname(__DIR__, 2));
@@ -49,6 +50,7 @@ EOF, $output);
 
 it('disable decorating printer when colors is set to never', function () {
     $process = new Process([
+        'php',
         './bin/pest',
         '--colors=never',
         'tests/Fixtures/DirectoryWithTests/ExampleTest.php',
