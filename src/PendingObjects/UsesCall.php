@@ -83,7 +83,7 @@ final class UsesCall
                 throw new InvalidUsesPath($target . "\n");
             }
 
-            return $target;
+            return realpath($target);
         }, $targets);
     }
 
