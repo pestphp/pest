@@ -82,6 +82,9 @@
             "providers": [
                 "Pest\\Laravel\\PestServiceProvider"
             ]
+        },
+        "branch-alias": {
+            "dev-master": "dev-feature/add-container"
         }
     }
 }
