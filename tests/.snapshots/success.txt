@@ -53,7 +53,7 @@
   ✓ it allows to call underlying protected/private methods
   ✓ it throws error if method do not exist
 
-   PASS  Tests\Features\HigherOrderMessages
+   PASS  Tests\Features\HigherOrderTests
   ✓ it proxies calls to object
 
    PASS  Tests\Features\It
@@ -62,6 +62,10 @@
 
    PASS  Tests\Features\Mocks
   ✓ it has bar
+
+   PASS  Tests\Features\PendingHigherOrderTests
+  ✓ get 'foo' → get 'bar' → assert true true
+  ✓ get 'foo' → assert true true
 
    WARN  Tests\Features\Skip
   ✓ it do not skips
@@ -130,5 +134,5 @@
    WARN  Tests\Visual\Success
   s visual snapshot of test suite on success
 
-  Tests:  6 skipped, 69 passed
-  Time:   2.34s
+  Tests:  6 skipped, 71 passed
+  Time:   2.89s

@@ -78,7 +78,9 @@ final class HigherOrderMessage
 
             if ($throwable->getMessage() === sprintf(self::UNDEFINED_METHOD, $this->methodName)) {
                 /** @var \ReflectionClass $reflection */
-                $reflection = (new ReflectionClass($target))->getParentClass();
+                $reflection = new ReflectionClass($target);
+                /* @phpstan-ignore-next-line */
+                $reflection = $reflection->getParentClass() ?: $reflection;
                 Reflection::setPropertyValue($throwable, 'message', sprintf('Call to undefined method %s::%s()', $reflection->getName(), $this->methodName));
             }
 
