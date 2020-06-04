@@ -66,7 +66,7 @@ function test(string $description = null, Closure $closure = null)
         return new HigherOrderTapProxy(TestSuite::getInstance()->test);
     }
 
-    $filename = Backtrace::file();
+    $filename = Backtrace::testFile();
 
     return new TestCall(TestSuite::getInstance(), $filename, $description, $closure);
 }
@@ -80,9 +80,9 @@ function test(string $description = null, Closure $closure = null)
  */
 function it(string $description, Closure $closure = null): TestCall
 {
-    $filename = Backtrace::file();
+    $description = sprintf('it %s', $description);
 
-    return new TestCall(TestSuite::getInstance(), $filename, sprintf('it %s', $description), $closure);
+    return test($description, $closure);
 }
 
 /**
