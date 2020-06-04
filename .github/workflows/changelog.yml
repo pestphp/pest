@@ -1,0 +1,27 @@
+name: Update documentation CHANGELOG
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - CHANGELOG.md
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Add file to filesystem
+      run: |
+        git clone https://github.com/pestphp/website pestphp-website
+        cp CHANGELOG.md pestphp-website/source/docs
+      shell: bash
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v2
+      with:
+          token: ${{ secrets.CHANGELOG_KEY }}
+          commit-message: Update changelog.md
+          committer: GitHub Action <noreply@github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          title: 'Update changelog.md'
+          path: ./pestphp-website
