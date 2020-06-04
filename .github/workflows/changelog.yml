@@ -1,7 +1,11 @@
-name: Update documentation CHANGELOG
+name: Changelog
 
 on:
   push:
+    branches: [ master ]
+    paths:
+      - CHANGELOG.md
+  pull_request:
     branches: [ master ]
     paths:
       - CHANGELOG.md
