@@ -15,11 +15,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Add file to filesystem
-      run: |
-        git clone https://github.com/pestphp/website pestphp-website
-        cp CHANGELOG.md pestphp-website/source/docs
-      shell: bash
+    - name: Checkout website repository
+      uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.CHANGELOG_KEY }}
+        repository: pestphp/website
+        path: pestphp-website
+    - name: Copy CHANGELOG to website repository
+      run: cp CHANGELOG.md pestphp-website/source/docs/changelog.md
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v2
       with:
