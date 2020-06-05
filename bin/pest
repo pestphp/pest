@@ -3,8 +3,10 @@
 
 use Pest\Actions\ValidatesEnvironment;
 use Pest\Console\Command;
+use Pest\Support\Container;
 use Pest\TestSuite;
 use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Console\Output\OutputInterface;
 
 (static function () {
     // Used when Pest is required using composer.
@@ -24,8 +26,13 @@ use Symfony\Component\Console\Output\ConsoleOutput;
     $rootPath = getcwd();
 
     $testSuite = TestSuite::getInstance($rootPath);
+    $output = new ConsoleOutput(ConsoleOutput::VERBOSITY_NORMAL, true);
+
+    $container = Container::getInstance();
+    $container->add(TestSuite::class, $testSuite);
+    $container->add(OutputInterface::class, $output);
 
     ValidatesEnvironment::in($testSuite);
 
-    exit((new Command($testSuite, new ConsoleOutput(ConsoleOutput::VERBOSITY_NORMAL, true)))->run($_SERVER['argv']));
+    exit($container->get(Command::class)->run($_SERVER['argv']));
 })();

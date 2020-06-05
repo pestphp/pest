@@ -14,9 +14,26 @@ use ReflectionParameter;
 final class Container
 {
     /**
+     * @var self
+     */
+    private static $instance;
+
+    /**
      * @var array<string, mixed>
      */
     private $instances = [];
+
+    /**
+     * Gets a new or already existing container.
+     */
+    public static function getInstance(): self
+    {
+        if (static::$instance === null) {
+            static::$instance = new static();
+        }
+
+        return static::$instance;
+    }
 
     /**
      * Gets a dependency from the container.
