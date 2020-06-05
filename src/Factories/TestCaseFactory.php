@@ -165,7 +165,7 @@ final class TestCaseFactory
             }, $filename);
         }
 
-        $filename     = realpath($filename);
+        $filename     = (string) realpath($filename);
         $rootPath     = TestSuite::getInstance()->rootPath;
         $relativePath = str_replace($rootPath . DIRECTORY_SEPARATOR, '', $filename);
         $relativePath = dirname(ucfirst($relativePath)) . DIRECTORY_SEPARATOR . basename($relativePath, '.php');
