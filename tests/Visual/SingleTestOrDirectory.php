@@ -10,12 +10,15 @@ $run = function (string $target, $decorated = false) {
     return $decorated ? $process->getOutput() : preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $process->getOutput());
 };
 
-$testsPath = dirname(__DIR__);
-$snapshot  = fn (string $name) => file_get_contents(implode(DIRECTORY_SEPARATOR, [
-    $testsPath,
-    '.snapshots',
-    "$name.txt",
-]));
+$snapshot  = function ($name) {
+    $testsPath = dirname(__DIR__);
+
+    return file_get_contents(implode(DIRECTORY_SEPARATOR, [
+        $testsPath,
+        '.snapshots',
+        "$name.txt",
+    ]));
+};
 
 test('allows to run a single test', function () use ($run, $snapshot) {
     assertStringContainsString(
