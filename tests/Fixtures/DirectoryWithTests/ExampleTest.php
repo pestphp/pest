@@ -1,3 +1,3 @@
 <?php
 
-it('example')->assertTrue(true);
+it('example 1')->assertTrue(true);

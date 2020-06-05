@@ -18,9 +18,9 @@
     ],
     "require": {
         "php": "^7.3",
-        "nunomaduro/collision": "^5.0",
-        "pestphp/pest-plugin": "dev-master",
-        "pestphp/pest-plugin-coverage": "dev-master",
+        "nunomaduro/collision": "^5.0.0-BETA2",
+        "pestphp/pest-plugin": "^0.2",
+        "pestphp/pest-plugin-coverage": "^0.2",
         "phpunit/phpunit": "^9.1.4",
         "sebastian/environment": "^5.1"
     },
@@ -67,9 +67,9 @@
         "lint": "rector process src && php-cs-fixer fix -v",
         "test:lint": "php-cs-fixer fix -v --dry-run && rector process src --dry-run",
         "test:types": "phpstan analyse --ansi",
-        "test:unit": "bin/pest --colors=always --exclude-group=integration",
-        "test:integration": "bin/pest --colors=always --group=integration",
-        "test:integration:snapshots": "REBUILD_SNAPSHOTS=true bin/pest --colors=always",
+        "test:unit": "php bin/pest --colors=always --exclude-group=integration",
+        "test:integration": "php bin/pest --colors=always --group=integration",
+        "test:integration:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --colors=always",
         "test": [
             "@test:lint",
             "@test:types",

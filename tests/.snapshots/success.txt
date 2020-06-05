@@ -1,5 +1,5 @@
 
-   PASS  Tests\CustomTestCase\PhpunitTest
+   PASS  Tests\CustomTestCase\ExecutedTest
   ✓ that gets executed
 
    PASS  Tests\Features\AfterAll
@@ -24,7 +24,7 @@
   ✓ it sets arrays
   ✓ it gets bound to test case object with ('a')
   ✓ it gets bound to test case object with ('b')
-  ✓ it truncates the description with (' fooo fooo fooo fooo fooo fooo fooo f...oo fooo')
+  ✓ it truncates the description with ('FoooFoooFoooFoooFoooFoooFoooF...ooFooo')
   ✓ lazy datasets with (1)
   ✓ lazy datasets with (2)
   ✓ lazy datasets did the job right
@@ -40,10 +40,10 @@
   ✓ eager wrapped registered datasets with (1)
   ✓ eager wrapped registered datasets with (2)
   ✓ eager registered wrapped datasets did the job right
-  ✓ lazy named datasets with ( bar  object (...))
+  ✓ lazy named datasets with (Bar Object (...))
 
    PASS  Tests\Features\Exceptions
-  ✓ it gives access the the underlying expect exception
+  ✓ it gives access the the underlying expectException
   ✓ it catch exceptions
   ✓ it catch exceptions and messages
 
@@ -64,8 +64,8 @@
   ✓ it has bar
 
    PASS  Tests\Features\PendingHigherOrderTests
-  ✓ get 'foo' → get 'bar' → assert true true
-  ✓ get 'foo' → assert true true
+  ✓ get 'foo' → get 'bar' → assertTrue true
+  ✓ get 'foo' → assertTrue true
 
    WARN  Tests\Features\Skip
   ✓ it do not skips
@@ -81,16 +81,16 @@
   ✓ higher order message test
 
    PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest
-  ✓ it example
+  ✓ it example 1
 
    PASS  Tests\Fixtures\ExampleTest
-  ✓ it example
+  ✓ it example 2
 
    PASS  Tests\PHPUnit\CustomTestCase\UsesPerDirectory
-  ✓ closure was bound to  custom test case
+  ✓ closure was bound to CustomTestCase
 
    PASS  Tests\PHPUnit\CustomTestCaseInSubFolders\SubFolder\SubFolder\UsesPerSubDirectory
-  ✓ closure was bound to  custom test case
+  ✓ closure was bound to CustomTestCase
 
    PASS  Tests\PHPUnit\CustomTestCaseInSubFolders\SubFolder2\UsesPerFile
   ✓ custom traits can be used
@@ -137,7 +137,7 @@
    PASS  Tests\Visual\SingleTestOrDirectory
   ✓ allows to run a single test
   ✓ allows to run a directory
-  ✓ it has ascii chars (decorated printer)
+  ✓ it has ascii chars
   ✓ it disable decorating printer when colors is set to never
 
    WARN  Tests\Visual\Success

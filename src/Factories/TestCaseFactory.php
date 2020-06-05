@@ -158,16 +158,25 @@ final class TestCaseFactory
      */
     public function makeClassFromFilename(string $filename): string
     {
+        if ('\\' === DIRECTORY_SEPARATOR) {
+            // In case Windows, strtolower drive name, like in UsesCall.
+            $filename = (string) preg_replace_callback('~^(?P<drive>[a-z]+:\\\)~i', function ($match): string {
+                return strtolower($match['drive']);
+            }, $filename);
+        }
+
+        $filename     = (string) realpath($filename);
         $rootPath     = TestSuite::getInstance()->rootPath;
         $relativePath = str_replace($rootPath . DIRECTORY_SEPARATOR, '', $filename);
+        $relativePath = dirname(ucfirst($relativePath)) . DIRECTORY_SEPARATOR . basename($relativePath, '.php');
+        $relativePath = str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath);
+
         // Strip out any %-encoded octets.
         $relativePath = (string) preg_replace('|%[a-fA-F0-9][a-fA-F0-9]|', '', $relativePath);
-
         // Limit to A-Z, a-z, 0-9, '_', '-'.
-        $relativePath = (string) preg_replace('/[^A-Za-z0-9.\/]/', '', $relativePath);
+        $relativePath = (string) preg_replace('/[^A-Za-z0-9.\\\]/', '', $relativePath);
 
-        $classFQN = 'P\\' . basename(ucfirst(str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath)), '.php');
-
+        $classFQN = 'P\\' . $relativePath;
         if (class_exists($classFQN)) {
             return $classFQN;
         }
