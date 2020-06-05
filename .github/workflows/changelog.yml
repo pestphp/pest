@@ -21,12 +21,30 @@ jobs:
         token: ${{ secrets.CHANGELOG_KEY }}
         repository: pestphp/website
         path: pestphp-website
+    - name: Read package.json
+      id: package
+      uses: juliangruber/read-file-action@v1
+      with:
+        path: ${{ env.home}}/CHANGELOG.md
+    - name: Add file headers
+      uses: DamianReeves/write-file-action@v1.0
+      with:
+        path: ./CHANGELOG.md
+        contents: |
+          ---
+          title: Changelog
+          description: Changelog
+          extends: _layouts.documentation
+          section: content
+          ---
+          ${{ steps.package.outputs.content }}
+        write-mode: overwrite
     - name: Copy CHANGELOG to website repository
       run: cp CHANGELOG.md pestphp-website/source/docs/changelog.md
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v2
       with:
-          token: ${{ secrets.CHANGELOG_KEY }}
+        token: ${{ secrets.CHANGELOG_KEY }}
           commit-message: Update changelog.md
           committer: GitHub Action <noreply@github.com>
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
