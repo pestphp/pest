@@ -10,6 +10,11 @@ $run = function (string $target) {
     return preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $process->getOutput());
 };
 
+test('output contains full test path', function() use ($run) {
+    $output = $run('tests/Fixtures/DirectoryWithTests/ExampleTest.php');
+    assertStringContainsString('  PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest', $output);
+});
+
 test('allows to run a single test', function () use ($run) {
     $output = $run('tests/Fixtures/DirectoryWithTests/ExampleTest.php');
     assertStringContainsString('  PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest', $output);
