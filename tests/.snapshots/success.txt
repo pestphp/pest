@@ -126,7 +126,6 @@
   ✓ it does not allow to add the same test description twice
 
    PASS  Tests\Visual\SingleTestOrDirectory
-  ✓ output contains full test path
   ✓ allows to run a single test
   ✓ allows to run a directory
   ✓ it has ascii chars (decorated printer)
@@ -135,5 +134,5 @@
    WARN  Tests\Visual\Success
   s visual snapshot of test suite on success
 
-  Tests:  6 skipped, 72 passed
+  Tests:  6 skipped, 71 passed
   Time:   2.89s

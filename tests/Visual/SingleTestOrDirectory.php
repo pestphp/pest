@@ -10,25 +10,25 @@ $run = function (string $target) {
     return preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $process->getOutput());
 };
 
-test('output contains full test path', function() use ($run) {
-    $output = $run('tests/Fixtures/DirectoryWithTests/ExampleTest.php');
-    assertStringContainsString('  PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest', $output);
-});
-
 test('allows to run a single test', function () use ($run) {
-    $output = $run('tests/Fixtures/DirectoryWithTests/ExampleTest.php');
-    assertStringContainsString('  PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest', $output);
-    assertStringContainsString('  ✓ it example 1', $output);
-    assertStringContainsString('  Tests:  1 passed', $output);
+    assertStringContainsString(<<<EOF
+   PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest
+  ✓ it example 1
+
+  Tests:  1 passed
+EOF, $run('tests/Fixtures/DirectoryWithTests/ExampleTest.php'));
 });
 
 test('allows to run a directory', function () use ($run) {
-    $output = $run('tests/Fixtures');
-    assertStringContainsString('  PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest', $output);
-    assertStringContainsString('  ✓ it example 1', $output);
-    assertStringContainsString('  PASS  Tests\Fixtures\ExampleTest', $output);
-    assertStringContainsString('  ✓ it example 2', $output);
-    assertStringContainsString('  Tests:  2 passed', $output);
+    assertStringContainsString(<<<EOF
+   PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest
+  ✓ it example 1
+
+   PASS  Tests\Fixtures\ExampleTest
+  ✓ it example 2
+
+  Tests:  2 passed
+EOF, $run('tests/Fixtures'));
 });
 
 it('has ascii chars (decorated printer)', function () {
@@ -40,9 +40,12 @@ it('has ascii chars (decorated printer)', function () {
 
     $process->run();
     $output = $process->getOutput();
-    assertStringContainsString("  \e[30;42;1m PASS \e[39;49;22m\e[39m Tests\Fixtures\DirectoryWithTests\ExampleTest\e[39m", $output);
-    assertStringContainsString("  \e[32;1m✓\e[39;22m\e[39m \e[2mit example 1\e[22m\e[39m", $output);
-    assertStringContainsString("  \e[37;1mTests:  \e[39;22m\e[32;1m1 passed\e[39;22m", $output);
+    assertStringContainsString(<<<EOF
+  \e[30;42;1m PASS \e[39;49;22m\e[39m Tests\Fixtures\DirectoryWithTests\ExampleTest\e[39m
+  \e[32;1m✓\e[39;22m\e[39m \e[2mit example\e[22m\e[39m
+
+  \e[37;1mTests:  \e[39;22m\e[32;1m1 passed\e[39;22m
+EOF, $output);
 });
 
 it('disable decorating printer when colors is set to never', function () {
@@ -55,7 +58,10 @@ it('disable decorating printer when colors is set to never', function () {
     $process->run();
     $output = $process->getOutput();
 
-    assertStringContainsString('  PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest', $output);
-    assertStringContainsString("  ✓ \e[2mit example 1\e[22m", $output);
-    assertStringContainsString('  Tests:  1 passed', $output);
+    assertStringContainsString(<<<EOF
+  \e[30;42;1m PASS \e[39;49;22m\e[39m Tests\Fixtures\DirectoryWithTests\ExampleTest\e[39m
+  \e[32;1m✓\e[39;22m\e[39m \e[2mit example\e[22m\e[39m
+
+  \e[37;1mTests:  \e[39;22m\e[32;1m1 passed\e[39;22m
+EOF, $output);
 });
