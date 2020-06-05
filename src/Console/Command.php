@@ -62,7 +62,7 @@ final class Command extends BaseCommand
 
         /** @var HandlesArguments $plugin */
         foreach ($plugins as $plugin) {
-            $argv = $plugin->handleArguments($this->testSuite, $argv);
+            $argv = $plugin->handleArguments($argv);
         }
 
         /*
@@ -134,7 +134,7 @@ final class Command extends BaseCommand
 
         /** @var AddsOutput $plugin */
         foreach ($plugins as $plugin) {
-            $result = $plugin->addOutput($this->testSuite, $this->output, $result);
+            $result = $plugin->addOutput($result);
         }
 
         exit($result);

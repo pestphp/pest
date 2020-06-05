@@ -118,6 +118,15 @@
    PASS  Tests\Unit\Support\Backtrace
   ✓ it gets file name from called file
 
+   PASS  Tests\Unit\Support\Container
+  ✓ it exists
+  ✓ it gets an instance
+  ✓ it creates an instance and resolves parameters
+  ✓ it creates an instance and resolves also sub parameters
+  ✓ it can resolve builtin value types
+  ✓ it cannot resolve a parameter that requires additional dependencies
+  ✓ it cannot resolve a parameter without type
+
    PASS  Tests\Unit\Support\Reflection
   ✓ it gets file name from closure
   ✓ it gets property values
@@ -134,5 +143,5 @@
    WARN  Tests\Visual\Success
   s visual snapshot of test suite on success
 
-  Tests:  6 skipped, 71 passed
-  Time:   2.87s
+  Tests:  6 skipped, 78 passed
+  Time:   3.40s
