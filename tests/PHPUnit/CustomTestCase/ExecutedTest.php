@@ -7,7 +7,7 @@ namespace Tests\CustomTestCase;
 use function PHPUnit\Framework\assertTrue;
 use PHPUnit\Framework\TestCase;
 
-class PhpunitTest extends TestCase
+class ExecutedTest extends TestCase
 {
     public static $executed = false;
 
@@ -16,8 +16,8 @@ class PhpunitTest extends TestCase
     {
         self::$executed = true;
 
-        $this->assertTrue(true);
+        assertTrue(true);
     }
 }
 
-// register_shutdown_function(fn () => assertTrue(PhpunitTest::$executed));
+// register_shutdown_function(fn () => assertTrue(ExecutedTest::$executed));
