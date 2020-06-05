@@ -144,4 +144,4 @@
   s visual snapshot of test suite on success
 
   Tests:  6 skipped, 78 passed
-  Time:   3.37s
+  Time:   3.40s
