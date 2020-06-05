@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Pest\Contracts\Plugins;
 
-use Pest\TestSuite;
-
 /**
  * @internal
  */
@@ -21,5 +19,5 @@ interface HandlesArguments
      *
      * @return array<int, string> the updated list of arguments
      */
-    public function handleArguments(TestSuite $testSuite, array $arguments): array;
+    public function handleArguments(array $arguments): array;
 }

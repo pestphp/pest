@@ -143,10 +143,5 @@
    WARN  Tests\Visual\Success
   s visual snapshot of test suite on success
 
-<<<<<<< HEAD
-  Tests:  6 skipped, 71 passed
-  Time:   2.89s
-=======
-  Tests:  6 skipped, 76 passed
-  Time:   3.32s
->>>>>>> 84c9078... Add basic container implementation
+  Tests:  6 skipped, 78 passed
+  Time:   3.37s
