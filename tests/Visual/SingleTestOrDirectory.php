@@ -59,9 +59,9 @@ it('disable decorating printer when colors is set to never', function () {
     $output = $process->getOutput();
 
     assertStringContainsString(<<<EOF
-  \e[30;42;1m PASS \e[39;49;22m\e[39m Tests\Fixtures\DirectoryWithTests\ExampleTest\e[39m
-  \e[32;1m✓\e[39;22m\e[39m \e[2mit example 1\e[22m\e[39m
+   PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest
+  ✓ \e[2mit example 1\e[22m
 
-  \e[37;1mTests:  \e[39;22m\e[32;1m1 passed\e[39;22m
+  Tests:  1 passed
 EOF, $output);
 });
