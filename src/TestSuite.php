@@ -83,7 +83,7 @@ final class TestSuite
         $this->afterEach  = new AfterEachRepository();
         $this->afterAll   = new AfterAllRepository();
 
-        $this->rootPath = $rootPath;
+        $this->rootPath = (string) realpath($rootPath);
     }
 
     /**

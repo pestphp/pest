@@ -81,10 +81,10 @@
   ✓ higher order message test
 
    PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest
-  ✓ it example
+  ✓ it example 1
 
    PASS  Tests\Fixtures\ExampleTest
-  ✓ it example
+  ✓ it example 2
 
    PASS  Tests\PHPUnit\CustomTestCase\UsesPerDirectory
   ✓ closure was bound to CustomTestCase
@@ -135,4 +135,4 @@
   s visual snapshot of test suite on success
 
   Tests:  6 skipped, 71 passed
-  Time:   2.96s
+  Time:   2.89s
