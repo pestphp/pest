@@ -1,0 +1,5 @@
+
+   PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest
+  ✓ [2mit example 1[22m
+
+  Tests:  1 passed
