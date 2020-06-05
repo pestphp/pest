@@ -80,7 +80,7 @@ final class UsesCall
         $this->targets = array_map(function ($target): string {
             $isValid = is_dir($target) || file_exists($target);
             if (!$isValid) {
-                throw new InvalidUsesPath($target . "\n");
+                throw new InvalidUsesPath($target);
             }
 
             return realpath($target);
