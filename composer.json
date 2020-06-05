@@ -18,7 +18,7 @@
     ],
     "require": {
         "php": "^7.3",
-        "nunomaduro/collision": "^5.0",
+        "nunomaduro/collision": "^5.0.0-BETA2",
         "pestphp/pest-plugin": "dev-master",
         "pestphp/pest-plugin-coverage": "dev-master",
         "phpunit/phpunit": "^9.1.4",
