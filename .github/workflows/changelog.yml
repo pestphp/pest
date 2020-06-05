@@ -25,7 +25,7 @@ jobs:
       id: package
       uses: juliangruber/read-file-action@v1
       with:
-        path: ${{ env.home}}/CHANGELOG.md
+        path: ./CHANGELOG.md
     - name: Add file headers
       uses: DamianReeves/write-file-action@v1.0
       with:
