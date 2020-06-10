@@ -7,11 +7,7 @@ $run = function (string $target, $decorated = false) {
 
     $process->run();
 
-    $output  = $decorated ? $process->getOutput() : preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $process->getOutput());
-
-    $output = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' ? str_replace("\n", "\r\n", $output) : $output;
-
-    return $output;
+    return $decorated ? $process->getOutput() : preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $process->getOutput());
 };
 
 $snapshot  = function ($name) {
@@ -28,21 +24,21 @@ test('allows to run a single test', function () use ($run, $snapshot) {
     assertStringContainsString(
         $snapshot('allows-to-run-a-single-test'),
         $run('tests/Fixtures/DirectoryWithTests/ExampleTest.php'));
-});
+})->skip(PHP_OS_FAMILY === 'Windows');
 
 test('allows to run a directory', function () use ($run, $snapshot) {
     assertStringContainsString(
         $snapshot('allows-to-run-a-directory'),
         $run('tests/Fixtures')
     );
-});
+})->skip(PHP_OS_FAMILY === 'Windows');
 
 it('has ascii chars', function () use ($run, $snapshot) {
     assertStringContainsString(
         $snapshot('has-ascii-chars'),
         $run('tests/Fixtures/DirectoryWithTests/ExampleTest.php', true)
     );
-});
+})->skip(PHP_OS_FAMILY === 'Windows');
 
 it('disable decorating printer when colors is set to never', function () use ($snapshot) {
     $process = new Process([
@@ -58,4 +54,4 @@ it('disable decorating printer when colors is set to never', function () use ($s
         $snapshot('disable-decorating-printer'),
         $output
     );
-});
+})->skip(PHP_OS_FAMILY === 'Windows');

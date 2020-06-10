@@ -25,4 +25,4 @@ test('visual snapshot of test suite on success', function () {
         assertStringContainsString(implode("\n", $output), file_get_contents($snapshot));
     }
 })->skip(!getenv('REBUILD_SNAPSHOTS') && getenv('EXCLUDE'))
-    ->skip(PHP_OS_FAMILY === 'Windows', 'File sorting algorithm causes different test order on Windows');
+    ->skip(PHP_OS_FAMILY === 'Windows');
