@@ -15,7 +15,7 @@ final class Backtrace
      * @var string
      */
     private const FILE = 'file';
-    
+
     private const BACKTRACE_OPTIONS = DEBUG_BACKTRACE_IGNORE_ARGS;
 
     /**
