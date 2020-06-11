@@ -1,5 +1,7 @@
 <?php
 
+use function Tests\mock;
+
 interface Foo
 {
     public function bar(): int;
