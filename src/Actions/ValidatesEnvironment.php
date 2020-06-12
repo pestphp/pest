@@ -19,7 +19,6 @@ final class ValidatesEnvironment
      */
     private const NEEDED_FILES = [
         'composer.json',
-        'tests',
     ];
 
     /**
