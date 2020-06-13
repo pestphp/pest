@@ -1,11 +1,15 @@
 <?php
 
-use Illuminate\Contracts\Auth\Authenticatable;
+namespace Tests;
 
 /**
- * Set the currently logged in user for the application.
+ * A basic assert example.
+ *
+ * @return TestCase
  */
-function actingAs(Authenticatable $user, string $driver = null): TestCase
+function assertExample()
 {
-    return test()->actingAs($user, $driver);
+    test()->assertTrue(true);
+
+    return test();
 }
