@@ -92,6 +92,8 @@ final class Container
 
                 return $reflectionClass->newInstanceArgs($params);
             }
+
+            return $reflectionClass->newInstance();
         }
 
         throw ShouldNotHappen::fromMessage(sprintf('A dependency with the name `%s` cannot be resolved.', $id));

@@ -18,6 +18,10 @@ it('gets an instance', function () {
     assertSame($this->container, $this->container->get(Container::class));
 });
 
+test('autowire', function () {
+    assertInstanceOf(Container::class, $this->container->get(Container::class));
+});
+
 it('creates an instance and resolves parameters', function () {
     $this->container->add(Container::class, $this->container);
     $instance = $this->container->get(ClassWithDependency::class);
@@ -39,15 +43,9 @@ it('can resolve builtin value types', function () {
     assertInstanceOf(TestSuite::class, $instance);
 });
 
-it('cannot resolve a parameter that requires additional dependencies', function () {
-    $this->expectException(ShouldNotHappen::class);
-    $this->container->get(ClassWithDependency::class);
-});
-
 it('cannot resolve a parameter without type', function () {
-    $this->expectException(ShouldNotHappen::class);
     $this->container->get(ClassWithoutTypeParameter::class);
-});
+})->throws(ShouldNotHappen::class);
 
 class ClassWithDependency
 {
