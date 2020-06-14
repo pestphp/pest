@@ -4,12 +4,8 @@ namespace Tests;
 
 /**
  * A basic assert example.
- *
- * @return TestCase
  */
-function assertExample()
+function assertExample(): void
 {
     test()->assertTrue(true);
-
-    return test();
 }
