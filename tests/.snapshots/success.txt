@@ -121,10 +121,10 @@
    PASS  Tests\Unit\Support\Container
   ✓ it exists
   ✓ it gets an instance
+  ✓ autowire
   ✓ it creates an instance and resolves parameters
   ✓ it creates an instance and resolves also sub parameters
   ✓ it can resolve builtin value types
-  ✓ it cannot resolve a parameter that requires additional dependencies
   ✓ it cannot resolve a parameter without type
 
    PASS  Tests\Unit\Support\Reflection
@@ -133,6 +133,9 @@
 
    PASS  Tests\Unit\TestSuite
   ✓ it does not allow to add the same test description twice
+
+   PASS  Tests\Visual\Coverage
+  ✓ coverage
 
    PASS  Tests\Visual\SingleTestOrDirectory
   ✓ allows to run a single test
@@ -143,5 +146,5 @@
    WARN  Tests\Visual\Success
   s visual snapshot of test suite on success
 
-  Tests:  6 skipped, 78 passed
-  Time:   3.40s
+  Tests:  6 skipped, 79 passed
+  Time:   3.91s

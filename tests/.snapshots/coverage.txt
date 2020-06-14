@@ -1,0 +1,60 @@
+
+   PASS  Tests\Playground
+  ✓ basic
+
+  Tests:  1 passed
+  Time:   0.20s
+  Cov:    6.49%
+
+  Actions/AddsDefaults ........................................... 0.0 %
+  Actions/AddsTests .............................................. 0.0 %
+  Actions/LoadStructure .......................................... 0.0 %
+  Actions/ValidatesConfiguration ................................. 0.0 %
+  Actions/ValidatesEnvironment ................................... 0.0 %
+  Concerns/TestCase 40..54, 71..88, 123..126, 147 ............... 44.4 %
+  Console/Command ................................................ 0.0 %
+  Contracts/HasPrintableTestCaseName ............................. 0.0 %
+  Contracts/Plugins/AddsOutput  ................................ 100.0 %
+  Contracts/Plugins/HandlesArguments  .......................... 100.0 %
+  Datasets ....................................................... 0.0 %
+  Exceptions/AfterAllAlreadyExist ................................ 0.0 %
+  Exceptions/AfterEachAlreadyExist ............................... 0.0 %
+  Exceptions/AttributeNotSupportedYet ............................ 0.0 %
+  Exceptions/BeforeEachAlreadyExist .............................. 0.0 %
+  Exceptions/DatasetAlreadyExist ................................. 0.0 %
+  Exceptions/DatasetDoesNotExist ................................. 0.0 %
+  Exceptions/FileOrFolderNotFound ................................ 0.0 %
+  Exceptions/InvalidConsoleArgument .............................. 0.0 %
+  Exceptions/InvalidPestCommand .................................. 0.0 %
+  Exceptions/InvalidUsesPath ..................................... 0.0 %
+  Exceptions/ShouldNotHappen ..................................... 0.0 %
+  Exceptions/TestAlreadyExist .................................... 0.0 %
+  Exceptions/TestCaseAlreadyInUse ................................ 0.0 %
+  Exceptions/TestCaseClassOrTraitNotFound ........................ 0.0 %
+  Factories/TestCaseFactory 111..133, 141..204 ................... 8.2 %
+  Laravel/Commands/PestDatasetCommand ............................ 0.0 %
+  Laravel/Commands/PestInstallCommand ............................ 0.0 %
+  Laravel/Commands/PestTestCommand ............................... 0.0 %
+  Laravel/PestServiceProvider .................................... 0.0 %
+  PendingObjects/AfterEachCall ................................... 0.0 %
+  PendingObjects/BeforeEachCall .................................. 0.0 %
+  PendingObjects/TestCall ........................................ 0.0 %
+  PendingObjects/UsesCall ........................................ 0.0 %
+  Plugin ......................................................... 0.0 %
+  Repositories/AfterAllRepository ................................ 0.0 %
+  Repositories/AfterEachRepository 28..33 ....................... 60.0 %
+  Repositories/BeforeAllRepository ............................... 0.0 %
+  Repositories/BeforeEachRepository 26..31 ...................... 20.0 %
+  Repositories/TestRepository .................................... 0.0 %
+  Support/Backtrace .............................................. 0.0 %
+  Support/ChainableClosure  .................................... 100.0 %
+  Support/Container .............................................. 0.0 %
+  Support/ExceptionTrace 25..32 ................................. 28.6 %
+  Support/HigherOrderMessage ..................................... 0.0 %
+  Support/HigherOrderMessageCollection 24..25, 33, 43 ........... 50.0 %
+  Support/HigherOrderTapProxy .................................... 0.0 %
+  Support/NullClosure  ......................................... 100.0 %
+  Support/Reflection ............................................. 0.0 %
+  Support/Str .................................................... 0.0 %
+  TestSuite 80..87, 95..101, 105 ................................ 20.0 %
+  globals ........................................................ 0.0 %
