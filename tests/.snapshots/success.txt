@@ -134,9 +134,6 @@
    PASS  Tests\Unit\TestSuite
   ✓ it does not allow to add the same test description twice
 
-   PASS  Tests\Visual\Coverage
-  ✓ coverage
-
    PASS  Tests\Visual\SingleTestOrDirectory
   ✓ allows to run a single test
   ✓ allows to run a directory
@@ -146,5 +143,5 @@
    WARN  Tests\Visual\Success
   s visual snapshot of test suite on success
 
-  Tests:  6 skipped, 79 passed
-  Time:   3.91s
+  Tests:  6 skipped, 78 passed
+  Time:   3.09s
