@@ -12,4 +12,13 @@ trait PluginTrait
     }
 }
 
+trait SecondPluginTrait
+{
+    public function assertSecondPluginTraitGotRegistered(): void
+    {
+        assertTrue(true);
+    }
+}
+
 Pest\Plugin::uses(PluginTrait::class);
+Pest\Plugin::uses(SecondPluginTrait::class);

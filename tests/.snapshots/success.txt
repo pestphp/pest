@@ -101,6 +101,7 @@
 
    PASS  Tests\Plugins\Traits
   ✓ it allows global uses
+  ✓ it allows multiple global uses registered in the same path
 
    PASS  Tests\Unit\Actions\AddsDefaults
   ✓ it sets defaults
@@ -143,5 +144,5 @@
    WARN  Tests\Visual\Success
   s visual snapshot of test suite on success
 
-  Tests:  6 skipped, 78 passed
-  Time:   3.09s
+  Tests:  6 skipped, 79 passed
+  Time:   3.44s
