@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [v0.2.1 (2020-06-17)](https://github.com/pestphp/pest/compare/v0.2.0...v0.2.1)
+### Fixes
+- Multiple `uses` in the same path override previous `uses` ([#97](https://github.com/pestphp/pest/pull/97))
+
 ## [v0.2.0 (2020-06-14)](https://github.com/pestphp/pest/compare/v0.1.5...v0.2.0)
 ### Adds
 - `--init` option to install Pest on a new blank project ([70b3c7e](https://github.com/pestphp/pest/commit/70b3c7ea1ddb031f3bbfaabdc28d56270608ebbd))
