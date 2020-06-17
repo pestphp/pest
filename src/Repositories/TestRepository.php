@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Pest\Repositories;
 
+use Pest\TestSuite;
+use Pest\Support\Str;
+use Pest\Factories\TestCaseFactory;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Exceptions\TestAlreadyExist;
 use Pest\Exceptions\TestCaseAlreadyInUse;
 use Pest\Exceptions\TestCaseClassOrTraitNotFound;
-use Pest\Factories\TestCaseFactory;
-use Pest\Support\Str;
-use Pest\TestSuite;
 
 /**
  * @internal
@@ -104,7 +104,14 @@ final class TestRepository
         }
 
         foreach ($paths as $path) {
-            $this->uses[$path] = [$classOrTraits, $groups];
+            if (array_key_exists($path, $this->uses)) {
+                $this->uses[$path] = [
+                    array_merge($this->uses[$path][0], $classOrTraits),
+                    array_merge($this->uses[$path][1], $groups)
+                ];
+            } else {
+                $this->uses[$path] = [$classOrTraits, $groups];
+            }
         }
     }
 
