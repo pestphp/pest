@@ -104,7 +104,14 @@ final class TestRepository
         }
 
         foreach ($paths as $path) {
-            $this->uses[$path] = [$classOrTraits, $groups];
+            if (array_key_exists($path, $this->uses)) {
+                $this->uses[$path] = [
+                    array_merge($this->uses[$path][0], $classOrTraits),
+                    array_merge($this->uses[$path][1], $groups),
+                ];
+            } else {
+                $this->uses[$path] = [$classOrTraits, $groups];
+            }
         }
     }
 
