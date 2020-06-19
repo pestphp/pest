@@ -84,6 +84,20 @@ final class TestCall
         return $this;
     }
 
+    public function dependsOn(string ...$tests): TestCall
+    {
+        $this->testCaseFactory
+            ->factoryProxies
+            ->add(Backtrace::file(), Backtrace::line(), 'addDependencies', [$tests]);
+
+        return $this;
+    }
+
+    public function depends(string ...$tests): TestCall
+    {
+        return $this->dependsOn(...$tests);
+    }
+
     /**
      * Makes the test suite only this test case.
      */

@@ -18,10 +18,10 @@ final class ExceptionTrace
      * Ensures the given closure reports
      * the good execution context.
      */
-    public static function ensure(Closure $closure): void
+    public static function ensure(Closure $closure): Mixed
     {
         try {
-            $closure();
+            return new Mixed($closure());
         } catch (Throwable $throwable) {
             if (Str::startsWith($message = $throwable->getMessage(), self::UNDEFINED_METHOD)) {
                 $message = str_replace(self::UNDEFINED_METHOD, 'Call to undefined method ', $message);

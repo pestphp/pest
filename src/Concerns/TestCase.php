@@ -53,6 +53,11 @@ trait TestCase
         $this->setGroups($groups);
     }
 
+    public function addDependencies(array $tests): void
+    {
+        $this->setDependencies($tests);
+    }
+
     /**
      * Returns the test case name. Note that, in Pest
      * we ignore withDataset argument as the description
@@ -130,16 +135,16 @@ trait TestCase
     /**
      * Runs the test.
      */
-    public function __test(): void
+    public function __test()
     {
-        $this->__callClosure($this->__test, func_get_args());
+        return $this->__callClosure($this->__test, func_get_args());
     }
 
-    private function __callClosure(Closure $closure, array $arguments): void
+    private function __callClosure(Closure $closure, array $arguments)
     {
-        ExceptionTrace::ensure(function () use ($closure, $arguments) {
-            call_user_func_array(Closure::bind($closure, $this, get_class($this)), $arguments);
-        });
+        return ExceptionTrace::ensure(function () use ($closure, $arguments) {
+            return call_user_func_array(Closure::bind($closure, $this, get_class($this)), $arguments);
+        })->getValue();
     }
 
     public function getPrintableTestCaseName(): string

@@ -42,6 +42,15 @@
   ✓ eager registered wrapped datasets did the job right
   ✓ lazy named datasets with (Bar Object (...))
 
+   PASS  Tests\Features\Depends
+  ✓ first
+  ✓ second
+  ✓ dependsOn
+  ✓ dependsOn with ...params
+  ✓ dependsOn with defined arguments
+  ✓ dependsOn run test only once
+  ✓ depends alias for dependsOn
+
    PASS  Tests\Features\Exceptions
   ✓ it gives access the the underlying expectException
   ✓ it catch exceptions
@@ -144,5 +153,5 @@
    WARN  Tests\Visual\Success
   s visual snapshot of test suite on success
 
-  Tests:  6 skipped, 79 passed
-  Time:   3.44s
+  Tests:  6 skipped, 86 passed
+  Time:   2.61s

@@ -132,10 +132,11 @@ final class TestCaseFactory
         $proxies     = $this->proxies;
         $factoryTest = $this->test;
 
-        $test = function () use ($chains, $proxies, $factoryTest): void {
+        $test = function () use ($chains, $proxies, $factoryTest) {
             $proxies->proxy($this);
             $chains->chain($this);
-            call_user_func(Closure::bind($factoryTest, $this, get_class($this)), ...func_get_args());
+
+            return call_user_func(Closure::bind($factoryTest, $this, get_class($this)), ...func_get_args());
         };
 
         $className = $this->makeClassFromFilename($this->filename);
