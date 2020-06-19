@@ -3,6 +3,7 @@
 use Pest\Datasets;
 use Pest\Exceptions\DatasetAlreadyExist;
 use Pest\Exceptions\DatasetDoesNotExist;
+use Pest\Plugin;
 
 it('throws exception if dataset does not exist', function () {
     $this->expectException(DatasetDoesNotExist::class);
@@ -106,3 +107,18 @@ $namedDatasets = [
 test('lazy named datasets', function ($text) use ($state, $datasets) {
     assertTrue(true);
 })->with($namedDatasets);
+
+$counter = 0;
+
+it('creates unique test case names', function (string $name, Plugin $plugin, bool $bool) use (&$counter) {
+    assertTrue(true);
+    $counter++;
+})->with([
+    ['Name 1', new Plugin(), true],
+    ['Name 1', new Plugin(), true],
+    ['Name 1', new Plugin(), false],
+])->group('foo');
+
+it('creates unique test case names - count', function() use (&$counter) {
+    assertEquals(3, $counter);
+})->group('foo');

@@ -91,7 +91,12 @@ final class Datasets
     private static function getDataSetDescription(array $data): string
     {
         $exporter = new Exporter();
+        $formatted = [];
 
-        return \sprintf(' with (%s)', $exporter->shortenedRecursiveExport($data));
+        foreach ($data as $value) {
+            $formatted[] = $exporter->export($value);
+        }
+
+        return \sprintf(' with (%s)', implode(', ', $formatted));
     }
 }
