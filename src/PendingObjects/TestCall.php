@@ -84,6 +84,9 @@ final class TestCall
         return $this;
     }
 
+    /**
+     * Sets the test depends.
+     */
     public function depends(string ...$tests): TestCall
     {
         $this->testCaseFactory
@@ -104,7 +107,7 @@ final class TestCall
     }
 
     /**
-     * Sets the test groups(s).
+     * Sets the test group(s).
      */
     public function group(string ...$groups): TestCall
     {
