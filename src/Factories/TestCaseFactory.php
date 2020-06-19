@@ -132,6 +132,9 @@ final class TestCaseFactory
         $proxies     = $this->proxies;
         $factoryTest = $this->test;
 
+        /**
+         * @return mixed
+         */
         $test = function () use ($chains, $proxies, $factoryTest) {
             $proxies->proxy($this);
             $chains->chain($this);

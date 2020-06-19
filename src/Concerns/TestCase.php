@@ -129,12 +129,21 @@ trait TestCase
 
     /**
      * Runs the test.
+     *
+     * @return mixed
+     *
+     * @throws \Throwable
      */
     public function __test()
     {
         return $this->__callClosure($this->__test, func_get_args());
     }
 
+    /**
+     * @return mixed
+     *
+     * @throws \Throwable
+     */
     private function __callClosure(Closure $closure, array $arguments)
     {
         return ExceptionTrace::ensure(function () use ($closure, $arguments) {
