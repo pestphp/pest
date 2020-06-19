@@ -75,11 +75,13 @@ final class Datasets
         }
 
         $namedData = [];
+        $number    = 1;
         foreach ($data as $values) {
             $values = is_array($values) ? $values : [$values];
 
-            $name             = $description . self::getDataSetDescription($values);
+            $name             = $description . sprintf(' #%d', $number) . self::getDataSetDescription($values);
             $namedData[$name] = $values;
+            $number++;
         }
 
         return $namedData;

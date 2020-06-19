@@ -22,25 +22,29 @@
   ✓ it throws exception if dataset already exist
   ✓ it sets closures
   ✓ it sets arrays
-  ✓ it gets bound to test case object with ('a')
-  ✓ it gets bound to test case object with ('b')
-  ✓ it truncates the description with ('FoooFoooFoooFoooFoooFoooFoooF...ooFooo')
-  ✓ lazy datasets with (1)
-  ✓ lazy datasets with (2)
+  ✓ it gets bound to test case object #1 with ('a')
+  ✓ it gets bound to test case object #2 with ('b')
+  ✓ it truncates the description #1 with ('FoooFoooFoooFoooFoooFoooFoooF...ooFooo')
+  ✓ lazy datasets #1 with (1)
+  ✓ lazy datasets #2 with (2)
   ✓ lazy datasets did the job right
-  ✓ eager datasets with (1)
-  ✓ eager datasets with (2)
+  ✓ eager datasets #1 with (1)
+  ✓ eager datasets #2 with (2)
   ✓ eager datasets did the job right
-  ✓ lazy registered datasets with (1)
-  ✓ lazy registered datasets with (2)
+  ✓ lazy registered datasets #1 with (1)
+  ✓ lazy registered datasets #2 with (2)
   ✓ lazy registered datasets did the job right
-  ✓ eager registered datasets with (1)
-  ✓ eager registered datasets with (2)
+  ✓ eager registered datasets #1 with (1)
+  ✓ eager registered datasets #2 with (2)
   ✓ eager registered datasets did the job right
-  ✓ eager wrapped registered datasets with (1)
-  ✓ eager wrapped registered datasets with (2)
+  ✓ eager wrapped registered datasets #1 with (1)
+  ✓ eager wrapped registered datasets #2 with (2)
   ✓ eager registered wrapped datasets did the job right
-  ✓ lazy named datasets with (Bar Object (...))
+  ✓ lazy named datasets #1 with (Bar Object (...))
+  ✓ it creates unique test case names #1 with ('Name 1', Pest\Plugin Object (), true)
+  ✓ it creates unique test case names #2 with ('Name 1', Pest\Plugin Object (), true)
+  ✓ it creates unique test case names #3 with ('Name 1', Pest\Plugin Object (), false)
+  ✓ it creates unique test case names - count
 
    PASS  Tests\Features\Exceptions
   ✓ it gives access the the underlying expectException
@@ -144,5 +148,5 @@
    WARN  Tests\Visual\Success
   s visual snapshot of test suite on success
 
-  Tests:  6 skipped, 79 passed
-  Time:   3.44s
+  Tests:  6 skipped, 83 passed
+  Time:   3.59s
