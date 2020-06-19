@@ -16,32 +16,25 @@ test('second', function () use (&$runCounter) {
     return 'second';
 });
 
-test('dependsOn', function () {
+test('depends', function () {
     assertEquals(
         ['first', 'second'],
         func_get_args()
     );
-})->dependsOn('first', 'second');
+})->depends('first', 'second');
 
-test('dependsOn with ...params', function (string ...$params) {
+test('depends with ...params', function (string ...$params) {
     assertEquals(
         ['first', 'second'],
         $params
     );
-})->dependsOn('first', 'second');
+})->depends('first', 'second');
 
-test('dependsOn with defined arguments', function (string $first, string $second) {
+test('depends with defined arguments', function (string $first, string $second) {
     assertEquals('first', $first);
     assertEquals('second', $second);
-})->dependsOn('first', 'second');
+})->depends('first', 'second');
 
-test('dependsOn run test only once', function () use (&$runCounter) {
+test('depends run test only once', function () use (&$runCounter) {
     assertEquals(2, $runCounter);
-})->dependsOn('first', 'second');
-
-test('depends alias for dependsOn', function (string ...$params) {
-    assertEquals(
-        ['first', 'second'],
-        $params
-    );
 })->depends('first', 'second');

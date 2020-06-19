@@ -45,11 +45,10 @@
    PASS  Tests\Features\Depends
   ✓ first
   ✓ second
-  ✓ dependsOn
-  ✓ dependsOn with ...params
-  ✓ dependsOn with defined arguments
-  ✓ dependsOn run test only once
-  ✓ depends alias for dependsOn
+  ✓ depends
+  ✓ depends with ...params
+  ✓ depends with defined arguments
+  ✓ depends run test only once
 
    PASS  Tests\Features\Exceptions
   ✓ it gives access the the underlying expectException
@@ -153,5 +152,5 @@
    WARN  Tests\Visual\Success
   s visual snapshot of test suite on success
 
-  Tests:  6 skipped, 86 passed
-  Time:   2.61s
+  Tests:  6 skipped, 85 passed
+  Time:   2.60s
