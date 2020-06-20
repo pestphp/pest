@@ -41,6 +41,13 @@
   ✓ eager wrapped registered datasets with (2)
   ✓ eager registered wrapped datasets did the job right
   ✓ lazy named datasets with (Bar Object (...))
+  ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #1
+  ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #2
+  ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), false)
+  ✓ it creates unique test case names with ('Name 2', Pest\Plugin Object (), false)
+  ✓ it creates unique test case names with ('Name 2', Pest\Plugin Object (), true)
+  ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #3
+  ✓ it creates unique test case names - count
 
    PASS  Tests\Features\Exceptions
   ✓ it gives access the the underlying expectException
@@ -144,5 +151,5 @@
    WARN  Tests\Visual\Success
   s visual snapshot of test suite on success
 
-  Tests:  6 skipped, 79 passed
-  Time:   3.44s
+  Tests:  6 skipped, 86 passed
+  Time:   3.58s
