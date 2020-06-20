@@ -117,8 +117,10 @@ it('creates unique test case names', function (string $name, Plugin $plugin, boo
     ['Name 1', new Plugin(), true],
     ['Name 1', new Plugin(), true],
     ['Name 1', new Plugin(), false],
+    ['Name 2', new Plugin(), false],
+    ['Name 2', new Plugin(), true],
 ]);
 
 it('creates unique test case names - count', function () use (&$counter) {
-    assertEquals(3, $counter);
+    assertEquals(5, $counter);
 });

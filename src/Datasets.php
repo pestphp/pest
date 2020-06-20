@@ -74,14 +74,31 @@ final class Datasets
             $data = iterator_to_array($data);
         }
 
-        $namedData = [];
-        $number    = 1;
+        $dataSetDescriptions = [];
+        $dataSetValues       = [];
+
         foreach ($data as $values) {
             $values = is_array($values) ? $values : [$values];
 
-            $name             = $description . sprintf(' #%d', $number) . self::getDataSetDescription($values);
-            $namedData[$name] = $values;
-            $number++;
+            $dataSetDescriptions[] = self::getDataSetDescription($values);
+            $dataSetValues[]       = $values;
+        }
+
+        $namedData  = [];
+        $valueIndex = 0;
+
+        foreach (array_count_values($dataSetDescriptions) as $dataSetDescription => $count) {
+            if ($count === 1) {
+                $name             = $description . $dataSetDescription;
+                $namedData[$name] = $dataSetValues[$valueIndex];
+            } else {
+                for ($i = 0; $i < $count; $i++) {
+                    $name             = $description . $dataSetDescription . sprintf(' #%d', $i + 1);
+                    $namedData[$name] = $dataSetValues[$valueIndex + $i];
+                }
+            }
+
+            $valueIndex += $count;
         }
 
         return $namedData;
