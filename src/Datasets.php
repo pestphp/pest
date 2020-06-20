@@ -80,25 +80,24 @@ final class Datasets
         foreach ($data as $values) {
             $values = is_array($values) ? $values : [$values];
 
-            $dataSetDescriptions[] = self::getDataSetDescription($values);
+            $dataSetDescriptions[] = $description . self::getDataSetDescription($values);
             $dataSetValues[]       = $values;
         }
 
-        $namedData  = [];
-        $valueIndex = 0;
-
-        foreach (array_count_values($dataSetDescriptions) as $dataSetDescription => $count) {
-            if ($count === 1) {
-                $name             = $description . $dataSetDescription;
-                $namedData[$name] = $dataSetValues[$valueIndex];
-            } else {
-                for ($i = 0; $i < $count; $i++) {
-                    $name             = $description . $dataSetDescription . sprintf(' #%d', $i + 1);
-                    $namedData[$name] = $dataSetValues[$valueIndex + $i];
+        foreach (array_count_values($dataSetDescriptions) as $descriptionToCheck => $count) {
+            if ($count > 1) {
+                $index = 1;
+                foreach ($dataSetDescriptions as $i => $dataSetDescription) {
+                    if ($dataSetDescription === $descriptionToCheck) {
+                        $dataSetDescriptions[$i] .= sprintf(' #%d', $index++);
+                    }
                 }
             }
+        }
 
-            $valueIndex += $count;
+        $namedData = [];
+        foreach ($dataSetDescriptions as $i => $dataSetDescription) {
+            $namedData[$dataSetDescription] = $dataSetValues[$i];
         }
 
         return $namedData;
