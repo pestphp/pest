@@ -33,12 +33,12 @@ final class Reflection
             $reflectionMethod->setAccessible(true);
 
             return $reflectionMethod->invoke($object, ...$args);
-        } catch(ReflectionException $ex) {
+        } catch (ReflectionException $exception) {
             if (method_exists($object, '__call')) {
                 return $object->__call($method, $args);
             }
 
-            throw $ex;
+            throw $exception;
         }
     }
 
