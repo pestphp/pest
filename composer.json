@@ -43,15 +43,15 @@
         ]
     },
     "require-dev": {
-        "ergebnis/phpstan-rules": "^0.14.4",
+        "ergebnis/phpstan-rules": "^0.15.0",
         "friendsofphp/php-cs-fixer": "^2.16.3",
-        "illuminate/console": "^7.10.3",
-        "illuminate/support": "^7.10.3",
-        "mockery/mockery": "^1.3.1",
-        "phpstan/phpstan": "^0.12.25",
+        "illuminate/console": "^7.16.1",
+        "illuminate/support": "^7.16.1",
+        "mockery/mockery": "^1.4.0",
+        "phpstan/phpstan": "^0.12.30",
         "phpstan/phpstan-strict-rules": "^0.12.2",
-        "rector/rector": "^0.7.25",
-        "symfony/var-dumper": "^5.0.8",
+        "rector/rector": "^0.7.37",
+        "symfony/var-dumper": "^5.1.2",
         "thecodingmachine/phpstan-strict-rules": "^0.12.0"
     },
     "minimum-stability": "dev",
@@ -70,7 +70,7 @@
         "test:types": "phpstan analyse --ansi",
         "test:unit": "php bin/pest --colors=always --exclude-group=integration",
         "test:integration": "php bin/pest --colors=always --group=integration",
-        "test:update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --colors=always",
+        "update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --colors=always",
         "test": [
             "@test:lint",
             "@test:types",

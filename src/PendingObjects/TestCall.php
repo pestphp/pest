@@ -85,6 +85,18 @@ final class TestCall
     }
 
     /**
+     * Sets the test depends.
+     */
+    public function depends(string ...$tests): TestCall
+    {
+        $this->testCaseFactory
+            ->factoryProxies
+            ->add(Backtrace::file(), Backtrace::line(), 'setDependencies', [$tests]);
+
+        return $this;
+    }
+
+    /**
      * Makes the test suite only this test case.
      */
     public function only(): TestCall
@@ -95,7 +107,7 @@ final class TestCall
     }
 
     /**
-     * Sets the test groups(s).
+     * Sets the test group(s).
      */
     public function group(string ...$groups): TestCall
     {
