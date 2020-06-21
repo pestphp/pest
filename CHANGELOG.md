@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [v0.2.2 (2020-06-21)](https://github.com/pestphp/pest/compare/v0.2.1...v0.2.2)
+### Added
+- `depends` phpunit feature ([#103](https://github.com/pestphp/pest/pull/103))
+
+### Fixes
+- datasets name conflit ([#101](https://github.com/pestphp/pest/pull/101))
+
 ## [v0.2.1 (2020-06-17)](https://github.com/pestphp/pest/compare/v0.2.0...v0.2.1)
 ### Fixes
 - Multiple `uses` in the same path override previous `uses` ([#97](https://github.com/pestphp/pest/pull/97))
