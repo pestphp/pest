@@ -8,8 +8,6 @@ uses(Macroable::class);
 beforeEach(function () {
     $this->macro('bar', function () {
         assertInstanceOf(TestCase::class, $this);
-
-        return $this;
     });
 });
 
