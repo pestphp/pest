@@ -5,8 +5,16 @@ use PHPUnit\Framework\TestCase;
 
 uses(Macroable::class);
 
-it('can call chained macro method')->macro('bar', function () {
-    assertInstanceOf(TestCase::class, $this);
+beforeEach(function () {
+    $this->macro('bar', function () {
+        assertInstanceOf(TestCase::class, $this);
 
-    return $this;
-})->bar();
+        return $this;
+    });
+});
+
+it('can call chained macro method')->bar();
+
+it('will throw exception from call if no macro exists')
+    ->throws(BadMethodCallException::class)
+    ->foo();
