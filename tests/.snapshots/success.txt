@@ -49,15 +49,13 @@
   ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #3
   ✓ it creates unique test case names - count
 
-   WARN  Tests\Features\Depends
+   PASS  Tests\Features\Depends
   ✓ first
   ✓ second
   ✓ depends
   ✓ depends with ...params
   ✓ depends with defined arguments
   ✓ depends run test only once
-  s incomplete → incomplete
-  w depends on incomplete → This test depends on "P\Tests\Features\Depends::incomplete" which does not exist.
 
    PASS  Tests\Features\Exceptions
   ✓ it gives access the the underlying expectException
@@ -161,6 +159,5 @@
    WARN  Tests\Visual\Success
   s visual snapshot of test suite on success
 
-  Tests:  1 warnings, 7 skipped, 85 passed
-  Time:   2.65s
-
+  Tests:  6 skipped, 92 passed
+  Time:   3.40s

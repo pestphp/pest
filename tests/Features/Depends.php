@@ -38,7 +38,3 @@ test('depends with defined arguments', function (string $first, string $second) 
 test('depends run test only once', function () use (&$runCounter) {
     assertEquals(2, $runCounter);
 })->depends('first', 'second');
-
-test('incomplete')->skip('incomplete');
-
-test('depends on incomplete')->depends('incomplete')->doesNotPerformAssertions();
