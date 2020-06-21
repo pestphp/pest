@@ -27,11 +27,19 @@ final class Reflection
     {
         $reflectionClass = new ReflectionClass($object);
 
-        $reflectionMethod = $reflectionClass->getMethod($method);
+        try {
+            $reflectionMethod = $reflectionClass->getMethod($method);
 
-        $reflectionMethod->setAccessible(true);
+            $reflectionMethod->setAccessible(true);
 
-        return $reflectionMethod->invoke($object, ...$args);
+            return $reflectionMethod->invoke($object, ...$args);
+        } catch(ReflectionException $ex) {
+            if (method_exists($object, '__call')) {
+                return $object->__call($method, $args);
+            }
+
+            throw $ex;
+        }
     }
 
     /**
