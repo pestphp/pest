@@ -75,6 +75,10 @@
   ✓ it is a test
   ✓ it is a higher order message test
 
+   PASS  Tests\Features\Macro
+  ✓ it can call chained macro method
+  ✓ it will throw exception from call if no macro exists
+
    PASS  Tests\Features\Mocks
   ✓ it has bar
 
@@ -159,5 +163,5 @@
    WARN  Tests\Visual\Success
   s visual snapshot of test suite on success
 
-  Tests:  6 skipped, 92 passed
-  Time:   3.40s
+  Tests:  6 skipped, 94 passed
+  Time:   3.73s
