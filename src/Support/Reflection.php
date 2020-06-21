@@ -34,8 +34,11 @@ final class Reflection
 
             return $reflectionMethod->invoke($object, ...$args);
         } catch (ReflectionException $exception) {
-            if (method_exists($object, '__call')) {
-                return $object->__call($method, $args);
+            if (
+                method_exists($object, '__call')
+                || method_exists($object, '__callStatic')
+            ) {
+                return call_user_func_array([$object, $method], $args);
             }
 
             throw $exception;
