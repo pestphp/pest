@@ -5,10 +5,8 @@ use PHPUnit\Framework\TestCase;
 
 uses(Macroable::class);
 
-beforeEach(function () {
-    $this->macro('bar', function () {
-        assertInstanceOf(TestCase::class, $this);
-    });
+beforeEach()->macro('bar', function () {
+    assertInstanceOf(TestCase::class, $this);
 });
 
 it('can call chained macro method')->bar();
