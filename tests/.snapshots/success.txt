@@ -41,6 +41,13 @@
   ✓ eager wrapped registered datasets with (2)
   ✓ eager registered wrapped datasets did the job right
   ✓ lazy named datasets with (Bar Object (...))
+  ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #1
+  ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #2
+  ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), false)
+  ✓ it creates unique test case names with ('Name 2', Pest\Plugin Object (), false)
+  ✓ it creates unique test case names with ('Name 2', Pest\Plugin Object (), true)
+  ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #3
+  ✓ it creates unique test case names - count
 
    WARN  Tests\Features\Depends
   ✓ first
@@ -156,3 +163,4 @@
 
   Tests:  1 warnings, 7 skipped, 85 passed
   Time:   2.65s
+
