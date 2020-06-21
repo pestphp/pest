@@ -67,6 +67,9 @@
   ✓ it is a test
   ✓ it is a higher order message test
 
+   PASS  Tests\Features\Macro
+  ✓ it can call chained macro method
+
    PASS  Tests\Features\Mocks
   ✓ it has bar
 
@@ -151,5 +154,5 @@
    WARN  Tests\Visual\Success
   s visual snapshot of test suite on success
 
-  Tests:  6 skipped, 86 passed
-  Time:   3.58s
+  Tests:  6 skipped, 87 passed
+  Time:   3.60s
