@@ -8,7 +8,7 @@ it('outputs the version when --version is used', function () {
     $plugin = new Version($output);
 
     $plugin->handleArguments(['foo', '--version']);
-    assertEquals("Pest    0.2.2\n", $output->fetch());
+    assertStringContainsString('Pest    0.2.2', $output->fetch());
 });
 
 it('do not outputs version when --version is not used', function () {
