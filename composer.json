@@ -31,6 +31,7 @@
         },
         "files": [
             "src/globals.php",
+            "src/Pest.php",
             "compiled/globals.php"
         ]
     },
@@ -67,7 +68,7 @@
         "compile": "@php ./scripts/compile.php",
         "lint": "rector process src && php-cs-fixer fix -v",
         "test:lint": "php-cs-fixer fix -v --dry-run && rector process src --dry-run",
-        "test:types": "phpstan analyse --ansi",
+        "test:types": "phpstan analyse --ansi --memory-limit=0",
         "test:unit": "php bin/pest --colors=always --exclude-group=integration",
         "test:integration": "php bin/pest --colors=always --group=integration",
         "update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --colors=always",
@@ -81,6 +82,11 @@
     "extra": {
         "branch-alias": {
             "dev-master": "0.2.x-dev"
+        },
+        "pest": {
+            "plugins": [
+                "Pest\\Plugins\\Version"
+            ]
         },
         "laravel": {
             "providers": [
