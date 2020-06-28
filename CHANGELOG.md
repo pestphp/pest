@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- `--version` option to view the current version of Pest ([9ea51ca](https://github.com/pestphp/pest/commit/9ea51caf3f74569debb1e465992e9ea916cb80fe))
 
 ## [v0.2.2 (2020-06-21)](https://github.com/pestphp/pest/compare/v0.2.1...v0.2.2)
 ### Added
