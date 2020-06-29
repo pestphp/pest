@@ -38,6 +38,8 @@ jobs:
           section: content
           ---
           ${{ steps.package.outputs.content }}
+
+          Next section: [Upgrade Guide →](/docs/upgrade-guide)
         write-mode: overwrite
     - name: Copy CHANGELOG to website repository
       run: cp CHANGELOG.md pestphp-website/source/docs/changelog.md
