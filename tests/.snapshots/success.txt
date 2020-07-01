@@ -135,6 +135,10 @@
   ✓ it throws exception when `process isolation` is true
   ✓ it do not throws exception when `process isolation` is false
 
+   WARN  Tests\Unit\Plugins\Thanks
+  - it outputs funding options when --thanks is used → The plugin uses `exit()` so not sure how to implement this
+  ✓ it does not output funding options when --thanks is not used
+
    PASS  Tests\Unit\Plugins\Version
   ✓ it outputs the version when --version is used
   ✓ it do not outputs version when --version is not used
@@ -167,5 +171,5 @@
    WARN  Tests\Visual\Success
   - visual snapshot of test suite on success
 
-  Tests:  6 skipped, 96 passed
-  Time:   3.56s
+  Tests:  7 skipped, 97 passed
+  Time:   3.57s
