@@ -85,6 +85,7 @@
         },
         "pest": {
             "plugins": [
+                "Pest\\Plugins\\Thanks",
                 "Pest\\Plugins\\Version"
             ]
         },
