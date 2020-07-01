@@ -59,6 +59,8 @@ final class PestInstallCommand extends Command
 
         $this->output->success('`tests/Pest.php` created successfully.');
         $this->output->success('`tests/Helpers.php` created successfully.');
+
+        (new \Pest\Console\Thanks($this->output))();
     }
 
     /**
