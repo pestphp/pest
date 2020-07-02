@@ -39,6 +39,8 @@ jobs:
           ---
           ${{ steps.package.outputs.content }}
 
+          ----
+
           Next section: [Upgrade Guide →](/docs/upgrade-guide)
         write-mode: overwrite
     - name: Copy CHANGELOG to website repository
