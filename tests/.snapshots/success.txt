@@ -2,6 +2,11 @@
    PASS  Tests\CustomTestCase\ExecutedTest
   ✓ that gets executed
 
+   PASS  Tests\Expect\ToBe
+  ✓ strict comparisons
+  ✓ failures
+  ✓ not failures
+
    PASS  Tests\Features\AfterAll
   ✓ deletes file after all
 
@@ -167,5 +172,5 @@
    WARN  Tests\Visual\Success
   - visual snapshot of test suite on success
 
-  Tests:  6 skipped, 96 passed
-  Time:   3.43s
+  Tests:  6 skipped, 99 passed
+  Time:   3.62s
