@@ -53,6 +53,101 @@ final class Expectation
     }
 
     /**
+     * Assert that value is false.
+     */
+    public function toBeFalse()
+    {
+        Assert::assertFalse($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that value is greater than expected one.
+     *
+     * @param int|float $value
+     */
+    public function toBeGreaterThan($value)
+    {
+        Assert::assertGreaterThan($value, $this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that value is greater than or equal to the expected one.
+     *
+     * @param int|float $value
+     */
+    public function toBeGreaterThanOrEqual($value)
+    {
+        Assert::assertGreaterThanOrEqual($value, $this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that value is less than or equal to the expected one.
+     *
+     * @param int|float $value
+     */
+    public function toBeLessThan($value)
+    {
+        Assert::assertLessThan($value, $this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that value is less than the expected one.
+     *
+     * @param int|float $value
+     */
+    public function toBeLessThanOrEqual($value)
+    {
+        Assert::assertLessThanOrEqual($value, $this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that needles is an element of value.
+     *
+     * @param mixed $needle
+     */
+    public function toContain($needle)
+    {
+        Assert::assertContains($needle, $this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that needles is a substring of value.
+     *
+     * @param string $needle
+     */
+    public function toContainString($needle)
+    {
+        Assert::assertStringContainsString($needle, $this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that needles is a substring of value, ignoring the
+     * difference in casing.
+     *
+     * @param string $needle
+     */
+    public function toContainStringIgnoringCase($needle)
+    {
+        Assert::assertStringContainsStringIgnoringCase($needle, $this->value);
+
+        return $this;
+    }
+
+    /**
      * Dynamically calls methods on the class without any arguments.
      *
      * @return Expectation
