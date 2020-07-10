@@ -127,7 +127,7 @@ final class Expectation
      *
      * @param string $needle
      */
-    public function toContainString($needle)
+    public function toContainString(string $needle)
     {
         Assert::assertStringContainsString($needle, $this->value);
 
@@ -140,7 +140,7 @@ final class Expectation
      *
      * @param string $needle
      */
-    public function toContainStringIgnoringCase($needle)
+    public function toContainStringIgnoringCase(string $needle)
     {
         Assert::assertStringContainsStringIgnoringCase($needle, $this->value);
 
