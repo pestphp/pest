@@ -7,17 +7,12 @@
   ✓ failures
   ✓ not failures
 
-   PASS  Tests\Expect\thatDirectoryExists
-  ✓ pass
-  ✓ failures
-  ✓ not failures
-
-   PASS  Tests\Expect\thatDirectoryIsReadable
-  ✓ pass
-  ✓ failures
-  ✓ not failures
-
    PASS  Tests\Expect\toBeEmpty
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeExistingDirectory
   ✓ pass
   ✓ failures
   ✓ not failures
@@ -44,6 +39,16 @@
 
    PASS  Tests\Expect\toBeLessThanOrEqual
   ✓ passes
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeReadableDirectory
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeWritableDirectory
+  ✓ pass
   ✓ failures
   ✓ not failures
 
@@ -262,5 +267,5 @@
    WARN  Tests\Visual\Success
   - visual snapshot of test suite on success
 
-  Tests:  6 skipped, 153 passed
-  Time:   4.35s
+  Tests:  6 skipped, 156 passed
+  Time:   4.42s

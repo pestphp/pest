@@ -273,6 +273,8 @@ final class Expectation
 
     /**
      * Dynamically calls methods on the class without any arguments.
+     *
+     * @return Expectation
      */
     public function __get(string $name)
     {
