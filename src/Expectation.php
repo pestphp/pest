@@ -55,7 +55,7 @@ final class Expectation
     /**
      * Assert the value is empty.
      */
-    public function toBeEmpty()
+    public function toBeEmpty(): Expectation
     {
         Assert::assertEmpty($this->value);
 
@@ -65,7 +65,7 @@ final class Expectation
     /**
      * Assert the value is false.
      */
-    public function toBeFalse()
+    public function toBeFalse(): Expectation
     {
         Assert::assertFalse($this->value);
 
@@ -77,7 +77,7 @@ final class Expectation
      *
      * @param int|float $value
      */
-    public function toBeGreaterThan($value)
+    public function toBeGreaterThan($value): Expectation
     {
         Assert::assertGreaterThan($value, $this->value);
 
@@ -89,7 +89,7 @@ final class Expectation
      *
      * @param int|float $value
      */
-    public function toBeGreaterThanOrEqual($value)
+    public function toBeGreaterThanOrEqual($value): Expectation
     {
         Assert::assertGreaterThanOrEqual($value, $this->value);
 
@@ -101,7 +101,7 @@ final class Expectation
      *
      * @param int|float $value
      */
-    public function toBeLessThan($value)
+    public function toBeLessThan($value): Expectation
     {
         Assert::assertLessThan($value, $this->value);
 
@@ -113,7 +113,7 @@ final class Expectation
      *
      * @param int|float $value
      */
-    public function toBeLessThanOrEqual($value)
+    public function toBeLessThanOrEqual($value): Expectation
     {
         Assert::assertLessThanOrEqual($value, $this->value);
 
@@ -125,7 +125,7 @@ final class Expectation
      *
      * @param mixed $needle
      */
-    public function toContain($needle)
+    public function toContain($needle): Expectation
     {
         Assert::assertContains($needle, $this->value);
 
@@ -135,9 +135,9 @@ final class Expectation
     /**
      * Assert the value contains only variables of type.
      *
-     * @param string|mixed $type
+     * @param mixed $type
      */
-    public function toContainOnly($type)
+    public function toContainOnly($type): Expectation
     {
         Assert::assertContainsOnly($type, $this->value);
 
@@ -147,7 +147,7 @@ final class Expectation
     /**
      * Assert the value contains only instances of $instance.
      */
-    public function toContainOnlyInstancesOf(string $instance)
+    public function toContainOnlyInstancesOf(string $instance): Expectation
     {
         Assert::assertContainsOnlyInstancesOf($instance, $this->value);
 
@@ -157,7 +157,7 @@ final class Expectation
     /**
      * Assert that needles is a substring of value.
      */
-    public function toContainString(string $needle)
+    public function toContainString(string $needle): Expectation
     {
         Assert::assertStringContainsString($needle, $this->value);
 
@@ -168,7 +168,7 @@ final class Expectation
      * Assert that needles is a substring of value, ignoring the
      * difference in casing.
      */
-    public function toContainStringIgnoringCase(string $needle)
+    public function toContainStringIgnoringCase(string $needle): Expectation
     {
         Assert::assertStringContainsStringIgnoringCase($needle, $this->value);
 
@@ -178,7 +178,7 @@ final class Expectation
     /**
      * Assert that $count matches the number of elements of $value.
      */
-    public function toCount(int $count)
+    public function toCount(int $count): Expectation
     {
         Assert::assertCount($count, $this->value);
 
@@ -190,7 +190,7 @@ final class Expectation
      *
      * @param mixed $value
      */
-    public function toEqual($value)
+    public function toEqual($value): Expectation
     {
         Assert::assertEquals($value, $this->value);
 
@@ -203,7 +203,7 @@ final class Expectation
      *
      * @param mixed $value
      */
-    public function toEqualIgnoringCase($value)
+    public function toEqualIgnoringCase($value): Expectation
     {
         Assert::assertEqualsIgnoringCase($value, $this->value);
 
@@ -221,7 +221,7 @@ final class Expectation
      *
      * @param mixed $value
      */
-    public function toEqualCanonicalizing($value)
+    public function toEqualCanonicalizing($value): Expectation
     {
         Assert::assertEqualsCanonicalizing($value, $this->value);
 
@@ -234,7 +234,7 @@ final class Expectation
      *
      * @param mixed $value
      */
-    public function toEqualWithDelta($value, float $delta)
+    public function toEqualWithDelta($value, float $delta): Expectation
     {
         Assert::assertEqualsWithDelta($value, $this->value, $delta);
 
@@ -244,7 +244,7 @@ final class Expectation
     /**
      * Assert that the value is a directory.
      */
-    public function toBeExistingDirectory()
+    public function toBeExistingDirectory(): Expectation
     {
         Assert::assertDirectoryExists($this->value);
 
@@ -254,7 +254,7 @@ final class Expectation
     /**
      * Assert that the value is a directory and is readable.
      */
-    public function toBeReadableDirectory()
+    public function toBeReadableDirectory(): Expectation
     {
         Assert::assertDirectoryIsReadable($this->value);
 
@@ -264,7 +264,7 @@ final class Expectation
     /**
      * Assert that the value is a directory and is writable.
      */
-    public function toBeWritableDirectory()
+    public function toBeWritableDirectory(): Expectation
     {
         Assert::assertDirectoryIsWritable($this->value);
 
@@ -273,10 +273,8 @@ final class Expectation
 
     /**
      * Dynamically calls methods on the class without any arguments.
-     *
-     * @return Expectation
      */
-    public function __get(string $name)
+    public function __get(string $name): Expectation
     {
         /* @phpstan-ignore-next-line */
         return $this->{$name}();
