@@ -274,7 +274,7 @@ final class Expectation
     /**
      * Dynamically calls methods on the class without any arguments.
      */
-    public function __get(string $name): Expectation
+    public function __get(string $name)
     {
         /* @phpstan-ignore-next-line */
         return $this->{$name}();
