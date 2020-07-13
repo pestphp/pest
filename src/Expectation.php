@@ -53,7 +53,17 @@ final class Expectation
     }
 
     /**
-     * Assert that value is false.
+     * Assert the value is empty.
+     */
+    public function toBeEmpty()
+    {
+        Assert::assertEmpty($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert the value is false.
      */
     public function toBeFalse()
     {
@@ -63,7 +73,7 @@ final class Expectation
     }
 
     /**
-     * Assert that value is greater than expected one.
+     * Assert the value is greater than expected one.
      *
      * @param int|float $value
      */
@@ -123,9 +133,29 @@ final class Expectation
     }
 
     /**
-     * Assert that needles is a substring of value.
+     * Assert the value contains only variables of type.
      *
-     * @param string $needle
+     * @param string|mixed $type
+     */
+    public function toContainOnly($type)
+    {
+        Assert::assertContainsOnly($type, $this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert the value contains only instances of $instance.
+     */
+    public function toContainOnlyInstancesOf(string $instance)
+    {
+        Assert::assertContainsOnlyInstancesOf($instance, $this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that needles is a substring of value.
      */
     public function toContainString(string $needle)
     {
@@ -137,12 +167,106 @@ final class Expectation
     /**
      * Assert that needles is a substring of value, ignoring the
      * difference in casing.
-     *
-     * @param string $needle
      */
     public function toContainStringIgnoringCase(string $needle)
     {
         Assert::assertStringContainsStringIgnoringCase($needle, $this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that $count matches the number of elements of $value.
+     */
+    public function toCount(int $count)
+    {
+        Assert::assertCount($count, $this->value);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that two variables have the same value.
+     *
+     * @param mixed $value
+     */
+    public function toEqual($value)
+    {
+        Assert::assertEquals($value, $this->value);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that two variables are equals, ignoring the casing
+     * for the comparison.
+     *
+     * @param mixed $value
+     */
+    public function toEqualIgnoringCase($value)
+    {
+        Assert::assertEqualsIgnoringCase($value, $this->value);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that two variables have the same value.
+     * The contents of $expected and $actual are canonicalized before
+     * they are compared. For instance, when the two variables $value and
+     * $this->value are arrays, then these arrays are sorted before they are
+     * compared. When $value and $this->value are objects,
+     * each object is converted to an array containing all private,
+     * protected and public attributes.
+     *
+     * @param mixed $value
+     */
+    public function toEqualCanonicalizing($value)
+    {
+        Assert::assertEqualsCanonicalizing($value, $this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that the absolute difference between $value and $this->value
+     * is greather thatn $delta.
+     *
+     * @param mixed $value
+     */
+    public function toEqualWithDelta($value, float $delta)
+    {
+        Assert::assertEqualsWithDelta($value, $this->value, $delta);
+
+        return $this;
+    }
+
+    /**
+     * Assert that the value is a directory.
+     */
+    public function toBeExistingDirectory()
+    {
+        Assert::assertDirectoryExists($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that the value is a directory and is readable.
+     */
+    public function toBeReadableDirectory()
+    {
+        Assert::assertDirectoryIsReadable($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that the value is a directory and is writable.
+     */
+    public function toBeWritableDirectory()
+    {
+        Assert::assertDirectoryIsWritable($this->value);
 
         return $this;
     }

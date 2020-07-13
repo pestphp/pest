@@ -7,6 +7,96 @@
   ✓ failures
   ✓ not failures
 
+   PASS  Tests\Expect\thatDirectoryExists
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\thatDirectoryIsReadable
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeEmpty
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeFalse
+  ✓ strict comparisons
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeGreatherThan
+  ✓ passes
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeGreatherThanOrEqual
+  ✓ passes
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeLessThan
+  ✓ passes
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeLessThanOrEqual
+  ✓ passes
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toContain
+  ✓ passes
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toContainOnly
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toContainOnlyInstancesOf
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toContainString
+  ✓ is case sensitive
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toContainStringIgnoringCase
+  ✓ ignore difference in casing
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toCount
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toEqual
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toEqualCanonicalizing
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toEqualIgnoringCase
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toEqualWithDelta
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
    PASS  Tests\Features\AfterAll
   ✓ deletes file after all
 
@@ -172,5 +262,5 @@
    WARN  Tests\Visual\Success
   - visual snapshot of test suite on success
 
-  Tests:  6 skipped, 99 passed
-  Time:   3.62s
+  Tests:  6 skipped, 153 passed
+  Time:   4.35s
