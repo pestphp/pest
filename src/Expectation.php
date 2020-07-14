@@ -63,6 +63,16 @@ final class Expectation
     }
 
     /**
+     * Assert the value is true.
+     */
+    public function toBeTrue(): Expectation
+    {
+        Assert::assertTrue($this->value);
+
+        return $this;
+    }
+
+    /**
      * Assert the value is false.
      */
     public function toBeFalse(): Expectation
@@ -123,54 +133,15 @@ final class Expectation
     /**
      * Assert that needles is an element of value.
      *
-     * @param mixed $needle
+     * @param mixed $value
      */
-    public function toContain($needle): Expectation
+    public function toContain($value): Expectation
     {
-        Assert::assertContains($needle, $this->value);
-
-        return $this;
-    }
-
-    /**
-     * Assert the value contains only variables of type.
-     *
-     * @param mixed $type
-     */
-    public function toContainOnly($type): Expectation
-    {
-        Assert::assertContainsOnly($type, $this->value);
-
-        return $this;
-    }
-
-    /**
-     * Assert the value contains only instances of $instance.
-     */
-    public function toContainOnlyInstancesOf(string $instance): Expectation
-    {
-        Assert::assertContainsOnlyInstancesOf($instance, $this->value);
-
-        return $this;
-    }
-
-    /**
-     * Assert that needles is a substring of value.
-     */
-    public function toContainString(string $needle): Expectation
-    {
-        Assert::assertStringContainsString($needle, $this->value);
-
-        return $this;
-    }
-
-    /**
-     * Assert that needles is a substring of value, ignoring the
-     * difference in casing.
-     */
-    public function toContainStringIgnoringCase(string $needle): Expectation
-    {
-        Assert::assertStringContainsStringIgnoringCase($needle, $this->value);
+        if (is_string($value)) {
+            Assert::assertStringContainsString($value, $this->value);
+        } else {
+            Assert::assertContains($value, $this->value);
+        }
 
         return $this;
     }
@@ -178,7 +149,7 @@ final class Expectation
     /**
      * Assert that $count matches the number of elements of $value.
      */
-    public function toCount(int $count): Expectation
+    public function toHaveCount(int $count): Expectation
     {
         Assert::assertCount($count, $this->value);
 
@@ -234,7 +205,7 @@ final class Expectation
      *
      * @param mixed $value
      */
-    public function toEqualWithDelta($value, float $delta): Expectation
+    public function toBeEqualWithDelta($value, float $delta): Expectation
     {
         Assert::assertEqualsWithDelta($value, $this->value, $delta);
 
@@ -254,11 +225,12 @@ final class Expectation
     /**
      * Assert that the value is an instance of $value.
      *
-     * @param mixed $value
+     * @param string $class
      */
-    public function toBeInstanceOf($value): Expectation
+    public function toBeInstanceOf($class): Expectation
     {
-        Assert::assertInstanceOf($value, $this->value);
+        /* @phpstan-ignore-next-line */
+        Assert::assertInstanceOf($class, $this->value);
 
         return $this;
     }
@@ -384,7 +356,7 @@ final class Expectation
     }
 
     /**
-     * Assert that the value is NAN.
+     * Assert that the value is null.
      */
     public function toBeNull(): Expectation
     {

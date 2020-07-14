@@ -8,7 +8,7 @@ trait PluginTrait
 {
     public function assertPluginTraitGotRegistered(): void
     {
-        assertTrue(true);
+        $this->assertTrue(true);
     }
 }
 
@@ -16,7 +16,7 @@ trait SecondPluginTrait
 {
     public function assertSecondPluginTraitGotRegistered(): void
     {
-        assertTrue(true);
+        $this->assertTrue(true);
     }
 }
 

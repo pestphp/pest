@@ -8,11 +8,11 @@ beforeAll(function () use ($foo) {
 });
 
 it('gets executed before tests', function () use ($foo) {
-    assertEquals($foo->bar, 1);
+    expect($foo->bar)->toBe(1);
 
     $foo->bar = 'changed';
 });
 
 it('do not get executed before each test', function () use ($foo) {
-    assertEquals($foo->bar, 'changed');
+    expect($foo->bar)->toBe('changed');
 });

@@ -15,32 +15,32 @@ it('exists')
 
 it('gets an instance', function () {
     $this->container->add(Container::class, $this->container);
-    assertSame($this->container, $this->container->get(Container::class));
+    expect($this->container->get(Container::class))->toBe($this->container);
 });
 
 test('autowire', function () {
-    assertInstanceOf(Container::class, $this->container->get(Container::class));
+    expect($this->container->get(Container::class))->toBeInstanceOf(Container::class);
 });
 
 it('creates an instance and resolves parameters', function () {
     $this->container->add(Container::class, $this->container);
     $instance = $this->container->get(ClassWithDependency::class);
 
-    assertInstanceOf(ClassWithDependency::class, $instance);
+    expect($instance)->toBeInstanceOf(ClassWithDependency::class);
 });
 
 it('creates an instance and resolves also sub parameters', function () {
     $this->container->add(Container::class, $this->container);
     $instance = $this->container->get(ClassWithSubDependency::class);
 
-    assertInstanceOf(ClassWithSubDependency::class, $instance);
+    expect($instance)->toBeInstanceOf(ClassWithSubDependency::class);
 });
 
 it('can resolve builtin value types', function () {
     $this->container->add('rootPath', getcwd());
 
     $instance = $this->container->get(TestSuite::class);
-    assertInstanceOf(TestSuite::class, $instance);
+    expect($instance)->toBeInstanceOf(TestSuite::class);
 });
 
 it('cannot resolve a parameter without type', function () {

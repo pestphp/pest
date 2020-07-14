@@ -23,13 +23,13 @@ it('sets closures', function () {
         yield [1];
     });
 
-    assertEquals([[1]], iterator_to_array(Datasets::get('foo')()));
+    expect(iterator_to_array(Datasets::get('foo')()))->toBe([[1]]);
 });
 
 it('sets arrays', function () {
     Datasets::set('bar', [[2]]);
 
-    assertEquals([[2]], Datasets::get('bar'));
+    expect(Datasets::get('bar'))->toBe([[2]]);
 });
 
 it('gets bound to test case object', function () {
@@ -37,7 +37,7 @@ it('gets bound to test case object', function () {
 })->with([['a'], ['b']]);
 
 test('it truncates the description', function () {
-    assertTrue(true);
+    expect(true)->toBe(true);
     // it gets tested by the integration test
 })->with([str_repeat('Fooo', 10000000)]);
 
@@ -48,51 +48,51 @@ $datasets = [[1], [2]];
 
 test('lazy datasets', function ($text) use ($state, $datasets) {
     $state->text .= $text;
-    assertTrue(in_array([$text], $datasets));
+    expect(in_array([$text], $datasets))->toBe(true);
 })->with($datasets);
 
 test('lazy datasets did the job right', function () use ($state) {
-    assertEquals('12', $state->text);
+    expect($state->text)->toBe('12');
 });
 
 $state->text = '';
 
 test('eager datasets', function ($text) use ($state, $datasets) {
     $state->text .= $text;
-    assertTrue(in_array([$text], $datasets));
+    expect($datasets)->toContain([$text]);
 })->with(function () use ($datasets) {
     return $datasets;
 });
 
 test('eager datasets did the job right', function () use ($state) {
-    assertEquals('1212', $state->text);
+    expect($state->text)->toBe('1212');
 });
 
 test('lazy registered datasets', function ($text) use ($state, $datasets) {
     $state->text .= $text;
-    assertTrue(in_array([$text], $datasets));
+    expect($datasets)->toContain([$text]);
 })->with('numbers.array');
 
 test('lazy registered datasets did the job right', function () use ($state) {
-    assertEquals('121212', $state->text);
+    expect($state->text)->toBe('121212');
 });
 
 test('eager registered datasets', function ($text) use ($state, $datasets) {
     $state->text .= $text;
-    assertTrue(in_array([$text], $datasets));
+    expect($datasets)->toContain([$text]);
 })->with('numbers.closure');
 
 test('eager registered datasets did the job right', function () use ($state) {
-    assertEquals('12121212', $state->text);
+    expect($state->text)->toBe('12121212');
 });
 
 test('eager wrapped registered datasets', function ($text) use ($state, $datasets) {
     $state->text .= $text;
-    assertTrue(in_array([$text], $datasets));
+    expect($datasets)->toContain([$text]);
 })->with('numbers.closure.wrapped');
 
 test('eager registered wrapped datasets did the job right', function () use ($state) {
-    assertEquals('1212121212', $state->text);
+    expect($state->text)->toBe('1212121212');
 });
 
 class Bar
@@ -105,13 +105,13 @@ $namedDatasets = [
 ];
 
 test('lazy named datasets', function ($text) use ($state, $datasets) {
-    assertTrue(true);
+    expect(true)->toBeTrue();
 })->with($namedDatasets);
 
 $counter = 0;
 
 it('creates unique test case names', function (string $name, Plugin $plugin, bool $bool) use (&$counter) {
-    assertTrue(true);
+    expect(true)->toBeTrue();
     $counter++;
 })->with([
     ['Name 1', new Plugin(), true],
@@ -123,5 +123,5 @@ it('creates unique test case names', function (string $name, Plugin $plugin, boo
 ]);
 
 it('creates unique test case names - count', function () use (&$counter) {
-    assertEquals(6, $counter);
+    expect($counter)->toBe(6);
 });

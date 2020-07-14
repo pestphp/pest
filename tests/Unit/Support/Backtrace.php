@@ -7,5 +7,5 @@ it('gets file name from called file', function () {
         return Backtrace::file();
     };
 
-    assertEquals(__FILE__, $a());
+    expect($a())->toBe(__FILE__);
 });

@@ -3,9 +3,10 @@
 use Pest\Support\Reflection;
 
 it('gets file name from closure', function () {
-    $fileName = Reflection::getFileNameFromClosure(function () {});
+    $fileName = Reflection::getFileNameFromClosure(function () {
+    });
 
-    assertEquals(__FILE__, $fileName);
+    expect($fileName)->toBe(__FILE__);
 });
 
 it('gets property values', function () {
@@ -15,5 +16,5 @@ it('gets property values', function () {
 
     $value = Reflection::getPropertyValue($class, 'foo');
 
-    assertEquals('bar', $value);
+    expect($value)->toBe('bar');
 });

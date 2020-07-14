@@ -20,8 +20,8 @@ afterAll(function () {
 });
 
 register_shutdown_function(function () use ($foo) {
-    assertFalse($foo->beforeAll);
-    assertFalse($foo->beforeEach);
-    assertFalse($foo->afterEach);
-    assertFalse($foo->afterAll);
+    expect($foo->beforeAll)->toBeFalse();
+    expect($foo->beforeEach)->toBeFalse();
+    expect($foo->afterEach)->toBeFalse();
+    expect($foo->afterAll)->toBeFalse();
 });

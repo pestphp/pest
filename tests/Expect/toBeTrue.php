@@ -2,14 +2,14 @@
 
 use PHPUnit\Framework\ExpectationFailedException;
 
-test('pass', function () {
-    expect(1.0)->toBeEqualWithDelta(1.3, .4);
+test('strict comparisons', function () {
+    expect(true)->toBeTrue();
 });
 
 test('failures', function () {
-    expect(1.0)->toBeEqualWithDelta(1.5, .1);
+    expect('')->toBeTrue();
 })->throws(ExpectationFailedException::class);
 
 test('not failures', function () {
-    expect(1.0)->not->toBeEqualWithDelta(1.6, .7);
+    expect(false)->not->toBe(false);
 })->throws(ExpectationFailedException::class);

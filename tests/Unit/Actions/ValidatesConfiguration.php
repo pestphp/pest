@@ -38,5 +38,5 @@ it('do not throws exception when `process isolation` is false', function () {
         'configuration' => $filename,
     ]);
 
-    assertTrue(true);
+    expect(true)->toBeTrue();
 });

@@ -11,10 +11,10 @@ afterEach(function () use ($state) {
 });
 
 it('does not get executed before the test', function () {
-    assertFalse(property_exists($this->state, 'bar'));
+    expect(property_exists($this->state, 'bar'))->toBeFalse();
 });
 
 it('gets executed after the test', function () {
-    assertTrue(property_exists($this->state, 'bar'));
-    assertEquals(2, $this->state->bar);
+    expect(property_exists($this->state, 'bar'))->toBeTrue();
+    expect($this->state->bar)->toBe(2);
 });

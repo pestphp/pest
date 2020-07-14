@@ -108,6 +108,8 @@ function afterAll(Closure $closure = null): void
 
 /**
  * Creates a new expectation.
+ *
+ * @param mixed $value the Value
  */
 function expect($value): Expectation
 {

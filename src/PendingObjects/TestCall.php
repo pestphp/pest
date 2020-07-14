@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\PendingObjects;
 
 use Closure;
+use Pest\Expectation;
 use Pest\Factories\TestCaseFactory;
 use Pest\Support\Backtrace;
 use Pest\Support\NullClosure;
@@ -82,6 +83,16 @@ final class TestCall
         $this->testCaseFactory->dataset = $data;
 
         return $this;
+    }
+
+    /**
+     * Creates a new expectation.
+     *
+     * @param mixed $value the Value
+     */
+    public function expect($value): Expectation
+    {
+        return expect($value);
     }
 
     /**

@@ -8,8 +8,8 @@ afterAll(function () use ($file) {
 
 test('deletes file after all', function () use ($file) {
     file_put_contents($file, 'foo');
-    assertFileExists($file);
+    $this->assertFileExists($file);
     register_shutdown_function(function () use ($file) {
-        assertFileNotExists($file);
+        $this->assertFileNotExists($file);
     });
 });

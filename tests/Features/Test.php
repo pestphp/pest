@@ -1,7 +1,7 @@
 <?php
 
 test('a test', function () {
-    assertArrayHasKey('key', ['key' => 'foo']);
+    $this->assertArrayHasKey('key', ['key' => 'foo']);
 });
 
-test('higher order message test')->assertTrue(true);
+test('higher order message test')->expect(true)->toBeTrue();
