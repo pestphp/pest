@@ -3,6 +3,7 @@
   ✓ that gets executed
 
    PASS  Tests\Expect\toBe
+  ✓ expect true → toBeTrue  → and false → toBeFalse 
   ✓ strict comparisons
   ✓ failures
   ✓ not failures
@@ -211,9 +212,9 @@
    PASS  Tests\Features\HigherOrderTests
   ✓ it proxies calls to object
 
-   WARN  Tests\Features\It
+   PASS  Tests\Features\It
   ✓ it is a test
-  ! it is a higher order message test → This test did not perform any assertions  /Users/nunomaduro/pestphp/pest/src/Factories/TestCaseFactory.php(204) : eval()'d code:4
+  ✓ it is a higher order message test
 
    PASS  Tests\Features\Macro
   ✓ it can call chained macro method
@@ -223,8 +224,8 @@
   ✓ it has bar
 
    PASS  Tests\Features\PendingHigherOrderTests
-  ✓ get 'foo' → get 'bar'
-  ✓ get 'foo'
+  ✓ get 'foo' → get 'bar' → expect true → toBeTrue 
+  ✓ get 'foo' → expect true → toBeTrue 
 
    WARN  Tests\Features\Skip
   ✓ it do not skips
@@ -235,9 +236,9 @@
   ✓ it do not skips with falsy closure condition
   - it skips with condition and message → skipped because foo
 
-   WARN  Tests\Features\Test
+   PASS  Tests\Features\Test
   ✓ a test
-  ! higher order message test → This test did not perform any assertions  /Users/nunomaduro/pestphp/pest/src/Factories/TestCaseFactory.php(204) : eval()'d code:4
+  ✓ higher order message test
 
    PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest
   ✓ it example 1
@@ -307,5 +308,5 @@
    WARN  Tests\Visual\Success
   - visual snapshot of test suite on success
 
-  Tests:  2 risked, 6 skipped, 178 passed
+  Tests:  6 skipped, 181 passed
   Time:   5.70s

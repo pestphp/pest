@@ -22,6 +22,7 @@ test('visual snapshot of test suite on success', function () {
         $output = explode("\n", $output());
         array_pop($output);
         array_pop($output);
+
         expect(file_get_contents($snapshot))->toContain(implode("\n", $output));
     }
 })->skip(!getenv('REBUILD_SNAPSHOTS') && getenv('EXCLUDE'))

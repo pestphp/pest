@@ -110,8 +110,10 @@ function afterAll(Closure $closure = null): void
  * Creates a new expectation.
  *
  * @param mixed $value the Value
+ *
+ * @return Expectation
  */
-function expect($value): Expectation
+function expect($value)
 {
-    return new Expectation($value);
+    return test()->expect($value);
 }

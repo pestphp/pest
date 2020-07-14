@@ -1,5 +1,7 @@
 <?php
 
+use function PHPUnit\Framework\assertFalse;
+
 $foo             = new stdClass();
 $foo->beforeAll  = false;
 $foo->beforeEach = false;
@@ -20,8 +22,8 @@ afterAll(function () {
 });
 
 register_shutdown_function(function () use ($foo) {
-    expect($foo->beforeAll)->toBeFalse();
-    expect($foo->beforeEach)->toBeFalse();
-    expect($foo->afterEach)->toBeFalse();
-    expect($foo->afterAll)->toBeFalse();
+    assertFalse($foo->beforeAll);
+    assertFalse($foo->beforeEach);
+    assertFalse($foo->afterEach);
+    assertFalse($foo->afterAll);
 });

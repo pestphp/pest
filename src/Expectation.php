@@ -31,6 +31,16 @@ final class Expectation
     }
 
     /**
+     * Creates a new expectation.
+     *
+     * @param mixed $value
+     */
+    public function and($value): Expectation
+    {
+        return new self($value);
+    }
+
+    /**
      * Creates the opposite expectation for the value.
      */
     public function not(): OppositeExpectation
