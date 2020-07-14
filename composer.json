@@ -31,8 +31,7 @@
         },
         "files": [
             "src/globals.php",
-            "src/Pest.php",
-            "compiled/globals.php"
+            "src/Pest.php"
         ]
     },
     "autoload-dev": {
@@ -65,7 +64,6 @@
         "bin/pest"
     ],
     "scripts": {
-        "compile": "@php ./scripts/compile.php",
         "lint": "rector process src && php-cs-fixer fix -v",
         "test:lint": "php-cs-fixer fix -v --dry-run && rector process src --dry-run",
         "test:types": "phpstan analyse --ansi --memory-limit=0",
