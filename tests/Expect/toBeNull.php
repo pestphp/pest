@@ -3,13 +3,14 @@
 use PHPUnit\Framework\ExpectationFailedException;
 
 test('pass', function () {
-    expect(sys_get_temp_dir())->toBeWritableDirectory();
+    expect(null)->toBeNull();
+    expect('')->not->toBeNull();
 });
 
 test('failures', function () {
-    expect('/random/path/whatever')->toBeWritableDirectory();
+    expect('hello')->toBeNull();
 })->throws(ExpectationFailedException::class);
 
 test('not failures', function () {
-    expect(sys_get_temp_dir())->not->toBeWritableDirectory();
+    expect(null)->not->toBeNull();
 })->throws(ExpectationFailedException::class);

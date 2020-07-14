@@ -2,8 +2,23 @@
    PASS  Tests\CustomTestCase\ExecutedTest
   ✓ that gets executed
 
-   PASS  Tests\Expect\ToBe
+   PASS  Tests\Expect\toBe
   ✓ strict comparisons
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeArray
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeBool
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeCallable
+  ✓ pass
   ✓ failures
   ✓ not failures
 
@@ -12,13 +27,13 @@
   ✓ failures
   ✓ not failures
 
-   PASS  Tests\Expect\toBeExistingDirectory
-  ✓ pass
+   PASS  Tests\Expect\toBeFalse
+  ✓ strict comparisons
   ✓ failures
   ✓ not failures
 
-   PASS  Tests\Expect\toBeFalse
-  ✓ strict comparisons
+   PASS  Tests\Expect\toBeFloat
+  ✓ pass
   ✓ failures
   ✓ not failures
 
@@ -32,6 +47,26 @@
   ✓ failures
   ✓ not failures
 
+   PASS  Tests\Expect\toBeInfinite
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeInstanceOf
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeInt
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeIterable
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
    PASS  Tests\Expect\toBeLessThan
   ✓ passes
   ✓ failures
@@ -42,12 +77,37 @@
   ✓ failures
   ✓ not failures
 
-   PASS  Tests\Expect\toBeReadableDirectory
+   PASS  Tests\Expect\toBeNAN
   ✓ pass
   ✓ failures
   ✓ not failures
 
-   PASS  Tests\Expect\toBeWritableDirectory
+   PASS  Tests\Expect\toBeNull
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeNumeric
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeObject
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeResource
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeScalar
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeString
   ✓ pass
   ✓ failures
   ✓ not failures
@@ -267,5 +327,5 @@
    WARN  Tests\Visual\Success
   - visual snapshot of test suite on success
 
-  Tests:  6 skipped, 156 passed
-  Time:   4.42s
+  Tests:  6 skipped, 192 passed
+  Time:   5.20s

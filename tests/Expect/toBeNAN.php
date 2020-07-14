@@ -3,15 +3,14 @@
 use PHPUnit\Framework\ExpectationFailedException;
 
 test('pass', function () {
-    $temp = sys_get_temp_dir();
-
-    expect($temp)->toBeExistingDirectory();
+    expect(asin(2))->toBeNan();
+    expect(log(0))->not->toBeNan();
 });
 
 test('failures', function () {
-    expect('/random/path/whatever')->toBeExistingDirectory();
+    expect(1)->toBeNan();
 })->throws(ExpectationFailedException::class);
 
 test('not failures', function () {
-    expect('.')->not->toBeExistingDirectory();
+    expect(acos(1.5))->not->toBeNan();
 })->throws(ExpectationFailedException::class);

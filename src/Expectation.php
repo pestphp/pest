@@ -230,7 +230,7 @@ final class Expectation
 
     /**
      * Assert that the absolute difference between $value and $this->value
-     * is greather thatn $delta.
+     * is greater than $delta.
      *
      * @param mixed $value
      */
@@ -242,31 +242,153 @@ final class Expectation
     }
 
     /**
-     * Assert that the value is a directory.
+     * Assert that the value infinite.
      */
-    public function toBeExistingDirectory(): Expectation
+    public function toBeInfinite(): Expectation
     {
-        Assert::assertDirectoryExists($this->value);
+        Assert::assertInfinite($this->value);
 
         return $this;
     }
 
     /**
-     * Assert that the value is a directory and is readable.
+     * Assert that the value is an instance of $value.
+     *
+     * @param mixed $value
      */
-    public function toBeReadableDirectory(): Expectation
+    public function toBeInstanceOf($value): Expectation
     {
-        Assert::assertDirectoryIsReadable($this->value);
+        Assert::assertInstanceOf($value, $this->value);
 
         return $this;
     }
 
     /**
-     * Assert that the value is a directory and is writable.
+     * Assert that the value is an array.
      */
-    public function toBeWritableDirectory(): Expectation
+    public function toBeArray(): Expectation
     {
-        Assert::assertDirectoryIsWritable($this->value);
+        Assert::assertIsArray($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that the value is of type bool.
+     */
+    public function toBeBool(): Expectation
+    {
+        Assert::assertIsBool($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that the value is of type callable.
+     */
+    public function toBeCallable(): Expectation
+    {
+        Assert::assertIsCallable($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that the value is type of float.
+     */
+    public function toBeFloat(): Expectation
+    {
+        Assert::assertIsFloat($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that the value is type of int.
+     */
+    public function toBeInt(): Expectation
+    {
+        Assert::assertIsInt($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that the value is type of iterable.
+     */
+    public function toBeIterable(): Expectation
+    {
+        Assert::assertIsIterable($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that the value is type of numeric.
+     */
+    public function toBeNumeric(): Expectation
+    {
+        Assert::assertIsNumeric($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that the value is type of object.
+     */
+    public function toBeObject(): Expectation
+    {
+        Assert::assertIsObject($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that the value is type of resource.
+     */
+    public function toBeResource(): Expectation
+    {
+        Assert::assertIsResource($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that the value is type of scalar.
+     */
+    public function toBeScalar(): Expectation
+    {
+        Assert::assertIsScalar($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that the value is type of string.
+     */
+    public function toBeString(): Expectation
+    {
+        Assert::assertIsString($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that the value is NAN.
+     */
+    public function toBeNan(): Expectation
+    {
+        Assert::assertNan($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that the value is NAN.
+     */
+    public function toBeNull(): Expectation
+    {
+        Assert::assertNull($this->value);
 
         return $this;
     }
