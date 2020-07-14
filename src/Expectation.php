@@ -169,19 +169,6 @@ final class Expectation
     }
 
     /**
-     * Asserts that two variables are equals, ignoring the casing
-     * for the comparison.
-     *
-     * @param mixed $value
-     */
-    public function toEqualIgnoringCase($value): Expectation
-    {
-        Assert::assertEqualsIgnoringCase($value, $this->value);
-
-        return $this;
-    }
-
-    /**
      * Asserts that two variables have the same value.
      * The contents of $expected and $actual are canonicalized before
      * they are compared. For instance, when the two variables $value and
@@ -205,7 +192,7 @@ final class Expectation
      *
      * @param mixed $value
      */
-    public function toBeEqualWithDelta($value, float $delta): Expectation
+    public function toEqualWithDelta($value, float $delta): Expectation
     {
         Assert::assertEqualsWithDelta($value, $this->value, $delta);
 
