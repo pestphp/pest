@@ -157,6 +157,16 @@ final class Expectation
     }
 
     /**
+     * Assert that the $value contains the property $name.
+     */
+    public function toHaveProperty(string $name): Expectation
+    {
+        Assert::assertTrue(property_exists($this->value, $name));
+
+        return $this;
+    }
+
+    /**
      * Asserts that two variables have the same value.
      *
      * @param mixed $value
