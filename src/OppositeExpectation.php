@@ -42,4 +42,19 @@ final class OppositeExpectation
 
         throw new ExpectationFailedException(sprintf('@todo'));
     }
+
+    /**
+     * Handle dynamic properties gets into the original expectation.
+     */
+    public function __get(string $name): Expectation
+    {
+        try {
+            /* @phpstan-ignore-next-line */
+            $this->original->{$name};
+        } catch (ExpectationFailedException $e) {
+            return $this->original;
+        }
+
+        throw new ExpectationFailedException(sprintf('@todo'));
+    }
 }

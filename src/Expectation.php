@@ -9,7 +9,7 @@ use PHPUnit\Framework\Assert;
 /**
  * @internal
  *
- * @property Expectation $not Creates the opposite expectation.
+ * @property Expectation not Creates the opposite expectation.
  */
 final class Expectation
 {

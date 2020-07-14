@@ -2,6 +2,9 @@
    PASS  Tests\CustomTestCase\ExecutedTest
   ✓ that gets executed
 
+   PASS  Tests\Expect\not
+  ✓ not property calls
+
    PASS  Tests\Expect\toBe
   ✓ expect true → toBeTrue  → and false → toBeFalse 
   ✓ strict comparisons
@@ -309,5 +312,5 @@
    WARN  Tests\Visual\Success
   - visual snapshot of test suite on success
 
-  Tests:  6 skipped, 182 passed
-  Time:   5.72s
+  Tests:  6 skipped, 183 passed
+  Time:   5.77s
