@@ -119,7 +119,8 @@
   ✓ not failures
 
    PASS  Tests\Expect\toContain
-  ✓ passes
+  ✓ passes strings
+  ✓ passes arrays
   ✓ failures
   ✓ not failures
 
@@ -308,5 +309,5 @@
    WARN  Tests\Visual\Success
   - visual snapshot of test suite on success
 
-  Tests:  6 skipped, 181 passed
-  Time:   5.70s
+  Tests:  6 skipped, 182 passed
+  Time:   5.72s

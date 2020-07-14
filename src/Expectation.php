@@ -147,7 +147,7 @@ final class Expectation
      */
     public function toContain($value): Expectation
     {
-        if (is_string($value)) {
+        if (is_string($this->value)) {
             Assert::assertStringContainsString($value, $this->value);
         } else {
             Assert::assertContains($value, $this->value);

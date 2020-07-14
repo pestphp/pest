@@ -2,8 +2,12 @@
 
 use PHPUnit\Framework\ExpectationFailedException;
 
-test('passes', function () {
+test('passes strings', function () {
     expect([1, 2, 42])->toContain(42);
+});
+
+test('passes arrays', function () {
+    expect('Nuno')->toContain('Nu');
 });
 
 test('failures', function () {
