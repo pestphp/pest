@@ -142,17 +142,17 @@
   ✓ failures
   ✓ not failures
 
-   PASS  Tests\Expect\toCount
-  ✓ pass
-  ✓ failures
-  ✓ not failures
-
    PASS  Tests\Expect\toEqual
   ✓ pass
   ✓ failures
   ✓ not failures
 
    PASS  Tests\Expect\toEqualWithDelta
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toHaveCount
   ✓ pass
   ✓ failures
   ✓ not failures
