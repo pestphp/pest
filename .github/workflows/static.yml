@@ -51,4 +51,4 @@ jobs:
       run: composer update --prefer-stable --no-interaction --prefer-dist --no-progress
 
     - name: Run PHPStan
-      run: vendor/bin/phpstan analyse
+      run: vendor/bin/phpstan analyse --no-progress
