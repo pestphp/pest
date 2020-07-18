@@ -26,6 +26,11 @@
   ✓ failures
   ✓ not failures
 
+   PASS  Tests\Expect\toBeDirectory
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
    PASS  Tests\Expect\toBeEmpty
   ✓ pass
   ✓ failures
@@ -101,6 +106,11 @@
   ✓ failures
   ✓ not failures
 
+   PASS  Tests\Expect\toBeReadableDirectory
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
    PASS  Tests\Expect\toBeResource
   ✓ pass
   ✓ failures
@@ -121,6 +131,11 @@
   ✓ failures
   ✓ not failures
 
+   PASS  Tests\Expect\toBeWritableDirectory
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
    PASS  Tests\Expect\toContain
   ✓ passes strings
   ✓ passes arrays
@@ -138,6 +153,11 @@
   ✓ not failures
 
    PASS  Tests\Expect\toHaveCount
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toHaveKey
   ✓ pass
   ✓ failures
   ✓ not failures
@@ -312,5 +332,5 @@
    WARN  Tests\Visual\Success
   - visual snapshot of test suite on success
 
-  Tests:  6 skipped, 183 passed
-  Time:   5.77s
+  Tests:  6 skipped, 195 passed
+  Time:   5.27s

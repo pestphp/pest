@@ -373,6 +373,46 @@ final class Expectation
     }
 
     /**
+     * Assert that the value array has the key.
+     */
+    public function toHaveKey(string $key): Expectation
+    {
+        Assert::assertArrayHasKey($key, $this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that the value is a directory.
+     */
+    public function toBeDirectory(): Expectation
+    {
+        Assert::assertDirectoryExists($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that the value is a directory and is readable.
+     */
+    public function toBeReadableDirectory(): Expectation
+    {
+        Assert::assertDirectoryIsReadable($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Assert that the value is a directory and is writable.
+     */
+    public function toBeWritableDirectory(): Expectation
+    {
+        Assert::assertDirectoryIsWritable($this->value);
+
+        return $this;
+    }
+
+    /**
      * Dynamically calls methods on the class without any arguments.
      *
      * @return Expectation
