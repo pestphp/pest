@@ -3,7 +3,6 @@
 $finder = PhpCsFixer\Finder::create()
     ->in(__DIR__ . DIRECTORY_SEPARATOR . 'tests')
     ->in(__DIR__ . DIRECTORY_SEPARATOR . 'bin')
-    ->in(__DIR__ . DIRECTORY_SEPARATOR . 'compiled')
     ->in(__DIR__ . DIRECTORY_SEPARATOR . 'scripts')
     ->in(__DIR__ . DIRECTORY_SEPARATOR . 'stubs')
     ->in(__DIR__ . DIRECTORY_SEPARATOR . 'src')

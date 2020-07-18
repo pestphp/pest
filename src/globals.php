@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Pest\Datasets;
+use Pest\Expectation;
 use Pest\PendingObjects\AfterEachCall;
 use Pest\PendingObjects\BeforeEachCall;
 use Pest\PendingObjects\TestCall;
@@ -103,4 +104,16 @@ function afterEach(Closure $closure = null): AfterEachCall
 function afterAll(Closure $closure = null): void
 {
     TestSuite::getInstance()->afterAll->set($closure);
+}
+
+/**
+ * Creates a new expectation.
+ *
+ * @param mixed $value the Value
+ *
+ * @return Expectation
+ */
+function expect($value)
+{
+    return test()->expect($value);
 }

@@ -12,7 +12,7 @@ class MyCustomClass extends PHPUnit\Framework\TestCase
 {
     public function assertTrueIsTrue()
     {
-        assertTrue(true);
+        $this->assertTrue(true);
     }
 }
 

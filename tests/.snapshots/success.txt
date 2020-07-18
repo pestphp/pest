@@ -2,6 +2,176 @@
    PASS  Tests\CustomTestCase\ExecutedTest
   ✓ that gets executed
 
+   PASS  Tests\Expect\not
+  ✓ not property calls
+
+   PASS  Tests\Expect\toBe
+  ✓ expect true → toBeTrue  → and false → toBeFalse 
+  ✓ strict comparisons
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeArray
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeBool
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeCallable
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeDirectory
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeEmpty
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeFalse
+  ✓ strict comparisons
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeFloat
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeGreatherThan
+  ✓ passes
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeGreatherThanOrEqual
+  ✓ passes
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeInfinite
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeInstanceOf
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeInt
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeIterable
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeLessThan
+  ✓ passes
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeLessThanOrEqual
+  ✓ passes
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeNAN
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeNull
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeNumeric
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeObject
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeReadableDirectory
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeResource
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeScalar
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeString
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeTrue
+  ✓ strict comparisons
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeWritableDirectory
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toContain
+  ✓ passes strings
+  ✓ passes arrays
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toEqual
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toEqualCanonicalizing
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toEqualWithDelta
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toHaveCount
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toHaveKey
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toHaveProperty
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
    PASS  Tests\Features\AfterAll
   ✓ deletes file after all
 
@@ -83,8 +253,8 @@
   ✓ it has bar
 
    PASS  Tests\Features\PendingHigherOrderTests
-  ✓ get 'foo' → get 'bar' → assertTrue true
-  ✓ get 'foo' → assertTrue true
+  ✓ get 'foo' → get 'bar' → expect true → toBeTrue 
+  ✓ get 'foo' → expect true → toBeTrue 
 
    WARN  Tests\Features\Skip
   ✓ it do not skips
@@ -167,5 +337,5 @@
    WARN  Tests\Visual\Success
   - visual snapshot of test suite on success
 
-  Tests:  6 skipped, 96 passed
-  Time:   3.43s
+  Tests:  6 skipped, 198 passed
+  Time:   5.46s

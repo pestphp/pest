@@ -16,10 +16,10 @@ test('default php unit tests', function () {
     $phpUnitTestCase = new class() extends PhpUnitTestCase {
     };
     $testSuite->addTest($phpUnitTestCase);
-    assertCount(1, $testSuite->tests());
+    expect($testSuite->tests())->toHaveCount(1);
 
     AddsTests::to($testSuite, new \Pest\TestSuite(getcwd()));
-    assertCount(1, $testSuite->tests());
+    expect($testSuite->tests())->toHaveCount(1);
 });
 
 it('removes warnings', function () use ($pestTestCase) {
@@ -28,5 +28,5 @@ it('removes warnings', function () use ($pestTestCase) {
     $testSuite->addTest($warningTestCase);
 
     AddsTests::to($testSuite, new \Pest\TestSuite(getcwd()));
-    assertCount(0, $testSuite->tests());
+    expect($testSuite->tests())->toHaveCount(0);
 });

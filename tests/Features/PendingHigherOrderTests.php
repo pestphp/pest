@@ -1,11 +1,12 @@
 <?php
 
+use Pest\PendingObjects\TestCall;
 use PHPUnit\Framework\TestCase;
 
 uses(Gettable::class);
 
 /**
- * @return TestCase|Gettable
+ * @return TestCase|TestCall|Gettable
  */
 function get(string $route)
 {
@@ -15,15 +16,15 @@ function get(string $route)
 trait Gettable
 {
     /**
-     * @return TestCase|Gettable
+     * @return TestCase|TestCall|Gettable
      */
     public function get(string $route)
     {
-        assertNotEmpty($route);
+        expect($route)->not->toBeEmpty();
 
         return $this;
     }
 }
 
-get('foo')->get('bar')->assertTrue(true);
-get('foo')->assertTrue(true);
+get('foo')->get('bar')->expect(true)->toBeTrue();
+get('foo')->expect(true)->toBeTrue();

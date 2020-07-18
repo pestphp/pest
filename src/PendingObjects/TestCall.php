@@ -12,6 +12,8 @@ use Pest\TestSuite;
 use SebastianBergmann\Exporter\Exporter;
 
 /**
+ * @method \Pest\Expectation expect(mixed $value)
+ *
  * @internal
  */
 final class TestCall

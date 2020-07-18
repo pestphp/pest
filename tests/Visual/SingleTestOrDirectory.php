@@ -10,7 +10,7 @@ $run = function (string $target, $decorated = false) {
     return $decorated ? $process->getOutput() : preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $process->getOutput());
 };
 
-$snapshot  = function ($name) {
+$snapshot = function ($name) {
     $testsPath = dirname(__DIR__);
 
     return file_get_contents(implode(DIRECTORY_SEPARATOR, [
@@ -21,23 +21,15 @@ $snapshot  = function ($name) {
 };
 
 test('allows to run a single test', function () use ($run, $snapshot) {
-    assertStringContainsString(
-        $snapshot('allows-to-run-a-single-test'),
-        $run('tests/Fixtures/DirectoryWithTests/ExampleTest.php'));
+    expect($run('tests/Fixtures/DirectoryWithTests/ExampleTest.php'))->toContain($snapshot('allows-to-run-a-single-test'));
 })->skip(PHP_OS_FAMILY === 'Windows');
 
 test('allows to run a directory', function () use ($run, $snapshot) {
-    assertStringContainsString(
-        $snapshot('allows-to-run-a-directory'),
-        $run('tests/Fixtures')
-    );
+    expect($run('tests/Fixtures'))->toContain($snapshot('allows-to-run-a-directory'));
 })->skip(PHP_OS_FAMILY === 'Windows');
 
 it('has ascii chars', function () use ($run, $snapshot) {
-    assertStringContainsString(
-        $snapshot('has-ascii-chars'),
-        $run('tests/Fixtures/DirectoryWithTests/ExampleTest.php', true)
-    );
+    expect($run('tests/Fixtures/DirectoryWithTests/ExampleTest.php', true))->toContain($snapshot('has-ascii-chars'));
 })->skip(PHP_OS_FAMILY === 'Windows');
 
 it('disable decorating printer when colors is set to never', function () use ($snapshot) {
@@ -49,9 +41,5 @@ it('disable decorating printer when colors is set to never', function () use ($s
     ], dirname(__DIR__, 2));
     $process->run();
     $output = $process->getOutput();
-
-    assertStringContainsString(
-        $snapshot('disable-decorating-printer'),
-        $output
-    );
+    expect($output)->toContain($snapshot('disable-decorating-printer'));
 })->skip(PHP_OS_FAMILY === 'Windows');

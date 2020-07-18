@@ -1,5 +1,7 @@
 <?php
 
+use function PHPUnit\Framework\assertFalse;
+
 $foo             = new stdClass();
 $foo->beforeAll  = false;
 $foo->beforeEach = false;
