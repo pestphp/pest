@@ -147,6 +147,11 @@
   ✓ failures
   ✓ not failures
 
+   PASS  Tests\Expect\toEqualCanonicalizing
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
    PASS  Tests\Expect\toEqualWithDelta
   ✓ pass
   ✓ failures
@@ -332,5 +337,5 @@
    WARN  Tests\Visual\Success
   - visual snapshot of test suite on success
 
-  Tests:  6 skipped, 195 passed
-  Time:   5.27s
+  Tests:  6 skipped, 198 passed
+  Time:   5.46s
