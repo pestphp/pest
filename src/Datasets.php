@@ -77,10 +77,10 @@ final class Datasets
         $dataSetDescriptions = [];
         $dataSetValues       = [];
 
-        foreach ($data as $values) {
+        foreach ($data as $key => $values) {
             $values = is_array($values) ? $values : [$values];
 
-            $dataSetDescriptions[] = $description . self::getDataSetDescription($values);
+            $dataSetDescriptions[] = $description . self::getDataSetDescription($key, $values);
             $dataSetValues[]       = $values;
         }
 
@@ -104,12 +104,15 @@ final class Datasets
     }
 
     /**
+     * @param int|string        $key
      * @param array<int, mixed> $data
      */
-    private static function getDataSetDescription(array $data): string
+    private static function getDataSetDescription($key, array $data): string
     {
         $exporter = new Exporter();
 
-        return \sprintf(' with (%s)', $exporter->shortenedRecursiveExport($data));
+        $nameInsert = is_string($key) ? \sprintf('data set "%s" ', $key) : '';
+
+        return \sprintf(' with %s(%s)', $nameInsert, $exporter->shortenedRecursiveExport($data));
     }
 }
