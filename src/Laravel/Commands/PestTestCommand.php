@@ -64,7 +64,8 @@ final class PestTestCommand extends Command
         $name = Str::endsWith($name, 'test') ? mb_substr($name, 0, -4) : $name;
 
         File::put($target, str_replace('{name}', $name, $contents));
+        $message = sprintf('`%s` created successfully.', $relativePath);
 
-        $this->output->success(sprintf('`%s` created successfully.', $relativePath));
+        $this->output->success($message);
     }
 }

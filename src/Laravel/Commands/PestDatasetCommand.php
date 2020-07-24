@@ -61,7 +61,8 @@ final class PestDatasetCommand extends Command
         $element  = Str::singular($name);
         $contents = str_replace('{dataset_element}', $element, $contents);
         File::put($target, str_replace('{dataset_name}', $name, $contents));
+        $message = sprintf('`%s` created successfully.', $relativePath);
 
-        $this->output->success(sprintf('`%s` created successfully.', $relativePath));
+        $this->output->success($message);
     }
 }

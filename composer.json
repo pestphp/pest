@@ -18,12 +18,12 @@
     ],
     "require": {
         "php": "^7.3",
-        "nunomaduro/collision": "^5.0.0-BETA3",
-        "pestphp/pest-plugin": "^0.2",
-        "pestphp/pest-plugin-coverage": "^0.2",
-        "pestphp/pest-plugin-init": "^0.2",
-        "phpunit/phpunit": "^9.1.4",
-        "sebastian/environment": "^5.1"
+        "nunomaduro/collision": "^5.0.0-BETA4",
+        "pestphp/pest-plugin": "^0.3",
+        "pestphp/pest-plugin-coverage": "^0.3",
+        "pestphp/pest-plugin-init": "^0.3",
+        "phpunit/phpunit": "^9.2.6",
+        "sebastian/environment": "^5.1.2"
     },
     "autoload": {
         "psr-4": {
@@ -43,16 +43,10 @@
         ]
     },
     "require-dev": {
-        "ergebnis/phpstan-rules": "^0.15.0",
-        "friendsofphp/php-cs-fixer": "^2.16.3",
         "illuminate/console": "^7.16.1",
         "illuminate/support": "^7.16.1",
         "mockery/mockery": "^1.4.0",
-        "phpstan/phpstan": "^0.12.30",
-        "phpstan/phpstan-strict-rules": "^0.12.2",
-        "rector/rector": "^0.7.37",
-        "symfony/var-dumper": "^5.1.2",
-        "thecodingmachine/phpstan-strict-rules": "^0.12.0"
+        "pestphp/pest-dev-tools": "dev-master"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -79,7 +73,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "0.2.x-dev"
+            "dev-master": "0.3.x-dev"
         },
         "pest": {
             "plugins": [
