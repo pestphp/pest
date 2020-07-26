@@ -55,15 +55,15 @@ final class Expectation
      *
      * @param mixed $value
      */
-    public function toBe($value): Expectation
+    public function toBe($expected): Expectation
     {
-        Assert::assertSame($value, $this->value);
+        Assert::assertSame($expected, $this->value);
 
         return $this;
     }
 
     /**
-     * Assert the value is empty.
+     * Asserts that the value is empty.
      */
     public function toBeEmpty(): Expectation
     {
@@ -73,7 +73,7 @@ final class Expectation
     }
 
     /**
-     * Assert the value is true.
+     * Asserts that the value is true.
      */
     public function toBeTrue(): Expectation
     {
@@ -83,7 +83,7 @@ final class Expectation
     }
 
     /**
-     * Assert the value is false.
+     * Asserts that the value is false.
      */
     public function toBeFalse(): Expectation
     {
@@ -93,71 +93,71 @@ final class Expectation
     }
 
     /**
-     * Assert the value is greater than expected one.
+     * Asserts that the value is greater than $expected.
      *
      * @param int|float $value
      */
-    public function toBeGreaterThan($value): Expectation
+    public function toBeGreaterThan($expected): Expectation
     {
-        Assert::assertGreaterThan($value, $this->value);
+        Assert::assertGreaterThan($expected, $this->value);
 
         return $this;
     }
 
     /**
-     * Assert that value is greater than or equal to the expected one.
+     * Asserts that the value is greater than or equal to $expected.
      *
      * @param int|float $value
      */
-    public function toBeGreaterThanOrEqual($value): Expectation
+    public function toBeGreaterThanOrEqual($expected): Expectation
     {
-        Assert::assertGreaterThanOrEqual($value, $this->value);
+        Assert::assertGreaterThanOrEqual($expected, $this->value);
 
         return $this;
     }
 
     /**
-     * Assert that value is less than or equal to the expected one.
+     * Asserts that the value is less than or equal to $expected.
      *
      * @param int|float $value
      */
-    public function toBeLessThan($value): Expectation
+    public function toBeLessThan($expected): Expectation
     {
-        Assert::assertLessThan($value, $this->value);
+        Assert::assertLessThan($expected, $this->value);
 
         return $this;
     }
 
     /**
-     * Assert that value is less than the expected one.
+     * Asserts that the value is less than $expected.
      *
      * @param int|float $value
      */
-    public function toBeLessThanOrEqual($value): Expectation
+    public function toBeLessThanOrEqual($expected): Expectation
     {
-        Assert::assertLessThanOrEqual($value, $this->value);
+        Assert::assertLessThanOrEqual($expected, $this->value);
 
         return $this;
     }
 
     /**
-     * Assert that needles is an element of value.
+     * Asserts that $needle is an element of the value.
      *
      * @param mixed $value
      */
-    public function toContain($value): Expectation
+    public function toContain($needle): Expectation
     {
         if (is_string($this->value)) {
-            Assert::assertStringContainsString($value, $this->value);
+            Assert::assertStringContainsString($needle, $this->value);
         } else {
-            Assert::assertContains($value, $this->value);
+            Assert::assertContains($needle, $this->value);
         }
 
         return $this;
     }
 
     /**
-     * Assert that $count matches the number of elements of $value.
+     * Asserts that $count matches the number of elements of the value.
      */
     public function toHaveCount(int $count): Expectation
     {
@@ -167,7 +167,7 @@ final class Expectation
     }
 
     /**
-     * Assert that the $value contains the property $name.
+     * Asserts that the value contains the property $name.
      */
     public function toHaveProperty(string $name): Expectation
     {
@@ -181,46 +181,46 @@ final class Expectation
      *
      * @param mixed $value
      */
-    public function toEqual($value): Expectation
+    public function toEqual($expected): Expectation
     {
-        Assert::assertEquals($value, $this->value);
+        Assert::assertEquals($expected, $this->value);
 
         return $this;
     }
 
     /**
      * Asserts that two variables have the same value.
-     * The contents of $expected and $actual are canonicalized before
-     * they are compared. For instance, when the two variables $value and
-     * $this->value are arrays, then these arrays are sorted before they are
-     * compared. When $value and $this->value are objects,
-     * each object is converted to an array containing all private,
-     * protected and public attributes.
+     * The contents of $expected and $this->value are canonicalized
+     * before they are compared. For instance, when the two variables
+     * $expected and $this->value are arrays, then these arrays are
+     * sorted before they are compared. When $expected and $this->value
+     * are objects, each object is converted to an array containing all
+     * private, protected and public attributes.
      *
      * @param mixed $value
      */
-    public function toEqualCanonicalizing($value): Expectation
+    public function toEqualCanonicalizing($expected): Expectation
     {
-        Assert::assertEqualsCanonicalizing($value, $this->value);
+        Assert::assertEqualsCanonicalizing($expected, $this->value);
 
         return $this;
     }
 
     /**
-     * Assert that the absolute difference between $value and $this->value
-     * is greater than $delta.
+     * Asserts that the absolute difference between the value and $expected
+     * is lower than $delta.
      *
      * @param mixed $value
      */
-    public function toEqualWithDelta($value, float $delta): Expectation
+    public function toEqualWithDelta($expected, float $delta): Expectation
     {
-        Assert::assertEqualsWithDelta($value, $this->value, $delta);
+        Assert::assertEqualsWithDelta($expected, $this->value, $delta);
 
         return $this;
     }
 
     /**
-     * Assert that the value infinite.
+     * Asserts that the value is infinite.
      */
     public function toBeInfinite(): Expectation
     {
@@ -230,7 +230,7 @@ final class Expectation
     }
 
     /**
-     * Assert that the value is an instance of $value.
+     * Asserts that the value is an instance of $class.
      *
      * @param string $class
      */
@@ -243,7 +243,7 @@ final class Expectation
     }
 
     /**
-     * Assert that the value is an array.
+     * Asserts that the value is an array.
      */
     public function toBeArray(): Expectation
     {
@@ -253,7 +253,7 @@ final class Expectation
     }
 
     /**
-     * Assert that the value is of type bool.
+     * Asserts that the value is of type bool.
      */
     public function toBeBool(): Expectation
     {
@@ -263,7 +263,7 @@ final class Expectation
     }
 
     /**
-     * Assert that the value is of type callable.
+     * Asserts that the value is of type callable.
      */
     public function toBeCallable(): Expectation
     {
@@ -273,7 +273,7 @@ final class Expectation
     }
 
     /**
-     * Assert that the value is type of float.
+     * Asserts that the value is of type float.
      */
     public function toBeFloat(): Expectation
     {
@@ -283,7 +283,7 @@ final class Expectation
     }
 
     /**
-     * Assert that the value is type of int.
+     * Asserts that the value is of type int.
      */
     public function toBeInt(): Expectation
     {
@@ -293,7 +293,7 @@ final class Expectation
     }
 
     /**
-     * Assert that the value is type of iterable.
+     * Asserts that the value is of type iterable.
      */
     public function toBeIterable(): Expectation
     {
@@ -303,7 +303,7 @@ final class Expectation
     }
 
     /**
-     * Assert that the value is type of numeric.
+     * Asserts that the value is of type numeric.
      */
     public function toBeNumeric(): Expectation
     {
@@ -313,7 +313,7 @@ final class Expectation
     }
 
     /**
-     * Assert that the value is type of object.
+     * Asserts that the value is of type object.
      */
     public function toBeObject(): Expectation
     {
@@ -323,7 +323,7 @@ final class Expectation
     }
 
     /**
-     * Assert that the value is type of resource.
+     * Asserts that the value is of type resource.
      */
     public function toBeResource(): Expectation
     {
@@ -333,7 +333,7 @@ final class Expectation
     }
 
     /**
-     * Assert that the value is type of scalar.
+     * Asserts that the value is of type scalar.
      */
     public function toBeScalar(): Expectation
     {
@@ -343,7 +343,7 @@ final class Expectation
     }
 
     /**
-     * Assert that the value is type of string.
+     * Asserts that the value is of type string.
      */
     public function toBeString(): Expectation
     {
@@ -353,7 +353,7 @@ final class Expectation
     }
 
     /**
-     * Assert that the value is NAN.
+     * Asserts that the value is NAN.
      */
     public function toBeNan(): Expectation
     {
@@ -363,7 +363,7 @@ final class Expectation
     }
 
     /**
-     * Assert that the value is null.
+     * Asserts that the value is null.
      */
     public function toBeNull(): Expectation
     {
@@ -373,7 +373,7 @@ final class Expectation
     }
 
     /**
-     * Assert that the value array has the key.
+     * Asserts that the value array has the provided $key.
      */
     public function toHaveKey(string $key): Expectation
     {
@@ -383,7 +383,7 @@ final class Expectation
     }
 
     /**
-     * Assert that the value is a directory.
+     * Asserts that the value is a directory.
      */
     public function toBeDirectory(): Expectation
     {
@@ -393,7 +393,7 @@ final class Expectation
     }
 
     /**
-     * Assert that the value is a directory and is readable.
+     * Asserts that the value is a directory and is readable.
      */
     public function toBeReadableDirectory(): Expectation
     {
@@ -403,7 +403,7 @@ final class Expectation
     }
 
     /**
-     * Assert that the value is a directory and is writable.
+     * Asserts that the value is a directory and is writable.
      */
     public function toBeWritableDirectory(): Expectation
     {
