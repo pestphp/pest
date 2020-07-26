@@ -53,7 +53,7 @@ final class Expectation
      * value. Used on objects, it asserts that two
      * variables reference the same object.
      *
-     * @param mixed $value
+     * @param mixed $expected
      */
     public function toBe($expected): Expectation
     {
@@ -95,7 +95,7 @@ final class Expectation
     /**
      * Asserts that the value is greater than $expected.
      *
-     * @param int|float $value
+     * @param int|float $expected
      */
     public function toBeGreaterThan($expected): Expectation
     {
@@ -107,7 +107,7 @@ final class Expectation
     /**
      * Asserts that the value is greater than or equal to $expected.
      *
-     * @param int|float $value
+     * @param int|float $expected
      */
     public function toBeGreaterThanOrEqual($expected): Expectation
     {
@@ -119,7 +119,7 @@ final class Expectation
     /**
      * Asserts that the value is less than or equal to $expected.
      *
-     * @param int|float $value
+     * @param int|float $expected
      */
     public function toBeLessThan($expected): Expectation
     {
@@ -131,7 +131,7 @@ final class Expectation
     /**
      * Asserts that the value is less than $expected.
      *
-     * @param int|float $value
+     * @param int|float $expected
      */
     public function toBeLessThanOrEqual($expected): Expectation
     {
@@ -143,7 +143,7 @@ final class Expectation
     /**
      * Asserts that $needle is an element of the value.
      *
-     * @param mixed $value
+     * @param mixed $needle
      */
     public function toContain($needle): Expectation
     {
@@ -179,7 +179,7 @@ final class Expectation
     /**
      * Asserts that two variables have the same value.
      *
-     * @param mixed $value
+     * @param mixed $expected
      */
     public function toEqual($expected): Expectation
     {
@@ -190,14 +190,14 @@ final class Expectation
 
     /**
      * Asserts that two variables have the same value.
-     * The contents of $expected and $this->value are canonicalized
-     * before they are compared. For instance, when the two variables
-     * $expected and $this->value are arrays, then these arrays are
-     * sorted before they are compared. When $expected and $this->value
+     * The contents of $expected and the $this->value are
+     * canonicalized before they are compared. For instance, when the two
+     * variables $expected and $this->value are arrays, then these arrays
+     * are sorted before they are compared. When $expected and $this->value
      * are objects, each object is converted to an array containing all
      * private, protected and public attributes.
      *
-     * @param mixed $value
+     * @param mixed $expected
      */
     public function toEqualCanonicalizing($expected): Expectation
     {
@@ -210,7 +210,7 @@ final class Expectation
      * Asserts that the absolute difference between the value and $expected
      * is lower than $delta.
      *
-     * @param mixed $value
+     * @param mixed $expected
      */
     public function toEqualWithDelta($expected, float $delta): Expectation
     {
