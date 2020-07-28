@@ -21,3 +21,12 @@ parameters:
         - "# with null as default value#"
         - "#has parameter \\$closure with default value.#"
         - "#has parameter \\$description with default value.#"
+        -
+            message: '#Call to an undefined method PHPUnit\\Framework\\Test::getName\(\)#'
+            path: src/TeamCity.php
+        -
+            message: '#invalid typehint type Pest\\Concerns\\TestCase#'
+            path: src/TeamCity.php
+        -
+            message: '#is not subtype of native type PHPUnit\\Framework\\Test#'
+            path: src/TeamCity.php

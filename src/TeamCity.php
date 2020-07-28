@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pest;
 
 use function getmypid;
@@ -13,24 +15,32 @@ use PHPUnit\TextUI\DefaultResultPrinter;
 use function round;
 use function str_replace;
 
-class TeamCity extends DefaultResultPrinter
+final class TeamCity extends DefaultResultPrinter
 {
-    private const PROTOCOL = 'pest_qn://';
+    private const PROTOCOL      = 'pest_qn://';
+    private const NAME          = 'name';
+    private const LOCATION_HINT = 'locationHint';
+    private const DURATION      = 'duration';
 
+    /** @var int */
     private $flowId;
+
+    /** @var bool */
     private $isSummaryTestCountPrinted = false;
+
+    /** @var \PHPUnit\Util\Log\TeamCity */
     private $phpunitTeamCity;
 
-    public function __construct($out = null, bool $verbose = false, string $colors = self::COLOR_DEFAULT, bool $debug = false, $numberOfColumns = 80, bool $reverse = false)
+    public function __construct($out, bool $verbose, string $colors)
     {
-        parent::__construct($out, $verbose, $colors, $debug, $numberOfColumns, $reverse);
+        parent::__construct($out, $verbose, $colors, false, 80, false);
         $this->phpunitTeamCity = new \PHPUnit\Util\Log\TeamCity(
             $out,
             $verbose,
             $colors,
-            $debug,
-            $numberOfColumns,
-            $reverse
+            false,
+            80,
+            false
         );
     }
 
@@ -40,6 +50,7 @@ class TeamCity extends DefaultResultPrinter
         $this->printFooter($result);
     }
 
+    /** @phpstan-ignore-next-line */
     public function startTestSuite(TestSuite $suite): void
     {
         $this->flowId = getmypid();
@@ -56,8 +67,8 @@ class TeamCity extends DefaultResultPrinter
 
         if (file_exists($suiteName)) {
             $this->printEvent('testSuiteStarted', [
-                'name'         => $suiteName,
-                'locationHint' => self::PROTOCOL . $suiteName,
+                self::NAME          => $suiteName,
+                self::LOCATION_HINT => self::PROTOCOL . $suiteName,
             ]);
 
             return;
@@ -66,26 +77,27 @@ class TeamCity extends DefaultResultPrinter
         $fileName = $suite->getName()::__getFileName();
 
         $this->printEvent('testSuiteStarted', [
-            'name'         => substr($suiteName, 2),
-            'locationHint' => self::PROTOCOL . $fileName,
+            self::NAME          => substr($suiteName, 2),
+            self::LOCATION_HINT => self::PROTOCOL . $fileName,
         ]);
     }
 
+    /** @phpstan-ignore-next-line */
     public function endTestSuite(TestSuite $suite): void
     {
         $suiteName = $suite->getName();
 
         if (file_exists($suiteName)) {
             $this->printEvent('testSuiteFinished', [
-                'name'         => $suiteName,
-                'locationHint' => self::PROTOCOL . $suiteName,
+                self::NAME          => $suiteName,
+                self::LOCATION_HINT => self::PROTOCOL . $suiteName,
             ]);
 
             return;
         }
 
         $this->printEvent('testSuiteFinished', [
-            'name'         => substr($suiteName, 2),
+            self::NAME         => substr($suiteName, 2),
         ]);
     }
 
@@ -101,8 +113,9 @@ class TeamCity extends DefaultResultPrinter
         }
 
         $this->printEvent('testStarted', [
-            'name'         => $test->getName(),
-            'locationHint' => self::PROTOCOL . $test->toString(),
+            self::NAME          => $test->getName(),
+            /* @phpstan-ignore-next-line */
+            self::LOCATION_HINT => self::PROTOCOL . $test->toString(),
         ]);
     }
 
@@ -118,8 +131,8 @@ class TeamCity extends DefaultResultPrinter
         }
 
         $this->printEvent('testFinished', [
-            'name'     => $test->getName(),
-            'duration' => self::toMilliseconds($time),
+            self::NAME     => $test->getName(),
+            self::DURATION => self::toMilliseconds($time),
         ]);
     }
 
@@ -128,21 +141,38 @@ class TeamCity extends DefaultResultPrinter
      */
     public function addError(Test $test, \Throwable $t, float $time): void
     {
+        if (!TeamCity::isPestTest($test)) {
+            $this->phpunitTeamCity->addError($test, $t, $time);
+
+            return;
+        }
+
         $this->printEvent('testFailed', [
-            'name'     => $test->getName(),
-            'message'  => $t->getMessage(),
-            'details'  => $t->getTraceAsString(),
-            'duration' => self::toMilliseconds($time),
+            self::NAME     => $test->getName(),
+            'message'      => $t->getMessage(),
+            'details'      => $t->getTraceAsString(),
+            self::DURATION => self::toMilliseconds($time),
         ]);
     }
 
+    /**
+     * @phpstan-ignore-next-line
+     *
+     * @param Test|TestCase $test
+     */
     public function addWarning(Test $test, Warning $e, float $time): void
     {
+        if (!TeamCity::isPestTest($test)) {
+            $this->phpunitTeamCity->addWarning($test, $e, $time);
+
+            return;
+        }
+
         $this->printEvent('testFailed', [
-            'name'     => $test->getName(),
-            'message'  => $e->getMessage(),
-            'details'  => $e->getTraceAsString(),
-            'duration' => self::toMilliseconds($time),
+            self::NAME     => $test->getName(),
+            'message'      => $e->getMessage(),
+            'details'      => $e->getTraceAsString(),
+            self::DURATION => self::toMilliseconds($time),
         ]);
     }
 
@@ -155,11 +185,14 @@ class TeamCity extends DefaultResultPrinter
     {
     }
 
+    /**
+     * @param array<string, string|int> $params
+     */
     private function printEvent(string $eventName, array $params = []): void
     {
         $this->write("\n##teamcity[{$eventName}");
 
-        if ($this->flowId) {
+        if ($this->flowId !== 0) {
             $params['flowId'] = $this->flowId;
         }
 
@@ -185,8 +218,8 @@ class TeamCity extends DefaultResultPrinter
         return (int) round($time * 1000);
     }
 
-    private static function isPestTest($test): bool
+    private static function isPestTest(Test $test): bool
     {
-        return in_array(TestCase::class, class_uses($test));
+        return in_array(TestCase::class, class_uses($test), true);
     }
 }
