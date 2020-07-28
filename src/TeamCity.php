@@ -17,10 +17,13 @@ use function str_replace;
 
 final class TeamCity extends DefaultResultPrinter
 {
-    private const PROTOCOL      = 'pest_qn://';
-    private const NAME          = 'name';
-    private const LOCATION_HINT = 'locationHint';
-    private const DURATION      = 'duration';
+    private const PROTOCOL            = 'pest_qn://';
+    private const NAME                = 'name';
+    private const LOCATION_HINT       = 'locationHint';
+    private const DURATION            = 'duration';
+    private const TEST_SUITE_STARTED  = 'testSuiteStarted';
+    private const TEST_SUITE_FINISHED = 'testSuiteFinished';
+    private const TEST_FAILED         = 'testFailed';
 
     /** @var int */
     private $flowId;
@@ -31,11 +34,11 @@ final class TeamCity extends DefaultResultPrinter
     /** @var \PHPUnit\Util\Log\TeamCity */
     private $phpunitTeamCity;
 
-    public function __construct($out, bool $verbose, string $colors)
+    public function __construct(bool $verbose, string $colors)
     {
-        parent::__construct($out, $verbose, $colors, false, 80, false);
+        parent::__construct(null, $verbose, $colors, false, 80, false);
         $this->phpunitTeamCity = new \PHPUnit\Util\Log\TeamCity(
-            $out,
+            null,
             $verbose,
             $colors,
             false,
@@ -66,7 +69,8 @@ final class TeamCity extends DefaultResultPrinter
         $suiteName = $suite->getName();
 
         if (file_exists($suiteName)) {
-            $this->printEvent('testSuiteStarted', [
+            $this->printEvent(
+                self::TEST_SUITE_STARTED, [
                 self::NAME          => $suiteName,
                 self::LOCATION_HINT => self::PROTOCOL . $suiteName,
             ]);
@@ -76,7 +80,8 @@ final class TeamCity extends DefaultResultPrinter
 
         $fileName = $suite->getName()::__getFileName();
 
-        $this->printEvent('testSuiteStarted', [
+        $this->printEvent(
+            self::TEST_SUITE_STARTED, [
             self::NAME          => substr($suiteName, 2),
             self::LOCATION_HINT => self::PROTOCOL . $fileName,
         ]);
@@ -88,7 +93,8 @@ final class TeamCity extends DefaultResultPrinter
         $suiteName = $suite->getName();
 
         if (file_exists($suiteName)) {
-            $this->printEvent('testSuiteFinished', [
+            $this->printEvent(
+                self::TEST_SUITE_FINISHED, [
                 self::NAME          => $suiteName,
                 self::LOCATION_HINT => self::PROTOCOL . $suiteName,
             ]);
@@ -96,7 +102,8 @@ final class TeamCity extends DefaultResultPrinter
             return;
         }
 
-        $this->printEvent('testSuiteFinished', [
+        $this->printEvent(
+            self::TEST_SUITE_FINISHED, [
             self::NAME         => substr($suiteName, 2),
         ]);
     }
@@ -147,7 +154,8 @@ final class TeamCity extends DefaultResultPrinter
             return;
         }
 
-        $this->printEvent('testFailed', [
+        $this->printEvent(
+            self::TEST_FAILED, [
             self::NAME     => $test->getName(),
             'message'      => $t->getMessage(),
             'details'      => $t->getTraceAsString(),
@@ -168,7 +176,8 @@ final class TeamCity extends DefaultResultPrinter
             return;
         }
 
-        $this->printEvent('testFailed', [
+        $this->printEvent(
+            self::TEST_FAILED, [
             self::NAME     => $test->getName(),
             'message'      => $e->getMessage(),
             'details'      => $e->getTraceAsString(),
