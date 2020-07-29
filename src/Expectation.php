@@ -159,7 +159,7 @@ final class Expectation
     /**
      * Asserts that all of the provided $needles are elements of the value.
      *
-     * @param array{mixed} $needles
+     * @param array<mixed> $needles
      */
     public function toContainAll(array $needles): Expectation
     {
@@ -405,7 +405,7 @@ final class Expectation
     /**
      * Asserts that the value array has all of the provided $keys.
      *
-     * @param array{mixed} $keys
+     * @param array<mixed> $keys
      */
     public function toHaveKeys(array $keys): Expectation
     {
