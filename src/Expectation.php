@@ -157,6 +157,26 @@ final class Expectation
     }
 
     /**
+     * Asserts that all of the provided $needles are elements of the value.
+     *
+     * @param array $needles
+     */
+    public function toContainAll(array $needles): Expectation
+    {
+        if (is_string($this->value)) {
+            foreach ($needles as $needle) {
+                Assert::assertStringContainsString($needle, $this->value);
+            }
+        } else {
+            foreach ($needles as $needle) {
+                Assert::assertContains($needle, $this->value);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * Asserts that $count matches the number of elements of the value.
      */
     public function toHaveCount(int $count): Expectation
