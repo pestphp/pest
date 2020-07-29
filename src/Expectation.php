@@ -383,6 +383,18 @@ final class Expectation
     }
 
     /**
+     * Asserts that the value array has all of the provided $keys.
+     */
+    public function toHaveKeys(array $keys): Expectation
+    {
+        foreach ($keys as $key) {
+            Assert::assertArrayHasKey($key, $this->value);
+        }
+
+        return $this;
+    }
+
+    /**
      * Asserts that the value is a directory.
      */
     public function toBeDirectory(): Expectation
