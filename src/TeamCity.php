@@ -68,7 +68,7 @@ final class TeamCity extends DefaultResultPrinter
 
         $suiteName = $suite->getName();
 
-        if (file_exists($suiteName)) {
+        if (file_exists($suiteName) || !method_exists($suiteName, '__getFileName')) {
             $this->printEvent(
                 self::TEST_SUITE_STARTED, [
                 self::NAME          => $suiteName,
@@ -78,7 +78,7 @@ final class TeamCity extends DefaultResultPrinter
             return;
         }
 
-        $fileName = $suite->getName()::__getFileName();
+        $fileName = $suiteName::__getFileName();
 
         $this->printEvent(
             self::TEST_SUITE_STARTED, [
@@ -92,7 +92,7 @@ final class TeamCity extends DefaultResultPrinter
     {
         $suiteName = $suite->getName();
 
-        if (file_exists($suiteName)) {
+        if (file_exists($suiteName) || !method_exists($suiteName, '__getFileName')) {
             $this->printEvent(
                 self::TEST_SUITE_FINISHED, [
                 self::NAME          => $suiteName,
