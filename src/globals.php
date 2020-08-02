@@ -44,8 +44,8 @@ function dataset(string $name, $dataset): void
 }
 
 /**
- * The uses function adds the binds the
- * given arguments to test closures.
+ * The uses function binds the given
+ * arguments to test closures.
  */
 function uses(string ...$classAndTraits): UsesCall
 {
