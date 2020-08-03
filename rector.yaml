@@ -3,7 +3,6 @@ parameters:
     sets:
         - 'action-injection-to-constructor-injection'
         - 'array-str-functions-to-static-call'
-        - 'celebrity'
         - 'phpstan'
         - 'phpunit-code-quality'
         - 'solid'
