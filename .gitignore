@@ -9,3 +9,6 @@ coverage.xml
 *.swp
 *.swo
 .vscode/
+phpunit.xml
+.php_cs
+phpstan.neon
