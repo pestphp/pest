@@ -22,7 +22,7 @@
         "pestphp/pest-plugin": "^0.2",
         "pestphp/pest-plugin-coverage": "^0.2",
         "pestphp/pest-plugin-init": "^0.2",
-        "phpunit/phpunit": "^9.1.4",
+        "phpunit/phpunit": "~9.2.0",
         "sebastian/environment": "^5.1"
     },
     "autoload": {
