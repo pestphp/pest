@@ -6,8 +6,7 @@ namespace Pest\Actions;
 
 use Pest\Exceptions\AttributeNotSupportedYet;
 use Pest\Exceptions\FileOrFolderNotFound;
-use PHPUnit\TextUI\Configuration\Configuration;
-use PHPUnit\TextUI\Configuration\Registry;
+use PHPUnit\TextUI\XmlConfiguration\Loader;
 
 /**
  * @internal
@@ -30,9 +29,7 @@ final class ValidatesConfiguration
             throw new FileOrFolderNotFound('phpunit.xml');
         }
 
-        $configuration = Registry::getInstance()
-            ->get($arguments[self::CONFIGURATION_KEY])
-            ->phpunit();
+        $configuration = (new Loader())->load($arguments[self::CONFIGURATION_KEY])->phpunit();
 
         if ($configuration->processIsolation()) {
             throw new AttributeNotSupportedYet('processIsolation', 'true');

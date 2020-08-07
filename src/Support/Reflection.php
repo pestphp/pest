@@ -9,6 +9,8 @@ use Pest\Exceptions\ShouldNotHappen;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionFunction;
+use ReflectionNamedType;
+use ReflectionParameter;
 use ReflectionProperty;
 
 /**
@@ -116,5 +118,33 @@ final class Reflection
 
         $reflectionProperty->setAccessible(true);
         $reflectionProperty->setValue($object, $value);
+    }
+
+    /**
+     * Get the class name of the given parameter's type, if possible.
+     *
+     * @see https://github.com/laravel/framework/blob/v6.18.25/src/Illuminate/Support/Reflector.php
+     */
+    public static function getParameterClassName(ReflectionParameter $parameter): ?string
+    {
+        $type = $parameter->getType();
+
+        if (!$type instanceof ReflectionNamedType || $type->isBuiltin()) {
+            return null;
+        }
+
+        $name = $type->getName();
+
+        if (($class = $parameter->getDeclaringClass()) instanceof ReflectionClass) {
+            if ($name === 'self') {
+                return $class->getName();
+            }
+
+            if ($name === 'parent' && ($parent = $class->getParentClass()) instanceof ReflectionClass) {
+                return $parent->getName();
+            }
+        }
+
+        return $name;
     }
 }

@@ -9,6 +9,7 @@ use Pest\Factories\TestCaseFactory;
 use Pest\Support\Backtrace;
 use Pest\Support\NullClosure;
 use Pest\TestSuite;
+use PHPUnit\Framework\ExecutionOrderDependency;
 use SebastianBergmann\Exporter\Exporter;
 
 /**
@@ -91,6 +92,12 @@ final class TestCall
      */
     public function depends(string ...$tests): TestCall
     {
+        $className = $this->testCaseFactory->getClassName();
+
+        $tests = array_map(function (string $test) use ($className): ExecutionOrderDependency {
+            return ExecutionOrderDependency::createFromDependsAnnotation($className, $test);
+        }, $tests);
+
         $this->testCaseFactory
             ->factoryProxies
             ->add(Backtrace::file(), Backtrace::line(), 'setDependencies', [$tests]);
