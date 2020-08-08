@@ -75,14 +75,15 @@ final class Container
             if ($constructor !== null) {
                 $params = array_map(
                     function (ReflectionParameter $param) use ($id) {
-                        $candidate = null;
+                        $candidate = Reflection::getParameterClassName($param);
 
-                        if ($param->getType() !== null && $param->getType()->isBuiltin()) {
-                            $candidate = $param->getName();
-                        } elseif ($param->getClass() !== null) {
-                            $candidate = $param->getClass()->getName();
-                        } else {
-                            throw ShouldNotHappen::fromMessage(sprintf('The type of `$%s` in `%s` cannot be determined.', $id, $param->getName()));
+                        if ($candidate === null) {
+                            $type = $param->getType();
+                            if ($type !== null && $type->isBuiltin()) {
+                                $candidate = $param->getName();
+                            } else {
+                                throw ShouldNotHappen::fromMessage(sprintf('The type of `$%s` in `%s` cannot be determined.', $id, $param->getName()));
+                            }
                         }
 
                         return $this->get($candidate);

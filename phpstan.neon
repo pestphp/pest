@@ -21,3 +21,4 @@ parameters:
         - "# with null as default value#"
         - "#has parameter \\$closure with default value.#"
         - "#has parameter \\$description with default value.#"
+        - "#Method Pest\\\\Support\\\\Reflection::getParameterClassName\\(\\) has a nullable return type declaration.#"

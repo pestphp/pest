@@ -219,14 +219,6 @@
   ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #3
   ✓ it creates unique test case names - count
 
-   PASS  Tests\Features\Depends
-  ✓ first
-  ✓ second
-  ✓ depends
-  ✓ depends with ...params
-  ✓ depends with defined arguments
-  ✓ depends run test only once
-
    PASS  Tests\Features\Exceptions
   ✓ it gives access the the underlying expectException
   ✓ it catch exceptions
@@ -336,6 +328,14 @@
 
    WARN  Tests\Visual\Success
   - visual snapshot of test suite on success
+
+   PASS  Tests\Features\Depends
+  ✓ first
+  ✓ second
+  ✓ depends
+  ✓ depends with ...params
+  ✓ depends with defined arguments
+  ✓ depends run test only once
 
   Tests:  6 skipped, 198 passed
   Time:   5.46s

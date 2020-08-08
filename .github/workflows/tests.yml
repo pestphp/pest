@@ -6,43 +6,39 @@ jobs:
   ci:
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: true
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        php: [7.3, 7.4]
+        php: ['7.3', '7.4', '8.0']
         dependency-version: [prefer-lowest, prefer-stable]
 
-    name: Tests P${{ matrix.php }} - ${{ matrix.os }} - ${{ matrix.dependency-version }}
+    name: PHP ${{ matrix.php }} - ${{ matrix.os }} - ${{ matrix.dependency-version }}
 
     steps:
-
     - name: Checkout
       uses: actions/checkout@v2
-
-    - name: Cache dependencies
-      uses: actions/cache@v1
-      with:
-        path: ~/.composer/cache/files
-        key: dependencies-php-${{ matrix.php }}-composer-${{ hashFiles('composer.json') }}
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
         php-version: ${{ matrix.php }}
-        extensions: dom, mbstring, zip
+        tools: composer:v2
         coverage: none
 
-    - name: Install Composer dependencies
-      run: composer update --${{ matrix.dependency-version }} --no-interaction --prefer-dist
+    - name: Setup Problem Matches
+      run: |
+        echo "::add-matcher::${{ runner.tool_cache }}/php.json"
+        echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+
+    - name: Install PHP 7 dependencies
+      run: composer update --${{ matrix.dependency-version }} --no-interaction --no-progress
+      if: "matrix.php < 8"
+
+    - name: Install PHP 8 dependencies
+      run: composer update --${{ matrix.dependency-version }} --ignore-platform-req=php --no-interaction --no-progress
+      if: "matrix.php >= 8"
 
     - name: Unit Tests
       run: php bin/pest --colors=always --exclude-group=integration
 
     - name: Integration Tests
       run: php bin/pest --colors=always --group=integration
-
-    - name: Setup problem matchers for PHP
-      run: echo "::add-matcher::${{ runner.tool_cache }}/php.json"
-
-    - name: Setup problem matchers for Pest
-      run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
