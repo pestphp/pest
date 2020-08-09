@@ -16,9 +16,11 @@ final class Expectation
     /**
      * The expectation value.
      *
+     * @readonly
+     *
      * @var mixed
      */
-    private $value;
+    public $value;
 
     /**
      * Creates a new expectation.
