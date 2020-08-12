@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Support;
 
 use ReflectionClass;
+use Throwable;
 
 /**
  * @internal
@@ -51,12 +52,12 @@ final class HigherOrderTapProxy
         try {
             // @phpstan-ignore-next-line
             return $this->target->{$property};
-        } catch (\Throwable $throwable) {
+        } catch (Throwable $throwable) {
             Reflection::setPropertyValue($throwable, 'file', Backtrace::file());
             Reflection::setPropertyValue($throwable, 'line', Backtrace::line());
 
             if (Str::startsWith($message = $throwable->getMessage(), self::UNDEFINED_PROPERTY)) {
-                /** @var \ReflectionClass $reflection */
+                /** @var ReflectionClass $reflection */
                 $reflection = (new ReflectionClass($this->target))->getParentClass();
                 Reflection::setPropertyValue($throwable, 'message', sprintf('Undefined property %s::$%s', $reflection->getName(), $property));
             }

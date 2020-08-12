@@ -9,6 +9,7 @@ use Pest\Expectation;
 use Pest\Support\ExceptionTrace;
 use Pest\TestSuite;
 use PHPUnit\Util\Test;
+use Throwable;
 
 /**
  * To avoid inheritance conflicts, all the fields related
@@ -143,7 +144,7 @@ trait TestCase
      *
      * @return mixed
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function __test()
     {
@@ -153,7 +154,7 @@ trait TestCase
     /**
      * @return mixed
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     private function __callClosure(Closure $closure, array $arguments)
     {

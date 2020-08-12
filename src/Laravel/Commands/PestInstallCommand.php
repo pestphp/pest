@@ -6,6 +6,7 @@ namespace Pest\Laravel\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
+use Pest\Console\Thanks;
 use Pest\Exceptions\InvalidConsoleArgument;
 use Pest\Support\Str;
 
@@ -61,7 +62,7 @@ final class PestInstallCommand extends Command
         $this->output->success('`tests/Helpers.php` created successfully.');
 
         if (!(bool) $this->option('no-interaction')) {
-            (new \Pest\Console\Thanks($this->output))();
+            (new Thanks($this->output))();
         }
     }
 

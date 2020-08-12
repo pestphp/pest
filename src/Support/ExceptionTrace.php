@@ -20,7 +20,7 @@ final class ExceptionTrace
      *
      * @return mixed
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     public static function ensure(Closure $closure)
     {
