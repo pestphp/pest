@@ -77,7 +77,7 @@ final class HigherOrderMessage
             Reflection::setPropertyValue($throwable, 'line', $this->line);
 
             if ($throwable->getMessage() === self::getUndefinedMethodMessage($target, $this->methodName)) {
-                /** @var \ReflectionClass $reflection */
+                /** @var ReflectionClass $reflection */
                 $reflection = new ReflectionClass($target);
                 /* @phpstan-ignore-next-line */
                 $reflection = $reflection->getParentClass() ?: $reflection;
