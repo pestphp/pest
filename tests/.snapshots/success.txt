@@ -41,6 +41,11 @@
   ✓ failures
   ✓ not failures
 
+   PASS  Tests\Expect\toBeFile
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
    PASS  Tests\Expect\toBeFloat
   ✓ pass
   ✓ failures
@@ -111,6 +116,11 @@
   ✓ failures
   ✓ not failures
 
+   PASS  Tests\Expect\toBeReadableFile
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
    PASS  Tests\Expect\toBeResource
   ✓ pass
   ✓ failures
@@ -132,6 +142,11 @@
   ✓ not failures
 
    PASS  Tests\Expect\toBeWritableDirectory
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeWritableFile
   ✓ pass
   ✓ failures
   ✓ not failures
@@ -337,4 +352,6 @@
   ✓ depends with defined arguments
   ✓ depends run test only once
 
-  Tests:  6 skipped, 198 passed
+  Tests:  6 skipped, 207 passed
+  Time:   5.89s
+
