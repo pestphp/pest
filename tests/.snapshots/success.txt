@@ -353,5 +353,3 @@
   ✓ depends run test only once
 
   Tests:  6 skipped, 207 passed
-  Time:   5.89s
-
