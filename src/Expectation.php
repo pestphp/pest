@@ -415,6 +415,36 @@ final class Expectation
     }
 
     /**
+     * Asserts that the value is a file.
+     */
+    public function toBeFile(): Expectation
+    {
+        Assert::assertFileExists($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is a file and is readable.
+     */
+    public function toBeReadableFile(): Expectation
+    {
+        Assert::assertFileIsReadable($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is a file and is writable.
+     */
+    public function toBeWritableFile(): Expectation
+    {
+        Assert::assertFileIsWritable($this->value);
+
+        return $this;
+    }
+
+    /**
      * Dynamically calls methods on the class without any arguments.
      *
      * @return Expectation
