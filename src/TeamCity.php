@@ -14,6 +14,7 @@ use PHPUnit\Framework\Warning;
 use PHPUnit\TextUI\DefaultResultPrinter;
 use function round;
 use function str_replace;
+use Throwable;
 
 final class TeamCity extends DefaultResultPrinter
 {
@@ -146,7 +147,7 @@ final class TeamCity extends DefaultResultPrinter
     /**
      * @param Test|TestCase $test
      */
-    public function addError(Test $test, \Throwable $t, float $time): void
+    public function addError(Test $test, Throwable $t, float $time): void
     {
         if (!TeamCity::isPestTest($test)) {
             $this->phpunitTeamCity->addError($test, $t, $time);
