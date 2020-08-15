@@ -20,7 +20,7 @@ jobs:
         coverage: none
 
     - name: Install Dependencies
-      run: composer update --no-interaction --prefer-dist --no-progress
+      run: composer update --no-interaction --no-progress
 
     - name: Run Rector
       run: vendor/bin/rector process src --dry-run
@@ -48,7 +48,7 @@ jobs:
         coverage: none
 
     - name: Install Dependencies
-      run: composer update --prefer-stable --no-interaction --prefer-dist --no-progress
+      run: composer update --prefer-stable --no-interaction --no-progress
 
     - name: Run PHPStan
       run: vendor/bin/phpstan analyse --no-progress

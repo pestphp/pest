@@ -10,6 +10,7 @@ use Pest\Repositories\AfterEachRepository;
 use Pest\Repositories\BeforeAllRepository;
 use Pest\Repositories\BeforeEachRepository;
 use Pest\Repositories\TestRepository;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
@@ -19,7 +20,7 @@ final class TestSuite
     /**
      * Holds the current test case.
      *
-     * @var \PHPUnit\Framework\TestCase|null
+     * @var TestCase|null
      */
     public $test;
 

@@ -23,7 +23,7 @@ test('visual snapshot of test suite on success', function () {
         array_pop($output);
         array_pop($output);
 
-        expect(file_get_contents($snapshot))->toContain(implode("\n", $output));
+        expect(implode("\n", $output))->toContain(file_get_contents($snapshot));
     }
 })->skip(!getenv('REBUILD_SNAPSHOTS') && getenv('EXCLUDE'))
     ->skip(PHP_OS_FAMILY === 'Windows');

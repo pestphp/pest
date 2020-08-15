@@ -16,9 +16,11 @@ final class Expectation
     /**
      * The expectation value.
      *
+     * @readonly
+     *
      * @var mixed
      */
-    private $value;
+    public $value;
 
     /**
      * Creates a new expectation.
@@ -408,6 +410,36 @@ final class Expectation
     public function toBeWritableDirectory(): Expectation
     {
         Assert::assertDirectoryIsWritable($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is a file.
+     */
+    public function toBeFile(): Expectation
+    {
+        Assert::assertFileExists($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is a file and is readable.
+     */
+    public function toBeReadableFile(): Expectation
+    {
+        Assert::assertFileIsReadable($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is a file and is writable.
+     */
+    public function toBeWritableFile(): Expectation
+    {
+        Assert::assertFileIsWritable($this->value);
 
         return $this;
     }

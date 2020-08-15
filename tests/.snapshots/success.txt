@@ -41,6 +41,11 @@
   ✓ failures
   ✓ not failures
 
+   PASS  Tests\Expect\toBeFile
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
    PASS  Tests\Expect\toBeFloat
   ✓ pass
   ✓ failures
@@ -111,6 +116,11 @@
   ✓ failures
   ✓ not failures
 
+   PASS  Tests\Expect\toBeReadableFile
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
    PASS  Tests\Expect\toBeResource
   ✓ pass
   ✓ failures
@@ -132,6 +142,11 @@
   ✓ not failures
 
    PASS  Tests\Expect\toBeWritableDirectory
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toBeWritableFile
   ✓ pass
   ✓ failures
   ✓ not failures
@@ -218,14 +233,6 @@
   ✓ it creates unique test case names with ('Name 2', Pest\Plugin Object (), true)
   ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #3
   ✓ it creates unique test case names - count
-
-   PASS  Tests\Features\Depends
-  ✓ first
-  ✓ second
-  ✓ depends
-  ✓ depends with ...params
-  ✓ depends with defined arguments
-  ✓ depends run test only once
 
    PASS  Tests\Features\Exceptions
   ✓ it gives access the the underlying expectException
@@ -337,5 +344,12 @@
    WARN  Tests\Visual\Success
   - visual snapshot of test suite on success
 
-  Tests:  6 skipped, 198 passed
-  Time:   5.46s
+   PASS  Tests\Features\Depends
+  ✓ first
+  ✓ second
+  ✓ depends
+  ✓ depends with ...params
+  ✓ depends with defined arguments
+  ✓ depends run test only once
+
+  Tests:  6 skipped, 207 passed

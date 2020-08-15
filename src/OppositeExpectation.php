@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest;
 
 use PHPUnit\Framework\ExpectationFailedException;
+use SebastianBergmann\Exporter\Exporter;
 
 /**
  * @internal
@@ -40,7 +41,8 @@ final class OppositeExpectation
             return $this->original;
         }
 
-        throw new ExpectationFailedException(sprintf('@todo'));
+        // @phpstan-ignore-next-line
+        $this->throwExpectationFailedExpection($name, $arguments);
     }
 
     /**
@@ -55,6 +57,24 @@ final class OppositeExpectation
             return $this->original;
         }
 
-        throw new ExpectationFailedException(sprintf('@todo'));
+        // @phpstan-ignore-next-line
+        $this->throwExpectationFailedExpection($name);
+    }
+
+    /**
+     * Creates a new expectation failed exception
+     * with a nice readable message.
+     *
+     * @param array<int, mixed> $arguments
+     */
+    private function throwExpectationFailedExpection(string $name, array $arguments = []): void
+    {
+        $exporter = new Exporter();
+
+        $toString = function ($argument) use ($exporter): string {
+            return $exporter->shortenedExport($argument);
+        };
+
+        throw new ExpectationFailedException(sprintf('Expecting %s not %s %s.', $toString($this->original->value), strtolower((string) preg_replace('/(?<!\ )[A-Z]/', ' $0', $name)), implode(' ', array_map(function ($argument) use ($toString): string { return $toString($argument); }, $arguments))));
     }
 }

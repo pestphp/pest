@@ -11,6 +11,7 @@ use Pest\Exceptions\TestCaseClassOrTraitNotFound;
 use Pest\Factories\TestCaseFactory;
 use Pest\Support\Str;
 use Pest\TestSuite;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
@@ -52,7 +53,7 @@ final class TestRepository
                 if ((!is_dir($path) && $filename === $path) || (is_dir($path) && $startsWith($filename, $path))) {
                     foreach ($classOrTraits as $class) {
                         if (class_exists($class)) {
-                            if ($testCase->class !== \PHPUnit\Framework\TestCase::class) {
+                            if ($testCase->class !== TestCase::class) {
                                 throw new TestCaseAlreadyInUse($testCase->class, $class, $filename);
                             }
                             $testCase->class = $class;
