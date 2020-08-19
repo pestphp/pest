@@ -6,6 +6,7 @@ use Pest\Actions\ValidatesEnvironment;
 use Pest\Console\Command;
 use Pest\Support\Container;
 use Pest\TestSuite;
+use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -27,7 +28,9 @@ use Symfony\Component\Console\Output\OutputInterface;
     $rootPath = getcwd();
 
     $testSuite = TestSuite::getInstance($rootPath);
-    $output = new ConsoleOutput(ConsoleOutput::VERBOSITY_NORMAL, true);
+
+    $isDecorated = (new ArgvInput())->getParameterOption('--colors', 'always') !== 'never';
+    $output = new ConsoleOutput(ConsoleOutput::VERBOSITY_NORMAL, $isDecorated);
 
     $container = Container::getInstance();
     $container->add(TestSuite::class, $testSuite);
