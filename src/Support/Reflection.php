@@ -6,6 +6,7 @@ namespace Pest\Support;
 
 use Closure;
 use Pest\Exceptions\ShouldNotHappen;
+use Pest\TestSuite;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionFunction;
@@ -38,6 +39,12 @@ final class Reflection
         } catch (ReflectionException $exception) {
             if (method_exists($object, '__call')) {
                 return $object->__call($method, $args);
+            }
+
+            if (is_callable($method)) {
+                return Closure::fromCallable($method)->bindTo(
+                    TestSuite::getInstance()->test
+                )(...$args);
             }
 
             throw $exception;

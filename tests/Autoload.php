@@ -22,3 +22,8 @@ trait SecondPluginTrait
 
 Pest\Plugin::uses(PluginTrait::class);
 Pest\Plugin::uses(SecondPluginTrait::class);
+
+function _assertThat()
+{
+    expect(true)->toBeTrue();
+}
