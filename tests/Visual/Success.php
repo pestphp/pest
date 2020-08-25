@@ -17,7 +17,10 @@ test('visual snapshot of test suite on success', function () {
     };
 
     if (getenv('REBUILD_SNAPSHOTS')) {
-        file_put_contents($snapshot, $output());
+        // Strip time from end of snapshot
+        $outputContent = preg_replace('/Time\: \s+\d+\.\d+s\s+/m', '', $output());
+
+        file_put_contents($snapshot, $outputContent);
     } elseif (!getenv('EXCLUDE')) {
         $output = explode("\n", $output());
         array_pop($output);
