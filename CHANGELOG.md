@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [v0.3.1 (2020-08-29)](https://github.com/pestphp/pest/compare/v0.3.0...v0.3.1)
+### Added
+- Support to PHPUnit 9.3.8 ([#174](https://github.com/pestphp/pest/pull/174))
+
 ## [v0.3.0 (2020-08-27)](https://github.com/pestphp/pest/compare/v0.2.3...v0.3.0)
 ### Added
 - Expectation API (TODO)
