@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Repositories;
 
+use Closure;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Exceptions\TestAlreadyExist;
 use Pest\Exceptions\TestCaseAlreadyInUse;
@@ -24,7 +25,7 @@ final class TestRepository
     private $state = [];
 
     /**
-     * @var array<string, array<int, array<int, string>>>
+     * @var array<string, array{0: array<int, string>, 1: array<int,string>, 2: array<string, Closure>, 3: array<string, int|double|string|array>}>
      */
     private $uses = [];
 
@@ -46,8 +47,9 @@ final class TestRepository
         };
 
         foreach ($this->uses as $path => $uses) {
-            [$classOrTraits, $groups] = $uses;
-            $setClassName             = function (TestCaseFactory $testCase, string $key) use ($path, $classOrTraits, $groups, $startsWith): void {
+            [$classOrTraits, $groups, $methods, $properties] = $uses;
+
+            $setClassName = function (TestCaseFactory $testCase, string $key) use ($path, $classOrTraits, $groups, $methods, $properties, $startsWith): void {
                 [$filename] = explode('@', $key);
 
                 if ((!is_dir($path) && $filename === $path) || (is_dir($path) && $startsWith($filename, $path))) {
@@ -61,6 +63,9 @@ final class TestRepository
                             $testCase->traits[] = $class;
                         }
                     }
+
+                    $testCase->methods      = $methods;
+                    $testCase->properties   = $properties;
 
                     $testCase
                         ->factoryProxies
@@ -92,11 +97,13 @@ final class TestRepository
     /**
      * Uses the given `$testCaseClass` on the given `$paths`.
      *
-     * @param array<int, string> $classOrTraits
-     * @param array<int, string> $groups
-     * @param array<int, string> $paths
+     * @param array<int, string>                     $classOrTraits
+     * @param array<int, string>                     $groups
+     * @param array<int, string>                     $paths
+     * @param array<string, Closure>                 $methods
+     * @param array<string, string|double|array|int> $properties
      */
-    public function use(array $classOrTraits, array $groups, array $paths): void
+    public function use(array $classOrTraits, array $groups, array $paths, array $methods = [], array $properties = []): void
     {
         foreach ($classOrTraits as $classOrTrait) {
             if (!class_exists($classOrTrait) && !trait_exists($classOrTrait)) {
@@ -109,9 +116,11 @@ final class TestRepository
                 $this->uses[$path] = [
                     array_merge($this->uses[$path][0], $classOrTraits),
                     array_merge($this->uses[$path][1], $groups),
+                    array_merge($this->uses[$path][2], $methods),
+                    array_merge($this->uses[$path][3], $properties),
                 ];
             } else {
-                $this->uses[$path] = [$classOrTraits, $groups];
+                $this->uses[$path] = [$classOrTraits, $groups, $methods, $properties];
             }
         }
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\PendingObjects;
 
+use Closure;
 use Pest\Exceptions\InvalidUsesPath;
 use Pest\TestSuite;
 
@@ -32,6 +33,20 @@ final class UsesCall
      * @var array<int, string>
      */
     private $targets;
+
+    /**
+     * Holds the overridden methods.
+     *
+     * @var array<string, Closure>
+     */
+    private $methods = [];
+
+    /**
+     * Holds the overridden methods.
+     *
+     * @var array<string, int|double|string|array>
+     */
+    private $properties = [];
 
     /**
      * Holds the groups of the uses.
@@ -98,10 +113,28 @@ final class UsesCall
     }
 
     /**
+     * Override parent methods.
+     *
+     * @param array<string, Closure|string|float|int|array> $overrides
+     */
+    public function with(array $overrides): UsesCall
+    {
+        foreach ($overrides as $key => $override) {
+            if ($override instanceof Closure) {
+                $this->methods[$key] = $override;
+            } else {
+                $this->properties[$key] = $override;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * Dispatch the creation of uses.
      */
     public function __destruct()
     {
-        TestSuite::getInstance()->tests->use($this->classAndTraits, $this->groups, $this->targets);
+        TestSuite::getInstance()->tests->use($this->classAndTraits, $this->groups, $this->targets, $this->methods, $this->properties);
     }
 }

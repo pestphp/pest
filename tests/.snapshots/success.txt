@@ -328,6 +328,14 @@
   ✓ custom traits can be used
   ✓ trait applied in this file
 
+   PASS  Tests\PHPUnit\OverriddenTestCase\MethodOverridenTest
+  ✓ methods can be overridden
+  ✓ typed methods can be overridden
+  ✓ untyped methods can be overridden
+  ✓ protected methods can be overridden
+  ✓ static methods can be overridden
+  ✓ properties can be overridden
+
    PASS  Tests\Playground
   ✓ basic
 
@@ -391,5 +399,5 @@
   ✓ depends with defined arguments
   ✓ depends run test only once
 
-  Tests:  7 skipped, 231 passed
+  Tests:  7 skipped, 237 passed
   

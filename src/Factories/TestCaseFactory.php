@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace Pest\Factories;
 
 use Closure;
+use ParseError;
 use Pest\Concerns;
 use Pest\Contracts\HasPrintableTestCaseName;
 use Pest\Datasets;
 use Pest\Exceptions\ShouldNotHappen;
+use Pest\Repositories\MethodProxyRepository;
 use Pest\Support\HigherOrderMessageCollection;
 use Pest\Support\NullClosure;
+use Pest\Support\Reflection;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestCase;
 
@@ -66,7 +69,7 @@ final class TestCaseFactory
     /**
      * The FQN of the test case class.
      *
-     * @var string
+     * @var class-string
      */
     public $class = TestCase::class;
 
@@ -78,6 +81,20 @@ final class TestCaseFactory
     public $traits = [
         Concerns\TestCase::class,
     ];
+
+    /**
+     * Registered methods to override from base test class.
+     *
+     * @var array <string, \Closure>
+     */
+    public $methods = [];
+
+    /**
+     * Registered properties to override from base test class.
+     *
+     * @var array <string, string|int|double|array>
+     */
+    public $properties = [];
 
     /**
      * Holds the higher order messages
@@ -146,6 +163,7 @@ final class TestCaseFactory
 
         $createTest = function ($description, $data) use ($className, $test) {
             $testCase = new $className($test, $description, $data);
+
             $this->factoryProxies->proxy($testCase);
 
             return $testCase;
@@ -187,31 +205,122 @@ final class TestCaseFactory
         // Limit to A-Z, a-z, 0-9, '_', '-'.
         $relativePath = (string) preg_replace('/[^A-Za-z0-9.\\\]/', '', $relativePath);
 
+        /**
+         * @var class-string
+         */
         $classFQN = 'P\\' . $relativePath;
+
+        $this->loadClass($classFQN, $filename);
+
+        return $classFQN;
+    }
+
+    /**
+     * Generates code for the testcase and loads it in memory
+     * so we can use it, but only once.
+     *
+     * @param class-string $classFQN
+     */
+    private function loadClass(string $classFQN, string $filename): void
+    {
         if (class_exists($classFQN)) {
-            return $classFQN;
+            return;
         }
 
         $hasPrintableTestCaseClassFQN = sprintf('\%s', HasPrintableTestCaseName::class);
-        $traitsCode                   = sprintf('use %s;', implode(', ', array_map(function ($trait): string {
-            return sprintf('\%s', $trait);
-        }, $this->traits)));
 
         $partsFQN  = explode('\\', $classFQN);
         $className = array_pop($partsFQN);
         $namespace = implode('\\', $partsFQN);
+
+        /**
+         * @var class-string
+         */
         $baseClass = sprintf('\%s', $this->class);
 
-        eval("
+        $traits     = $this->createTraits();
+        $properties = $this->createProperties($baseClass);
+        $methods    = $this->createMethods($classFQN, $baseClass);
+
+        $code    = "
             namespace $namespace;
 
             final class $className extends $baseClass implements $hasPrintableTestCaseClassFQN {
-                $traitsCode
+
+                $traits
+                $properties
 
                 private static \$__filename = '$filename';
+                
+                $methods
             }
-        ");
+        ";
 
-        return $classFQN;
+        try {
+            eval($code);
+        } catch (ParseError $e) {
+            ShouldNotHappen::fromMessage("
+                
+                The code template threw a parse error: {$e->getMessage()}
+
+                $code
+                
+            ");
+        }
+    }
+
+    /**
+     * Parses used traits to inject as code in produced testcase.
+     */
+    private function createTraits(): string
+    {
+        return sprintf('use %s;', implode(', ', array_map(function ($trait): string {
+            return sprintf('\%s', $trait);
+        }, $this->traits)));
+    }
+
+    /**
+     * Parses used properties to inject as code in produced testcase.
+     *
+     * @param class-string $base
+     */
+    private function createProperties(string $base): string
+    {
+        return implode("\n", array_map(function (string $propertyName) use ($base): string {
+            $static       = Reflection::isPropertyStatic($base, $propertyName) ? 'static' : '';
+            $defaultValue = Reflection::encodeValue($this->properties[$propertyName]);
+
+            return "public $static \$$propertyName = $defaultValue;";
+        }, array_keys($this->properties)));
+    }
+
+    /**
+     * Parses overridden methods to inject as code in produced testcase.
+     *
+     * @param class-string $fqn
+     * @param class-string $base
+     */
+    private function createMethods(string $fqn, string $base): string
+    {
+        return implode(array_map(function (string $methodName) use ($fqn, $base): string {
+            $static     = Reflection::isMethodStatic($base, $methodName) ? 'static' : '';
+            $arguments  = Reflection::getMethodSignature($base, $methodName);
+            $returnType = Reflection::getReturnType($base, $methodName);
+
+            [$evaluator, $context] = ((bool) $static) ? ['staticEvaluate', 'self::class'] : ['evaluate', '$this'];
+
+            MethodProxyRepository::register($fqn, $methodName, $this->methods[$methodName]);
+
+            return "
+                final public $static function $methodName($arguments) $returnType
+                {
+                    return \\Pest\\Repositories\\MethodProxyRepository::$evaluator(
+                        $context,
+                        '$methodName',
+                        func_get_args()
+                    );
+                }
+            ";
+        }, array_keys($this->methods)));
     }
 }

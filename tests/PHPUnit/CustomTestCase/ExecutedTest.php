@@ -19,5 +19,3 @@ class ExecutedTest extends TestCase
         assertTrue(true);
     }
 }
-
-// register_shutdown_function(fn () => assertTrue(ExecutedTest::$executed));

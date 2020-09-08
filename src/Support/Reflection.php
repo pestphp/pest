@@ -10,6 +10,7 @@ use Pest\TestSuite;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionFunction;
+use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionParameter;
 use ReflectionProperty;
@@ -153,5 +154,105 @@ final class Reflection
         }
 
         return $name;
+    }
+
+    /**
+     * @param class-string $class
+     */
+    public static function getReturnType(string $class, string $method): string
+    {
+        /**
+         * @var ReflectionNamedType | null
+         */
+        $returnType = self::getReflectionMethod($class, $method)->getReturnType();
+
+        return $returnType !== null ? (': ' . self::getTypeHint($returnType)) : '';
+    }
+
+    /**
+     * @param class-string $class
+     */
+    public static function getMethodSignature(string $class, string $method): string
+    {
+        return implode(', ', array_map(function (ReflectionParameter $parameter): string {
+            /**
+             * @var ReflectionNamedType | null
+             */
+            $reflectionType = $parameter->getType();
+
+            $typeHint = $reflectionType === null ? '' : self::getTypeHint($reflectionType);
+
+            return sprintf('%s $%s %s', $typeHint, $parameter->getName(), self::getDefaultParameterValue($parameter));
+        }, self::getReflectionMethod($class, $method)->getParameters()));
+    }
+
+    /**
+     * @param class-string $class
+     */
+    public static function isMethodStatic(string $class, string $method): bool
+    {
+        return self::getReflectionMethod($class, $method)->isStatic();
+    }
+
+    /**
+     * @param class-string $class
+     */
+    public static function isPropertyStatic(string $class, string $property): bool
+    {
+        return self::getReflectionProperty($class, $property)->isStatic();
+    }
+
+    /**
+     * @param mixed $value
+     */
+    public static function encodeValue($value): string
+    {
+        $encoder = (array_values(array_filter(
+            [
+                'is_string' => function (string $value): string { return "\"$value\""; },
+                'is_array'  => function (array $value): string { return static::parseArrayValue($value); },
+                'is_null'   => function ($value): string { return 'NULL'; },
+            ],
+            function ($predicate) use ($value): bool {
+                return (bool) $predicate($value);
+            }, ARRAY_FILTER_USE_KEY))[0] ?? function ($value): string { return (string) $value; });
+
+        return $encoder($value);
+    }
+
+    /**
+     * @param class-string $class
+     */
+    private static function getReflectionMethod(string $class, string $method): ReflectionMethod
+    {
+        return (new ReflectionClass($class))->getMethod($method);
+    }
+
+    /**
+     * @param class-string $class
+     */
+    private static function getReflectionProperty(string $class, string $property): ReflectionProperty
+    {
+        return new ReflectionProperty($class, $property);
+    }
+
+    private static function getTypeHint(ReflectionNamedType $reflectionType): string
+    {
+        return ($reflectionType->allowsNull() ? '? ' : '') . $reflectionType->getName();
+    }
+
+    private static function getDefaultParameterValue(ReflectionParameter $parameter): string
+    {
+        return $parameter->isOptional() ? ('= ' . self::encodeValue($parameter->getDefaultValue())) : '';
+    }
+
+    /**
+     * @param array<mixed> $value
+     */
+    private static function parseArrayValue(array $value): string
+    {
+        return sprintf('[%s]', implode(',', array_map(function ($key) use ($value): string {
+            return self::encodeValue($key) . ' => ' . self::encodeValue($value[$key]);
+        }, array_keys($value))));
     }
 }
