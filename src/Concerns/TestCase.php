@@ -65,6 +65,11 @@ trait TestCase
         return $this->__description;
     }
 
+    public static function __getFileName(): string
+    {
+        return self::$__filename;
+    }
+
     /**
      * This method is called before the first test of this test class is run.
      */
