@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [v0.3.2 (2020-09-13)](https://github.com/pestphp/pest/compare/v0.3.2...v0.3.3)
+## [v0.3.3 (2020-09-13)](https://github.com/pestphp/pest/compare/v0.3.2...v0.3.3)
 ### Added
 - `toHaveKeys` expectation ([204f343](https://github.com/pestphp/pest/commit/204f343831adc17bb3734553c24fac92d02f27c7))
 
