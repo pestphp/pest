@@ -376,10 +376,26 @@ final class Expectation
 
     /**
      * Asserts that the value array has the provided $key.
+     *
+     * @param string|int $key
      */
-    public function toHaveKey(string $key): Expectation
+    public function toHaveKey($key): Expectation
     {
         Assert::assertArrayHasKey($key, $this->value);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value array has the provided $keys.
+     *
+     * @param array<int, int|string> $keys
+     */
+    public function toHaveKeys(array $keys): Expectation
+    {
+        foreach ($keys as $key) {
+            $this->toHaveKey($key);
+        }
 
         return $this;
     }

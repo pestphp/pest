@@ -28,6 +28,26 @@ final class OppositeExpectation
     }
 
     /**
+     * Asserts that the value array not has the provided $keys.
+     *
+     * @param array<int, int|string> $keys
+     */
+    public function toHaveKeys(array $keys): Expectation
+    {
+        foreach ($keys as $key) {
+            try {
+                $this->original->toHaveKey($key);
+            } catch (ExpectationFailedException $e) {
+                continue;
+            }
+
+            $this->throwExpectationFailedExpection('toHaveKey', [$key]);
+        }
+
+        return $this->original;
+    }
+
+    /**
      * Handle dynamic method calls into the original expectation.
      *
      * @param array<int, mixed> $arguments

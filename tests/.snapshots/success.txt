@@ -182,6 +182,11 @@
   ✓ failures
   ✓ not failures
 
+   PASS  Tests\Expect\toHaveKeys
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
    PASS  Tests\Expect\toHaveProperty
   ✓ pass
   ✓ failures
@@ -353,5 +358,5 @@
   ✓ depends with defined arguments
   ✓ depends run test only once
 
-  Tests:  6 skipped, 208 passed
+  Tests:  6 skipped, 211 passed
   
