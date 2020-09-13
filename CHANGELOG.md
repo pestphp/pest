@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [v0.3.2 (2020-09-13)](https://github.com/pestphp/pest/compare/v0.3.2...v0.3.3)
+### Added
+- `toHaveKeys` expectation ([204f343](https://github.com/pestphp/pest/commit/204f343831adc17bb3734553c24fac92d02f27c7))
+
 ## [v0.3.2 (2020-09-12)](https://github.com/pestphp/pest/compare/v0.3.1...v0.3.2)
 ### Added
 - Support to PHPUnit 9.3.9, and 9.3.10 ([1318bf9](https://github.com/pestphp/pest/commit/97f98569bc86e8b87f8cde963fe7b4bf5399623b))
