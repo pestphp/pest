@@ -192,6 +192,11 @@
   ✓ failures
   ✓ not failures
 
+   PASS  Tests\Expect\toMatchObject
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
    PASS  Tests\Features\AfterAll
   ✓ deletes file after all
 
@@ -358,5 +363,5 @@
   ✓ depends with defined arguments
   ✓ depends run test only once
 
-  Tests:  6 skipped, 211 passed
+  Tests:  6 skipped, 214 passed
   
