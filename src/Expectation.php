@@ -170,10 +170,19 @@ final class Expectation
 
     /**
      * Asserts that the value contains the property $name.
+     *
+     * @param mixed $value
      */
-    public function toHaveProperty(string $name): Expectation
+    public function toHaveProperty(string $name, $value = null): Expectation
     {
+        $this->toBeObject();
+
         Assert::assertTrue(property_exists($this->value, $name));
+
+        if (func_num_args() > 1) {
+            /* @phpstan-ignore-next-line */
+            Assert::assertEquals($value, $this->value->{$name});
+        }
 
         return $this;
     }
@@ -456,6 +465,21 @@ final class Expectation
     public function toBeWritableFile(): Expectation
     {
         Assert::assertFileIsWritable($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value object matches a subset
+     * of the properties of an given object.
+     *
+     * @param array<string, mixed>|object $object
+     */
+    public function toMatchObject($object): Expectation
+    {
+        foreach ((array) $object as $property => $value) {
+            $this->toHaveProperty($property, $value);
+        }
 
         return $this;
     }
