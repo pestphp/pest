@@ -494,4 +494,22 @@ final class Expectation
         /* @phpstan-ignore-next-line */
         return $this->{$name}();
     }
+
+    /**
+     * Dynamically calls custom expectation if it can be found
+     *
+     * @param string $method
+     * @param array $args
+     */
+    public function __call(string $method, array $args)
+    {
+        if (function_exists($method)) {
+            $result = $method($this->value, ...$args);
+            Assert::assertTrue($result);
+
+            return $this;
+        }
+
+        throw new \InvalidArgumentException("Could not find expectation for $method");
+    }
 }
