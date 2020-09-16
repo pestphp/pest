@@ -13,6 +13,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    if: github.repository == 'pestphp/pest'
+
     steps:
     - uses: actions/checkout@v2
     - name: Checkout website repository
