@@ -506,6 +506,16 @@ final class Expectation
     }
 
     /**
+     * Asserts that the value matches a regular expression.
+     */
+    public function toMatchRegEx(string $expression): Expectation
+    {
+        Assert::assertMatchesRegularExpression($expression, $this->value);
+
+        return $this;
+    }
+
+    /**
      * Asserts that the value matches a constraint.
      */
     public function toMatchConstraint(Constraint $constraint): Expectation
