@@ -157,6 +157,11 @@
   ✓ failures
   ✓ not failures
 
+   PASS  Tests\Expect\toEndWith
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
    PASS  Tests\Expect\toEqual
   ✓ pass
   ✓ failures
@@ -193,6 +198,11 @@
   ✓ not failures
 
    PASS  Tests\Expect\toMatchObject
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Expect\toStartWith
   ✓ pass
   ✓ failures
   ✓ not failures
@@ -363,5 +373,5 @@
   ✓ depends with defined arguments
   ✓ depends run test only once
 
-  Tests:  6 skipped, 214 passed
+  Tests:  6 skipped, 220 passed
   
