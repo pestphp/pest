@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Pest;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\Assert;
+
 
 /**
  * @internal
@@ -499,9 +501,10 @@ final class Expectation
      * Dynamically calls custom expectation if it can be found
      *
      * @param string $method
-     * @param array $args
+     * @param array<mixed> $args
+     * @return Expectation
      */
-    public function __call(string $method, array $args)
+    public function __call(string $method, array $args): Expectation
     {
         if (function_exists($method)) {
             $result = $method($this->value, ...$args);
@@ -510,6 +513,6 @@ final class Expectation
             return $this;
         }
 
-        throw new \InvalidArgumentException("Could not find expectation for $method");
+        throw new InvalidArgumentException("Could not find expectation for $method");
     }
 }
