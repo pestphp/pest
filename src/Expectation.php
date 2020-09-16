@@ -159,6 +159,16 @@ final class Expectation
     }
 
     /**
+     * Asserts that the value starts with $expected.
+     */
+    public function toStartWith(string $expected): Expectation
+    {
+        Assert::assertStringStartsWith($expected, $this->value);
+
+        return $this;
+    }
+
+    /**
      * Asserts that $count matches the number of elements of the value.
      */
     public function toHaveCount(int $count): Expectation
