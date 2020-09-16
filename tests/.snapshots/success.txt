@@ -207,6 +207,11 @@
   ✓ failures
   ✓ not failures
 
+   PASS  Tests\Expect\toMatchRegEx
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
    PASS  Tests\Expect\toStartWith
   ✓ pass
   ✓ failures
