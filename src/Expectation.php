@@ -169,6 +169,16 @@ final class Expectation
     }
 
     /**
+     * Asserts that the value ends with $expected.
+     */
+    public function toEndWith(string $expected): Expectation
+    {
+        Assert::assertStringEndsWith($expected, $this->value);
+
+        return $this;
+    }
+
+    /**
      * Asserts that $count matches the number of elements of the value.
      */
     public function toHaveCount(int $count): Expectation
