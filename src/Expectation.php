@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest;
 
 use PHPUnit\Framework\Assert;
+use PHPUnit\Framework\Constraint\Constraint;
 
 /**
  * @internal
@@ -500,6 +501,16 @@ final class Expectation
         foreach ((array) $object as $property => $value) {
             $this->toHaveProperty($property, $value);
         }
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value matches a constraint.
+     */
+    public function toMatchConstraint(Constraint $constraint): Expectation
+    {
+        Assert::assertThat($this->value, $constraint);
 
         return $this;
     }
