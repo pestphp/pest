@@ -508,7 +508,7 @@ final class Expectation
     /**
      * Asserts that the value matches a regular expression.
      */
-    public function toMatchRegEx(string $expression): Expectation
+    public function toMatch(string $expression): Expectation
     {
         Assert::assertMatchesRegularExpression($expression, $this->value);
 
