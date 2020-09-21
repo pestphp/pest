@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [v0.3.6 (2020-09-21)](https://github.com/pestphp/pest/compare/v0.3.5...v0.3.6)
+### Added
+- `toMatch` expectation ([#191](https://github.com/pestphp/pest/pull/191))
+- `toMatchConstraint` expectation ([#190](https://github.com/pestphp/pest/pull/190))
+
 ## [v0.3.5 (2020-09-16)](https://github.com/pestphp/pest/compare/v0.3.4...v0.3.5)
 ### Added
 - `toStartWith` and `toEndWith` expectations ([#187](https://github.com/pestphp/pest/pull/187))
