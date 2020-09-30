@@ -278,6 +278,7 @@
 
    PASS  Tests\Features\HigherOrderTests
   ✓ it proxies calls to object
+  ✓ it is capable doing multiple assertions
 
    PASS  Tests\Features\It
   ✓ it is a test
@@ -302,6 +303,7 @@
   - it skips with truthy closure condition
   ✓ it do not skips with falsy closure condition
   - it skips with condition and message → skipped because foo
+  - it skips when skip after assertion
 
    PASS  Tests\Features\Test
   ✓ a test
@@ -383,5 +385,5 @@
   ✓ depends with defined arguments
   ✓ depends run test only once
 
-  Tests:  6 skipped, 226 passed
+  Tests:  7 skipped, 227 passed
   
