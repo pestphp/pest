@@ -6,7 +6,7 @@
   ✓ not property calls
 
    PASS  Tests\Expect\toBe
-  ✓ expect true → toBeTrue  → and false → toBeFalse 
+  ✓ expect true → toBeTrue  → and false → toBeFalse
   ✓ strict comparisons
   ✓ failures
   ✓ not failures
@@ -255,6 +255,9 @@
   ✓ eager wrapped registered datasets with (1)
   ✓ eager wrapped registered datasets with (2)
   ✓ eager registered wrapped datasets did the job right
+  ✓ named datasets with data set "one" (1)
+  ✓ named datasets with data set "two" (2)
+  ✓ named datasets did the job right
   ✓ lazy named datasets with (Bar Object (...))
   ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #1
   ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #2
@@ -292,8 +295,8 @@
   ✓ it has bar
 
    PASS  Tests\Features\PendingHigherOrderTests
-  ✓ get 'foo' → get 'bar' → expect true → toBeTrue 
-  ✓ get 'foo' → expect true → toBeTrue 
+  ✓ get 'foo' → get 'bar' → expect true → toBeTrue
+  ✓ get 'foo' → expect true → toBeTrue
 
    WARN  Tests\Features\Skip
   ✓ it do not skips
@@ -388,5 +391,4 @@
   ✓ depends with defined arguments
   ✓ depends run test only once
 
-  Tests:  7 skipped, 228 passed
-  
+  Tests:  7 skipped, 231 passed
