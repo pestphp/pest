@@ -30,7 +30,7 @@ final class HigherOrderMessageCollection
     public function chain(object $target): void
     {
         foreach ($this->messages as $message) {
-            $target = $message->call($target);
+            $target = $message->call($target) ?? $target;
         }
     }
 
