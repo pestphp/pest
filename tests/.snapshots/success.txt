@@ -6,7 +6,7 @@
   ✓ not property calls
 
    PASS  Tests\Expect\toBe
-  ✓ expect true → toBeTrue  → and false → toBeFalse
+  ✓ expect true → toBeTrue  → and false → toBeFalse 
   ✓ strict comparisons
   ✓ failures
   ✓ not failures
@@ -295,8 +295,8 @@
   ✓ it has bar
 
    PASS  Tests\Features\PendingHigherOrderTests
-  ✓ get 'foo' → get 'bar' → expect true → toBeTrue
-  ✓ get 'foo' → expect true → toBeTrue
+  ✓ get 'foo' → get 'bar' → expect true → toBeTrue 
+  ✓ get 'foo' → expect true → toBeTrue 
 
    WARN  Tests\Features\Skip
   ✓ it do not skips
@@ -392,3 +392,4 @@
   ✓ depends run test only once
 
   Tests:  7 skipped, 231 passed
+  

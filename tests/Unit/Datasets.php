@@ -8,6 +8,6 @@ it('show the names of named datasets in their description', function () {
         'two' => [[2]],
     ]));
 
-    $this->assertSame('test description with data set "one" (1)', $descriptions[0]);
-    $this->assertSame('test description with data set "two" (array(2))', $descriptions[1]);
+    expect($descriptions[0])->toBe('test description with data set "one" (1)');
+    expect($descriptions[1])->toBe('test description with data set "two" (array(2))');
 });
