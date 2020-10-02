@@ -304,6 +304,10 @@
   ✓ it do not skips with falsy closure condition
   - it skips with condition and message → skipped because foo
   - it skips when skip after assertion
+  - it skips if the PHP version is the current one (with message) → because of the current version
+  - it skips if the PHP version is greater that 7 (should skip)
+  ✓ it skips if the PHP version is less than 7 (should never skip)
+  - it runs only if the PHP version is the current one (should never skip)
 
    PASS  Tests\Features\Test
   ✓ a test
@@ -385,5 +389,5 @@
   ✓ depends with defined arguments
   ✓ depends run test only once
 
-  Tests:  7 skipped, 227 passed
+  Tests:  10 skipped, 228 passed
   

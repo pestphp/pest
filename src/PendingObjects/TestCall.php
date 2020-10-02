@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\PendingObjects;
 
 use Closure;
+use Pest\Expectation;
 use Pest\Factories\TestCaseFactory;
 use Pest\Support\Backtrace;
 use Pest\Support\NullClosure;
@@ -13,7 +14,7 @@ use PHPUnit\Framework\ExecutionOrderDependency;
 use SebastianBergmann\Exporter\Exporter;
 
 /**
- * @method \Pest\Expectation expect(mixed $value)
+ * @method Expectation expect(mixed $value)
  *
  * @internal
  */
@@ -78,7 +79,7 @@ final class TestCall
      * Runs the current test multiple times with
      * each item of the given `iterable`.
      *
-     * @param \Closure|iterable<int, mixed>|string $data
+     * @param Closure|iterable<int, mixed>|string $data
      */
     public function with($data): TestCall
     {
@@ -128,6 +129,17 @@ final class TestCall
     }
 
     /**
+     * Skips the test for a given version of PHP.
+     */
+    public function skipForVersion(string $version, string $operator = null, string $message = ''): TestCall
+    {
+        return $this->skip(
+            version_compare(PHP_VERSION, $version, $operator ?? '=='),
+            $message
+        );
+    }
+
+    /**
      * Skips the current test.
      *
      * @param Closure|bool|string $conditionOrMessage
@@ -155,6 +167,17 @@ final class TestCall
         }
 
         return $this;
+    }
+
+    /**
+     * Runs the test only for a given version of PHP.
+     */
+    public function onlyForVersion(string $version, string $message = ''): TestCall
+    {
+        return $this->skip(
+            version_compare(PHP_VERSION, $version, '=='),
+            $message
+        );
     }
 
     /**
