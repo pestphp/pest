@@ -255,6 +255,9 @@
   ✓ eager wrapped registered datasets with (1)
   ✓ eager wrapped registered datasets with (2)
   ✓ eager registered wrapped datasets did the job right
+  ✓ named datasets with data set "one" (1)
+  ✓ named datasets with data set "two" (2)
+  ✓ named datasets did the job right
   ✓ lazy named datasets with (Bar Object (...))
   ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #1
   ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #2
@@ -345,6 +348,9 @@
   ✓ it throws exception when `process isolation` is true
   ✓ it do not throws exception when `process isolation` is false
 
+   PASS  Tests\Unit\Datasets
+  ✓ it show the names of named datasets in their description
+
    PASS  Tests\Unit\Plugins\Version
   ✓ it outputs the version when --version is used
   ✓ it do not outputs version when --version is not used
@@ -385,5 +391,5 @@
   ✓ depends with defined arguments
   ✓ depends run test only once
 
-  Tests:  7 skipped, 227 passed
+  Tests:  7 skipped, 231 passed
   
