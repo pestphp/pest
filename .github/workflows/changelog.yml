@@ -23,6 +23,7 @@ jobs:
         token: ${{ secrets.CHANGELOG_KEY }}
         repository: pestphp/website
         path: pestphp-website
+        ref: master
     - name: Read CHANGELOG.md
       id: package
       uses: juliangruber/read-file-action@v1
@@ -36,8 +37,6 @@ jobs:
           ---
           title: Changelog
           description: Changelog
-          extends: _layouts.documentation
-          section: content
           ---
           ${{ steps.package.outputs.content }}
 
@@ -46,12 +45,13 @@ jobs:
           Next section: [Upgrade Guide →](/docs/upgrade-guide)
         write-mode: overwrite
     - name: Copy CHANGELOG to website repository
-      run: cp CHANGELOG.md pestphp-website/source/docs/changelog.md
+      run: cp CHANGELOG.md pestphp-website/changelog.md
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v2
       with:
         token: ${{ secrets.CHANGELOG_KEY }}
         commit-message: Update changelog.md
+        branch: master
         committer: GitHub Action <noreply@github.com>
         author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
         title: 'Update changelog.md'
