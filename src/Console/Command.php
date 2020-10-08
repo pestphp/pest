@@ -11,6 +11,8 @@ use Pest\Actions\ValidatesConfiguration;
 use Pest\Contracts\Plugins\AddsOutput;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Plugin\Loader;
+use Pest\Plugins\Version;
+use Pest\Support\Container;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestSuite as BaseTestSuite;
 use PHPUnit\TextUI\Command as BaseCommand;
@@ -138,5 +140,13 @@ final class Command extends BaseCommand
         }
 
         exit($result);
+    }
+
+    protected function showHelp(): void
+    {
+        /** @var Version $version */
+        $version = Container::getInstance()->get(Version::class);
+        $version->handleArguments(['--version']);
+        parent::showHelp();
     }
 }
