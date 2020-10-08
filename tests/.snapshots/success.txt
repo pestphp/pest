@@ -395,5 +395,5 @@
   ✓ depends with defined arguments
   ✓ depends run test only once
 
-  Tests:  10 skipped, 228 passed
+  Tests:  10 skipped, 232 passed
   
