@@ -95,6 +95,18 @@ test('eager registered wrapped datasets did the job right', function () use ($st
     expect($state->text)->toBe('1212121212');
 });
 
+test('named datasets', function ($text) use ($state, $datasets) {
+    $state->text .= $text;
+    expect($datasets)->toContain([$text]);
+})->with([
+    'one' => [1],
+    'two' => [2],
+]);
+
+test('named datasets did the job right', function () use ($state) {
+    expect($state->text)->toBe('121212121212');
+});
+
 class Bar
 {
     public $name = 1;

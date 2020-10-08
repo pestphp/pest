@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [v0.3.8 (2020-10-03)](https://github.com/pestphp/pest/compare/v0.3.7...v0.3.8)
+### Added
+- Add support for PHPUnit 9.4.0 ([#199](https://github.com/pestphp/pest/pull/199))
+
+### Fixed
+- Fix chained higher order assertions returning void ([#196](https://github.com/pestphp/pest/pull/196))
+
 ## [v0.3.7 (2020-09-30)](https://github.com/pestphp/pest/compare/v0.3.6...v0.3.7)
 ### Added
 - Add support for PHPUnit 9.3.11 ([#193](https://github.com/pestphp/pest/pull/193))
