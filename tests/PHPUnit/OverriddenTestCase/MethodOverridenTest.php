@@ -50,6 +50,11 @@ class MethodOverriddenTest extends PHPUnit\Framework\TestCase
     {
         return 'method'; 
     }
+
+    public function methodThatReturnsAClosure()
+    {
+        return function () : string { return 'foo'; }; 
+    }
 }
 
 uses(MethodOverriddenTest::class)
@@ -84,7 +89,13 @@ uses(MethodOverriddenTest::class)
         return 'method-override';
     })
     
-    ->with('propertyThatIsAlsoAMethod', 'property-override');
+    ->with('propertyThatIsAlsoAMethod', 'property-override')
+
+    ->extends('methodThatReturnsAClosure', function () {
+        return function () {
+            return 'bar';
+        };
+    });
 
 test('methods can be overridden', function () {
     $this->assertOverride();
@@ -115,4 +126,8 @@ test('properties can be overridden', function () {
 test('overriding a method that has the same name as a property works', function () {
     $this->assertEquals('property-override', $this->propertyThatIsAlsoAMethod);
     $this->assertEquals('method-override', $this->propertyThatIsAlsoAMethod());
+});
+
+test('that a closure can return a closure without issues', function () {
+    $this->assertEquals('bar', $this->methodThatReturnsAClosure()());
 });
