@@ -10,6 +10,8 @@ class MethodOverriddenTest extends PHPUnit\Framework\TestCase
         'baz' => 'baz',
     ];
 
+    public $propertyThatIsAlsoAMethod = 'property';
+
     public function assertOverride()
     {
         $this->assertTrue(false);
@@ -43,31 +45,46 @@ class MethodOverriddenTest extends PHPUnit\Framework\TestCase
     {
         return 0;
     }
+
+    public function propertyThatIsAlsoAMethod(): string
+    {
+        return 'method'; 
+    }
 }
 
-$typedOverride = function (string $foo, ? int $bar): string {
-    $this->assertEquals($foo, 'foo');
-    $this->assertEquals($bar, 123);
+uses(MethodOverriddenTest::class)
 
-    return $foo;
-};
+    ->extends([
+        'assertOverride'        => function () { $this->assertTrue(true); },
+        'overrideableConfig'    => function (): array { return ['foo' => 'baz']; },
+        'getStaticValue'        => function (): int { return 42; },
+    ])
 
-$untypedOverride = function ($foo) {
-    $this->assertEquals($foo, 'foo');
+    ->extends('assertUntypedOverride', function ($foo) {
+        $this->assertEquals($foo, 'foo');
 
-    return $foo;
-};
+        return $foo;
+    })
 
-uses(MethodOverriddenTest::class)->with([
-    'assertOverride'        => function () { $this->assertTrue(true); },
-    'assertTypedOverride'   => $typedOverride,
-    'assertUntypedOverride' => $untypedOverride,
-    'overrideableConfig'    => function (): array { return ['foo' => 'baz']; },
-    'getStaticValue'        => function (): int { return 42; },
-    'foo'                   => 'foo-override',
-    'bar'                   => 'bar-override',
-    'baz'                   => ['baz' => 'baz-override'],
-]);
+    ->extends('assertTypedOverride', function (string $foo, ? int $bar): string {
+        $this->assertEquals($foo, 'foo');
+        $this->assertEquals($bar, 123);
+
+        return $foo;
+    })
+
+    ->with('foo', 'foo-override')
+
+    ->with([
+        'bar'   => 'bar-override',
+        'baz'   => ['baz' => 'baz-override'],
+    ])
+    
+    ->extends('propertyThatIsAlsoAMethod', function() : string {
+        return 'method-override';
+    })
+    
+    ->with('propertyThatIsAlsoAMethod', 'property-override');
 
 test('methods can be overridden', function () {
     $this->assertOverride();
@@ -93,4 +110,9 @@ test('properties can be overridden', function () {
     $this->assertEquals('foo-override', $this->foo);
     $this->assertEquals('bar-override', $this->bar);
     $this->assertEquals(['baz' => 'baz-override'], $this->baz);
+});
+
+test('overriding a method that has the same name as a property works', function () {
+    $this->assertEquals('property-override', $this->propertyThatIsAlsoAMethod);
+    $this->assertEquals('method-override', $this->propertyThatIsAlsoAMethod());
 });

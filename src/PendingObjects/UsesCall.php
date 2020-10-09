@@ -113,18 +113,34 @@ final class UsesCall
     }
 
     /**
-     * Override parent methods.
+     * Override parent properties.
      *
-     * @param array<string, Closure|string|float|int|array> $overrides
+     * @param array<string, scalar> | string $property
+     * @param scalar | NULL                  $value
      */
-    public function with(array $overrides): UsesCall
+    public function with($property, $value = null): UsesCall
     {
-        foreach ($overrides as $key => $override) {
-            if ($override instanceof Closure) {
-                $this->methods[$key] = $override;
-            } else {
-                $this->properties[$key] = $override;
-            }
+        $properties = is_array($property) ? $property : [$property => $value];
+
+        foreach ($properties as $property => $value) {
+            $this->properties[$property] = $value;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Override parent properties.
+     *
+     * @param array<string, Closure> | string $method
+     * @param Closure | NULL                  $value
+     */
+    public function extends($method, ? Closure $value = null): UsesCall
+    {
+        $methods = is_array($method) ? $method : [$method => $value];
+
+        foreach ($methods as $name => $method) {
+            $this->methods[$name] = $method;
         }
 
         return $this;
@@ -135,6 +151,12 @@ final class UsesCall
      */
     public function __destruct()
     {
-        TestSuite::getInstance()->tests->use($this->classAndTraits, $this->groups, $this->targets, $this->methods, $this->properties);
+        TestSuite::getInstance()->tests->use(
+            $this->classAndTraits,
+            $this->groups,
+            $this->targets,
+            $this->methods,
+            $this->properties
+        );
     }
 }
