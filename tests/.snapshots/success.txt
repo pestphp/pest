@@ -335,6 +335,9 @@
   ✓ protected methods can be overridden
   ✓ static methods can be overridden
   ✓ properties can be overridden
+  ✓ overriding a method that has the same name as a property works
+  ✓ that a closure can return a closure without issues
+  ✓ that a method can return a custom class without issues
 
    PASS  Tests\Playground
   ✓ basic
@@ -399,5 +402,5 @@
   ✓ depends with defined arguments
   ✓ depends run test only once
 
-  Tests:  7 skipped, 237 passed
+  Tests:  7 skipped, 240 passed
   

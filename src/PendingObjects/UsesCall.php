@@ -44,7 +44,7 @@ final class UsesCall
     /**
      * Holds the overridden methods.
      *
-     * @var array<string, int|double|string|array>
+     * @var array<string, scalar|array|null>
      */
     private $properties = [];
 
@@ -115,32 +115,33 @@ final class UsesCall
     /**
      * Override parent properties.
      *
-     * @param array<string, scalar> | string $property
-     * @param scalar | NULL                  $value
+     * @param array<string, scalar | array | null > | string $property
+     * @param scalar | array<scalar> | null                  $default
      */
-    public function with($property, $value = null): UsesCall
+    public function with($property, $default = null): UsesCall
     {
-        $properties = is_array($property) ? $property : [$property => $value];
-
-        foreach ($properties as $property => $value) {
-            $this->properties[$property] = $value;
-        }
+        $this->properties = array_merge(
+            $this->properties,
+            is_array($property) ? $property : [$property => $default]
+        );
 
         return $this;
     }
 
     /**
-     * Override parent properties.
+     * Override parent methods.
      *
      * @param array<string, Closure> | string $method
-     * @param Closure | NULL                  $value
+     * @param Closure | NULL                  $override
      */
-    public function extends($method, ? Closure $value = null): UsesCall
+    public function extends($method, $override = null): UsesCall
     {
-        $methods = is_array($method) ? $method : [$method => $value];
+        if (!is_array($method) && $override !== null) {
+            $this->methods[$method] = $override;
+        }
 
-        foreach ($methods as $name => $method) {
-            $this->methods[$name] = $method;
+        if (is_array($method)) {
+            $this->methods = array_merge($this->methods, $method);
         }
 
         return $this;

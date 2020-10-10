@@ -166,7 +166,13 @@ final class Reflection
          */
         $returnType = self::getReflectionMethod($class, $method)->getReturnType();
 
-        return $returnType !== null ? (': ' . self::getTypeHint($returnType)) : '';
+        if ($returnType === null) {
+            return '';
+        }
+
+        $typehint = self::getTypeHint($returnType);
+
+        return ': ' . (class_exists($typehint) ? ' \\' . $typehint : $typehint);
     }
 
     /**

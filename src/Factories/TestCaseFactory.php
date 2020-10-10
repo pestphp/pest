@@ -92,7 +92,7 @@ final class TestCaseFactory
     /**
      * Registered properties to override from base test class.
      *
-     * @var array <string, string|int|double|array>
+     * @var array <string, scalar|array|null>
      */
     public $properties = [];
 
