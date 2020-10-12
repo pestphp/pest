@@ -36,7 +36,7 @@ final class MethodProxyRepository
      */
     public static function evaluate(TestCase $newThis, string $methodName, array $params)
     {
-        return self::$methodProxies[get_class($newThis)][$methodName]->bindTo($newThis)(...$params);
+        return self::$methodProxies[get_class($newThis)][$methodName]->call($newThis, ...$params);
     }
 
     /**

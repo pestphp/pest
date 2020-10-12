@@ -62,6 +62,11 @@ class MethodOverriddenTest extends PHPUnit\Framework\TestCase
     {
         return new DummyFoo('foo');
     }
+
+    public function methodThatWillBeCalledAsParent(): string
+    {
+        return 'parent';
+    }
 }
 
 uses(MethodOverriddenTest::class)
@@ -106,6 +111,10 @@ uses(MethodOverriddenTest::class)
 
     ->extends('methodThatReturnsAClass', function () {
         return new DummyFoo('bar');
+    })
+
+    ->extends('methodThatWillBeCalledAsParent', function () {
+        return parent::methodThatWillBeCalledAsParent() . '-child';
     });
 
 test('methods can be overridden')->assertOverride();
@@ -139,4 +148,8 @@ test('that a closure can return a closure without issues', function () {
 
 test('that a method can return a custom class without issues', function () {
     $this->assertEquals('bar', $this->methodThatReturnsAClass()->value);
+});
+
+test('that a method can call parent methods', function () {
+    $this->assertEquals('parent-child', $this->methodThatWillBeCalledAsParent());
 });
