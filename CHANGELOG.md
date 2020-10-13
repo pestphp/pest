@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [v0.3.9 (2020-10-13)](https://github.com/pestphp/pest/compare/v0.3.8...v0.3.9)
+### Added
+- Add support for named datasets in description output ([#134](https://github.com/pestphp/pest/pull/134))
+- Add Pest version to `--help` output ([#203](https://github.com/pestphp/pest/pull/203))
+- Add support for PHPUnit 9.4.1 ([#207](https://github.com/pestphp/pest/pull/207))
+
 ## [v0.3.8 (2020-10-03)](https://github.com/pestphp/pest/compare/v0.3.7...v0.3.8)
 ### Added
 - Add support for PHPUnit 9.4.0 ([#199](https://github.com/pestphp/pest/pull/199))
