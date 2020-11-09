@@ -24,7 +24,6 @@ final class TeamCity extends DefaultResultPrinter
     private const DURATION            = 'duration';
     private const TEST_SUITE_STARTED  = 'testSuiteStarted';
     private const TEST_SUITE_FINISHED = 'testSuiteFinished';
-    private const TEST_FAILED         = 'testFailed';
 
     /** @var int */
     private $flowId;
@@ -149,19 +148,7 @@ final class TeamCity extends DefaultResultPrinter
      */
     public function addError(Test $test, Throwable $t, float $time): void
     {
-        if (!TeamCity::isPestTest($test)) {
-            $this->phpunitTeamCity->addError($test, $t, $time);
-
-            return;
-        }
-
-        $this->printEvent(
-            self::TEST_FAILED, [
-            self::NAME     => $test->getName(),
-            'message'      => $t->getMessage(),
-            'details'      => $t->getTraceAsString(),
-            self::DURATION => self::toMilliseconds($time),
-        ]);
+        $this->phpunitTeamCity->addError($test, $t, $time);
     }
 
     /**
@@ -171,19 +158,7 @@ final class TeamCity extends DefaultResultPrinter
      */
     public function addWarning(Test $test, Warning $e, float $time): void
     {
-        if (!TeamCity::isPestTest($test)) {
-            $this->phpunitTeamCity->addWarning($test, $e, $time);
-
-            return;
-        }
-
-        $this->printEvent(
-            self::TEST_FAILED, [
-            self::NAME     => $test->getName(),
-            'message'      => $e->getMessage(),
-            'details'      => $e->getTraceAsString(),
-            self::DURATION => self::toMilliseconds($time),
-        ]);
+        $this->phpunitTeamCity->addWarning($test, $e, $time);
     }
 
     public function addFailure(Test $test, AssertionFailedError $e, float $time): void
