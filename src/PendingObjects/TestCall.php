@@ -95,7 +95,11 @@ final class TestCall
         $className = $this->testCaseFactory->getClassName();
 
         $tests = array_map(function (string $test) use ($className): ExecutionOrderDependency {
-            return ExecutionOrderDependency::createFromDependsAnnotation($className, $test);
+            if (strpos($test, '::') === false) {
+                $test = "{$className}::{$test}";
+            }
+
+            return new ExecutionOrderDependency($test, null, '');
         }, $tests);
 
         $this->testCaseFactory
