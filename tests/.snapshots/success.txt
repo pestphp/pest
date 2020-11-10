@@ -348,6 +348,9 @@
   ✓ it throws exception when `process isolation` is true
   ✓ it do not throws exception when `process isolation` is false
 
+   PASS  Tests\Unit\Console\Help
+  ✓ it outputs the help information when --help is used
+
    PASS  Tests\Unit\Datasets
   ✓ it show the names of named datasets in their description
 
@@ -391,5 +394,5 @@
   ✓ depends with defined arguments
   ✓ depends run test only once
 
-  Tests:  7 skipped, 231 passed
+  Tests:  7 skipped, 232 passed
   
