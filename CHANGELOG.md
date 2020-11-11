@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v0.3.12 (2020-11-11)](https://github.com/pestphp/pest/compare/v0.3.11...v0.3.12)
+### Added
+- Add support for PHPUnit 9.4.3 ([#219](https://github.com/pestphp/pest/pull/219)
+
 ## [v0.3.11 (2020-11-09)](https://github.com/pestphp/pest/compare/v0.3.10...v0.3.11)
 ### Changed
 - Improved the exception output for the TeamCity printer (usage with phpstorm plugin) ([#215](https://github.com/pestphp/pest/pull/215))
