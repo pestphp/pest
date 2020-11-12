@@ -1,0 +1,5 @@
+Pest Options:
+  --init                      Initialise a standard Pest configuration
+  --coverage                  Enable coverage and output to standard output
+  --min=<N>                   Set the minimum required coverage percentage (<N>), and fail if not met
+  --group=<name>              Only runs tests from the specified group(s)

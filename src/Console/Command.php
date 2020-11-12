@@ -148,5 +148,7 @@ final class Command extends BaseCommand
         $version = Container::getInstance()->get(Version::class);
         $version->handleArguments(['--version']);
         parent::showHelp();
+
+        (new Help($this->output))();
     }
 }
