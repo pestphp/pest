@@ -392,10 +392,12 @@
    PASS  Tests\Features\Depends
   ✓ first
   ✓ second
+  ✓ it asserts true is true
   ✓ depends
   ✓ depends with ...params
   ✓ depends with defined arguments
   ✓ depends run test only once
+  ✓ depends works with the correct test name
 
-  Tests:  7 skipped, 233 passed
+  Tests:  7 skipped, 235 passed
   
