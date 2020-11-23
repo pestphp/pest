@@ -412,7 +412,11 @@ final class Expectation
      */
     public function toHaveKey($key, $value = null): Expectation
     {
-        $array = (array) $this->value;
+        if (is_object($this->value) && method_exists($this->value, 'toArray')) {
+            $array = $this->value->toArray();
+        } else {
+            $array = (array) $this->value;
+        }
 
         Assert::assertArrayHasKey($key, $array);
 
