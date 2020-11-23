@@ -202,6 +202,11 @@
   ✓ failures
   ✓ not failures
 
+   PASS  Tests\Expect\toMatchArray
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
    PASS  Tests\Expect\toMatchConstraint
   ✓ pass
   ✓ failures
@@ -399,5 +404,5 @@
   ✓ depends run test only once
   ✓ depends works with the correct test name
 
-  Tests:  7 skipped, 235 passed
+  Tests:  7 skipped, 238 passed
   

@@ -408,10 +408,17 @@ final class Expectation
      * Asserts that the value array has the provided $key.
      *
      * @param string|int $key
+     * @param mixed      $value
      */
-    public function toHaveKey($key): Expectation
+    public function toHaveKey($key, $value = null): Expectation
     {
-        Assert::assertArrayHasKey($key, $this->value);
+        $array = (array) $this->value;
+
+        Assert::assertArrayHasKey($key, $array);
+
+        if (func_num_args() > 1) {
+            Assert::assertEquals($value, $array[$key]);
+        }
 
         return $this;
     }
@@ -486,6 +493,20 @@ final class Expectation
     public function toBeWritableFile(): Expectation
     {
         Assert::assertFileIsWritable($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value array matches the given array subset.
+     *
+     * @param array<int|string, mixed> $array
+     */
+    public function toMatchArray($array): Expectation
+    {
+        foreach ($array as $property => $value) {
+            $this->toHaveKey($property, $value);
+        }
 
         return $this;
     }
