@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [v0.3.13 (2020-11-23)](https://github.com/pestphp/pest/compare/v0.3.12...v0.3.13)
 ### Added
 - `toMatchArray` expectation ([7bea51f](https://github.com/pestphp/pest/commit/7bea51fe09dd2eca7093e4c34cf2dab2e8d39fa5), [3fd24d9](https://github.com/pestphp/pest/commit/3fd24d96d3145dcebdb0aab40aa8b76faa8b6979))
+- Add Pest options to `--help` output ([#217](https://github.com/pestphp/pest/pull/217))
+
+### Fixed
+- Resolve issue with name resolution in `depends()` ([#216](https://github.com/pestphp/pest/pull/216))
 
 ## [v0.3.12 (2020-11-11)](https://github.com/pestphp/pest/compare/v0.3.11...v0.3.12)
 ### Added
