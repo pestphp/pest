@@ -18,6 +18,7 @@
     ],
     "require": {
         "php": "^7.3 || ^8.0",
+        "illuminate/macroable": "^8.16",
         "nunomaduro/collision": "^5.0",
         "pestphp/pest-plugin": "^0.3",
         "pestphp/pest-plugin-coverage": "^0.3",
