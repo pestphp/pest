@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest;
 
+use Illuminate\Support\Traits\Macroable;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Constraint\Constraint;
 
@@ -14,6 +15,8 @@ use PHPUnit\Framework\Constraint\Constraint;
  */
 final class Expectation
 {
+    use Macroable;
+
     /**
      * The expectation value.
      *
