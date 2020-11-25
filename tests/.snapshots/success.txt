@@ -2,6 +2,12 @@
    PASS  Tests\CustomTestCase\ExecutedTest
   ✓ that gets executed
 
+   PASS  Tests\Expect\Macro
+  ✓ it macros true is true
+  ✓ it macros false is not true
+  ✓ it macros true is true with argument
+  ✓ it macros false is not true with argument
+
    PASS  Tests\Expect\not
   ✓ not property calls
 
@@ -404,5 +410,5 @@
   ✓ depends run test only once
   ✓ depends works with the correct test name
 
-  Tests:  7 skipped, 238 passed
+  Tests:  7 skipped, 242 passed
   
