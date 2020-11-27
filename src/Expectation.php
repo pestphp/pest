@@ -6,6 +6,7 @@ namespace Pest;
 
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Constraint\Constraint;
+use SebastianBergmann\Exporter\Exporter;
 
 /**
  * @internal
@@ -22,6 +23,15 @@ final class Expectation
      * @var mixed
      */
     public $value;
+
+    /**
+     * The exporter instance, if any.
+     *
+     * @readonly
+     *
+     * @var Exporter|null
+     */
+    private $exporter;
 
     /**
      * Creates a new expectation.
@@ -508,8 +518,24 @@ final class Expectation
      */
     public function toMatchArray($array): Expectation
     {
-        foreach ($array as $property => $value) {
-            $this->toHaveKey($property, $value);
+        if (is_object($this->value) && method_exists($this->value, 'toArray')) {
+            $valueAsArray = $this->value->toArray();
+        } else {
+            $valueAsArray = (array) $this->value;
+        }
+
+        foreach ($array as $key => $value) {
+            Assert::assertArrayHasKey($key, $valueAsArray);
+
+            Assert::assertEquals(
+                $value,
+                $valueAsArray[$key],
+                sprintf(
+                    'Failed asserting that an array has a key %s with the value %s.',
+                    $this->export($key),
+                    $this->export($valueAsArray[$key]),
+                ),
+            );
         }
 
         return $this;
@@ -524,7 +550,19 @@ final class Expectation
     public function toMatchObject($object): Expectation
     {
         foreach ((array) $object as $property => $value) {
-            $this->toHaveProperty($property, $value);
+            Assert::assertTrue(property_exists($this->value, $property));
+
+            /* @phpstan-ignore-next-line */
+            $propertyValue = $this->value->{$property};
+            Assert::assertEquals(
+                $value,
+                $propertyValue,
+                sprintf(
+                    'Failed asserting that an object has a property %s with the value %s.',
+                    $this->export($property),
+                    $this->export($propertyValue),
+                ),
+            );
         }
 
         return $this;
@@ -548,6 +586,20 @@ final class Expectation
         Assert::assertThat($this->value, $constraint);
 
         return $this;
+    }
+
+    /**
+     * Exports the given value.
+     *
+     * @param mixed $value
+     */
+    private function export($value): string
+    {
+        if ($this->exporter === null) {
+            $this->exporter = new Exporter();
+        }
+
+        return $this->exporter->export($value);
     }
 
     /**
