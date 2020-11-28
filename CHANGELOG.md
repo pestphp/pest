@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v0.3.14 (2020-11-28)](https://github.com/pestphp/pest/compare/v0.3.13...v0.3.14)
+### Added
+- `pest:dusk` command ([#223](https://github.com/pestphp/pest/pull/223))
+- Better feedback on errors in `toMatchArray` and `toMatchObject` ([#231](https://github.com/pestphp/pest/pull/231))
+
 ## [v0.3.13 (2020-11-23)](https://github.com/pestphp/pest/compare/v0.3.12...v0.3.13)
 ### Added
 - `toMatchArray` expectation ([7bea51f](https://github.com/pestphp/pest/commit/7bea51fe09dd2eca7093e4c34cf2dab2e8d39fa5), [3fd24d9](https://github.com/pestphp/pest/commit/3fd24d96d3145dcebdb0aab40aa8b76faa8b6979))
