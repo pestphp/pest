@@ -44,6 +44,7 @@
     "require-dev": {
         "illuminate/console": "^7.16.1",
         "illuminate/support": "^7.16.1",
+        "laravel/dusk": "^6.9.0",
         "mockery/mockery": "^1.4.1",
         "pestphp/pest-dev-tools": "dev-master"
     },
