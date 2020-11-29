@@ -9,6 +9,7 @@ use Pest\PendingObjects\BeforeEachCall;
 use Pest\PendingObjects\TestCall;
 use Pest\PendingObjects\UsesCall;
 use Pest\Support\Backtrace;
+use Pest\Support\Extendable;
 use Pest\Support\HigherOrderTapProxy;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestCase;
@@ -111,9 +112,13 @@ function afterAll(Closure $closure = null): void
  *
  * @param mixed $value the Value
  *
- * @return Expectation
+ * @return Expectation|Extendable
  */
-function expect($value)
+function expect($value = null)
 {
+    if (func_num_args() === 0) {
+        return new Extendable(Expectation::class);
+    }
+
     return test()->expect($value);
 }
