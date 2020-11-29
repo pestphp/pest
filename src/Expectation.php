@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest;
 
+use Pest\Concerns\Extendable;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Constraint\Constraint;
 use SebastianBergmann\Exporter\Exporter;
@@ -15,6 +16,8 @@ use SebastianBergmann\Exporter\Exporter;
  */
 final class Expectation
 {
+    use Extendable;
+
     /**
      * The expectation value.
      *
