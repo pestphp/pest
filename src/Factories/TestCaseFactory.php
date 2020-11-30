@@ -59,7 +59,7 @@ final class TestCaseFactory
     /**
      * Holds the dataset, if any.
      *
-     * @var Closure|iterable<int, mixed>|string|null
+     * @var Closure|iterable<int|string, mixed>|string|null
      */
     public $dataset;
 

@@ -51,7 +51,7 @@ final class Datasets
     /**
      * Resolves the current dataset to an array value.
      *
-     * @param Traversable<int, mixed>|Closure|iterable<int, mixed>|string|null $data
+     * @param Traversable<int|string, mixed>|Closure|iterable<int|string, mixed>|string|null $data
      *
      * @return array<string, mixed>
      */
