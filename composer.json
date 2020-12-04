@@ -22,7 +22,7 @@
         "pestphp/pest-plugin": "^0.3",
         "pestphp/pest-plugin-coverage": "^0.3",
         "pestphp/pest-plugin-init": "^0.3",
-        "phpunit/phpunit": ">= 9.3.7 <= 9.4.3"
+        "phpunit/phpunit": ">= 9.3.7 <= 9.5.0"
     },
     "autoload": {
         "psr-4": {
