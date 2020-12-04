@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v0.3.15 (2020-12-04)](https://github.com/pestphp/pest/compare/v0.3.14...v0.3.15)
+### Added
+- Support for PHPUnit 9.5.0 ([#234](https://github.com/pestphp/pest/pull/234))
+- Support for extending expectation API ([#232](https://github.com/pestphp/pest/pull/232))
+
+### Fixed
+- Static analysis while using string as key for datasets ([#233](https://github.com/pestphp/pest/pull/233))
+
 ## [v0.3.14 (2020-11-28)](https://github.com/pestphp/pest/compare/v0.3.13...v0.3.14)
 ### Added
 - `pest:dusk` command ([#223](https://github.com/pestphp/pest/pull/223))
