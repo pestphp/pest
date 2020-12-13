@@ -18,14 +18,14 @@ final class Datasets
     /**
      * Holds the datasets.
      *
-     * @var array<string, \Closure|iterable<int, mixed>>
+     * @var array<int|string, Closure|iterable<int|string, mixed>>
      */
     private static $datasets = [];
 
     /**
      * Sets the given.
      *
-     * @param Closure|iterable<int, mixed> $data
+     * @param Closure|iterable<int|string, mixed> $data
      */
     public static function set(string $name, $data): void
     {
@@ -37,7 +37,7 @@ final class Datasets
     }
 
     /**
-     * @return Closure|iterable<int, mixed>
+     * @return Closure|iterable<int|string, mixed>
      */
     public static function get(string $name)
     {

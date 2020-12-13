@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pest\Concerns;
 
 use Closure;
-use Pest\Expectation;
 use Pest\Support\ExceptionTrace;
 use Pest\TestSuite;
 use PHPUnit\Util\Test;
@@ -92,16 +91,6 @@ trait TestCase
         call_user_func(Closure::bind($afterAll, null, self::class));
 
         parent::tearDownAfterClass();
-    }
-
-    /**
-     * Creates a new expectation.
-     *
-     * @param mixed $value
-     */
-    public function expect($value): Expectation
-    {
-        return new Expectation($value);
     }
 
     /**

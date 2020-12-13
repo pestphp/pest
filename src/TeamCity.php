@@ -56,7 +56,7 @@ final class TeamCity extends DefaultResultPrinter
     /** @phpstan-ignore-next-line */
     public function startTestSuite(TestSuite $suite): void
     {
-        $this->flowId = getmypid();
+        $this->flowId = (int) getmypid();
 
         if (!$this->isSummaryTestCountPrinted) {
             $this->printEvent(

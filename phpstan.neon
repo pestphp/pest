@@ -7,14 +7,13 @@ parameters:
     level: max
     paths:
         - src
-    excludes_analyse:
-        - src/globals.php
 
     checkMissingIterableValueType: true
     checkGenericClassInNonGenericObjectType: false
     reportUnmatchedIgnoredErrors: true
 
     ignoreErrors:
+        - "#type mixed is not subtype of native#"
         - "#Undefined variable: \\$this#"
         - "#is not allowed to extend#"
         - "#Language construct eval#"

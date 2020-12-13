@@ -21,6 +21,7 @@
         "nunomaduro/collision": "^5.0",
         "pestphp/pest-plugin": "^0.3",
         "pestphp/pest-plugin-coverage": "^0.3",
+        "pestphp/pest-plugin-expectations": "^0.3",
         "pestphp/pest-plugin-init": "^0.3",
         "phpunit/phpunit": ">= 9.3.7 <= 9.5.0"
     },
@@ -29,7 +30,7 @@
             "Pest\\": "src/"
         },
         "files": [
-            "src/globals.php",
+            "src/Functions.php",
             "src/Pest.php"
         ]
     },
@@ -44,7 +45,7 @@
     "require-dev": {
         "illuminate/console": "^7.16.1",
         "illuminate/support": "^7.16.1",
-        "laravel/dusk": "^6.9.0",
+        "laravel/dusk": "^6.9.1",
         "mockery/mockery": "^1.4.1",
         "pestphp/pest-dev-tools": "dev-master"
     },
@@ -58,8 +59,8 @@
         "bin/pest"
     ],
     "scripts": {
-        "lint": "rector process src && php-cs-fixer fix -v",
-        "test:lint": "php-cs-fixer fix -v --dry-run && rector process src --dry-run",
+        "lint": "php-cs-fixer fix -v",
+        "test:lint": "php-cs-fixer fix -v --dry-run",
         "test:types": "phpstan analyse --ansi --memory-limit=0",
         "test:unit": "php bin/pest --colors=always --exclude-group=integration",
         "test:integration": "php bin/pest --colors=always --group=integration",

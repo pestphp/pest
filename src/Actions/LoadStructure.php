@@ -21,6 +21,7 @@ final class LoadStructure
      * @var array<int, string>
      */
     private const STRUCTURE = [
+        'Expectations.php',
         'Datasets.php',
         'Helpers.php',
         'Pest.php',

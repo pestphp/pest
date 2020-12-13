@@ -22,7 +22,7 @@ test('default php unit tests', function () {
     expect($testSuite->tests())->toHaveCount(1);
 });
 
-it('removes warnings', function () use ($pestTestCase) {
+it('removes warnings', function () {
     $testSuite = new TestSuite();
     $warningTestCase = new WarningTestCase('No tests found in class "Pest\TestCase".');
     $testSuite->addTest($warningTestCase);

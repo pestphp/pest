@@ -116,7 +116,7 @@ $namedDatasets = [
     new Bar(),
 ];
 
-test('lazy named datasets', function ($text) use ($state, $datasets) {
+test('lazy named datasets', function ($text) {
     expect(true)->toBeTrue();
 })->with($namedDatasets);
 

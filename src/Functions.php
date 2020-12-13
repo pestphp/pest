@@ -3,13 +3,11 @@
 declare(strict_types=1);
 
 use Pest\Datasets;
-use Pest\Expectation;
 use Pest\PendingObjects\AfterEachCall;
 use Pest\PendingObjects\BeforeEachCall;
 use Pest\PendingObjects\TestCall;
 use Pest\PendingObjects\UsesCall;
 use Pest\Support\Backtrace;
-use Pest\Support\Extendable;
 use Pest\Support\HigherOrderTapProxy;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestCase;
@@ -37,7 +35,7 @@ function beforeEach(Closure $closure = null): BeforeEachCall
 /**
  * Registers the given dataset.
  *
- * @param Closure|iterable $dataset
+ * @param Closure|iterable<int|string, mixed> $dataset
  */
 function dataset(string $name, $dataset): void
 {
@@ -64,7 +62,7 @@ function uses(string ...$classAndTraits): UsesCall
  */
 function test(string $description = null, Closure $closure = null)
 {
-    if ($description === null && TestSuite::getInstance()->test) {
+    if ($description === null && TestSuite::getInstance()->test !== null) {
         return new HigherOrderTapProxy(TestSuite::getInstance()->test);
     }
 
@@ -102,23 +100,7 @@ function afterEach(Closure $closure = null): AfterEachCall
 /**
  * Runs the given closure after all tests in the current file.
  */
-function afterAll(Closure $closure = null): void
+function afterAll(Closure $closure): void
 {
     TestSuite::getInstance()->afterAll->set($closure);
-}
-
-/**
- * Creates a new expectation.
- *
- * @param mixed $value the Value
- *
- * @return Expectation|Extendable
- */
-function expect($value = null)
-{
-    if (func_num_args() === 0) {
-        return new Extendable(Expectation::class);
-    }
-
-    return test()->expect($value);
 }

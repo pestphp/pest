@@ -6,7 +6,7 @@ beforeEach(function () use ($state) {
     $this->state = $state;
 });
 
-afterEach(function () use ($state) {
+afterEach(function () {
     $this->state->bar = 2;
 });
 
