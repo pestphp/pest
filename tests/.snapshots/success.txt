@@ -114,7 +114,7 @@
   ✓ trait applied in this file
 
    PASS  Tests\Playground
-  ✓ numeric ranges
+  ✓ basic
 
    PASS  Tests\Plugins\Traits
   ✓ it allows global uses
