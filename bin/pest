@@ -19,13 +19,16 @@ use Symfony\Component\Console\Output\OutputInterface;
 
     if (file_exists($vendorPath)) {
         include_once $vendorPath;
+        $autoloadPath = $vendorPath;
     } else {
         include_once $localPath;
+        $autoloadPath = $localPath;
     }
 
     (new Provider())->register();
 
-    $rootPath = getcwd();
+    // get $rootPath based on $autoloadPath
+    $rootPath =  dirname($autoloadPath, 2);
 
     $testSuite = TestSuite::getInstance($rootPath);
 
