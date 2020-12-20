@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v0.3.17 (2020-12-20)](https://github.com/pestphp/pest/compare/v0.3.16...v0.3.17)
+### Fixed
+- Class inheritance with `depends()` ([#236](https://github.com/pestphp/pest/pull/236))
+
 ## [v0.3.16 (2020-12-13)](https://github.com/pestphp/pest/compare/v0.3.15...v0.3.16)
 ### Changed
 - Moves expectation API for external plugin ([5d7f262](https://github.com/pestphp/pest/commit/5d7f262f4ab280a660a85900f402eebb23abfda8))
