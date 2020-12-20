@@ -157,14 +157,6 @@ final class TestCaseFactory
     }
 
     /**
-     * Makes a fully qualified class name from the current filename.
-     */
-    public function getClassName(): string
-    {
-        return $this->makeClassFromFilename($this->filename);
-    }
-
-    /**
      * Makes a fully qualified class name from the given filename.
      */
     public function makeClassFromFilename(string $filename): string

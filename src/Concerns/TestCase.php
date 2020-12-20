@@ -7,6 +7,7 @@ namespace Pest\Concerns;
 use Closure;
 use Pest\Support\ExceptionTrace;
 use Pest\TestSuite;
+use PHPUnit\Framework\ExecutionOrderDependency;
 use PHPUnit\Util\Test;
 use Throwable;
 
@@ -52,6 +53,24 @@ trait TestCase
         $groups = array_unique(array_merge($this->getGroups(), $groups));
 
         $this->setGroups($groups);
+    }
+
+    /**
+     * Add dependencies to the test case and map them to instances of ExecutionOrderDependency.
+     */
+    public function addDependencies(array $tests): void
+    {
+        $className = get_class($this);
+
+        $tests = array_map(function (string $test) use ($className): ExecutionOrderDependency {
+            if (strpos($test, '::') === false) {
+                $test = "{$className}::{$test}";
+            }
+
+            return new ExecutionOrderDependency($test, null, '');
+        }, $tests);
+
+        $this->setDependencies($tests);
     }
 
     /**
