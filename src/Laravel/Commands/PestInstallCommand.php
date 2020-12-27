@@ -8,7 +8,6 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Pest\Console\Thanks;
 use Pest\Exceptions\InvalidConsoleArgument;
-use Pest\Support\Str;
 
 /**
  * @internal
