@@ -33,9 +33,9 @@ final class PestDuskCommand extends DuskCommand
     protected function binary()
     {
         if ('phpdbg' === PHP_SAPI) {
-            return [PHP_BINARY, '-qrr', 'vendor/bin/pest'];
+            return [PHP_BINARY, '-qrr', 'vendor/pestphp/pest/bin/pest'];
         }
 
-        return [PHP_BINARY, 'vendor/bin/pest'];
+        return [PHP_BINARY, 'vendor/pestphp/pest/bin/pest'];
     }
 }
