@@ -54,13 +54,4 @@ final class PestInstallCommand extends Command
             (new Thanks($this->output))();
         }
     }
-
-    /**
-     * Determine if this is a Lumen application.
-     */
-    private function isLumen(): bool
-    {
-        /* @phpstan-ignore-next-line */
-        return Str::startsWith(app()->version(), 'Lumen');
-    }
 }
