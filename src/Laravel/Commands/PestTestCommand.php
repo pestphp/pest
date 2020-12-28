@@ -19,7 +19,7 @@ final class PestTestCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'pest:test {name : The name of the file} {--unit : Create a unit test} {--dusk : Create a dusk test}';
+    protected $signature = 'pest:test {name : The name of the file} {--unit : Create a unit test} {--dusk : Create a Dusk test}';
 
     /**
      * The console command description.
