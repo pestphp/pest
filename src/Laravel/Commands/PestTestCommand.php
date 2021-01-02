@@ -19,7 +19,7 @@ final class PestTestCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'pest:test {name : The name of the file} {--unit : Create a unit test}';
+    protected $signature = 'pest:test {name : The name of the file} {--unit : Create a unit test} {--dusk : Create a Dusk test}';
 
     /**
      * The console command description.
@@ -36,7 +36,7 @@ final class PestTestCommand extends Command
         /** @var string $name */
         $name = $this->argument('name');
 
-        $type = ((bool) $this->option('unit')) ? 'Unit' : 'Feature';
+        $type = ((bool) $this->option('unit')) ? 'Unit' : (((bool) $this->option('dusk')) ? 'Browser' : 'Feature');
 
         $relativePath = sprintf('tests/%s/%s.php',
             $type,
