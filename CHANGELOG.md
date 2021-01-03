@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.0.0 (2021-01-03)](https://github.com/pestphp/pest/compare/v0.3.19...v1.0.0)
+### Added
+- `pest:test --dusk` option ([#245](https://github.com/pestphp/pest/pull/245))
+
+### Changed
+- Stable version
+- Updates init structure ([#240](https://github.com/pestphp/pest/pull/240))
+
 ## [v0.3.19 (2020-12-27)](https://github.com/pestphp/pest/compare/v0.3.18...v0.3.19)
 ### Fixed
 - Fix binary path in `pest:dusk` command ([#239](https://github.com/pestphp/pest/pull/239))
