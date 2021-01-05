@@ -12,7 +12,7 @@ use Pest\TestSuite;
 use SebastianBergmann\Exporter\Exporter;
 
 /**
- * @method \Pest\Expectation expect(mixed $value)
+ * @method \Pest\Expectations\Expectation expect(mixed $value)
  *
  * @internal
  */
