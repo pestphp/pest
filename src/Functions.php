@@ -72,6 +72,16 @@ function test(string $description = null, Closure $closure = null)
 }
 
 /**
+ * Shorthand function to skip the current test.
+ *
+ * @return TestCall|TestCase|mixed
+ */
+function xtest(string $description, Closure $closure = null): TestCall
+{
+    return test($description, $closure)->skip();
+}
+
+/**
  * Adds the given closure as a test. The first argument
  * is the test description; the second argument is
  * a closure that contains the test expectations.
@@ -83,6 +93,16 @@ function it(string $description, Closure $closure = null): TestCall
     $description = sprintf('it %s', $description);
 
     return test($description, $closure);
+}
+
+/**
+ * Shorthand function to skip the current test.
+ *
+ * @return TestCall|TestCase|mixed
+ */
+function xit(string $description, Closure $closure = null): TestCall
+{
+    return it($description, $closure)->skip();
 }
 
 /**

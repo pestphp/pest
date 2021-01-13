@@ -31,3 +31,9 @@ it('skips with condition and message')
 it('skips when skip after assertion')
     ->assertTrue(true)
     ->skip();
+
+xit('skips with shorthand')
+    ->assertTrue(false);
+
+xtest('test skips with shorthand')
+    ->assertTrue(false);
