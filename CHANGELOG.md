@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.0.0 (2021-01-18)](https://github.com/pestphp/pest/compare/v1.0.0...v1.0.1)
+### Added
+- Support for PHPUnit 9.5.1 ([#261](https://github.com/pestphp/pest/pull/261))
+
+### Fixed
+- Fix `TestCase@expect` PHPDoc tag ([#251](https://github.com/pestphp/pest/pull/251))
+
 ## [v1.0.0 (2021-01-03)](https://github.com/pestphp/pest/compare/v0.3.19...v1.0.0)
 ### Added
 - `pest:test --dusk` option ([#245](https://github.com/pestphp/pest/pull/245))
