@@ -21,9 +21,9 @@
         "nunomaduro/collision": "^5.0",
         "pestphp/pest-plugin": "^1.0",
         "pestphp/pest-plugin-coverage": "^1.0",
-        "pestphp/pest-plugin-expectations": "^1.0",
+        "pestphp/pest-plugin-expectations": "dev-feat/phpunit-10-support",
         "pestphp/pest-plugin-init": "^1.0",
-        "phpunit/phpunit": ">= 9.3.7 <= 9.5.1"
+        "phpunit/phpunit": "10.0.x-dev"
     },
     "autoload": {
         "psr-4": {
