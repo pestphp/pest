@@ -6,7 +6,6 @@ namespace Pest\Actions;
 
 use Pest\Support\Str;
 use PHPUnit\TextUI\Configuration\Configuration;
-use PHPUnit\Util\FileLoader;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
@@ -36,7 +35,7 @@ final class LoadStructure
         $testsPath = $rootPath . DIRECTORY_SEPARATOR . 'tests';
 
         $load = function ($filename): bool {
-            return file_exists($filename) && (bool) FileLoader::checkAndLoad($filename);
+            return file_exists($filename) && (bool) include_once $filename;
         };
 
         foreach (self::STRUCTURE as $filename) {
