@@ -179,7 +179,7 @@ final class TestCaseFactory
         // Limit to A-Z, a-z, 0-9, '_', '-'.
         $relativePath = (string) preg_replace('/[^A-Za-z0-9.\\\]/', '', $relativePath);
 
-        $classFQN = str_replace('.', '', 'P\\' . $relativePath)
+        $classFQN = str_replace('.', '', 'P\\' . $relativePath);
         if (class_exists($classFQN)) {
             return $classFQN;
         }
