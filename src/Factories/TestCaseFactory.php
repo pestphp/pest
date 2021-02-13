@@ -171,8 +171,7 @@ final class TestCaseFactory
             }, $filename);
         }
 
-        $quote        = '\'';
-        $filename     = str_replace($quote, sprintf('\\%s', $quote), (string) realpath($filename));
+        $filename     = addslashes((string) realpath($filename));
         $rootPath     = TestSuite::getInstance()->rootPath;
         $relativePath = str_replace($rootPath . DIRECTORY_SEPARATOR, '', $filename);
         $relativePath = dirname(ucfirst($relativePath)) . DIRECTORY_SEPARATOR . basename($relativePath, '.php');
@@ -180,6 +179,10 @@ final class TestCaseFactory
 
         // Strip out any %-encoded octets.
         $relativePath = (string) preg_replace('|%[a-fA-F0-9][a-fA-F0-9]|', '', $relativePath);
+        // Remove escaped quote sequences
+        $relativePath = str_replace(array_map(function (string $quote): string {
+            return sprintf('\\%s', $quote);
+        }, ['\'', '"']), '', $relativePath);
         // Limit to A-Z, a-z, 0-9, '_', '-'.
         $relativePath = (string) preg_replace('/[^A-Za-z0-9\\\\]/', '', $relativePath);
 
@@ -210,7 +213,7 @@ final class TestCaseFactory
                 final class $className extends $baseClass implements $hasPrintableTestCaseClassFQN {
                     $traitsCode
 
-                    private static \$__filename = $quote$filename$quote;
+                    private static \$__filename = '$filename';
                 }
             ");
         } catch (ParseError $caught) {
