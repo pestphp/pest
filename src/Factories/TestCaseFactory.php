@@ -170,7 +170,8 @@ final class TestCaseFactory
             }, $filename);
         }
 
-        $filename     = (string) realpath($filename);
+        $quote        = '\'';
+        $filename     = str_replace($quote, sprintf('\\%s', $quote), (string) realpath($filename));
         $rootPath     = TestSuite::getInstance()->rootPath;
         $relativePath = str_replace($rootPath . DIRECTORY_SEPARATOR, '', $filename);
         $relativePath = dirname(ucfirst($relativePath)) . DIRECTORY_SEPARATOR . basename($relativePath, '.php');
@@ -203,7 +204,7 @@ final class TestCaseFactory
                 final class $className extends $baseClass implements $hasPrintableTestCaseClassFQN {
                     $traitsCode
 
-                    private static \$__filename = '$filename';
+                    private static \$__filename = $quote$filename$quote;
                 }
             ");
         } catch (ParseError $caught) {
