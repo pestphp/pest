@@ -12,6 +12,7 @@ use Pest\Datasets;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Support\HigherOrderMessageCollection;
 use Pest\Support\NullClosure;
+use Pest\Support\Str;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -196,6 +197,11 @@ final class TestCaseFactory
         $className = array_pop($partsFQN);
         $namespace = implode('\\', $partsFQN);
         $baseClass = sprintf('\%s', $this->class);
+
+        if (empty(trim($className))) {
+            $className = 'InvalidTestName' . Str::random();
+            $classFQN .= $className;
+        }
 
         try {
             eval("
