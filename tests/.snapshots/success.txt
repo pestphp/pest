@@ -104,25 +104,25 @@
   ✓ it example 2
 
    PASS  Tests\PHPUnit\CustomAffixes\InvalidTestName
-  ✓ this runs file names like "@#$%^&()-_=+.php"
+  ✓ it runs file names like `@#$%^&()-_=+.php`
 
    PASS  Tests\PHPUnit\CustomAffixes\ATestWithSpaces
-  ✓ this runs file names like "A Test With Spaces.php"
+  ✓ it runs file names like `A Test With Spaces.php`
 
    PASS  Tests\PHPUnit\CustomAffixes\AdditionalFileExtensionspec
-  ✓ this runs file names like "AdditionalFileExtension.spec.php"
+  ✓ it runs file names like `AdditionalFileExtension.spec.php`
 
    PASS  Tests\PHPUnit\CustomAffixes\ManyExtensionsclasstest
-  ✓ this runs file names like "ManyExtensions.class.test.php"
+  ✓ it runs file names like `ManyExtensions.class.test.php`
 
    PASS  Tests\PHPUnit\CustomAffixes\TestCaseWithQuotes
-  ✓ this runs file names like "Test 'Case' With Quotes.php"
+  ✓ it runs file names like `Test 'Case' With Quotes.php`
 
    PASS  Tests\PHPUnit\CustomAffixes\kebabcasespec
-  ✓ this runs file names like "kebab-case-spec.php"
+  ✓ it runs file names like `kebab-case-spec.php`
 
    PASS  Tests\PHPUnit\CustomAffixes\snakecasespec
-  ✓ this runs file names like "snake_case_spec.php"
+  ✓ it runs file names like `snake_case_spec.php`
 
    PASS  Tests\PHPUnit\CustomTestCase\UsesPerDirectory
   ✓ closure was bound to CustomTestCase

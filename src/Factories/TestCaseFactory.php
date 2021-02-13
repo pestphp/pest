@@ -179,7 +179,7 @@ final class TestCaseFactory
 
         // Strip out any %-encoded octets.
         $relativePath = (string) preg_replace('|%[a-fA-F0-9][a-fA-F0-9]|', '', $relativePath);
-        // Remove escaped quote sequences
+        // Remove escaped quote sequences (maintain namespace)
         $relativePath = str_replace(array_map(function (string $quote): string {
             return sprintf('\\%s', $quote);
         }, ['\'', '"']), '', $relativePath);
