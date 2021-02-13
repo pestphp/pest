@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Factories;
 
 use Closure;
+use ParseError;
 use Pest\Concerns;
 use Pest\Contracts\HasPrintableTestCaseName;
 use Pest\Datasets;
@@ -13,6 +14,7 @@ use Pest\Support\HigherOrderMessageCollection;
 use Pest\Support\NullClosure;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 /**
  * @internal
@@ -194,15 +196,19 @@ final class TestCaseFactory
         $namespace = implode('\\', $partsFQN);
         $baseClass = sprintf('\%s', $this->class);
 
-        eval("
-            namespace $namespace;
+        try {
+            eval("
+                namespace $namespace;
 
-            final class $className extends $baseClass implements $hasPrintableTestCaseClassFQN {
-                $traitsCode
+                final class $className extends $baseClass implements $hasPrintableTestCaseClassFQN {
+                    $traitsCode
 
-                private static \$__filename = '$filename';
-            }
-        ");
+                    private static \$__filename = '$filename';
+                }
+            ");
+        } catch (ParseError $caught) {
+            throw new RuntimeException(sprintf('Unable to create test case for test file at %s', $filename), 1, $caught);
+        }
 
         return $classFQN;
     }
