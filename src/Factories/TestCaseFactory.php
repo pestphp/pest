@@ -177,9 +177,9 @@ final class TestCaseFactory
         // Strip out any %-encoded octets.
         $relativePath = (string) preg_replace('|%[a-fA-F0-9][a-fA-F0-9]|', '', $relativePath);
         // Limit to A-Z, a-z, 0-9, '_', '-'.
-        $relativePath = (string) preg_replace('/[^A-Za-z0-9.\\\]/', '', $relativePath);
+        $relativePath = (string) preg_replace('/[^A-Za-z0-9\\\\]/', '', $relativePath);
 
-        $classFQN = str_replace('.', '', 'P\\' . $relativePath);
+        $classFQN = 'P\\' . $relativePath;
         if (class_exists($classFQN)) {
             return $classFQN;
         }
