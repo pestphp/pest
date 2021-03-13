@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.0.3 (2021-03-13)](https://github.com/pestphp/pest/compare/v1.0.2...v1.0.3)
+### Added
+- Support for test extensions ([#269](https://github.com/pestphp/pest/pull/269))
+
 ## [v1.0.2 (2021-02-04)](https://github.com/pestphp/pest/compare/v1.0.1...v1.0.2)
 ### Added
 - Support for PHPUnit 9.5.2 ([#267](https://github.com/pestphp/pest/pull/267))
