@@ -5,14 +5,17 @@ declare(strict_types=1);
 namespace Pest\Factories;
 
 use Closure;
+use ParseError;
 use Pest\Concerns;
 use Pest\Contracts\HasPrintableTestCaseName;
 use Pest\Datasets;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Support\HigherOrderMessageCollection;
 use Pest\Support\NullClosure;
+use Pest\Support\Str;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 /**
  * @internal
@@ -168,7 +171,7 @@ final class TestCaseFactory
             }, $filename);
         }
 
-        $filename     = (string) realpath($filename);
+        $filename     = str_replace('\\\\', '\\', addslashes((string) realpath($filename)));
         $rootPath     = TestSuite::getInstance()->rootPath;
         $relativePath = str_replace($rootPath . DIRECTORY_SEPARATOR, '', $filename);
         $relativePath = dirname(ucfirst($relativePath)) . DIRECTORY_SEPARATOR . basename($relativePath, '.php');
@@ -176,8 +179,12 @@ final class TestCaseFactory
 
         // Strip out any %-encoded octets.
         $relativePath = (string) preg_replace('|%[a-fA-F0-9][a-fA-F0-9]|', '', $relativePath);
+        // Remove escaped quote sequences (maintain namespace)
+        $relativePath = str_replace(array_map(function (string $quote): string {
+            return sprintf('\\%s', $quote);
+        }, ['\'', '"']), '', $relativePath);
         // Limit to A-Z, a-z, 0-9, '_', '-'.
-        $relativePath = (string) preg_replace('/[^A-Za-z0-9.\\\]/', '', $relativePath);
+        $relativePath = (string) preg_replace('/[^A-Za-z0-9\\\\]/', '', $relativePath);
 
         $classFQN = 'P\\' . $relativePath;
         if (class_exists($classFQN)) {
@@ -194,15 +201,24 @@ final class TestCaseFactory
         $namespace = implode('\\', $partsFQN);
         $baseClass = sprintf('\%s', $this->class);
 
-        eval("
-            namespace $namespace;
+        if ('' === trim($className)) {
+            $className = 'InvalidTestName' . Str::random();
+            $classFQN .= $className;
+        }
 
-            final class $className extends $baseClass implements $hasPrintableTestCaseClassFQN {
-                $traitsCode
+        try {
+            eval("
+                namespace $namespace;
 
-                private static \$__filename = '$filename';
-            }
-        ");
+                final class $className extends $baseClass implements $hasPrintableTestCaseClassFQN {
+                    $traitsCode
+
+                    private static \$__filename = '$filename';
+                }
+            ");
+        } catch (ParseError $caught) {
+            throw new RuntimeException(sprintf('Unable to create test case for test file at %s', $filename), 1, $caught);
+        }
 
         return $classFQN;
     }

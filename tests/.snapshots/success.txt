@@ -103,6 +103,27 @@
    PASS  Tests\Fixtures\ExampleTest
   ✓ it example 2
 
+   PASS  Tests\PHPUnit\CustomAffixes\InvalidTestName
+  ✓ it runs file names like `@#$%^&()-_=+.php`
+
+   PASS  Tests\PHPUnit\CustomAffixes\ATestWithSpaces
+  ✓ it runs file names like `A Test With Spaces.php`
+
+   PASS  Tests\PHPUnit\CustomAffixes\AdditionalFileExtensionspec
+  ✓ it runs file names like `AdditionalFileExtension.spec.php`
+
+   PASS  Tests\PHPUnit\CustomAffixes\ManyExtensionsclasstest
+  ✓ it runs file names like `ManyExtensions.class.test.php`
+
+   PASS  Tests\PHPUnit\CustomAffixes\TestCaseWithQuotes
+  ✓ it runs file names like `Test 'Case' With Quotes.php`
+
+   PASS  Tests\PHPUnit\CustomAffixes\kebabcasespec
+  ✓ it runs file names like `kebab-case-spec.php`
+
+   PASS  Tests\PHPUnit\CustomAffixes\snakecasespec
+  ✓ it runs file names like `snake_case_spec.php`
+
    PASS  Tests\PHPUnit\CustomTestCase\UsesPerDirectory
   ✓ closure was bound to CustomTestCase
 
@@ -188,5 +209,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  7 skipped, 108 passed
+  Tests:  7 skipped, 115 passed
   
