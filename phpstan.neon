@@ -14,7 +14,6 @@ parameters:
 
     ignoreErrors:
         - "#type mixed is not subtype of native#"
-        - "#Undefined variable: \\$this#"
         - "#is not allowed to extend#"
         - "#Language construct eval#"
         - "# with null as default value#"

@@ -142,6 +142,7 @@ final class TestCaseFactory
             $proxies->proxy($this);
             $chains->chain($this);
 
+            /* @phpstan-ignore-next-line */
             return call_user_func(Closure::bind($factoryTest, $this, get_class($this)), ...func_get_args());
         };
 

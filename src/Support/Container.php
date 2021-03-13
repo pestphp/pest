@@ -79,6 +79,7 @@ final class Container
 
                         if ($candidate === null) {
                             $type = $param->getType();
+                            /* @phpstan-ignore-next-line */
                             if ($type !== null && $type->isBuiltin()) {
                                 $candidate = $param->getName();
                             } else {
