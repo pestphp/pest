@@ -16,7 +16,9 @@ final class PestDuskCommand extends DuskCommand
      *
      * @var string
      */
-    protected $signature = 'pest:dusk {--without-tty : Disable output to TTY}';
+    protected $signature = 'pest:dusk
+                {--browse : Open a browser instead of using headless mode}
+                {--without-tty : Disable output to TTY}';
 
     /**
      * The console command description.
