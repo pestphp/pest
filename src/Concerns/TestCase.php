@@ -56,6 +56,15 @@ trait TestCase
     }
 
     /**
+     * Add a shared/"global" before each test hook that will execute **before**
+     * the test defined `beforeEach` hook.
+     */
+    public function addBeforeEach(?Closure $hook): void
+    {
+        $this->beforeEach = $hook;
+    }
+
+    /**
      * Add dependencies to the test case and map them to instances of ExecutionOrderDependency.
      */
     public function addDependencies(array $tests): void
@@ -120,6 +129,10 @@ trait TestCase
         TestSuite::getInstance()->test = $this;
 
         parent::setUp();
+
+        if ($this->beforeEach instanceof Closure) {            
+            $this->__callClosure($this->beforeEach, func_get_args());
+        }
 
         $beforeEach = TestSuite::getInstance()->beforeEach->get(self::$__filename);
 

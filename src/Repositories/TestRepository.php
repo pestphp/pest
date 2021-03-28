@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Repositories;
 
+use Closure;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Exceptions\TestAlreadyExist;
 use Pest\Exceptions\TestCaseAlreadyInUse;
@@ -46,8 +47,9 @@ final class TestRepository
         };
 
         foreach ($this->uses as $path => $uses) {
-            [$classOrTraits, $groups] = $uses;
-            $setClassName             = function (TestCaseFactory $testCase, string $key) use ($path, $classOrTraits, $groups, $startsWith): void {
+            [$classOrTraits, $groups, $beforeEach] = $uses;
+
+            $setClassName = function (TestCaseFactory $testCase, string $key) use ($path, $classOrTraits, $groups, $startsWith, $beforeEach): void {
                 [$filename] = explode('@', $key);
 
                 if ((!is_dir($path) && $filename === $path) || (is_dir($path) && $startsWith($filename, $path))) {
@@ -62,10 +64,9 @@ final class TestRepository
                         }
                     }
 
-                    $testCase
-                        ->factoryProxies
-                        // Consider set the real line here.
-                        ->add($filename, 0, 'addGroups', [$groups]);
+                    // IDEA: Consider set the real lines on these.
+                    $testCase->factoryProxies->add($filename, 0, 'addBeforeEach', [$beforeEach]);
+                    $testCase->factoryProxies->add($filename, 0, 'addGroups', [$groups]);
                 }
             };
 
@@ -81,7 +82,7 @@ final class TestRepository
         $state = count($onlyState) > 0 ? $onlyState : $this->state;
 
         foreach ($state as $testFactory) {
-            /* @var TestCaseFactory $testFactory */
+            /** @var TestCaseFactory $testFactory */
             $tests = $testFactory->build($testSuite);
             foreach ($tests as $test) {
                 $each($test);
@@ -95,8 +96,9 @@ final class TestRepository
      * @param array<int, string> $classOrTraits
      * @param array<int, string> $groups
      * @param array<int, string> $paths
+     * @param Closure|null $beforeEach
      */
-    public function use(array $classOrTraits, array $groups, array $paths): void
+    public function use(array $classOrTraits, array $groups, array $paths, ?Closure $beforeEach): void
     {
         foreach ($classOrTraits as $classOrTrait) {
             if (!class_exists($classOrTrait) && !trait_exists($classOrTrait)) {
@@ -109,9 +111,10 @@ final class TestRepository
                 $this->uses[$path] = [
                     array_merge($this->uses[$path][0], $classOrTraits),
                     array_merge($this->uses[$path][1], $groups),
+                    $this->uses[$path][2] ?? $beforeEach,
                 ];
             } else {
-                $this->uses[$path] = [$classOrTraits, $groups];
+                $this->uses[$path] = [$classOrTraits, $groups, $beforeEach];
             }
         }
     }

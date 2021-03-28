@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\PendingObjects;
 
+use Closure;
 use Pest\Exceptions\InvalidUsesPath;
 use Pest\TestSuite;
 
@@ -12,6 +13,13 @@ use Pest\TestSuite;
  */
 final class UsesCall
 {
+    /**
+     * Contains a global before each hook closure to be executed.
+     *
+     * @var Closure
+     */
+    private $beforeEach;
+
     /**
      * Holds the class and traits.
      *
@@ -98,10 +106,25 @@ final class UsesCall
     }
 
     /**
+     * Sets the global beforeEach test hook
+     */
+    public function beforeEach(Closure $hook): UsesCall
+    {
+        $this->beforeEach = $hook;
+
+        return $this;
+    }
+
+    /**
      * Dispatch the creation of uses.
      */
     public function __destruct()
     {
-        TestSuite::getInstance()->tests->use($this->classAndTraits, $this->groups, $this->targets);
+        TestSuite::getInstance()->tests->use(
+            $this->classAndTraits,
+            $this->groups,
+            $this->targets,
+            $this->beforeEach,
+        );
     }
 }
