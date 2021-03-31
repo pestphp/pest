@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.0.5 (2021-03-31)](https://github.com/pestphp/pest/compare/v1.0.4...v1.0.5)
+### Added
+- Add `--browse` option to `pest:dusk` command ([#280](https://github.com/pestphp/pest/pull/280))
+- Support for PHPUnit 9.5.4 ([#284](https://github.com/pestphp/pest/pull/284))
+
 ## [v1.0.4 (2021-03-17)](https://github.com/pestphp/pest/compare/v1.0.3...v1.0.4)
 ### Added
 - Support for PHPUnit 9.5.3 ([#278](https://github.com/pestphp/pest/pull/278))
