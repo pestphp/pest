@@ -31,7 +31,7 @@ test('Cached value will still be set', function () {
     $this->assertSame(1, $value);
 });
 
-test('Global value is not set because the process is separate', function () {
+test('Cacheable function should return a different value because of process isolation', function () {
     if (!defined('ISOLATED')) {
         define('ISOLATED', false);
     }
