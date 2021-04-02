@@ -41,6 +41,15 @@ final class TestCaseFactory
     public $only = false;
 
     /**
+     * Identifier whether the test should be run in a separate process.
+     *
+     * @readonly
+     *
+     * @var bool
+     */
+    public $separateProcess = false;
+
+    /**
      * Holds the test description.
      *
      * If the description is null, means that it
@@ -84,7 +93,7 @@ final class TestCaseFactory
 
     /**
      * Holds the higher order messages
-     *  for the factory that are proxyble.
+     *  for the factory that are proxyable.
      *
      * @var HigherOrderMessageCollection
      */
@@ -92,7 +101,7 @@ final class TestCaseFactory
 
     /**
      * Holds the higher order
-     * messages that are proxyble.
+     * messages that are proxyable.
      *
      * @var HigherOrderMessageCollection
      */
@@ -150,6 +159,12 @@ final class TestCaseFactory
 
         $createTest = function ($description, $data) use ($className, $test) {
             $testCase = new $className($test, $description, $data);
+
+            if ($this->separateProcess) {
+                $testCase->setInIsolation(true);
+                $testCase->setPreserveGlobalState(true);
+            }
+
             $this->factoryProxies->proxy($testCase);
 
             return $testCase;
