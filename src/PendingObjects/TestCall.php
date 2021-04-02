@@ -151,6 +151,16 @@ final class TestCall
     }
 
     /**
+     * Run the current test in a separate process.
+     */
+    public function runInSeparateProcess(): TestCall
+    {
+        $this->testCaseFactory->separateProcess = true;
+
+        return $this;
+    }
+
+    /**
      * Saves the calls to be used on the target.
      *
      * @param array<int, mixed> $arguments
