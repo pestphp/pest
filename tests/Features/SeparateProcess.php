@@ -40,4 +40,3 @@ test('Cacheable function should return a different value because of process isol
 
     $this->assertSame(2, $value);
 })->runInSeparateProcess();
-

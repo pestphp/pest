@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Actions;
 
-use Pest\Exceptions\AttributeNotSupportedYet;
 use Pest\Exceptions\FileOrFolderNotFound;
-use PHPUnit\TextUI\XmlConfiguration\Loader;
 
 /**
  * @internal

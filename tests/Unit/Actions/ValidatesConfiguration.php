@@ -1,7 +1,6 @@
 <?php
 
 use Pest\Actions\ValidatesConfiguration;
-use Pest\Exceptions\AttributeNotSupportedYet;
 use Pest\Exceptions\FileOrFolderNotFound;
 
 it('throws exception when configuration not found', function () {
@@ -13,7 +12,6 @@ it('throws exception when configuration not found', function () {
 });
 
 it('do not throws exception when `process isolation` is true', function () {
-
     $filename = implode(DIRECTORY_SEPARATOR, [
         dirname(__DIR__, 2),
         'Fixtures',
