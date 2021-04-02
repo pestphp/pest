@@ -28,11 +28,5 @@ final class ValidatesConfiguration
         if (!array_key_exists(self::CONFIGURATION_KEY, $arguments) || !file_exists($arguments[self::CONFIGURATION_KEY])) {
             throw new FileOrFolderNotFound('phpunit.xml');
         }
-
-        $configuration = (new Loader())->load($arguments[self::CONFIGURATION_KEY])->phpunit();
-
-        if ($configuration->processIsolation()) {
-            throw new AttributeNotSupportedYet('processIsolation', 'true');
-        }
     }
 }
