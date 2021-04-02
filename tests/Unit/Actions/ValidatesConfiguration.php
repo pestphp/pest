@@ -12,9 +12,7 @@ it('throws exception when configuration not found', function () {
     ]);
 });
 
-it('throws exception when `process isolation` is true', function () {
-    $this->expectException(AttributeNotSupportedYet::class);
-    $this->expectExceptionMessage('The PHPUnit attribute `processIsolation` with value `true` is not supported yet.');
+it('do not throws exception when `process isolation` is true', function () {
 
     $filename = implode(DIRECTORY_SEPARATOR, [
         dirname(__DIR__, 2),
@@ -25,6 +23,8 @@ it('throws exception when `process isolation` is true', function () {
     ValidatesConfiguration::in([
         'configuration' => $filename,
     ]);
+
+    expect(true)->toBeTrue();
 });
 
 it('do not throws exception when `process isolation` is false', function () {
