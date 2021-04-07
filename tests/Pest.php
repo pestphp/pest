@@ -1,6 +1,19 @@
 <?php
 
 uses()->group('integration')->in('Visual');
-uses()->beforeEach(function (): void {
-    $this->baz = 1;
-})->in('Hooks');
+
+uses()
+    ->beforeEach(function () {
+        $this->baz = 0;
+    })
+    // ->beforeAll(function () {
+    //     dump(0);
+    // })
+    ->afterEach(function () {
+       $this->ith = 0;
+    })
+    // ->afterAll(function () {
+    //     dump(0);
+    // })
+    ->in('Hooks');
+
