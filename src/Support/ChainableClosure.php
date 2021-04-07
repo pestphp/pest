@@ -23,4 +23,14 @@ final class ChainableClosure
             call_user_func_array(Closure::bind($next, $this, get_class($this)), func_get_args());
         };
     }
+
+    public static function fromStatic(Closure $closure, Closure $next): Closure
+    {
+        return static function () use ($closure, $next): void {
+            /* @phpstan-ignore-next-line */
+            call_user_func_array(Closure::bind($closure, null, self::class), func_get_args());
+            /* @phpstan-ignore-next-line */
+            call_user_func_array(Closure::bind($next, null, self::class), func_get_args());
+        };
+    }
 }
