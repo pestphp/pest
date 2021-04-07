@@ -10,10 +10,9 @@ uses()
     //     dump(0);
     // })
     ->afterEach(function () {
-       $this->ith = 0;
+        $this->ith = 0;
     })
     // ->afterAll(function () {
     //     dump(0);
     // })
     ->in('Hooks');
-

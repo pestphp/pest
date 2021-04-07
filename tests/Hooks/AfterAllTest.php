@@ -8,4 +8,3 @@ afterAll(function () {
 
 test('global afterAll execution order', function () {
 });
-

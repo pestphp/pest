@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace Pest\Concerns;
 
 use Closure;
-use Pest\Repositories\BeforeEachRepository;
-use Pest\Support\ExceptionTrace;
 use Pest\Support\ChainableClosure;
+use Pest\Support\ExceptionTrace;
 use Pest\TestSuite;
 use PHPUnit\Framework\ExecutionOrderDependency;
 use PHPUnit\Util\Test;
@@ -58,7 +57,7 @@ trait TestCase
     public function __construct(Closure $test, string $description, array $data)
     {
         $this->__test        = $test;
-        $this->__description = $description; 
+        $this->__description = $description;
 
         parent::__construct('__test', $data);
     }
@@ -173,7 +172,7 @@ trait TestCase
 
         $beforeEach = TestSuite::getInstance()->beforeEach->get(self::$__filename);
 
-        if ($this->beforeEach instanceof Closure) {            
+        if ($this->beforeEach instanceof Closure) {
             $beforeEach = ChainableClosure::from($this->beforeEach, $beforeEach);
         }
 
@@ -187,7 +186,7 @@ trait TestCase
     {
         $afterEach = TestSuite::getInstance()->afterEach->get(self::$__filename);
 
-        if ($this->afterEach instanceof Closure) {            
+        if ($this->afterEach instanceof Closure) {
             $afterEach = ChainableClosure::from($this->afterEach, $afterEach);
         }
 

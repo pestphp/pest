@@ -21,4 +21,3 @@ test('global afterEach execution order', function () {
         ->not()
         ->toHaveProperty('ith');
 });
-

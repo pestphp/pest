@@ -25,7 +25,7 @@ final class TestRepository
     private $state = [];
 
     /**
-     * @var array<string, array<int, array<int, string>>>
+     * @var array<string, array<int, array<int, string, Closure>>>
      */
     private $uses = [];
 
@@ -96,10 +96,10 @@ final class TestRepository
     /**
      * Uses the given `$testCaseClass` on the given `$paths`.
      *
-     * @param array<int, string> $classOrTraits
-     * @param array<int, string> $groups
-     * @param array<int, string> $paths
-     * @param array<intm Closure> $hooks
+     * @param array<int, string>  $classOrTraits
+     * @param array<int, string>  $groups
+     * @param array<int, string>  $paths
+     * @param array<int, Closure> $hooks
      */
     public function use(array $classOrTraits, array $groups, array $paths, array $hooks): void
     {

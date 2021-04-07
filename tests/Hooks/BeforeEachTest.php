@@ -24,4 +24,3 @@ test('global beforeEach execution order', function () {
         ->and($this->baz)
         ->toBe(2);
 });
-
