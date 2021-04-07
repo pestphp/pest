@@ -103,6 +103,18 @@
    PASS  Tests\Fixtures\ExampleTest
   ✓ it example 2
 
+   PASS  Tests\Hooks\AfterAllTest
+  ✓ global afterAll execution order
+
+   PASS  Tests\Hooks\AfterEachTest
+  ✓ global afterEach execution order
+
+   PASS  Tests\Hooks\BeforeAllTest
+  ✓ global beforeAll execution order
+
+   PASS  Tests\Hooks\BeforeEachTest
+  ✓ global beforeEach execution order
+
    PASS  Tests\PHPUnit\CustomAffixes\InvalidTestName
   ✓ it runs file names like `@#$%^&()-_=+.php`
 
@@ -209,5 +221,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  7 skipped, 115 passed
+  Tests:  7 skipped, 119 passed
   
