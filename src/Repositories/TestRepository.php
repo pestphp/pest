@@ -25,7 +25,7 @@ final class TestRepository
     private $state = [];
 
     /**
-     * @var array<string, array<int, array<int, string, Closure>>>
+     * @var array<string, array<int, array<int, string|Closure>>>
      */
     private $uses = [];
 
@@ -53,7 +53,7 @@ final class TestRepository
                 [$filename] = explode('@', $key);
 
                 if ((!is_dir($path) && $filename === $path) || (is_dir($path) && $startsWith($filename, $path))) {
-                    foreach ($classOrTraits as $class) {
+                    foreach ($classOrTraits as $class) { /** @var string $class */
                         if (class_exists($class)) {
                             if ($testCase->class !== TestCase::class) {
                                 throw new TestCaseAlreadyInUse($testCase->class, $class, $filename);
@@ -114,7 +114,7 @@ final class TestRepository
                 $this->uses[$path] = [
                     array_merge($this->uses[$path][0], $classOrTraits),
                     array_merge($this->uses[$path][1], $groups),
-                    $this->uses[$path][2] + $hooks,
+                    $this->uses[$path][2] + $hooks, // NOTE: array_merge will destroy numeric indices
                 ];
             } else {
                 $this->uses[$path] = [$classOrTraits, $groups, $hooks];
