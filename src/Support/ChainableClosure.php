@@ -12,7 +12,7 @@ use Closure;
 final class ChainableClosure
 {
     /**
-     * Calls the given `$closure` and chains the the `$next` closure.
+     * Calls the given `$closure` and chains the `$next` closure.
      */
     public static function from(Closure $closure, Closure $next): Closure
     {
@@ -24,6 +24,9 @@ final class ChainableClosure
         };
     }
 
+    /**
+     * Call the given static `$closure` and chains the `$next` closure.
+     */
     public static function fromStatic(Closure $closure, Closure $next): Closure
     {
         return static function () use ($closure, $next): void {
