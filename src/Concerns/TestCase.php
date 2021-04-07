@@ -52,6 +52,22 @@ trait TestCase
     private $afterEach = null;
 
     /**
+     * Holds a global/shared beforeAll ("set up before") closure if one has been
+     * defined.
+     *
+     * @var Closure|null
+     */
+    private static $beforeAll = null;
+
+    /**
+     * Holds a global/shared afterAll ("tear down after") closure if one has
+     * been defined.
+     *
+     * @var Closure|null
+     */
+    private static $afterAll = null;
+
+    /**
      * Creates a new instance of the test case.
      */
     public function __construct(Closure $test, string $description, array $data)
@@ -88,6 +104,36 @@ trait TestCase
         }, $tests);
 
         $this->setDependencies($tests);
+    }
+
+    /**
+     * Add a shared/"global" before all test hook that will execute **before**
+     * the test defined `beforeAll` hook(s).
+     */
+    public function addBeforeAll(?Closure $hook): void
+    {
+        if (!$hook) {
+            return;
+        }
+
+        self::$beforeAll = (self::$beforeAll instanceof Closure)
+            ? ChainableClosure::fromStatic(self::$beforeAll, $hook)
+            : $hook;
+    }
+
+    /**
+     * Add a shared/"global" after all test hook that will execute **before**
+     * the test defined `afterAll` hook(s).
+     */
+    public function addAfterAll(?Closure $hook): void
+    {
+        if (!$hook) {
+            return;
+        }
+
+        self::$afterAll = (self::$afterAll instanceof Closure)
+            ? ChainableClosure::fromStatic(self::$afterAll, $hook)
+            : $hook;
     }
 
     /**
@@ -146,6 +192,10 @@ trait TestCase
 
         $beforeAll = TestSuite::getInstance()->beforeAll->get(self::$__filename);
 
+        if (self::$beforeAll instanceof Closure) {
+            $beforeAll = ChainableClosure::fromStatic(self::$beforeAll, $beforeAll);
+        }
+
         call_user_func(Closure::bind($beforeAll, null, self::class));
     }
 
@@ -155,6 +205,10 @@ trait TestCase
     public static function tearDownAfterClass(): void
     {
         $afterAll = TestSuite::getInstance()->afterAll->get(self::$__filename);
+
+        if (self::$afterAll instanceof Closure) {
+            $afterAll = ChainableClosure::fromStatic(self::$afterAll, $afterAll);
+        }
 
         call_user_func(Closure::bind($afterAll, null, self::class));
 

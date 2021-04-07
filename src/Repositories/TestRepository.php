@@ -66,10 +66,10 @@ final class TestRepository
 
                     // IDEA: Consider set the real lines on these.
                     $testCase->factoryProxies->add($filename, 0, 'addGroups', [$groups]);
-                    // $testCase->factoryProxies->add($filename, 0, 'addBeforeAll', [$hooks[0] ?? null]);
+                    $testCase->factoryProxies->add($filename, 0, 'addBeforeAll', [$hooks[0] ?? null]);
                     $testCase->factoryProxies->add($filename, 0, 'addBeforeEach', [$hooks[1] ?? null]);
                     $testCase->factoryProxies->add($filename, 0, 'addAfterEach', [$hooks[2] ?? null]);
-                    // $testCase->factoryProxies->add($filename, 0, 'addAfterAll', [$hooks[3] ?? null]);
+                    $testCase->factoryProxies->add($filename, 0, 'addAfterAll', [$hooks[3] ?? null]);
                 }
             };
 
