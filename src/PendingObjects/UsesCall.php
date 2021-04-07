@@ -16,9 +16,16 @@ final class UsesCall
     /**
      * Contains a global before each hook closure to be executed.
      *
-     * @var Closure
+     * Array indices here matter. They are mapped as follows:
+     *
+     * - `0` => `beforeAll`
+     * - `1` => `beforeEach`
+     * - `2` => `afterEach`
+     * - `3` => `afterAll`
+     *
+     * @var array<int, Closure>
      */
-    private $beforeEach;
+    private $hooks = [];
 
     /**
      * Holds the class and traits.
@@ -106,11 +113,41 @@ final class UsesCall
     }
 
     /**
-     * Sets the global beforeEach test hook
+     * Sets the global beforeAll test hook.
+     */
+    public function beforeAll(Closure $hook): UsesCall
+    {
+        $this->hooks[0] = $hook;
+
+        return $this;
+    }
+
+    /**
+     * Sets the global beforeEach test hook.
      */
     public function beforeEach(Closure $hook): UsesCall
     {
-        $this->beforeEach = $hook;
+        $this->hooks[1] = $hook;
+
+        return $this;
+    }
+
+    /**
+     * Sets the global afterEach test hook.
+     */
+    public function afterEach(Closure $hook): UsesCall
+    {
+        $this->hooks[2] = $hook;
+
+        return $this;
+    }
+
+    /**
+     * Sets the global afterAll test hook.
+     */
+    public function afterAll(Closure $hook): UsesCall
+    {
+        $this->hooks[3] = $hook;
 
         return $this;
     }
@@ -124,7 +161,7 @@ final class UsesCall
             $this->classAndTraits,
             $this->groups,
             $this->targets,
-            $this->beforeEach,
+            $this->hooks,
         );
     }
 }

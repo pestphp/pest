@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Pest\Concerns;
 
 use Closure;
+use Pest\Repositories\BeforeEachRepository;
 use Pest\Support\ExceptionTrace;
+use Pest\Support\ChainableClosure;
 use Pest\TestSuite;
 use PHPUnit\Framework\ExecutionOrderDependency;
 use PHPUnit\Util\Test;
@@ -35,12 +37,28 @@ trait TestCase
     private $__test;
 
     /**
+     * Holds a global/shared beforeEach ("set up") closure if one has been
+     * defined.
+     *
+     * @var Closure|null
+     */
+    private $beforeEach = null;
+
+    /**
+     * Holds a global/shared afterEach ("tear down") closure if one has been
+     * defined.
+     *
+     * @var Closure|null
+     */
+    private $afterEach = null;
+
+    /**
      * Creates a new instance of the test case.
      */
     public function __construct(Closure $test, string $description, array $data)
     {
         $this->__test        = $test;
-        $this->__description = $description;
+        $this->__description = $description; 
 
         parent::__construct('__test', $data);
     }
@@ -53,15 +71,6 @@ trait TestCase
         $groups = array_unique(array_merge($this->getGroups(), $groups));
 
         $this->setGroups($groups);
-    }
-
-    /**
-     * Add a shared/"global" before each test hook that will execute **before**
-     * the test defined `beforeEach` hook.
-     */
-    public function addBeforeEach(?Closure $hook): void
-    {
-        $this->beforeEach = $hook;
     }
 
     /**
@@ -80,6 +89,38 @@ trait TestCase
         }, $tests);
 
         $this->setDependencies($tests);
+    }
+
+    /**
+     * Add a shared/"global" before each test hook that will execute **before**
+     * the test defined `beforeEach` hook.
+     */
+    public function addBeforeEach(?Closure $hook): void
+    {
+        $this->addHook('beforeEach', $hook);
+    }
+
+    /**
+     * Add a shared/"global" after each test hook that will execute **before**
+     * the test defined `afterEach` hook.
+     */
+    public function addAfterEach(?Closure $hook): void
+    {
+        $this->addHook('afterEach', $hook);
+    }
+
+    /**
+     * Add a shared/global hook and compose them if more than one is passed.
+     */
+    private function addHook(string $property, ?Closure $hook): void
+    {
+        if (!$hook) {
+            return;
+        }
+
+        $this->{$property} = ($this->{$property} instanceof Closure)
+            ? ChainableClosure::from($this->{$property}, $hook)
+            : $hook;
     }
 
     /**
@@ -130,11 +171,11 @@ trait TestCase
 
         parent::setUp();
 
-        if ($this->beforeEach instanceof Closure) {            
-            $this->__callClosure($this->beforeEach, func_get_args());
-        }
-
         $beforeEach = TestSuite::getInstance()->beforeEach->get(self::$__filename);
+
+        if ($this->beforeEach instanceof Closure) {            
+            $beforeEach = ChainableClosure::from($this->beforeEach, $beforeEach);
+        }
 
         $this->__callClosure($beforeEach, func_get_args());
     }
@@ -145,6 +186,10 @@ trait TestCase
     protected function tearDown(): void
     {
         $afterEach = TestSuite::getInstance()->afterEach->get(self::$__filename);
+
+        if ($this->afterEach instanceof Closure) {            
+            $afterEach = ChainableClosure::from($this->afterEach, $afterEach);
+        }
 
         $this->__callClosure($afterEach, func_get_args());
 

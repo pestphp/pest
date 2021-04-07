@@ -47,9 +47,9 @@ final class TestRepository
         };
 
         foreach ($this->uses as $path => $uses) {
-            [$classOrTraits, $groups, $beforeEach] = $uses;
+            [$classOrTraits, $groups, $hooks] = $uses;
 
-            $setClassName = function (TestCaseFactory $testCase, string $key) use ($path, $classOrTraits, $groups, $startsWith, $beforeEach): void {
+            $setClassName = function (TestCaseFactory $testCase, string $key) use ($path, $classOrTraits, $groups, $startsWith, $hooks): void {
                 [$filename] = explode('@', $key);
 
                 if ((!is_dir($path) && $filename === $path) || (is_dir($path) && $startsWith($filename, $path))) {
@@ -65,8 +65,11 @@ final class TestRepository
                     }
 
                     // IDEA: Consider set the real lines on these.
-                    $testCase->factoryProxies->add($filename, 0, 'addBeforeEach', [$beforeEach]);
                     $testCase->factoryProxies->add($filename, 0, 'addGroups', [$groups]);
+                    // $testCase->factoryProxies->add($filename, 0, 'addBeforeAll', [$hooks[0] ?? null]);
+                    $testCase->factoryProxies->add($filename, 0, 'addBeforeEach', [$hooks[1] ?? null]);
+                    $testCase->factoryProxies->add($filename, 0, 'addAfterEach', [$hooks[2] ?? null]);
+                    // $testCase->factoryProxies->add($filename, 0, 'addAfterAll', [$hooks[3] ?? null]);
                 }
             };
 
@@ -96,9 +99,9 @@ final class TestRepository
      * @param array<int, string> $classOrTraits
      * @param array<int, string> $groups
      * @param array<int, string> $paths
-     * @param Closure|null $beforeEach
+     * @param array<intm Closure> $hooks
      */
-    public function use(array $classOrTraits, array $groups, array $paths, ?Closure $beforeEach): void
+    public function use(array $classOrTraits, array $groups, array $paths, array $hooks): void
     {
         foreach ($classOrTraits as $classOrTrait) {
             if (!class_exists($classOrTrait) && !trait_exists($classOrTrait)) {
@@ -111,10 +114,10 @@ final class TestRepository
                 $this->uses[$path] = [
                     array_merge($this->uses[$path][0], $classOrTraits),
                     array_merge($this->uses[$path][1], $groups),
-                    $this->uses[$path][2] ?? $beforeEach,
+                    $this->uses[$path][2] + $hooks,
                 ];
             } else {
-                $this->uses[$path] = [$classOrTraits, $groups, $beforeEach];
+                $this->uses[$path] = [$classOrTraits, $groups, $hooks];
             }
         }
     }
