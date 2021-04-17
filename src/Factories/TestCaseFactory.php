@@ -157,13 +157,18 @@ final class TestCaseFactory
 
         $className = $this->makeClassFromFilename($this->filename);
 
+
         $createTest = function ($description, $data) use ($className, $test) {
+
+            $classFilename = str_replace('.php', 'Temp.php', $this->filename);
+            require_once $classFilename;
+
             $testCase = new $className($test, $description, $data);
 
             if ($this->separateProcess) {
                 $testCase->setPreserveGlobalState(false);
                 $testCase->setInIsolation(false);
-                $testCase->setRunClassInSeparateProcess(true);
+                $testCase->setRunTestInSeparateProcess(true);
             }
 
             $this->factoryProxies->proxy($testCase);
@@ -223,19 +228,22 @@ final class TestCaseFactory
             $classFQN .= $className;
         }
 
-        try {
-            eval("
-                namespace $namespace;
+        // If the file should be run in a separate process, we cannot create it 'on the fly' as this will
+        // crash PHPUnit. Instead, we'll write a temporary file in the same folder, but with the Temp.php
+        // suffix. That way we can clean it up when the test passes. In the build method, we will provide
+        // that file instead on the fly creating one.
+        $filename = str_replace('.php', 'Temp.php', $filename);
+        $classFQN = str_replace($classFQN, "{$classFQN}Temp", $classFQN);
+        $className = str_replace($className, "{$className}Temp", $className);
 
-                final class $className extends $baseClass implements $hasPrintableTestCaseClassFQN {
-                    $traitsCode
+        file_put_contents($filename,"<?php
+namespace $namespace;
 
-                    private static \$__filename = '$filename';
-                }
-            ");
-        } catch (ParseError $caught) {
-            throw new RuntimeException(sprintf('Unable to create test case for test file at %s', $filename), 1, $caught);
-        }
+final class $className extends $baseClass implements $hasPrintableTestCaseClassFQN {
+    $traitsCode
+
+    private static \$__filename = '$filename';
+}");
 
         return $classFQN;
     }

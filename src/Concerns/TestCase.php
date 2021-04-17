@@ -138,6 +138,7 @@ trait TestCase
         parent::tearDown();
 
         TestSuite::getInstance()->test = null;
+        // Cleanup Temp.php files in tests!
     }
 
     /**
