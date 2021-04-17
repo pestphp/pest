@@ -161,8 +161,9 @@ final class TestCaseFactory
             $testCase = new $className($test, $description, $data);
 
             if ($this->separateProcess) {
-                $testCase->setInIsolation(true);
-                $testCase->setPreserveGlobalState(true);
+                $testCase->setPreserveGlobalState(false);
+                $testCase->setInIsolation(false);
+                $testCase->setRunClassInSeparateProcess(true);
             }
 
             $this->factoryProxies->proxy($testCase);
