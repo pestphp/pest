@@ -155,26 +155,36 @@ final class TestCaseFactory
             return call_user_func(Closure::bind($factoryTest, $this, get_class($this)), ...func_get_args());
         };
 
-        $className = $this->makeClassFromFilename($this->filename);
+        if ($this->separateProcess) {
+            $className = $this->makeTemporaryClassFromFilename($this->filename);
 
+            $createTest = function ($description, $data) use ($className, $test) {
 
-        $createTest = function ($description, $data) use ($className, $test) {
+                $classFilename = str_replace('.php', 'Temp.php', $this->filename);
+                require_once $classFilename;
 
-            $classFilename = str_replace('.php', 'Temp.php', $this->filename);
-            require_once $classFilename;
+                $testCase = new $className($test, $description, $data);
 
-            $testCase = new $className($test, $description, $data);
+                if ($this->separateProcess) {
+                    $testCase->setPreserveGlobalState(false);
+                    $testCase->setInIsolation(false);
+                    $testCase->setRunTestInSeparateProcess(true);
+                }
 
-            if ($this->separateProcess) {
-                $testCase->setPreserveGlobalState(false);
-                $testCase->setInIsolation(false);
-                $testCase->setRunTestInSeparateProcess(true);
-            }
+                $this->factoryProxies->proxy($testCase);
 
-            $this->factoryProxies->proxy($testCase);
+                return $testCase;
+            };
+        } else {
+            $className = $this->makeClassFromFilename($this->filename);
 
-            return $testCase;
-        };
+            $createTest = function ($description, $data) use ($className, $test) {
+                $testCase = new $className($test, $description, $data);
+                $this->factoryProxies->proxy($testCase);
+
+                return $testCase;
+            };
+        }
 
         $datasets = Datasets::resolve($this->description, $this->dataset);
 
@@ -228,13 +238,76 @@ final class TestCaseFactory
             $classFQN .= $className;
         }
 
+        try {
+            eval("
+                namespace $namespace;
+
+                final class $className extends $baseClass implements $hasPrintableTestCaseClassFQN {
+                    $traitsCode
+
+                    private static \$__filename = '$filename';
+                }
+            ");
+        } catch (ParseError $caught) {
+            throw new RuntimeException(sprintf('Unable to create test case for test file at %s', $filename), 1, $caught);
+        }
+
+        return $classFQN;
+    }
+
+    /**
+     * Makes a fully qualified class name from the given filename.
+     */
+    public function makeTemporaryClassFromFilename(string $filename): string
+    {
+        if ('\\' === DIRECTORY_SEPARATOR) {
+            // In case Windows, strtolower drive name, like in UsesCall.
+            $filename = (string) preg_replace_callback('~^(?P<drive>[a-z]+:\\\)~i', function ($match): string {
+                return strtolower($match['drive']);
+            }, $filename);
+        }
+
+        $filename     = str_replace('\\\\', '\\', addslashes((string) realpath($filename)));
+        $rootPath     = TestSuite::getInstance()->rootPath;
+        $relativePath = str_replace($rootPath . DIRECTORY_SEPARATOR, '', $filename);
+        $relativePath = dirname(ucfirst($relativePath)) . DIRECTORY_SEPARATOR . basename($relativePath, '.php');
+        $relativePath = str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath);
+
+        // Strip out any %-encoded octets.
+        $relativePath = (string) preg_replace('|%[a-fA-F0-9][a-fA-F0-9]|', '', $relativePath);
+        // Remove escaped quote sequences (maintain namespace)
+        $relativePath = str_replace(array_map(function (string $quote): string {
+            return sprintf('\\%s', $quote);
+        }, ['\'', '"']), '', $relativePath);
+        // Limit to A-Z, a-z, 0-9, '_', '-'.
+        $relativePath = (string) preg_replace('/[^A-Za-z0-9\\\\]/', '', $relativePath);
+
+        $classFQN = 'P\\' . $relativePath;
+        $classFQN = str_replace($classFQN, "{$classFQN}Temp", $classFQN);
+        if (class_exists($classFQN)) {
+            return $classFQN;
+        }
+
+        $hasPrintableTestCaseClassFQN = sprintf('\%s', HasPrintableTestCaseName::class);
+        $traitsCode                   = sprintf('use %s;', implode(', ', array_map(function ($trait): string {
+            return sprintf('\%s', $trait);
+        }, $this->traits)));
+
+        $partsFQN  = explode('\\', $classFQN);
+        $className = array_pop($partsFQN);
+        $namespace = implode('\\', $partsFQN);
+        $baseClass = sprintf('\%s', $this->class);
+
+        if ('' === trim($className)) {
+            $className = 'InvalidTestName' . Str::random();
+            $classFQN .= $className;
+        }
+
         // If the file should be run in a separate process, we cannot create it 'on the fly' as this will
         // crash PHPUnit. Instead, we'll write a temporary file in the same folder, but with the Temp.php
         // suffix. That way we can clean it up when the test passes. In the build method, we will provide
         // that file instead on the fly creating one.
         $filename = str_replace('.php', 'Temp.php', $filename);
-        $classFQN = str_replace($classFQN, "{$classFQN}Temp", $classFQN);
-        $className = str_replace($className, "{$className}Temp", $className);
 
         file_put_contents($filename,"<?php
 namespace $namespace;
