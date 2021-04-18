@@ -138,7 +138,15 @@ trait TestCase
         parent::tearDown();
 
         TestSuite::getInstance()->test = null;
+
         // Cleanup Temp.php files in tests!
+        $iterator = new \RecursiveDirectoryIterator(dirname(__FILE__, 3) . '/tests');
+
+        foreach(new \RecursiveIteratorIterator($iterator) as $file) {
+            if (strpos($file->getFileName(), 'Temp.php') !== false) {
+                unlink($file->getPath() . DIRECTORY_SEPARATOR . $file->getFileName());
+            }
+        }
     }
 
     /**
