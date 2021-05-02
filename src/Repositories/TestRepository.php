@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Repositories;
 
+use Closure;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Exceptions\TestAlreadyExist;
 use Pest\Exceptions\TestCaseAlreadyInUse;
@@ -24,7 +25,7 @@ final class TestRepository
     private $state = [];
 
     /**
-     * @var array<string, array<int, array<int, string>>>
+     * @var array<string, array<int, array<int, string|Closure>>>
      */
     private $uses = [];
 
@@ -46,12 +47,13 @@ final class TestRepository
         };
 
         foreach ($this->uses as $path => $uses) {
-            [$classOrTraits, $groups] = $uses;
-            $setClassName             = function (TestCaseFactory $testCase, string $key) use ($path, $classOrTraits, $groups, $startsWith): void {
+            [$classOrTraits, $groups, $hooks] = $uses;
+
+            $setClassName = function (TestCaseFactory $testCase, string $key) use ($path, $classOrTraits, $groups, $startsWith, $hooks): void {
                 [$filename] = explode('@', $key);
 
                 if ((!is_dir($path) && $filename === $path) || (is_dir($path) && $startsWith($filename, $path))) {
-                    foreach ($classOrTraits as $class) {
+                    foreach ($classOrTraits as $class) { /** @var string $class */
                         if (class_exists($class)) {
                             if ($testCase->class !== TestCase::class) {
                                 throw new TestCaseAlreadyInUse($testCase->class, $class, $filename);
@@ -62,10 +64,12 @@ final class TestRepository
                         }
                     }
 
-                    $testCase
-                        ->factoryProxies
-                        // Consider set the real line here.
-                        ->add($filename, 0, 'addGroups', [$groups]);
+                    // IDEA: Consider set the real lines on these.
+                    $testCase->factoryProxies->add($filename, 0, 'addGroups', [$groups]);
+                    $testCase->factoryProxies->add($filename, 0, 'addBeforeAll', [$hooks[0] ?? null]);
+                    $testCase->factoryProxies->add($filename, 0, 'addBeforeEach', [$hooks[1] ?? null]);
+                    $testCase->factoryProxies->add($filename, 0, 'addAfterEach', [$hooks[2] ?? null]);
+                    $testCase->factoryProxies->add($filename, 0, 'addAfterAll', [$hooks[3] ?? null]);
                 }
             };
 
@@ -81,7 +85,7 @@ final class TestRepository
         $state = count($onlyState) > 0 ? $onlyState : $this->state;
 
         foreach ($state as $testFactory) {
-            /* @var TestCaseFactory $testFactory */
+            /** @var TestCaseFactory $testFactory */
             $tests = $testFactory->build($testSuite);
             foreach ($tests as $test) {
                 $each($test);
@@ -92,11 +96,12 @@ final class TestRepository
     /**
      * Uses the given `$testCaseClass` on the given `$paths`.
      *
-     * @param array<int, string> $classOrTraits
-     * @param array<int, string> $groups
-     * @param array<int, string> $paths
+     * @param array<int, string>  $classOrTraits
+     * @param array<int, string>  $groups
+     * @param array<int, string>  $paths
+     * @param array<int, Closure> $hooks
      */
-    public function use(array $classOrTraits, array $groups, array $paths): void
+    public function use(array $classOrTraits, array $groups, array $paths, array $hooks): void
     {
         foreach ($classOrTraits as $classOrTrait) {
             if (!class_exists($classOrTrait) && !trait_exists($classOrTrait)) {
@@ -109,9 +114,10 @@ final class TestRepository
                 $this->uses[$path] = [
                     array_merge($this->uses[$path][0], $classOrTraits),
                     array_merge($this->uses[$path][1], $groups),
+                    $this->uses[$path][2] + $hooks, // NOTE: array_merge will destroy numeric indices
                 ];
             } else {
-                $this->uses[$path] = [$classOrTraits, $groups];
+                $this->uses[$path] = [$classOrTraits, $groups, $hooks];
             }
         }
     }

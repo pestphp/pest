@@ -90,8 +90,6 @@ final class Command extends BaseCommand
          */
         $this->arguments = AddsDefaults::to($this->arguments);
 
-        LoadStructure::in($this->testSuite->rootPath);
-
         $testRunner = new TestRunner($this->arguments['loader']);
         $testSuite  = $this->arguments['test'];
 
@@ -127,6 +125,8 @@ final class Command extends BaseCommand
      */
     public function run(array $argv, bool $exit = true): int
     {
+        LoadStructure::in($this->testSuite->rootPath);
+
         $result = parent::run($argv, false);
 
         /*
