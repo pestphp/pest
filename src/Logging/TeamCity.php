@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pest;
+namespace Pest\Logging;
 
 use function getmypid;
 use Pest\Concerns\TestCase;
@@ -121,7 +121,7 @@ final class TeamCity extends DefaultResultPrinter
 
         $this->printEvent('testStarted', [
             self::NAME          => $test->getName(),
-            /* @phpstan-ignore-next-line */
+            // @phpstan-ignore-next-line
             self::LOCATION_HINT => self::PROTOCOL . $test->toString(),
         ]);
     }
@@ -203,7 +203,7 @@ final class TeamCity extends DefaultResultPrinter
         return (int) round($time * 1000);
     }
 
-    private static function isPestTest(Test $test): bool
+    public static function isPestTest(Test $test): bool
     {
         /** @var array<string, string> $uses */
         $uses = class_uses($test);
