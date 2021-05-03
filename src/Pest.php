@@ -8,3 +8,8 @@ function version(): string
 {
     return '1.0.4';
 }
+
+function testDirectory(string $file = ''): string
+{
+    return TestSuite::getInstance()->testPath . $file;
+}

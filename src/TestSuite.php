@@ -67,6 +67,13 @@ final class TestSuite
     public $rootPath;
 
     /**
+     * Holds the test path.
+     *
+     * @var string
+     */
+    public $testPath;
+
+    /**
      * Holds an instance of the test suite.
      *
      * @var TestSuite
@@ -76,7 +83,7 @@ final class TestSuite
     /**
      * Creates a new instance of the test suite.
      */
-    public function __construct(string $rootPath)
+    public function __construct(string $rootPath, string $testPath)
     {
         $this->beforeAll  = new BeforeAllRepository();
         $this->beforeEach = new BeforeEachRepository();
@@ -85,15 +92,16 @@ final class TestSuite
         $this->afterAll   = new AfterAllRepository();
 
         $this->rootPath = (string) realpath($rootPath);
+        $this->testPath = $testPath;
     }
 
     /**
      * Returns the current instance of the test suite.
      */
-    public static function getInstance(string $rootPath = null): TestSuite
+    public static function getInstance(string $rootPath = null, string $testPath = null): TestSuite
     {
-        if (is_string($rootPath)) {
-            self::$instance = new TestSuite($rootPath);
+        if (is_string($rootPath) && is_string($testPath)) {
+            self::$instance = new TestSuite($rootPath, $testPath);
 
             foreach (Plugin::$callables as $callable) {
                 $callable();
