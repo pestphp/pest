@@ -6,5 +6,5 @@ namespace Pest;
 
 function version(): string
 {
-    return '1.0.5';
+    return '1.1.0';
 }
