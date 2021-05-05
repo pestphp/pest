@@ -8,6 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Pest\Exceptions\InvalidConsoleArgument;
+use function Pest\testDirectory;
 
 /**
  * @internal
@@ -36,7 +37,7 @@ final class PestDatasetCommand extends Command
         /** @var string $name */
         $name = $this->argument('name');
 
-        $relativePath   = sprintf('tests/Datasets/%s.php', ucfirst($name));
+        $relativePath   = sprintf(testDirectory('Datasets/%s.php'), ucfirst($name));
 
         /* @phpstan-ignore-next-line */
         $target         = base_path($relativePath);

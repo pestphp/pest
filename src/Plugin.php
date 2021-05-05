@@ -22,7 +22,7 @@ final class Plugin
     public static function uses(string ...$traits): void
     {
         self::$callables[] = function () use ($traits): void {
-            uses(...$traits)->in(TestSuite::getInstance()->rootPath . DIRECTORY_SEPARATOR . 'tests');
+            uses(...$traits)->in(TestSuite::getInstance()->rootPath . DIRECTORY_SEPARATOR . testDirectory());
         };
     }
 }

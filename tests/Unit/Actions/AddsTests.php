@@ -18,7 +18,7 @@ test('default php unit tests', function () {
     $testSuite->addTest($phpUnitTestCase);
     expect($testSuite->tests())->toHaveCount(1);
 
-    AddsTests::to($testSuite, new \Pest\TestSuite(getcwd()));
+    AddsTests::to($testSuite, new \Pest\TestSuite(getcwd(), 'tests'));
     expect($testSuite->tests())->toHaveCount(1);
 });
 
@@ -27,6 +27,6 @@ it('removes warnings', function () {
     $warningTestCase = new WarningTestCase('No tests found in class "Pest\TestCase".');
     $testSuite->addTest($warningTestCase);
 
-    AddsTests::to($testSuite, new \Pest\TestSuite(getcwd()));
+    AddsTests::to($testSuite, new \Pest\TestSuite(getcwd(), 'tests'));
     expect($testSuite->tests())->toHaveCount(0);
 });

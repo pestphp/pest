@@ -8,6 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Pest\Exceptions\InvalidConsoleArgument;
 use Pest\Support\Str;
+use function Pest\testDirectory;
 
 /**
  * @internal
@@ -38,7 +39,7 @@ final class PestTestCommand extends Command
 
         $type = ((bool) $this->option('unit')) ? 'Unit' : (((bool) $this->option('dusk')) ? 'Browser' : 'Feature');
 
-        $relativePath = sprintf('tests/%s/%s.php',
+        $relativePath = sprintf(testDirectory('%s/%s.php'),
             $type,
             ucfirst($name)
         );
