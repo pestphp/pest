@@ -11,5 +11,5 @@ function version(): string
 
 function testDirectory(string $file = ''): string
 {
-    return TestSuite::getInstance()->testPath . $file;
+    return TestSuite::getInstance()->testPath . '/' . $file;
 }
