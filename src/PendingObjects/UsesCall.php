@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pest\PendingObjects;
 
 use Closure;
-use Pest\Exceptions\InvalidUsesPath;
 use Pest\TestSuite;
 
 /**
@@ -92,14 +91,13 @@ final class UsesCall
                 ]);
         }, $targets);
 
-        $this->targets = array_map(function ($target): string {
-            $isValid = is_dir($target) || file_exists($target);
-            if (!$isValid) {
-                throw new InvalidUsesPath($target);
+        $this->targets = array_reduce($targets, function (array $accumulator, string $target): array {
+            if (is_dir($target) || file_exists($target)) {
+                $accumulator[] = (string) realpath($target);
             }
 
-            return (string) realpath($target);
-        }, $targets);
+            return $accumulator;
+        }, []);
     }
 
     /**
