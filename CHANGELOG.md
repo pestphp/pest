@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.2.0 (2021-05-13)](https://github.com/pestphp/pest/compare/v1.1.0...v1.2.0)
+### Added
+- Adds JUnit / Infection support ([#291](https://github.com/pestphp/pest/pull/291))
+- `--test-directory` command line option ([#283](https://github.com/pestphp/pest/pull/283))
+
 ## [v1.1.0 (2021-05-02)](https://github.com/pestphp/pest/compare/v1.0.5...v1.1.0)
 ### Added
 - Possibility of "hooks" being added using the "uses" function ([#282](https://github.com/pestphp/pest/pull/282))
