@@ -9,7 +9,6 @@ use Pest\Support\ChainableClosure;
 use Pest\Support\ExceptionTrace;
 use Pest\TestSuite;
 use PHPUnit\Framework\ExecutionOrderDependency;
-use PHPUnit\Util\Test;
 use Throwable;
 
 /**
