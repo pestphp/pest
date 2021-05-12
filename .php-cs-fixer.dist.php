@@ -6,7 +6,7 @@ $finder = PhpCsFixer\Finder::create()
     ->in(__DIR__ . DIRECTORY_SEPARATOR . 'scripts')
     ->in(__DIR__ . DIRECTORY_SEPARATOR . 'stubs')
     ->in(__DIR__ . DIRECTORY_SEPARATOR . 'src')
-    ->append(['.php_cs']);
+    ->append(['.php-cs-fixer.dist.php']);
 
 $rules = [
     '@Symfony'               => true,
@@ -25,7 +25,7 @@ $rules = [
 
 $rules['increment_style'] = ['style' => 'post'];
 
-return PhpCsFixer\Config::create()
+return (new PhpCsFixer\Config())
     ->setUsingCache(true)
     ->setRules($rules)
     ->setFinder($finder);
