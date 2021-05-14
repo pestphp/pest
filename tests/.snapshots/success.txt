@@ -223,9 +223,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-<<<<<<< HEAD
-  Tests:  7 skipped, 119 passed
-=======
-  Tests:  7 skipped, 117 passed
->>>>>>> feat(mock): adds work in progress
+  Tests:  7 skipped, 121 passed
   
