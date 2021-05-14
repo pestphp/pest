@@ -35,7 +35,8 @@ final class PestInstallCommand extends Command
      */
     public function handle(): void
     {
-        TestSuite::getInstance(base_path(), $this->option('test-directory', 'tests'));
+        /* @phpstan-ignore-next-line */
+        TestSuite::getInstance(base_path(), $this->option('test-directory'));
 
         /* @phpstan-ignore-next-line */
         $pest    = base_path(testDirectory('Pest.php'));

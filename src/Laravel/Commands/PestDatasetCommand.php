@@ -36,7 +36,8 @@ final class PestDatasetCommand extends Command
      */
     public function handle(): void
     {
-        TestSuite::getInstance(base_path(), $this->option('test-directory', 'tests'));
+        /* @phpstan-ignore-next-line */
+        TestSuite::getInstance(base_path(), $this->option('test-directory'));
 
         /** @var string $name */
         $name = $this->argument('name');
