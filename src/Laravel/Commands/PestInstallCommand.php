@@ -8,6 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Pest\Console\Thanks;
 use Pest\Exceptions\InvalidConsoleArgument;
+use Pest\TestSuite;
 use function Pest\testDirectory;
 
 /**
@@ -20,7 +21,7 @@ final class PestInstallCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'pest:install';
+    protected $signature = 'pest:install {--test-directory=tests : The name of the tests directory}';
 
     /**
      * The console command description.
@@ -34,6 +35,8 @@ final class PestInstallCommand extends Command
      */
     public function handle(): void
     {
+        TestSuite::getInstance(base_path(), $this->option('test-directory', 'tests'));
+
         /* @phpstan-ignore-next-line */
         $pest    = base_path(testDirectory('Pest.php'));
         $stubs   = 'stubs/Laravel';
