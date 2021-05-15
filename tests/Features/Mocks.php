@@ -10,15 +10,15 @@ interface Http
 
 it('can mock methods', function () {
     $mock = mock(Http::class)->expect(
-        get: 'foo',
+        get: fn () => 'foo',
     );
 
     expect($mock->get())->toBe('foo');
 })->skip(((float) phpversion()) < 8.0);
 
-test('access to the mock object', function () {
+it('allows access to the underlying mockery mock', function () {
     $mock = mock(Http::class);
-    expect($mock->expect())->toBeInstanceOf(MockInterface::class);
 
+    expect($mock->expect())->toBeInstanceOf(MockInterface::class);
     expect($mock->shouldReceive())->toBeInstanceOf(CompositeExpectation::class);
 })->skip(((float) phpversion()) < 8.0);

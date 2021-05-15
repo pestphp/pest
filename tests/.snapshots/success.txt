@@ -79,7 +79,7 @@
 
    PASS  Tests\Features\Mocks
   ✓ it can mock methods
-  ✓ access to the mock object
+  ✓ it allows access to the underlying mockery mock
 
    PASS  Tests\Features\PendingHigherOrderTests
   ✓ get 'foo' → get 'bar' → expect true → toBeTrue 

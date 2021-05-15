@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest;
 
+use InvalidArgumentException;
 use Mockery;
 use Pest\Exceptions\MissingDependency;
 
@@ -44,11 +45,17 @@ final class Mock
      */
     public function expect(...$methods)
     {
-        foreach ($methods as $method => $result) {
+        foreach ($methods as $method => $expectation) {
             /* @phpstan-ignore-next-line */
-            $this->mock
+            $method = $this->mock
                 ->shouldReceive((string) $method)
-                ->andReturn($result);
+                ->once();
+
+            if (!is_callable($expectation)) {
+                throw new InvalidArgumentException(sprintf('Method %s from %s expects a callable as expectation.', $method, $method->mock()->mockery_getName(), ));
+            }
+
+            $method->andReturnUsing($expectation);
         }
 
         return $this->mock;
