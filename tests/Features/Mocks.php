@@ -16,6 +16,14 @@ it('can mock methods', function () {
     expect($mock->get())->toBe('foo');
 })->skip(((float) phpversion()) < 8.0);
 
+it('can access to arguments', function () {
+    $mock = mock(Http::class)->expect(
+        get: fn ($foo) => $foo,
+    );
+
+    expect($mock->get('foo'))->toBe('foo');
+})->skip(((float) phpversion()) < 8.0);
+
 it('allows access to the underlying mockery mock', function () {
     $mock = mock(Http::class);
 
