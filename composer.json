@@ -46,7 +46,6 @@
         "illuminate/console": "^8.32.1",
         "illuminate/support": "^8.32.1",
         "laravel/dusk": "^6.13.0",
-        "mockery/mockery": "^1.4.3",
         "pestphp/pest-dev-tools": "dev-master"
     },
     "minimum-stability": "dev",
