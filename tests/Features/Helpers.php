@@ -42,3 +42,5 @@ it('throws error if method do not exist', function () {
 })->throws(\ReflectionException::class, 'Call to undefined method PHPUnit\Framework\TestCase::name()');
 
 it('can forward unexpected calls to any global function')->_assertThat();
+
+it('can use helpers from helpers file')->myAssertTrue(true);

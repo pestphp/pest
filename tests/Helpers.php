@@ -1,11 +1,6 @@
 <?php
 
-namespace Tests;
-
-use Mockery;
-use Mockery\MockInterface;
-
-function mock(string $class): MockInterface
+function myAssertTrue($value)
 {
-    return Mockery::mock($class);
+    test()->assertTrue($value);
 }

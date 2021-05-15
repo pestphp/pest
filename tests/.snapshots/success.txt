@@ -63,6 +63,7 @@
   ✓ it allows to call underlying protected/private methods
   ✓ it throws error if method do not exist
   ✓ it can forward unexpected calls to any global function
+  ✓ it can use helpers from helpers file
 
    PASS  Tests\Features\HigherOrderTests
   ✓ it proxies calls to object
@@ -77,7 +78,8 @@
   ✓ it will throw exception from call if no macro exists
 
    PASS  Tests\Features\Mocks
-  ✓ it has bar
+  ✓ it can mock methods
+  ✓ it allows access to the underlying mockery mock
 
    PASS  Tests\Features\PendingHigherOrderTests
   ✓ get 'foo' → get 'bar' → expect true → toBeTrue 
@@ -221,5 +223,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  7 skipped, 119 passed
+  Tests:  7 skipped, 121 passed
   
