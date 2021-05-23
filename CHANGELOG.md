@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.3.0 (2021-05-23)](https://github.com/pestphp/pest/compare/v1.2.1...v1.3.0)
+### Added
+- Named datasets no longer show the arguments ([#302](https://github.com/pestphp/pest/pull/302))
+
+### Fixed
+- Wraps global functions within `function_exists` ([#300](https://github.com/pestphp/pest/pull/300))
+
 ## [v1.2.1 (2021-05-14)](https://github.com/pestphp/pest/compare/v1.2.0...v1.2.1)
 ### Fixed
 - Laravel commands failing with new `--test-directory` option ([#297](https://github.com/pestphp/pest/pull/297))
