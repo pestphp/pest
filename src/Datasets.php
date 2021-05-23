@@ -111,7 +111,7 @@ final class Datasets
     {
         $exporter = new Exporter();
 
-        if(is_int($key)){
+        if (is_int($key)) {
             return \sprintf(' with (%s)', $exporter->shortenedRecursiveExport($data));
         }
 

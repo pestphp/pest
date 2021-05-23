@@ -40,8 +40,8 @@
   ✓ eager wrapped registered datasets with (1)
   ✓ eager wrapped registered datasets with (2)
   ✓ eager registered wrapped datasets did the job right
-  ✓ named datasets with data set "one" (1)
-  ✓ named datasets with data set "two" (2)
+  ✓ named datasets with data set "one"
+  ✓ named datasets with data set "two"
   ✓ named datasets did the job right
   ✓ lazy named datasets with (Bar Object (...))
   ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #1
@@ -168,7 +168,8 @@
   ✓ it outputs the help information when --help is used
 
    PASS  Tests\Unit\Datasets
-  ✓ it show the names of named datasets in their description
+  ✓ it show only the names of named datasets in their description
+  ✓ it show the actual dataset of non-named datasets in their description
 
    PASS  Tests\Unit\Plugins\Version
   ✓ it outputs the version when --version is used
@@ -219,5 +220,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  7 skipped, 119 passed
+  Tests:  7 skipped, 120 passed
   
