@@ -111,8 +111,10 @@ final class Datasets
     {
         $exporter = new Exporter();
 
-        $nameInsert = is_string($key) ? \sprintf('data set "%s" ', $key) : '';
+        if(is_int($key)){
+            return \sprintf(' with (%s)', $exporter->shortenedRecursiveExport($data));
+        }
 
-        return \sprintf(' with %s(%s)', $nameInsert, $exporter->shortenedRecursiveExport($data));
+        return \sprintf(' with data set "%s"', $key);
     }
 }
