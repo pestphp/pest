@@ -170,6 +170,24 @@
    PASS  Tests\Unit\Datasets
   ✓ it show only the names of named datasets in their description
   ✓ it show the actual dataset of non-named datasets in their description
+  ✓ it generates a matrix with given datasets with data set "dataset_aa" / data set "dataset_ba" / ('bar', 'foo', 'baz')
+  ✓ it generates a matrix with given datasets with data set "dataset_aa" / data set "dataset_ba" / ('zip', 'zap', 'zop')
+  ✓ it generates a matrix with given datasets with data set "dataset_aa" / data set "dataset_bb" / ('bar', 'foo', 'baz')
+  ✓ it generates a matrix with given datasets with data set "dataset_aa" / data set "dataset_bb" / ('zip', 'zap', 'zop')
+  ✓ it generates a matrix with given datasets with data set "dataset_aa" / data set "dataset_bc" / ('bar', 'foo', 'baz')
+  ✓ it generates a matrix with given datasets with data set "dataset_aa" / data set "dataset_bc" / ('zip', 'zap', 'zop')
+  ✓ it generates a matrix with given datasets with data set "dataset_ab" / data set "dataset_ba" / ('bar', 'foo', 'baz')
+  ✓ it generates a matrix with given datasets with data set "dataset_ab" / data set "dataset_ba" / ('zip', 'zap', 'zop')
+  ✓ it generates a matrix with given datasets with data set "dataset_ab" / data set "dataset_bb" / ('bar', 'foo', 'baz')
+  ✓ it generates a matrix with given datasets with data set "dataset_ab" / data set "dataset_bb" / ('zip', 'zap', 'zop')
+  ✓ it generates a matrix with given datasets with data set "dataset_ab" / data set "dataset_bc" / ('bar', 'foo', 'baz')
+  ✓ it generates a matrix with given datasets with data set "dataset_ab" / data set "dataset_bc" / ('zip', 'zap', 'zop')
+  ✓ it generates a matrix with given datasets with data set "dataset_ac" / data set "dataset_ba" / ('bar', 'foo', 'baz')
+  ✓ it generates a matrix with given datasets with data set "dataset_ac" / data set "dataset_ba" / ('zip', 'zap', 'zop')
+  ✓ it generates a matrix with given datasets with data set "dataset_ac" / data set "dataset_bb" / ('bar', 'foo', 'baz')
+  ✓ it generates a matrix with given datasets with data set "dataset_ac" / data set "dataset_bb" / ('zip', 'zap', 'zop')
+  ✓ it generates a matrix with given datasets with data set "dataset_ac" / data set "dataset_bc" / ('bar', 'foo', 'baz')
+  ✓ it generates a matrix with given datasets with data set "dataset_ac" / data set "dataset_bc" / ('zip', 'zap', 'zop')
 
    PASS  Tests\Unit\Plugins\Version
   ✓ it outputs the version when --version is used
@@ -220,5 +238,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  7 skipped, 120 passed
+  Tests:  7 skipped, 138 passed
   
