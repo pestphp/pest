@@ -51,7 +51,7 @@ final class Datasets
     /**
      * Resolves the current dataset to an array value.
      *
-     * @param  array<Closure|iterable<int|string, mixed>|string>  $datasets
+     * @param array<Closure|iterable<int|string, mixed>|string> $datasets
      *
      * @return array<string, mixed>
      */
@@ -80,10 +80,10 @@ final class Datasets
             }
 
             foreach ($datasets[$index] as $key => $values) {
-                $values = is_array($values) ? $values : [$values];
+                $values             = is_array($values) ? $values : [$values];
                 $processedDataset[] = [
                     'label'  => self::getDataSetDescription($key, $values),
-                    'values' =>  $values,
+                    'values' => $values,
                 ];
             }
 
@@ -93,19 +93,19 @@ final class Datasets
         $datasetCombinations = self::getDataSetsCombinations($processedDatasets);
 
         $dataSetDescriptions = [];
-        $dataSetValues = [];
+        $dataSetValues       = [];
 
-        foreach ($datasetCombinations as $datasets){
+        foreach ($datasetCombinations as $datasets) {
             $partialDescriptions = [];
-            $values = [];
+            $values              = [];
 
-            foreach ($datasets as $dataset_data){
+            foreach ($datasets as $dataset_data) {
                 $partialDescriptions[] = $dataset_data['label'];
-                $values = array_merge($values, $dataset_data['values']);
+                $values                = array_merge($values, $dataset_data['values']);
             }
 
-            $dataSetDescriptions[] = $description." with ".implode(" / ", $partialDescriptions);
-            $dataSetValues[] = $values;
+            $dataSetDescriptions[] = $description . ' with ' . implode(' / ', $partialDescriptions);
+            $dataSetValues[]       = $values;
         }
 
         foreach (array_count_values($dataSetDescriptions) as $descriptionToCheck => $count) {
@@ -139,6 +139,7 @@ final class Datasets
             }
             $result = $tmp;
         }
+
         return $result;
     }
 

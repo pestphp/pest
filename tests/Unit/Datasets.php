@@ -26,7 +26,7 @@ it('show the actual dataset of non-named datasets in their description', functio
     expect($descriptions[1])->toBe('test description with (array(2))');
 });
 
-$state       = new stdClass();
+$state               = new stdClass();
 $state->combinations = [
     ['a', 'b', 'c', 1, 2, 'bar', 'foo', 'baz'],
     ['a', 'b', 'c', 1, 2, 'zip', 'zap', 'zop'],
