@@ -95,11 +95,11 @@ final class Datasets
         $dataSetDescriptions = [];
         $dataSetValues       = [];
 
-        foreach ($datasetCombinations as $datasets) {
+        foreach ($datasetCombinations as $datasetCombination) {
             $partialDescriptions = [];
             $values              = [];
 
-            foreach ($datasets as $dataset_data) {
+            foreach ($datasetCombination as $dataset_data) {
                 $partialDescriptions[] = $dataset_data['label'];
                 $values                = array_merge($values, $dataset_data['values']);
             }
@@ -127,7 +127,12 @@ final class Datasets
         return $namedData;
     }
 
-    private static function getDataSetsCombinations($combinations): array
+    /**
+     * @param array<array> $combinations
+     *
+     * @return array<array>
+     */
+    private static function getDataSetsCombinations(array $combinations): array
     {
         $result = [[]];
         foreach ($combinations as $index => $values) {
