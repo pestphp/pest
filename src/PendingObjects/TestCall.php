@@ -81,7 +81,7 @@ final class TestCall
      */
     public function with($data): TestCall
     {
-        $this->testCaseFactory->dataset = $data;
+        $this->testCaseFactory->datasets[] = $data;
 
         return $this;
     }
