@@ -62,9 +62,9 @@ final class TestCaseFactory
     /**
      * Holds the dataset, if any.
      *
-     * @var Closure|iterable<int|string, mixed>|string|null
+     * @var array<Closure|iterable<int|string, mixed>|string>
      */
-    public $dataset;
+    public $datasets = [];
 
     /**
      * The FQN of the test case class.
@@ -155,7 +155,7 @@ final class TestCaseFactory
             return $testCase;
         };
 
-        $datasets = Datasets::resolve($this->description, $this->dataset);
+        $datasets = Datasets::resolve($this->description, $this->datasets);
 
         return array_map($createTest, array_keys($datasets), $datasets);
     }
