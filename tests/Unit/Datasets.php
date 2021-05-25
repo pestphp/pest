@@ -26,44 +26,56 @@ it('show the actual dataset of non-named datasets in their description', functio
     expect($descriptions[1])->toBe('test description with (array(2))');
 });
 
-$state               = new stdClass();
-$state->combinations = [
-    ['a', 'b', 'c', 1, 2, 'bar', 'foo', 'baz'],
-    ['a', 'b', 'c', 1, 2, 'zip', 'zap', 'zop'],
-    ['a', 'b', 'c', 3, 4, 'bar', 'foo', 'baz'],
-    ['a', 'b', 'c', 3, 4, 'zip', 'zap', 'zop'],
-    ['a', 'b', 'c', 5, 6, 'bar', 'foo', 'baz'],
-    ['a', 'b', 'c', 5, 6, 'zip', 'zap', 'zop'],
-    ['d', 'e', 'f', 1, 2, 'bar', 'foo', 'baz'],
-    ['d', 'e', 'f', 1, 2, 'zip', 'zap', 'zop'],
-    ['d', 'e', 'f', 3, 4, 'bar', 'foo', 'baz'],
-    ['d', 'e', 'f', 3, 4, 'zip', 'zap', 'zop'],
-    ['d', 'e', 'f', 5, 6, 'bar', 'foo', 'baz'],
-    ['d', 'e', 'f', 5, 6, 'zip', 'zap', 'zop'],
-    ['g', 'h', 'i', 1, 2, 'bar', 'foo', 'baz'],
-    ['g', 'h', 'i', 1, 2, 'zip', 'zap', 'zop'],
-    ['g', 'h', 'i', 3, 4, 'bar', 'foo', 'baz'],
-    ['g', 'h', 'i', 3, 4, 'zip', 'zap', 'zop'],
-    ['g', 'h', 'i', 5, 6, 'bar', 'foo', 'baz'],
-    ['g', 'h', 'i', 5, 6, 'zip', 'zap', 'zop'],
-];
+it('show only the names of multiple named datasets in their description', function () {
+    $descriptions = array_keys(Datasets::resolve('test description', [
+        [
+            'one' => [1],
+            'two' => [[2]],
+        ],
+        [
+            'three' => [3],
+            'four'  => [[4]],
+        ],
+    ]));
 
-it('generates a matrix with given datasets', function ($a1, $a2, $a3, $b1, $b2, $c1, $c2, $c3) use ($state) {
-    $combinations = $state->combinations;
-    $set = $combinations[0];
-    array_shift($combinations);
-    $state->combinations = $combinations;
+    expect($descriptions[0])->toBe('test description with data set "one" / data set "three"');
+    expect($descriptions[1])->toBe('test description with data set "one" / data set "four"');
+    expect($descriptions[2])->toBe('test description with data set "two" / data set "three"');
+    expect($descriptions[3])->toBe('test description with data set "two" / data set "four"');
+});
 
-    expect([$a1, $a2, $a3, $b1, $b2, $c1, $c2, $c3])->toMatchArray($set);
-})->with([
-    'dataset_aa' => ['a1' => 'a', 'a2' => 'b', 'a3' => 'c'],
-    'dataset_ab' => ['a1' => 'd', 'a2' => 'e', 'a3' => 'f'],
-    'dataset_ac' => ['a1' => 'g', 'a2' => 'h', 'a3' => 'i'],
-])->with([
-    'dataset_ba' => ['b1' => 1, 'b2' => 2],
-    'dataset_bb' => ['b1' => 3, 'b2' => 4],
-    'dataset_bc' => ['b1' => 5, 'b2' => 6],
-])->with([
-    ['c1' => 'bar', 'c2' => 'foo', 'c3' => 'baz'],
-    ['c1' => 'zip', 'c2' => 'zap', 'c3' => 'zop'],
-]);
+it('show the actual dataset of multiple non-named datasets in their description', function () {
+    $descriptions = array_keys(Datasets::resolve('test description', [
+        [
+            [1],
+            [[2]],
+        ],
+        [
+            [3],
+            [[4]],
+        ],
+    ]));
+
+    expect($descriptions[0])->toBe('test description with (1) / (3)');
+    expect($descriptions[1])->toBe('test description with (1) / (array(4))');
+    expect($descriptions[2])->toBe('test description with (array(2)) / (3)');
+    expect($descriptions[3])->toBe('test description with (array(2)) / (array(4))');
+});
+
+it('show the correct description for mixed named and not-named datasets', function () {
+    $descriptions = array_keys(Datasets::resolve('test description', [
+        [
+            'one' => [1],
+            [[2]],
+        ],
+        [
+            [3],
+            'four' => [[4]],
+        ],
+    ]));
+
+    expect($descriptions[0])->toBe('test description with data set "one" / (3)');
+    expect($descriptions[1])->toBe('test description with data set "one" / data set "four"');
+    expect($descriptions[2])->toBe('test description with (array(2)) / (3)');
+    expect($descriptions[3])->toBe('test description with (array(2)) / data set "four"');
+});
