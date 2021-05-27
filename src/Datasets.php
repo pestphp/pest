@@ -62,35 +62,9 @@ final class Datasets
             return [$description => []];
         }
 
-        $processedDatasets = [];
+        $datasets = self::processDatasets($datasets);
 
-        foreach ($datasets as $index => $data) {
-            $processedDataset = [];
-
-            if (is_string($data)) {
-                $datasets[$index] = self::get($data);
-            }
-
-            if (is_callable($datasets[$index])) {
-                $datasets[$index] = call_user_func($datasets[$index]);
-            }
-
-            if ($datasets[$index] instanceof Traversable) {
-                $datasets[$index] = iterator_to_array($datasets[$index]);
-            }
-
-            foreach ($datasets[$index] as $key => $values) {
-                $values             = is_array($values) ? $values : [$values];
-                $processedDataset[] = [
-                    'label'  => self::getDataSetDescription($key, $values),
-                    'values' => $values,
-                ];
-            }
-
-            $processedDatasets[] = $processedDataset;
-        }
-
-        $datasetCombinations = self::getDataSetsCombinations($processedDatasets);
+        $datasetCombinations = self::getDataSetsCombinations($datasets);
 
         $dataSetDescriptions = [];
         $dataSetValues       = [];
@@ -125,6 +99,44 @@ final class Datasets
         }
 
         return $namedData;
+    }
+
+    /**
+     * @param array<Closure|iterable<int|string, mixed>|string> $datasets
+     *
+     * @return array<array>
+     */
+    private static function processDatasets(array $datasets): array
+    {
+        $processedDatasets = [];
+
+        foreach ($datasets as $index => $data) {
+            $processedDataset = [];
+
+            if (is_string($data)) {
+                $datasets[$index] = self::get($data);
+            }
+
+            if (is_callable($datasets[$index])) {
+                $datasets[$index] = call_user_func($datasets[$index]);
+            }
+
+            if ($datasets[$index] instanceof Traversable) {
+                $datasets[$index] = iterator_to_array($datasets[$index]);
+            }
+
+            foreach ($datasets[$index] as $key => $values) {
+                $values             = is_array($values) ? $values : [$values];
+                $processedDataset[] = [
+                    'label'  => self::getDataSetDescription($key, $values),
+                    'values' => $values,
+                ];
+            }
+
+            $processedDatasets[] = $processedDataset;
+        }
+
+        return $processedDatasets;
     }
 
     /**
