@@ -48,4 +48,14 @@ final class Str
 
         return substr($target, -$length) === $search;
     }
+
+    /**
+     * Ensures that `$target` ends with a single instance of the given `$cap`.
+     */
+    public static function finish($target, $cap)
+    {
+        $quoted = preg_quote($cap, '/');
+
+        return preg_replace('/(?:'.$quoted.')+$/u', '', $target).$cap;
+    }
 }

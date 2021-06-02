@@ -39,7 +39,7 @@ final class PestTestCommand extends Command
         TestSuite::getInstance(base_path(), $this->option('test-directory'));
 
         /** @var string $name */
-        $name = $this->argument('name');
+        $name = Str::finish($this->argument('name'), 'Test');
 
         $type = ((bool) $this->option('unit')) ? 'Unit' : (((bool) $this->option('dusk')) ? 'Browser' : 'Feature');
 
