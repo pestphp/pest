@@ -52,7 +52,7 @@ final class Str
     /**
      * Ensures that `$target` ends with a single instance of the given `$cap`.
      */
-    public static function finish($target, $cap)
+    public static function finish(string $target, string $cap)
     {
         $quoted = preg_quote($cap, '/');
 
