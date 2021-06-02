@@ -20,6 +20,11 @@ use PHPUnit\Framework\TestCase;
 final class TestRepository
 {
     /**
+     * @var string
+     */
+    private const SEPARATOR = '>>>';
+
+    /**
      * @var array<string, TestCaseFactory>
      */
     private $state = [];
@@ -50,7 +55,7 @@ final class TestRepository
             [$classOrTraits, $groups, $hooks] = $uses;
 
             $setClassName = function (TestCaseFactory $testCase, string $key) use ($path, $classOrTraits, $groups, $startsWith, $hooks): void {
-                [$filename] = explode('@', $key);
+                [$filename] = explode(self::SEPARATOR, $key);
 
                 if ((!is_dir($path) && $filename === $path) || (is_dir($path) && $startsWith($filename, $path))) {
                     foreach ($classOrTraits as $class) { /** @var string $class */
@@ -131,10 +136,10 @@ final class TestRepository
             throw ShouldNotHappen::fromMessage('Trying to create a test without description.');
         }
 
-        if (array_key_exists(sprintf('%s@%s', $test->filename, $test->description), $this->state)) {
+        if (array_key_exists(sprintf('%s%s%s', $test->filename, self::SEPARATOR, $test->description), $this->state)) {
             throw new TestAlreadyExist($test->filename, $test->description);
         }
 
-        $this->state[sprintf('%s@%s', $test->filename, $test->description)] = $test;
+        $this->state[sprintf('%s%s%s', $test->filename, self::SEPARATOR, $test->description)] = $test;
     }
 }
