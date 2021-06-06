@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.3.1 (2021-06-06)](https://github.com/pestphp/pest/compare/v1.3.0...v1.3.1)
+### Added
+- Added for PHPUnit 9.5.5 ([#310](https://github.com/pestphp/pest/pull/310))
+
 ## [v1.3.0 (2021-05-23)](https://github.com/pestphp/pest/compare/v1.2.1...v1.3.0)
 ### Added
 - Named datasets no longer show the arguments ([#302](https://github.com/pestphp/pest/pull/302))
