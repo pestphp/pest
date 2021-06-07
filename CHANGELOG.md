@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Added for PHPUnit 9.5.5 ([#310](https://github.com/pestphp/pest/pull/310))
 
+### Changed
+- Lock minimum Pest plugin versions ([#306](https://github.com/pestphp/pest/pull/306))
+
 ## [v1.3.0 (2021-05-23)](https://github.com/pestphp/pest/compare/v1.2.1...v1.3.0)
 ### Added
 - Named datasets no longer show the arguments ([#302](https://github.com/pestphp/pest/pull/302))
