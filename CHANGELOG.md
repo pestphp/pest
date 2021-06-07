@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v.1.3.2 (2021-06-07)](https://github.com/pestphp/pest/compare/v1.3.1...v1.3.2)
+### Fixed 
+- Test cases with the @ symbol in the directory fail ([#308](https://github.com/pestphp/pest/pull/308))
+
 ## [v1.3.1 (2021-06-06)](https://github.com/pestphp/pest/compare/v1.3.0...v1.3.1)
 ### Added
 - Added for PHPUnit 9.5.5 ([#310](https://github.com/pestphp/pest/pull/310))
