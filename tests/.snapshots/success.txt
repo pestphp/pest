@@ -122,6 +122,10 @@
    PASS  Tests\PHPUnit\CustomAffixes\AdditionalFileExtensionspec
   ✓ it runs file names like `AdditionalFileExtension.spec.php`
 
+   PASS  Tests\PHPUnit\CustomAffixes\FolderWithAn\ExampleTest
+  ✓ custom traits can be used
+  ✓ trait applied in this file
+
    PASS  Tests\PHPUnit\CustomAffixes\ManyExtensionsclasstest
   ✓ it runs file names like `ManyExtensions.class.test.php`
 
@@ -220,5 +224,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  7 skipped, 120 passed
+  Tests:  7 skipped, 122 passed
   
