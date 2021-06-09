@@ -106,14 +106,16 @@ final class UsesCall
     public function inFinder($finder): void
     {
         if (!class_exists(Finder::class)) {
-            throw ShouldNotHappen::fromMessage(sprintf(
-                'Unable to find the `%s` class, please install `symfony/finder`',
-                Finder::class
-            ));
+            throw ShouldNotHappen::fromMessage(sprintf('Unable to find the `%s` class, please install `symfony/finder`', Finder::class));
+        }
+
+        /* @phpstan-ignore-next-line */
+        if (!($finder instanceof Finder)) {
+            throw new \InvalidArgumentException(sprintf('Invalid object `%s` passed to `uses()->inFinder()`', get_class($finder)));
         }
 
         $paths = \array_map(function (\Symfony\Component\Finder\SplFileInfo $item): string {
-            return $item->getRealPath();
+            return (string) $item->getRealPath();
         }, \iterator_to_array($finder));
 
         $this->in(...$paths);
