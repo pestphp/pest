@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Pest\PendingObjects;
 
 use Closure;
+use Pest\Exceptions\ShouldNotHappen;
 use Pest\TestSuite;
+use Symfony\Component\Finder\Finder;
 
 /**
  * @internal
@@ -98,6 +100,23 @@ final class UsesCall
 
             return $accumulator;
         }, []);
+    }
+
+    /** @param Finder $finder */
+    public function inFinder($finder): void
+    {
+        if (!class_exists(Finder::class)) {
+            throw ShouldNotHappen::fromMessage(sprintf(
+                'Unable to find the `%s` class, please install `symfony/finder`',
+                Finder::class
+            ));
+        }
+
+        $paths = \array_map(function (\Symfony\Component\Finder\SplFileInfo $item): string {
+            return $item->getRealPath();
+        }, \iterator_to_array($finder));
+
+        $this->in(...$paths);
     }
 
     /**

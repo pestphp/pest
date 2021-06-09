@@ -43,7 +43,8 @@
         "illuminate/console": "^8.47.0",
         "illuminate/support": "^8.47.0",
         "laravel/dusk": "^6.15.0",
-        "pestphp/pest-dev-tools": "dev-master"
+        "pestphp/pest-dev-tools": "dev-master",
+        "symfony/finder": "^5.2"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -84,5 +85,8 @@
                 "Pest\\Laravel\\PestServiceProvider"
             ]
         }
+    },
+    "suggest": {
+        "symfony/finder": "If using `uses()->inFinder($finder)` for class or trait usage declaration. (^5.2)"
     }
 }
