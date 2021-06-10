@@ -4,7 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [v.1.3.2 (2021-06-07)](https://github.com/pestphp/pest/compare/v1.3.1...v1.3.2)
+## [v1.4.0 (2021-06-10)](https://github.com/pestphp/pest/compare/v1.3.2...v1.4.0)
+### Added
+- Support for multiple datasets (Matrix) on the `with` method ([#303](https://github.com/pestphp/pest/pull/303))
+- Support for incompleted tests ([49de462](https://github.com/pestphp/pest/commit/49de462250cf9f65f09e13eaf6dcc0e06865b930))
+
+## [v1.3.2 (2021-06-07)](https://github.com/pestphp/pest/compare/v1.3.1...v1.3.2)
 ### Fixed 
 - Test cases with the @ symbol in the directory fail ([#308](https://github.com/pestphp/pest/pull/308))
 
