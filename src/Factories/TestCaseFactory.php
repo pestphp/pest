@@ -11,9 +11,9 @@ use Pest\Contracts\HasPrintableTestCaseName;
 use Pest\Datasets;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Support\HigherOrderMessageCollection;
-use Pest\Support\NullClosure;
 use Pest\Support\Str;
 use Pest\TestSuite;
+use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
@@ -113,7 +113,11 @@ final class TestCaseFactory
     {
         $this->filename    = $filename;
         $this->description = $description;
-        $this->test        = $closure ?? NullClosure::create();
+        $this->test        = $closure ?? function (): void {
+            if (Assert::getCount() === 0) {
+                self::markTestIncomplete(); // @phpstan-ignore-line
+            }
+        };
 
         $this->factoryProxies = new HigherOrderMessageCollection();
         $this->proxies        = new HigherOrderMessageCollection();

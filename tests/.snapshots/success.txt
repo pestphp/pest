@@ -108,6 +108,15 @@
   ✓ it proxies calls to object
   ✓ it is capable doing multiple assertions
 
+   WARN  Tests\Features\Incompleted
+  … it is incompleted
+  … it is incompleted even with method calls like skip
+  … it is incompleted even with method calls like group
+  ✓ it is not incompleted because of expect
+  ✓ it is not incompleted because of assert
+  ! it is not incompleted because of test with no assertions → This test did not perform any assertions  /Users/nunomaduro/code/pestphp/pest/src/Factories/TestCaseFactory.php(221) : eval()'d code:4
+  ✓ it is not incompleted because of test with assertions
+
    PASS  Tests\Features\It
   ✓ it is a test
   ✓ it is a higher order message test
@@ -266,5 +275,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  7 skipped, 164 passed
+  Tests:  1 risked, 3 incompleted, 7 skipped, 167 passed
   
