@@ -51,6 +51,45 @@
   ✓ it creates unique test case names with ('Name 2', Pest\Plugin Object (), true)
   ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #3
   ✓ it creates unique test case names - count
+  ✓ lazy multiple datasets with (1) / (3)
+  ✓ lazy multiple datasets with (1) / (4)
+  ✓ lazy multiple datasets with (2) / (3)
+  ✓ lazy multiple datasets with (2) / (4)
+  ✓ lazy multiple datasets did the job right
+  ✓ eager multiple datasets with (1) / (3)
+  ✓ eager multiple datasets with (1) / (4)
+  ✓ eager multiple datasets with (2) / (3)
+  ✓ eager multiple datasets with (2) / (4)
+  ✓ eager multiple datasets did the job right
+  ✓ lazy registered multiple datasets with (1) / (1)
+  ✓ lazy registered multiple datasets with (1) / (2)
+  ✓ lazy registered multiple datasets with (2) / (1)
+  ✓ lazy registered multiple datasets with (2) / (2)
+  ✓ lazy registered multiple datasets did the job right
+  ✓ eager registered multiple datasets with (1) / (1)
+  ✓ eager registered multiple datasets with (1) / (2)
+  ✓ eager registered multiple datasets with (2) / (1)
+  ✓ eager registered multiple datasets with (2) / (2)
+  ✓ eager registered multiple datasets did the job right
+  ✓ eager wrapped registered multiple datasets with (1) / (1)
+  ✓ eager wrapped registered multiple datasets with (1) / (2)
+  ✓ eager wrapped registered multiple datasets with (2) / (1)
+  ✓ eager wrapped registered multiple datasets with (2) / (2)
+  ✓ eager wrapped registered multiple datasets did the job right
+  ✓ named multiple datasets with data set "one" / data set "three"
+  ✓ named multiple datasets with data set "one" / data set "four"
+  ✓ named multiple datasets with data set "two" / data set "three"
+  ✓ named multiple datasets with data set "two" / data set "four"
+  ✓ named multiple datasets did the job right
+  ✓ more than two datasets with (1) / (3) / (5)
+  ✓ more than two datasets with (1) / (3) / (6)
+  ✓ more than two datasets with (1) / (4) / (5)
+  ✓ more than two datasets with (1) / (4) / (6)
+  ✓ more than two datasets with (2) / (3) / (5)
+  ✓ more than two datasets with (2) / (3) / (6)
+  ✓ more than two datasets with (2) / (4) / (5)
+  ✓ more than two datasets with (2) / (4) / (6)
+  ✓ more than two datasets did the job right
 
    PASS  Tests\Features\Exceptions
   ✓ it gives access the the underlying expectException
@@ -174,6 +213,9 @@
    PASS  Tests\Unit\Datasets
   ✓ it show only the names of named datasets in their description
   ✓ it show the actual dataset of non-named datasets in their description
+  ✓ it show only the names of multiple named datasets in their description
+  ✓ it show the actual dataset of multiple non-named datasets in their description
+  ✓ it show the correct description for mixed named and not-named datasets
 
    PASS  Tests\Unit\Plugins\Version
   ✓ it outputs the version when --version is used
@@ -224,5 +266,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  7 skipped, 122 passed
+  Tests:  7 skipped, 164 passed
   
