@@ -26,5 +26,6 @@ trait Gettable
     }
 }
 
+get('foo'); // not incomplete because closure is created...
 get('foo')->get('bar')->expect(true)->toBeTrue();
 get('foo')->expect(true)->toBeTrue();

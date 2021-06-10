@@ -109,12 +109,12 @@
   ✓ it is capable doing multiple assertions
 
    WARN  Tests\Features\Incompleted
+  … incompleted
   … it is incompleted
   … it is incompleted even with method calls like skip
   … it is incompleted even with method calls like group
   ✓ it is not incompleted because of expect
   ✓ it is not incompleted because of assert
-  ! it is not incompleted because of test with no assertions → This test did not perform any assertions  /Users/nunomaduro/code/pestphp/pest/src/Factories/TestCaseFactory.php(221) : eval()'d code:4
   ✓ it is not incompleted because of test with assertions
 
    PASS  Tests\Features\It
@@ -126,6 +126,7 @@
   ✓ it will throw exception from call if no macro exists
 
    PASS  Tests\Features\PendingHigherOrderTests
+  ✓ get 'foo'
   ✓ get 'foo' → get 'bar' → expect true → toBeTrue 
   ✓ get 'foo' → expect true → toBeTrue 
 
@@ -275,5 +276,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  1 risked, 3 incompleted, 7 skipped, 167 passed
+  Tests:  4 incompleted, 7 skipped, 168 passed
   
