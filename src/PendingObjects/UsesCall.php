@@ -68,7 +68,7 @@ final class UsesCall
 
     /**
      * The directories or file where the
-     * class or trais should be used.
+     * class or traits should be used.
      */
     public function in(string ...$targets): void
     {
