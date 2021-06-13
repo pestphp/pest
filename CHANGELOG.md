@@ -167,7 +167,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Expectation API (TODO)
 - PHPUnit 9.3 and PHP 8 support ([#128](https://github.com/pestphp/pest/pull/128))
-- Fowards `$this` calls to globals ([#169](https://github.com/pestphp/pest/pull/169))
+- Forwards `$this` calls to globals ([#169](https://github.com/pestphp/pest/pull/169))
 
 ### Fixed
 - don't decorate output if --colors=never is set ([36b879f](https://github.com/pestphp/pest/commit/36b879f97d7b187c87a94eb60af5b7d3b7253d56))
@@ -182,7 +182,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `depends` phpunit feature ([#103](https://github.com/pestphp/pest/pull/103))
 
 ### Fixes
-- datasets name conflit ([#101](https://github.com/pestphp/pest/pull/101))
+- datasets name conflict ([#101](https://github.com/pestphp/pest/pull/101))
 
 ## [v0.2.1 (2020-06-17)](https://github.com/pestphp/pest/compare/v0.2.0...v0.2.1)
 ### Fixes
