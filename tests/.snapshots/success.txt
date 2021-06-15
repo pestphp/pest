@@ -102,6 +102,278 @@
   ✓ it catch exceptions
   ✓ it catch exceptions and messages
 
+   PASS  Tests\Features\Expect\HigherOrder\methods
+  ✓ it can access methods
+  ✓ it can access multiple methods
+  ✓ it works with not
+  ✓ it can accept arguments
+  ✓ it works with each
+  ✓ it works inside of each
+  ✓ it works with sequence
+  ✓ it can compose complex expectations
+
+   PASS  Tests\Features\Expect\HigherOrder\methodsAndProperties
+  ✓ it can access methods and properties
+
+   PASS  Tests\Features\Expect\HigherOrder\properties
+  ✓ it allows properties to be accessed from the value
+  ✓ it can access multiple properties from the value
+  ✓ it works with not
+  ✓ it works with each
+  ✓ it works inside of each
+  ✓ it works with sequence
+  ✓ it can compose complex expectations
+  ✓ it works with objects
+
+   PASS  Tests\Features\Expect\each
+  ✓ an exception is thrown if the the type is not iterable
+  ✓ it expects on each item
+  ✓ it chains expectations on each item
+  ✓ opposite expectations on each item
+  ✓ chained opposite and non-opposite expectations
+  ✓ it can add expectations via "and"
+  ✓ it accepts callables
+
+   PASS  Tests\Features\Expect\extend
+  ✓ it macros true is true
+  ✓ it macros false is not true
+  ✓ it macros true is true with argument
+  ✓ it macros false is not true with argument
+
+   PASS  Tests\Features\Expect\not
+  ✓ not property calls
+
+   PASS  Tests\Features\Expect\ray
+  ✓ ray calls do not fail when ray is not installed
+
+   PASS  Tests\Features\Expect\sequence
+  ✓ an exception is thrown if the the type is not iterable
+  ✓ allows for sequences of checks to be run on iterable data
+  ✓ loops back to the start if it runs out of sequence items
+  ✓ it works if the number of items in the iterable is smaller than the number of expectations
+  ✓ it works with associative arrays
+
+   PASS  Tests\Features\Expect\toBe
+  ✓ strict comparisons
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeArray
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeBool
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeCallable
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeDirectory
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeEmpty
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeFalse
+  ✓ strict comparisons
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeFile
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeFloat
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeGreatherThan
+  ✓ passes
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeGreatherThanOrEqual
+  ✓ passes
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeInfinite
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeInstanceOf
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeInt
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeIterable
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeJson
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeLessThan
+  ✓ passes
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeLessThanOrEqual
+  ✓ passes
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeNAN
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeNull
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeNumeric
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeObject
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeReadableDirectory
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeReadableFile
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeResource
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeScalar
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeString
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeTrue
+  ✓ strict comparisons
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeWritableDirectory
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeWritableFile
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toContain
+  ✓ passes strings
+  ✓ passes arrays
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toEndWith
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toEqual
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toEqualCanonicalizing
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toEqualWithDelta
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toHaveCount
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toHaveKey
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toHaveKeys
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toHaveProperty
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toMatch
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toMatchArray
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toMatchConstraint
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toMatchObject
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toStartWith
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
    PASS  Tests\Features\Helpers
   ✓ it can set/get properties on $this
   ✓ it throws error if property do not exist
@@ -282,5 +554,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 7 skipped, 172 passed
+  Tests:  4 incompleted, 7 skipped, 340 passed
   

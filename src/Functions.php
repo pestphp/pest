@@ -3,14 +3,32 @@
 declare(strict_types=1);
 
 use Pest\Datasets;
+use Pest\Expectation;
 use Pest\PendingObjects\AfterEachCall;
 use Pest\PendingObjects\BeforeEachCall;
 use Pest\PendingObjects\TestCall;
 use Pest\PendingObjects\UsesCall;
 use Pest\Support\Backtrace;
+use Pest\Support\Extendable;
 use Pest\Support\HigherOrderTapProxy;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestCase;
+
+/**
+ * Creates a new expectation.
+ *
+ * @param mixed $value the Value
+ *
+ * @return Expectation|Extendable
+ */
+function expect($value = null)
+{
+    if (func_num_args() === 0) {
+        return new Extendable(Expectation::class);
+    }
+
+    return new Expectation($value);
+}
 
 if (!function_exists('beforeAll')) {
     /**
