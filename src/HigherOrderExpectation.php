@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pest;
 
-use Pest\Concerns\Expectations;
+use Pest\Concerns\Expectable;
 
 /**
  * @internal
@@ -13,7 +13,7 @@ use Pest\Concerns\Expectations;
  */
 final class HigherOrderExpectation
 {
-    use Expectations;
+    use Expectable;
 
     /**
      * @var Expectation

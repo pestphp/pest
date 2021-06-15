@@ -9,7 +9,7 @@ use Pest\Expectation;
 /**
  * @internal
  */
-trait Expectations
+trait Expectable
 {
     /**
      * Creates a new expectation.
