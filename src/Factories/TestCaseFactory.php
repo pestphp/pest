@@ -80,6 +80,7 @@ final class TestCaseFactory
      */
     public $traits = [
         Concerns\TestCase::class,
+        Concerns\Expectations::class,
     ];
 
     /**
