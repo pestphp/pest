@@ -20,9 +20,7 @@
         "php": "^7.3 || ^8.0",
         "nunomaduro/collision": "^5.0",
         "pestphp/pest-plugin": "^1.0",
-        "pestphp/pest-plugin-coverage": "^1.0",
         "pestphp/pest-plugin-expectations": "^1.6",
-        "pestphp/pest-plugin-init": "^1.1",
         "phpunit/phpunit": ">= 9.3.7 <= 9.5.5"
     },
     "autoload": {
@@ -77,6 +75,8 @@
         },
         "pest": {
             "plugins": [
+                "Pest\\Plugins\\Coverage",
+                "Pest\\Plugins\\Init",
                 "Pest\\Plugins\\Version"
             ]
         },
