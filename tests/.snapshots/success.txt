@@ -17,6 +17,12 @@
   ✓ it gets executed before each test
   ✓ it gets executed before each test once again
 
+   PASS  Tests\Features\Coverage
+  ✓ it has plugin
+  ✓ it adds coverage if --coverage exist
+  ✓ it adds coverage if --min exist
+  ✓ it generates coverage based on file input
+
    PASS  Tests\Features\Datasets
   ✓ it throws exception if dataset does not exist
   ✓ it throws exception if dataset already exist
@@ -276,5 +282,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 7 skipped, 168 passed
+  Tests:  4 incompleted, 7 skipped, 172 passed
   
