@@ -24,7 +24,7 @@ parameters:
             message: '#Call to an undefined method PHPUnit\\Framework\\Test::getName\(\)#'
             path: src/Logging
         -
-            message: '#invalid typehint type Pest\\Concerns\\TestCase#'
+            message: '#invalid typehint type Pest\\Concerns\\Testable#'
             path: src/Logging
         -
             message: '#is not subtype of native type PHPUnit\\Framework\\Test#'
