@@ -223,3 +223,172 @@ test('more than two datasets', function ($text_a, $text_b, $text_c) use ($state,
 test('more than two datasets did the job right', function () use ($state) {
     expect($state->text)->toBe('121212121212131423241314232411122122111221221112212213142324135136145146235236245246');
 });
+
+$people = [
+    'Nuno'   => [
+        'name'    => 'Nuno',
+        'country' => 'Portugal',
+        'role'    => 'Owner',
+    ],
+    'Fabio'  => [
+        'name'    => 'Fabio',
+        'country' => 'Italy',
+        'role'    => 'Member',
+    ],
+    'Oliver' => [
+        'name'    => 'Oliver',
+        'country' => 'Denmark',
+        'role'    => 'Maintainer',
+    ],
+];
+dataset('people', $people);
+
+it('can generate test with extracted dataset', function ($role, $name) use ($people) {
+    expect($people)->toHaveKey($name);
+    expect($name)->toEqual($people[$name]['name']);
+    expect($role)->toEqual($people[$name]['role']);
+})->with('people:role,name');
+
+it('extracts keys from lazy dataset', function () {
+    Datasets::set('dataset', [
+        [
+            'foo' => 1,
+            'bar' => 2,
+            'baz' => 3,
+        ],
+        [
+            'foo' => 4,
+            'bar' => 5,
+            'baz' => 6,
+        ],
+    ]);
+
+    expect(Datasets::get('dataset:baz,bar'))->toMatchArray([
+        [
+            'baz' => 3,
+            'bar' => 2,
+        ],
+        [
+            'baz' => 6,
+            'bar' => 5,
+        ],
+    ]);
+
+    Datasets::unset('dataset');
+});
+
+it('extracts keys from eager dataset', function () {
+    Datasets::set('dataset', function () {
+        return [
+            [
+                'foo' => 1,
+                'bar' => 2,
+                'baz' => 3,
+            ],
+            [
+                'foo' => 4,
+                'bar' => 5,
+                'baz' => 6,
+            ],
+        ];
+    });
+
+    expect(Datasets::get('dataset:baz,foo'))->toMatchArray([
+        [
+            'baz' => 3,
+            'foo' => 1,
+        ],
+        [
+            'baz' => 6,
+            'foo' => 4,
+        ],
+    ]);
+
+    Datasets::unset('dataset');
+});
+
+it('trims extract dataset keys', function () {
+    Datasets::set('dataset', [
+        [
+            'foo' => 1,
+            'bar' => 2,
+            'baz' => 3,
+        ],
+        [
+            'foo' => 4,
+            'bar' => 5,
+            'baz' => 6,
+        ],
+    ]);
+
+    expect(Datasets::get(' dataset : baz , bar '))->toMatchArray([
+        [
+            'baz' => 3,
+            'bar' => 2,
+        ],
+        [
+            'baz' => 6,
+            'bar' => 5,
+        ],
+    ]);
+
+    Datasets::unset('dataset');
+});
+
+it('replaces missing keys with null', function () {
+    Datasets::set('dataset', [
+        [
+            'foo' => 1,
+            'bar' => 2,
+            'baz' => 3,
+        ],
+        [
+            'foo' => 4,
+            'bar' => 5,
+            'baz' => 6,
+        ],
+    ]);
+
+    expect(Datasets::get('dataset:baz,bar,wee'))->toMatchArray([
+        [
+            'baz' => 3,
+            'bar' => 2,
+            'wee' => null,
+        ],
+        [
+            'baz' => 6,
+            'bar' => 5,
+            'wee' => null,
+        ],
+    ]);
+
+    Datasets::unset('dataset');
+});
+
+it('ignores empty keys', function () {
+    Datasets::set('dataset', [
+        [
+            'foo' => 1,
+            'bar' => 2,
+            'baz' => 3,
+        ],
+        [
+            'foo' => 4,
+            'bar' => 5,
+            'baz' => 6,
+        ],
+    ]);
+
+    expect(Datasets::get('dataset:baz, ,bar'))->toMatchArray([
+        [
+            'baz' => 3,
+            'bar' => 2,
+        ],
+        [
+            'baz' => 6,
+            'bar' => 5,
+        ],
+    ]);
+
+    Datasets::unset('dataset');
+});

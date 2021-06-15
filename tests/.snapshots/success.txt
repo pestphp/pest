@@ -90,6 +90,14 @@
   ✓ more than two datasets with (2) / (4) / (5)
   ✓ more than two datasets with (2) / (4) / (6)
   ✓ more than two datasets did the job right
+  ✓ it can generate test with extracted dataset with data set "Nuno"
+  ✓ it can generate test with extracted dataset with data set "Fabio"
+  ✓ it can generate test with extracted dataset with data set "Oliver"
+  ✓ it extracts keys from lazy dataset
+  ✓ it extracts keys from eager dataset
+  ✓ it trims extract dataset keys
+  ✓ it replaces missing keys with null
+  ✓ it ignores empty keys
 
    PASS  Tests\Features\Exceptions
   ✓ it gives access the the underlying expectException
@@ -276,5 +284,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 7 skipped, 168 passed
+  Tests:  4 incompleted, 7 skipped, 176 passed
   

@@ -42,10 +42,67 @@ final class Datasets
     public static function get(string $name)
     {
         if (!array_key_exists($name, self::$datasets)) {
-            throw new DatasetDoesNotExist($name);
+            return self::extract_dataset_keys($name);
         }
 
         return self::$datasets[$name];
+    }
+
+    public static function unset(string $name): void
+    {
+        if (array_key_exists($name, self::$datasets)) {
+            unset(self::$datasets[$name]);
+        }
+    }
+
+    /**
+     * @return array[]
+     */
+    private static function extract_dataset_keys(string $dataset_name): array
+    {
+        $original_dataset_name = $dataset_name;
+
+        $pieces = explode(':', $dataset_name);
+
+        if ($pieces == false) {
+            throw new DatasetDoesNotExist($original_dataset_name);
+        }
+
+        $dataset_name = trim($pieces[0]);
+
+        if (!array_key_exists($dataset_name, self::$datasets)) {
+            throw new DatasetDoesNotExist($original_dataset_name);
+        }
+
+        $dataset = self::computeDataset(self::$datasets[$dataset_name]);
+
+        /** @var string[] $possibleKeys */
+        $possibleKeys = explode(',', $pieces[1] ?? '');
+
+        $keysToExtract = [];
+        foreach ($possibleKeys as $key) {
+            $key = trim($key);
+
+            if ($key === '') {
+                continue;
+            }
+
+            $keysToExtract[] = $key;
+        }
+
+        if (count($keysToExtract) === 0) {
+            return $dataset;
+        }
+
+        $extracted_dataset = [];
+
+        foreach ($dataset as $dataset_key => $dataset_array) {
+            foreach ($keysToExtract as $key) {
+                $extracted_dataset[$dataset_key][$key] = $dataset_array[$key] ?? null;
+            }
+        }
+
+        return $extracted_dataset;
     }
 
     /**
@@ -113,19 +170,10 @@ final class Datasets
         foreach ($datasets as $index => $data) {
             $processedDataset = [];
 
-            if (is_string($data)) {
-                $datasets[$index] = self::get($data);
-            }
-
-            if (is_callable($datasets[$index])) {
-                $datasets[$index] = call_user_func($datasets[$index]);
-            }
-
-            if ($datasets[$index] instanceof Traversable) {
-                $datasets[$index] = iterator_to_array($datasets[$index]);
-            }
+            $datasets[$index] = self::computeDataset($data);
 
             foreach ($datasets[$index] as $key => $values) {
+                /* @phpstan-ignore-next-line */
                 $values             = is_array($values) ? $values : [$values];
                 $processedDataset[] = [
                     'label'  => self::getDataSetDescription($key, $values),
@@ -137,6 +185,29 @@ final class Datasets
         }
 
         return $processedDatasets;
+    }
+
+    /**
+     * @param Closure|iterable<int|string, mixed>|string $data
+     *
+     * @return array<array>
+     */
+    private static function computeDataset($data): array
+    {
+        if (is_string($data)) {
+            $data = self::get($data);
+        }
+
+        if (is_callable($data)) {
+            $data = call_user_func($data);
+        }
+
+        if ($data instanceof Traversable) {
+            $data = iterator_to_array($data);
+        }
+
+        /* @var array $data */
+        return $data;
     }
 
     /**
