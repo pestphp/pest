@@ -42,7 +42,7 @@ final class Datasets
     public static function get(string $name)
     {
         if (!array_key_exists($name, self::$datasets)) {
-            return self::extract_dataset_keys($name);
+            return self::extractDatasetKeys($name);
         }
 
         return self::$datasets[$name];
@@ -58,23 +58,23 @@ final class Datasets
     /**
      * @return array[]
      */
-    private static function extract_dataset_keys(string $dataset_name): array
+    private static function extractDatasetKeys(string $datasetName): array
     {
-        $original_dataset_name = $dataset_name;
+        $originalDatasetName = $datasetName;
 
-        $pieces = explode(':', $dataset_name);
+        $pieces = explode(':', $datasetName);
 
         if ($pieces == false) {
-            throw new DatasetDoesNotExist($original_dataset_name);
+            throw new DatasetDoesNotExist($originalDatasetName);
         }
 
-        $dataset_name = trim($pieces[0]);
+        $datasetName = trim($pieces[0]);
 
-        if (!array_key_exists($dataset_name, self::$datasets)) {
-            throw new DatasetDoesNotExist($original_dataset_name);
+        if (!array_key_exists($datasetName, self::$datasets)) {
+            throw new DatasetDoesNotExist($originalDatasetName);
         }
 
-        $dataset = self::computeDataset(self::$datasets[$dataset_name]);
+        $dataset = self::computeDataset(self::$datasets[$datasetName]);
 
         /** @var string[] $possibleKeys */
         $possibleKeys = explode(',', $pieces[1] ?? '');
@@ -94,15 +94,15 @@ final class Datasets
             return $dataset;
         }
 
-        $extracted_dataset = [];
+        $extractedDataset = [];
 
-        foreach ($dataset as $dataset_key => $dataset_array) {
+        foreach ($dataset as $datasetKey => $datasetArray) {
             foreach ($keysToExtract as $key) {
-                $extracted_dataset[$dataset_key][$key] = $dataset_array[$key] ?? null;
+                $extractedDataset[$datasetKey][$key] = $datasetArray[$key] ?? null;
             }
         }
 
-        return $extracted_dataset;
+        return $extractedDataset;
     }
 
     /**
@@ -130,9 +130,9 @@ final class Datasets
             $partialDescriptions = [];
             $values              = [];
 
-            foreach ($datasetCombination as $dataset_data) {
-                $partialDescriptions[] = $dataset_data['label'];
-                $values                = array_merge($values, $dataset_data['values']);
+            foreach ($datasetCombination as $datasetData) {
+                $partialDescriptions[] = $datasetData['label'];
+                $values                = array_merge($values, $datasetData['values']);
             }
 
             $dataSetDescriptions[] = $description . ' with ' . implode(' / ', $partialDescriptions);
