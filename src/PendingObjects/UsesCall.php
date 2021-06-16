@@ -108,9 +108,9 @@ final class UsesCall
     }
 
     /**
-     * @param array<Finder> $targets
+     * @param array<int, Finder> $targets
      *
-     * @return array<string>
+     * @return array<int, string>
      */
     private function convertFinderToPaths(array $targets): array
     {
