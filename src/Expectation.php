@@ -120,7 +120,7 @@ final class Expectation
     /**
      * Allows you to specify a sequential set of expectations for each item in a iterable "value".
      *
-     * @param mixed ...$callbacks
+     * @param callable(Expectation, Expectation): void|mixed ...$callbacks
      */
     public function sequence(...$callbacks): Expectation
     {
