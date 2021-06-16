@@ -110,7 +110,7 @@ final class Expectation
 
         if (is_callable($callback)) {
             foreach ($this->value as $item) {
-                $callback(expect($item));
+                $callback(new Expectation($item));
             }
         }
 
@@ -119,8 +119,10 @@ final class Expectation
 
     /**
      * Allows you to specify a sequential set of expectations for each item in a iterable "value".
+     *
+     * @param mixed ...$callbacks
      */
-    public function sequence(callable ...$callbacks): Expectation
+    public function sequence(...$callbacks): Expectation
     {
         if (!is_iterable($this->value)) {
             throw new BadMethodCallException('Expectation value is not iterable.');
@@ -138,7 +140,12 @@ final class Expectation
         }
 
         foreach ($values as $key => $item) {
-            call_user_func($callbacks[$key], expect($item), expect($keys[$key]));
+            if (is_callable($callbacks[$key])) {
+                call_user_func($callbacks[$key], new Expectation($item), new Expectation($keys[$key]));
+                continue;
+            }
+
+            (new Expectation($item))->toEqual($callbacks[$key]);
         }
 
         return $this;
