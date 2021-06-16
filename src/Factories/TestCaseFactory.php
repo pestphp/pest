@@ -67,6 +67,13 @@ final class TestCaseFactory
     public $datasets = [];
 
     /**
+     * Has the current test been marked dependent on others?
+     *
+     * @var bool
+     */
+    public $dependent = false;
+
+    /**
      * The FQN of the test case class.
      *
      * @var string
