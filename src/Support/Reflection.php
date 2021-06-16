@@ -162,7 +162,7 @@ final class Reflection
     public static function getFunctionArguments(Closure $function): array
     {
         $parameters = (new ReflectionFunction($function))->getParameters();
-        $arguments = [];
+        $arguments  = [];
 
         foreach ($parameters as $parameter) {
             $arguments[$parameter->getName()] = ($parameter->hasType()) ? $parameter->getType() : 'mixed';

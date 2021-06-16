@@ -10,7 +10,7 @@ use NunoMaduro\Collision\Contracts\RenderlessTrace;
 use Symfony\Component\Console\Exception\ExceptionInterface;
 
 /**
- * Creates a new instance of dataset is not present for test that has arguments
+ * Creates a new instance of dataset is not present for test that has arguments.
  *
  * @internal
  */
