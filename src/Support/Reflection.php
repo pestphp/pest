@@ -165,7 +165,7 @@ final class Reflection
         $arguments  = [];
 
         foreach ($parameters as $parameter) {
-            $arguments[$parameter->getName()] = ($parameter->hasType()) ? $parameter->getType() : 'mixed';
+            $arguments[$parameter->getName()] = ($parameter->hasType()) ? (string) $parameter->getType() : 'mixed';
         }
 
         return $arguments;
