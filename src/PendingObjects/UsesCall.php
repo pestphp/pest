@@ -71,9 +71,21 @@ final class UsesCall
     /**
      * The directories or file where the
      * class or traits should be used.
+     *
+     * @param string|Finder $targets
      */
-    public function in(string ...$targets): void
+    public function in(...$targets): void
     {
+        if (!is_string($targets[0]) && $targets[0] instanceof Finder && count($targets) > 1) {
+            throw new \InvalidArgumentException(sprintf('A single `%s` object must be provided when not using string paths', get_class($finder)));
+        }
+
+        if ($targets[0] instanceof Finder) {
+            $targets = \array_map(function (\Symfony\Component\Finder\SplFileInfo $item): string {
+                return (string) $item->getRealPath();
+            }, \iterator_to_array($targets[0]));
+        }
+
         $targets = array_map(function ($path): string {
             $startChar = DIRECTORY_SEPARATOR;
 
@@ -100,25 +112,6 @@ final class UsesCall
 
             return $accumulator;
         }, []);
-    }
-
-    /** @param Finder $finder */
-    public function inFinder($finder): void
-    {
-        if (!class_exists(Finder::class)) {
-            throw ShouldNotHappen::fromMessage(sprintf('Unable to find the `%s` class, please install `symfony/finder`', Finder::class));
-        }
-
-        /* @phpstan-ignore-next-line */
-        if (!($finder instanceof Finder)) {
-            throw new \InvalidArgumentException(sprintf('Invalid object `%s` passed to `uses()->inFinder()`', get_class($finder)));
-        }
-
-        $paths = \array_map(function (\Symfony\Component\Finder\SplFileInfo $item): string {
-            return (string) $item->getRealPath();
-        }, \iterator_to_array($finder));
-
-        $this->in(...$paths);
     }
 
     /**
