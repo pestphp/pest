@@ -18,3 +18,23 @@ uses()
         $globalHook->afterAll = 0;
     })
     ->in('Hooks');
+
+trait TestTraitUsedByFinder
+{
+}
+
+trait MultipleTestTraitUsedByFinder
+{
+}
+
+uses(TestTraitUsedByFinder::class)->in(
+    Symfony\Component\Finder\Finder::create()
+        ->in(__DIR__ . '/Features/Uses')
+        ->name('Finder')
+);
+
+uses(MultipleTestTraitUsedByFinder::class)->in(
+    Symfony\Component\Finder\Finder::create()
+        ->in(__DIR__ . '/Features/Uses/Finder')
+        ->notName('SingleUses.php')
+);

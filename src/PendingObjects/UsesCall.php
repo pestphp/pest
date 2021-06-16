@@ -6,6 +6,7 @@ namespace Pest\PendingObjects;
 
 use Closure;
 use Pest\TestSuite;
+use Symfony\Component\Finder\Finder;
 
 /**
  * @internal
@@ -69,9 +70,15 @@ final class UsesCall
     /**
      * The directories or file where the
      * class or traits should be used.
+     *
+     * @param string|Finder $targets
      */
-    public function in(string ...$targets): void
+    public function in(...$targets): void
     {
+        if ($targets[0] instanceof Finder) {
+            $targets = $this->convertFinderToPaths($targets);
+        }
+
         $targets = array_map(function ($path): string {
             $startChar = DIRECTORY_SEPARATOR;
 
@@ -98,6 +105,22 @@ final class UsesCall
 
             return $accumulator;
         }, []);
+    }
+
+    /**
+     * @param array<int, Finder> $targets
+     *
+     * @return array<int, string>
+     */
+    private function convertFinderToPaths(array $targets): array
+    {
+        if (count($targets) > 1) {
+            throw new \InvalidArgumentException(sprintf('Multiple `%s` objects are not supported with `uses()->in()`', get_class($targets[0])));
+        }
+
+        return \array_map(function (\Symfony\Component\Finder\SplFileInfo $item): string {
+            return (string) $item->getRealPath();
+        }, \iterator_to_array($targets[0]));
     }
 
     /**
