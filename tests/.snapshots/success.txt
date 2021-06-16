@@ -111,11 +111,9 @@
   ✓ it works inside of each
   ✓ it works with sequence
   ✓ it can compose complex expectations
-  ✓ it can handle nested method calls
 
    PASS  Tests\Features\Expect\HigherOrder\methodsAndProperties
   ✓ it can access methods and properties
-  ✓ it can handle nested methods and properties
 
    PASS  Tests\Features\Expect\HigherOrder\properties
   ✓ it allows properties to be accessed from the value
@@ -126,7 +124,6 @@
   ✓ it works with sequence
   ✓ it can compose complex expectations
   ✓ it works with objects
-  ✓ it works with nested properties
 
    PASS  Tests\Features\Expect\each
   ✓ an exception is thrown if the the type is not iterable
@@ -339,8 +336,23 @@
 
    PASS  Tests\Features\Expect\toHaveKey
   ✓ pass
+  ✓ pass with nested key
+  ✓ pass with plain key with dots
+  ✓ pass with value check
+  ✓ pass with value check and nested key
+  ✓ pass with value check and plain key with dots
   ✓ failures
+  ✓ failures with nested key
+  ✓ failures with plain key with dots
+  ✓ fails with wrong value
+  ✓ fails with wrong value and nested key
+  ✓ fails with wrong value and plain key with dots
   ✓ not failures
+  ✓ not failures with nested key
+  ✓ not failures with plain key with dots
+  ✓ not failures with correct value
+  ✓ not failures with correct value and  with nested key
+  ✓ not failures with correct value and  with plain key with dots
 
    PASS  Tests\Features\Expect\toHaveKeys
   ✓ pass
@@ -557,5 +569,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 7 skipped, 343 passed
+  Tests:  4 incompleted, 7 skipped, 355 passed
   
