@@ -6,6 +6,7 @@ namespace Pest;
 
 use BadMethodCallException;
 use Pest\Concerns\Extendable;
+use Pest\Concerns\RetrievesValues;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Constraint\Constraint;
 use SebastianBergmann\Exporter\Exporter;
@@ -18,7 +19,10 @@ use SebastianBergmann\Exporter\Exporter;
  */
 final class Expectation
 {
-    use Extendable;
+    use Extendable {
+        __call as __extendsCall;
+    }
+    use RetrievesValues;
 
     /**
      * The expectation value.
@@ -697,6 +701,24 @@ final class Expectation
     }
 
     /**
+     * Dynamically handle calls to the class or
+     * creates a new higher order expectation.
+     *
+     * @param array<int, mixed> $parameters
+     *
+     * @return mixed
+     */
+    public function __call(string $method, array $parameters)
+    {
+        if (!static::hasExtend($method)) {
+            /* @phpstan-ignore-next-line */
+            return new HigherOrderExpectation($this, $this->value->$method(...$parameters));
+        }
+
+        return $this->__extendsCall($method, $parameters);
+    }
+
+    /**
      * Dynamically calls methods on the class without any arguments
      * or creates a new higher order expectation.
      *
@@ -705,7 +727,7 @@ final class Expectation
     public function __get(string $name)
     {
         if (!method_exists($this, $name) && !static::hasExtend($name)) {
-            return new HigherOrderExpectation($this, $name);
+            return new HigherOrderExpectation($this, $this->retrieve($name, $this->value));
         }
 
         /* @phpstan-ignore-next-line */

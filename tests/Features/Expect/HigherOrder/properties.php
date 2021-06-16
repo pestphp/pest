@@ -58,6 +58,12 @@ it('works with objects', function () {
         );
 });
 
+it('works with nested properties', function () {
+    expect(new HasProperties())
+        ->nested->foo->bar->toBeString()->toEqual('baz')
+        ->posts->toBeArray()->toHaveCount(2);
+});
+
 class HasProperties
 {
     public $name = 'foo';
@@ -71,5 +77,9 @@ class HasProperties
             'is_published' => true,
             'title'        => 'Bar',
         ],
+    ];
+
+    public $nested = [
+        'foo' => ['bar' => 'baz'],
     ];
 }
