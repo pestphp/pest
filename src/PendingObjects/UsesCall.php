@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pest\PendingObjects;
 
 use Closure;
-use Pest\Exceptions\ShouldNotHappen;
 use Pest\TestSuite;
 use Symfony\Component\Finder\Finder;
 
@@ -76,14 +75,8 @@ final class UsesCall
      */
     public function in(...$targets): void
     {
-        if (!is_string($targets[0]) && $targets[0] instanceof Finder && count($targets) > 1) {
-            throw new \InvalidArgumentException(sprintf('A single `%s` object must be provided when not using string paths', get_class($finder)));
-        }
-
         if ($targets[0] instanceof Finder) {
-            $targets = \array_map(function (\Symfony\Component\Finder\SplFileInfo $item): string {
-                return (string) $item->getRealPath();
-            }, \iterator_to_array($targets[0]));
+            $targets = $this->convertFinderToPaths($targets);
         }
 
         $targets = array_map(function ($path): string {
@@ -112,6 +105,22 @@ final class UsesCall
 
             return $accumulator;
         }, []);
+    }
+
+    /**
+     * @param array<Finder> $targets
+     *
+     * @return array<string>
+     */
+    private function convertFinderToPaths(array $targets): array
+    {
+        if (count($targets) > 1) {
+            throw new \InvalidArgumentException(sprintf('Multiple `%s` objects are not supported with `uses()->in()`', get_class($targets[0])));
+        }
+
+        return \array_map(function (\Symfony\Component\Finder\SplFileInfo $item): string {
+            return (string) $item->getRealPath();
+        }, \iterator_to_array($targets[0]));
     }
 
     /**

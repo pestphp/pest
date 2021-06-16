@@ -422,8 +422,13 @@
   ✓ a test
   ✓ higher order message test
 
-   PASS  Tests\Features\Uses\Finder\Uses
+   PASS  Tests\Features\Uses\Finder\MultipleUses
   ✓ it uses the right trait by using Symfony Finder call
+  ✓ it uses the additional trait from the Symfony Finder call
+
+   PASS  Tests\Features\Uses\Finder\SingleUses
+  ✓ it uses the right trait by using Symfony Finder call
+  ✓ it does not use the additional trait from the Symfony Finder call
 
    PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest
   ✓ it example 1
@@ -557,5 +562,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 7 skipped, 341 passed
+  Tests:  4 incompleted, 7 skipped, 344 passed
   
