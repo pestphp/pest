@@ -153,4 +153,21 @@ final class Reflection
 
         return $name;
     }
+
+    /**
+     * Receive a map of function argument names to their types.
+     *
+     * @return array<string, string>
+     */
+    public static function getFunctionArguments(Closure $function): array
+    {
+        $parameters = (new ReflectionFunction($function))->getParameters();
+        $arguments = [];
+
+        foreach ($parameters as $parameter) {
+            $arguments[$parameter->getName()] = ($parameter->hasType()) ? $parameter->getType() : 'mixed';
+        }
+
+        return $arguments;
+    }
 }
