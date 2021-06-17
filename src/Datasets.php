@@ -62,6 +62,7 @@ final class Datasets
     {
         $originalDatasetName = $datasetName;
 
+        /* @phpstan-ignore-next-line  */
         if (!preg_match('/^(.*):(.*)/', $datasetName, $pieces)) {
             throw new DatasetDoesNotExist($originalDatasetName);
         }

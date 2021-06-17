@@ -365,7 +365,7 @@ it('replaces missing extracted keys with null', function () {
     Datasets::unset('dataset');
 });
 
-it('ignores empty values when extracting keys', function () {
+it('ignores empty values and trailing commas when extracting keys', function () {
     Datasets::set('dataset', [
         [
             'foo' => 1,
@@ -379,7 +379,7 @@ it('ignores empty values when extracting keys', function () {
         ],
     ]);
 
-    expect(Datasets::get('dataset:baz, ,bar'))->toMatchArray([
+    expect(Datasets::get('dataset:baz, ,bar,'))->toMatchArray([
         [
             'baz' => 3,
             'bar' => 2,
@@ -393,7 +393,7 @@ it('ignores empty values when extracting keys', function () {
     Datasets::unset('dataset');
 });
 
-it('handles keys extraction from datasets with : in their name', function(){
+it('handles keys extraction from datasets with : in their name', function () {
     Datasets::set('my:dataset', [
         [
             'foo' => 1,
@@ -419,4 +419,4 @@ it('handles keys extraction from datasets with : in their name', function(){
     ]);
 
     Datasets::unset('dataset');
-})->only();
+});
