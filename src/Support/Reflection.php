@@ -12,6 +12,7 @@ use ReflectionException;
 use ReflectionFunction;
 use ReflectionNamedType;
 use ReflectionParameter;
+use ReflectionUnionType;
 
 /**
  * @internal
@@ -165,9 +166,23 @@ final class Reflection
         $arguments  = [];
 
         foreach ($parameters as $parameter) {
-            /** @var ReflectionNamedType|null $type */
-            $type                             = ($parameter->hasType()) ? $parameter->getType() : null;
-            $arguments[$parameter->getName()] = (is_null($type)) ? 'mixed' : $type->getName();
+            /** @var ReflectionNamedType|ReflectionUnionType|null $types */
+            $types = ($parameter->hasType()) ? $parameter->getType() : null;
+
+            if (is_null($types)) {
+                $arguments[$parameter->getName()] = 'mixed';
+
+                continue;
+            }
+
+            $arguments[$parameter->getName()] = implode('|', array_map(
+                static function (ReflectionNamedType $type): string {
+                    return $type->getName();
+                },
+                ($types instanceof ReflectionNamedType)
+                    ? [$types] // NOTE: normalize as list of to handle unions
+                    : $types->getTypes(),
+            ));
         }
 
         return $arguments;
