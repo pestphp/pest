@@ -62,13 +62,11 @@ final class Datasets
     {
         $originalDatasetName = $datasetName;
 
-        $pieces = explode(':', $datasetName);
-
-        if ($pieces == false) {
+        if (!preg_match('/^(.*):(.*)/', $datasetName, $pieces)) {
             throw new DatasetDoesNotExist($originalDatasetName);
         }
 
-        $datasetName = trim($pieces[0]);
+        $datasetName = trim($pieces[1]);
 
         if (!array_key_exists($datasetName, self::$datasets)) {
             throw new DatasetDoesNotExist($originalDatasetName);
@@ -77,7 +75,7 @@ final class Datasets
         $dataset = self::computeDataset(self::$datasets[$datasetName]);
 
         /** @var string[] $possibleKeys */
-        $possibleKeys = explode(',', $pieces[1] ?? '');
+        $possibleKeys = explode(',', $pieces[2] ?? '');
 
         $keysToExtract = [];
         foreach ($possibleKeys as $key) {
