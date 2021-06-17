@@ -6,21 +6,38 @@ namespace Pest\Concerns;
 
 use Pest\Exceptions\DatasetDoesNotExist;
 
-const DATASET_KEY_EXTRACTION_PATTERN = '/^(.*):(.*)/';
-
+/**
+ * Implements some methods useful to extract specific keys from a registered dataset.
+ *
+ * given a dataset: dataset('people',  'Nuno'   => [
+ *      'Nuno' => ['name' => 'Nuno', 'country' => 'Portugal', 'role' => 'Owner'],
+ *      'Fabio' => ['name' => 'Fabio', 'country' => 'Italy', 'role' => 'Member'],
+ *      'Oliver' => ['name' => 'Oliver', 'country' => 'Denmark', 'role' => 'Maintainer'],
+ *  ],
+ *
+ * Keys are selected by using a specific pattern when calling a dataset for a
+ * specific test, eg. ->with('people:name,age')
+ */
 trait ExtractsDatasetKeys
 {
     /**
+     * @internal
+     *
+     * @var string
+     */
+    private static $DATASET_KEY_EXTRACTION_PATTERN = '/^(.*):(.*)/';
+
+    /**
      * @return array[]
      */
-    private static function extractDataset(string $datasetName): array
+    private static function extractDataset(string $registeredDatasetName): array
     {
-        $realDatasetName = self::retrieveDatasetName($datasetName);
+        $realDatasetName = self::retrieveDatasetName($registeredDatasetName);
 
-        $keys = self::retrieveDatasetKeys($datasetName);
+        $keys = self::retrieveDatasetKeys($registeredDatasetName);
 
         if (!array_key_exists($realDatasetName, self::$datasets)) {
-            throw new DatasetDoesNotExist($datasetName);
+            throw new DatasetDoesNotExist($registeredDatasetName);
         }
 
         $dataset = self::computeDataset(self::$datasets[$realDatasetName]);
@@ -29,7 +46,7 @@ trait ExtractsDatasetKeys
             return $dataset;
         }
 
-        return self::extractDatasetFromKeys($dataset, $keys);
+        return self::extractDatasetKeys($dataset, $keys);
     }
 
     /**
@@ -38,7 +55,7 @@ trait ExtractsDatasetKeys
     private static function retrieveDatasetKeys(string $datasetName): array
     {
         /* @phpstan-ignore-next-line */
-        if (!preg_match(DATASET_KEY_EXTRACTION_PATTERN, $datasetName, $matches)) {
+        if (!preg_match(self::$DATASET_KEY_EXTRACTION_PATTERN, $datasetName, $matches)) {
             throw new DatasetDoesNotExist($datasetName);
         }
 
@@ -62,7 +79,7 @@ trait ExtractsDatasetKeys
     private static function retrieveDatasetName(string $datasetName): string
     {
         /* @phpstan-ignore-next-line */
-        if (!preg_match(DATASET_KEY_EXTRACTION_PATTERN, $datasetName, $matches)) {
+        if (!preg_match(self::$DATASET_KEY_EXTRACTION_PATTERN, $datasetName, $matches)) {
             throw new DatasetDoesNotExist($datasetName);
         }
 
@@ -75,7 +92,7 @@ trait ExtractsDatasetKeys
      *
      * @return array[]
      */
-    private static function extractDatasetFromKeys(array $dataset, array $keys): array
+    private static function extractDatasetKeys(array $dataset, array $keys): array
     {
         $extractedDataset = [];
 

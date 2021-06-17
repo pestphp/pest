@@ -225,21 +225,9 @@ test('more than two datasets did the job right', function () use ($state) {
 });
 
 $people = [
-    'Nuno'   => [
-        'name'    => 'Nuno',
-        'country' => 'Portugal',
-        'role'    => 'Owner',
-    ],
-    'Fabio'  => [
-        'name'    => 'Fabio',
-        'country' => 'Italy',
-        'role'    => 'Member',
-    ],
-    'Oliver' => [
-        'name'    => 'Oliver',
-        'country' => 'Denmark',
-        'role'    => 'Maintainer',
-    ],
+    'Nuno'   => ['name' => 'Nuno', 'country' => 'Portugal', 'role' => 'Owner'],
+    'Fabio'  => ['name' => 'Fabio', 'country' => 'Italy', 'role' => 'Member'],
+    'Oliver' => ['name' => 'Oliver', 'country' => 'Denmark', 'role' => 'Maintainer'],
 ];
 dataset('people', $people);
 
