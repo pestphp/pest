@@ -6,8 +6,10 @@ namespace Pest;
 
 use BadMethodCallException;
 use Pest\Concerns\Extendable;
+use Pest\Support\Arr;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Constraint\Constraint;
+use PHPUnit\Framework\ExpectationFailedException;
 use SebastianBergmann\Exporter\Exporter;
 
 /**
@@ -522,10 +524,16 @@ final class Expectation
             $array = (array) $this->value;
         }
 
-        Assert::assertArrayHasKey($key, $array);
+        try {
+            Assert::assertTrue(Arr::has($array, $key));
+
+            /* @phpstan-ignore-next-line  */
+        } catch (ExpectationFailedException $exception) {
+            throw new ExpectationFailedException("Failed asserting that an array has the key '$key'", $exception->getComparisonFailure());
+        }
 
         if (func_num_args() > 1) {
-            Assert::assertEquals($value, $array[$key]);
+            Assert::assertEquals($value, Arr::get($array, $key));
         }
 
         return $this;

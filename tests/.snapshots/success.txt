@@ -336,8 +336,23 @@
 
    PASS  Tests\Features\Expect\toHaveKey
   ✓ pass
+  ✓ pass with nested key
+  ✓ pass with plain key with dots
+  ✓ pass with value check
+  ✓ pass with value check and nested key
+  ✓ pass with value check and plain key with dots
   ✓ failures
+  ✓ failures with nested key
+  ✓ failures with plain key with dots
+  ✓ fails with wrong value
+  ✓ fails with wrong value and nested key
+  ✓ fails with wrong value and plain key with dots
   ✓ not failures
+  ✓ not failures with nested key
+  ✓ not failures with plain key with dots
+  ✓ not failures with correct value
+  ✓ not failures with correct value and  with nested key
+  ✓ not failures with correct value and  with plain key with dots
 
    PASS  Tests\Features\Expect\toHaveKeys
   ✓ pass
@@ -555,5 +570,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 7 skipped, 341 passed
+  Tests:  4 incompleted, 7 skipped, 356 passed
   
