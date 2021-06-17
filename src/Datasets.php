@@ -8,8 +8,8 @@ use Closure;
 use Pest\Concerns\ExtractsDatasetKeys;
 use Pest\Exceptions\DatasetAlreadyExist;
 use SebastianBergmann\Exporter\Exporter;
-use Traversable;
 use function sprintf;
+use Traversable;
 
 /**
  * @internal
