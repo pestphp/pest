@@ -79,7 +79,8 @@ final class TestCaseFactory
      * @var array <int, string>
      */
     public $traits = [
-        Concerns\TestCase::class,
+        Concerns\Testable::class,
+        Concerns\Expectable::class,
     ];
 
     /**

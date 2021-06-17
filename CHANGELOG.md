@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.5.0 (2021-06-15)](https://github.com/pestphp/pest/compare/v1.4.0...v1.5.0)
+### Changed
+- Moves plugins from the `require` section to the core itself ([#317](https://github.com/pestphp/pest/pull/317)), ([#318](https://github.com/pestphp/pest/pull/318)), ([#320](https://github.com/pestphp/pest/pull/320))
+
 ## [v1.4.0 (2021-06-10)](https://github.com/pestphp/pest/compare/v1.3.2...v1.4.0)
 ### Added
 - Support for multiple datasets (Matrix) on the `with` method ([#303](https://github.com/pestphp/pest/pull/303))

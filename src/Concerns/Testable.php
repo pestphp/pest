@@ -17,7 +17,7 @@ use Throwable;
  *
  * @internal
  */
-trait TestCase
+trait Testable
 {
     /**
      * The test case description. Contains the first

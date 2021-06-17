@@ -18,9 +18,8 @@
     ],
     "require": {
         "php": "^7.3 || ^8.0",
-        "nunomaduro/collision": "^5.0",
-        "pestphp/pest-plugin": "^1.0",
-        "pestphp/pest-plugin-expectations": "^1.6",
+        "nunomaduro/collision": "^5.4.0",
+        "pestphp/pest-plugin": "^1.0.0",
         "phpunit/phpunit": ">= 9.3.7 <= 9.5.5"
     },
     "autoload": {
@@ -41,9 +40,9 @@
         ]
     },
     "require-dev": {
-        "illuminate/console": "^8.32.1",
-        "illuminate/support": "^8.32.1",
-        "laravel/dusk": "^6.13.0",
+        "illuminate/console": "^8.47.0",
+        "illuminate/support": "^8.47.0",
+        "laravel/dusk": "^6.15.0",
         "pestphp/pest-dev-tools": "dev-master"
     },
     "minimum-stability": "dev",

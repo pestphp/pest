@@ -18,7 +18,7 @@ use DOMElement;
 use Exception;
 use function get_class;
 use function method_exists;
-use Pest\Concerns\TestCase;
+use Pest\Concerns\Testable;
 use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\ExceptionWrapper;
 use PHPUnit\Framework\SelfDescribing;
@@ -266,7 +266,7 @@ final class JUnit extends Printer implements TestListener
     /**
      * A test started.
      *
-     * @param Test|TestCase $test
+     * @param Test|Testable $test
      */
     public function startTest(Test $test): void
     {
