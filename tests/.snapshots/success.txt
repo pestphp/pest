@@ -156,6 +156,8 @@
   ✓ loops back to the start if it runs out of sequence items
   ✓ it works if the number of items in the iterable is smaller than the number of expectations
   ✓ it works with associative arrays
+  ✓ it can be passed non-callable values
+  ✓ it can be passed a mixture of value types
 
    PASS  Tests\Features\Expect\toBe
   ✓ strict comparisons
@@ -573,5 +575,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 7 skipped, 357 passed
+  Tests:  4 incompleted, 7 skipped, 359 passed
   

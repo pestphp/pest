@@ -128,9 +128,10 @@ final class Expectation
     }
 
     /**
+     * @template TValue
      * Allows you to specify a sequential set of expectations for each item in a iterable "value".
      *
-     * @param callable(Expectation, Expectation): void|mixed ...$callbacks
+     * @param callable(Expectation, Expectation): void|TValue ...$callbacks
      */
     public function sequence(...$callbacks): Expectation
     {
