@@ -60,6 +60,7 @@ final class Expectation
      * Creates a new expectation.
      *
      * @param TValue $value
+     *
      * @return Expectation<TValue>
      */
     public function and($value): Expectation

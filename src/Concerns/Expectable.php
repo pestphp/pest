@@ -17,6 +17,7 @@ trait Expectable
      * Creates a new expectation.
      *
      * @param TValue $value
+     *
      * @return Expectation<TValue>
      */
     public function expect($value): Expectation
