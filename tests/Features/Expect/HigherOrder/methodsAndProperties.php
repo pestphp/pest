@@ -14,9 +14,19 @@ it('can access methods and properties', function () {
         );
 });
 
+it('can handle nested methods and properties', function () {
+    expect(new HasMethodsAndProperties())
+        ->meta->foo->bar->toBeString()->toEqual('baz')->not->toBeInt
+        ->newInstance()->meta->foo->toBeArray()
+        ->newInstance()->multiply(2, 2)->toEqual(4)->not->toEqual(5)
+        ->newInstance()->books()->toBeArray();
+});
+
 class HasMethodsAndProperties
 {
     public $name = 'Has Methods and Properties';
+
+    public $meta = ['foo' => ['bar' => 'baz']];
 
     public $posts = [
         [
@@ -46,5 +56,10 @@ class HasMethodsAndProperties
     public function multiply($x, $y)
     {
         return $x * $y;
+    }
+
+    public function newInstance()
+    {
+        return new static();
     }
 }

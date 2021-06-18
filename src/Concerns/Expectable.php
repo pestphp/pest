@@ -12,9 +12,13 @@ use Pest\Expectation;
 trait Expectable
 {
     /**
+     * @template TValue
+     *
      * Creates a new expectation.
      *
-     * @param mixed $value
+     * @param TValue $value
+     *
+     * @return Expectation<TValue>
      */
     public function expect($value): Expectation
     {
