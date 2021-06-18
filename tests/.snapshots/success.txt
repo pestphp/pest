@@ -140,6 +140,10 @@
   ✓ it macros true is true with argument
   ✓ it macros false is not true with argument
 
+   PASS  Tests\Features\Expect\json
+  ✓ it properly parses json string
+  ✓ fails with broken json string
+
    PASS  Tests\Features\Expect\not
   ✓ not property calls
 
@@ -569,5 +573,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 7 skipped, 355 passed
+  Tests:  4 incompleted, 7 skipped, 357 passed
   
