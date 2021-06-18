@@ -61,6 +61,17 @@ final class Expectation
     }
 
     /**
+     * Parses Json String to Array.
+     */
+    public function json(): Expectation
+    {
+        Assert::assertIsString($this->value);
+        Assert::assertJson($this->value);
+
+        return new self(json_decode($this->value, true));
+    }
+
+    /**
      * Dump the expectation value and end the script.
      *
      * @param mixed $arguments
