@@ -15,7 +15,7 @@ $globalsFilePath = implode(DIRECTORY_SEPARATOR, [
 
 $compiledFilePath = implode(DIRECTORY_SEPARATOR, [dirname(__DIR__), 'compiled', 'globals.php']);
 
-/** @phpstan-ignore-next-line */
+/* @phpstan-ignore-next-line */
 @unlink($compiledFilePath);
 
 $replace = function ($contents, $string, $by) {
