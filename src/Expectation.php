@@ -65,10 +65,7 @@ final class Expectation
      */
     public function json(): Expectation
     {
-        Assert::assertIsString($this->value);
-        Assert::assertJson($this->value);
-
-        return new self(json_decode($this->value, true));
+        return $this->toBeJson()->and(json_decode($this->value, true));
     }
 
     /**
