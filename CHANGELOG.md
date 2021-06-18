@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.6.0 (2021-06-18)](https://github.com/pestphp/pest/compare/v1.5.0...v1.6.0)
+### Added
+- Adds a new `json` expectation method to improve testing with JSON strings ([#325](https://github.com/pestphp/pest/pull/325))
+- Adds dot notation support to the `toHaveKey` and `toHaveKeys` expectations ([#322](https://github.com/pestphp/pest/pull/322))
+
 ## [v1.5.0 (2021-06-15)](https://github.com/pestphp/pest/compare/v1.4.0...v1.5.0)
 ### Changed
 - Moves plugins from the `require` section to the core itself ([#317](https://github.com/pestphp/pest/pull/317)), ([#318](https://github.com/pestphp/pest/pull/318)), ([#320](https://github.com/pestphp/pest/pull/320))
