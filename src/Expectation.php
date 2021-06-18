@@ -61,6 +61,14 @@ final class Expectation
     }
 
     /**
+     * Creates a new expectation with the decoded JSON value.
+     */
+    public function json(): Expectation
+    {
+        return $this->toBeJson()->and(json_decode($this->value, true));
+    }
+
+    /**
      * Dump the expectation value and end the script.
      *
      * @param mixed $arguments
