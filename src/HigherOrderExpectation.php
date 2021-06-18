@@ -66,7 +66,7 @@ final class HigherOrderExpectation
     /**
      * Dynamically calls methods on the class with the given arguments.
      *
-     * @param array<int|string, mixed> $arguments
+     * @param array $arguments
      */
     public function __call(string $name, array $arguments): self
     {
@@ -115,7 +115,7 @@ final class HigherOrderExpectation
     /**
      * Performs the given assertion with the current expectation.
      *
-     * @param array<int|string, mixed> $arguments
+     * @param array $arguments
      */
     private function performAssertion(string $name, array $arguments): self
     {

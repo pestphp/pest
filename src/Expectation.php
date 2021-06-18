@@ -16,6 +16,8 @@ use SebastianBergmann\Exporter\Exporter;
 /**
  * @internal
  *
+ * @template TValue
+ *
  * @property Expectation $not  Creates the opposite expectation.
  * @property Each        $each Creates an expectation on each element on the traversable value.
  */
@@ -47,7 +49,7 @@ final class Expectation
     /**
      * Creates a new expectation.
      *
-     * @param mixed $value
+     * @param TValue $value
      */
     public function __construct($value)
     {
@@ -57,7 +59,8 @@ final class Expectation
     /**
      * Creates a new expectation.
      *
-     * @param mixed $value
+     * @param TValue $value
+     * @return Expectation<TValue>
      */
     public function and($value): Expectation
     {
@@ -722,7 +725,7 @@ final class Expectation
      *
      * @param array<int, mixed> $parameters
      *
-     * @return mixed
+     * @return HigherOrderExpectation|mixed
      */
     public function __call(string $method, array $parameters)
     {
