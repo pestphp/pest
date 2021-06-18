@@ -10,12 +10,14 @@ namespace Pest\Concerns;
 trait RetrievesValues
 {
     /**
+     * @template TValue
+     *
      * Safely retrieve the value at the given key from an object or array.
      *
-     * @param array<mixed>|object $value
-     * @param mixed               $default
+     * @param array<string, TValue>|object $value
+     * @param TValue|null               $default
      *
-     * @return mixed
+     * @return TValue|null
      */
     private function retrieve(string $key, $value, $default = null)
     {
