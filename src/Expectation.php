@@ -120,7 +120,7 @@ final class Expectation
 
         if (is_callable($callback)) {
             foreach ($this->value as $item) {
-                $callback(new Expectation($item));
+                $callback(new self($item));
             }
         }
 
@@ -128,10 +128,11 @@ final class Expectation
     }
 
     /**
-     * @template TValue
      * Allows you to specify a sequential set of expectations for each item in a iterable "value".
      *
-     * @param callable(Expectation, Expectation): void|TValue ...$callbacks
+     * @template TValue
+     *
+     * @param callable(self, self): void|TValue ...$callbacks
      */
     public function sequence(...$callbacks): Expectation
     {
@@ -152,11 +153,11 @@ final class Expectation
 
         foreach ($values as $key => $item) {
             if (is_callable($callbacks[$key])) {
-                call_user_func($callbacks[$key], new Expectation($item), new Expectation($keys[$key]));
+                call_user_func($callbacks[$key], new self($item), new self($keys[$key]));
                 continue;
             }
 
-            (new Expectation($item))->toEqual($callbacks[$key]);
+            (new self($item))->toEqual($callbacks[$key]);
         }
 
         return $this;
