@@ -138,9 +138,9 @@ final class Expectation
     /**
      * Allows you to specify a sequential set of expectations for each item in a iterable "value".
      *
-     * @template TValue
+     * @template TSequenceValue
      *
-     * @param callable(self, self): void|TValue ...$callbacks
+     * @param callable(self, self): void|TSequenceValue ...$callbacks
      */
     public function sequence(...$callbacks): Expectation
     {
