@@ -140,6 +140,10 @@
   ✓ it macros true is true with argument
   ✓ it macros false is not true with argument
 
+   PASS  Tests\Features\Expect\json
+  ✓ it properly parses json string
+  ✓ fails with broken json string
+
    PASS  Tests\Features\Expect\not
   ✓ not property calls
 
@@ -152,8 +156,6 @@
   ✓ loops back to the start if it runs out of sequence items
   ✓ it works if the number of items in the iterable is smaller than the number of expectations
   ✓ it works with associative arrays
-  ✓ it can be passed non-callable values
-  ✓ it can be passed a mixture of value types
 
    PASS  Tests\Features\Expect\toBe
   ✓ strict comparisons
@@ -338,8 +340,23 @@
 
    PASS  Tests\Features\Expect\toHaveKey
   ✓ pass
+  ✓ pass with nested key
+  ✓ pass with plain key with dots
+  ✓ pass with value check
+  ✓ pass with value check and nested key
+  ✓ pass with value check and plain key with dots
   ✓ failures
+  ✓ failures with nested key
+  ✓ failures with plain key with dots
+  ✓ fails with wrong value
+  ✓ fails with wrong value and nested key
+  ✓ fails with wrong value and plain key with dots
   ✓ not failures
+  ✓ not failures with nested key
+  ✓ not failures with plain key with dots
+  ✓ not failures with correct value
+  ✓ not failures with correct value and  with nested key
+  ✓ not failures with correct value and  with plain key with dots
 
    PASS  Tests\Features\Expect\toHaveKeys
   ✓ pass
@@ -556,5 +573,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 7 skipped, 342 passed
+  Tests:  4 incompleted, 7 skipped, 357 passed
   
