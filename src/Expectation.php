@@ -61,7 +61,7 @@ final class Expectation
     }
 
     /**
-     * Parses Json String to Array.
+     * Creates a new expectation with the decoded JSON value.
      */
     public function json(): Expectation
     {
