@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.7.0 (2021-06-19)](https://github.com/pestphp/pest/compare/v1.6.0...v1.7.0)
+### Added
+- Support for non-callable values in the sequence method, which will be passed as `toEqual` ([#323](https://github.com/pestphp/pest/pull/323))
+- Support for nested Higher Order Expectations ([#324](https://github.com/pestphp/pest/pull/324))
+
 ## [v1.6.0 (2021-06-18)](https://github.com/pestphp/pest/compare/v1.5.0...v1.6.0)
 ### Added
 - Adds a new `json` expectation method to improve testing with JSON strings ([#325](https://github.com/pestphp/pest/pull/325))
