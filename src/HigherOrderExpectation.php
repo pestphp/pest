@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest;
 
 use Pest\Concerns\Expectable;
+use Pest\Concerns\RetrievesValues;
 
 /**
  * @internal
@@ -14,6 +15,7 @@ use Pest\Concerns\Expectable;
 final class HigherOrderExpectation
 {
     use Expectable;
+    use RetrievesValues;
 
     /**
      * @var Expectation
@@ -31,6 +33,11 @@ final class HigherOrderExpectation
     private $opposite = false;
 
     /**
+     * @var bool
+     */
+    private $shouldReset = false;
+
+    /**
      * @var string
      */
     private $name;
@@ -38,45 +45,12 @@ final class HigherOrderExpectation
     /**
      * Creates a new higher order expectation.
      *
-     * @param array<int|string, mixed>|null $parameters
-     * @phpstan-ignore-next-line
+     * @param mixed $value
      */
-    public function __construct(Expectation $original, string $name, ?array $parameters = null)
+    public function __construct(Expectation $original, $value)
     {
-        $this->original = $original;
-        $this->name     = $name;
-
-        $this->expectation = $this->expect(
-            is_null($parameters) ? $this->getPropertyValue() : $this->getMethodValue($parameters)
-        );
-    }
-
-    /**
-     * Retrieves the property value from the original expectation.
-     *
-     * @return mixed
-     */
-    private function getPropertyValue()
-    {
-        if (is_array($this->original->value)) {
-            return $this->original->value[$this->name];
-        }
-
-        // @phpstan-ignore-next-line
-        return $this->original->value->{$this->name};
-    }
-
-    /**
-     * Retrieves the value of the method from the original expectation.
-     *
-     * @param array<int|string, mixed> $arguments
-     *
-     * @return mixed
-     */
-    private function getMethodValue(array $arguments)
-    {
-        // @phpstan-ignore-next-line
-        return $this->original->value->{$this->name}(...$arguments);
+        $this->original     = $original;
+        $this->expectation  = $this->expect($value);
     }
 
     /**
@@ -92,12 +66,13 @@ final class HigherOrderExpectation
     /**
      * Dynamically calls methods on the class with the given arguments.
      *
-     * @param array<int|string, mixed> $arguments
+     * @param array<int, mixed> $arguments
      */
     public function __call(string $name, array $arguments): self
     {
-        if (!$this->originalHasMethod($name)) {
-            return new self($this->original, $name, $arguments);
+        if (!$this->expectationHasMethod($name)) {
+            /* @phpstan-ignore-next-line */
+            return new self($this->original, $this->getValue()->$name(...$arguments));
         }
 
         return $this->performAssertion($name, $arguments);
@@ -112,8 +87,8 @@ final class HigherOrderExpectation
             return $this->not();
         }
 
-        if (!$this->originalHasMethod($name)) {
-            return new self($this->original, $name);
+        if (!$this->expectationHasMethod($name)) {
+            return new self($this->original, $this->retrieve($name, $this->getValue()));
         }
 
         return $this->performAssertion($name, []);
@@ -122,25 +97,33 @@ final class HigherOrderExpectation
     /**
      * Determines if the original expectation has the given method name.
      */
-    private function originalHasMethod(string $name): bool
+    private function expectationHasMethod(string $name): bool
     {
         return method_exists($this->original, $name) || $this->original::hasExtend($name);
     }
 
     /**
+     * Retrieve the applicable value based on the current reset condition.
+     *
+     * @return mixed
+     */
+    private function getValue()
+    {
+        return $this->shouldReset ? $this->original->value : $this->expectation->value;
+    }
+
+    /**
      * Performs the given assertion with the current expectation.
      *
-     * @param array<int|string, mixed> $arguments
+     * @param array<int, mixed> $arguments
      */
     private function performAssertion(string $name, array $arguments): self
     {
-        $expectation = $this->opposite
-            ? $this->expectation->not()
-            : $this->expectation;
+        /* @phpstan-ignore-next-line */
+        $this->expectation = ($this->opposite ? $this->expectation->not() : $this->expectation)->{$name}(...$arguments);
 
-        $this->expectation = $expectation->{$name}(...$arguments); // @phpstan-ignore-line
-
-        $this->opposite = false;
+        $this->opposite    = false;
+        $this->shouldReset = true;
 
         return $this;
     }
