@@ -59,6 +59,14 @@ it('can compose complex expectations', function () {
         );
 });
 
+it('can handle nested method calls', function () {
+    expect(new HasMethods())
+        ->newInstance()->newInstance()->name()->toEqual('Has Methods')->toBeString()
+        ->newInstance()->name()->toEqual('Has Methods')->not->toBeInt
+        ->name()->toEqual('Has Methods')
+        ->books()->each->toBeArray();
+});
+
 class HasMethods
 {
     public function name()
@@ -96,5 +104,10 @@ class HasMethods
                 'cost'  => 30,
             ],
         ];
+    }
+
+    public function newInstance()
+    {
+        return new static();
     }
 }

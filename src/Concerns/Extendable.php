@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Pest\Concerns;
 
+use BadMethodCallException;
 use Closure;
-use Pest\HigherOrderExpectation;
 
 /**
  * @internal
@@ -43,7 +43,7 @@ trait Extendable
     public function __call(string $method, array $parameters)
     {
         if (!static::hasExtend($method)) {
-            return new HigherOrderExpectation($this, $method, $parameters);
+            throw new BadMethodCallException("$method is not a callable method name.");
         }
 
         /** @var Closure $extend */

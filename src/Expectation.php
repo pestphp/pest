@@ -6,6 +6,7 @@ namespace Pest;
 
 use BadMethodCallException;
 use Pest\Concerns\Extendable;
+use Pest\Concerns\RetrievesValues;
 use Pest\Support\Arr;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Constraint\Constraint;
@@ -15,12 +16,17 @@ use SebastianBergmann\Exporter\Exporter;
 /**
  * @internal
  *
+ * @template TValue
+ *
  * @property Expectation $not  Creates the opposite expectation.
  * @property Each        $each Creates an expectation on each element on the traversable value.
  */
 final class Expectation
 {
-    use Extendable;
+    use Extendable {
+        __call as __extendsCall;
+    }
+    use RetrievesValues;
 
     /**
      * The expectation value.
@@ -43,7 +49,7 @@ final class Expectation
     /**
      * Creates a new expectation.
      *
-     * @param mixed $value
+     * @param TValue $value
      */
     public function __construct($value)
     {
@@ -53,11 +59,21 @@ final class Expectation
     /**
      * Creates a new expectation.
      *
-     * @param mixed $value
+     * @param TValue $value
+     *
+     * @return Expectation<TValue>
      */
     public function and($value): Expectation
     {
         return new self($value);
+    }
+
+    /**
+     * Creates a new expectation with the decoded JSON value.
+     */
+    public function json(): Expectation
+    {
+        return $this->toBeJson()->and(json_decode($this->value, true));
     }
 
     /**
@@ -112,7 +128,7 @@ final class Expectation
 
         if (is_callable($callback)) {
             foreach ($this->value as $item) {
-                $callback(expect($item));
+                $callback(new self($item));
             }
         }
 
@@ -121,8 +137,12 @@ final class Expectation
 
     /**
      * Allows you to specify a sequential set of expectations for each item in a iterable "value".
+     *
+     * @template TSequenceValue
+     *
+     * @param callable(self, self): void|TSequenceValue ...$callbacks
      */
-    public function sequence(callable ...$callbacks): Expectation
+    public function sequence(...$callbacks): Expectation
     {
         if (!is_iterable($this->value)) {
             throw new BadMethodCallException('Expectation value is not iterable.');
@@ -140,7 +160,12 @@ final class Expectation
         }
 
         foreach ($values as $key => $item) {
-            call_user_func($callbacks[$key], expect($item), expect($keys[$key]));
+            if (is_callable($callbacks[$key])) {
+                call_user_func($callbacks[$key], new self($item), new self($keys[$key]));
+                continue;
+            }
+
+            (new self($item))->toEqual($callbacks[$key]);
         }
 
         return $this;
@@ -705,6 +730,24 @@ final class Expectation
     }
 
     /**
+     * Dynamically handle calls to the class or
+     * creates a new higher order expectation.
+     *
+     * @param array<int, mixed> $parameters
+     *
+     * @return HigherOrderExpectation|mixed
+     */
+    public function __call(string $method, array $parameters)
+    {
+        if (!static::hasExtend($method)) {
+            /* @phpstan-ignore-next-line */
+            return new HigherOrderExpectation($this, $this->value->$method(...$parameters));
+        }
+
+        return $this->__extendsCall($method, $parameters);
+    }
+
+    /**
      * Dynamically calls methods on the class without any arguments
      * or creates a new higher order expectation.
      *
@@ -713,7 +756,7 @@ final class Expectation
     public function __get(string $name)
     {
         if (!method_exists($this, $name) && !static::hasExtend($name)) {
-            return new HigherOrderExpectation($this, $name);
+            return new HigherOrderExpectation($this, $this->retrieve($name, $this->value));
         }
 
         /* @phpstan-ignore-next-line */
