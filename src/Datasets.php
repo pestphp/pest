@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace Pest;
 
 use Closure;
+use Pest\Concerns\ExtractsDatasetKeys;
 use Pest\Exceptions\DatasetAlreadyExist;
-use Pest\Exceptions\DatasetDoesNotExist;
 use SebastianBergmann\Exporter\Exporter;
+use function sprintf;
 use Traversable;
 
 /**
@@ -15,6 +16,8 @@ use Traversable;
  */
 final class Datasets
 {
+    use ExtractsDatasetKeys;
+
     /**
      * Holds the datasets.
      *
@@ -42,10 +45,17 @@ final class Datasets
     public static function get(string $name)
     {
         if (!array_key_exists($name, self::$datasets)) {
-            throw new DatasetDoesNotExist($name);
+            return self::extractDataset($name);
         }
 
         return self::$datasets[$name];
+    }
+
+    public static function unset(string $name): void
+    {
+        if (array_key_exists($name, self::$datasets)) {
+            unset(self::$datasets[$name]);
+        }
     }
 
     /**
@@ -73,9 +83,9 @@ final class Datasets
             $partialDescriptions = [];
             $values              = [];
 
-            foreach ($datasetCombination as $dataset_data) {
-                $partialDescriptions[] = $dataset_data['label'];
-                $values                = array_merge($values, $dataset_data['values']);
+            foreach ($datasetCombination as $datasetData) {
+                $partialDescriptions[] = $datasetData['label'];
+                $values                = array_merge($values, $datasetData['values']);
             }
 
             $dataSetDescriptions[] = $description . ' with ' . implode(' / ', $partialDescriptions);
@@ -113,19 +123,10 @@ final class Datasets
         foreach ($datasets as $index => $data) {
             $processedDataset = [];
 
-            if (is_string($data)) {
-                $datasets[$index] = self::get($data);
-            }
-
-            if (is_callable($datasets[$index])) {
-                $datasets[$index] = call_user_func($datasets[$index]);
-            }
-
-            if ($datasets[$index] instanceof Traversable) {
-                $datasets[$index] = iterator_to_array($datasets[$index]);
-            }
+            $datasets[$index] = self::computeDataset($data);
 
             foreach ($datasets[$index] as $key => $values) {
+                /* @phpstan-ignore-next-line */
                 $values             = is_array($values) ? $values : [$values];
                 $processedDataset[] = [
                     'label'  => self::getDataSetDescription($key, $values),
@@ -137,6 +138,29 @@ final class Datasets
         }
 
         return $processedDatasets;
+    }
+
+    /**
+     * @param Closure|iterable<int|string, mixed>|string $data
+     *
+     * @return array<array>
+     */
+    private static function computeDataset($data): array
+    {
+        if (is_string($data)) {
+            $data = self::get($data);
+        }
+
+        if (is_callable($data)) {
+            $data = call_user_func($data);
+        }
+
+        if ($data instanceof Traversable) {
+            $data = iterator_to_array($data);
+        }
+
+        /* @var array $data */
+        return $data;
     }
 
     /**
@@ -169,9 +193,9 @@ final class Datasets
         $exporter = new Exporter();
 
         if (is_int($key)) {
-            return \sprintf('(%s)', $exporter->shortenedRecursiveExport($data));
+            return sprintf('(%s)', $exporter->shortenedRecursiveExport($data));
         }
 
-        return \sprintf('data set "%s"', $key);
+        return sprintf('data set "%s"', $key);
     }
 }
