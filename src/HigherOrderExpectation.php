@@ -66,11 +66,15 @@ final class HigherOrderExpectation
     /**
      * Creates a new expectation.
      *
-     * @param mixed $value
+     * @template TValue
+     *
+     * @param TValue $value
+     *
+     * @return Expectation<TValue>
      */
-    public function and($value): HigherOrderExpectation
+    public function and($value): Expectation
     {
-        return new self($this->expect($value), $value);
+        return $this->expect($value);
     }
 
     /**
