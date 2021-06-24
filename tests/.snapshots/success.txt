@@ -116,6 +116,7 @@
    PASS  Tests\Features\Expect\HigherOrder\methodsAndProperties
   ✓ it can access methods and properties
   ✓ it can handle nested methods and properties
+  ✓ it can start a new higher order expectation using the and syntax
 
    PASS  Tests\Features\Expect\HigherOrder\properties
   ✓ it allows properties to be accessed from the value
@@ -409,8 +410,6 @@
    PASS  Tests\Features\HigherOrderTests
   ✓ it proxies calls to object
   ✓ it is capable doing multiple assertions
-  ✓ it can tap into the test
-  ✓ it can use the returned instance from a tap
 
    WARN  Tests\Features\Incompleted
   … incompleted
@@ -580,5 +579,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 7 skipped, 364 passed
+  Tests:  4 incompleted, 7 skipped, 363 passed
   
