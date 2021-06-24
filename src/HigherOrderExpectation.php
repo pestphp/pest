@@ -64,6 +64,16 @@ final class HigherOrderExpectation
     }
 
     /**
+     * Creates a new expectation.
+     *
+     * @param mixed $value
+     */
+    public function and($value): HigherOrderExpectation
+    {
+        return new self($this->expect($value), $value);
+    }
+
+    /**
      * Dynamically calls methods on the class with the given arguments.
      *
      * @param array<int, mixed> $arguments
