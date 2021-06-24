@@ -22,6 +22,17 @@ it('can handle nested methods and properties', function () {
         ->newInstance()->books()->toBeArray();
 });
 
+it('can start a new higher order expectation using the and syntax', function () {
+    expect(new HasMethodsAndProperties())
+        ->toBeInstanceOf(HasMethodsAndProperties::class)
+        ->meta->toBeArray
+        ->and(['foo' => 'bar'])
+        ->toBeArray()
+        ->foo->toEqual('bar');
+
+    expect(static::getCount())->toEqual(4);
+});
+
 class HasMethodsAndProperties
 {
     public $name = 'Has Methods and Properties';

@@ -64,6 +64,20 @@ final class HigherOrderExpectation
     }
 
     /**
+     * Creates a new expectation.
+     *
+     * @template TValue
+     *
+     * @param TValue $value
+     *
+     * @return Expectation<TValue>
+     */
+    public function and($value): Expectation
+    {
+        return $this->expect($value);
+    }
+
+    /**
      * Dynamically calls methods on the class with the given arguments.
      *
      * @param array<int, mixed> $arguments
