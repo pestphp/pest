@@ -28,11 +28,12 @@ use Symfony\Component\Console\Output\OutputInterface;
     (new Provider())->register();
 
     // get $rootPath based on $autoloadPath
-    $rootPath =  dirname($autoloadPath, 2);
+    $rootPath = dirname($autoloadPath, 2);
+    $argv = new ArgvInput();
 
-    $testSuite = TestSuite::getInstance($rootPath);
+    $testSuite = TestSuite::getInstance($rootPath, $argv->getParameterOption('--test-directory', 'tests'));
 
-    $isDecorated = (new ArgvInput())->getParameterOption('--colors', 'always') !== 'never';
+    $isDecorated = $argv->getParameterOption('--colors', 'always') !== 'never';
     $output = new ConsoleOutput(ConsoleOutput::VERBOSITY_NORMAL, $isDecorated);
 
     $container = Container::getInstance();
@@ -40,6 +41,15 @@ use Symfony\Component\Console\Output\OutputInterface;
     $container->add(OutputInterface::class, $output);
 
     ValidatesEnvironment::in($testSuite);
+
+    // lets remove any arguments that PHPUnit does not understand
+    if ($argv->hasParameterOption('--test-directory')) {
+        foreach ($_SERVER['argv'] as $key => $value) {
+            if (strpos($value, '--test-directory') !== false) {
+                unset($_SERVER['argv'][$key]);
+            }
+        }
+    }
 
     exit($container->get(Command::class)->run($_SERVER['argv']));
 })();

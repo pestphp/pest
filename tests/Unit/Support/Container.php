@@ -38,6 +38,7 @@ it('creates an instance and resolves also sub parameters', function () {
 
 it('can resolve builtin value types', function () {
     $this->container->add('rootPath', getcwd());
+    $this->container->add('testPath', 'tests');
 
     $instance = $this->container->get(TestSuite::class);
     expect($instance)->toBeInstanceOf(TestSuite::class);

@@ -18,10 +18,10 @@
     ],
     "require": {
         "php": "^7.4 || ^8.0",
-        "nunomaduro/collision": "^5.0",
+        "nunomaduro/collision": "^5.4.0",
         "pestphp/pest-plugin": "^1.0",
         "pestphp/pest-plugin-coverage": "^1.0",
-        "pestphp/pest-plugin-expectations": "dev-feat/phpunit-10-support",
+        "pestphp/pest-plugin-expectations": "^1.0",
         "pestphp/pest-plugin-init": "^1.0",
         "phpunit/phpunit": "10.0.x-dev"
     },
@@ -43,10 +43,9 @@
         ]
     },
     "require-dev": {
-        "illuminate/console": "^8.0",
-        "illuminate/support": "^8.0",
-        "laravel/dusk": "^6.9.1",
-        "mockery/mockery": "^1.4.1",
+        "illuminate/console": "^8.47.0",
+        "illuminate/support": "^8.47.0",
+        "laravel/dusk": "^6.15.0",
         "pestphp/pest-dev-tools": "dev-master"
     },
     "minimum-stability": "dev",
@@ -78,6 +77,8 @@
         },
         "pest": {
             "plugins": [
+                "Pest\\Plugins\\Coverage",
+                "Pest\\Plugins\\Init",
                 "Pest\\Plugins\\Version"
             ]
         },

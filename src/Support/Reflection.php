@@ -12,7 +12,6 @@ use ReflectionException;
 use ReflectionFunction;
 use ReflectionNamedType;
 use ReflectionParameter;
-use ReflectionProperty;
 
 /**
  * @internal

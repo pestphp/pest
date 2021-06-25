@@ -1,7 +1,7 @@
 <?php
 
 it('is a test', function () {
-    $this->assertArrayHasKey('key', ['key' => 'foo']);
+    expect(['key' => 'foo'])->toHaveKey('key')->key->toBeString();
 });
 
 it('is a higher order message test')->expect(true)->toBeTrue();

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Pest;
+namespace Pest\Logging;
 
 use function getmypid;
-use Pest\Concerns\TestCase;
+use Pest\Concerns\Testable;
 use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\Test;
 use PHPUnit\Framework\TestResult;
@@ -109,7 +109,7 @@ final class TeamCity extends DefaultResultPrinter
     }
 
     /**
-     * @param Test|TestCase $test
+     * @param Test|Testable $test
      */
     public function startTest(Test $test): void
     {
@@ -121,13 +121,13 @@ final class TeamCity extends DefaultResultPrinter
 
         $this->printEvent('testStarted', [
             self::NAME          => $test->getName(),
-            /* @phpstan-ignore-next-line */
+            // @phpstan-ignore-next-line
             self::LOCATION_HINT => self::PROTOCOL . $test->toString(),
         ]);
     }
 
     /**
-     * @param Test|TestCase $test
+     * @param Test|Testable $test
      */
     public function endTest(Test $test, float $time): void
     {
@@ -144,7 +144,7 @@ final class TeamCity extends DefaultResultPrinter
     }
 
     /**
-     * @param Test|TestCase $test
+     * @param Test|Testable $test
      */
     public function addError(Test $test, Throwable $t, float $time): void
     {
@@ -154,7 +154,7 @@ final class TeamCity extends DefaultResultPrinter
     /**
      * @phpstan-ignore-next-line
      *
-     * @param Test|TestCase $test
+     * @param Test|Testable $test
      */
     public function addWarning(Test $test, Warning $e, float $time): void
     {
@@ -203,11 +203,11 @@ final class TeamCity extends DefaultResultPrinter
         return (int) round($time * 1000);
     }
 
-    private static function isPestTest(Test $test): bool
+    public static function isPestTest(Test $test): bool
     {
         /** @var array<string, string> $uses */
         $uses = class_uses($test);
 
-        return in_array(TestCase::class, $uses, true);
+        return in_array(Testable::class, $uses, true);
     }
 }

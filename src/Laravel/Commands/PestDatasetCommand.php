@@ -8,6 +8,8 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Pest\Exceptions\InvalidConsoleArgument;
+use function Pest\testDirectory;
+use Pest\TestSuite;
 
 /**
  * @internal
@@ -19,7 +21,8 @@ final class PestDatasetCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'pest:dataset {name : The name of the dataset}';
+    protected $signature = 'pest:dataset {name : The name of the dataset}
+                                         {--test-directory=tests : The name of the tests directory}';
 
     /**
      * The console command description.
@@ -33,10 +36,13 @@ final class PestDatasetCommand extends Command
      */
     public function handle(): void
     {
+        /* @phpstan-ignore-next-line */
+        TestSuite::getInstance(base_path(), $this->option('test-directory'));
+
         /** @var string $name */
         $name = $this->argument('name');
 
-        $relativePath   = sprintf('tests/Datasets/%s.php', ucfirst($name));
+        $relativePath   = sprintf(testDirectory('Datasets/%s.php'), ucfirst($name));
 
         /* @phpstan-ignore-next-line */
         $target         = base_path($relativePath);

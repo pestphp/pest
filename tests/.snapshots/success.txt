@@ -17,6 +17,12 @@
   ✓ it gets executed before each test
   ✓ it gets executed before each test once again
 
+   PASS  Tests\Features\Coverage
+  ✓ it has plugin
+  ✓ it adds coverage if --coverage exist
+  ✓ it adds coverage if --min exist
+  ✓ it generates coverage based on file input
+
    PASS  Tests\Features\Datasets
   ✓ it throws exception if dataset does not exist
   ✓ it throws exception if dataset already exist
@@ -40,8 +46,8 @@
   ✓ eager wrapped registered datasets with (1)
   ✓ eager wrapped registered datasets with (2)
   ✓ eager registered wrapped datasets did the job right
-  ✓ named datasets with data set "one" (1)
-  ✓ named datasets with data set "two" (2)
+  ✓ named datasets with data set "one"
+  ✓ named datasets with data set "two"
   ✓ named datasets did the job right
   ✓ lazy named datasets with (Bar Object (...))
   ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #1
@@ -51,11 +57,347 @@
   ✓ it creates unique test case names with ('Name 2', Pest\Plugin Object (), true)
   ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #3
   ✓ it creates unique test case names - count
+  ✓ lazy multiple datasets with (1) / (3)
+  ✓ lazy multiple datasets with (1) / (4)
+  ✓ lazy multiple datasets with (2) / (3)
+  ✓ lazy multiple datasets with (2) / (4)
+  ✓ lazy multiple datasets did the job right
+  ✓ eager multiple datasets with (1) / (3)
+  ✓ eager multiple datasets with (1) / (4)
+  ✓ eager multiple datasets with (2) / (3)
+  ✓ eager multiple datasets with (2) / (4)
+  ✓ eager multiple datasets did the job right
+  ✓ lazy registered multiple datasets with (1) / (1)
+  ✓ lazy registered multiple datasets with (1) / (2)
+  ✓ lazy registered multiple datasets with (2) / (1)
+  ✓ lazy registered multiple datasets with (2) / (2)
+  ✓ lazy registered multiple datasets did the job right
+  ✓ eager registered multiple datasets with (1) / (1)
+  ✓ eager registered multiple datasets with (1) / (2)
+  ✓ eager registered multiple datasets with (2) / (1)
+  ✓ eager registered multiple datasets with (2) / (2)
+  ✓ eager registered multiple datasets did the job right
+  ✓ eager wrapped registered multiple datasets with (1) / (1)
+  ✓ eager wrapped registered multiple datasets with (1) / (2)
+  ✓ eager wrapped registered multiple datasets with (2) / (1)
+  ✓ eager wrapped registered multiple datasets with (2) / (2)
+  ✓ eager wrapped registered multiple datasets did the job right
+  ✓ named multiple datasets with data set "one" / data set "three"
+  ✓ named multiple datasets with data set "one" / data set "four"
+  ✓ named multiple datasets with data set "two" / data set "three"
+  ✓ named multiple datasets with data set "two" / data set "four"
+  ✓ named multiple datasets did the job right
+  ✓ more than two datasets with (1) / (3) / (5)
+  ✓ more than two datasets with (1) / (3) / (6)
+  ✓ more than two datasets with (1) / (4) / (5)
+  ✓ more than two datasets with (1) / (4) / (6)
+  ✓ more than two datasets with (2) / (3) / (5)
+  ✓ more than two datasets with (2) / (3) / (6)
+  ✓ more than two datasets with (2) / (4) / (5)
+  ✓ more than two datasets with (2) / (4) / (6)
+  ✓ more than two datasets did the job right
 
    PASS  Tests\Features\Exceptions
   ✓ it gives access the the underlying expectException
   ✓ it catch exceptions
   ✓ it catch exceptions and messages
+
+   PASS  Tests\Features\Expect\HigherOrder\methods
+  ✓ it can access methods
+  ✓ it can access multiple methods
+  ✓ it works with not
+  ✓ it can accept arguments
+  ✓ it works with each
+  ✓ it works inside of each
+  ✓ it works with sequence
+  ✓ it can compose complex expectations
+  ✓ it can handle nested method calls
+
+   PASS  Tests\Features\Expect\HigherOrder\methodsAndProperties
+  ✓ it can access methods and properties
+  ✓ it can handle nested methods and properties
+  ✓ it can start a new higher order expectation using the and syntax
+
+   PASS  Tests\Features\Expect\HigherOrder\properties
+  ✓ it allows properties to be accessed from the value
+  ✓ it can access multiple properties from the value
+  ✓ it works with not
+  ✓ it works with each
+  ✓ it works inside of each
+  ✓ it works with sequence
+  ✓ it can compose complex expectations
+  ✓ it works with objects
+  ✓ it works with nested properties
+
+   PASS  Tests\Features\Expect\each
+  ✓ an exception is thrown if the the type is not iterable
+  ✓ it expects on each item
+  ✓ it chains expectations on each item
+  ✓ opposite expectations on each item
+  ✓ chained opposite and non-opposite expectations
+  ✓ it can add expectations via "and"
+  ✓ it accepts callables
+
+   PASS  Tests\Features\Expect\extend
+  ✓ it macros true is true
+  ✓ it macros false is not true
+  ✓ it macros true is true with argument
+  ✓ it macros false is not true with argument
+
+   PASS  Tests\Features\Expect\json
+  ✓ it properly parses json string
+  ✓ fails with broken json string
+
+   PASS  Tests\Features\Expect\not
+  ✓ not property calls
+
+   PASS  Tests\Features\Expect\ray
+  ✓ ray calls do not fail when ray is not installed
+
+   PASS  Tests\Features\Expect\sequence
+  ✓ an exception is thrown if the the type is not iterable
+  ✓ allows for sequences of checks to be run on iterable data
+  ✓ loops back to the start if it runs out of sequence items
+  ✓ it works if the number of items in the iterable is smaller than the number of expectations
+  ✓ it works with associative arrays
+  ✓ it can be passed non-callable values
+  ✓ it can be passed a mixture of value types
+
+   PASS  Tests\Features\Expect\toBe
+  ✓ strict comparisons
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeArray
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeBool
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeCallable
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeDirectory
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeEmpty
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeFalse
+  ✓ strict comparisons
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeFile
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeFloat
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeGreatherThan
+  ✓ passes
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeGreatherThanOrEqual
+  ✓ passes
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeInfinite
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeInstanceOf
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeInt
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeIterable
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeJson
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeLessThan
+  ✓ passes
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeLessThanOrEqual
+  ✓ passes
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeNAN
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeNull
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeNumeric
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeObject
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeReadableDirectory
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeReadableFile
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeResource
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeScalar
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeString
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeTrue
+  ✓ strict comparisons
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeWritableDirectory
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeWritableFile
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toContain
+  ✓ passes strings
+  ✓ passes arrays
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toEndWith
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toEqual
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toEqualCanonicalizing
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toEqualWithDelta
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toHaveCount
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toHaveKey
+  ✓ pass
+  ✓ pass with nested key
+  ✓ pass with plain key with dots
+  ✓ pass with value check
+  ✓ pass with value check and nested key
+  ✓ pass with value check and plain key with dots
+  ✓ failures
+  ✓ failures with nested key
+  ✓ failures with plain key with dots
+  ✓ fails with wrong value
+  ✓ fails with wrong value and nested key
+  ✓ fails with wrong value and plain key with dots
+  ✓ not failures
+  ✓ not failures with nested key
+  ✓ not failures with plain key with dots
+  ✓ not failures with correct value
+  ✓ not failures with correct value and  with nested key
+  ✓ not failures with correct value and  with plain key with dots
+
+   PASS  Tests\Features\Expect\toHaveKeys
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toHaveProperty
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toMatch
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toMatchArray
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toMatchConstraint
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toMatchObject
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toStartWith
+  ✓ pass
+  ✓ failures
+  ✓ not failures
 
    PASS  Tests\Features\Helpers
   ✓ it can set/get properties on $this
@@ -63,10 +405,20 @@
   ✓ it allows to call underlying protected/private methods
   ✓ it throws error if method do not exist
   ✓ it can forward unexpected calls to any global function
+  ✓ it can use helpers from helpers file
 
    PASS  Tests\Features\HigherOrderTests
   ✓ it proxies calls to object
   ✓ it is capable doing multiple assertions
+
+   WARN  Tests\Features\Incompleted
+  … incompleted
+  … it is incompleted
+  … it is incompleted even with method calls like skip
+  … it is incompleted even with method calls like group
+  ✓ it is not incompleted because of expect
+  ✓ it is not incompleted because of assert
+  ✓ it is not incompleted because of test with assertions
 
    PASS  Tests\Features\It
   ✓ it is a test
@@ -76,10 +428,8 @@
   ✓ it can call chained macro method
   ✓ it will throw exception from call if no macro exists
 
-   PASS  Tests\Features\Mocks
-  ✓ it has bar
-
    PASS  Tests\Features\PendingHigherOrderTests
+  ✓ get 'foo'
   ✓ get 'foo' → get 'bar' → expect true → toBeTrue 
   ✓ get 'foo' → expect true → toBeTrue 
 
@@ -102,6 +452,43 @@
 
    PASS  Tests\Fixtures\ExampleTest
   ✓ it example 2
+
+   PASS  Tests\Hooks\AfterAllTest
+  ✓ global afterAll execution order
+
+   PASS  Tests\Hooks\AfterEachTest
+  ✓ global afterEach execution order
+
+   PASS  Tests\Hooks\BeforeAllTest
+  ✓ global beforeAll execution order
+
+   PASS  Tests\Hooks\BeforeEachTest
+  ✓ global beforeEach execution order
+
+   PASS  Tests\PHPUnit\CustomAffixes\InvalidTestName
+  ✓ it runs file names like `@#$%^&()-_=+.php`
+
+   PASS  Tests\PHPUnit\CustomAffixes\ATestWithSpaces
+  ✓ it runs file names like `A Test With Spaces.php`
+
+   PASS  Tests\PHPUnit\CustomAffixes\AdditionalFileExtensionspec
+  ✓ it runs file names like `AdditionalFileExtension.spec.php`
+
+   PASS  Tests\PHPUnit\CustomAffixes\FolderWithAn\ExampleTest
+  ✓ custom traits can be used
+  ✓ trait applied in this file
+
+   PASS  Tests\PHPUnit\CustomAffixes\ManyExtensionsclasstest
+  ✓ it runs file names like `ManyExtensions.class.test.php`
+
+   PASS  Tests\PHPUnit\CustomAffixes\TestCaseWithQuotes
+  ✓ it runs file names like `Test 'Case' With Quotes.php`
+
+   PASS  Tests\PHPUnit\CustomAffixes\kebabcasespec
+  ✓ it runs file names like `kebab-case-spec.php`
+
+   PASS  Tests\PHPUnit\CustomAffixes\snakecasespec
+  ✓ it runs file names like `snake_case_spec.php`
 
    PASS  Tests\PHPUnit\CustomTestCase\UsesPerDirectory
   ✓ closure was bound to CustomTestCase
@@ -137,7 +524,11 @@
   ✓ it outputs the help information when --help is used
 
    PASS  Tests\Unit\Datasets
-  ✓ it show the names of named datasets in their description
+  ✓ it show only the names of named datasets in their description
+  ✓ it show the actual dataset of non-named datasets in their description
+  ✓ it show only the names of multiple named datasets in their description
+  ✓ it show the actual dataset of multiple non-named datasets in their description
+  ✓ it show the correct description for mixed named and not-named datasets
 
    PASS  Tests\Unit\Plugins\Version
   ✓ it outputs the version when --version is used
@@ -188,5 +579,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  7 skipped, 108 passed
+  Tests:  4 incompleted, 7 skipped, 363 passed
   

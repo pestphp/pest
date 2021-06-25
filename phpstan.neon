@@ -7,6 +7,7 @@ parameters:
     level: max
     paths:
         - src
+        - scripts
 
     checkMissingIterableValueType: true
     checkGenericClassInNonGenericObjectType: false
@@ -14,7 +15,6 @@ parameters:
 
     ignoreErrors:
         - "#type mixed is not subtype of native#"
-        - "#Undefined variable: \\$this#"
         - "#is not allowed to extend#"
         - "#Language construct eval#"
         - "# with null as default value#"
@@ -23,10 +23,13 @@ parameters:
         - "#Method Pest\\\\Support\\\\Reflection::getParameterClassName\\(\\) has a nullable return type declaration.#"
         -
             message: '#Call to an undefined method PHPUnit\\Framework\\Test::getName\(\)#'
-            path: src/TeamCity.php
+            path: src/Logging
         -
-            message: '#invalid typehint type Pest\\Concerns\\TestCase#'
-            path: src/TeamCity.php
+            message: '#invalid typehint type Pest\\Concerns\\Testable#'
+            path: src/Logging
         -
             message: '#is not subtype of native type PHPUnit\\Framework\\Test#'
-            path: src/TeamCity.php
+            path: src/Logging
+        -
+            message: '#Call to an undefined method PHPUnit\\Framework\\Test::getPrintableTestCaseName\(\)#'
+            path: src/Logging

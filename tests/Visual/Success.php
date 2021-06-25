@@ -13,7 +13,13 @@ test('visual snapshot of test suite on success', function () {
 
         $process->run();
 
-        return preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $process->getOutput());
+        return preg_replace([
+            '#\\x1b[[][^A-Za-z]*[A-Za-z]#',
+            '/(Tests\\\PHPUnit\\\CustomAffixes\\\InvalidTestName)([A-Za-z0-9]*)/',
+        ], [
+            '',
+            '$1',
+        ], $process->getOutput());
     };
 
     if (getenv('REBUILD_SNAPSHOTS')) {

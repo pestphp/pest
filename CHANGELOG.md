@@ -4,6 +4,77 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.7.1 (2021-06-24)](https://github.com/pestphp/pest/compare/v1.7.0...v1.7.1)
+### Fixed
+- The `and` method not being usable in Higher Order expectations ([#330](https://github.com/pestphp/pest/pull/330))
+
+## [v1.7.0 (2021-06-19)](https://github.com/pestphp/pest/compare/v1.6.0...v1.7.0)
+### Added
+- Support for non-callable values in the sequence method, which will be passed as `toEqual` ([#323](https://github.com/pestphp/pest/pull/323))
+- Support for nested Higher Order Expectations ([#324](https://github.com/pestphp/pest/pull/324))
+
+## [v1.6.0 (2021-06-18)](https://github.com/pestphp/pest/compare/v1.5.0...v1.6.0)
+### Added
+- Adds a new `json` expectation method to improve testing with JSON strings ([#325](https://github.com/pestphp/pest/pull/325))
+- Adds dot notation support to the `toHaveKey` and `toHaveKeys` expectations ([#322](https://github.com/pestphp/pest/pull/322))
+
+## [v1.5.0 (2021-06-15)](https://github.com/pestphp/pest/compare/v1.4.0...v1.5.0)
+### Changed
+- Moves plugins from the `require` section to the core itself ([#317](https://github.com/pestphp/pest/pull/317)), ([#318](https://github.com/pestphp/pest/pull/318)), ([#320](https://github.com/pestphp/pest/pull/320))
+
+## [v1.4.0 (2021-06-10)](https://github.com/pestphp/pest/compare/v1.3.2...v1.4.0)
+### Added
+- Support for multiple datasets (Matrix) on the `with` method ([#303](https://github.com/pestphp/pest/pull/303))
+- Support for incompleted tests ([49de462](https://github.com/pestphp/pest/commit/49de462250cf9f65f09e13eaf6dcc0e06865b930))
+
+## [v1.3.2 (2021-06-07)](https://github.com/pestphp/pest/compare/v1.3.1...v1.3.2)
+### Fixed 
+- Test cases with the @ symbol in the directory fail ([#308](https://github.com/pestphp/pest/pull/308))
+
+## [v1.3.1 (2021-06-06)](https://github.com/pestphp/pest/compare/v1.3.0...v1.3.1)
+### Added
+- Added for PHPUnit 9.5.5 ([#310](https://github.com/pestphp/pest/pull/310))
+
+### Changed
+- Lock minimum Pest plugin versions ([#306](https://github.com/pestphp/pest/pull/306))
+
+## [v1.3.0 (2021-05-23)](https://github.com/pestphp/pest/compare/v1.2.1...v1.3.0)
+### Added
+- Named datasets no longer show the arguments ([#302](https://github.com/pestphp/pest/pull/302))
+
+### Fixed
+- Wraps global functions within `function_exists` ([#300](https://github.com/pestphp/pest/pull/300))
+
+## [v1.2.1 (2021-05-14)](https://github.com/pestphp/pest/compare/v1.2.0...v1.2.1)
+### Fixed
+- Laravel commands failing with new `--test-directory` option ([#297](https://github.com/pestphp/pest/pull/297))
+
+## [v1.2.0 (2021-05-13)](https://github.com/pestphp/pest/compare/v1.1.0...v1.2.0)
+### Added
+- Adds JUnit / Infection support ([#291](https://github.com/pestphp/pest/pull/291))
+- `--test-directory` command line option ([#283](https://github.com/pestphp/pest/pull/283))
+
+## [v1.1.0 (2021-05-02)](https://github.com/pestphp/pest/compare/v1.0.5...v1.1.0)
+### Added
+- Possibility of "hooks" being added using the "uses" function ([#282](https://github.com/pestphp/pest/pull/282))
+
+## [v1.0.5 (2021-03-31)](https://github.com/pestphp/pest/compare/v1.0.4...v1.0.5)
+### Added
+- Add `--browse` option to `pest:dusk` command ([#280](https://github.com/pestphp/pest/pull/280))
+- Support for PHPUnit 9.5.4 ([#284](https://github.com/pestphp/pest/pull/284))
+
+## [v1.0.4 (2021-03-17)](https://github.com/pestphp/pest/compare/v1.0.3...v1.0.4)
+### Added
+- Support for PHPUnit 9.5.3 ([#278](https://github.com/pestphp/pest/pull/278))
+
+## [v1.0.3 (2021-03-13)](https://github.com/pestphp/pest/compare/v1.0.2...v1.0.3)
+### Added
+- Support for test extensions ([#269](https://github.com/pestphp/pest/pull/269))
+
+## [v1.0.2 (2021-02-04)](https://github.com/pestphp/pest/compare/v1.0.1...v1.0.2)
+### Added
+- Support for PHPUnit 9.5.2 ([#267](https://github.com/pestphp/pest/pull/267))
+
 ## [v1.0.1 (2021-01-18)](https://github.com/pestphp/pest/compare/v1.0.0...v1.0.1)
 ### Added
 - Support for PHPUnit 9.5.1 ([#261](https://github.com/pestphp/pest/pull/261))
@@ -114,7 +185,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Expectation API (TODO)
 - PHPUnit 9.3 and PHP 8 support ([#128](https://github.com/pestphp/pest/pull/128))
-- Fowards `$this` calls to globals ([#169](https://github.com/pestphp/pest/pull/169))
+- Forwards `$this` calls to globals ([#169](https://github.com/pestphp/pest/pull/169))
 
 ### Fixed
 - don't decorate output if --colors=never is set ([36b879f](https://github.com/pestphp/pest/commit/36b879f97d7b187c87a94eb60af5b7d3b7253d56))
@@ -129,7 +200,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `depends` phpunit feature ([#103](https://github.com/pestphp/pest/pull/103))
 
 ### Fixes
-- datasets name conflit ([#101](https://github.com/pestphp/pest/pull/101))
+- datasets name conflict ([#101](https://github.com/pestphp/pest/pull/101))
 
 ## [v0.2.1 (2020-06-17)](https://github.com/pestphp/pest/compare/v0.2.0...v0.2.1)
 ### Fixes
