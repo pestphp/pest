@@ -11,7 +11,8 @@ use Pest\Support\NullClosure;
 use Pest\TestSuite;
 use SebastianBergmann\Exporter\Exporter;
 
-/**
+/*
+ * @mixin \Pest\Support\HigherOrderCallables
  * @method \Pest\Expectations\Expectation expect(mixed $value)
  *
  * @internal
