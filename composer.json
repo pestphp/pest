@@ -20,9 +20,6 @@
         "php": "^7.4 || ^8.0",
         "nunomaduro/collision": "^5.4.0",
         "pestphp/pest-plugin": "^1.0",
-        "pestphp/pest-plugin-coverage": "^1.0",
-        "pestphp/pest-plugin-expectations": "^1.0",
-        "pestphp/pest-plugin-init": "^1.0",
         "phpunit/phpunit": "10.0.x-dev"
     },
     "autoload": {
