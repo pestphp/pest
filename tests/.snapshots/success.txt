@@ -552,6 +552,7 @@
 
    PASS  Tests\Unit\TestSuite
   ✓ it does not allow to add the same test description twice
+  ✓ it alerts users about tests with arguments but no input
 
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
@@ -579,5 +580,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 7 skipped, 363 passed
+  Tests:  4 incompleted, 7 skipped, 364 passed
   

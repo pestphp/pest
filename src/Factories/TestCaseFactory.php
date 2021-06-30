@@ -67,6 +67,13 @@ final class TestCaseFactory
     public $datasets = [];
 
     /**
+     * Has the current test been marked dependent on others?
+     *
+     * @var bool
+     */
+    public $dependent = false;
+
+    /**
      * The FQN of the test case class.
      *
      * @var string
@@ -227,5 +234,13 @@ final class TestCaseFactory
         }
 
         return $classFQN;
+    }
+
+    /**
+     * Determine if the test case will receive argument input from Pest, or not.
+     */
+    public function receivesArguments(): bool
+    {
+        return $this->dependent === true || count($this->datasets) > 0;
     }
 }
