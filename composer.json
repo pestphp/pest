@@ -20,7 +20,7 @@
         "php": "^7.3 || ^8.0",
         "nunomaduro/collision": "^5.4.0",
         "pestphp/pest-plugin": "^1.0.0",
-        "phpunit/phpunit": ">= 9.3.7 <= 9.5.5"
+        "phpunit/phpunit": ">= 9.3.7 <= 9.5.6"
     },
     "autoload": {
         "psr-4": {

@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.7.1 (2021-06-24)](https://github.com/pestphp/pest/compare/v1.7.0...v1.7.1)
+### Fixed
+- The `and` method not being usable in Higher Order expectations ([#330](https://github.com/pestphp/pest/pull/330))
+
 ## [v1.7.0 (2021-06-19)](https://github.com/pestphp/pest/compare/v1.6.0...v1.7.0)
 ### Added
 - Support for non-callable values in the sequence method, which will be passed as `toEqual` ([#323](https://github.com/pestphp/pest/pull/323))
