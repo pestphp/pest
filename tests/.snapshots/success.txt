@@ -580,5 +580,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 7 skipped, 363 passed
+  Tests:  4 incompleted, 7 skipped, 364 passed
   

@@ -142,7 +142,7 @@ final class TestRepository
             throw new TestAlreadyExist($test->filename, $test->description);
         }
 
-        if ($test->dependent === false && count($test->datasets) === 0) {
+        if (!$test->receivesArguments()) {
             $arguments = Reflection::getFunctionArguments($test->test);
 
             if (count($arguments) > 0) {
