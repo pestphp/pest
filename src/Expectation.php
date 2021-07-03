@@ -405,6 +405,16 @@ final class Expectation
     }
 
     /**
+     * Asserts that the value is an instance of Illuminate\Support\Collection.
+     */
+    public function toBeCollection(): Expectation
+    {
+        $this->toBeInstanceOf(\Illuminate\Support\Collection::class);
+
+        return $this;
+    }
+
+    /**
      * Asserts that the value is of type bool.
      */
     public function toBeBool(): Expectation
