@@ -410,8 +410,8 @@
    PASS  Tests\Features\HigherOrderTests
   ✓ it proxies calls to object
   ✓ it is capable doing multiple assertions
+  ✓ it resolves expect callables correctly
   ✓ it can tap into the test
-  ✓ it can use the returned instance from a tap
 
    WARN  Tests\Features\Incompleted
   … incompleted

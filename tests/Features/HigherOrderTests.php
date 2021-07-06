@@ -10,14 +10,18 @@ it('is capable doing multiple assertions')
     ->assertTrue(true)
     ->assertFalse(false);
 
-it('can tap into the test')
-    ->expect('foo')->toBeString()->toBe('foo')
-    ->tap(function () { expect($this)->toBeInstanceOf(TestCase::class); })
-    ->and('hello world')->toBeString();
+it('resolves expect callables correctly')
+    ->expect(function () { return 'foo'; })
+    ->toBeString()
+    ->toBe('foo')
+    ->and('bar')
+    ->toBeString()
+    ->toBe('bar');
 
-it('can use the returned instance from a tap')
-    ->expect('foo')->toBeString()->toBe('foo')
-    ->tap(function () { return expect($this); })
-    ->toBeInstanceOf(TestCase::class);
+it('can tap into the test')
+    ->expect('foo')->toBeString()
+    ->tap(function () { expect($this)->toBeInstanceOf(TestCase::class); })
+    ->toBe('foo')
+    ->and('hello world')->toBeString();
 
 afterEach()->assertTrue(true);
