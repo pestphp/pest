@@ -39,3 +39,8 @@ it('skips when skip after assertion')
 it('can use something in the test case as a condition')
     ->skip(function () { return $this->shouldSkip; }, 'This test was skipped')
     ->assertTrue(false);
+
+it('can user higher order callables and skip')
+    ->skip(function () { return $this->shouldSkip; })
+    ->expect(function () { return $this->shouldSkip; })
+    ->toBeFalse();
