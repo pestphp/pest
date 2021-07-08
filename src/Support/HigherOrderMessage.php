@@ -55,7 +55,7 @@ final class HigherOrderMessage
     /**
      * An optional condition that will determine if the message will be executed.
      *
-     * @var callable|null
+     * @var callable(): bool|null
      */
     public $condition = null;
 
@@ -102,6 +102,11 @@ final class HigherOrderMessage
         }
     }
 
+    /**
+     * Indicates that this message should only be called when the given condition is true.
+     *
+     * @param callable(): bool $condition
+     */
     public function when(callable $condition): self
     {
         $this->condition = $condition;
