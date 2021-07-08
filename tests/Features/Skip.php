@@ -1,5 +1,9 @@
 <?php
 
+beforeEach(function () {
+    $this->shouldSkip = true;
+});
+
 it('do not skips')
     ->skip(false)
     ->assertTrue(true);
@@ -31,3 +35,7 @@ it('skips with condition and message')
 it('skips when skip after assertion')
     ->assertTrue(true)
     ->skip();
+
+it('can use something in the test case as a condition')
+    ->skip(function () { return $this->shouldSkip; }, 'This test was skipped')
+    ->assertTrue(false);

@@ -143,11 +143,9 @@ final class TestCall
             ? $conditionOrMessage
             : $message;
 
-        if ($condition() !== false) {
-            $this->testCaseFactory
-                ->chains
-                ->add(Backtrace::file(), Backtrace::line(), 'markTestSkipped', [$message]);
-        }
+        $this->testCaseFactory
+            ->chains
+            ->addWhen($condition, Backtrace::file(), Backtrace::line(), 'markTestSkipped', [$message]);
 
         return $this;
     }

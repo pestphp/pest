@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pest\Support;
 
+use Closure;
+use const PHP_MAJOR_VERSION;
 use ReflectionClass;
 use Throwable;
 
@@ -51,6 +53,13 @@ final class HigherOrderMessage
     public $arguments;
 
     /**
+     * An optional condition that will determine if the message will be executed.
+     *
+     * @var callable|null
+     */
+    public $condition = null;
+
+    /**
      * Creates a new higher order message.
      *
      * @param array<int, mixed> $arguments
@@ -70,6 +79,11 @@ final class HigherOrderMessage
      */
     public function call(object $target)
     {
+        /* @phpstan-ignore-next-line */
+        if (is_callable($this->condition) && call_user_func(Closure::bind($this->condition, $target)) === false) {
+            return $target;
+        }
+
         try {
             return Reflection::call($target, $this->methodName, $this->arguments);
         } catch (Throwable $throwable) {
@@ -88,9 +102,16 @@ final class HigherOrderMessage
         }
     }
 
+    public function when(callable $condition): self
+    {
+        $this->condition = $condition;
+
+        return $this;
+    }
+
     private static function getUndefinedMethodMessage(object $target, string $methodName): string
     {
-        if (\PHP_MAJOR_VERSION >= 8) {
+        if (PHP_MAJOR_VERSION >= 8) {
             return sprintf(sprintf(self::UNDEFINED_METHOD, sprintf('%s::%s()', get_class($target), $methodName)));
         }
 
