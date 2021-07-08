@@ -410,6 +410,8 @@
    PASS  Tests\Features\HigherOrderTests
   ✓ it proxies calls to object
   ✓ it is capable doing multiple assertions
+  ✓ it resolves expect callables correctly
+  ✓ it can tap into the test
 
    WARN  Tests\Features\Incompleted
   … incompleted
@@ -579,5 +581,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 7 skipped, 363 passed
+  Tests:  4 incompleted, 7 skipped, 365 passed
   
