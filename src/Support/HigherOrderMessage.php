@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Support;
 
+use Closure;
 use ReflectionClass;
 use Throwable;
 
@@ -51,6 +52,13 @@ final class HigherOrderMessage
     public $arguments;
 
     /**
+     * An optional condition that will determine if the message will be executed.
+     *
+     * @var callable(): bool|null
+     */
+    public $condition = null;
+
+    /**
      * Creates a new higher order message.
      *
      * @param array<int, mixed> $arguments
@@ -70,6 +78,11 @@ final class HigherOrderMessage
      */
     public function call(object $target)
     {
+        /* @phpstan-ignore-next-line */
+        if (is_callable($this->condition) && call_user_func(Closure::bind($this->condition, $target)) === false) {
+            return $target;
+        }
+
         if ($this->hasHigherOrderCallable()) {
             /* @phpstan-ignore-next-line */
             return (new HigherOrderCallables($target))->{$this->methodName}(...$this->arguments);
@@ -91,6 +104,18 @@ final class HigherOrderMessage
 
             throw $throwable;
         }
+    }
+
+    /**
+     * Indicates that this message should only be called when the given condition is true.
+     *
+     * @param callable(): bool $condition
+     */
+    public function when(callable $condition): self
+    {
+        $this->condition = $condition;
+
+        return $this;
     }
 
     /**
