@@ -70,8 +70,9 @@ final class HigherOrderMessage
      */
     public function call(object $target)
     {
-        if (($value = $this->retrieveHigherOrderCallable($target)) !== null) {
-            return $value;
+        if ($this->hasHigherOrderCallable()) {
+            /* @phpstan-ignore-next-line */
+            return (new HigherOrderCallables($target))->{$this->methodName}(...$this->arguments);
         }
 
         try {
@@ -93,18 +94,13 @@ final class HigherOrderMessage
     }
 
     /**
-     * Attempts to call one of the available Higher Order callables if it exists.
+     * Determines whether or not there exists a higher order callable with the message name.
      *
-     * @return mixed|null
+     * @return bool
      */
-    private function retrieveHigherOrderCallable(object $target)
+    private function hasHigherOrderCallable()
     {
-        if (in_array($this->methodName, get_class_methods(HigherOrderCallables::class), true)) {
-            /* @phpstan-ignore-next-line */
-            return (new HigherOrderCallables($target))->{$this->methodName}(...$this->arguments);
-        }
-
-        return null;
+        return in_array($this->methodName, get_class_methods(HigherOrderCallables::class), true);
     }
 
     private static function getUndefinedMethodMessage(object $target, string $methodName): string
