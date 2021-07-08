@@ -41,13 +41,23 @@ final class Reflection
             }
 
             if (is_callable($method)) {
-                return Closure::fromCallable($method)->bindTo(
-                    TestSuite::getInstance()->test
-                )(...$args);
+                return static::bindCallable($method, $args);
             }
 
             throw $exception;
         }
+    }
+
+    /**
+     * Bind a callable to the TestCase and return the result.
+     *
+     * @param array<int, mixed> $args
+     *
+     * @return mixed
+     */
+    public static function bindCallable(callable $callable, array $args = [])
+    {
+        return Closure::fromCallable($callable)->bindTo(TestSuite::getInstance()->test)(...$args);
     }
 
     /**

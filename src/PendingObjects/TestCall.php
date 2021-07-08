@@ -7,14 +7,15 @@ namespace Pest\PendingObjects;
 use Closure;
 use Pest\Factories\TestCaseFactory;
 use Pest\Support\Backtrace;
+use Pest\Support\HigherOrderCallables;
 use Pest\Support\NullClosure;
 use Pest\TestSuite;
 use SebastianBergmann\Exporter\Exporter;
 
 /**
- * @method \Pest\Expectations\Expectation expect(mixed $value)
- *
  * @internal
+ *
+ * @mixin HigherOrderCallables
  */
 final class TestCall
 {

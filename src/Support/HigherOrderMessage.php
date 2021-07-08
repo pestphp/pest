@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pest\Support;
 
 use Closure;
-use const PHP_MAJOR_VERSION;
 use ReflectionClass;
 use Throwable;
 
@@ -84,6 +83,11 @@ final class HigherOrderMessage
             return $target;
         }
 
+        if ($this->hasHigherOrderCallable()) {
+            /* @phpstan-ignore-next-line */
+            return (new HigherOrderCallables($target))->{$this->methodName}(...$this->arguments);
+        }
+
         try {
             return Reflection::call($target, $this->methodName, $this->arguments);
         } catch (Throwable $throwable) {
@@ -114,9 +118,19 @@ final class HigherOrderMessage
         return $this;
     }
 
+    /**
+     * Determines whether or not there exists a higher order callable with the message name.
+     *
+     * @return bool
+     */
+    private function hasHigherOrderCallable()
+    {
+        return in_array($this->methodName, get_class_methods(HigherOrderCallables::class), true);
+    }
+
     private static function getUndefinedMethodMessage(object $target, string $methodName): string
     {
-        if (PHP_MAJOR_VERSION >= 8) {
+        if (\PHP_MAJOR_VERSION >= 8) {
             return sprintf(sprintf(self::UNDEFINED_METHOD, sprintf('%s::%s()', get_class($target), $methodName)));
         }
 
