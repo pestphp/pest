@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.8.0 (2021-07-08)](https://github.com/pestphp/pest/compare/v1.7.1...v1.8.0)
+### Added
+- A new `tap` and test case aware `expect` methods for higher order tests ([#331](https://github.com/pestphp/pest/pull/331))
+- Access to test case methods and properties when using `skip` ([#338](https://github.com/pestphp/pest/pull/338))
+
 ## [v1.7.1 (2021-06-24)](https://github.com/pestphp/pest/compare/v1.7.0...v1.7.1)
 ### Fixed
 - The `and` method not being usable in Higher Order expectations ([#330](https://github.com/pestphp/pest/pull/330))
