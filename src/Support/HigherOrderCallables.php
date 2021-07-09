@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Pest\Support;
 
 use Pest\Expectation;
+use Pest\PendingObjects\TestCall;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
@@ -50,11 +52,9 @@ final class HigherOrderCallables
     }
 
     /**
-     * @template TValue
+     * Tap into the test case to perform an action and return the test case.
      *
-     * @param callable(): TValue $callable
-     *
-     * @return TValue|object
+     * @return TestCall|TestCase|object
      */
     public function tap(callable $callable)
     {
