@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.9.0 (2021-07-09)](https://github.com/pestphp/pest/compare/v1.8.0...v1.9.0)
+### Changed
+- You may now pass just an exception message when using the `throws` method ([#339](https://github.com/pestphp/pest/pull/339)) 
+
 ## [v1.8.0 (2021-07-08)](https://github.com/pestphp/pest/compare/v1.7.1...v1.8.0)
 ### Added
 - A new `tap` and test case aware `expect` methods for higher order tests ([#331](https://github.com/pestphp/pest/pull/331))
