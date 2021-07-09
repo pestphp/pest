@@ -13,3 +13,7 @@ it('catch exceptions', function () {
 it('catch exceptions and messages', function () {
     throw new Exception('Something bad happened');
 })->throws(Exception::class, 'Something bad happened');
+
+it('can just define the message', function () {
+    throw new Exception('Something bad happened');
+})->throws('Something bad happened');

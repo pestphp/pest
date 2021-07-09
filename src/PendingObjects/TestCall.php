@@ -59,11 +59,15 @@ final class TestCall
     /**
      * Asserts that the test throws the given `$exceptionClass` when called.
      */
-    public function throws(string $exceptionClass, string $exceptionMessage = null): TestCall
+    public function throws(string $exception, string $exceptionMessage = null): TestCall
     {
-        $this->testCaseFactory
-            ->proxies
-            ->add(Backtrace::file(), Backtrace::line(), 'expectException', [$exceptionClass]);
+        if (class_exists($exception)) {
+            $this->testCaseFactory
+                ->proxies
+                ->add(Backtrace::file(), Backtrace::line(), 'expectException', [$exception]);
+        } else {
+            $exceptionMessage = $exception;
+        }
 
         if (is_string($exceptionMessage)) {
             $this->testCaseFactory
