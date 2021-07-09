@@ -156,11 +156,29 @@ final class TestCall
     }
 
     /**
+     * Saves the property accessors to be used on the target.
+     */
+    public function __get(string $name): self
+    {
+        return $this->addChain($name);
+    }
+
+    /**
      * Saves the calls to be used on the target.
      *
      * @param array<int, mixed> $arguments
      */
     public function __call(string $name, array $arguments): self
+    {
+        return $this->addChain($name, $arguments);
+    }
+
+    /**
+     * Add a chain to the test case factory. Omitting the arguments will treat it as a property accessor.
+     *
+     * @param array<int, mixed>|null $arguments
+     */
+    private function addChain(string $name, array $arguments = null): self
     {
         $this->testCaseFactory
             ->chains
@@ -171,7 +189,9 @@ final class TestCall
             if ($this->testCaseFactory->description !== null) {
                 $this->testCaseFactory->description .= ' → ';
             }
-            $this->testCaseFactory->description .= sprintf('%s %s', $name, $exporter->shortenedRecursiveExport($arguments));
+            $this->testCaseFactory->description .= $arguments === null
+                ? $name
+                : sprintf('%s %s', $name, $exporter->shortenedRecursiveExport($arguments));
         }
 
         return $this;
