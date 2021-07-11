@@ -18,6 +18,9 @@ it('resolves expect callables correctly')
     ->toBeString()
     ->toBe('bar');
 
+test('does not treat method names as callables')
+    ->expect('it')->toBeString();
+
 it('can tap into the test')
     ->expect('foo')->toBeString()
     ->tap(function () { expect($this)->toBeInstanceOf(TestCase::class); })

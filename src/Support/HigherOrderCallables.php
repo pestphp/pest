@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Support;
 
+use Closure;
 use Pest\Expectation;
 use Pest\PendingObjects\TestCall;
 use PHPUnit\Framework\TestCase;
@@ -34,7 +35,7 @@ final class HigherOrderCallables
      */
     public function expect($value)
     {
-        return new Expectation(is_callable($value) ? Reflection::bindCallable($value) : $value);
+        return new Expectation($value instanceof Closure ? Reflection::bindCallable($value) : $value);
     }
 
     /**
