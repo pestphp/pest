@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.10.0 (2021-07-12)](https://github.com/pestphp/pest/compare/v1.9.1...v1.10.0)
+### Added
+- The ability to use higher order expectations inside higher order tests ([#341](https://github.com/pestphp/pest/pull/341))
+
 ## [v1.9.1 (2021-07-11)](https://github.com/pestphp/pest/compare/v1.9.0...v1.9.1)
 ### Fixed
 - Callable `expect` values in higher order tests failing if the value was an existing method name ([#334](https://github.com/pestphp/pest/pull/344)) 
