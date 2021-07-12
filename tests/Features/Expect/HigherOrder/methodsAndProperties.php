@@ -22,6 +22,13 @@ it('can handle nested methods and properties', function () {
         ->newInstance()->books()->toBeArray();
 });
 
+it('works with higher order tests')
+    ->expect(new HasMethodsAndProperties())
+    ->meta->foo->bar->toBeString()->toEqual('baz')->not->toBeInt
+    ->newInstance()->meta->foo->toBeArray
+    ->newInstance()->multiply(2, 2)->toEqual(4)->not->toEqual(5)
+    ->newInstance()->books()->toBeArray();
+
 it('can start a new higher order expectation using the and syntax', function () {
     expect(new HasMethodsAndProperties())
         ->toBeInstanceOf(HasMethodsAndProperties::class)
@@ -32,6 +39,14 @@ it('can start a new higher order expectation using the and syntax', function () 
 
     expect(static::getCount())->toEqual(4);
 });
+
+it('can start a new higher order expectation using the and syntax in higher order tests')
+    ->expect(new HasMethodsAndProperties())
+    ->toBeInstanceOf(HasMethodsAndProperties::class)
+    ->meta->toBeArray
+    ->and(['foo' => 'bar'])
+    ->toBeArray()
+    ->foo->toEqual('bar');
 
 class HasMethodsAndProperties
 {

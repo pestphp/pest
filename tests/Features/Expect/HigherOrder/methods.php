@@ -67,6 +67,13 @@ it('can handle nested method calls', function () {
         ->books()->each->toBeArray();
 });
 
+it('works with higher order tests')
+    ->expect(new HasMethods())
+    ->newInstance()->newInstance()->name()->toEqual('Has Methods')->toBeString()
+    ->newInstance()->name()->toEqual('Has Methods')->not->toBeArray
+    ->name()->toEqual('Has Methods')
+    ->books()->each->toBeArray;
+
 class HasMethods
 {
     public function name()

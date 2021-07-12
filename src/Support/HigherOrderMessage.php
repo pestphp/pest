@@ -34,18 +34,18 @@ final class HigherOrderMessage
     public $line;
 
     /**
-     * The method name.
+     * The method or property name to access.
      *
      * @readonly
      *
      * @var string
      */
-    public $methodName;
+    public $name;
 
     /**
      * The arguments.
      *
-     * @var array<int, mixed>
+     * @var array<int, mixed>|null
      *
      * @readonly
      */
@@ -61,13 +61,13 @@ final class HigherOrderMessage
     /**
      * Creates a new higher order message.
      *
-     * @param array<int, mixed> $arguments
+     * @param array<int, mixed>|null $arguments
      */
-    public function __construct(string $filename, int $line, string $methodName, array $arguments)
+    public function __construct(string $filename, int $line, string $methodName, $arguments)
     {
         $this->filename   = $filename;
         $this->line       = $line;
-        $this->methodName = $methodName;
+        $this->name       = $methodName;
         $this->arguments  = $arguments;
     }
 
@@ -85,21 +85,23 @@ final class HigherOrderMessage
 
         if ($this->hasHigherOrderCallable()) {
             /* @phpstan-ignore-next-line */
-            return (new HigherOrderCallables($target))->{$this->methodName}(...$this->arguments);
+            return (new HigherOrderCallables($target))->{$this->name}(...$this->arguments);
         }
 
         try {
-            return Reflection::call($target, $this->methodName, $this->arguments);
+            return is_array($this->arguments)
+                ? Reflection::call($target, $this->name, $this->arguments)
+                : $target->{$this->name}; /* @phpstan-ignore-line */
         } catch (Throwable $throwable) {
             Reflection::setPropertyValue($throwable, 'file', $this->filename);
             Reflection::setPropertyValue($throwable, 'line', $this->line);
 
-            if ($throwable->getMessage() === self::getUndefinedMethodMessage($target, $this->methodName)) {
+            if ($throwable->getMessage() === self::getUndefinedMethodMessage($target, $this->name)) {
                 /** @var ReflectionClass $reflection */
                 $reflection = new ReflectionClass($target);
                 /* @phpstan-ignore-next-line */
                 $reflection = $reflection->getParentClass() ?: $reflection;
-                Reflection::setPropertyValue($throwable, 'message', sprintf('Call to undefined method %s::%s()', $reflection->getName(), $this->methodName));
+                Reflection::setPropertyValue($throwable, 'message', sprintf('Call to undefined method %s::%s()', $reflection->getName(), $this->name));
             }
 
             throw $throwable;
@@ -125,7 +127,7 @@ final class HigherOrderMessage
      */
     private function hasHigherOrderCallable()
     {
-        return in_array($this->methodName, get_class_methods(HigherOrderCallables::class), true);
+        return in_array($this->name, get_class_methods(HigherOrderCallables::class), true);
     }
 
     private static function getUndefinedMethodMessage(object $target, string $methodName): string
