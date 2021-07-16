@@ -37,7 +37,12 @@ final class TeamCity extends DefaultResultPrinter
     /** @var \PHPUnit\Util\Log\TeamCity */
     private $phpunitTeamCity;
 
-    /** @var array<callable> */
+    /**
+     * A stack of error messages and test failures to be displayed
+     * once the test suite has finished running.
+     *
+     * @var array<callable>
+     */
     protected $outputStack = [];
 
     public function __construct(bool $verbose, string $colors)
@@ -55,6 +60,9 @@ final class TeamCity extends DefaultResultPrinter
         $this->logo();
     }
 
+    /**
+     * Outputs Pest's logo and version number at the top of the output.
+     */
     private function logo(): void
     {
         $this->writeNewLine();
@@ -72,7 +80,7 @@ final class TeamCity extends DefaultResultPrinter
     public function startTestSuite(TestSuite $suite): void
     {
         if (str_starts_with($suite->getName(), 'P\\')) {
-            $this->writeWithColor('bg-white, fg-black, bold', ' ' . substr_replace($suite->getName(), '', 0, 2) . ' ');
+            $this->writeWithColor('fg-white, bold', ' ' . substr_replace($suite->getName(), '', 0, 2) . ' ');
         }
 
         $this->flowId = (int) getmypid();
