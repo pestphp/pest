@@ -294,10 +294,10 @@ final class TeamCity extends DefaultResultPrinter
 
         $results = [
             'failed'     => ['count' => $result->errorCount() + $result->failureCount(), 'color' => 'fg-red'],
-            'skipped'    => ['count' => $result->skippedCount(), 'color' => 'fg-yellow'],
-            'warned'     => ['count' => $result->warningCount(), 'color' => 'fg-yellow'],
-            'risked'     => ['count' => $result->riskyCount(), 'color' => 'fg-yellow'],
-            'incomplete' => ['count' => $result->notImplementedCount(), 'color' => 'fg-yellow'],
+            'skipped'    => ['count' => $result->skippedCount(), 'color' => 'fg-cyan'],
+            'warned'     => ['count' => $result->warningCount(), 'color' => 'fg-cyan'],
+            'risked'     => ['count' => $result->riskyCount(), 'color' => 'fg-cyan'],
+            'incomplete' => ['count' => $result->notImplementedCount(), 'color' => 'fg-cyan'],
             'passed'     => ['count' => $this->successfulTestCount($result), 'color' => 'fg-green'],
         ];
 
