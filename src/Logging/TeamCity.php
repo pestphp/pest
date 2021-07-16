@@ -71,7 +71,7 @@ final class TeamCity extends DefaultResultPrinter
     /** @phpstan-ignore-next-line */
     public function startTestSuite(TestSuite $suite): void
     {
-        if (!str_contains($suite->getName(), '.php')) {
+        if (str_starts_with($suite->getName(), 'P\\')) {
             $this->writeWithColor('bg-white, fg-black, bold', ' ' . substr_replace($suite->getName(), '', 0, 2) . ' ');
         }
 
@@ -110,6 +110,10 @@ final class TeamCity extends DefaultResultPrinter
     public function endTestSuite(TestSuite $suite): void
     {
         $suiteName = $suite->getName();
+
+        if (str_starts_with($suiteName, 'P\\')) {
+            $this->writeNewLine();
+        }
 
         if (file_exists($suiteName) || !method_exists($suiteName, '__getFileName')) {
             $this->printEvent(
