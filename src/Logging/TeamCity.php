@@ -60,9 +60,6 @@ final class TeamCity extends DefaultResultPrinter
         $this->logo();
     }
 
-    /**
-     * Outputs Pest's logo and version number at the top of the output.
-     */
     private function logo(): void
     {
         $this->writeNewLine();
