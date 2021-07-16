@@ -77,7 +77,7 @@ final class TeamCity extends DefaultResultPrinter
     public function startTestSuite(TestSuite $suite): void
     {
         if (str_starts_with($suite->getName(), 'P\\')) {
-            $this->writeWithColor('fg-white, bold', ' ' . substr_replace($suite->getName(), '', 0, 2) . ' ');
+            $this->writeWithColor('fg-white, bold', '  ' . substr_replace($suite->getName(), '', 0, 2) . ' ');
         }
 
         $this->flowId = (int) getmypid();
