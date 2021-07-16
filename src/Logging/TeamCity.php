@@ -55,7 +55,7 @@ final class TeamCity extends DefaultResultPrinter
         $this->logo();
     }
 
-    private function logo()
+    private function logo(): void
     {
         $this->writeNewLine();
         $this->write('Pest ' . version());
@@ -72,7 +72,7 @@ final class TeamCity extends DefaultResultPrinter
     public function startTestSuite(TestSuite $suite): void
     {
         if (!str_contains($suite->getName(), '.php')) {
-            $this->writeWithColor('bold', substr_replace($suite->getName(), '', 0, 2));
+            $this->writeWithColor('bg-white, fg-black, bold', ' ' . substr_replace($suite->getName(), '', 0, 2) . ' ');
         }
 
         $this->flowId = (int) getmypid();
@@ -157,7 +157,7 @@ final class TeamCity extends DefaultResultPrinter
         }
 
         if (!$this->lastTestFailed) {
-            $this->writePestTestOutput($test->getName(), 'green', '✓');
+            $this->writePestTestOutput($test->getName(), 'fg-green, bold', '✓');
         }
 
         if ($test instanceof TestCase) {
@@ -174,16 +174,15 @@ final class TeamCity extends DefaultResultPrinter
         ]);
     }
 
-    protected function writePestTestOutput(string $message, string $color, string $symbol, callable $suffix = null)
+    private function writePestTestOutput(string $message, string $color, string $symbol, string $suffix = null): void
     {
-        $this->writeProgressWithColor("fg-$color, bold", "$symbol ");
+        $this->writeProgressWithColor($color, "$symbol ");
         $this->writeProgress($message);
 
-        if ($suffix) {
-            $suffix();
+        if ($suffix !== null && strlen($suffix) > 0) {
+            $suffix = str_replace("\n", ' ', $suffix);
+            $this->writeWithColor($color, " -> $suffix");
         }
-
-        $this->writeNewLine();
     }
 
     /**
@@ -192,9 +191,11 @@ final class TeamCity extends DefaultResultPrinter
     public function addError(Test $test, Throwable $t, float $time): void
     {
         $this->lastTestFailed = true;
-        $this->writePestTestOutput($test->getName(), 'red', '⨯');
+        $this->writePestTestOutput($test->getName(), 'fg-red, bold', '⨯');
 
-        $this->outputStack[] = function () use ($test, $t, $time) {
+        $this->outputStack[] = function () use ($test, $t, $time): void {
+            $this->writeNewLine();
+            $this->writeWithColor('fg-red', "• {$test->getPrintableTestCaseName()} > {$test->getName()}");
             $this->phpunitTeamCity->addError($test, $t, $time);
         };
     }
@@ -202,9 +203,11 @@ final class TeamCity extends DefaultResultPrinter
     public function addFailure(Test $test, AssertionFailedError $e, float $time): void
     {
         $this->lastTestFailed = true;
-        $this->writePestTestOutput($test->getName(), 'red', '⨯');
+        $this->writePestTestOutput($test->getName(), 'fg-red, bold', '⨯');
 
-        $this->outputStack[] = function () use ($test, $e, $time) {
+        $this->outputStack[] = function () use ($test, $e, $time): void {
+            $this->writeNewLine();
+            $this->writeWithColor('fg-red', "• {$test->getPrintableTestCaseName()} > {$test->getName()}");
             $this->phpunitTeamCity->addFailure($test, $e, $time);
         };
     }
@@ -216,36 +219,26 @@ final class TeamCity extends DefaultResultPrinter
      */
     public function addWarning(Test $test, Warning $e, float $time): void
     {
-        $this->phpunitTeamCity->addWarning($test, $e, $time);
+        $this->lastTestFailed = true;
+        $this->writeWarning($test, $e);
     }
 
     public function addIncompleteTest(Test $test, Throwable $t, float $time): void
     {
         $this->lastTestFailed = true;
-        $this->writePestTestOutput($test->getName(), 'yellow', '…', function () use ($t) {
-            $this->writeProgressWithColor('fg-yellow', ' -> ' . $t->getMessage());
-        });
+        $this->writeWarning($test, $t);
     }
 
     public function addRiskyTest(Test $test, Throwable $t, float $time): void
     {
         $this->lastTestFailed = true;
-        $this->writePestTestOutput($test->getName(), 'yellow', '!', function () use ($t) {
-            $this->writeProgressWithColor('fg-yellow', ' -> ' . $t->getMessage());
-        });
+        $this->writeWarning($test, $t);
     }
 
     public function addSkippedTest(Test $test, Throwable $t, float $time): void
     {
         $this->lastTestFailed = true;
-        $this->writePestTestOutput($test->getName(), 'yellow', '-', function () use ($t) {
-            $this->writeProgressWithColor('fg-yellow', ' -> ' . $t->getMessage());
-        });
-    }
-
-    protected function writeProgress(string $progress): void
-    {
-        parent::writeProgress($progress);
+        $this->writeWarning($test, $t);
     }
 
     /**
@@ -267,13 +260,20 @@ final class TeamCity extends DefaultResultPrinter
         $this->write("]\n");
     }
 
-    protected function countSuccessfulTests(TestResult $result)
+    private function writeWarning(Test $test, Throwable $t): void
+    {
+        $this->writePestTestOutput($test->getName(), 'fg-cyan, bold', '-', $t->getMessage());
+    }
+
+    private function successfulTestCount(TestResult $result): int
     {
         return $result->count()
             - $result->failureCount()
             - $result->errorCount()
             - $result->skippedCount()
-            - $result->warningCount();
+            - $result->warningCount()
+            - $result->notImplementedCount()
+            - $result->riskyCount();
     }
 
     protected function printHeader(TestResult $result): void
@@ -294,10 +294,10 @@ final class TeamCity extends DefaultResultPrinter
             'warned'     => ['count' => $result->warningCount(), 'color' => 'fg-yellow'],
             'risked'     => ['count' => $result->riskyCount(), 'color' => 'fg-yellow'],
             'incomplete' => ['count' => $result->notImplementedCount(), 'color' => 'fg-yellow'],
-            'passed'     => ['count' => $this->countSuccessfulTests($result), 'color' => 'fg-green'],
+            'passed'     => ['count' => $this->successfulTestCount($result), 'color' => 'fg-green'],
         ];
 
-        $filteredResults = array_filter($results, function ($item) {
+        $filteredResults = array_filter($results, function ($item): bool {
             return $item['count'] > 0;
         });
 
@@ -308,6 +308,9 @@ final class TeamCity extends DefaultResultPrinter
                 $this->write(', ');
             }
         }
+
+        $this->writeNewLine();
+        $this->write("Assertions:  $this->numAssertions");
 
         $this->writeNewLine();
         $this->write("Time:  {$result->time()}s");
