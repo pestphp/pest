@@ -9,6 +9,11 @@ test('it properly parses json string', function () {
         ->toBe('uno');
 });
 
+it('is incomplete');
+
+it('doesnt do anything', function () {
+});
+
 test('fails with broken json string', function () {
     expect('{":"Nuno"}')->json();
 })->throws(ExpectationFailedException::class);

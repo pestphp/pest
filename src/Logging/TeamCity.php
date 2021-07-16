@@ -6,6 +6,7 @@ namespace Pest\Logging;
 
 use function getmypid;
 use Pest\Concerns\Testable;
+use function Pest\version;
 use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\Test;
 use PHPUnit\Framework\TestCase;
@@ -36,6 +37,9 @@ final class TeamCity extends DefaultResultPrinter
     /** @var \PHPUnit\Util\Log\TeamCity */
     private $phpunitTeamCity;
 
+    /** @var array<callable> */
+    protected $outputStack = [];
+
     public function __construct(bool $verbose, string $colors)
     {
         parent::__construct(null, $verbose, $colors, false, 80, false);
@@ -47,6 +51,15 @@ final class TeamCity extends DefaultResultPrinter
             80,
             false
         );
+
+        $this->logo();
+    }
+
+    private function logo()
+    {
+        $this->writeNewLine();
+        $this->write('Pest ' . version());
+        $this->writeNewLine();
     }
 
     public function printResult(TestResult $result): void
@@ -58,6 +71,10 @@ final class TeamCity extends DefaultResultPrinter
     /** @phpstan-ignore-next-line */
     public function startTestSuite(TestSuite $suite): void
     {
+        if (!str_contains($suite->getName(), '.php')) {
+            $this->writeWithColor('bold', substr_replace($suite->getName(), '', 0, 2));
+        }
+
         $this->flowId = (int) getmypid();
 
         if (!$this->isSummaryTestCountPrinted) {
@@ -176,7 +193,20 @@ final class TeamCity extends DefaultResultPrinter
     {
         $this->lastTestFailed = true;
         $this->writePestTestOutput($test->getName(), 'red', '⨯');
-        $this->phpunitTeamCity->addError($test, $t, $time);
+
+        $this->outputStack[] = function () use ($test, $t, $time) {
+            $this->phpunitTeamCity->addError($test, $t, $time);
+        };
+    }
+
+    public function addFailure(Test $test, AssertionFailedError $e, float $time): void
+    {
+        $this->lastTestFailed = true;
+        $this->writePestTestOutput($test->getName(), 'red', '⨯');
+
+        $this->outputStack[] = function () use ($test, $e, $time) {
+            $this->phpunitTeamCity->addFailure($test, $e, $time);
+        };
     }
 
     /**
@@ -189,32 +219,33 @@ final class TeamCity extends DefaultResultPrinter
         $this->phpunitTeamCity->addWarning($test, $e, $time);
     }
 
-    public function addRiskyTest(Test $test, Throwable $t, float $time): void
+    public function addIncompleteTest(Test $test, Throwable $t, float $time): void
     {
         $this->lastTestFailed = true;
-        $this->writePestTestOutput($test->getName(), 'yellow', '!', function() use ($t) {
+        $this->writePestTestOutput($test->getName(), 'yellow', '…', function () use ($t) {
             $this->writeProgressWithColor('fg-yellow', ' -> ' . $t->getMessage());
         });
     }
 
-    public function addFailure(Test $test, AssertionFailedError $e, float $time): void
+    public function addRiskyTest(Test $test, Throwable $t, float $time): void
     {
         $this->lastTestFailed = true;
-        $this->writePestTestOutput($test->getName(), 'red', '⨯');
-        $this->phpunitTeamCity->addFailure($test, $e, $time);
-    }
-
-    protected function writeProgress(string $progress): void
-    {
-        parent::writeProgress($progress);
+        $this->writePestTestOutput($test->getName(), 'yellow', '!', function () use ($t) {
+            $this->writeProgressWithColor('fg-yellow', ' -> ' . $t->getMessage());
+        });
     }
 
     public function addSkippedTest(Test $test, Throwable $t, float $time): void
     {
         $this->lastTestFailed = true;
-        $this->writePestTestOutput($test->getName(), 'yellow', '-', function() use ($t) {
+        $this->writePestTestOutput($test->getName(), 'yellow', '-', function () use ($t) {
             $this->writeProgressWithColor('fg-yellow', ' -> ' . $t->getMessage());
         });
+    }
+
+    protected function writeProgress(string $progress): void
+    {
+        parent::writeProgress($progress);
     }
 
     /**
@@ -245,30 +276,41 @@ final class TeamCity extends DefaultResultPrinter
             - $result->warningCount();
     }
 
+    protected function printHeader(TestResult $result): void
+    {
+        foreach ($this->outputStack as $callable) {
+            $callable();
+        }
+    }
+
     protected function printFooter(TestResult $result): void
     {
+        $this->writeNewLine();
         $this->writeProgress('Tests:  ');
 
         $results = [
-            'failed' => ['count' => $result->errorCount() + $result->failureCount(), 'color' => 'fg-red'],
-            'skipped' => ['count' => $result->skippedCount(), 'color' => 'fg-yellow'],
-            'warned' => ['count' => $result->warningCount(), 'color' => 'fg-yellow'],
-            'risked' => ['count' => $result->riskyCount(), 'color' => 'fg-yellow'],
+            'failed'     => ['count' => $result->errorCount() + $result->failureCount(), 'color' => 'fg-red'],
+            'skipped'    => ['count' => $result->skippedCount(), 'color' => 'fg-yellow'],
+            'warned'     => ['count' => $result->warningCount(), 'color' => 'fg-yellow'],
+            'risked'     => ['count' => $result->riskyCount(), 'color' => 'fg-yellow'],
             'incomplete' => ['count' => $result->notImplementedCount(), 'color' => 'fg-yellow'],
-            'passed' => ['count' => $this->countSuccessfulTests($result), 'color' => 'fg-green'],
+            'passed'     => ['count' => $this->countSuccessfulTests($result), 'color' => 'fg-green'],
         ];
 
-        $filteredResults = array_filter($results, function($item) {
+        $filteredResults = array_filter($results, function ($item) {
             return $item['count'] > 0;
         });
 
-        foreach ($filteredResults as $key => $result) {
-            $this->writeProgressWithColor($result['color'], $result['count'] . " $key");
+        foreach ($filteredResults as $key => $info) {
+            $this->writeProgressWithColor($info['color'], $info['count'] . " $key");
 
             if ($key !== array_reverse(array_keys($filteredResults))[0]) {
                 $this->write(', ');
             }
         }
+
+        $this->writeNewLine();
+        $this->write("Time:  {$result->time()}s");
 
         $this->writeNewLine();
     }
