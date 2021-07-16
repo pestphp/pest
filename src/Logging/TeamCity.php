@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Pest\Logging;
 
-use PHPUnit\Framework\TestCase;
-use PHPUnit\Runner\PhptTestCase;
 use function getmypid;
 use Pest\Concerns\Testable;
 use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\Test;
+use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\TestResult;
 use PHPUnit\Framework\TestSuite;
 use PHPUnit\Framework\Warning;
+use PHPUnit\Runner\PhptTestCase;
 use PHPUnit\TextUI\DefaultResultPrinter;
 use function round;
 use function str_replace;
