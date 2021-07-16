@@ -6,7 +6,7 @@ test('it properly parses json string', function () {
     expect('{"name":"Nuno"}')
         ->json()
         ->name
-        ->toBe('Nuno');
+        ->toBe('uno');
 });
 
 test('fails with broken json string', function () {

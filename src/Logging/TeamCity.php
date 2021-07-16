@@ -139,11 +139,17 @@ final class TeamCity extends DefaultResultPrinter
             return;
         }
 
+        if (!$this->lastTestFailed) {
+            $this->writePestTestOutput($test->getName(), 'green', '✓');
+        }
+
         if ($test instanceof TestCase) {
             $this->numAssertions += $test->getNumAssertions();
         } elseif ($test instanceof PhptTestCase) {
             $this->numAssertions++;
         }
+
+        $this->lastTestFailed = false;
 
         $this->printEvent('testFinished', [
             self::NAME     => $test->getName(),
@@ -151,11 +157,25 @@ final class TeamCity extends DefaultResultPrinter
         ]);
     }
 
+    protected function writePestTestOutput(string $message, string $color, string $symbol, callable $suffix = null)
+    {
+        $this->writeProgressWithColor("fg-$color, bold", "$symbol ");
+        $this->writeProgress($message);
+
+        if ($suffix) {
+            $suffix();
+        }
+
+        $this->writeNewLine();
+    }
+
     /**
      * @param Test|Testable $test
      */
     public function addError(Test $test, Throwable $t, float $time): void
     {
+        $this->lastTestFailed = true;
+        $this->writePestTestOutput($test->getName(), 'red', '⨯');
         $this->phpunitTeamCity->addError($test, $t, $time);
     }
 
@@ -169,13 +189,32 @@ final class TeamCity extends DefaultResultPrinter
         $this->phpunitTeamCity->addWarning($test, $e, $time);
     }
 
+    public function addRiskyTest(Test $test, Throwable $t, float $time): void
+    {
+        $this->lastTestFailed = true;
+        $this->writePestTestOutput($test->getName(), 'yellow', '!', function() use ($t) {
+            $this->writeProgressWithColor('fg-yellow', ' -> ' . $t->getMessage());
+        });
+    }
+
     public function addFailure(Test $test, AssertionFailedError $e, float $time): void
     {
+        $this->lastTestFailed = true;
+        $this->writePestTestOutput($test->getName(), 'red', '⨯');
         $this->phpunitTeamCity->addFailure($test, $e, $time);
     }
 
     protected function writeProgress(string $progress): void
     {
+        parent::writeProgress($progress);
+    }
+
+    public function addSkippedTest(Test $test, Throwable $t, float $time): void
+    {
+        $this->lastTestFailed = true;
+        $this->writePestTestOutput($test->getName(), 'yellow', '-', function() use ($t) {
+            $this->writeProgressWithColor('fg-yellow', ' -> ' . $t->getMessage());
+        });
     }
 
     /**
@@ -195,6 +234,43 @@ final class TeamCity extends DefaultResultPrinter
         }
 
         $this->write("]\n");
+    }
+
+    protected function countSuccessfulTests(TestResult $result)
+    {
+        return $result->count()
+            - $result->failureCount()
+            - $result->errorCount()
+            - $result->skippedCount()
+            - $result->warningCount();
+    }
+
+    protected function printFooter(TestResult $result): void
+    {
+        $this->writeProgress('Tests:  ');
+
+        $results = [
+            'failed' => ['count' => $result->errorCount() + $result->failureCount(), 'color' => 'fg-red'],
+            'skipped' => ['count' => $result->skippedCount(), 'color' => 'fg-yellow'],
+            'warned' => ['count' => $result->warningCount(), 'color' => 'fg-yellow'],
+            'risked' => ['count' => $result->riskyCount(), 'color' => 'fg-yellow'],
+            'incomplete' => ['count' => $result->notImplementedCount(), 'color' => 'fg-yellow'],
+            'passed' => ['count' => $this->countSuccessfulTests($result), 'color' => 'fg-green'],
+        ];
+
+        $filteredResults = array_filter($results, function($item) {
+            return $item['count'] > 0;
+        });
+
+        foreach ($filteredResults as $key => $result) {
+            $this->writeProgressWithColor($result['color'], $result['count'] . " $key");
+
+            if ($key !== array_reverse(array_keys($filteredResults))[0]) {
+                $this->write(', ');
+            }
+        }
+
+        $this->writeNewLine();
     }
 
     private static function escapeValue(string $text): string
