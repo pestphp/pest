@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pest\Logging;
 
+use PHPUnit\Framework\TestCase;
+use PHPUnit\Runner\PhptTestCase;
 use function getmypid;
 use Pest\Concerns\Testable;
 use PHPUnit\Framework\AssertionFailedError;
@@ -135,6 +137,12 @@ final class TeamCity extends DefaultResultPrinter
             $this->phpunitTeamCity->endTest($test, $time);
 
             return;
+        }
+
+        if ($test instanceof TestCase) {
+            $this->numAssertions += $test->getNumAssertions();
+        } elseif ($test instanceof PhptTestCase) {
+            $this->numAssertions++;
         }
 
         $this->printEvent('testFinished', [
