@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Pest\Logging;
 
 use function getmypid;
+use NunoMaduro\Collision\Adapters\Phpunit\Printer;
 use Pest\Concerns\Testable;
+use function Pest\version;
 use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\Test;
 use PHPUnit\Framework\TestCase;
@@ -16,6 +18,7 @@ use PHPUnit\Runner\PhptTestCase;
 use PHPUnit\TextUI\DefaultResultPrinter;
 use function round;
 use function str_replace;
+use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Throwable;
 
 final class TeamCity extends DefaultResultPrinter
@@ -27,37 +30,53 @@ final class TeamCity extends DefaultResultPrinter
     private const TEST_SUITE_STARTED  = 'testSuiteStarted';
     private const TEST_SUITE_FINISHED = 'testSuiteFinished';
 
+    /**
+     * A stack of error messages and test failures to be displayed
+     * once the test suite has finished running.
+     *
+     * @var array<callable>
+     */
+    protected $outputStack = [];
+
     /** @var int */
     private $flowId;
 
     /** @var bool */
     private $isSummaryTestCountPrinted = false;
 
-    /** @var \PHPUnit\Util\Log\TeamCity */
-    private $phpunitTeamCity;
+    /** @var \NunoMaduro\Collision\Adapters\Phpunit\Printer|null Printer */
+    private $collisionPrinter = null;
 
-    public function __construct(bool $verbose, string $colors)
+    /**
+     * @param resource|string|null $out
+     */
+    public function __construct($out, bool $verbose, string $colors)
     {
-        parent::__construct(null, $verbose, $colors, false, 80, false);
-        $this->phpunitTeamCity = new \PHPUnit\Util\Log\TeamCity(
-            null,
-            $verbose,
-            $colors,
-            false,
-            80,
-            false
-        );
+        parent::__construct($out, $verbose, $colors, false, 80, false);
+        /* @phpstan-ignore-next-line  */
+        if ($out === null || $out instanceof ConsoleOutputInterface) {
+            $this->collisionPrinter = new Printer($out, $verbose, $colors);
+        }
+
+        $this->writeNewLine();
+        $this->write('Pest ' . version());
+        $this->writeNewLine();
     }
 
     public function printResult(TestResult $result): void
     {
-        $this->printHeader($result);
-        $this->printFooter($result);
+        if ($this->collisionPrinter !== null) {
+            $this->collisionPrinter->printResult($result);
+        }
     }
 
     /** @phpstan-ignore-next-line */
     public function startTestSuite(TestSuite $suite): void
     {
+        if ($this->collisionPrinter !== null) {
+            $this->collisionPrinter->startTestSuite($suite);
+        }
+
         $this->flowId = (int) getmypid();
 
         if (!$this->isSummaryTestCountPrinted) {
@@ -89,95 +108,6 @@ final class TeamCity extends DefaultResultPrinter
         ]);
     }
 
-    /** @phpstan-ignore-next-line */
-    public function endTestSuite(TestSuite $suite): void
-    {
-        $suiteName = $suite->getName();
-
-        if (file_exists($suiteName) || !method_exists($suiteName, '__getFileName')) {
-            $this->printEvent(
-                self::TEST_SUITE_FINISHED, [
-                self::NAME          => $suiteName,
-                self::LOCATION_HINT => self::PROTOCOL . $suiteName,
-            ]);
-
-            return;
-        }
-
-        $this->printEvent(
-            self::TEST_SUITE_FINISHED, [
-            self::NAME         => substr($suiteName, 2),
-        ]);
-    }
-
-    /**
-     * @param Test|Testable $test
-     */
-    public function startTest(Test $test): void
-    {
-        if (!TeamCity::isPestTest($test)) {
-            $this->phpunitTeamCity->startTest($test);
-
-            return;
-        }
-
-        $this->printEvent('testStarted', [
-            self::NAME          => $test->getName(),
-            // @phpstan-ignore-next-line
-            self::LOCATION_HINT => self::PROTOCOL . $test->toString(),
-        ]);
-    }
-
-    /**
-     * @param Test|Testable $test
-     */
-    public function endTest(Test $test, float $time): void
-    {
-        if (!TeamCity::isPestTest($test)) {
-            $this->phpunitTeamCity->endTest($test, $time);
-
-            return;
-        }
-
-        if ($test instanceof TestCase) {
-            $this->numAssertions += $test->getNumAssertions();
-        } elseif ($test instanceof PhptTestCase) {
-            $this->numAssertions++;
-        }
-
-        $this->printEvent('testFinished', [
-            self::NAME     => $test->getName(),
-            self::DURATION => self::toMilliseconds($time),
-        ]);
-    }
-
-    /**
-     * @param Test|Testable $test
-     */
-    public function addError(Test $test, Throwable $t, float $time): void
-    {
-        $this->phpunitTeamCity->addError($test, $t, $time);
-    }
-
-    /**
-     * @phpstan-ignore-next-line
-     *
-     * @param Test|Testable $test
-     */
-    public function addWarning(Test $test, Warning $e, float $time): void
-    {
-        $this->phpunitTeamCity->addWarning($test, $e, $time);
-    }
-
-    public function addFailure(Test $test, AssertionFailedError $e, float $time): void
-    {
-        $this->phpunitTeamCity->addFailure($test, $e, $time);
-    }
-
-    protected function writeProgress(string $progress): void
-    {
-    }
-
     /**
      * @param array<string, string|int> $params
      */
@@ -206,9 +136,45 @@ final class TeamCity extends DefaultResultPrinter
         );
     }
 
-    private static function toMilliseconds(float $time): int
+    /** @phpstan-ignore-next-line */
+    public function endTestSuite(TestSuite $suite): void
     {
-        return (int) round($time * 1000);
+        $suiteName = $suite->getName();
+
+        if ($this->collisionPrinter !== null) {
+            $this->collisionPrinter->endTestSuite($suite);
+        }
+
+        if (file_exists($suiteName) || !method_exists($suiteName, '__getFileName')) {
+            $this->printEvent(
+                self::TEST_SUITE_FINISHED, [
+                self::NAME          => $suiteName,
+                self::LOCATION_HINT => self::PROTOCOL . $suiteName,
+            ]);
+
+            return;
+        }
+
+        $this->printEvent(
+            self::TEST_SUITE_FINISHED, [
+            self::NAME => substr($suiteName, 2),
+        ]);
+    }
+
+    /**
+     * @param Test|Testable $test
+     */
+    public function startTest(Test $test): void
+    {
+        $this->printEvent('testStarted', [
+            self::NAME => $test->getName(),
+            // @phpstan-ignore-next-line
+            self::LOCATION_HINT => self::PROTOCOL . $test->toString(),
+        ]);
+
+        if ($this->collisionPrinter !== null) {
+            $this->collisionPrinter->startTest($test);
+        }
     }
 
     public static function isPestTest(Test $test): bool
@@ -217,5 +183,76 @@ final class TeamCity extends DefaultResultPrinter
         $uses = class_uses($test);
 
         return in_array(Testable::class, $uses, true);
+    }
+
+    /**
+     * @param Test|Testable $test
+     */
+    public function endTest(Test $test, float $time): void
+    {
+        if ($test instanceof TestCase) {
+            $this->numAssertions += $test->getNumAssertions();
+        } elseif ($test instanceof PhptTestCase) {
+            $this->numAssertions++;
+        }
+
+        $this->printEvent('testFinished', [
+            self::NAME     => $test->getName(),
+            self::DURATION => self::toMilliseconds($time),
+        ]);
+
+        if ($this->collisionPrinter !== null) {
+            $this->collisionPrinter->endTest($test, $time);
+        }
+    }
+
+    private static function toMilliseconds(float $time): int
+    {
+        return (int) round($time * 1000);
+    }
+
+    /**
+     * @param Test|Testable $test
+     */
+    public function addError(Test $test, Throwable $t, float $time): void
+    {
+        if ($this->collisionPrinter !== null) {
+            $this->collisionPrinter->addError($test, $t, $time);
+        }
+    }
+
+    public function addFailure(Test $test, AssertionFailedError $e, float $time): void
+    {
+        if ($this->collisionPrinter !== null) {
+            $this->collisionPrinter->addFailure($test, $e, $time);
+        }
+    }
+
+    public function addWarning(Test $test, Warning $e, float $time): void
+    {
+        if ($this->collisionPrinter !== null) {
+            $this->collisionPrinter->addWarning($test, $e, $time);
+        }
+    }
+
+    public function addIncompleteTest(Test $test, Throwable $t, float $time): void
+    {
+        if ($this->collisionPrinter !== null) {
+            $this->collisionPrinter->addIncompleteTest($test, $t, $time);
+        }
+    }
+
+    public function addRiskyTest(Test $test, Throwable $t, float $time): void
+    {
+        if ($this->collisionPrinter !== null) {
+            $this->collisionPrinter->addRiskyTest($test, $t, $time);
+        }
+    }
+
+    public function addSkippedTest(Test $test, Throwable $t, float $time): void
+    {
+        if ($this->collisionPrinter !== null) {
+            $this->collisionPrinter->addSkippedTest($test, $t, $time);
+        }
     }
 }
