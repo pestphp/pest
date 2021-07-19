@@ -17,6 +17,7 @@ use PHPUnit\Runner\PhptTestCase;
 use PHPUnit\TextUI\DefaultResultPrinter;
 use function round;
 use function str_replace;
+use function strlen;
 use Throwable;
 
 final class TeamCity extends DefaultResultPrinter
@@ -45,11 +46,14 @@ final class TeamCity extends DefaultResultPrinter
      */
     protected $outputStack = [];
 
-    public function __construct(bool $verbose, string $colors)
+    /**
+     * @param resource|string|null $out
+     */
+    public function __construct($out, bool $verbose, string $colors)
     {
-        parent::__construct(null, $verbose, $colors, false, 80, false);
+        parent::__construct($out, $verbose, $colors, false, 80, false);
         $this->phpunitTeamCity = new \PHPUnit\Util\Log\TeamCity(
-            null,
+            $out,
             $verbose,
             $colors,
             false,
@@ -76,7 +80,7 @@ final class TeamCity extends DefaultResultPrinter
     /** @phpstan-ignore-next-line */
     public function startTestSuite(TestSuite $suite): void
     {
-        if (str_starts_with($suite->getName(), 'P\\')) {
+        if (static::isPestTestSuite($suite)) {
             $this->writeWithColor('fg-white, bold', '  ' . substr_replace($suite->getName(), '', 0, 2) . ' ');
         }
 
@@ -116,7 +120,7 @@ final class TeamCity extends DefaultResultPrinter
     {
         $suiteName = $suite->getName();
 
-        if (str_starts_with($suiteName, 'P\\')) {
+        if (static::isPestTestSuite($suite)) {
             $this->writeNewLine();
         }
 
@@ -347,5 +351,15 @@ final class TeamCity extends DefaultResultPrinter
         $uses = class_uses($test);
 
         return in_array(Testable::class, $uses, true);
+    }
+
+    /**
+     * Verify that the given test suite is a valid Pest suite.
+     *
+     * @param TestSuite<Test> $suite
+     */
+    private static function isPestTestSuite(TestSuite $suite): bool
+    {
+        return strncmp($suite->getName(), 'P\\', strlen('P\\')) === 0;
     }
 }
