@@ -56,7 +56,7 @@ final class PestTestCommand extends Command
             File::makeDirectory(dirname($target), 0777, true, true);
         }
 
-        if (File::exists($target) and !$this->option('force')) {
+        if (File::exists($target) and !(bool) $this->option('force')) {
             throw new InvalidConsoleArgument(sprintf('%s already exist', $target));
         }
 
