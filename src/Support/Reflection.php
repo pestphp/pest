@@ -109,10 +109,6 @@ final class Reflection
             }
         }
 
-        if ($reflectionProperty === null) {
-            throw ShouldNotHappen::fromMessage('Reflection property not found.');
-        }
-
         $reflectionProperty->setAccessible(true);
 
         return $reflectionProperty->getValue($object);
@@ -141,10 +137,6 @@ final class Reflection
                     throw new ShouldNotHappen($reflectionException);
                 }
             }
-        }
-
-        if ($reflectionProperty === null) {
-            throw ShouldNotHappen::fromMessage('Reflection property not found.');
         }
 
         $reflectionProperty->setAccessible(true);
