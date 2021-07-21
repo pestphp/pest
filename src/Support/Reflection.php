@@ -69,6 +69,21 @@ final class Reflection
     }
 
     /**
+     * Bind a callable to the TestCase and return the result,
+     * passing in the current dataset values as arguments.
+     *
+     * @return mixed
+     */
+    public static function bindCallableWithData(callable $callable)
+    {
+        $test = TestSuite::getInstance()->test;
+
+        return $test === null
+            ? static::bindCallable($callable)
+            : Closure::fromCallable($callable)->bindTo($test)(...$test->getProvidedData());
+    }
+
+    /**
      * Infers the file name from the given closure.
      */
     public static function getFileNameFromClosure(Closure $closure): string

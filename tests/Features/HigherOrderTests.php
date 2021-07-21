@@ -27,6 +27,22 @@ it('can tap into the test')
     ->toBe('foo')
     ->and('hello world')->toBeString();
 
+it('can pass datasets into the expect callables')
+    ->with([[1, 2, 3]])
+    ->expect(function (...$numbers) { return $numbers; })->toBe([1, 2, 3])
+    ->and(function (...$numbers) { return $numbers; })->toBe([1, 2, 3]);
+
+it('can pass datasets into the tap callable')
+    ->with([[1, 2, 3]])
+    ->tap(function (...$numbers) { expect($numbers)->toBe([1, 2, 3]); });
+
+it('can pass shared datasets into callables')
+    ->with('numbers.closure.wrapped')
+    ->expect(function ($value) { return $value; })
+    ->and(function ($value) { return $value; })
+    ->tap(function ($value) { expect($value)->toBeInt(); })
+    ->toBeInt();
+
 it('can call global methods after an expect chain')
     ->expect('foo')
     ->toBeString()->toBe('foo')
