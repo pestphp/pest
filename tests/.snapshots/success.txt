@@ -418,6 +418,10 @@
   ✓ it resolves expect callables correctly
   ✓ does not treat method names as callables
   ✓ it can tap into the test
+  ✓ it can pass datasets into the expect callables with (1, 2, 3)
+  ✓ it can pass datasets into the tap callable with (1, 2, 3)
+  ✓ it can pass shared datasets into callables with (1)
+  ✓ it can pass shared datasets into callables with (2)
   ✓ it can call global methods after an expect chain
   ✓ it can call test methods after an expect chain
 
@@ -591,5 +595,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 373 passed
+  Tests:  4 incompleted, 9 skipped, 377 passed
   
