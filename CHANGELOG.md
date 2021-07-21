@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.11.0 (2021-07-21)](https://github.com/pestphp/pest/compare/v1.10.0...v1.11.0)
+### Added
+- Support for interacting with datasets in higher order tests ([#352](https://github.com/pestphp/pest/pull/352))
+
+### Changed
+- The unit test stub now uses the expectation API ([#348](https://github.com/pestphp/pest/pull/348))
+
+### Fixed
+- PhpStorm will no longer show 0 assertions in the output ([#349](https://github.com/pestphp/pest/pull/349))
+
 ## [v1.10.0 (2021-07-12)](https://github.com/pestphp/pest/compare/v1.9.1...v1.10.0)
 ### Added
 - The ability to use higher order expectations inside higher order tests ([#341](https://github.com/pestphp/pest/pull/341))
