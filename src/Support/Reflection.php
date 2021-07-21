@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Support;
 
+use BadMethodCallException;
 use Closure;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\TestSuite;
@@ -12,6 +13,7 @@ use ReflectionException;
 use ReflectionFunction;
 use ReflectionNamedType;
 use ReflectionParameter;
+use Throwable;
 
 /**
  * @internal
@@ -37,7 +39,13 @@ final class Reflection
             return $reflectionMethod->invoke($object, ...$args);
         } catch (ReflectionException $exception) {
             if (method_exists($object, '__call')) {
-                return $object->__call($method, $args);
+                try {
+                    return $object->__call($method, $args);
+                } catch (Throwable $exception) {
+                    if ($exception instanceof BadMethodCallException) {
+                        throw $exception;
+                    }
+                }
             }
 
             if (is_callable($method)) {
@@ -94,10 +102,6 @@ final class Reflection
             }
         }
 
-        if ($reflectionProperty === null) {
-            throw ShouldNotHappen::fromMessage('Reflection property not found.');
-        }
-
         $reflectionProperty->setAccessible(true);
 
         return $reflectionProperty->getValue($object);
@@ -126,10 +130,6 @@ final class Reflection
                     throw new ShouldNotHappen($reflectionException);
                 }
             }
-        }
-
-        if ($reflectionProperty === null) {
-            throw ShouldNotHappen::fromMessage('Reflection property not found.');
         }
 
         $reflectionProperty->setAccessible(true);

@@ -138,7 +138,7 @@ final class TestCall
             ? NullClosure::create()
             : $conditionOrMessage;
 
-        $condition = is_callable($condition)
+        $condition = $condition instanceof Closure
             ? $condition
             : function () use ($condition) { /* @phpstan-ignore-line */
                 return $condition;

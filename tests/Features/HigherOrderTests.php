@@ -27,4 +27,14 @@ it('can tap into the test')
     ->toBe('foo')
     ->and('hello world')->toBeString();
 
+it('can call global methods after an expect chain')
+    ->expect('foo')
+    ->toBeString()->toBe('foo')
+    ->test();
+
+it('can call test methods after an expect chain')
+    ->expect('foo')
+    ->toBeString()->toBe('foo')
+    ->getNumAssertions();
+
 afterEach()->assertTrue(true);
