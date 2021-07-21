@@ -57,7 +57,7 @@ final class HigherOrderMessage
     /**
      * An optional condition that will determine if the message will be executed.
      *
-     * @var callable(): bool|null
+     * @var callable(): bool|bool|null
      */
     public $condition = null;
 
@@ -81,8 +81,7 @@ final class HigherOrderMessage
      */
     public function call(object $target)
     {
-        /* @phpstan-ignore-next-line */
-        if ($this->condition instanceof Closure && call_user_func(Closure::bind($this->condition, $target)) === false) {
+        if (!$this->passesCondition()) {
             return $target;
         }
 
@@ -128,9 +127,9 @@ final class HigherOrderMessage
     /**
      * Indicates that this message should only be called when the given condition is true.
      *
-     * @param callable(): bool $condition
+     * @param callable(): bool|bool $condition
      */
-    public function when(callable $condition): self
+    public function when($condition): self
     {
         $this->condition = $condition;
 
@@ -154,5 +153,22 @@ final class HigherOrderMessage
         }
 
         return sprintf(self::UNDEFINED_METHOD, $methodName);
+    }
+
+    private function passesCondition(): bool
+    {
+        if ($this->condition === null) {
+            return true;
+        }
+
+        if ($this->condition instanceof Closure && (bool) Reflection::bindCallable($this->condition) !== true) {
+            return false;
+        }
+
+        if ((bool) $this->condition !== true) {
+            return false;
+        }
+
+        return true;
     }
 }

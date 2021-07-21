@@ -27,9 +27,10 @@ final class HigherOrderMessageCollection
     /**
      * Adds a new higher order message to the collection if the callable condition is does not return false.
      *
+     * @param callable(): bool|bool  $condition
      * @param array<int, mixed>|null $arguments
      */
-    public function addWhen(callable $condition, string $filename, int $line, string $name, array $arguments = null): void
+    public function addWhen($condition, string $filename, int $line, string $name, array $arguments = null): void
     {
         $this->messages[] = (new HigherOrderMessage($filename, $line, $name, $arguments))->when($condition);
     }

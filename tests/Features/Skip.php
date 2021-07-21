@@ -5,7 +5,7 @@ beforeEach(function () {
 });
 
 it('do not skips')
-    ->skip(false)
+    ->skip(false, 'here')
     ->assertTrue(true);
 
 it('skips with truthy')
@@ -33,7 +33,7 @@ it('skips with condition and message')
     ->assertTrue(false);
 
 it('skips when skip after assertion')
-    ->assertTrue(true)
+    ->assertTrue(false)
     ->skip();
 
 it('can use something in the test case as a condition')

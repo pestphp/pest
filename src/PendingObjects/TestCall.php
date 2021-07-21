@@ -8,7 +8,6 @@ use Closure;
 use Pest\Factories\TestCaseFactory;
 use Pest\Support\Backtrace;
 use Pest\Support\HigherOrderCallables;
-use Pest\Support\NullClosure;
 use Pest\TestSuite;
 use SebastianBergmann\Exporter\Exporter;
 
@@ -135,21 +134,15 @@ final class TestCall
     public function skip($conditionOrMessage = true, string $message = ''): TestCall
     {
         $condition = is_string($conditionOrMessage)
-            ? NullClosure::create()
+            ? true
             : $conditionOrMessage;
-
-        $condition = $condition instanceof Closure
-            ? $condition
-            : function () use ($condition) { /* @phpstan-ignore-line */
-                return $condition;
-            };
 
         $message = is_string($conditionOrMessage)
             ? $conditionOrMessage
             : $message;
 
         $this->testCaseFactory
-            ->chains
+            ->proxies
             ->addWhen($condition, Backtrace::file(), Backtrace::line(), 'markTestSkipped', [$message]);
 
         return $this;
