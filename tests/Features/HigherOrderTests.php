@@ -37,10 +37,10 @@ it('can pass datasets into the tap callable')
     ->tap(function (...$numbers) { expect($numbers)->toBe([1, 2, 3]); });
 
 it('can pass shared datasets into callables')
-    ->with('numbers.closure.wrapped')
     ->expect(function ($value) { return $value; })
     ->and(function ($value) { return $value; })
     ->tap(function ($value) { expect($value)->toBeInt(); })
-    ->toBeInt();
+    ->toBeInt()
+    ->with('numbers.closure.wrapped');
 
 afterEach()->assertTrue(true);
