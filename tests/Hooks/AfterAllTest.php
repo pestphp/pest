@@ -41,7 +41,7 @@ test('global afterAll execution order', function () use ($globalHook) {
         ->toBe(0);
 });
 
-test('it only gets called once per file', function () use ($globalHook) {
+it('only gets called once per file', function () use ($globalHook) {
     expect($globalHook)
         ->not()
         ->toHaveProperty('afterAll')
