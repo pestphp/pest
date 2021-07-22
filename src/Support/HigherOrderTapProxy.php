@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Support;
 
+use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use Throwable;
 
@@ -17,16 +18,14 @@ final class HigherOrderTapProxy
     /**
      * The target being tapped.
      *
-     * @var mixed
+     * @var TestCase
      */
     public $target;
 
     /**
      * Create a new tap proxy instance.
-     *
-     * @param mixed $target
      */
-    public function __construct($target)
+    public function __construct(TestCase $target)
     {
         $this->target = $target;
     }

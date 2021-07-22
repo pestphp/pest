@@ -7,14 +7,15 @@ namespace Pest\PendingObjects;
 use Closure;
 use Pest\Factories\TestCaseFactory;
 use Pest\Support\Backtrace;
+use Pest\Support\HigherOrderCallables;
 use Pest\Support\NullClosure;
 use Pest\TestSuite;
 use SebastianBergmann\Exporter\Exporter;
 
 /**
- * @method \Pest\Expectations\Expectation expect(mixed $value)
- *
  * @internal
+ *
+ * @mixin HigherOrderCallables
  */
 final class TestCall
 {
@@ -58,11 +59,15 @@ final class TestCall
     /**
      * Asserts that the test throws the given `$exceptionClass` when called.
      */
-    public function throws(string $exceptionClass, string $exceptionMessage = null): TestCall
+    public function throws(string $exception, string $exceptionMessage = null): TestCall
     {
-        $this->testCaseFactory
-            ->proxies
-            ->add(Backtrace::file(), Backtrace::line(), 'expectException', [$exceptionClass]);
+        if (class_exists($exception)) {
+            $this->testCaseFactory
+                ->proxies
+                ->add(Backtrace::file(), Backtrace::line(), 'expectException', [$exception]);
+        } else {
+            $exceptionMessage = $exception;
+        }
 
         if (is_string($exceptionMessage)) {
             $this->testCaseFactory
@@ -145,13 +150,19 @@ final class TestCall
             ? $conditionOrMessage
             : $message;
 
-        if ($condition() !== false) {
-            $this->testCaseFactory
-                ->chains
-                ->add(Backtrace::file(), Backtrace::line(), 'markTestSkipped', [$message]);
-        }
+        $this->testCaseFactory
+            ->chains
+            ->addWhen($condition, Backtrace::file(), Backtrace::line(), 'markTestSkipped', [$message]);
 
         return $this;
+    }
+
+    /**
+     * Saves the property accessors to be used on the target.
+     */
+    public function __get(string $name): self
+    {
+        return $this->addChain($name);
     }
 
     /**
@@ -160,6 +171,16 @@ final class TestCall
      * @param array<int, mixed> $arguments
      */
     public function __call(string $name, array $arguments): self
+    {
+        return $this->addChain($name, $arguments);
+    }
+
+    /**
+     * Add a chain to the test case factory. Omitting the arguments will treat it as a property accessor.
+     *
+     * @param array<int, mixed>|null $arguments
+     */
+    private function addChain(string $name, array $arguments = null): self
     {
         $this->testCaseFactory
             ->chains
@@ -170,7 +191,9 @@ final class TestCall
             if ($this->testCaseFactory->description !== null) {
                 $this->testCaseFactory->description .= ' → ';
             }
-            $this->testCaseFactory->description .= sprintf('%s %s', $name, $exporter->shortenedRecursiveExport($arguments));
+            $this->testCaseFactory->description .= $arguments === null
+                ? $name
+                : sprintf('%s %s', $name, $exporter->shortenedRecursiveExport($arguments));
         }
 
         return $this;

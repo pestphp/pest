@@ -64,6 +64,11 @@ it('works with nested properties', function () {
         ->posts->toBeArray()->toHaveCount(2);
 });
 
+it('works with higher order tests')
+    ->expect(new HasProperties())
+    ->nested->foo->bar->toBeString()->toEqual('baz')
+    ->posts->toBeArray()->toHaveCount(2);
+
 class HasProperties
 {
     public $name = 'foo';

@@ -21,8 +21,9 @@ We would like to extend our thanks to the following sponsors for funding Pest de
 
 ### Premium Sponsors
 
-- **[Scout APM](https://scoutapm.com)**
 - **[Akaunting](https://akaunting.com)**
+- **[Scout APM](https://scoutapm.com)**
 - **[Meema](https://meema.io/)**
+- **[Spatie](https://spatie.be/)**
 
 Pest was created by **[Nuno Maduro](https://twitter.com/enunomaduro)** under the **[Sponsorware license](https://github.com/sponsorware/docs)**. It got open-sourced and is now licensed under the **[MIT license](https://opensource.org/licenses/MIT)**.

@@ -17,11 +17,21 @@ final class HigherOrderMessageCollection
     /**
      * Adds a new higher order message to the collection.
      *
-     * @param array<int, mixed> $arguments
+     * @param array<int, mixed>|null $arguments
      */
-    public function add(string $filename, int $line, string $methodName, array $arguments): void
+    public function add(string $filename, int $line, string $name, array $arguments = null): void
     {
-        $this->messages[] = new HigherOrderMessage($filename, $line, $methodName, $arguments);
+        $this->messages[] = new HigherOrderMessage($filename, $line, $name, $arguments);
+    }
+
+    /**
+     * Adds a new higher order message to the collection if the callable condition is does not return false.
+     *
+     * @param array<int, mixed>|null $arguments
+     */
+    public function addWhen(callable $condition, string $filename, int $line, string $name, array $arguments = null): void
+    {
+        $this->messages[] = (new HigherOrderMessage($filename, $line, $name, $arguments))->when($condition);
     }
 
     /**

@@ -4,6 +4,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.11.0 (2021-07-21)](https://github.com/pestphp/pest/compare/v1.10.0...v1.11.0)
+### Added
+- Support for interacting with datasets in higher order tests ([#352](https://github.com/pestphp/pest/pull/352))
+
+### Changed
+- The unit test stub now uses the expectation API ([#348](https://github.com/pestphp/pest/pull/348))
+
+### Fixed
+- PhpStorm will no longer show 0 assertions in the output ([#349](https://github.com/pestphp/pest/pull/349))
+
+## [v1.10.0 (2021-07-12)](https://github.com/pestphp/pest/compare/v1.9.1...v1.10.0)
+### Added
+- The ability to use higher order expectations inside higher order tests ([#341](https://github.com/pestphp/pest/pull/341))
+
+## [v1.9.1 (2021-07-11)](https://github.com/pestphp/pest/compare/v1.9.0...v1.9.1)
+### Fixed
+- Callable `expect` values in higher order tests failing if the value was an existing method name ([#334](https://github.com/pestphp/pest/pull/344)) 
+
+## [v1.9.0 (2021-07-09)](https://github.com/pestphp/pest/compare/v1.8.0...v1.9.0)
+### Changed
+- You may now pass just an exception message when using the `throws` method ([#339](https://github.com/pestphp/pest/pull/339)) 
+
+## [v1.8.0 (2021-07-08)](https://github.com/pestphp/pest/compare/v1.7.1...v1.8.0)
+### Added
+- A new `tap` and test case aware `expect` methods for higher order tests ([#331](https://github.com/pestphp/pest/pull/331))
+- Access to test case methods and properties when using `skip` ([#338](https://github.com/pestphp/pest/pull/338))
+
 ## [v1.7.1 (2021-06-24)](https://github.com/pestphp/pest/compare/v1.7.0...v1.7.1)
 ### Fixed
 - The `and` method not being usable in Higher Order expectations ([#330](https://github.com/pestphp/pest/pull/330))

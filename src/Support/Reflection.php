@@ -42,13 +42,38 @@ final class Reflection
             }
 
             if (is_callable($method)) {
-                return Closure::fromCallable($method)->bindTo(
-                    TestSuite::getInstance()->test
-                )(...$args);
+                return static::bindCallable($method, $args);
             }
 
             throw $exception;
         }
+    }
+
+    /**
+     * Bind a callable to the TestCase and return the result.
+     *
+     * @param array<int, mixed> $args
+     *
+     * @return mixed
+     */
+    public static function bindCallable(callable $callable, array $args = [])
+    {
+        return Closure::fromCallable($callable)->bindTo(TestSuite::getInstance()->test)(...$args);
+    }
+
+    /**
+     * Bind a callable to the TestCase and return the result,
+     * passing in the current dataset values as arguments.
+     *
+     * @return mixed
+     */
+    public static function bindCallableWithData(callable $callable)
+    {
+        $test = TestSuite::getInstance()->test;
+
+        return $test === null
+            ? static::bindCallable($callable)
+            : Closure::fromCallable($callable)->bindTo($test)(...$test->getProvidedData());
     }
 
     /**
@@ -85,10 +110,6 @@ final class Reflection
             }
         }
 
-        if ($reflectionProperty === null) {
-            throw ShouldNotHappen::fromMessage('Reflection property not found.');
-        }
-
         $reflectionProperty->setAccessible(true);
 
         return $reflectionProperty->getValue($object);
@@ -117,10 +138,6 @@ final class Reflection
                     throw new ShouldNotHappen($reflectionException);
                 }
             }
-        }
-
-        if ($reflectionProperty === null) {
-            throw ShouldNotHappen::fromMessage('Reflection property not found.');
         }
 
         $reflectionProperty->setAccessible(true);

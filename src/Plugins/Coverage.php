@@ -81,7 +81,6 @@ final class Coverage implements AddsOutput, HandlesArguments
         }
 
         if ($input->getOption(self::MIN_OPTION) !== null) {
-            /* @phpstan-ignore-next-line */
             $this->coverageMin = (float) $input->getOption(self::MIN_OPTION);
         }
 

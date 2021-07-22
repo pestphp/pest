@@ -8,9 +8,11 @@ use function getmypid;
 use Pest\Concerns\Testable;
 use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\Test;
+use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\TestResult;
 use PHPUnit\Framework\TestSuite;
 use PHPUnit\Framework\Warning;
+use PHPUnit\Runner\PhptTestCase;
 use PHPUnit\TextUI\DefaultResultPrinter;
 use function round;
 use function str_replace;
@@ -135,6 +137,12 @@ final class TeamCity extends DefaultResultPrinter
             $this->phpunitTeamCity->endTest($test, $time);
 
             return;
+        }
+
+        if ($test instanceof TestCase) {
+            $this->numAssertions += $test->getNumAssertions();
+        } elseif ($test instanceof PhptTestCase) {
+            $this->numAssertions++;
         }
 
         $this->printEvent('testFinished', [
