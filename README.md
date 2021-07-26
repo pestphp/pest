@@ -27,4 +27,4 @@ We would like to extend our thanks to the following sponsors for funding Pest de
 - **[Scout APM](https://scoutapm.com)**
 - **[Spatie](https://spatie.be/)**
 
-Pest was created by **[Nuno Maduro](https://twitter.com/enunomaduro)** under the **[Sponsorware license](https://github.com/sponsorware/docs)**. It got open-sourced and is now licensed under the **[MIT license](https://opensource.org/licenses/MIT)**.
+Pest is an open-sourced software licensed under the **[MIT license](https://opensource.org/licenses/MIT)**.
