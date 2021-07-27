@@ -372,6 +372,16 @@ final class Expectation
     }
 
     /**
+     * Asserts that the value is one of the given values.
+     */
+    public function toBeIn(array $possibleValues): Expectation
+    {
+        Assert::assertContains($this->value, $possibleValues);
+
+        return $this;
+    }
+
+    /**
      * Asserts that the value is infinite.
      */
     public function toBeInfinite(): Expectation
