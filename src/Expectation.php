@@ -374,11 +374,11 @@ final class Expectation
     /**
      * Asserts that the value is one of the given values.
      *
-     * @param array<int, int|string> $possibleValues
+     * @param iterable<int|string, mixed> $values
      */
-    public function toBeIn(array $possibleValues): Expectation
+    public function toBeIn(iterable $values): Expectation
     {
-        Assert::assertContains($this->value, $possibleValues);
+        Assert::assertContains($this->value, $values);
 
         return $this;
     }
