@@ -373,6 +373,8 @@ final class Expectation
 
     /**
      * Asserts that the value is one of the given values.
+     *
+     * @param array<int, int|string> $possibleValues
      */
     public function toBeIn(array $possibleValues): Expectation
     {
