@@ -81,14 +81,14 @@ final class TestCall
     /**
      * Asserts that the test throws the given `$exceptionClass` when called if the given condition is true.
      *
-     * @param Closure|bool $condition
+     * @param Closure|bool|int $condition
      */
     public function throw_if($condition, string $exception, string $exceptionMessage = null): TestCall
     {
         $condition = is_callable($condition)
             ? $condition
             : Closure::fromCallable(function () use ($condition): bool {
-                return $condition;
+                return (bool) $condition;
             });
 
         if ($condition() === true) {

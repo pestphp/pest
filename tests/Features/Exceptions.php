@@ -33,3 +33,7 @@ it('catch exceptions and messages if given condition is true', function () {
 it('can just define the message if given condition is true', function () {
     throw new Exception('Something bad happened');
 })->throw_if(true, 'Something bad happened');
+
+it('can just define the message if given condition is 1', function () {
+    throw new Exception('Something bad happened');
+})->throw_if(1, 'Something bad happened');
