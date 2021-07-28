@@ -102,8 +102,6 @@ final class TestCall
             ->factoryProxies
             ->add(Backtrace::file(), Backtrace::line(), 'addDependencies', [$tests]);
 
-        $this->testCaseFactory->dependent = true;
-
         return $this;
     }
 

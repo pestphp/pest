@@ -67,13 +67,6 @@ final class TestCaseFactory
     public $datasets = [];
 
     /**
-     * Has the current test been marked dependent on others?
-     *
-     * @var bool
-     */
-    public $dependent = false;
-
-    /**
      * The FQN of the test case class.
      *
      * @var string
@@ -241,6 +234,7 @@ final class TestCaseFactory
      */
     public function receivesArguments(): bool
     {
-        return $this->dependent === true || count($this->datasets) > 0;
+        return count($this->datasets) > 0
+            || $this->factoryProxies->count('addDependencies') > 0;
     }
 }
