@@ -57,7 +57,7 @@
     "scripts": {
         "lint": "php-cs-fixer fix -v",
         "test:lint": "php-cs-fixer fix -v --dry-run",
-        "test:types": "phpstan analyse --ansi --memory-limit=0",
+        "test:types": "phpstan analyse --ansi",
         "test:unit": "php bin/pest --colors=always --exclude-group=integration",
         "test:integration": "php bin/pest --colors=always --group=integration",
         "update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --colors=always",
