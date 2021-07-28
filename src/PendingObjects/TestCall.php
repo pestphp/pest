@@ -148,6 +148,8 @@ final class TestCall
             ? $conditionOrMessage
             : $message;
 
+        $condition = $condition->bindTo(null);
+
         $this->testCaseFactory
             ->chains
             ->addWhen($condition, Backtrace::file(), Backtrace::line(), 'markTestSkipped', [$message]);
