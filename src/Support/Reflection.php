@@ -12,6 +12,7 @@ use ReflectionException;
 use ReflectionFunction;
 use ReflectionNamedType;
 use ReflectionParameter;
+use ReflectionUnionType;
 
 /**
  * @internal
@@ -169,5 +170,38 @@ final class Reflection
         }
 
         return $name;
+    }
+
+    /**
+     * Receive a map of function argument names to their types.
+     *
+     * @return array<string, string>
+     */
+    public static function getFunctionArguments(Closure $function): array
+    {
+        $parameters = (new ReflectionFunction($function))->getParameters();
+        $arguments  = [];
+
+        foreach ($parameters as $parameter) {
+            /** @var ReflectionNamedType|ReflectionUnionType|null $types */
+            $types = ($parameter->hasType()) ? $parameter->getType() : null;
+
+            if (is_null($types)) {
+                $arguments[$parameter->getName()] = 'mixed';
+
+                continue;
+            }
+
+            $arguments[$parameter->getName()] = implode('|', array_map(
+                static function (ReflectionNamedType $type): string {
+                    return $type->getName();
+                },
+                ($types instanceof ReflectionNamedType)
+                    ? [$types] // NOTE: normalize as list of to handle unions
+                    : $types->getTypes(),
+            ));
+        }
+
+        return $arguments;
     }
 }

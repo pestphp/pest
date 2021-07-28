@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Pest\Repositories;
 
 use Closure;
+use Pest\Exceptions\DatasetMissing;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Exceptions\TestAlreadyExist;
 use Pest\Exceptions\TestCaseAlreadyInUse;
 use Pest\Exceptions\TestCaseClassOrTraitNotFound;
 use Pest\Factories\TestCaseFactory;
+use Pest\Support\Reflection;
 use Pest\Support\Str;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestCase;
@@ -138,6 +140,14 @@ final class TestRepository
 
         if (array_key_exists(sprintf('%s%s%s', $test->filename, self::SEPARATOR, $test->description), $this->state)) {
             throw new TestAlreadyExist($test->filename, $test->description);
+        }
+
+        if (!$test->receivesArguments()) {
+            $arguments = Reflection::getFunctionArguments($test->test);
+
+            if (count($arguments) > 0) {
+                throw new DatasetMissing($test->filename, $test->description, $arguments);
+            }
         }
 
         $this->state[sprintf('%s%s%s', $test->filename, self::SEPARATOR, $test->description)] = $test;
