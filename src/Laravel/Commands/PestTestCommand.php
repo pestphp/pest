@@ -21,7 +21,7 @@ final class PestTestCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'pest:test {name : The name of the file} {--unit : Create a unit test} {--dusk : Create a Dusk test} {--test-directory=tests : The name of the tests directory}';
+    protected $signature = 'pest:test {name : The name of the file} {--unit : Create a unit test} {--dusk : Create a Dusk test} {--test-directory=tests : The name of the tests directory} {--force : Overwrite the existing test file with the same name}';
 
     /**
      * The console command description.
@@ -56,7 +56,7 @@ final class PestTestCommand extends Command
             File::makeDirectory(dirname($target), 0777, true, true);
         }
 
-        if (File::exists($target)) {
+        if (File::exists($target) && !(bool) $this->option('force')) {
             throw new InvalidConsoleArgument(sprintf('%s already exist', $target));
         }
 
