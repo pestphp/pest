@@ -148,6 +148,7 @@ final class TestCall
             ? $conditionOrMessage
             : $message;
 
+        /** @var callable(): bool $condition */
         $condition = $condition->bindTo(null);
 
         $this->testCaseFactory
