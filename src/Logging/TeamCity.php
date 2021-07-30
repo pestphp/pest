@@ -250,10 +250,6 @@ final class TeamCity extends DefaultResultPrinter
      */
     public function endTest(Test $test, float $time): void
     {
-        if (!TeamCity::isPestTest($test)) {
-            parent::endTest($test, $time);
-        }
-
         $this->printEvent('testFinished', [
             self::NAME     => $test->getName(),
             self::DURATION => self::toMilliseconds($time),
