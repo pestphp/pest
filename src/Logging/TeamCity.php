@@ -119,6 +119,8 @@ final class TeamCity extends DefaultResultPrinter
     {
         if (static::isPestTestSuite($suite)) {
             $this->writeWithColor('fg-white, bold', '  '.substr_replace($suite->getName(), '', 0, 2).' ');
+        } else {
+            $this->writeWithColor('fg-white, bold', '  '.$suite->getName());
         }
 
         $this->flowId = (int) getmypid();
@@ -194,6 +196,8 @@ final class TeamCity extends DefaultResultPrinter
     public function endTestSuite(TestSuite $suite): void
     {
         $suiteName = $suite->getName();
+
+        $this->writeNewLine();
         $this->writeNewLine();
 
         if (file_exists($suiteName) || !method_exists($suiteName, '__getFileName')) {
