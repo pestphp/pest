@@ -578,6 +578,9 @@
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
 
+   PASS  Tests\Visual\JUnit
+  ✓ it is can successfully call all public methods
+
    PASS  Tests\Visual\SingleTestOrDirectory
   ✓ allows to run a single test
   ✓ allows to run a directory
@@ -586,6 +589,9 @@
 
    WARN  Tests\Visual\Success
   - visual snapshot of test suite on success
+
+   PASS  Tests\Visual\TeamCity
+  ✓ it is can successfully call all public methods
 
    PASS  Tests\Features\Depends
   ✓ first
@@ -601,5 +607,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 381 passed
+  Tests:  4 incompleted, 9 skipped, 383 passed
   
