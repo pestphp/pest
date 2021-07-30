@@ -213,6 +213,8 @@ final class TeamCity extends DefaultResultPrinter
             self::TEST_SUITE_FINISHED, [
             self::NAME => substr($suiteName, 2),
         ]);
+
+        $this->writeNewLine();
     }
 
     /**
