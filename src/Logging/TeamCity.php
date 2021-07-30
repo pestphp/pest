@@ -168,7 +168,7 @@ final class TeamCity extends DefaultResultPrinter
      */
     private function printEvent(string $eventName, array $params = []): void
     {
-        $this->write("\n##teamcity[{$eventName}");
+        $this->write("##teamcity[{$eventName}");
 
         if ($this->flowId !== 0) {
             $params['flowId'] = $this->flowId;
