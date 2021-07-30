@@ -83,7 +83,7 @@ final class TestCall
      *
      * @param Closure|bool|int $condition
      */
-    public function throw_if($condition, string $exception, string $exceptionMessage = null): TestCall
+    public function throwsIf($condition, string $exception, string $exceptionMessage = null): TestCall
     {
         $condition = is_callable($condition)
             ? $condition

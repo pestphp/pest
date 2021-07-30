@@ -20,20 +20,20 @@ it('can just define the message', function () {
 
 it('not catch exceptions if given condition is false', function () {
     $this->assertTrue(true);
-})->throw_if(false, Exception::class);
+})->throwsIf(false, Exception::class);
 
 it('catch exceptions if given condition is true', function () {
     throw new Exception('Something bad happened');
-})->throw_if(function () { return true; }, Exception::class);
+})->throwsIf(function () { return true; }, Exception::class);
 
 it('catch exceptions and messages if given condition is true', function () {
     throw new Exception('Something bad happened');
-})->throw_if(true, Exception::class, 'Something bad happened');
+})->throwsIf(true, Exception::class, 'Something bad happened');
 
 it('can just define the message if given condition is true', function () {
     throw new Exception('Something bad happened');
-})->throw_if(true, 'Something bad happened');
+})->throwsIf(true, 'Something bad happened');
 
 it('can just define the message if given condition is 1', function () {
     throw new Exception('Something bad happened');
-})->throw_if(1, 'Something bad happened');
+})->throwsIf(1, 'Something bad happened');
