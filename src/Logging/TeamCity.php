@@ -70,7 +70,6 @@ final class TeamCity extends DefaultResultPrinter
 
     protected function printFooter(TestResult $result): void
     {
-        $this->writeNewLine();
         $this->writeProgress('Tests:  ');
 
         $results = [
