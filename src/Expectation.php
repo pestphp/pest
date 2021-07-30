@@ -372,6 +372,18 @@ final class Expectation
     }
 
     /**
+     * Asserts that the value is one of the given values.
+     *
+     * @param iterable<int|string, mixed> $values
+     */
+    public function toBeIn(iterable $values): Expectation
+    {
+        Assert::assertContains($this->value, $values);
+
+        return $this;
+    }
+
+    /**
      * Asserts that the value is infinite.
      */
     public function toBeInfinite(): Expectation

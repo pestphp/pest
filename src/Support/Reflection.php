@@ -12,6 +12,7 @@ use ReflectionException;
 use ReflectionFunction;
 use ReflectionNamedType;
 use ReflectionParameter;
+use ReflectionUnionType;
 
 /**
  * @internal
@@ -61,6 +62,21 @@ final class Reflection
     }
 
     /**
+     * Bind a callable to the TestCase and return the result,
+     * passing in the current dataset values as arguments.
+     *
+     * @return mixed
+     */
+    public static function bindCallableWithData(callable $callable)
+    {
+        $test = TestSuite::getInstance()->test;
+
+        return $test === null
+            ? static::bindCallable($callable)
+            : Closure::fromCallable($callable)->bindTo($test)(...$test->getProvidedData());
+    }
+
+    /**
      * Infers the file name from the given closure.
      */
     public static function getFileNameFromClosure(Closure $closure): string
@@ -94,10 +110,6 @@ final class Reflection
             }
         }
 
-        if ($reflectionProperty === null) {
-            throw ShouldNotHappen::fromMessage('Reflection property not found.');
-        }
-
         $reflectionProperty->setAccessible(true);
 
         return $reflectionProperty->getValue($object);
@@ -126,10 +138,6 @@ final class Reflection
                     throw new ShouldNotHappen($reflectionException);
                 }
             }
-        }
-
-        if ($reflectionProperty === null) {
-            throw ShouldNotHappen::fromMessage('Reflection property not found.');
         }
 
         $reflectionProperty->setAccessible(true);
@@ -162,5 +170,38 @@ final class Reflection
         }
 
         return $name;
+    }
+
+    /**
+     * Receive a map of function argument names to their types.
+     *
+     * @return array<string, string>
+     */
+    public static function getFunctionArguments(Closure $function): array
+    {
+        $parameters = (new ReflectionFunction($function))->getParameters();
+        $arguments  = [];
+
+        foreach ($parameters as $parameter) {
+            /** @var ReflectionNamedType|ReflectionUnionType|null $types */
+            $types = ($parameter->hasType()) ? $parameter->getType() : null;
+
+            if (is_null($types)) {
+                $arguments[$parameter->getName()] = 'mixed';
+
+                continue;
+            }
+
+            $arguments[$parameter->getName()] = implode('|', array_map(
+                static function (ReflectionNamedType $type): string {
+                    return $type->getName();
+                },
+                ($types instanceof ReflectionNamedType)
+                    ? [$types] // NOTE: normalize as list of to handle unions
+                    : $types->getTypes(),
+            ));
+        }
+
+        return $arguments;
     }
 }

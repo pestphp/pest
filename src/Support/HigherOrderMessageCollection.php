@@ -53,4 +53,20 @@ final class HigherOrderMessageCollection
             $message->call($target);
         }
     }
+
+    /**
+     * Count the number of messages with the given name.
+     *
+     * @param string $name A higher order message name (usually a method name)
+     */
+    public function count(string $name): int
+    {
+        return array_reduce(
+            $this->messages,
+            static function (int $total, HigherOrderMessage $message) use ($name): int {
+                return $total + (int) ($name === $message->name);
+            },
+            0,
+        );
+    }
 }

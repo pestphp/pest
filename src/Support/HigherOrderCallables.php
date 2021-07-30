@@ -35,7 +35,7 @@ final class HigherOrderCallables
      */
     public function expect($value)
     {
-        return new Expectation($value instanceof Closure ? Reflection::bindCallable($value) : $value);
+        return new Expectation($value instanceof Closure ? Reflection::bindCallableWithData($value) : $value);
     }
 
     /**
@@ -59,7 +59,7 @@ final class HigherOrderCallables
      */
     public function tap(callable $callable)
     {
-        Reflection::bindCallable($callable);
+        Reflection::bindCallableWithData($callable);
 
         return $this->target;
     }

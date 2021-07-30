@@ -228,4 +228,13 @@ final class TestCaseFactory
 
         return $classFQN;
     }
+
+    /**
+     * Determine if the test case will receive argument input from Pest, or not.
+     */
+    public function receivesArguments(): bool
+    {
+        return count($this->datasets) > 0
+            || $this->factoryProxies->count('addDependencies') > 0;
+    }
 }

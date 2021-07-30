@@ -73,6 +73,8 @@ trait Testable
     {
         $this->__test        = $test;
         $this->__description = $description;
+        self::$beforeAll     = null;
+        self::$afterAll      = null;
 
         parent::__construct('__test', $data);
     }

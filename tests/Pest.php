@@ -2,7 +2,8 @@
 
 uses()->group('integration')->in('Visual');
 
-$globalHook = (object) []; // NOTE: global test value container to be mutated and checked across files, as needed
+// NOTE: global test value container to be mutated and checked across files, as needed
+$globalHook = (object) ['calls' => (object) ['beforeAll' => 0, 'afterAll' => 0]];
 
 uses()
     ->beforeEach(function () {
@@ -10,11 +11,13 @@ uses()
     })
     ->beforeAll(function () use ($globalHook) {
         $globalHook->beforeAll = 0;
+        $globalHook->calls->beforeAll++;
     })
     ->afterEach(function () {
         $this->ith = 0;
     })
     ->afterAll(function () use ($globalHook) {
         $globalHook->afterAll = 0;
+        $globalHook->calls->afterAll++;
     })
     ->in('Hooks');

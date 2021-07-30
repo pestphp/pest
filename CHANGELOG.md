@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.13.0 (2021-07-28)](https://github.com/pestphp/pest/compare/v1.12.0...v1.13.0)
+### Added
+- `toBeIn` expectation ([#363](https://github.com/pestphp/pest/pull/363))
+
+### Fixed
+- `skip` with false condition marking test as skipped ([22b822c](https://github.com/pestphp/pest/commit/22b822ce87a3d19d84960fa5c93eb286820b525d))
+
+## [v1.12.0 (2021-07-26)](https://github.com/pestphp/pest/compare/v1.11.0...v1.12.0)
+### Added
+- `--force` option to override tests in `pest:test` artisan command ([#353](https://github.com/pestphp/pest/pull/353))
+- Support for PHPUnit `^9.3.7` ([ca9d783](https://github.com/pestphp/pest/commit/ca9d783cf942a2caabc85ff7a728c7f28350c67a))
+
+### Fixed
+- `beforeAll` and `afterAll` behind called multiple times per test ([#357](https://github.com/pestphp/pest/pull/357))
+
+## [v1.11.0 (2021-07-21)](https://github.com/pestphp/pest/compare/v1.10.0...v1.11.0)
+### Added
+- Support for interacting with datasets in higher order tests ([#352](https://github.com/pestphp/pest/pull/352))
+
+### Changed
+- The unit test stub now uses the expectation API ([#348](https://github.com/pestphp/pest/pull/348))
+
+### Fixed
+- PhpStorm will no longer show 0 assertions in the output ([#349](https://github.com/pestphp/pest/pull/349))
+
 ## [v1.10.0 (2021-07-12)](https://github.com/pestphp/pest/compare/v1.9.1...v1.10.0)
 ### Added
 - The ability to use higher order expectations inside higher order tests ([#341](https://github.com/pestphp/pest/pull/341))
