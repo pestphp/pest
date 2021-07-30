@@ -122,6 +122,8 @@ final class TeamCity extends DefaultResultPrinter
             $this->writeWithColor('fg-white, bold', '  ' . $suite->getName());
         }
 
+        $this->writeNewLine();
+
         $this->flowId = (int) getmypid();
 
         if (!$this->isSummaryTestCountPrinted) {
@@ -254,6 +256,8 @@ final class TeamCity extends DefaultResultPrinter
         if (!$this->lastTestFailed) {
             $this->writePestTestOutput($test->getName(), 'fg-green, bold', '✓');
         }
+
+        $this->writeNewLine();
 
         if ($test instanceof TestCase) {
             $this->numAssertions += $test->getNumAssertions();
