@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pest\Logging;
 
+use ReflectionClass;
+use ReflectionProperty;
 use function getmypid;
 use Pest\Concerns\Testable;
 use function Pest\version;
@@ -292,6 +294,7 @@ final class TeamCity extends DefaultResultPrinter
         $this->lastTestFailed = true;
         $this->writePestTestOutput($test->getName(), 'fg-red, bold', '⨯');
 
+        $this->removePestFromStackTrace($t);
         $this->phpunitTeamCity->addError($test, $t, $time);
     }
 
@@ -300,7 +303,26 @@ final class TeamCity extends DefaultResultPrinter
         $this->lastTestFailed = true;
         $this->writePestTestOutput($test->getName(), 'fg-red, bold', '⨯');
 
+        $this->removePestFromStackTrace($e);
         $this->phpunitTeamCity->addFailure($test, $e, $time);
+    }
+
+    private function removePestFromStackTrace(Throwable $e): void
+    {
+        $property = new ReflectionProperty($e, 'serializableTrace');
+        $property->setAccessible(true);
+        $trace = $property->getValue($e);
+
+        $cleanedTrace = [];
+        foreach ($trace as $item) {
+            if (key_exists('file', $item) && mb_strpos($item['file'], 'vendor/pestphp/pest/') > 0) {
+                continue;
+            }
+
+            $cleanedTrace[] = $item;
+        }
+
+        $property->setValue($e, $cleanedTrace);
     }
 
     /**
