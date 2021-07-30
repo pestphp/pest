@@ -333,6 +333,8 @@ final class TeamCity extends DefaultResultPrinter
     public function addWarning(Test $test, Warning $e, float $time): void
     {
         $this->lastTestFailed = true;
+
+        $this->removePestFromStackTrace($e);
         $this->writeWarning($test, $e);
     }
 
@@ -344,18 +346,24 @@ final class TeamCity extends DefaultResultPrinter
     public function addIncompleteTest(Test $test, Throwable $t, float $time): void
     {
         $this->lastTestFailed = true;
+
+        $this->removePestFromStackTrace($t);
         $this->writeWarning($test, $t);
     }
 
     public function addRiskyTest(Test $test, Throwable $t, float $time): void
     {
         $this->lastTestFailed = true;
+
+        $this->removePestFromStackTrace($t);
         $this->writeWarning($test, $t);
     }
 
     public function addSkippedTest(Test $test, Throwable $t, float $time): void
     {
         $this->lastTestFailed = true;
+
+        $this->removePestFromStackTrace($t);
         $this->writeWarning($test, $t);
         $this->phpunitTeamCity->printIgnoredTest($test->getName(), $t, $time);
     }
