@@ -325,9 +325,16 @@
 
    PASS  Tests\Features\Expect\toContain
   ✓ passes strings
+  ✓ passes strings with multiple needles
   ✓ passes arrays
+  ✓ passes arrays with multiple needles
+  ✓ passes with array needles
   ✓ failures
+  ✓ failures with multiple needles (all failing)
+  ✓ failures with multiple needles (some failing)
   ✓ not failures
+  ✓ not failures with multiple needles (all failing)
+  ✓ not failures with multiple needles (some failing)
 
    PASS  Tests\Features\Expect\toEndWith
   ✓ pass
@@ -601,5 +608,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 381 passed
+  Tests:  4 incompleted, 9 skipped, 388 passed
   
