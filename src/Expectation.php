@@ -266,14 +266,16 @@ final class Expectation
     /**
      * Asserts that $needle is an element of the value.
      *
-     * @param mixed $needle
+     * @param mixed $needles
      */
-    public function toContain($needle): Expectation
+    public function toContain(...$needles): Expectation
     {
-        if (is_string($this->value)) {
-            Assert::assertStringContainsString($needle, $this->value);
-        } else {
-            Assert::assertContains($needle, $this->value);
+        foreach ($needles as $needle) {
+            if (is_string($this->value)) {
+                Assert::assertStringContainsString($needle, $this->value);
+            } else {
+                Assert::assertContains($needle, $this->value);
+            }
         }
 
         return $this;
