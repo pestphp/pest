@@ -96,6 +96,11 @@
   ✓ more than two datasets with (2) / (4) / (5)
   ✓ more than two datasets with (2) / (4) / (6)
   ✓ more than two datasets did the job right
+  ✓ it can resolve a dataset after the test case is available with (Closure Object (...))
+  ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (...)) #1
+  ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (...)) #2
+  ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (...)) #1
+  ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (...)) #2
 
    PASS  Tests\Features\Exceptions
   ✓ it gives access the the underlying expectException
@@ -608,5 +613,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 388 passed
+  Tests:  4 incompleted, 9 skipped, 393 passed
   
