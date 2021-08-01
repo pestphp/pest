@@ -325,9 +325,16 @@
 
    PASS  Tests\Features\Expect\toContain
   ✓ passes strings
+  ✓ passes strings with multiple needles
   ✓ passes arrays
+  ✓ passes arrays with multiple needles
+  ✓ passes with array needles
   ✓ failures
+  ✓ failures with multiple needles (all failing)
+  ✓ failures with multiple needles (some failing)
   ✓ not failures
+  ✓ not failures with multiple needles (all failing)
+  ✓ not failures with multiple needles (some failing)
 
    PASS  Tests\Features\Expect\toEndWith
   ✓ pass
@@ -578,9 +585,6 @@
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
 
-   PASS  Tests\Visual\JUnit
-  ✓ it is can successfully call all public methods
-
    PASS  Tests\Visual\SingleTestOrDirectory
   ✓ allows to run a single test
   ✓ allows to run a directory
@@ -589,9 +593,6 @@
 
    WARN  Tests\Visual\Success
   - visual snapshot of test suite on success
-
-   PASS  Tests\Visual\TeamCity
-  ✓ it is can successfully call all public methods
 
    PASS  Tests\Features\Depends
   ✓ first
@@ -607,5 +608,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 383 passed
+  Tests:  4 incompleted, 9 skipped, 388 passed
   
