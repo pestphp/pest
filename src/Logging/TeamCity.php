@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Pest\Logging;
 
-use ReflectionClass;
-use ReflectionProperty;
 use function getmypid;
 use Pest\Concerns\Testable;
 use function Pest\version;
@@ -17,6 +15,7 @@ use PHPUnit\Framework\TestSuite;
 use PHPUnit\Framework\Warning;
 use PHPUnit\Runner\PhptTestCase;
 use PHPUnit\TextUI\DefaultResultPrinter;
+use ReflectionProperty;
 use function round;
 use function str_replace;
 use function strlen;
@@ -309,6 +308,10 @@ final class TeamCity extends DefaultResultPrinter
 
     private function removePestFromStackTrace(Throwable $e): void
     {
+        if (!property_exists($e, 'serializableTrace')) {
+            return;
+        }
+
         $property = new ReflectionProperty($e, 'serializableTrace');
         $property->setAccessible(true);
         $trace = $property->getValue($e);
