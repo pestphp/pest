@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Pest\Logging;
 
 use function getmypid;
+use Pest\Concerns\Logging\WritesToConsole;
 use Pest\Concerns\Testable;
+use Pest\Support\ExceptionTrace;
 use function Pest\version;
 use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\Test;
@@ -13,9 +15,7 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\TestResult;
 use PHPUnit\Framework\TestSuite;
 use PHPUnit\Framework\Warning;
-use PHPUnit\Runner\PhptTestCase;
 use PHPUnit\TextUI\DefaultResultPrinter;
-use ReflectionProperty;
 use function round;
 use function str_replace;
 use function strlen;
@@ -23,12 +23,14 @@ use Throwable;
 
 final class TeamCity extends DefaultResultPrinter
 {
+    use WritesToConsole;
     private const PROTOCOL            = 'pest_qn://';
     private const NAME                = 'name';
     private const LOCATION_HINT       = 'locationHint';
     private const DURATION            = 'duration';
     private const TEST_SUITE_STARTED  = 'testSuiteStarted';
     private const TEST_SUITE_FINISHED = 'testSuiteFinished';
+    private const TEST_COUNT          = 'testCount';
 
     /** @var int */
     private $flowId;
@@ -42,10 +44,10 @@ final class TeamCity extends DefaultResultPrinter
     /**
      * @param resource|string|null $out
      */
-    public function __construct(bool $verbose, string $colors)
+    public function __construct($out, bool $verbose, string $colors)
     {
-        parent::__construct(null, $verbose, $colors);
-        $this->phpunitTeamCity = new \PHPUnit\Util\Log\TeamCity(null, $verbose, $colors);
+        parent::__construct($out, $verbose, $colors);
+        $this->phpunitTeamCity = new \PHPUnit\Util\Log\TeamCity($out, $verbose, $colors);
 
         $this->logo();
     }
@@ -59,19 +61,14 @@ final class TeamCity extends DefaultResultPrinter
 
     public function printResult(TestResult $result): void
     {
-        $this->printFooter($result);
-    }
-
-    protected function printFooter(TestResult $result): void
-    {
-        $this->writeProgress('Tests:  ');
+        $this->write('Tests:  ');
 
         $results = [
             'failed'     => ['count' => $result->errorCount() + $result->failureCount(), 'color' => 'fg-red'],
-            'skipped'    => ['count' => $result->skippedCount(), 'color' => 'fg-cyan'],
-            'warned'     => ['count' => $result->warningCount(), 'color' => 'fg-cyan'],
-            'risked'     => ['count' => $result->riskyCount(), 'color' => 'fg-cyan'],
-            'incomplete' => ['count' => $result->notImplementedCount(), 'color' => 'fg-cyan'],
+            'skipped'    => ['count' => $result->skippedCount(), 'color' => 'fg-yellow'],
+            'warned'     => ['count' => $result->warningCount(), 'color' => 'fg-yellow'],
+            'risked'     => ['count' => $result->riskyCount(), 'color' => 'fg-yellow'],
+            'incomplete' => ['count' => $result->notImplementedCount(), 'color' => 'fg-yellow'],
             'passed'     => ['count' => $this->successfulTestCount($result), 'color' => 'fg-green'],
         ];
 
@@ -80,7 +77,7 @@ final class TeamCity extends DefaultResultPrinter
         });
 
         foreach ($filteredResults as $key => $info) {
-            $this->writeProgressWithColor($info['color'], $info['count'] . " $key");
+            $this->writeWithColor($info['color'], $info['count'] . " $key", false);
 
             if ($key !== array_reverse(array_keys($filteredResults))[0]) {
                 $this->write(', ');
@@ -110,10 +107,14 @@ final class TeamCity extends DefaultResultPrinter
     /** @phpstan-ignore-next-line */
     public function startTestSuite(TestSuite $suite): void
     {
-        if (static::isPestTestSuite($suite)) {
-            $this->writeWithColor('fg-white, bold', '  ' . substr_replace($suite->getName(), '', 0, 2) . ' ');
+        $suiteName = $suite->getName();
+
+        if (static::isCompoundTestSuite($suite)) {
+            $this->writeWithColor('bold', '  ' . $suiteName);
+        } elseif (static::isPestTestSuite($suite)) {
+            $this->writeWithColor('fg-white, bold', '  ' . substr_replace($suiteName, '', 0, 2) . ' ');
         } else {
-            $this->writeWithColor('fg-white, bold', '  ' . $suite->getName());
+            $this->writeWithColor('fg-white, bold', '  ' . $suiteName);
         }
 
         $this->writeNewLine();
@@ -121,42 +122,16 @@ final class TeamCity extends DefaultResultPrinter
         $this->flowId = (int) getmypid();
 
         if (!$this->isSummaryTestCountPrinted) {
-            $this->printEvent(
-                'testCount',
-                ['count' => $suite->count()]
-            );
+            $this->printEvent(self::TEST_COUNT, [
+                'count' => $suite->count(),
+            ]);
             $this->isSummaryTestCountPrinted = true;
         }
 
-        $suiteName = $suite->getName();
-
-        if (file_exists($suiteName) || !method_exists($suiteName, '__getFileName')) {
-            $this->printEvent(
-                self::TEST_SUITE_STARTED, [
-                self::NAME          => $suiteName,
-                self::LOCATION_HINT => self::PROTOCOL . $suiteName,
-            ]);
-
-            return;
-        }
-
-        $fileName = $suiteName::__getFileName();
-
-        $this->printEvent(
-            self::TEST_SUITE_STARTED, [
-            self::NAME          => substr($suiteName, 2),
-            self::LOCATION_HINT => self::PROTOCOL . $fileName,
+        $this->printEvent(self::TEST_SUITE_STARTED, [
+            self::NAME          => static::isCompoundTestSuite($suite) ? $suiteName : substr($suiteName, 2),
+            self::LOCATION_HINT => self::PROTOCOL . (static::isCompoundTestSuite($suite) ? $suiteName : $suiteName::__getFileName()),
         ]);
-    }
-
-    /**
-     * Verify that the given test suite is a valid Pest suite.
-     *
-     * @param TestSuite<Test> $suite
-     */
-    private static function isPestTestSuite(TestSuite $suite): bool
-    {
-        return strncmp($suite->getName(), 'P\\', strlen('P\\')) === 0;
     }
 
     /**
@@ -195,19 +170,9 @@ final class TeamCity extends DefaultResultPrinter
         $this->writeNewLine();
         $this->writeNewLine();
 
-        if (file_exists($suiteName) || !method_exists($suiteName, '__getFileName')) {
-            $this->printEvent(
-                self::TEST_SUITE_FINISHED, [
-                self::NAME          => $suiteName,
-                self::LOCATION_HINT => self::PROTOCOL . $suiteName,
-            ]);
-
-            return;
-        }
-
-        $this->printEvent(
-            self::TEST_SUITE_FINISHED, [
-            self::NAME => substr($suiteName, 2),
+        $this->printEvent(self::TEST_SUITE_FINISHED, [
+            self::NAME          => static::isCompoundTestSuite($suite) ? $suiteName : substr($suiteName, 2),
+            self::LOCATION_HINT => self::PROTOCOL . (static::isCompoundTestSuite($suite) ? $suiteName : $suiteName::__getFileName()),
         ]);
     }
 
@@ -229,6 +194,26 @@ final class TeamCity extends DefaultResultPrinter
         ]);
     }
 
+    /**
+     * Verify that the given test suite is a valid Pest suite.
+     *
+     * @param TestSuite<Test> $suite
+     */
+    private static function isPestTestSuite(TestSuite $suite): bool
+    {
+        return strncmp($suite->getName(), 'P\\', strlen('P\\')) === 0;
+    }
+
+    /**
+     * Determine if the test suite is made up of multiple smaller test suites.
+     *
+     * @param TestSuite<Test> $suite
+     */
+    private static function isCompoundTestSuite(TestSuite $suite): bool
+    {
+        return file_exists($suite->getName()) || !method_exists($suite->getName(), '__getFileName');
+    }
+
     public static function isPestTest(Test $test): bool
     {
         /** @var array<string, string> $uses */
@@ -248,17 +233,10 @@ final class TeamCity extends DefaultResultPrinter
         ]);
 
         if (!$this->lastTestFailed) {
-            $this->writePestTestOutput($test->getName(), 'fg-green, bold', '✓');
+            $this->writeSuccess($test->getName());
         }
 
-        $this->writeNewLine();
-
-        if ($test instanceof TestCase) {
-            $this->numAssertions += $test->getNumAssertions();
-        } elseif ($test instanceof PhptTestCase) {
-            $this->numAssertions++;
-        }
-
+        $this->numAssertions += $test instanceof TestCase ? $test->getNumAssertions() : 1;
         $this->lastTestFailed = false;
     }
 
@@ -267,100 +245,51 @@ final class TeamCity extends DefaultResultPrinter
         return (int) round($time * 1000);
     }
 
-    private function writePestTestOutput(string $message, string $color, string $symbol, string $suffix = null): void
-    {
-        $this->writeProgressWithColor($color, "$symbol ");
-        $this->writeProgress($message);
-
-        if ($suffix !== null && strlen($suffix) > 0) {
-            $suffix = str_replace("\n", ' ', $suffix);
-            $this->writeWithColor($color, " -> $suffix");
-        }
-    }
-
-    /**
-     * @param Test|Testable $test
-     */
     public function addError(Test $test, Throwable $t, float $time): void
     {
-        $this->lastTestFailed = true;
-        $this->writePestTestOutput($test->getName(), 'fg-red, bold', '⨯');
-
-        $this->removePestFromStackTrace($t);
+        $this->markAsFailure($t);
+        $this->writeError($test->getName());
         $this->phpunitTeamCity->addError($test, $t, $time);
     }
 
     public function addFailure(Test $test, AssertionFailedError $e, float $time): void
     {
-        $this->lastTestFailed = true;
-        $this->writePestTestOutput($test->getName(), 'fg-red, bold', '⨯');
-
-        $this->removePestFromStackTrace($e);
+        $this->markAsFailure($e);
+        $this->writeError($test->getName());
         $this->phpunitTeamCity->addFailure($test, $e, $time);
     }
 
-    private function removePestFromStackTrace(Throwable $e): void
-    {
-        if (!property_exists($e, 'serializableTrace')) {
-            return;
-        }
-
-        $property = new ReflectionProperty($e, 'serializableTrace');
-        $property->setAccessible(true);
-        $trace = $property->getValue($e);
-
-        $cleanedTrace = [];
-        foreach ($trace as $item) {
-            if (key_exists('file', $item) && mb_strpos($item['file'], 'vendor/pestphp/pest/') > 0) {
-                continue;
-            }
-
-            $cleanedTrace[] = $item;
-        }
-
-        $property->setValue($e, $cleanedTrace);
-    }
-
-    /**
-     * @phpstan-ignore-next-line
-     *
-     * @param Test|Testable $test
-     */
     public function addWarning(Test $test, Warning $e, float $time): void
     {
-        $this->lastTestFailed = true;
-
-        $this->removePestFromStackTrace($e);
-        $this->writeWarning($test, $e);
-    }
-
-    private function writeWarning(Test $test, Throwable $t): void
-    {
-        $this->writePestTestOutput($test->getName(), 'fg-yellow, bold', '-', $t->getMessage());
+        $this->markAsFailure($e);
+        $this->writeWarning($test->getName());
+        $this->phpunitTeamCity->addWarning($test, $e, $time);
     }
 
     public function addIncompleteTest(Test $test, Throwable $t, float $time): void
     {
-        $this->lastTestFailed = true;
-
-        $this->removePestFromStackTrace($t);
-        $this->writeWarning($test, $t);
+        $this->markAsFailure($t);
+        $this->writeWarning($test->getName());
+        $this->phpunitTeamCity->addIncompleteTest($test, $t, $time);
     }
 
     public function addRiskyTest(Test $test, Throwable $t, float $time): void
     {
-        $this->lastTestFailed = true;
-
-        $this->removePestFromStackTrace($t);
-        $this->writeWarning($test, $t);
+        $this->markAsFailure($t);
+        $this->writeWarning($test->getName());
+        $this->phpunitTeamCity->addRiskyTest($test, $t, $time);
     }
 
     public function addSkippedTest(Test $test, Throwable $t, float $time): void
     {
-        $this->lastTestFailed = true;
+        $this->markAsFailure($t);
+        $this->writeWarning($test->getName());
+        $this->phpunitTeamCity->addSkippedTest($test, $t, $time);
+    }
 
-        $this->removePestFromStackTrace($t);
-        $this->writeWarning($test, $t);
-        $this->phpunitTeamCity->printIgnoredTest($test->getName(), $t, $time);
+    private function markAsFailure(Throwable $t): void
+    {
+        $this->lastTestFailed = true;
+        ExceptionTrace::removePestReferences($t);
     }
 }
