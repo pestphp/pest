@@ -42,17 +42,10 @@ final class TeamCity extends DefaultResultPrinter
     /**
      * @param resource|string|null $out
      */
-    public function __construct($out, bool $verbose, string $colors)
+    public function __construct(bool $verbose, string $colors)
     {
-        parent::__construct($out, $verbose, $colors, false, 80, false);
-        $this->phpunitTeamCity = new \PHPUnit\Util\Log\TeamCity(
-            $out,
-            $verbose,
-            $colors,
-            false,
-            80,
-            false
-        );
+        parent::__construct(null, $verbose, $colors);
+        $this->phpunitTeamCity = new \PHPUnit\Util\Log\TeamCity(null, $verbose, $colors);
 
         $this->logo();
     }

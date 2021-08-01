@@ -30,7 +30,7 @@ final class AddsDefaults
         }
 
         if ($arguments[self::PRINTER] === \PHPUnit\Util\Log\TeamCity::class) {
-            $arguments[self::PRINTER] = new TeamCity(null, $arguments['verbose'] ?? false, $arguments['colors'] ?? DefaultResultPrinter::COLOR_ALWAYS);
+            $arguments[self::PRINTER] = new TeamCity($arguments['verbose'] ?? false, $arguments['colors'] ?? DefaultResultPrinter::COLOR_ALWAYS);
         }
 
         // Load our junit logger instead.
