@@ -31,6 +31,8 @@ final class TeamCity extends DefaultResultPrinter
     private const TEST_SUITE_STARTED  = 'testSuiteStarted';
     private const TEST_SUITE_FINISHED = 'testSuiteFinished';
     private const TEST_COUNT          = 'testCount';
+    private const TEST_STARTED        = 'testStarted';
+    private const TEST_FINISHED       = 'testFinished';
 
     /** @var int */
     private $flowId;
@@ -187,7 +189,7 @@ final class TeamCity extends DefaultResultPrinter
             return;
         }
 
-        $this->printEvent('testStarted', [
+        $this->printEvent(self::TEST_STARTED, [
             self::NAME => $test->getName(),
             // @phpstan-ignore-next-line
             self::LOCATION_HINT => self::PROTOCOL . $test->toString(),
@@ -227,7 +229,7 @@ final class TeamCity extends DefaultResultPrinter
      */
     public function endTest(Test $test, float $time): void
     {
-        $this->printEvent('testFinished', [
+        $this->printEvent(self::TEST_FINISHED, [
             self::NAME     => $test->getName(),
             self::DURATION => self::toMilliseconds($time),
         ]);
