@@ -5,15 +5,15 @@ on: ['push', 'pull_request']
 jobs:
   ci:
     runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.continue-on-error }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         php: ['7.3', '7.4', '8.0', '8.1']
         dependency-version: [prefer-lowest, prefer-stable]
-      include:
-        os: '8.1'
-        continue-on-error: true
-      continue-on-error: ${{matrix.continue-on-error}}
+        include:
+          - os: '8.1'
+            continue-on-error: true
 
     name: PHP ${{ matrix.php }} - ${{ matrix.os }} - ${{ matrix.dependency-version }}
 
