@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [v1.13.0 (2021-07-28)](https://github.com/pestphp/pest/compare/v1.12.0...v1.13.0)
 ### Added
+- A cleaner output when running the Pest runner in PhpStorm ([#350](https://github.com/pestphp/pest/pull/350)) 
 - `toBeIn` expectation ([#363](https://github.com/pestphp/pest/pull/363))
 
 ### Fixed
