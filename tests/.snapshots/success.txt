@@ -96,11 +96,6 @@
   ✓ more than two datasets with (2) / (4) / (5)
   ✓ more than two datasets with (2) / (4) / (6)
   ✓ more than two datasets did the job right
-  ✓ it can resolve a dataset after the test case is available with (Closure Object (...))
-  ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (...)) #1
-  ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (...)) #2
-  ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (...)) #1
-  ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (...)) #2
 
    PASS  Tests\Features\Exceptions
   ✓ it gives access the the underlying expectException
@@ -590,6 +585,9 @@
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
 
+   PASS  Tests\Visual\JUnit
+  ✓ it is can successfully call all public methods
+
    PASS  Tests\Visual\SingleTestOrDirectory
   ✓ allows to run a single test
   ✓ allows to run a directory
@@ -598,6 +596,9 @@
 
    WARN  Tests\Visual\Success
   - visual snapshot of test suite on success
+
+   PASS  Tests\Visual\TeamCity
+  ✓ it is can successfully call all public methods
 
    PASS  Tests\Features\Depends
   ✓ first
@@ -613,5 +614,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 393 passed
+  Tests:  4 incompleted, 9 skipped, 390 passed
   
