@@ -16,12 +16,15 @@ jobs:
           - php: '8.1'
             os: ubuntu-latest
             experimental: true
+            dependency-version: prefer-stable
           - php: '8.1'
             os: macos-latest
             experimental: true
+            dependency-version: prefer-stable
           - php: '8.1'
             os: windows-latest
             experimental: true
+            dependency-version: prefer-stable
 
     name: PHP ${{ matrix.php }} - ${{ matrix.os }} - ${{ matrix.dependency-version }}
 
