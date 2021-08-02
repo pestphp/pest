@@ -17,11 +17,11 @@ jobs:
             os: ubuntu-latest
             experimental: true
           - php: '8.1'
-              os: macos-latest
-              experimental: true
+            os: macos-latest
+            experimental: true
           - php: '8.1'
-              os: windows-latest
-              experimental: true
+            os: windows-latest
+            experimental: true
 
     name: PHP ${{ matrix.php }} - ${{ matrix.os }} - ${{ matrix.dependency-version }}
 
