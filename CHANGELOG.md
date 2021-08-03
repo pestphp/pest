@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.14.0 (2021-08-03)](https://github.com/pestphp/pest/compare/v1.13.0...v1.14.0)
+### Added
+- A new bound closure that allows you to access the test case in Datasets ([#364](https://github.com/pestphp/pest/pull/364))
+
 ## [v1.13.0 (2021-08-02)](https://github.com/pestphp/pest/compare/v1.12.0...v1.13.0)
 ### Added
 - A cleaner output when running the Pest runner in PhpStorm ([#350](https://github.com/pestphp/pest/pull/350)) 
