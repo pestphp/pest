@@ -27,7 +27,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
     (new Provider())->register();
 
-    // get $rootPath based on $autoloadPath
+    // Get $rootPath based on $autoloadPath
     $rootPath = dirname($autoloadPath, 2);
     $argv = new ArgvInput();
 
@@ -42,7 +42,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
     ValidatesEnvironment::in($testSuite);
 
-    // lets remove any arguments that PHPUnit does not understand
+    // Let's remove any arguments that PHPUnit does not understand
     if ($argv->hasParameterOption('--test-directory')) {
         foreach ($_SERVER['argv'] as $key => $value) {
             if (strpos($value, '--test-directory') !== false) {
