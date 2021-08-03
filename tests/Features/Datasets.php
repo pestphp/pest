@@ -5,6 +5,10 @@ use Pest\Exceptions\DatasetAlreadyExist;
 use Pest\Exceptions\DatasetDoesNotExist;
 use Pest\Plugin;
 
+beforeEach(function () {
+    $this->foo = 'bar';
+});
+
 it('throws exception if dataset does not exist', function () {
     $this->expectException(DatasetDoesNotExist::class);
     $this->expectExceptionMessage("A dataset with the name `first` does not exist. You can create it using `dataset('first', ['a', 'b']);`.");
@@ -223,3 +227,17 @@ test('more than two datasets', function ($text_a, $text_b, $text_c) use ($state,
 test('more than two datasets did the job right', function () use ($state) {
     expect($state->text)->toBe('121212121212131423241314232411122122111221221112212213142324135136145146235236245246');
 });
+
+it('can resolve a dataset after the test case is available', function ($result) {
+    expect($result)->toBe('bar');
+})->with([
+    function () { return $this->foo; },
+]);
+
+it('can resolve a dataset after the test case is available with shared yield sets', function ($result) {
+    expect($result)->toBeInt()->toBeLessThan(3);
+})->with('bound.closure');
+
+it('can resolve a dataset after the test case is available with shared array sets', function ($result) {
+    expect($result)->toBeInt()->toBeLessThan(3);
+})->with('bound.array');
