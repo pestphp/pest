@@ -206,6 +206,16 @@ final class Expectation
     }
 
     /**
+     * Asserts that the value is truthy.
+     */
+    public function toBeTruthy(): Expectation
+    {
+        Assert::assertTrue((bool) $this->value);
+
+        return $this;
+    }
+
+    /**
      * Asserts that the value is false.
      */
     public function toBeFalse(): Expectation
