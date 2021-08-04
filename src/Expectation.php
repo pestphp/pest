@@ -226,6 +226,16 @@ final class Expectation
     }
 
     /**
+     * Asserts that the value is falsy.
+     */
+    public function toBeFalsy(): Expectation
+    {
+        Assert::assertFalse((bool) $this->value);
+
+        return $this;
+    }
+
+    /**
      * Asserts that the value is greater than $expected.
      *
      * @param int|float $expected
