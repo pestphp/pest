@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.15.0 (2021-08-04)](https://github.com/pestphp/pest/compare/v1.14.0...v1.15.0)
+### Added
+- `toBeTruthy` and `toBeFalsy` ([#367](https://github.com/pestphp/pest/pull/367))
+
 ## [v1.14.0 (2021-08-03)](https://github.com/pestphp/pest/compare/v1.13.0...v1.14.0)
 ### Added
 - A new bound closure that allows you to access the test case in Datasets ([#364](https://github.com/pestphp/pest/pull/364))
