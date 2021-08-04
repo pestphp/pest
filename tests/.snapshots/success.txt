@@ -208,6 +208,20 @@
   ✓ failures
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toBeFalsy
+  ✓ passes as falsy with (false)
+  ✓ passes as falsy with ('')
+  ✓ passes as falsy with (null)
+  ✓ passes as falsy with (0)
+  ✓ passes as falsy with ('0')
+  ✓ passes as not falsy with (true)
+  ✓ passes as not falsy with (1) #1
+  ✓ passes as not falsy with ('false')
+  ✓ passes as not falsy with (1) #2
+  ✓ passes as not falsy with (-1)
+  ✓ failures
+  ✓ not failures
+
    PASS  Tests\Features\Expect\toBeFile
   ✓ pass
   ✓ failures
@@ -315,6 +329,20 @@
 
    PASS  Tests\Features\Expect\toBeTrue
   ✓ strict comparisons
+  ✓ failures
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeTruthy
+  ✓ passes as truthy with (true)
+  ✓ passes as truthy with (1) #1
+  ✓ passes as truthy with ('false')
+  ✓ passes as truthy with (1) #2
+  ✓ passes as truthy with (-1)
+  ✓ passes as not truthy with (false)
+  ✓ passes as not truthy with ('')
+  ✓ passes as not truthy with (null)
+  ✓ passes as not truthy with (0)
+  ✓ passes as not truthy with ('0')
   ✓ failures
   ✓ not failures
 
@@ -619,5 +647,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 395 passed
+  Tests:  4 incompleted, 9 skipped, 419 passed
   
