@@ -101,9 +101,9 @@ final class Runner implements RunnerInterface
     {
         $this->beforeLoadChecks();
 
-        LoadStructure::in(TestSuite::getInstance()->rootPath);
-
         $loader->load();
+        $this->pending = $loader->getSuites();
+
         $this->loadPestSuite();
 
         $this->sortPending();
@@ -330,7 +330,6 @@ final class Runner implements RunnerInterface
     private function loadPestSuite(): void
     {
         $pestTestSuite = TestSuite::getInstance();
-        LoadStructure::in($pestTestSuite->rootPath);
 
         $files = array_values(array_map(function (TestCaseFactory $factory): string {
             return $factory->filename;
@@ -348,6 +347,6 @@ final class Runner implements RunnerInterface
             );
         }, $occurrences, array_keys($occurrences)));
 
-        $this->pending = $tests;
+        $this->pending = array_merge($this->pending, $tests);
     }
 }
