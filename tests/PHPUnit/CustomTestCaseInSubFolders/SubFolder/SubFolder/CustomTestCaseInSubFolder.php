@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\SubFolder\SubFolder\SubFolder;
+namespace Tests\CustomTestCaseInSubFolders\SubFolder\SubFolder;
 
 use PHPUnit\Framework\TestCase;
 

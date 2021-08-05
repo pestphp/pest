@@ -1,3 +1,5 @@
 <?php
 
-uses(Tests\SubFolder\SubFolder\SubFolder\CustomTestCaseInSubFolder::class)->in('CustomTestCaseInSubFolders/SubFolder');
+use Tests\CustomTestCaseInSubFolders\SubFolder\SubFolder\CustomTestCaseInSubFolder;
+
+uses(CustomTestCaseInSubFolder::class)->in('CustomTestCaseInSubFolders/SubFolder');
