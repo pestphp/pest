@@ -3,6 +3,7 @@
 
 use NunoMaduro\Collision\Provider;
 use ParaTest\Console\Commands\ParaTestCommand;
+use Pest\Actions\LoadStructure;
 use Pest\Actions\ValidatesEnvironment;
 use Pest\Console\Command;
 use Pest\Console\Paratest\Runner;
@@ -62,6 +63,7 @@ use Symfony\Component\Console\Output\OutputInterface;
         $_SERVER['argv'][] = '--runner';
         $_SERVER['argv'][] = Runner::class;
 
+        LoadStructure::in($testSuite->rootPath);
         exit(ParaTestCommand::applicationFactory($testSuite->rootPath)->run(new ArgvInput()));
     }
 
