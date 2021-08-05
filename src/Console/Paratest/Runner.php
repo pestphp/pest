@@ -99,10 +99,9 @@ final class Runner implements RunnerInterface
     private function load(SuiteLoader $loader): void
     {
         $this->beforeLoadChecks();
+
         $loader->load();
-        $this->pending = $this->options->functional()
-            ? $loader->getTestMethods()
-            : $loader->getSuites();
+        $this->loadPestSuite();
 
         $this->sortPending();
 
@@ -154,7 +153,7 @@ final class Runner implements RunnerInterface
     /**
      * Write output to JUnit format if requested.
      */
-    final private function log(): void
+    private function log(): void
     {
         if (($logJunit = $this->options->logJunit()) === null) {
             return;
@@ -169,7 +168,7 @@ final class Runner implements RunnerInterface
     /**
      * Write coverage to file if requested.
      */
-    final private function logCoverage(): void
+    private function logCoverage(): void
     {
         if (!$this->hasCoverage()) {
             return;
@@ -228,20 +227,18 @@ final class Runner implements RunnerInterface
         );
     }
 
-    final private function hasCoverage(): bool
+    private function hasCoverage(): bool
     {
         return $this->options->hasCoverage();
     }
 
-    final private function getCoverage(): ?CoverageMerger
+    private function getCoverage(): ?CoverageMerger
     {
         return $this->coverage;
     }
 
     private function doRun(): void
     {
-        $this->loadPestSuite();
-
         $availableTokens = range(1, $this->options->processes());
         while (count($this->running) > 0 || count($this->pending) > 0) {
             $this->fillRunQueue($availableTokens);
@@ -348,11 +345,5 @@ final class Runner implements RunnerInterface
         }, $occurrences, array_keys($occurrences)));
 
         $this->pending = $tests;
-
-        // We need to reset the printer because we don't want to output
-
-        foreach ($this->pending as $pending) {
-            $this->printer->addTest($pending);
-        }
     }
 }
