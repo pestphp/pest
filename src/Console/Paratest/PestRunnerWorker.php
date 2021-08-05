@@ -4,18 +4,16 @@ declare(strict_types=1);
 
 namespace Pest\Console\Paratest;
 
+use function array_merge;
+use const DIRECTORY_SEPARATOR;
 use ParaTest\Runners\PHPUnit\ExecutableTest;
 use ParaTest\Runners\PHPUnit\Options;
 use ParaTest\Runners\PHPUnit\WorkerCrashedException;
 use RuntimeException;
+use function strlen;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 use Throwable;
-
-use function array_merge;
-use function strlen;
-
-use const DIRECTORY_SEPARATOR;
 
 /**
  * @internal
@@ -94,7 +92,7 @@ final class PestRunnerWorker
      *
      * @param string $cmd Command line
      *
-     * @throws RuntimeException on too long command line.
+     * @throws RuntimeException on too long command line
      *
      * @codeCoverageIgnore
      */

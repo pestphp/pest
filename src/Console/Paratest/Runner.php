@@ -7,16 +7,13 @@ use ParaTest\Coverage\CoverageMerger;
 use ParaTest\Coverage\CoverageReporter;
 use ParaTest\Logging\JUnit\Writer;
 use ParaTest\Logging\LogInterpreter;
-use ParaTest\Runners\PHPUnit\BaseRunner;
 use ParaTest\Runners\PHPUnit\EmptyLogFileException;
 use ParaTest\Runners\PHPUnit\ExecutableTest;
-use ParaTest\Runners\PHPUnit\FullSuite;
 use ParaTest\Runners\PHPUnit\Options;
 use ParaTest\Runners\PHPUnit\ResultPrinter;
 use ParaTest\Runners\PHPUnit\RunnerInterface;
 use ParaTest\Runners\PHPUnit\SuiteLoader;
 use Pest\Factories\TestCaseFactory;
-use Pest\Support\Container;
 use Pest\TestSuite;
 use PHPUnit\TextUI\TestRunner;
 use SebastianBergmann\Timer\Timer;
@@ -24,13 +21,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 final class Runner implements RunnerInterface
 {
-    protected const CYCLE_SLEEP = 10000;
+    private const CYCLE_SLEEP = 10000;
 
     /** @var Options */
-    protected $options;
+    private $options;
 
     /** @var ResultPrinter */
-    protected $printer;
+    private $printer;
 
     /**
      * A collection of ExecutableTest objects that have processes
@@ -46,7 +43,7 @@ final class Runner implements RunnerInterface
      *
      * @var ExecutableTest[]
      */
-    protected $pending = [];
+    private $pending = [];
 
     /**
      * A tallied exit code that returns the highest exit
@@ -54,10 +51,10 @@ final class Runner implements RunnerInterface
      *
      * @var int
      */
-    protected $exitcode = -1;
+    private $exitcode = -1;
 
     /** @var OutputInterface */
-    protected $output;
+    private $output;
 
     /** @var LogInterpreter */
     private $interpreter;
@@ -76,7 +73,7 @@ final class Runner implements RunnerInterface
         $this->interpreter = new LogInterpreter();
         $this->printer     = new ResultPrinter($this->interpreter, $output, $options);
 
-        if (! $this->options->hasCoverage()) {
+        if (!$this->options->hasCoverage()) {
             return;
         }
 
@@ -157,7 +154,7 @@ final class Runner implements RunnerInterface
     /**
      * Write output to JUnit format if requested.
      */
-    final protected function log(): void
+    final private function log(): void
     {
         if (($logJunit = $this->options->logJunit()) === null) {
             return;
@@ -172,9 +169,9 @@ final class Runner implements RunnerInterface
     /**
      * Write coverage to file if requested.
      */
-    final protected function logCoverage(): void
+    final private function logCoverage(): void
     {
-        if (! $this->hasCoverage()) {
+        if (!$this->hasCoverage()) {
             return;
         }
 
@@ -231,17 +228,17 @@ final class Runner implements RunnerInterface
         );
     }
 
-    final protected function hasCoverage(): bool
+    final private function hasCoverage(): bool
     {
         return $this->options->hasCoverage();
     }
 
-    final protected function getCoverage(): ?CoverageMerger
+    final private function getCoverage(): ?CoverageMerger
     {
         return $this->coverage;
     }
 
-    protected function doRun(): void
+    private function doRun(): void
     {
         $this->loadPestSuite();
 
@@ -326,7 +323,7 @@ final class Runner implements RunnerInterface
         return false;
     }
 
-    protected function beforeLoadChecks(): void
+    private function beforeLoadChecks(): void
     {
     }
 
@@ -334,13 +331,13 @@ final class Runner implements RunnerInterface
     {
         $pestTestSuite = TestSuite::getInstance();
 
-        $files = array_values(array_map(function(TestCaseFactory $factory): string {
+        $files = array_values(array_map(function (TestCaseFactory $factory): string {
             return $factory->filename;
         }, $pestTestSuite->tests->state));
 
         $occurrences = array_count_values($files);
 
-        $tests = array_values(array_map(function(int $occurrences, string $file) {
+        $tests = array_values(array_map(function (int $occurrences, string $file) {
             return new ExecutablePestTest(
                 $file,
                 $occurrences,

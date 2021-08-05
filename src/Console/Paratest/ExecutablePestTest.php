@@ -9,7 +9,7 @@ class ExecutablePestTest extends ExecutableTest
     /**
      * The number of tests in this file.
      *
-     * @var int $testCount
+     * @var int
      */
     private $testCount;
 
