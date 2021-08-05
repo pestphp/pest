@@ -35,9 +35,18 @@ use Symfony\Component\Console\Output\OutputInterface;
     $argv = new ArgvInput();
 
     $testSuite = TestSuite::getInstance($rootPath, $argv->getParameterOption('--test-directory', 'tests'));
+
     $shouldExecuteInParallel = $argv->hasParameterOption('--parallel');
     // Let's remove the parallel option now we've retrieved its value
     if (($parallelKey = array_search('--parallel', $_SERVER['argv'])) !== false) {
+        unset($_SERVER['argv'][$parallelKey]);
+    }
+
+    if ($argv->hasParameterOption('--isInParallel')) {
+        $testSuite->isInParallel = true;
+    }
+    // Let's remove the parallel flag now we've retrieved its value
+    if (($parallelKey = array_search('--isInParallel', $_SERVER['argv'])) !== false) {
         unset($_SERVER['argv'][$parallelKey]);
     }
 

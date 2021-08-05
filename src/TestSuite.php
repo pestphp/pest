@@ -74,6 +74,13 @@ final class TestSuite
     public $testPath;
 
     /**
+     * Determines if this test is running in parallel.
+     *
+     * @var bool
+     */
+    public $isInParallel = false;
+
+    /**
      * Holds an instance of the test suite.
      *
      * @var TestSuite

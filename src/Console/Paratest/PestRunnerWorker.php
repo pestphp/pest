@@ -40,10 +40,11 @@ final class PestRunnerWorker
         $args = array_merge(
             $args,
             $this->executableTest->commandArguments(
-                $this->getPestBinary(),
+                $this->getPestBinary($options),
                 $options->filtered(),
                 $options->passthru()
-            )
+            ),
+            ['--isInParallel'],
         );
 
         $this->process = new Process($args, $options->cwd(), $options->fillEnvWithTokens($token));
@@ -109,15 +110,14 @@ final class PestRunnerWorker
         }
     }
 
-    private function getPestBinary(): string
+    private function getPestBinary(Options $options): string
     {
-        // Used when Pest is required using composer.
-        $vendorPath = dirname(__DIR__, 7) . '/bin/pest';
+        $paths = [
+            implode(DIRECTORY_SEPARATOR, [$options->cwd(), 'bin', 'pest']),
+            implode(DIRECTORY_SEPARATOR, [$options->cwd(), 'vendor', 'bin', 'pest']),
+        ];
 
-        // Used when Pest maintainers are running Pest tests.
-        $localPath = dirname(__DIR__, 3) . '/bin/pest';
-
-        return file_exists($vendorPath) ? $vendorPath : $localPath;
+        return file_exists($paths[0]) ? $paths[0] : $paths[1];
     }
 
     public function getWorkerCrashedException(?Throwable $previousException = null): WorkerCrashedException

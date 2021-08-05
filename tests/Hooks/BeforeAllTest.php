@@ -1,13 +1,14 @@
 <?php
 
 use Pest\Support\Str;
+use Pest\TestSuite;
 
 global $globalHook;
 
 // HACK: we have to determine our $globalHook->calls baseline. This is because
 // two other tests are executed before this one due to filename ordering.
 $args   = $_SERVER['argv'] ?? [];
-$single = isset($args[1]) && Str::endsWith(__FILE__, $args[1]);
+$single = isset($args[1]) && Str::endsWith(__FILE__, $args[1]) || TestSuite::getInstance()->isInParallel;
 $offset = $single ? 0 : 2;
 
 uses()->beforeAll(function () use ($globalHook, $offset) {
