@@ -13,6 +13,7 @@ use ParaTest\Runners\PHPUnit\Options;
 use ParaTest\Runners\PHPUnit\ResultPrinter;
 use ParaTest\Runners\PHPUnit\RunnerInterface;
 use ParaTest\Runners\PHPUnit\SuiteLoader;
+use Pest\Actions\LoadStructure;
 use Pest\Factories\TestCaseFactory;
 use Pest\TestSuite;
 use PHPUnit\TextUI\TestRunner;
@@ -99,6 +100,8 @@ final class Runner implements RunnerInterface
     private function load(SuiteLoader $loader): void
     {
         $this->beforeLoadChecks();
+
+        LoadStructure::in(TestSuite::getInstance()->rootPath);
 
         $loader->load();
         $this->loadPestSuite();
@@ -327,6 +330,7 @@ final class Runner implements RunnerInterface
     private function loadPestSuite(): void
     {
         $pestTestSuite = TestSuite::getInstance();
+        LoadStructure::in($pestTestSuite->rootPath);
 
         $files = array_values(array_map(function (TestCaseFactory $factory): string {
             return $factory->filename;

@@ -62,7 +62,7 @@ use Symfony\Component\Console\Output\OutputInterface;
         $_SERVER['argv'][] = '--runner';
         $_SERVER['argv'][] = Runner::class;
 
-        exit(ParaTestCommand::applicationFactory(getcwd())->run(new ArgvInput()));
+        exit(ParaTestCommand::applicationFactory($testSuite->rootPath)->run(new ArgvInput()));
     }
 
     exit($container->get(Command::class)->run($_SERVER['argv']));

@@ -40,7 +40,7 @@ final class PestRunnerWorker
         $args = array_merge(
             $args,
             $this->executableTest->commandArguments(
-                '/Users/luke/Packages/pest/bin/pest',
+                $this->getPestBinary(),
                 $options->filtered(),
                 $options->passthru()
             )
@@ -107,6 +107,17 @@ final class PestRunnerWorker
         if (strlen($cmd) > 32767) {
             throw new RuntimeException('Command line is too long, try to decrease max batch size');
         }
+    }
+
+    private function getPestBinary(): string
+    {
+        // Used when Pest is required using composer.
+        $vendorPath = dirname(__DIR__, 7) . '/bin/pest';
+
+        // Used when Pest maintainers are running Pest tests.
+        $localPath = dirname(__DIR__, 3) . '/bin/pest';
+
+        return file_exists($vendorPath) ? $vendorPath : $localPath;
     }
 
     public function getWorkerCrashedException(?Throwable $previousException = null): WorkerCrashedException
