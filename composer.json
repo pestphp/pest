@@ -40,6 +40,7 @@
         ]
     },
     "require-dev": {
+        "brianium/paratest": "dev-pest-support",
         "illuminate/console": "^8.47.0",
         "illuminate/support": "^8.47.0",
         "laravel/dusk": "^6.15.0",
@@ -84,5 +85,11 @@
                 "Pest\\Laravel\\PestServiceProvider"
             ]
         }
-    }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "../paratest"
+        }
+    ]
 }

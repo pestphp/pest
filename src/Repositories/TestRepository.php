@@ -29,7 +29,7 @@ final class TestRepository
     /**
      * @var array<string, TestCaseFactory>
      */
-    private $state = [];
+    public $state = [];
 
     /**
      * @var array<string, array<int, array<int, string|Closure>>>
