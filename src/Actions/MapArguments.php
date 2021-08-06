@@ -17,12 +17,10 @@ final class MapArguments
 {
     public static function toParatest(TestSuite $testSuite): void
     {
-        var_dump($_SERVER['argv']);
         self::coverage();
         self::registerPlugins();
         self::parallel();
         self::color();
-        var_dump($_SERVER['argv']);
     }
 
     public static function toPest(TestSuite $testSuite): void
