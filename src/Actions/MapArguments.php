@@ -17,8 +17,8 @@ final class MapArguments
 {
     public static function toParatest(TestSuite $testSuite): void
     {
-        self::coverage();
         self::registerPlugins();
+        self::coverage();
         self::parallel();
         self::color();
     }
@@ -26,6 +26,7 @@ final class MapArguments
     public static function toPest(TestSuite $testSuite): void
     {
         self::inParallel($testSuite);
+        // we could add coverage here too, so we stop before even running tests if there is no coverage driver
     }
 
     private static function registerPlugins(): void
@@ -70,12 +71,23 @@ final class MapArguments
 
     private static function coverage(): void
     {
-        if (! Coverage::isAvailable()) {
+        if (self::needsCoverage() && ! Coverage::isAvailable()) {
             Container::getInstance()->get(OutputInterface::class)->writeln(
                 "\n  <fg=white;bg=red;options=bold> ERROR </> No code coverage driver is available.</>",
             );
             exit(1);
         }
+    }
+
+    private static function needsCoverage(): bool
+    {
+        foreach ($_SERVER['argv'] as $argument) {
+            if(str_starts_with($argument, '--coverage')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static function unsetArgument(string $argument): bool
