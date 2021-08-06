@@ -14,6 +14,7 @@ use ParaTest\Runners\PHPUnit\ResultPrinter;
 use ParaTest\Runners\PHPUnit\RunnerInterface;
 use ParaTest\Runners\PHPUnit\SuiteLoader;
 use Pest\Factories\TestCaseFactory;
+use Pest\Plugins\Coverage;
 use Pest\TestSuite;
 use PHPUnit\TextUI\TestRunner;
 use SebastianBergmann\Timer\Timer;
@@ -227,6 +228,12 @@ final class Runner implements RunnerInterface
         $this->output->writeln(
             sprintf('done [%s]', $timer->stop()->asString())
         );
+
+        if ($this->options->coveragePhp() && file_exists(\Pest\Support\Coverage::getPath())) {
+            $coveragePlugin = new Coverage($this->output);
+            $coveragePlugin->coverage = true;
+            $coveragePlugin->addOutput(0);
+        }
     }
 
     private function hasCoverage(): bool

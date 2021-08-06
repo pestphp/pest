@@ -4,9 +4,9 @@
 use NunoMaduro\Collision\Provider;
 use ParaTest\Console\Commands\ParaTestCommand;
 use Pest\Actions\LoadStructure;
+use Pest\Actions\MapArguments;
 use Pest\Actions\ValidatesEnvironment;
 use Pest\Console\Command;
-use Pest\Console\Paratest\Runner;
 use Pest\Support\Container;
 use Pest\TestSuite;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -36,20 +36,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
     $testSuite = TestSuite::getInstance($rootPath, $argv->getParameterOption('--test-directory', 'tests'));
 
-    $shouldExecuteInParallel = $argv->hasParameterOption('--parallel');
-    // Let's remove the parallel option now we've retrieved its value
-    if (($parallelKey = array_search('--parallel', $_SERVER['argv'])) !== false) {
-        unset($_SERVER['argv'][$parallelKey]);
-    }
-
-    if ($argv->hasParameterOption('--isInParallel')) {
-        $testSuite->isInParallel = true;
-    }
-    // Let's remove the parallel flag now we've retrieved its value
-    if (($parallelKey = array_search('--isInParallel', $_SERVER['argv'])) !== false) {
-        unset($_SERVER['argv'][$parallelKey]);
-    }
-
     $isDecorated = $argv->getParameterOption('--colors', 'always') !== 'never';
     $output = new ConsoleOutput(ConsoleOutput::VERBOSITY_NORMAL, $isDecorated);
 
@@ -68,13 +54,13 @@ use Symfony\Component\Console\Output\OutputInterface;
         }
     }
 
-    if ($shouldExecuteInParallel) {
-        $_SERVER['argv'][] = '--runner';
-        $_SERVER['argv'][] = Runner::class;
-
+    if ($argv->hasParameterOption('--parallel')) {
         LoadStructure::in($testSuite->rootPath);
+        MapArguments::toParatest($testSuite);
         exit(ParaTestCommand::applicationFactory($testSuite->rootPath)->run(new ArgvInput()));
     }
+
+    MapArguments::toPest($testSuite);
 
     exit($container->get(Command::class)->run($_SERVER['argv']));
 })();
