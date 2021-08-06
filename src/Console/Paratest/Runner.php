@@ -188,6 +188,7 @@ final class Runner implements RunnerInterface
 
         $reporter = new CoverageReporter($codeCoverage, $codeCoverageConfiguration);
 
+        $this->output->writeln('');
         $this->output->write('Generating code coverage report ... ');
 
         $timer = new Timer();
