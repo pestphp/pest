@@ -82,7 +82,7 @@ final class MapArguments
     private static function needsCoverage(): bool
     {
         foreach ($_SERVER['argv'] as $argument) {
-            if(str_starts_with($argument, '--coverage')) {
+            if(strpos($argument, '--coverage',) === 0) {
                 return true;
             }
         }
