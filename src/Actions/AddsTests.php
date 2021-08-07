@@ -22,8 +22,6 @@ final class AddsTests
     {
         self::removeTestClosureWarnings($testSuite);
 
-        // @todo refactor this...
-
         $testSuites = [];
         $pestTestSuite->tests->build($pestTestSuite, function (TestCase $testCase) use (&$testSuites): void {
             $testCaseClass = get_class($testCase);

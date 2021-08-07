@@ -7,7 +7,6 @@ parameters:
     level: max
     paths:
         - src
-        - scripts
 
     checkMissingIterableValueType: true
     checkGenericClassInNonGenericObjectType: false

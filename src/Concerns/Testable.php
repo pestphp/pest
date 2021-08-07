@@ -273,7 +273,19 @@ trait Testable
      */
     public function __test()
     {
-        return $this->__callClosure($this->__test, func_get_args());
+        return $this->__callClosure($this->__test, $this->resolveTestArguments(func_get_args()));
+    }
+
+    /**
+     * Resolve the passed arguments. Any Closures will be bound to the testcase and resolved.
+     *
+     * @throws Throwable
+     */
+    private function resolveTestArguments(array $arguments): array
+    {
+        return array_map(function ($data) {
+            return $data instanceof Closure ? $this->__callClosure($data, []) : $data;
+        }, $arguments);
     }
 
     /**

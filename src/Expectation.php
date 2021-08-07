@@ -206,11 +206,31 @@ final class Expectation
     }
 
     /**
+     * Asserts that the value is truthy.
+     */
+    public function toBeTruthy(): Expectation
+    {
+        Assert::assertTrue((bool) $this->value);
+
+        return $this;
+    }
+
+    /**
      * Asserts that the value is false.
      */
     public function toBeFalse(): Expectation
     {
         Assert::assertFalse($this->value);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is falsy.
+     */
+    public function toBeFalsy(): Expectation
+    {
+        Assert::assertFalse((bool) $this->value);
 
         return $this;
     }
@@ -266,14 +286,16 @@ final class Expectation
     /**
      * Asserts that $needle is an element of the value.
      *
-     * @param mixed $needle
+     * @param mixed $needles
      */
-    public function toContain($needle): Expectation
+    public function toContain(...$needles): Expectation
     {
-        if (is_string($this->value)) {
-            Assert::assertStringContainsString($needle, $this->value);
-        } else {
-            Assert::assertContains($needle, $this->value);
+        foreach ($needles as $needle) {
+            if (is_string($this->value)) {
+                Assert::assertStringContainsString($needle, $this->value);
+            } else {
+                Assert::assertContains($needle, $this->value);
+            }
         }
 
         return $this;
@@ -367,6 +389,18 @@ final class Expectation
     public function toEqualWithDelta($expected, float $delta): Expectation
     {
         Assert::assertEqualsWithDelta($expected, $this->value, $delta);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is one of the given values.
+     *
+     * @param iterable<int|string, mixed> $values
+     */
+    public function toBeIn(iterable $values): Expectation
+    {
+        Assert::assertContains($this->value, $values);
 
         return $this;
     }
