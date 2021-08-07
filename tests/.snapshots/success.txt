@@ -653,3 +653,4 @@
   ✓ it uses correct parent class
 
   Tests:  4 incompleted, 9 skipped, 424 passed
+  
