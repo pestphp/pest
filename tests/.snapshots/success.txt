@@ -107,6 +107,11 @@
   ✓ it catch exceptions
   ✓ it catch exceptions and messages
   ✓ it can just define the message
+  ✓ it not catch exceptions if given condition is false
+  ✓ it catch exceptions if given condition is true
+  ✓ it catch exceptions and messages if given condition is true
+  ✓ it can just define the message if given condition is true
+  ✓ it can just define the message if given condition is 1
 
    PASS  Tests\Features\Expect\HigherOrder\methods
   ✓ it can access methods
@@ -647,5 +652,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 419 passed
+  Tests:  4 incompleted, 9 skipped, 424 passed
   
