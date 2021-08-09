@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Console\Paratest;
 
+use Symfony\Component\Console\Output\OutputInterface;
 use function array_merge;
 use const DIRECTORY_SEPARATOR;
 use ParaTest\Runners\PHPUnit\ExecutableTest;
@@ -22,11 +23,23 @@ final class PestRunnerWorker
 {
     /** @var ExecutableTest */
     private $executableTest;
+
     /** @var Process */
     private $process;
 
-    public function __construct(ExecutableTest $executableTest, Options $options, int $token)
+    /**
+     * @var OutputInterface
+     */
+    private $output;
+
+    /**
+     * @var array<string>
+     */
+    public static $additionalOutput = [];
+
+    public function __construct(OutputInterface $output, ExecutableTest $executableTest, Options $options, int $token)
     {
+        $this->output = $output;
         $this->executableTest = $executableTest;
 
         $phpFinder = new PhpExecutableFinder();
@@ -81,7 +94,28 @@ final class PestRunnerWorker
      */
     public function stop(): ?int
     {
-        return $this->process->stop();
+        $exitCode = $this->process->stop();
+        $this->handleOutput($this->process->getOutput());
+        return $exitCode;
+    }
+
+    private function handleOutput(string $output)
+    {
+        $matches = [];
+        preg_match_all("/^\\n/m", $output, $matches, PREG_OFFSET_CAPTURE);
+
+        $overview = substr($output, 0, $matches[0][1][1]);
+        $this->output->write($overview);
+
+        if (count($matches[0]) > 3) {
+            $summarySectionIndex = count($matches[0]) - 2;
+
+            static::$additionalOutput[] = substr(
+                $output,
+                $matches[0][1][1],
+                $matches[0][$summarySectionIndex][1] - $matches[0][1][1],
+            );
+        }
     }
 
     /**

@@ -84,7 +84,7 @@ final class Runner implements RunnerInterface
     final public function run(): void
     {
         $this->load(new SuiteLoader($this->options, $this->output));
-        $this->printer->start();
+//        $this->printer->start();
 
         $this->doRun();
 
@@ -109,7 +109,7 @@ final class Runner implements RunnerInterface
         $this->sortPending();
 
         foreach ($this->pending as $pending) {
-            $this->printer->addTest($pending);
+//            $this->printer->addTest($pending);
         }
     }
 
@@ -135,7 +135,11 @@ final class Runner implements RunnerInterface
      */
     private function complete(): void
     {
-        $this->printer->printResults();
+        foreach(PestRunnerWorker::$additionalOutput as $output) {
+            $this->output->write($output);
+        }
+        PestRunnerWorker::$additionalOutput = [];
+//        $this->printer->printResults();
         $this->log();
         $this->logCoverage();
         $readers = $this->interpreter->getReaders();
@@ -273,7 +277,7 @@ final class Runner implements RunnerInterface
         ) {
             $executableTest = array_shift($this->pending);
 
-            $this->running[$token] = new PestRunnerWorker($executableTest, $this->options, $token);
+            $this->running[$token] = new PestRunnerWorker($this->output, $executableTest, $this->options, $token);
             $this->running[$token]->run();
 
             if ($this->options->verbosity() < Options::VERBOSITY_VERY_VERBOSE) {
@@ -314,7 +318,7 @@ final class Runner implements RunnerInterface
 
         $executableTest = $worker->getExecutableTest();
         try {
-            $this->printer->printFeedback($executableTest);
+//            $this->printer->printFeedback($executableTest);
         } catch (EmptyLogFileException $emptyLogFileException) {
             throw $worker->getWorkerCrashedException($emptyLogFileException);
         }
