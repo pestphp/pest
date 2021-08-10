@@ -3,10 +3,11 @@
 
 use NunoMaduro\Collision\Provider;
 use ParaTest\Console\Commands\ParaTestCommand;
+use Pest\Actions\InteractsWithPlugins;
 use Pest\Actions\LoadStructure;
-use Pest\Actions\MapArguments;
 use Pest\Actions\ValidatesEnvironment;
 use Pest\Console\Command;
+use Pest\Support\Arr;
 use Pest\Support\Container;
 use Pest\TestSuite;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -54,13 +55,16 @@ use Symfony\Component\Console\Output\OutputInterface;
         }
     }
 
+    $_SERVER['argv'] = InteractsWithPlugins::handleArguments($_SERVER['argv']);
+
     if ($argv->hasParameterOption('--parallel')) {
         LoadStructure::in($testSuite->rootPath);
-        MapArguments::toParatest($testSuite);
         exit(ParaTestCommand::applicationFactory($testSuite->rootPath)->run(new ArgvInput()));
     }
 
-    MapArguments::toPest($testSuite);
+    if (Arr::get($_SERVER, 'PARATEST', false) !== false) {
+        TestSuite::getInstance()->isInParallel = true;
+    }
 
     exit($container->get(Command::class)->run($_SERVER['argv']));
 })();

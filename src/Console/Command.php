@@ -9,7 +9,6 @@ use Pest\Actions\AddsTests;
 use Pest\Actions\LoadStructure;
 use Pest\Actions\ValidatesConfiguration;
 use Pest\Contracts\Plugins\AddsOutput;
-use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Plugin\Loader;
 use Pest\Plugins\Version;
 use Pest\Support\Container;
@@ -57,23 +56,10 @@ final class Command extends BaseCommand
      */
     protected function handleArguments(array $argv): void
     {
-        /*
-         * First, let's call all plugins that want to handle arguments
-         */
-        $plugins = Loader::getPlugins(HandlesArguments::class);
-
-        /** @var HandlesArguments $plugin */
-        foreach ($plugins as $plugin) {
-            $argv = $plugin->handleArguments($argv);
-        }
-
-        /*
-         * Next, as usual, let's send the console arguments to PHPUnit.
-         */
         parent::handleArguments($argv);
 
         /*
-         * Finally, let's validate the configuration. Making
+         * Let's validate the configuration. Making
          * sure all options are yet supported by Pest.
          */
         ValidatesConfiguration::in($this->arguments);

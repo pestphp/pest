@@ -20,6 +20,7 @@
         "php": "^7.3 || ^8.0",
         "nunomaduro/collision": "^5.4.0",
         "pestphp/pest-plugin": "^1.0.0",
+        "pestphp/pest-plugin-template": "1.x-dev",
         "phpunit/phpunit": "^9.5.5"
     },
     "autoload": {
@@ -44,7 +45,8 @@
         "illuminate/console": "^8.47.0",
         "illuminate/support": "^8.47.0",
         "laravel/dusk": "^6.15.0",
-        "pestphp/pest-dev-tools": "dev-master"
+        "pestphp/pest-dev-tools": "dev-master",
+        "pestphp/pest-plugin-parallel": "1.x-dev"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -85,5 +87,11 @@
                 "Pest\\Laravel\\PestServiceProvider"
             ]
         }
-    }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../pest-plugin-parallel"
+        }
+    ]
 }
