@@ -304,4 +304,12 @@ trait Testable
     {
         return ltrim(self::class, 'P\\');
     }
+
+    /**
+     * Determine whether this test case is being executed in a parallel environment.
+     */
+    public function isInParallel(): bool
+    {
+        return TestSuite::getInstance()->isInParallel;
+    }
 }
