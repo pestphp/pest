@@ -58,7 +58,6 @@ use Symfony\Component\Console\Output\OutputInterface;
     $_SERVER['argv'] = InteractsWithPlugins::handleArguments($_SERVER['argv']);
 
     if ($argv->hasParameterOption('--parallel')) {
-        LoadStructure::in($testSuite->rootPath);
         exit(ParaTestCommand::applicationFactory($testSuite->rootPath)->run(new ArgvInput()));
     }
 
