@@ -4,10 +4,8 @@
 use NunoMaduro\Collision\Provider;
 use ParaTest\Console\Commands\ParaTestCommand;
 use Pest\Actions\InteractsWithPlugins;
-use Pest\Actions\LoadStructure;
 use Pest\Actions\ValidatesEnvironment;
 use Pest\Console\Command;
-use Pest\Support\Arr;
 use Pest\Support\Container;
 use Pest\TestSuite;
 use Symfony\Component\Console\Input\ArgvInput;
