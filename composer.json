@@ -40,7 +40,6 @@
         ]
     },
     "require-dev": {
-        "brianium/paratest": "^6.3.0",
         "illuminate/console": "^8.47.0",
         "illuminate/support": "^8.47.0",
         "laravel/dusk": "^6.15.0",
