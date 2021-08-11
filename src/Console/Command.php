@@ -6,6 +6,7 @@ namespace Pest\Console;
 
 use Pest\Actions\AddsDefaults;
 use Pest\Actions\AddsTests;
+use Pest\Actions\InteractsWithPlugins;
 use Pest\Actions\LoadStructure;
 use Pest\Actions\ValidatesConfiguration;
 use Pest\Contracts\Plugins\AddsOutput;
@@ -114,16 +115,7 @@ final class Command extends BaseCommand
         LoadStructure::in($this->testSuite->rootPath);
 
         $result = parent::run($argv, false);
-
-        /*
-         * Let's call all plugins that want to add output after test execution
-         */
-        $plugins = Loader::getPlugins(AddsOutput::class);
-
-        /** @var AddsOutput $plugin */
-        foreach ($plugins as $plugin) {
-            $result = $plugin->addOutput($result);
-        }
+        $result = InteractsWithPlugins::addOutput($result);
 
         exit($result);
     }

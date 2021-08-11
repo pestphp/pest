@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Actions;
 
+use Pest\Contracts\Plugins\AddsOutput;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Plugin\Loader;
 
@@ -29,5 +30,21 @@ final class InteractsWithPlugins
         }
 
         return $argv;
+    }
+
+    /**
+     * Provides an opportunity for any plugins that want
+     * to provide additional output after test execution.
+     */
+    public static function addOutput(int $result): int
+    {
+        $plugins = Loader::getPlugins(AddsOutput::class);
+
+        /** @var AddsOutput $plugin */
+        foreach ($plugins as $plugin) {
+            $result = $plugin->addOutput($result);
+        }
+
+        return $result;
     }
 }
