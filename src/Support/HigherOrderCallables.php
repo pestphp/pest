@@ -6,6 +6,7 @@ namespace Pest\Support;
 
 use Closure;
 use Pest\Expectation;
+use Pest\HigherOrderExpectation;
 use Pest\PendingObjects\TestCall;
 use PHPUnit\Framework\TestCase;
 
@@ -43,12 +44,16 @@ final class HigherOrderCallables
      *
      * Create a new expectation. Callable values will be executed prior to returning the new expectation.
      *
-     * @param callable|TValue $value
+     * @param callable|TValue|null $value
      *
-     * @return Expectation<TValue>
+     * @return Expectation<TValue|null>
      */
-    public function and($value)
+    public function and($value = null)
     {
+        if ($value === null && $this->target instanceof HigherOrderExpectation) {
+            return $this->target->and();
+        }
+
         return $this->expect($value);
     }
 

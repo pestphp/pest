@@ -84,8 +84,9 @@ final class HigherOrderMessage
         }
 
         if ($this->hasHigherOrderCallable()) {
+            $arguments = $this->arguments ?? [];
             /* @phpstan-ignore-next-line */
-            return (new HigherOrderCallables($target))->{$this->name}(...$this->arguments);
+            return (new HigherOrderCallables($target))->{$this->name}(...$arguments);
         }
 
         try {

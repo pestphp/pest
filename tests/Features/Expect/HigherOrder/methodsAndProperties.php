@@ -22,9 +22,19 @@ it('can handle nested methods and properties', function () {
         ->newInstance()->books()->toBeArray();
 });
 
+it('can reset the scope using the and method', function () {
+    expect((new HasMethodsAndProperties())->meta)
+        ->toBeArray()
+        ->foo->toBeArray()
+        ->and()->toEqual(['foo' => ['bar' => 'baz']])
+        ->foo->bar->toEqual('baz')
+        ->and->toHaveCount(1);
+});
+
 it('works with higher order tests')
     ->expect(new HasMethodsAndProperties())
     ->meta->foo->bar->toBeString()->toEqual('baz')->not->toBeInt
+    ->and->toBeInstanceOf(HasMethodsAndProperties::class)
     ->newInstance()->meta->foo->toBeArray
     ->newInstance()->multiply(2, 2)->toEqual(4)->not->toEqual(5)
     ->newInstance()->books()->toBeArray();

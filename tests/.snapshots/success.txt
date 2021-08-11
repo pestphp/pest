@@ -123,6 +123,7 @@
    PASS  Tests\Features\Expect\HigherOrder\methodsAndProperties
   ✓ it can access methods and properties
   ✓ it can handle nested methods and properties
+  ✓ it can reset the scope using the and method
   ✓ it works with higher order tests
   ✓ it can start a new higher order expectation using the and syntax
   ✓ it can start a new higher order expectation using the and syntax in higher order tests
@@ -647,5 +648,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 419 passed
+  Tests:  4 incompleted, 9 skipped, 420 passed
   

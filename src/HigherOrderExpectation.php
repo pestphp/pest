@@ -70,10 +70,14 @@ final class HigherOrderExpectation
      *
      * @param TValue $value
      *
-     * @return Expectation<TValue>
+     * @return Expectation<TValue>|Expectation
      */
-    public function and($value): Expectation
+    public function and($value = null): Expectation
     {
+        if ($value === null) {
+            return $this->original;
+        }
+
         return $this->expect($value);
     }
 
@@ -94,11 +98,17 @@ final class HigherOrderExpectation
 
     /**
      * Accesses properties in the value or in the expectation.
+     *
+     * @return self|Expectation
      */
-    public function __get(string $name): self
+    public function __get(string $name)
     {
         if ($name === 'not') {
             return $this->not();
+        }
+
+        if ($name === 'and') {
+            return $this->and();
         }
 
         if (!$this->expectationHasMethod($name)) {
