@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Pest\Concerns\Testable;
 use Pest\Datasets;
 use Pest\Expectation;
 use Pest\PendingObjects\AfterEachCall;
@@ -86,7 +85,7 @@ if (!function_exists('test')) {
      * is the test description; the second argument is
      * a closure that contains the test expectations.
      *
-     * @return TestCall|TestCase|Testable|mixed
+     * @return TestCall|TestCase|mixed
      */
     function test(string $description = null, Closure $closure = null)
     {
