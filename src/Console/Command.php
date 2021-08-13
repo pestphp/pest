@@ -9,8 +9,6 @@ use Pest\Actions\AddsTests;
 use Pest\Actions\InteractsWithPlugins;
 use Pest\Actions\LoadStructure;
 use Pest\Actions\ValidatesConfiguration;
-use Pest\Contracts\Plugins\AddsOutput;
-use Pest\Plugin\Loader;
 use Pest\Plugins\Version;
 use Pest\Support\Container;
 use Pest\TestSuite;
@@ -57,6 +55,8 @@ final class Command extends BaseCommand
      */
     protected function handleArguments(array $argv): void
     {
+        $argv = InteractsWithPlugins::handleArguments($argv);
+
         parent::handleArguments($argv);
 
         /*
