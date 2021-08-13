@@ -87,11 +87,5 @@
                 "Pest\\Laravel\\PestServiceProvider"
             ]
         }
-    },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../pest-plugin-parallel"
-        }
-    ]
+    }
 }
