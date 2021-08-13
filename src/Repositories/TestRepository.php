@@ -29,7 +29,7 @@ final class TestRepository
     /**
      * @var array<string, TestCaseFactory>
      */
-    public $state = [];
+    private $state = [];
 
     /**
      * @var array<string, array<int, array<int, string|Closure>>>
@@ -42,6 +42,16 @@ final class TestRepository
     public function count(): int
     {
         return count($this->state);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function getFilenames(): array
+    {
+        return array_values(array_map(function (TestCaseFactory $factory): string {
+            return $factory->filename;
+        }, $this->state));
     }
 
     /**
