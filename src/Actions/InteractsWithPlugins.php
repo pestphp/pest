@@ -16,9 +16,9 @@ final class InteractsWithPlugins
     /**
      * Transform the input arguments by passing it to the relevant plugins.
      *
-     * @param array<string> $argv
+     * @param array<int, string> $argv
      *
-     * @return array<string>
+     * @return array<int, string>
      */
     public static function handleArguments(array $argv): array
     {
