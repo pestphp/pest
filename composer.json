@@ -44,7 +44,7 @@
         "illuminate/support": "^8.47.0",
         "laravel/dusk": "^6.15.0",
         "pestphp/pest-dev-tools": "dev-master",
-        "pestphp/pest-plugin-parallel": "dev-master"
+        "pestphp/pest-plugin-parallel": "^1.0"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -85,11 +85,5 @@
                 "Pest\\Laravel\\PestServiceProvider"
             ]
         }
-    },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../pest-plugin-parallel"
-        }
-    ]
+    }
 }
