@@ -286,7 +286,7 @@ final class TeamCity extends DefaultResultPrinter
     {
         $this->markAsFailure($t);
         $this->writeWarning($test->getName());
-        $this->phpunitTeamCity->addSkippedTest($test, $t, $time);
+        $this->phpunitTeamCity->printIgnoredTest($test->getName(), $t, $time);
     }
 
     private function markAsFailure(Throwable $t): void

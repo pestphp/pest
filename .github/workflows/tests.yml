@@ -10,8 +10,9 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
         php: ['7.3', '7.4', '8.0']
         dependency-version: [prefer-lowest, prefer-stable]
+        parallel: ['', '--parallel']
 
-    name: PHP ${{ matrix.php }} - ${{ matrix.os }} - ${{ matrix.dependency-version }}
+    name: PHP ${{ matrix.php }} - ${{ matrix.os }} - ${{ matrix.dependency-version }} - ${{ matrix.parallel }}
 
     steps:
     - name: Checkout
@@ -38,7 +39,7 @@ jobs:
       if: "matrix.php >= 8"
 
     - name: Unit Tests
-      run: php bin/pest --colors=always --exclude-group=integration
+      run: php bin/pest --colors=always --exclude-group=integration ${{ matrix.parallel }}
 
     - name: Integration Tests
       run: php bin/pest --colors=always --group=integration
