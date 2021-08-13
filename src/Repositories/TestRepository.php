@@ -45,13 +45,17 @@ final class TestRepository
     }
 
     /**
+     * Returns the filename of each test that should be run in the suite.
+     *
      * @return array<int, string>
      */
     public function getFilenames(): array
     {
+        $testsWithOnly = $this->testsUsingOnly();
+
         return array_values(array_map(function (TestCaseFactory $factory): string {
             return $factory->filename;
-        }, $this->state));
+        }, count($testsWithOnly) > 0 ? $testsWithOnly : $this->state));
     }
 
     /**
@@ -95,9 +99,7 @@ final class TestRepository
             }
         }
 
-        $onlyState = array_filter($this->state, function ($testFactory): bool {
-            return $testFactory->only;
-        });
+        $onlyState = $this->testsUsingOnly();
 
         $state = count($onlyState) > 0 ? $onlyState : $this->state;
 
@@ -108,6 +110,18 @@ final class TestRepository
                 $each($test);
             }
         }
+    }
+
+    /**
+     * Return all tests that have called the only method.
+     *
+     * @return array<TestCaseFactory>
+     */
+    private function testsUsingOnly(): array
+    {
+        return array_filter($this->state, function ($testFactory): bool {
+            return $testFactory->only;
+        });
     }
 
     /**

@@ -34,3 +34,18 @@ it('can return an array of all test suite filenames', function () {
         __FILE__,
     ]);
 });
+
+it('can filter the test suite filenames to those with the only method', function () {
+    $testSuite = new TestSuite(getcwd(), 'tests');
+    $test = function () {};
+
+    $testWithOnly = new \Pest\Factories\TestCaseFactory(__FILE__, 'foo', $test);
+    $testWithOnly->only = true;
+    $testSuite->tests->set($testWithOnly);
+
+    $testSuite->tests->set(new \Pest\Factories\TestCaseFactory('Baz/Bar/Boo.php', 'bar', $test));
+
+    expect($testSuite->tests->getFilenames())->toEqual([
+        __FILE__,
+    ]);
+});
