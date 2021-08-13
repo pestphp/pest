@@ -74,13 +74,6 @@ final class TestSuite
     public $testPath;
 
     /**
-     * Whether this test is running as part of a parallel suite.
-     *
-     * @var bool
-     */
-    public $isInParallel = false;
-
-    /**
      * Holds an instance of the test suite.
      *
      * @var TestSuite

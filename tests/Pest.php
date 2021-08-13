@@ -1,5 +1,9 @@
 <?php
 
+use Tests\CustomTestCaseInSubFolders\SubFolder\SubFolder\CustomTestCaseInSubFolder;
+
+uses(CustomTestCaseInSubFolder::class)->in('PHPUnit/CustomTestCaseInSubFolders/SubFolder/SubFolder');
+
 uses()->group('integration')->in('Visual');
 
 // NOTE: global test value container to be mutated and checked across files, as needed

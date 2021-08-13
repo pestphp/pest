@@ -1,7 +1,5 @@
 <?php
 
-use Pest\TestSuite;
-
 test('visual snapshot of test suite on success', function () {
     $testsPath = dirname(__DIR__);
     $snapshot = implode(DIRECTORY_SEPARATOR, [
@@ -11,7 +9,7 @@ test('visual snapshot of test suite on success', function () {
     ]);
 
     $output = function () use ($testsPath) {
-        $process = (new Symfony\Component\Process\Process(['php', 'bin/pest'], dirname($testsPath), ['EXCLUDE' => 'integration', 'REBUILD_SNAPSHOTS' => false]));
+        $process = (new Symfony\Component\Process\Process(['php', 'bin/pest'], dirname($testsPath), ['EXCLUDE' => 'integration', 'REBUILD_SNAPSHOTS' => false, 'PARATEST' => 0]));
 
         $process->run();
 
@@ -37,5 +35,4 @@ test('visual snapshot of test suite on success', function () {
         expect(implode("\n", $output))->toContain(file_get_contents($snapshot));
     }
 })->skip(!getenv('REBUILD_SNAPSHOTS') && getenv('EXCLUDE'))
-    ->skip(TestSuite::getInstance()->isInParallel)
     ->skip(PHP_OS_FAMILY === 'Windows');

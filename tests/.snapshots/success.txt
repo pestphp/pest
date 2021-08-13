@@ -485,11 +485,6 @@
   ✓ it can call chained macro method
   ✓ it will throw exception from call if no macro exists
 
-   WARN  Tests\Features\Parallel
-  - it can determine in the test case if it is running in parallel
-  ✓ it can determine in the test case if it is not running in parallel
-  ✓ it can skip using the test case based on parallel status
-
    PASS  Tests\Features\PendingHigherOrderTests
   ✓ get 'foo'
   ✓ get 'foo' → get 'bar' → expect true → toBeTrue 
@@ -652,5 +647,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 10 skipped, 421 passed
+  Tests:  4 incompleted, 9 skipped, 419 passed
   
