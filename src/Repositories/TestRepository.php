@@ -45,7 +45,7 @@ final class TestRepository
     }
 
     /**
-     * Returns the filename of each test that should be run in the suite.
+     * Returns the filename of each test that should be executed in the suite.
      *
      * @return array<int, string>
      */
