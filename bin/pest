@@ -5,6 +5,7 @@ use NunoMaduro\Collision\Provider;
 use Pest\Actions\ValidatesEnvironment;
 use Pest\Support\Container;
 use Pest\TestSuite;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -52,9 +53,11 @@ use Symfony\Component\Console\Output\OutputInterface;
         }
     }
 
-    $command = $argv->hasParameterOption(['--parallel', '-P'])
-        ? \Pest\Parallel\Command::class
-        : \Pest\Console\Command::class;
+    if ($runInParallel = $argv->hasParameterOption(['--parallel', '-P']) && !class_exists(\Pest\Parallel\Command::class)) {
+        $output->writeln("Parallel support requires the Pest Parallel plugin. Run <fg=yellow;options=bold>`composer require --dev pestphp/pest-plugin-parallel`</> first.");
+        exit(Command::FAILURE);
+    }
 
+    $command = $runInParallel ? \Pest\Parallel\Command::class : \Pest\Console\Command::class;
     exit($container->get($command)->run($args));
 })();
