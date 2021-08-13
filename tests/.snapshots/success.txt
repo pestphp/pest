@@ -614,6 +614,7 @@
    PASS  Tests\Unit\TestSuite
   ✓ it does not allow to add the same test description twice
   ✓ it alerts users about tests with arguments but no input
+  ✓ it can return an array of all test suite filenames
 
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
@@ -647,5 +648,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 419 passed
+  Tests:  4 incompleted, 9 skipped, 420 passed
   
