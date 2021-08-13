@@ -23,7 +23,7 @@ it('alerts users about tests with arguments but no input', function () {
     sprintf("A test with the description '%s' has %d argument(s) ([%s]) and no dataset(s) provided in %s", 'foo', 1, 'int $arg', __FILE__),
 );
 
-it('can return an array of all test suite filenames', function() {
+it('can return an array of all test suite filenames', function () {
     $testSuite = new TestSuite(getcwd(), 'tests');
     $test = function () {};
     $testSuite->tests->set(new \Pest\Factories\TestCaseFactory(__FILE__, 'foo', $test));
