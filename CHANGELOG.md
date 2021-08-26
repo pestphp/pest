@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.17.0 (2021-08-26)](https://github.com/pestphp/pest/compare/v1.16.0...v1.17.0)
+### Added
+- `toThrow` expectation ([#361](https://github.com/pestphp/pest/pull/361))
+
 ## [v1.16.0 (2021-08-19)](https://github.com/pestphp/pest/compare/v1.15.0...v1.16.0)
 ### Added
 - Support for new parallel options ([#369](https://github.com/pestphp/pest/pull/369))
