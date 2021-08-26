@@ -5,13 +5,19 @@ declare(strict_types=1);
 namespace Pest;
 
 use BadMethodCallException;
+use Closure;
+use LogicException;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\RetrievesValues;
 use Pest\Support\Arr;
+use Pest\Support\NullClosure;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Constraint\Constraint;
 use PHPUnit\Framework\ExpectationFailedException;
+use ReflectionFunction;
+use ReflectionNamedType;
 use SebastianBergmann\Exporter\Exporter;
+use Throwable;
 
 /**
  * @internal
@@ -747,6 +753,57 @@ final class Expectation
         Assert::assertThat($this->value, $constraint);
 
         return $this;
+    }
+
+    /**
+     * Asserts that executing value throws an exception.
+     *
+     * @param string|Closure $exception string: the exception class
+     *                                  Closure: first parameter = exception class
+     */
+    public function toThrow($exception, string $exceptionMessage = null): Expectation
+    {
+        $callback = NullClosure::create();
+
+        if ($exception instanceof Closure) {
+            $callback   = $exception;
+            $parameters = (new ReflectionFunction($exception))->getParameters();
+
+            if (1 !== count($parameters)) {
+                throw new LogicException('The "toThrow" closure must have a single parameter type-hinted as the class string');
+            }
+
+            if (!($type = $parameters[0]->getType()) instanceof ReflectionNamedType) {
+                throw new LogicException('The "toThrow" closure\'s parameter must be type-hinted as the class string');
+            }
+
+            $exception = $type->getName();
+        }
+
+        try {
+            ($this->value)();
+        } catch (Throwable $e) {
+            if (!class_exists($exception)) {
+                Assert::assertStringContainsString($exception, $e->getMessage());
+
+                return $this;
+            }
+
+            if ($exceptionMessage) {
+                Assert::assertStringContainsString($exceptionMessage, $e->getMessage());
+            }
+
+            Assert::assertInstanceOf($exception, $e);
+            $callback($e);
+
+            return $this;
+        }
+
+        if (!class_exists($exception)) {
+            throw new ExpectationFailedException("Exception with message \"{$exception}\" not thrown.");
+        }
+
+        throw new ExpectationFailedException("Exception \"{$exception}\" not thrown.");
     }
 
     /**
