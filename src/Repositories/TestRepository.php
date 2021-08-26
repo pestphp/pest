@@ -22,7 +22,7 @@ use PHPUnit\Framework\TestCase;
 final class TestRepository
 {
     /**
-     * @var string
+     * @var non-empty-string
      */
     private const SEPARATOR = '>>>';
 

@@ -53,8 +53,8 @@ test('not failures', function () {
 
 test('closure missing parameter', function () {
     expect(function () {})->toThrow(function () {});
-})->throws(LogicException::class, 'The "toThrow" closure must have a single parameter type-hinted as the class string');
+})->throws(InvalidArgumentException::class, 'The given closure must have a single parameter type-hinted as the class string.');
 
 test('closure missing type-hint', function () {
     expect(function () {})->toThrow(function ($e) {});
-})->throws(LogicException::class, 'The "toThrow" closure\'s parameter must be type-hinted as the class string');
+})->throws(InvalidArgumentException::class, 'The given closure\'s parameter must be type-hinted as the class string.');

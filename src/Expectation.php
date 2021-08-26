@@ -6,7 +6,7 @@ namespace Pest;
 
 use BadMethodCallException;
 use Closure;
-use LogicException;
+use InvalidArgumentException;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\RetrievesValues;
 use Pest\Support\Arr;
@@ -758,8 +758,7 @@ final class Expectation
     /**
      * Asserts that executing value throws an exception.
      *
-     * @param string|Closure $exception string: the exception class
-     *                                  Closure: first parameter = exception class
+     * @param (Closure(Throwable): mixed)|string $exception
      */
     public function toThrow($exception, string $exceptionMessage = null): Expectation
     {
@@ -770,11 +769,11 @@ final class Expectation
             $parameters = (new ReflectionFunction($exception))->getParameters();
 
             if (1 !== count($parameters)) {
-                throw new LogicException('The "toThrow" closure must have a single parameter type-hinted as the class string');
+                throw new InvalidArgumentException('The given closure must have a single parameter type-hinted as the class string.');
             }
 
             if (!($type = $parameters[0]->getType()) instanceof ReflectionNamedType) {
-                throw new LogicException('The "toThrow" closure\'s parameter must be type-hinted as the class string');
+                throw new InvalidArgumentException('The given closure\'s parameter must be type-hinted as the class string.');
             }
 
             $exception = $type->getName();
@@ -782,14 +781,14 @@ final class Expectation
 
         try {
             ($this->value)();
-        } catch (Throwable $e) {
+        } catch (Throwable $e) { // @phpstan-ignore-line
             if (!class_exists($exception)) {
                 Assert::assertStringContainsString($exception, $e->getMessage());
 
                 return $this;
             }
 
-            if ($exceptionMessage) {
+            if ($exceptionMessage !== null) {
                 Assert::assertStringContainsString($exceptionMessage, $e->getMessage());
             }
 

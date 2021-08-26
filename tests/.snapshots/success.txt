@@ -449,6 +449,19 @@
   ✓ failures
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toThrow
+  ✓ passes
+  ✓ failures 1
+  ✓ failures 2
+  ✓ failures 3
+  ✓ failures 4
+  ✓ failures 5
+  ✓ failures 6
+  ✓ failures 7
+  ✓ not failures
+  ✓ closure missing parameter
+  ✓ closure missing type-hint
+
    PASS  Tests\Features\Helpers
   ✓ it can set/get properties on $this
   ✓ it throws error if property do not exist
@@ -649,5 +662,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 421 passed
+  Tests:  4 incompleted, 9 skipped, 432 passed
   
