@@ -83,6 +83,38 @@ final class Expectation
     }
 
     /**
+     * Creates a new expectation with the value's length/count.
+     */
+    public function len(): Expectation
+    {
+        if (is_string($this->value)) {
+            $this->value = grapheme_strlen($this->value);
+
+            return $this;
+        }
+
+        if (is_array($this->value)) {
+            $this->value = count($this->value);
+
+            return $this;
+        }
+
+        if (is_object($this->value) && get_class($this->value) == 'Illuminate\Support\Collection') {
+            $this->value = $this->value->count();
+
+            return $this;
+        }
+
+        if (is_object($this->value)) {
+            $this->value = count(get_object_vars($this->value));
+
+            return $this;
+        }
+
+        throw new BadMethodCallException("Expectation value's length is uncountable");
+    }
+
+    /**
      * Dump the expectation value and end the script.
      *
      * @param mixed $arguments
