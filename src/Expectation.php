@@ -344,14 +344,12 @@ final class Expectation
 
         if (is_object($this->value)) {
             if (method_exists($this->value, 'toArray')) {
-                $array = $this->value->toArray();
+                $this->value = $this->value->toArray();
             } else {
-                $array = (array) $this->value;
+                $this->value = (array) $this->value;
             }
 
-            Assert::assertCount($number, $array);
-
-            return $this;
+            return $this->toHaveCount($number);
         }
 
         throw new BadMethodCallException('Expectation value length is not countable.');
