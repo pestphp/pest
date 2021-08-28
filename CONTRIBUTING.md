@@ -31,6 +31,10 @@ composer lint
 ```
 ## Tests
 
+Update the snapshots:
+```bash
+composer update:snapshots
+```
 Run all tests:
 ```bash
 composer test
