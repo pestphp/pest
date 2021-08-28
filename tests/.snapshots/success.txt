@@ -419,6 +419,21 @@
   ✓ failures
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toHaveLength
+  ✓ it passes with ('Fortaleza')
+  ✓ it passes with ('Sollefteå')
+  ✓ it passes with ('Ιεράπετρα')
+  ✓ it passes with ('PT-BR 🇵🇹🇧🇷😎')
+  ✓ it passes with (stdClass Object (...))
+  ✓ it passes with (Illuminate\Support\Collection Object (...))
+  ✓ it passes with array
+  ✓ it passes with *not*
+  ✓ it properly fails with *not*
+  ✓ it fails with (1)
+  ✓ it fails with (1.5)
+  ✓ it fails with (true)
+  ✓ it fails with (null)
+
    PASS  Tests\Features\Expect\toHaveProperty
   ✓ pass
   ✓ failures
@@ -662,5 +677,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 432 passed
+  Tests:  4 incompleted, 9 skipped, 445 passed
   
