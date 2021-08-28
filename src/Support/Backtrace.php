@@ -25,8 +25,10 @@ final class Backtrace
     {
         $current = null;
 
+        $filerLoaderPath = mb_strtolower((string) realpath('vendor/phpunit/phpunit/src/Util/FileLoader.php'));
+
         foreach (debug_backtrace(self::BACKTRACE_OPTIONS) as $trace) {
-            if (Str::endsWith($trace[self::FILE], (string) realpath('vendor/phpunit/phpunit/src/Util/FileLoader.php'))) {
+            if (Str::endsWith(mb_strtolower($trace[self::FILE]), $filerLoaderPath)) {
                 break;
             }
 
