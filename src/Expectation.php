@@ -328,6 +328,36 @@ final class Expectation
     }
 
     /**
+     * Asserts that $number matches value's Length.
+     */
+    public function toHaveLength(int $number): Expectation
+    {
+        if (is_string($this->value)) {
+            Assert::assertEquals($number, grapheme_strlen($this->value));
+
+            return $this;
+        }
+
+        if (is_iterable($this->value)) {
+            return $this->toHaveCount($number);
+        }
+
+        if (is_object($this->value)) {
+            if (method_exists($this->value, 'toArray')) {
+                $array = $this->value->toArray();
+            } else {
+                $array = (array) $this->value;
+            }
+
+            Assert::assertCount($number, $array);
+
+            return $this;
+        }
+
+        throw new BadMethodCallException('Expectation value length is not countable.');
+    }
+
+    /**
      * Asserts that $count matches the number of elements of the value.
      */
     public function toHaveCount(int $count): Expectation
