@@ -423,7 +423,6 @@
   ✓ it passes with ('Fortaleza')
   ✓ it passes with ('Sollefteå')
   ✓ it passes with ('Ιεράπετρα')
-  ✓ it passes with ('PT-BR 🇵🇹🇧🇷😎')
   ✓ it passes with (stdClass Object (...))
   ✓ it passes with (Illuminate\Support\Collection Object (...))
   ✓ it passes with array
@@ -677,5 +676,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 445 passed
+  Tests:  4 incompleted, 9 skipped, 444 passed
   
