@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.18.0 (2021-08-30)](https://github.com/pestphp/pest/compare/v1.17.0...v1.18.0)
+### Added
+- `toHaveLength` expectation ([#386](https://github.com/pestphp/pest/pull/386))
+- `nunomaduro/collision:^6.0` support ([4ae482c](https://github.com/pestphp/pest/commit/4ae482c7073fb77782b8a4b5738ef1fcea0f82ab))
+
 ## [v1.17.0 (2021-08-26)](https://github.com/pestphp/pest/compare/v1.16.0...v1.17.0)
 ### Added
 - `toThrow` expectation ([#361](https://github.com/pestphp/pest/pull/361))
