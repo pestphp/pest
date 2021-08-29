@@ -333,7 +333,7 @@ final class Expectation
     public function toHaveLength(int $number): Expectation
     {
         if (is_string($this->value)) {
-            Assert::assertEquals($number, grapheme_strlen($this->value));
+            Assert::assertEquals($number, mb_strlen($this->value));
 
             return $this;
         }
