@@ -21,7 +21,7 @@ We would like to extend our thanks to the following sponsors for funding Pest de
 
 ### Premium Sponsors
 
-- **[Auth0](Auth0https://auth0.com)**
+- **[Auth0](https://auth0.com)**
 - **[Akaunting](https://akaunting.com)**
 - **[Codecourse](https://codecourse.com/)**
 - **[Meema](https://meema.io)**
