@@ -387,6 +387,20 @@ final class Expectation
     }
 
     /**
+     * Asserts that the value contains the provided properties $names.
+     *
+     * @param iterable<array-key, string> $names
+     */
+    public function toHaveProperties(iterable $names): Expectation
+    {
+        foreach ($names as $name) {
+            $this->toHaveProperty($name);
+        }
+
+        return $this;
+    }
+
+    /**
      * Asserts that two variables have the same value.
      *
      * @param mixed $expected
