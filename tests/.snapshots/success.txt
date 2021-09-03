@@ -433,6 +433,11 @@
   ✓ it fails with (true)
   ✓ it fails with (null)
 
+   PASS  Tests\Features\Expect\toHaveProperties
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
    PASS  Tests\Features\Expect\toHaveProperty
   ✓ pass
   ✓ failures
@@ -676,5 +681,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 444 passed
+  Tests:  4 incompleted, 9 skipped, 447 passed
   
