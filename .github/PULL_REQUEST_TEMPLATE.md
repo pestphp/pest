@@ -1,10 +1,21 @@
-| Q             | A
-| ------------- | ---
-| Bug fix?      | yes/no
-| New feature?  | yes/no
-| Fixed tickets | #... <!-- #-prefixed issue number(s), if any -->
-
-<!--
-- Replace this comment by a description of what your PR is solving.
--->
-
+---
+body:
+    - type: radio
+      id: type
+      attributes:
+        label: Select one type
+        options:
+            - Bug fix
+            - New feature
+      validations:
+        required: false
+    - type: input
+      id: issue
+      attributes:
+        label: Fixed tickets
+        description: prefixed issue number(s), if any
+        value: \#
+    - type: markdown
+      attributes:
+        label: Description
+---
