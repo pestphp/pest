@@ -1,5 +1,6 @@
 <?php
 
+use Pest\Contracts\TestableValue;
 use Pest\Datasets;
 use Pest\Exceptions\DatasetAlreadyExist;
 use Pest\Exceptions\DatasetDoesNotExist;
@@ -98,6 +99,21 @@ test('eager wrapped registered datasets', function ($text) use ($state, $dataset
 test('eager registered wrapped datasets did the job right', function () use ($state) {
     expect($state->text)->toBe('1212121212');
 });
+
+test('dataset of single testable value', function (TestableValue $string) {
+    expect(strtoupper($string->origin()))->toEqual($string->expected());
+})->with([
+    origin('a')->expect('A'),
+    origin('b')->expect('B'),
+]);
+
+test('dataset of multi testable value', function (TestableValue $firstString, TestableValue $secondString) {
+    expect(strtoupper($firstString->origin()))->toEqual($firstString->expected());
+    expect(strtoupper($secondString->origin()))->toEqual($secondString->expected());
+})->with([
+    [origin('a')->expect('A'), origin('aa')->expect('AA')],
+    [origin('b')->expect('B'), origin('bb')->expect('BB')],
+]);
 
 test('named datasets', function ($text) use ($state, $datasets) {
     $state->text .= $text;

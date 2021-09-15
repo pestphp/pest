@@ -11,6 +11,7 @@ use Pest\PendingObjects\UsesCall;
 use Pest\Support\Backtrace;
 use Pest\Support\Extendable;
 use Pest\Support\HigherOrderTapProxy;
+use Pest\Support\TestableValue;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestCase;
 
@@ -28,6 +29,20 @@ function expect($value = null)
     }
 
     return new Expectation($value);
+}
+
+if (!function_exists('origin')) {
+    /**
+     * Creates a new testable value.
+     *
+     * @param mixed $origin the Value
+     *
+     * @return TestableValue
+     */
+    function origin($origin)
+    {
+        return new TestableValue($origin);
+    }
 }
 
 if (!function_exists('beforeAll')) {

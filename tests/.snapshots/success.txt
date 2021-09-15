@@ -46,6 +46,10 @@
   ✓ eager wrapped registered datasets with (1)
   ✓ eager wrapped registered datasets with (2)
   ✓ eager registered wrapped datasets did the job right
+  ✓ dataset of single testable value with ('a')
+  ✓ dataset of single testable value with ('b')
+  ✓ dataset of multi testable value with ('a', 'aa')
+  ✓ dataset of multi testable value with ('b', 'bb')
   ✓ named datasets with data set "one"
   ✓ named datasets with data set "two"
   ✓ named datasets did the job right
@@ -619,6 +623,7 @@
    PASS  Tests\Unit\Datasets
   ✓ it show only the names of named datasets in their description
   ✓ it show the actual dataset of non-named datasets in their description
+  ✓ it show the origin value of non-named datasets in their description
   ✓ it show only the names of multiple named datasets in their description
   ✓ it show the actual dataset of multiple non-named datasets in their description
   ✓ it show the correct description for mixed named and not-named datasets
@@ -681,5 +686,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 447 passed
+  Tests:  4 incompleted, 9 skipped, 452 passed
   

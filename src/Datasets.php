@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest;
 
 use Closure;
+use Pest\Contracts\TestableValue;
 use Pest\Exceptions\DatasetAlreadyExist;
 use Pest\Exceptions\DatasetDoesNotExist;
 use SebastianBergmann\Exporter\Exporter;
@@ -128,7 +129,11 @@ final class Datasets
             foreach ($datasets[$index] as $key => $values) {
                 $values             = is_array($values) ? $values : [$values];
                 $processedDataset[] = [
-                    'label'  => self::getDataSetDescription($key, $values),
+                    'label'  => self::getDataSetDescription($key, array_map(function ($value) {
+                        return ($value instanceof TestableValue)
+                                ? $value->origin()
+                                : $value;
+                    }, $values)),
                     'values' => $values,
                 ];
             }

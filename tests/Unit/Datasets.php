@@ -26,6 +26,18 @@ it('show the actual dataset of non-named datasets in their description', functio
     expect($descriptions[1])->toBe('test description with (array(2))');
 });
 
+it('show the origin value of non-named datasets in their description', function () {
+    $descriptions = array_keys(Datasets::resolve('test description', [
+        [
+            [origin(1)->expect(10)],
+            [origin(2)],
+        ],
+    ]));
+
+    expect($descriptions[0])->toBe('test description with (1)');
+    expect($descriptions[1])->toBe('test description with (2)');
+});
+
 it('show only the names of multiple named datasets in their description', function () {
     $descriptions = array_keys(Datasets::resolve('test description', [
         [
