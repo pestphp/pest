@@ -39,7 +39,7 @@ final class TestableValue implements TestableValueInterface
             return $this->value['expected'];
         }
 
-        throw new MissingExpectedValue('No expectation set.');
+        throw new MissingExpectedValue();
     }
 
     /**

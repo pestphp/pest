@@ -10,4 +10,11 @@ use Symfony\Component\Console\Exception\ExceptionInterface;
 
 final class MissingExpectedValue extends \InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
 {
+    /**
+     * Creates a new instance of missing expected value exception.
+     */
+    public function __construct()
+    {
+        parent::__construct('No expected value available.');
+    }
 }

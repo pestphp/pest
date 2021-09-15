@@ -4,6 +4,7 @@ use Pest\Contracts\TestableValue;
 use Pest\Datasets;
 use Pest\Exceptions\DatasetAlreadyExist;
 use Pest\Exceptions\DatasetDoesNotExist;
+use Pest\Exceptions\MissingExpectedValue;
 use Pest\Plugin;
 
 beforeEach(function () {
@@ -114,6 +115,12 @@ test('dataset of multi testable value', function (TestableValue $firstString, Te
     [origin('a')->expect('A'), origin('aa')->expect('AA')],
     [origin('b')->expect('B'), origin('bb')->expect('BB')],
 ]);
+
+test('testable value without expected value throw exception', function (TestableValue $string) {
+    $string->expected();
+})->with([
+    origin('a'),
+])->throws(MissingExpectedValue::class);
 
 test('named datasets', function ($text) use ($state, $datasets) {
     $state->text .= $text;

@@ -50,6 +50,7 @@
   ✓ dataset of single testable value with ('b')
   ✓ dataset of multi testable value with ('a', 'aa')
   ✓ dataset of multi testable value with ('b', 'bb')
+  ✓ testable value without expected value throw exception with ('a')
   ✓ named datasets with data set "one"
   ✓ named datasets with data set "two"
   ✓ named datasets did the job right
@@ -686,5 +687,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 452 passed
+  Tests:  4 incompleted, 9 skipped, 453 passed
   
