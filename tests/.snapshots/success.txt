@@ -168,7 +168,7 @@
   ✓ an exception is thrown if the the type is not iterable
   ✓ allows for sequences of checks to be run on iterable data
   ✓ loops back to the start if it runs out of sequence items
-  ✓ it works if the number of items in the iterable is smaller than the number of expectations
+  ✓ fails if the number of iterable items is greater than the number of expectations
   ✓ it works with associative arrays
   ✓ it can be passed non-callable values
   ✓ it can be passed a mixture of value types
