@@ -424,6 +424,25 @@
   ✓ failures
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toHaveLength
+  ✓ it passes with ('Fortaleza')
+  ✓ it passes with ('Sollefteå')
+  ✓ it passes with ('Ιεράπετρα')
+  ✓ it passes with (stdClass Object (...))
+  ✓ it passes with (Illuminate\Support\Collection Object (...))
+  ✓ it passes with array
+  ✓ it passes with *not*
+  ✓ it properly fails with *not*
+  ✓ it fails with (1)
+  ✓ it fails with (1.5)
+  ✓ it fails with (true)
+  ✓ it fails with (null)
+
+   PASS  Tests\Features\Expect\toHaveProperties
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
    PASS  Tests\Features\Expect\toHaveProperty
   ✓ pass
   ✓ failures
@@ -453,6 +472,19 @@
   ✓ pass
   ✓ failures
   ✓ not failures
+
+   PASS  Tests\Features\Expect\toThrow
+  ✓ passes
+  ✓ failures 1
+  ✓ failures 2
+  ✓ failures 3
+  ✓ failures 4
+  ✓ failures 5
+  ✓ failures 6
+  ✓ failures 7
+  ✓ not failures
+  ✓ closure missing parameter
+  ✓ closure missing type-hint
 
    PASS  Tests\Features\Helpers
   ✓ it can set/get properties on $this
@@ -619,6 +651,8 @@
    PASS  Tests\Unit\TestSuite
   ✓ it does not allow to add the same test description twice
   ✓ it alerts users about tests with arguments but no input
+  ✓ it can return an array of all test suite filenames
+  ✓ it can filter the test suite filenames to those with the only method
 
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
@@ -652,5 +686,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 424 passed
+  Tests:  4 incompleted, 9 skipped, 447 passed
   

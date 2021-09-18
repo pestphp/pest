@@ -5,13 +5,19 @@ declare(strict_types=1);
 namespace Pest;
 
 use BadMethodCallException;
+use Closure;
+use InvalidArgumentException;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\RetrievesValues;
 use Pest\Support\Arr;
+use Pest\Support\NullClosure;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Constraint\Constraint;
 use PHPUnit\Framework\ExpectationFailedException;
+use ReflectionFunction;
+use ReflectionNamedType;
 use SebastianBergmann\Exporter\Exporter;
+use Throwable;
 
 /**
  * @internal
@@ -322,6 +328,36 @@ final class Expectation
     }
 
     /**
+     * Asserts that $number matches value's Length.
+     */
+    public function toHaveLength(int $number): Expectation
+    {
+        if (is_string($this->value)) {
+            Assert::assertEquals($number, mb_strlen($this->value));
+
+            return $this;
+        }
+
+        if (is_iterable($this->value)) {
+            return $this->toHaveCount($number);
+        }
+
+        if (is_object($this->value)) {
+            if (method_exists($this->value, 'toArray')) {
+                $array = $this->value->toArray();
+            } else {
+                $array = (array) $this->value;
+            }
+
+            Assert::assertCount($number, $array);
+
+            return $this;
+        }
+
+        throw new BadMethodCallException('Expectation value length is not countable.');
+    }
+
+    /**
      * Asserts that $count matches the number of elements of the value.
      */
     public function toHaveCount(int $count): Expectation
@@ -345,6 +381,20 @@ final class Expectation
         if (func_num_args() > 1) {
             /* @phpstan-ignore-next-line */
             Assert::assertEquals($value, $this->value->{$name});
+        }
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value contains the provided properties $names.
+     *
+     * @param iterable<array-key, string> $names
+     */
+    public function toHaveProperties(iterable $names): Expectation
+    {
+        foreach ($names as $name) {
+            $this->toHaveProperty($name);
         }
 
         return $this;
@@ -747,6 +797,56 @@ final class Expectation
         Assert::assertThat($this->value, $constraint);
 
         return $this;
+    }
+
+    /**
+     * Asserts that executing value throws an exception.
+     *
+     * @param (Closure(Throwable): mixed)|string $exception
+     */
+    public function toThrow($exception, string $exceptionMessage = null): Expectation
+    {
+        $callback = NullClosure::create();
+
+        if ($exception instanceof Closure) {
+            $callback   = $exception;
+            $parameters = (new ReflectionFunction($exception))->getParameters();
+
+            if (1 !== count($parameters)) {
+                throw new InvalidArgumentException('The given closure must have a single parameter type-hinted as the class string.');
+            }
+
+            if (!($type = $parameters[0]->getType()) instanceof ReflectionNamedType) {
+                throw new InvalidArgumentException('The given closure\'s parameter must be type-hinted as the class string.');
+            }
+
+            $exception = $type->getName();
+        }
+
+        try {
+            ($this->value)();
+        } catch (Throwable $e) { // @phpstan-ignore-line
+            if (!class_exists($exception)) {
+                Assert::assertStringContainsString($exception, $e->getMessage());
+
+                return $this;
+            }
+
+            if ($exceptionMessage !== null) {
+                Assert::assertStringContainsString($exceptionMessage, $e->getMessage());
+            }
+
+            Assert::assertInstanceOf($exception, $e);
+            $callback($e);
+
+            return $this;
+        }
+
+        if (!class_exists($exception)) {
+            throw new ExpectationFailedException("Exception with message \"{$exception}\" not thrown.");
+        }
+
+        throw new ExpectationFailedException("Exception \"{$exception}\" not thrown.");
     }
 
     /**
