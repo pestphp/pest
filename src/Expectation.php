@@ -850,6 +850,51 @@ final class Expectation
     }
 
     /**
+     * The current value can be changed before the next expectation.
+     *
+     * @template TToValue
+     *
+     * @param (callable(TToValue): TToValue)|mixed ...$callbacks
+     */
+    public function to(...$callbacks): Expectation
+    {
+        if (is_array($this->value) || is_iterable($this->value)) {
+            $value          = is_array($this->value) ? $this->value : iterator_to_array($this->value);
+            $keys           = array_keys($value);
+            $values         = array_values($value);
+            $callbacksCount = count($callbacks);
+
+            $index = 0;
+
+            while (count($callbacks) < count($values)) {
+                $callbacks[] = $callbacks[$index];
+                $index       = $index < count($values) - 1 ? $index + 1 : 0;
+            }
+
+            if ($callbacksCount > count($values)) {
+                Assert::assertLessThanOrEqual(count($value), count($callbacks));
+            }
+
+            $newValues = [];
+
+            foreach ($values as $key => $item) {
+                if (is_callable($callbacks[$key])) {
+                    $newValues[$keys[$key]] = $callbacks[$key]($item);
+                    continue;
+                }
+
+                $newValues[$keys[$key]] = $callbacks[$key];
+            }
+        } else {
+            Assert::assertCount(1, $callbacks);
+
+            $newValues = $callbacks[0]($this->value);
+        }
+
+        return new self($newValues);
+    }
+
+    /**
      * Exports the given value.
      *
      * @param mixed $value
