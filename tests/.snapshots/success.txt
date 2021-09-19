@@ -173,6 +173,15 @@
   ✓ it can be passed non-callable values
   ✓ it can be passed a mixture of value types
 
+   PASS  Tests\Features\Expect\to
+  ✓ allows to run on non-iterable data
+  ✓ fails if iterable items are used for the non-iterable value
+  ✓ allows it to be run on iterable data
+  ✓ loops back to the start if it runs out of items
+  ✓ fails if the number of iterable items is greater than the number of values
+  ✓ it can be passed non-callable values
+  ✓ it can be passed a mixture of value types
+
    PASS  Tests\Features\Expect\toBe
   ✓ strict comparisons
   ✓ failures
@@ -681,5 +690,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 447 passed
+  Tests:  4 incompleted, 9 skipped, 454 passed
   
