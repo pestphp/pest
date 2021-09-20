@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.19.0 (2021-09-20)](https://github.com/pestphp/pest/compare/v1.18.0...v1.19.0)
+### Added
+- PHP 8.1 support ([e6c7d68](https://github.com/pestphp/pest/commit/e6c7d68defaec8efe01e71e15dd8d8c45b0cf60f))
+
 ## [v1.18.0 (2021-08-30)](https://github.com/pestphp/pest/compare/v1.17.0...v1.18.0)
 ### Added
 - `toHaveLength` expectation ([#386](https://github.com/pestphp/pest/pull/386))
