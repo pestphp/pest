@@ -30,13 +30,8 @@ jobs:
         echo "::add-matcher::${{ runner.tool_cache }}/php.json"
         echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
-    - name: Install PHP 7 dependencies
+    - name: Install PHP dependencies
       run: composer update --${{ matrix.dependency-version }} --no-interaction --no-progress
-      if: "matrix.php < 8"
-
-    - name: Install PHP 8 dependencies
-      run: composer update --${{ matrix.dependency-version }} --ignore-platform-req=php --no-interaction --no-progress
-      if: "matrix.php >= 8"
 
     - name: Unit Tests
       run: php bin/pest --colors=always --exclude-group=integration ${{ matrix.parallel }}
