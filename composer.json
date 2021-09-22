@@ -79,7 +79,8 @@
             "plugins": [
                 "Pest\\Plugins\\Coverage",
                 "Pest\\Plugins\\Init",
-                "Pest\\Plugins\\Version"
+                "Pest\\Plugins\\Version",
+                "Pest\\Plugins\\Context"
             ]
         },
         "laravel": {

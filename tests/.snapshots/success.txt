@@ -623,6 +623,10 @@
   ✓ it show the actual dataset of multiple non-named datasets in their description
   ✓ it show the correct description for mixed named and not-named datasets
 
+   PASS  Tests\Unit\Plugins\Context
+  ✓ environment is set to CI when --ci option is used
+  ✓ environment is set to Local when --ci option is not used
+
    PASS  Tests\Unit\Plugins\Version
   ✓ it outputs the version when --version is used
   ✓ it do not outputs version when --version is not used
@@ -682,5 +686,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 448 passed
+  Tests:  4 incompleted, 9 skipped, 450 passed
   
