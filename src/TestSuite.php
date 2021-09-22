@@ -74,6 +74,13 @@ final class TestSuite
     public $testPath;
 
     /**
+     * Holds the current working environment identifier.
+     *
+     * @var string
+     */
+    public $workingEnv;
+
+    /**
      * Holds an instance of the test suite.
      *
      * @var TestSuite
@@ -98,10 +105,11 @@ final class TestSuite
     /**
      * Returns the current instance of the test suite.
      */
-    public static function getInstance(string $rootPath = null, string $testPath = null): TestSuite
+    public static function getInstance(string $rootPath = null, string $testPath = null, string $workingEnv = null): TestSuite
     {
         if (is_string($rootPath) && is_string($testPath)) {
             self::$instance = new TestSuite($rootPath, $testPath);
+            self::$instance->workingEnv = $workingEnv;
 
             foreach (Plugin::$callables as $callable) {
                 $callable();

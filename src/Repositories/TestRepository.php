@@ -119,6 +119,10 @@ final class TestRepository
      */
     private function testsUsingOnly(): array
     {
+        if (TestSuite::getInstance()->workingEnv === 'ci') {
+            return [];
+        }
+
         return array_filter($this->state, function ($testFactory): bool {
             return $testFactory->only;
         });

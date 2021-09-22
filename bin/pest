@@ -31,7 +31,8 @@ use Symfony\Component\Console\Output\OutputInterface;
     $rootPath = dirname($autoloadPath, 2);
     $argv = new ArgvInput();
 
-    $testSuite = TestSuite::getInstance($rootPath, $argv->getParameterOption('--test-directory', 'tests'));
+    $workingEnv = $argv->hasParameterOption('--ci') ? 'ci' : 'local';
+    $testSuite = TestSuite::getInstance($rootPath, $argv->getParameterOption('--test-directory', 'tests'), $workingEnv);
 
     $isDecorated = $argv->getParameterOption('--colors', 'always') !== 'never';
     $output = new ConsoleOutput(ConsoleOutput::VERBOSITY_NORMAL, $isDecorated);
@@ -45,9 +46,9 @@ use Symfony\Component\Console\Output\OutputInterface;
     $args = $_SERVER['argv'];
 
     // Let's remove any arguments that PHPUnit does not understand
-    if ($argv->hasParameterOption('--test-directory')) {
+    if ($argv->hasParameterOption(['--test-directory', '--ci'])) {
         foreach ($args as $key => $value) {
-            if (strpos($value, '--test-directory') !== false) {
+            if (strpos($value, '--test-directory') !== false || strpos($value, '--ci') !== false) {
                 unset($args[$key]);
             }
         }
