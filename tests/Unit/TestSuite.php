@@ -50,7 +50,7 @@ it('can filter the test suite filenames to those with the only method', function
     ]);
 });
 
-it('does not filter the test suite filenames to those with the only method when working in CI pipeline', function(){
+it('does not filter the test suite filenames to those with the only method when working in CI pipeline', function () {
     $testSuite = TestSuite::getInstance(getcwd(), 'tests', 'ci');
 
     $test = function () {};

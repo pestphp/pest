@@ -98,8 +98,8 @@ final class TestSuite
         $this->afterEach  = new AfterEachRepository();
         $this->afterAll   = new AfterAllRepository();
 
-        $this->rootPath = (string) realpath($rootPath);
-        $this->testPath = $testPath;
+        $this->rootPath   = (string) realpath($rootPath);
+        $this->testPath   = $testPath;
         $this->workingEnv = 'local';
     }
 
@@ -109,7 +109,7 @@ final class TestSuite
     public static function getInstance(string $rootPath = null, string $testPath = null, string $workingEnv = null): TestSuite
     {
         if (is_string($rootPath) && is_string($testPath)) {
-            self::$instance = new TestSuite($rootPath, $testPath);
+            self::$instance             = new TestSuite($rootPath, $testPath);
             self::$instance->workingEnv = $workingEnv ?? 'local';
 
             foreach (Plugin::$callables as $callable) {
