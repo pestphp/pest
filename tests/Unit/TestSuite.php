@@ -24,7 +24,7 @@ it('alerts users about tests with arguments but no input', function () {
 );
 
 it('can return an array of all test suite filenames', function () {
-    $testSuite = new TestSuite(getcwd(), 'tests');
+    $testSuite = TestSuite::getInstance(getcwd(), 'tests');
     $test = function () {};
     $testSuite->tests->set(new \Pest\Factories\TestCaseFactory(__FILE__, 'foo', $test));
     $testSuite->tests->set(new \Pest\Factories\TestCaseFactory(__FILE__, 'bar', $test));
@@ -36,7 +36,7 @@ it('can return an array of all test suite filenames', function () {
 });
 
 it('can filter the test suite filenames to those with the only method', function () {
-    $testSuite = new TestSuite(getcwd(), 'tests');
+    $testSuite = TestSuite::getInstance(getcwd(), 'tests');
     $test = function () {};
 
     $testWithOnly = new \Pest\Factories\TestCaseFactory(__FILE__, 'foo', $test);
@@ -47,5 +47,22 @@ it('can filter the test suite filenames to those with the only method', function
 
     expect($testSuite->tests->getFilenames())->toEqual([
         __FILE__,
+    ]);
+});
+
+it('does not filter the test suite filenames to those with the only method when working in CI pipeline', function(){
+    $testSuite = TestSuite::getInstance(getcwd(), 'tests', 'ci');
+
+    $test = function () {};
+
+    $testWithOnly = new \Pest\Factories\TestCaseFactory(__FILE__, 'foo', $test);
+    $testWithOnly->only = true;
+    $testSuite->tests->set($testWithOnly);
+
+    $testSuite->tests->set(new \Pest\Factories\TestCaseFactory('Baz/Bar/Boo.php', 'bar', $test));
+
+    expect($testSuite->tests->getFilenames())->toEqual([
+        __FILE__,
+        'Baz/Bar/Boo.php',
     ]);
 });
