@@ -100,6 +100,7 @@ final class TestSuite
 
         $this->rootPath = (string) realpath($rootPath);
         $this->testPath = $testPath;
+        $this->workingEnv = 'local';
     }
 
     /**
@@ -109,7 +110,7 @@ final class TestSuite
     {
         if (is_string($rootPath) && is_string($testPath)) {
             self::$instance = new TestSuite($rootPath, $testPath);
-            self::$instance->workingEnv = $workingEnv;
+            self::$instance->workingEnv = $workingEnv ?? 'local';
 
             foreach (Plugin::$callables as $callable) {
                 $callable();
