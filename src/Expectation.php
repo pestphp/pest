@@ -178,6 +178,56 @@ final class Expectation
     }
 
     /**
+     * If the subject matches one of the expressions, the callback in the expression is run.
+     *
+     * @template TMatchValue
+     *
+     * @param Closure|bool|string                            $subject
+     * @param array<mixed, callable(self): void|TMatchValue> $expressions
+     *
+     * @return \Pest\Expectation
+     */
+    public function match($subject, array $expressions): Expectation
+    {
+        $subject = is_callable($subject)
+            ? $subject
+            : function () use ($subject) {
+                return $subject;
+            };
+
+        $subject   = $subject();
+        $keys      = array_keys($expressions);
+        $matched   = false;
+
+        if (in_array($subject, ['0', '1', false, true], true)) {
+            $subject = (int) $subject;
+        }
+
+        foreach ($expressions as $key => $callback) {
+            if ($subject !== $key) {
+                continue;
+            }
+
+            $matched = true;
+
+            if (is_callable($callback)) {
+                $callback(new self($this->value));
+                continue;
+            }
+
+            (new self($this->value))->toEqual($callback);
+
+            break;
+        }
+
+        if (!$matched) {
+            test()->addWarning('No item found matching "' . $subject . '".');
+        }
+
+        return $this;
+    }
+
+    /**
      * Asserts that two variables have the same type and
      * value. Used on objects, it asserts that two
      * variables reference the same object.
