@@ -497,6 +497,15 @@
   ✓ closure missing parameter
   ✓ closure missing type-hint
 
+   PASS  Tests\Features\Expect\unless
+  ✓ it pass
+  ✓ it failures
+  ✓ it runs with truthy
+  ✓ it skips with falsy
+  ✓ it runs with truthy closure condition
+  ✓ it skips with falsy closure condition
+  ✓ it can be used in higher order tests
+
    PASS  Tests\Features\Expect\when
   ✓ it pass
   ✓ it failures
@@ -706,5 +715,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 468 passed
+  Tests:  4 incompleted, 9 skipped, 475 passed
   

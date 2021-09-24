@@ -222,6 +222,23 @@ final class Expectation
     }
 
     /**
+     * Apply the callback if the given "condition" is falsy.
+     *
+     * @param  (callable(): bool)|bool $condition
+     * @param callable(Expectation<TValue>): mixed $callback
+     */
+    public function unless($condition, callable $callback): Expectation
+    {
+        $condition = is_callable($condition)
+            ? $condition
+            : static function () use ($condition): mixed {
+                return $condition;
+            };
+
+        return $this->when(!$condition(), $callback);
+    }
+
+    /**
      * Apply the callback if the given "condition" is truthy.
      *
      * @param  (callable(): bool)|bool $condition
@@ -236,7 +253,7 @@ final class Expectation
             };
 
         if ($condition()) {
-            $callback(new self($this->value));
+            $callback($this->and($this->value));
         }
 
         return $this;
