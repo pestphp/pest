@@ -178,14 +178,12 @@ final class Expectation
     }
 
     /**
-     * If the subject matches one of the expressions, the callback in the expression is run.
+     * If the subject matches one of the given "expressions", the expression callback will run.
      *
-     * @template TMatchValue
+     * @template TMatchSubject of array-key
      *
-     * @param Closure|bool|string                            $subject
-     * @param array<mixed, callable(self): void|TMatchValue> $expressions
-     *
-     * @return \Pest\Expectation
+     * @param callable(): TMatchSubject|TMatchSubject $subject
+     * @param array<TMatchSubject, (callable(Expectation<TValue>): mixed)|TValue> $expressions
      */
     public function match($subject, array $expressions): Expectation
     {
@@ -196,16 +194,15 @@ final class Expectation
             };
 
         $subject   = $subject();
-        $keys      = array_keys($expressions);
 
-        if (in_array($subject, ['0', '1', false, true], true)) {
-            $subject = (int) $subject;
-        }
+        $matched = false;
 
         foreach ($expressions as $key => $callback) {
-            if ($subject !== $key) {
+            if ($subject != $key) {
                 continue;
             }
+
+            $matched = true;
 
             if (is_callable($callback)) {
                 $callback(new self($this->value));
@@ -215,6 +212,10 @@ final class Expectation
             $this->and($this->value)->toEqual($callback);
 
             break;
+        }
+
+        if ($matched === false) {
+            throw new ExpectationFailedException('Unhandled match value.');
         }
 
         return $this;

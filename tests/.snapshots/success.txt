@@ -171,7 +171,7 @@
   ✓ it runs with truthy closure condition
   ✓ it runs with falsy closure condition
   ✓ it can be passed non-callable values
-  ✓ it passes with empty data
+  ✓ it fails with unhandled match
   ✓ it can be used in higher order tests
 
    PASS  Tests\Features\Expect\not

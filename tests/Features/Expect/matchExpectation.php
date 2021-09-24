@@ -130,11 +130,9 @@ it('can be passed non-callable values', function () {
         );
 })->throws(ExpectationFailedException::class, 'two strings are equal');
 
-it('passes with empty data', function () {
-    expect('foo')
-        ->match('bar', [])
-        ->toEqual('foo');
-});
+it('fails with unhandled match', function () {
+    expect('foo')->match('bar', []);
+})->throws(ExpectationFailedException::class, 'Unhandled match value.');
 
 it('can be used in higher order tests')
     ->expect(true)
