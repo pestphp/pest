@@ -219,7 +219,7 @@ final class Expectation
 
         return $this;
     }
-  
+
     /**
      * It skips the tests in the callback if the condition is not truthy.
      *
