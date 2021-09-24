@@ -212,7 +212,7 @@ final class Expectation
                 continue;
             }
 
-            (new self($this->value))->toEqual($callback);
+            $this->and($this->value)->toEqual($callback);
 
             break;
         }
