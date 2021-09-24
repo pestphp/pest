@@ -158,16 +158,15 @@
   ✓ it properly parses json string
   ✓ fails with broken json string
 
-   WARN  Tests\Features\Expect\matchExpectation
+   PASS  Tests\Features\Expect\matchExpectation
   ✓ it pass
   ✓ it failures
-  ! it adds a warning if no match is found → No item found matching "bar".
   ✓ it runs with truthy
   ✓ it runs with falsy
   ✓ it runs with truthy closure condition
   ✓ it runs with falsy closure condition
   ✓ it can be passed non-callable values
-  ! it passes with empty data → No item found matching "bar".
+  ✓ it passes with empty data
   ✓ it can be used in higher order tests
 
    PASS  Tests\Features\Expect\not
@@ -693,5 +692,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  2 warnings, 4 incompleted, 9 skipped, 455 passed
+  Tests:  4 incompleted, 9 skipped, 456 passed
   
