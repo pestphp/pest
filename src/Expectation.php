@@ -197,7 +197,6 @@ final class Expectation
 
         $subject   = $subject();
         $keys      = array_keys($expressions);
-        $matched   = false;
 
         if (in_array($subject, ['0', '1', false, true], true)) {
             $subject = (int) $subject;
@@ -208,8 +207,6 @@ final class Expectation
                 continue;
             }
 
-            $matched = true;
-
             if (is_callable($callback)) {
                 $callback(new self($this->value));
                 continue;
@@ -218,10 +215,6 @@ final class Expectation
             (new self($this->value))->toEqual($callback);
 
             break;
-        }
-
-        if (!$matched) {
-            test()->addWarning('No item found matching "' . $subject . '".');
         }
 
         return $this;

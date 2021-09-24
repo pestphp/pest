@@ -39,16 +39,6 @@ it('failures', function () {
         );
 })->throws(ExpectationFailedException::class, 'true is false');
 
-it('adds a warning if no match is found', function () {
-    expect(true)
-        ->match('bar', [
-                'foo' => function ($value) {
-                    return $value->toBeFalse();
-                },
-            ]
-        );
-});
-
 it('runs with truthy', function () {
     expect('foo')
         ->match(1, [
