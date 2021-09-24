@@ -178,6 +178,49 @@ final class Expectation
     }
 
     /**
+     * If the subject matches one of the expressions, the callback in the expression is run.
+     *
+     * @template TMatchValue
+     *
+     * @param Closure|bool|string                            $subject
+     * @param array<mixed, callable(self): void|TMatchValue> $expressions
+     *
+     * @return \Pest\Expectation
+     */
+    public function match($subject, array $expressions): Expectation
+    {
+        $subject = is_callable($subject)
+            ? $subject
+            : function () use ($subject) {
+                return $subject;
+            };
+
+        $subject   = $subject();
+        $keys      = array_keys($expressions);
+
+        if (in_array($subject, ['0', '1', false, true], true)) {
+            $subject = (int) $subject;
+        }
+
+        foreach ($expressions as $key => $callback) {
+            if ($subject !== $key) {
+                continue;
+            }
+
+            if (is_callable($callback)) {
+                $callback(new self($this->value));
+                continue;
+            }
+
+            $this->and($this->value)->toEqual($callback);
+
+            break;
+        }
+
+        return $this;
+    }
+
+    /**
      * Apply the callback if the given "condition" is truthy.
      *
      * @param  (callable(): bool)|bool $condition
