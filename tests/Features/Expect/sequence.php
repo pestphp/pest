@@ -28,6 +28,17 @@ test('loops back to the start if it runs out of sequence items', function () {
     expect(static::getCount())->toBe(16);
 });
 
+test('it works if the number of items in the iterable is bigger than the number of expectations', function () {
+    expect([1, 2, 3, 4])
+        ->sequence(
+            function ($expectation) { $expectation->toBeInt()->toEqual(1); },
+            function ($expectation) { $expectation->toBeInt()->toEqual(2); },
+            function ($expectation) { $expectation->toBeInt()->toEqual(3); },
+        );
+
+    expect(static::getCount())->toBe(6);
+});
+
 test('fails if the number of iterable items is greater than the number of expectations', function () {
     expect([1, 2])
         ->sequence(
