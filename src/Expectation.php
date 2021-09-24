@@ -219,6 +219,26 @@ final class Expectation
 
         return $this;
     }
+  
+    /**
+     * It skips the tests in the callback if the condition is not truthy.
+     *
+     * @param Closure|bool|string $condition
+     */
+    public function when($condition, callable $callback): Expectation
+    {
+        $condition = is_callable($condition)
+            ? $condition
+            : function () use ($condition) {
+                return $condition;
+            };
+
+        if ($condition()) {
+            $callback(new self($this->value));
+        }
+
+        return $this;
+    }
 
     /**
      * Asserts that two variables have the same type and
