@@ -154,15 +154,20 @@ final class Expectation
             throw new BadMethodCallException('Expectation value is not iterable.');
         }
 
-        $value  = is_array($this->value) ? $this->value : iterator_to_array($this->value);
-        $keys   = array_keys($value);
-        $values = array_values($value);
+        $value          = is_array($this->value) ? $this->value : iterator_to_array($this->value);
+        $keys           = array_keys($value);
+        $values         = array_values($value);
+        $callbacksCount = count($callbacks);
 
         $index = 0;
 
         while (count($callbacks) < count($values)) {
             $callbacks[] = $callbacks[$index];
             $index       = $index < count($values) - 1 ? $index + 1 : 0;
+        }
+
+        if ($callbacksCount > count($values)) {
+            Assert::assertLessThanOrEqual(count($value), count($callbacks));
         }
 
         foreach ($values as $key => $item) {
