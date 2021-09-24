@@ -221,15 +221,16 @@ final class Expectation
     }
 
     /**
-     * It skips the tests in the callback if the condition is not truthy.
+     * Apply the callback if the given "condition" is truthy.
      *
-     * @param Closure|bool|string $condition
+     * @param  (callable(): bool)|bool $condition
+     * @param callable(Expectation<TValue>): mixed $callback
      */
     public function when($condition, callable $callback): Expectation
     {
         $condition = is_callable($condition)
             ? $condition
-            : function () use ($condition) {
+            : static function () use ($condition): mixed {
                 return $condition;
             };
 

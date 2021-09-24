@@ -79,6 +79,26 @@ final class TestCall
     }
 
     /**
+     * Asserts that the test throws the given `$exceptionClass` when called if the given condition is true.
+     *
+     * @param (callable(): bool)|bool $condition
+     */
+    public function throwsIf($condition, string $exception, string $exceptionMessage = null): TestCall
+    {
+        $condition = is_callable($condition)
+            ? $condition
+            : static function () use ($condition): mixed {
+                return $condition;
+            };
+
+        if ($condition()) {
+            return $this->throws($exception, $exceptionMessage);
+        }
+
+        return $this;
+    }
+
+    /**
      * Runs the current test multiple times with
      * each item of the given `iterable`.
      *
