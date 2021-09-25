@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.20.0 (2021-09-25)](https://github.com/pestphp/pest/compare/v1.19.0...v1.20.0)
+### Added
+- `throwsIf` test call ([#371](https://github.com/pestphp/pest/pull/371))
+- `--ci` CLI option to ignore development options like `->local()` ([#405](https://github.com/pestphp/pest/pull/405))
+- `when` conditional expectation ([#406](https://github.com/pestphp/pest/pull/406))
+- `unless` conditional expectation ([b43a598](https://github.com/pestphp/pest/commit/b43a59868d5b790a28cbb29c6110c9f068b0b812))
+- `match` conditional expectation ([#407](https://github.com/pestphp/pest/pull/407))
+
+### Fixed
+- `sequence` with more expectations than iterable elements ([#399](https://github.com/pestphp/pest/pull/399))
+
 ## [v1.19.0 (2021-09-20)](https://github.com/pestphp/pest/compare/v1.18.0...v1.19.0)
 ### Added
 - PHP 8.1 support ([e6c7d68](https://github.com/pestphp/pest/commit/e6c7d68defaec8efe01e71e15dd8d8c45b0cf60f))
