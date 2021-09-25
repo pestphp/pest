@@ -11,6 +11,11 @@ jobs:
         php: ['7.3', '7.4', '8.0', '8.1']
         dependency-version: [prefer-lowest, prefer-stable]
         parallel: ['', '--parallel']
+        exclude:
+          - php: 8.1
+            os: macos-latest
+          - php: 8.1
+            os: windows-latest
 
     name: PHP ${{ matrix.php }} - ${{ matrix.os }} - ${{ matrix.dependency-version }} - ${{ matrix.parallel }}
 
