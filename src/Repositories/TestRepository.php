@@ -11,7 +11,7 @@ use Pest\Exceptions\TestAlreadyExist;
 use Pest\Exceptions\TestCaseAlreadyInUse;
 use Pest\Exceptions\TestCaseClassOrTraitNotFound;
 use Pest\Factories\TestCaseFactory;
-use Pest\Plugins\Context;
+use Pest\Plugins\Environment;
 use Pest\Support\Reflection;
 use Pest\Support\Str;
 use Pest\TestSuite;
@@ -120,7 +120,7 @@ final class TestRepository
      */
     private function testsUsingOnly(): array
     {
-        if (Context::getInstance()->env === Context::ENV_CI) {
+        if (Environment::name() === Environment::CI) {
             return [];
         }
 

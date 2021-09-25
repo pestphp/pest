@@ -3,7 +3,7 @@
 use Pest\Exceptions\DatasetMissing;
 use Pest\Exceptions\TestAlreadyExist;
 use Pest\Factories\TestCaseFactory;
-use Pest\Plugins\Context;
+use Pest\Plugins\Environment;
 use Pest\TestSuite;
 
 it('does not allow to add the same test description twice', function () {
@@ -38,7 +38,7 @@ it('can return an array of all test suite filenames', function () {
 });
 
 it('can filter the test suite filenames to those with the only method', function () {
-    $testSuite = TestSuite::getInstance(getcwd(), 'tests');
+    $testSuite = new TestSuite(getcwd(), 'tests');
     $test = function () {};
 
     $testWithOnly = new TestCaseFactory(__FILE__, 'foo', $test);
@@ -53,8 +53,8 @@ it('can filter the test suite filenames to those with the only method', function
 });
 
 it('does not filter the test suite filenames to those with the only method when working in CI pipeline', function () {
-    $old_env = Context::getInstance()->env;
-    Context::getInstance()->env = Context::ENV_CI;
+    $previousEnvironment = Environment::name();
+    Environment::name(Environment::CI);
     $testSuite = TestSuite::getInstance(getcwd(), 'tests');
 
     $test = function () {};
@@ -70,5 +70,5 @@ it('does not filter the test suite filenames to those with the only method when 
         'Baz/Bar/Boo.php',
     ]);
 
-    Context::getInstance()->env = $old_env;
+    Environment::name($previousEnvironment);
 });

@@ -80,7 +80,7 @@
                 "Pest\\Plugins\\Coverage",
                 "Pest\\Plugins\\Init",
                 "Pest\\Plugins\\Version",
-                "Pest\\Plugins\\Context"
+                "Pest\\Plugins\\Environment"
             ]
         },
         "laravel": {
