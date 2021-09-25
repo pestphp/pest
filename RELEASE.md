@@ -10,6 +10,7 @@ When releasing a new version of Pest there are some checks and updates that need
 - Push the changes to GitHub
 - Check that the CI is passing as expected: [github.com/pestphp/pest/actions](https://github.com/pestphp/pest/actions)
 - Tag and push the tag with `git tag vX.X.X && git push --tags`
+- Publish release here: [github.com/pestphp/pest/releases/new](https://github.com/pestphp/pest/releases/new).
 
 ### Plugins
 
