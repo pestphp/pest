@@ -657,6 +657,10 @@
   ✓ it show the actual dataset of multiple non-named datasets in their description
   ✓ it show the correct description for mixed named and not-named datasets
 
+   PASS  Tests\Unit\Plugins\Context
+  ✓ environment is set to CI when --ci option is used
+  ✓ environment is set to Local when --ci option is not used
+
    PASS  Tests\Unit\Plugins\Version
   ✓ it outputs the version when --version is used
   ✓ it do not outputs version when --version is not used
@@ -682,6 +686,7 @@
   ✓ it alerts users about tests with arguments but no input
   ✓ it can return an array of all test suite filenames
   ✓ it can filter the test suite filenames to those with the only method
+  ✓ it does not filter the test suite filenames to those with the only method when working in CI pipeline
 
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
@@ -715,5 +720,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 475 passed
+  Tests:  4 incompleted, 9 skipped, 478 passed
   
