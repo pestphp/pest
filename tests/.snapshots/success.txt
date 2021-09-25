@@ -107,6 +107,11 @@
   ✓ it catch exceptions
   ✓ it catch exceptions and messages
   ✓ it can just define the message
+  ✓ it not catch exceptions if given condition is false
+  ✓ it catch exceptions if given condition is true
+  ✓ it catch exceptions and messages if given condition is true
+  ✓ it can just define the message if given condition is true
+  ✓ it can just define the message if given condition is 1
 
    PASS  Tests\Features\Expect\HigherOrder\methods
   ✓ it can access methods
@@ -158,6 +163,17 @@
   ✓ it properly parses json string
   ✓ fails with broken json string
 
+   PASS  Tests\Features\Expect\matchExpectation
+  ✓ it pass
+  ✓ it failures
+  ✓ it runs with truthy
+  ✓ it runs with falsy
+  ✓ it runs with truthy closure condition
+  ✓ it runs with falsy closure condition
+  ✓ it can be passed non-callable values
+  ✓ it fails with unhandled match
+  ✓ it can be used in higher order tests
+
    PASS  Tests\Features\Expect\not
   ✓ not property calls
 
@@ -168,7 +184,7 @@
   ✓ an exception is thrown if the the type is not iterable
   ✓ allows for sequences of checks to be run on iterable data
   ✓ loops back to the start if it runs out of sequence items
-  ✓ it works if the number of items in the iterable is smaller than the number of expectations
+  ✓ fails if the number of iterable items is greater than the number of expectations
   ✓ it works with associative arrays
   ✓ it can be passed non-callable values
   ✓ it can be passed a mixture of value types
@@ -481,6 +497,24 @@
   ✓ closure missing parameter
   ✓ closure missing type-hint
 
+   PASS  Tests\Features\Expect\unless
+  ✓ it pass
+  ✓ it failures
+  ✓ it runs with truthy
+  ✓ it skips with falsy
+  ✓ it runs with truthy closure condition
+  ✓ it skips with falsy closure condition
+  ✓ it can be used in higher order tests
+
+   PASS  Tests\Features\Expect\when
+  ✓ it pass
+  ✓ it failures
+  ✓ it runs with truthy
+  ✓ it skips with falsy
+  ✓ it runs with truthy closure condition
+  ✓ it skips with falsy closure condition
+  ✓ it can be used in higher order tests
+
    PASS  Tests\Features\Helpers
   ✓ it can set/get properties on $this
   ✓ it throws error if property do not exist
@@ -623,10 +657,6 @@
   ✓ it show the actual dataset of multiple non-named datasets in their description
   ✓ it show the correct description for mixed named and not-named datasets
 
-   PASS  Tests\Unit\Plugins\Context
-  ✓ environment is set to CI when --ci option is used
-  ✓ environment is set to Local when --ci option is not used
-
    PASS  Tests\Unit\Plugins\Version
   ✓ it outputs the version when --version is used
   ✓ it do not outputs version when --version is not used
@@ -652,7 +682,6 @@
   ✓ it alerts users about tests with arguments but no input
   ✓ it can return an array of all test suite filenames
   ✓ it can filter the test suite filenames to those with the only method
-  ✓ it does not filter the test suite filenames to those with the only method when working in CI pipeline
 
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
@@ -686,5 +715,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 450 passed
+  Tests:  4 incompleted, 9 skipped, 475 passed
   

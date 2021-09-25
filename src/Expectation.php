@@ -154,15 +154,20 @@ final class Expectation
             throw new BadMethodCallException('Expectation value is not iterable.');
         }
 
-        $value  = is_array($this->value) ? $this->value : iterator_to_array($this->value);
-        $keys   = array_keys($value);
-        $values = array_values($value);
+        $value          = is_array($this->value) ? $this->value : iterator_to_array($this->value);
+        $keys           = array_keys($value);
+        $values         = array_values($value);
+        $callbacksCount = count($callbacks);
 
         $index = 0;
 
         while (count($callbacks) < count($values)) {
             $callbacks[] = $callbacks[$index];
             $index       = $index < count($values) - 1 ? $index + 1 : 0;
+        }
+
+        if ($callbacksCount > count($values)) {
+            Assert::assertLessThanOrEqual(count($value), count($callbacks));
         }
 
         foreach ($values as $key => $item) {
@@ -172,6 +177,88 @@ final class Expectation
             }
 
             (new self($item))->toEqual($callbacks[$key]);
+        }
+
+        return $this;
+    }
+
+    /**
+     * If the subject matches one of the given "expressions", the expression callback will run.
+     *
+     * @template TMatchSubject of array-key
+     *
+     * @param callable(): TMatchSubject|TMatchSubject $subject
+     * @param array<TMatchSubject, (callable(Expectation<TValue>): mixed)|TValue> $expressions
+     */
+    public function match($subject, array $expressions): Expectation
+    {
+        $subject = is_callable($subject)
+            ? $subject
+            : function () use ($subject) {
+                return $subject;
+            };
+
+        $subject   = $subject();
+
+        $matched = false;
+
+        foreach ($expressions as $key => $callback) {
+            if ($subject != $key) {
+                continue;
+            }
+
+            $matched = true;
+
+            if (is_callable($callback)) {
+                $callback(new self($this->value));
+                continue;
+            }
+
+            $this->and($this->value)->toEqual($callback);
+
+            break;
+        }
+
+        if ($matched === false) {
+            throw new ExpectationFailedException('Unhandled match value.');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Apply the callback if the given "condition" is falsy.
+     *
+     * @param  (callable(): bool)|bool $condition
+     * @param callable(Expectation<TValue>): mixed $callback
+     */
+    public function unless($condition, callable $callback): Expectation
+    {
+        $condition = is_callable($condition)
+            ? $condition
+            : static function () use ($condition): mixed {
+                return $condition;
+            };
+
+        return $this->when(!$condition(), $callback);
+    }
+
+    /**
+     * Apply the callback if the given "condition" is truthy.
+     *
+     * @param  (callable(): bool)|bool $condition
+     * @param callable(Expectation<TValue>): mixed $callback
+     */
+    public function when($condition, callable $callback): Expectation
+    {
+        $condition = is_callable($condition)
+            ? $condition
+            : static function () use ($condition): mixed {
+                return $condition;
+            };
+
+        if ($condition()) {
+            $callback($this->and($this->value));
         }
 
         return $this;
