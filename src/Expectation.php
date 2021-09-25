@@ -236,8 +236,8 @@ final class Expectation
     {
         $condition = is_callable($condition)
             ? $condition
-            : static function () use ($condition): mixed {
-                return $condition;
+            : static function () use ($condition): bool {
+                return (bool) $condition; // @phpstan-ignore-line
             };
 
         return $this->when(!$condition(), $callback);
@@ -253,8 +253,8 @@ final class Expectation
     {
         $condition = is_callable($condition)
             ? $condition
-            : static function () use ($condition): mixed {
-                return $condition;
+            : static function () use ($condition): bool {
+                return (bool) $condition; // @phpstan-ignore-line
             };
 
         if ($condition()) {

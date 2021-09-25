@@ -87,8 +87,8 @@ final class TestCall
     {
         $condition = is_callable($condition)
             ? $condition
-            : static function () use ($condition): mixed {
-                return $condition;
+            : static function () use ($condition): bool {
+                return (bool) $condition; // @phpstan-ignore-line
             };
 
         if ($condition()) {
