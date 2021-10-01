@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Support;
 
 use Closure;
+use PHPUnit\Framework\SkippedTestError;
 use ReflectionClass;
 use Throwable;
 
@@ -102,6 +103,10 @@ final class HigherOrderMessage
                 /* @phpstan-ignore-next-line */
                 $reflection = $reflection->getParentClass() ?: $reflection;
                 Reflection::setPropertyValue($throwable, 'message', sprintf('Call to undefined method %s::%s()', $reflection->getName(), $this->name));
+            }
+
+            if($throwable instanceof SkippedTestError){
+                return null;
             }
 
             throw $throwable;
