@@ -140,6 +140,10 @@ final class TestCaseFactory
         $proxies     = $this->proxies;
         $factoryTest = $this->test;
 
+        if ($chains->hasMessage('markTestSkipped')) {
+            $proxies->forgetMessage('expectException');
+        }
+
         /**
          * @return mixed
          */
