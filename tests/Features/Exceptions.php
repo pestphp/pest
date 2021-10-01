@@ -1,5 +1,7 @@
 <?php
 
+use PHPUnit\Framework\ExpectationFailedException;
+
 it('gives access the the underlying expectException', function () {
     $this->expectException(InvalidArgumentException::class);
 
@@ -40,4 +42,4 @@ it('can just define the message if given condition is 1', function () {
 
 it('can handle a skipped test if it is trying to catch an exception', function(){
     expect(1)->toBe(2);
-})->throws(ExpectationFailedException::class)->skip('this test should be skipped');
+})->throws(ExpectationFailedException::class)->skip('this test should be skipped')->only();
