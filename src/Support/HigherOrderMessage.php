@@ -105,7 +105,7 @@ final class HigherOrderMessage
                 Reflection::setPropertyValue($throwable, 'message', sprintf('Call to undefined method %s::%s()', $reflection->getName(), $this->name));
             }
 
-            if($throwable instanceof SkippedTestError){
+            if ($throwable instanceof SkippedTestError) {
                 return null;
             }
 
