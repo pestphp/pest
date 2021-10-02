@@ -69,24 +69,4 @@ final class HigherOrderMessageCollection
             0,
         );
     }
-
-    public function hasMessage(string $name): bool
-    {
-        foreach ($this->messages as $message) {
-            if ($message->name === $name) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public function forgetMessage(string $name): void
-    {
-        foreach ($this->messages as $index => $message) {
-            if ($message->name === $name) {
-                unset($this->messages[$index]);
-            }
-        }
-    }
 }
