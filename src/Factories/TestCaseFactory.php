@@ -140,12 +140,16 @@ final class TestCaseFactory
         $proxies     = $this->proxies;
         $factoryTest = $this->test;
 
+        if ($chains->hasMessage('markTestSkipped')) {
+            $proxies->forgetMessage('expectException');
+        }
+
         /**
          * @return mixed
          */
         $test = function () use ($chains, $proxies, $factoryTest) {
-            $chains->chain($this);
             $proxies->proxy($this);
+            $chains->chain($this);
 
             /* @phpstan-ignore-next-line */
             return call_user_func(Closure::bind($factoryTest, $this, get_class($this)), ...func_get_args());
