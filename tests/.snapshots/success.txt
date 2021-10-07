@@ -102,7 +102,7 @@
   ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (...)) #1
   ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (...)) #2
 
-   PASS  Tests\Features\Exceptions
+   WARN  Tests\Features\Exceptions
   ✓ it gives access the the underlying expectException
   ✓ it catch exceptions
   ✓ it catch exceptions and messages
@@ -112,6 +112,7 @@
   ✓ it catch exceptions and messages if given condition is true
   ✓ it can just define the message if given condition is true
   ✓ it can just define the message if given condition is 1
+  - it can handle a skipped test if it is trying to catch an exception → this test should be skipped
 
    PASS  Tests\Features\Expect\HigherOrder\methods
   ✓ it can access methods
@@ -720,5 +721,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 478 passed
+  Tests:  4 incompleted, 10 skipped, 478 passed
   
