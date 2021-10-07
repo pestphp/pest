@@ -113,7 +113,7 @@ final class HigherOrderExpectation
      */
     private function expectationHasMethod(string $name): bool
     {
-        return method_exists($this->original, $name) || $this->original::hasExtend($name);
+        return method_exists($this->original, $name) || $this->original::hasMethod($name) || $this->original::hasExtend($name);
     }
 
     /**
