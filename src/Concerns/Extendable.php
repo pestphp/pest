@@ -60,10 +60,11 @@ trait Extendable
 
         $decorators = [];
         foreach (self::$decorators[$name] as $decorator) {
-            //@phpstan-ignore-next-line
+
             $decorators[] = $decorator->bindTo($context, $scope);
         }
 
+        //@phpstan-ignore-next-line
         return $decorators;
     }
 

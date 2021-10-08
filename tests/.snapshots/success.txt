@@ -113,6 +113,9 @@
   ✓ it can just define the message if given condition is true
   ✓ it can just define the message if given condition is 1
 
+   PASS  Tests\Features\Expect\HigherOrder\decorate
+  ✓ pass
+
    PASS  Tests\Features\Expect\HigherOrder\methods
   ✓ it can access methods
   ✓ it can access multiple methods
@@ -720,5 +723,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 478 passed
+  Tests:  4 incompleted, 9 skipped, 479 passed
   
