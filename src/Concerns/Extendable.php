@@ -60,7 +60,6 @@ trait Extendable
 
         $decorators = [];
         foreach (self::$decorators[$name] as $decorator) {
-
             $decorators[] = $decorator->bindTo($context, $scope);
         }
 
