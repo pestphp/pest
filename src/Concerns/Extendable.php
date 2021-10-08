@@ -17,6 +17,9 @@ trait Extendable
      */
     private static $extends = [];
 
+    /** @var array<string, array<Closure>> */
+    private static $decorators = [];
+
     /**
      * Register a custom extend.
      */
@@ -25,12 +28,43 @@ trait Extendable
         static::$extends[$name] = $extend;
     }
 
+    public static function decorate(string $name, Closure $decorator): void
+    {
+        static::$decorators[$name][] = $decorator;
+    }
+
     /**
      * Checks if extend is registered.
      */
     public static function hasExtend(string $name): bool
     {
         return array_key_exists($name, static::$extends);
+    }
+
+    /**
+     * Checks if decorator are registered.
+     */
+    public static function hasDecorators(string $name): bool
+    {
+        return array_key_exists($name, static::$decorators);
+    }
+
+    /**
+     * @return array<int, Closure>
+     */
+    public function decorators(string $name, object $context, string $scope): array
+    {
+        if (!self::hasDecorators($name)) {
+            return [];
+        }
+
+        $decorators = [];
+        foreach (self::$decorators[$name] as $decorator) {
+            //@phpstan-ignore-next-line
+            $decorators[] = $decorator->bindTo($context, $scope);
+        }
+
+        return $decorators;
     }
 
     /**

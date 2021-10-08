@@ -7,6 +7,7 @@ namespace Pest;
 use BadMethodCallException;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\RetrievesValues;
+use Pest\Support\Pipeline;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\ExpectationFailedException;
 
@@ -250,23 +251,50 @@ final class Expectation
      *
      * @param array<int, mixed> $parameters
      *
-     * @return HigherOrderExpectation|mixed
+     * @return HigherOrderExpectation|Expectation
      */
     public function __call(string $method, array $parameters)
     {
-        if (method_exists($this->coreExpectation, $method)) {
-            //@phpstan-ignore-next-line
-            $this->coreExpectation = $this->coreExpectation->{$method}(...$parameters);
-
-            return $this;
-        }
-
-        if (!self::hasExtend($method)) {
+        if (!$this->hasExpectation($method)) {
             /* @phpstan-ignore-next-line */
             return new HigherOrderExpectation($this, $this->value->$method(...$parameters));
         }
 
-        return $this->__extendsCall($method, $parameters);
+        Pipeline::send(...$parameters)
+            ->through($this->decorators($method, $this, Expectation::class))
+            ->finally(function ($parameters) use ($method): void {
+                $this->callExpectation($method, $parameters);
+            });
+
+        return $this;
+    }
+
+    /**
+     * @param array<mixed> $parameters
+     */
+    private function callExpectation(string $name, array $parameters): void
+    {
+        if (method_exists($this->coreExpectation, $name)) {
+            //@phpstan-ignore-next-line
+            $this->coreExpectation->{$name}(...$parameters);
+        } else {
+            if (self::hasExtend($name)) {
+                $this->__extendsCall($name, $parameters);
+            }
+        }
+    }
+
+    private function hasExpectation(string $name): bool
+    {
+        if (method_exists($this->coreExpectation, $name)) {
+            return true;
+        }
+
+        if (self::hasExtend($name)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

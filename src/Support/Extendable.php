@@ -30,4 +30,9 @@ final class Extendable
     {
         $this->extendableClass::extend($name, $extend);
     }
+
+    public function decorate(string $name, Closure $extend): void
+    {
+        $this->extendableClass::decorate($name, $extend);
+    }
 }
