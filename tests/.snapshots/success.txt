@@ -186,6 +186,7 @@
   ✓ intercept stops the pipeline
   ✓ interception is called only when filter is met
   ✓ intercept can be filtered with a closure
+  ✓ intercept can add new parameters to the expectation
 
    PASS  Tests\Features\Expect\ray
   ✓ ray calls do not fail when ray is not installed
@@ -730,5 +731,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 486 passed
+  Tests:  4 incompleted, 9 skipped, 487 passed
   

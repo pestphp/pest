@@ -1,8 +1,10 @@
 <?php
 
 use function PHPUnit\Framework\assertEquals;
+use function PHPUnit\Framework\assertEqualsIgnoringCase;
 use function PHPUnit\Framework\assertInstanceOf;
 use function PHPUnit\Framework\assertIsNumeric;
+use function PHPUnit\Framework\assertSame;
 
 class Number
 {
@@ -118,6 +120,19 @@ expect()->pipe('toBe', function ($next, $expected) use ($state) {
     $next();
 });
 
+/*
+ * Overrides toBe check strings ignoring case
+ */
+expect()->intercept('toBe', function ($value) {
+    return is_string($value);
+}, function ($expected, $ignoreCase = false) {
+    if ($ignoreCase) {
+        assertEqualsIgnoringCase($expected, $this->value);
+    } else {
+        assertSame($expected, $this->value);
+    }
+});
+
 test('pipe is applied and can stop pipeline', function () use ($state) {
     $letter = new Character('A');
 
@@ -218,4 +233,8 @@ test('intercept can be filtered with a closure', function () use ($state) {
         ->and($state)
         ->runCount->toHaveKey('wildcard', 1)
         ->appliedCount->toHaveKey('wildcard', 1);
+});
+
+test('intercept can add new parameters to the expectation', function () {
+    expect('Foo')->toBe('foo', true);
 });
