@@ -179,6 +179,8 @@
 
    PASS  Tests\Features\Expect\pipe
   ✓ pipe is applied and can stop pipeline
+  ✓ interceptor works with negated expectation
+  ✓ pipe works with negated expectation
   ✓ pipe is run and can let the pipeline keep going
   ✓ intercept is applied
   ✓ intercept stops the pipeline
@@ -728,5 +730,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 484 passed
+  Tests:  4 incompleted, 9 skipped, 486 passed
   

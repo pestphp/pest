@@ -1,7 +1,6 @@
 <?php
 
 use function PHPUnit\Framework\assertEquals;
-use function PHPUnit\Framework\assertEqualsIgnoringCase;
 use function PHPUnit\Framework\assertInstanceOf;
 use function PHPUnit\Framework\assertIsNumeric;
 
@@ -37,7 +36,7 @@ class Symbol
 
 class State
 {
-    public $runCount = [];
+    public $runCount     = [];
     public $appliedCount = [];
 
     public function __construct()
@@ -68,7 +67,7 @@ $state = new State();
 /*
  * Overrides toBe to assert two Characters are the same
  */
-expect()->pipe('toBe', function ($expected, $next) use ($state) {
+expect()->pipe('toBe', function ($next, $expected) use ($state) {
     $state->runCount['character']++;
 
     if ($this->value instanceof Character) {
@@ -79,7 +78,7 @@ expect()->pipe('toBe', function ($expected, $next) use ($state) {
         return;
     }
 
-    $next($expected);
+    $next();
 });
 
 /*
@@ -105,7 +104,7 @@ expect()->intercept('toBe', function ($value) {
 /*
  * Overrides toBe to assert two Symbols are the same
  */
-expect()->pipe('toBe', function ($expected, $next) use ($state) {
+expect()->pipe('toBe', function ($next, $expected) use ($state) {
     $state->runCount['symbol']++;
 
     if ($this->value instanceof Symbol) {
@@ -116,15 +115,8 @@ expect()->pipe('toBe', function ($expected, $next) use ($state) {
         return;
     }
 
-    $next($expected);
+    $next();
 });
-
-expect()->intercept('toHaveProperty', function ($value) {
-    return $value instanceof Symbol && $value->value == '£';
-}, function (string $propertyName, $propertyValue = null) {
-    assertEquals("£", $this->value->value);
-});
-
 
 test('pipe is applied and can stop pipeline', function () use ($state) {
     $letter = new Character('A');
@@ -145,8 +137,19 @@ test('pipe is applied and can stop pipeline', function () use ($state) {
             'wildcard'  => 0,
             'symbol'    => 0,
         ]);
-})
-;
+});
+
+test('interceptor works with negated expectation', function () {
+    $letter = new Number(1);
+
+    expect($letter)->not->toBe(new Character('B'));
+});
+
+test('pipe works with negated expectation', function () {
+    $letter = new Character('A');
+
+    expect($letter)->not->toBe(new Character('B'));
+});
 
 test('pipe is run and can let the pipeline keep going', function () use ($state) {
     $state->reset();
@@ -216,8 +219,3 @@ test('intercept can be filtered with a closure', function () use ($state) {
         ->runCount->toHaveKey('wildcard', 1)
         ->appliedCount->toHaveKey('wildcard', 1);
 });
-
-test('intercept can handle default values', function(){
-   expect(new Symbol("£"))->toHaveProperty('value');
-   expect(new Symbol("£"))->toHaveProperty('value', '£');
-})->only();

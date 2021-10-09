@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Pest\Support;
 
 use Closure;
-use Pest\Exceptions\PipeException;
-use ReflectionFunction;
 
 final class ExpectationPipeline
 {
@@ -25,7 +23,7 @@ final class ExpectationPipeline
     public function __construct(string $expectationName, Closure $expectationClosure)
     {
         $this->expectationClosure = $expectationClosure;
-        $this->expectationName = $expectationName;
+        $this->expectationName    = $expectationName;
     }
 
     public static function for(string $expectationName, Closure $expectationClosure): self
@@ -39,6 +37,7 @@ final class ExpectationPipeline
     public function send(...$passable): self
     {
         $this->passable = $passable;
+
         return $this;
     }
 
@@ -57,58 +56,20 @@ final class ExpectationPipeline
         $pipeline = array_reduce(
             array_reverse($this->pipes),
             $this->carry(),
-            $this->expectationClosure
+            function (): void {
+                ($this->expectationClosure)(...$this->passable);
+            }
         );
 
-        $pipeline(...$this->passable);
+        $pipeline();
     }
 
     public function carry(): Closure
     {
         return function ($stack, $pipe): Closure {
-            return function (...$passable) use ($stack, $pipe) {
-                $this->checkOptionalParametersBecomeRequired($pipe);
-
-                $passable = $this->preparePassable($passable);
-
-                $passable[] = $stack;
-
-                return $pipe(...$passable);
+            return function () use ($stack, $pipe) {
+                return $pipe($stack, ...$this->passable);
             };
         };
-    }
-
-
-    private function preparePassable(array $passable): array
-    {
-        $reflection = new ReflectionFunction($this->expectationClosure);
-
-        $requiredParametersCount = $reflection->getNumberOfParameters();
-
-
-        if (count($passable) < $requiredParametersCount) {
-            foreach ($reflection->getParameters() as $index => $parameter) {
-                if (!isset($passable[$index])) {
-                    $passable[$index] = $parameter->getDefaultValue();
-                }
-            }
-        }
-
-        return $passable;
-    }
-
-    private function checkOptionalParametersBecomeRequired($pipe)
-    {
-        $reflection = new ReflectionFunction($pipe);
-
-        foreach ($reflection->getParameters() as $parameter) {
-            if ($parameter->isDefaultValueAvailable()) {
-                /*
-                 * TODO add pipeline blame in the exception message and a stronger clarification like
-                 * “You’re attempting to pipe ‘toBe’, but haven’t added the $actual parameter to your pipe handler”
-                 */
-                throw PipeException::optionalParmetersShouldBecomeRequired($this->expectationName);
-            }
-        }
     }
 }

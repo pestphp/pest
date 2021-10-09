@@ -29,12 +29,17 @@ trait Extendable
         static::$extends[$name] = $extend;
     }
 
+    /**
+     * Register a a pipe to be applied before an expectation is checked.
+     */
     public static function pipe(string $name, Closure $pipe): void
     {
         self::$pipes[$name][] = $pipe;
     }
 
     /**
+     * Recister an interceptor that should replace an existing expectation.
+     *
      * @param string|Closure $filter
      */
     public static function intercept(string $name, $filter, Closure $handler): void
@@ -46,9 +51,7 @@ trait Extendable
         }
 
         //@phpstan-ignore-next-line
-        self::pipe($name, function (...$arguments) use ($handler, $filter) {
-            $next = array_pop($arguments);
-
+        self::pipe($name, function ($next, ...$arguments) use ($handler, $filter) {
             //@phpstan-ignore-next-line
             if ($filter($this->value)) {
                 //@phpstan-ignore-next-line
@@ -57,7 +60,7 @@ trait Extendable
                 return;
             }
 
-            $next(...$arguments);
+            $next();
         });
     }
 
