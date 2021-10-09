@@ -113,9 +113,6 @@
   ✓ it can just define the message if given condition is true
   ✓ it can just define the message if given condition is 1
 
-   PASS  Tests\Features\Expect\HigherOrder\decorate
-  ✓ pass
-
    PASS  Tests\Features\Expect\HigherOrder\methods
   ✓ it can access methods
   ✓ it can access multiple methods
@@ -179,6 +176,9 @@
 
    PASS  Tests\Features\Expect\not
   ✓ not property calls
+
+   PASS  Tests\Features\Expect\pipe
+  ✓ pass
 
    PASS  Tests\Features\Expect\ray
   ✓ ray calls do not fail when ray is not installed
