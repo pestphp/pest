@@ -1,6 +1,7 @@
 <?php
 
 use function PHPUnit\Framework\assertEquals;
+use function PHPUnit\Framework\assertEqualsIgnoringCase;
 use function PHPUnit\Framework\assertInstanceOf;
 use function PHPUnit\Framework\assertIsNumeric;
 
@@ -36,7 +37,7 @@ class Symbol
 
 class State
 {
-    public $runCount     = [];
+    public $runCount = [];
     public $appliedCount = [];
 
     public function __construct()
@@ -47,17 +48,17 @@ class State
     public function reset(): void
     {
         $this->runCount = [
-            'character'   => 0,
-            'number'      => 0,
-            'wildcard'    => 0,
-            'symbol'      => 0,
+            'character' => 0,
+            'number'    => 0,
+            'wildcard'  => 0,
+            'symbol'    => 0,
         ];
 
         $this->appliedCount = [
-            'character'   => 0,
-            'number'      => 0,
-            'wildcard'    => 0,
-            'symbol'      => 0,
+            'character' => 0,
+            'number'    => 0,
+            'wildcard'  => 0,
+            'symbol'    => 0,
         ];
     }
 }
@@ -65,7 +66,7 @@ class State
 $state = new State();
 
 /*
- * Asserts two Characters are the same
+ * Overrides toBe to assert two Characters are the same
  */
 expect()->pipe('toBe', function ($expected, $next) use ($state) {
     $state->runCount['character']++;
@@ -82,7 +83,7 @@ expect()->pipe('toBe', function ($expected, $next) use ($state) {
 });
 
 /*
- * Asserts two Numbers are the same
+ * Overrides toBe to assert two Numbers are the same
  */
 expect()->intercept('toBe', Number::class, function ($expected) use ($state) {
     $state->runCount['number']++;
@@ -91,7 +92,7 @@ expect()->intercept('toBe', Number::class, function ($expected) use ($state) {
 });
 
 /*
- * Asserts all integers are allowed if value is an '*'
+ * Overrides toBe to assert all integers are allowed if value is an '*'
  */
 expect()->intercept('toBe', function ($value) {
     return $value === '*';
@@ -102,7 +103,7 @@ expect()->intercept('toBe', function ($value) {
 });
 
 /*
- * Asserts two Symbols are the same
+ * Overrides toBe to assert two Symbols are the same
  */
 expect()->pipe('toBe', function ($expected, $next) use ($state) {
     $state->runCount['symbol']++;
@@ -118,6 +119,13 @@ expect()->pipe('toBe', function ($expected, $next) use ($state) {
     $next($expected);
 });
 
+expect()->intercept('toHaveProperty', function ($value) {
+    return $value instanceof Symbol && $value->value == '£';
+}, function (string $propertyName, $propertyValue = null) {
+    assertEquals("£", $this->value->value);
+});
+
+
 test('pipe is applied and can stop pipeline', function () use ($state) {
     $letter = new Character('A');
 
@@ -126,18 +134,19 @@ test('pipe is applied and can stop pipeline', function () use ($state) {
     expect($letter)->toBe(new Character('A'))
         ->and($state)
         ->runCount->toMatchArray([
-            'character'   => 1,
-            'number'      => 0,
-            'wildcard'    => 0,
-            'symbol'      => 0,
+            'character' => 1,
+            'number'    => 0,
+            'wildcard'  => 0,
+            'symbol'    => 0,
         ])
         ->appliedCount->toMatchArray([
-            'character'   => 1,
-            'number'      => 0,
-            'wildcard'    => 0,
-            'symbol'      => 0,
+            'character' => 1,
+            'number'    => 0,
+            'wildcard'  => 0,
+            'symbol'    => 0,
         ]);
-});
+})
+;
 
 test('pipe is run and can let the pipeline keep going', function () use ($state) {
     $state->reset();
@@ -145,16 +154,16 @@ test('pipe is run and can let the pipeline keep going', function () use ($state)
     expect(3)->toBe(3)
         ->and($state)
         ->runCount->toMatchArray([
-            'character'   => 1,
-            'number'      => 0,
-            'wildcard'    => 0,
-            'symbol'      => 1,
+            'character' => 1,
+            'number'    => 0,
+            'wildcard'  => 0,
+            'symbol'    => 1,
         ])
         ->appliedCount->toMatchArray([
-            'character'   => 0,
-            'number'      => 0,
-            'wildcard'    => 0,
-            'symbol'      => 0,
+            'character' => 0,
+            'number'    => 0,
+            'wildcard'  => 0,
+            'symbol'    => 0,
         ]);
 });
 
@@ -177,16 +186,16 @@ test('intercept stops the pipeline', function () use ($state) {
     expect($number)->toBe(new Number(1))
         ->and($state)
         ->runCount->toMatchArray([
-            'character'   => 1,
-            'number'      => 1,
-            'wildcard'    => 0,
-            'symbol'      => 0,
+            'character' => 1,
+            'number'    => 1,
+            'wildcard'  => 0,
+            'symbol'    => 0,
         ])
         ->appliedCount->toMatchArray([
-            'character'   => 0,
-            'number'      => 1,
-            'wildcard'    => 0,
-            'symbol'      => 0,
+            'character' => 0,
+            'number'    => 1,
+            'wildcard'  => 0,
+            'symbol'    => 0,
         ]);
 });
 
@@ -207,3 +216,8 @@ test('intercept can be filtered with a closure', function () use ($state) {
         ->runCount->toHaveKey('wildcard', 1)
         ->appliedCount->toHaveKey('wildcard', 1);
 });
+
+test('intercept can handle default values', function(){
+   expect(new Symbol("£"))->toHaveProperty('value');
+   expect(new Symbol("£"))->toHaveProperty('value', '£');
+})->only();

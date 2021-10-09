@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Pest;
 
 use BadMethodCallException;
+use Closure;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\RetrievesValues;
-use Pest\Support\Pipeline;
+use Pest\Exceptions\PipeException;
+use Pest\Support\ExpectationPipeline;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\ExpectationFailedException;
 
@@ -17,7 +19,7 @@ use PHPUnit\Framework\ExpectationFailedException;
  * @template TValue
  *
  * @property Expectation $not  Creates the opposite expectation.
- * @property Each        $each Creates an expectation on each element on the traversable value.
+ * @property Each $each Creates an expectation on each element on the traversable value.
  *
  * @mixin CoreExpectation
  */
@@ -135,16 +137,16 @@ final class Expectation
             throw new BadMethodCallException('Expectation value is not iterable.');
         }
 
-        $value          = is_array($this->value) ? $this->value : iterator_to_array($this->value);
-        $keys           = array_keys($value);
-        $values         = array_values($value);
+        $value = is_array($this->value) ? $this->value : iterator_to_array($this->value);
+        $keys = array_keys($value);
+        $values = array_values($value);
         $callbacksCount = count($callbacks);
 
         $index = 0;
 
         while (count($callbacks) < count($values)) {
             $callbacks[] = $callbacks[$index];
-            $index       = $index < count($values) - 1 ? $index + 1 : 0;
+            $index = $index < count($values) - 1 ? $index + 1 : 0;
         }
 
         if ($callbacksCount > count($values)) {
@@ -168,7 +170,7 @@ final class Expectation
      *
      * @template TMatchSubject of array-key
      *
-     * @param callable(): TMatchSubject|TMatchSubject                             $subject
+     * @param callable(): TMatchSubject|TMatchSubject $subject
      * @param array<TMatchSubject, (callable(Expectation<TValue>): mixed)|TValue> $expressions
      */
     public function match($subject, array $expressions): Expectation
@@ -260,28 +262,23 @@ final class Expectation
             return new HigherOrderExpectation($this, $this->value->$method(...$parameters));
         }
 
-        Pipeline::send(...$parameters)
+        ExpectationPipeline::for($method, $this->getExpectationClosure($method))
+            ->send(...$parameters)
             ->through($this->pipes($method, $this, Expectation::class))
-            ->finally(function ($parameters) use ($method): void {
-                $this->callExpectation($method, $parameters);
-            });
+            ->run();
 
         return $this;
     }
 
-    /**
-     * @param array<mixed> $parameters
-     */
-    private function callExpectation(string $name, array $parameters): void
+    private function getExpectationClosure(string $name): Closure
     {
         if (method_exists($this->coreExpectation, $name)) {
-            //@phpstan-ignore-next-line
-            $this->coreExpectation->{$name}(...$parameters);
-        } else {
-            if (self::hasExtend($name)) {
-                $this->__extendsCall($name, $parameters);
-            }
+            return Closure::fromCallable([$this->coreExpectation, $name]);
+        } elseif (self::hasExtend($name)) {
+            return self::$extends[$name];
         }
+
+        throw PipeException::expectationNotFound($name);
     }
 
     private function hasExpectation(string $name): bool
