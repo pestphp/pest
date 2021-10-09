@@ -23,7 +23,7 @@ class Character
     }
 }
 
-expect()->decorate('toBe', function ($next, $expected) {
+expect()->pipe('toBe', function ($expected, $next) {
     if ($this->value instanceof Character) {
         assertInstanceOf(Character::class, $expected);
         assertEquals($this->value->value, $expected->value);
@@ -34,15 +34,8 @@ expect()->decorate('toBe', function ($next, $expected) {
     $next($expected);
 });
 
-expect()->decorate('toBe', function ($next, $expected) {
-    if ($this->value instanceof Number) {
-        assertInstanceOf(Number::class, $expected);
-        assertEquals($this->value->value, $expected->value);
-
-        return;
-    }
-
-    $next($expected);
+expect()->intercept('toBe', Number::class, function ($expected) {
+    assertEquals($this->value->value, $expected->value);
 });
 
 test('pass', function () {

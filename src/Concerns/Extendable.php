@@ -6,6 +6,7 @@ namespace Pest\Concerns;
 
 use BadMethodCallException;
 use Closure;
+use Pest\Expectation;
 
 /**
  * @internal
@@ -18,7 +19,7 @@ trait Extendable
     private static $extends = [];
 
     /** @var array<string, array<Closure>> */
-    private static $decorators = [];
+    private static $pipes = [];
 
     /**
      * Register a custom extend.
@@ -28,9 +29,36 @@ trait Extendable
         static::$extends[$name] = $extend;
     }
 
-    public static function decorate(string $name, Closure $decorator): void
+    public static function pipe(string $name, Closure $pipe): void
     {
-        static::$decorators[$name][] = $decorator;
+        self::$pipes[$name][] = $pipe;
+    }
+
+    /**
+     * @param string|Closure $filter
+     */
+    public static function intercept(string $name, $filter, Closure $handler): void
+    {
+        if (is_string($filter)) {
+            $filter = function ($value) use ($filter): bool {
+                return $value instanceof $filter;
+            };
+        }
+
+        //@phpstan-ignore-next-line
+        self::pipe($name, function (...$arguments) use ($handler, $filter) {
+            $next = array_pop($arguments);
+
+            //@phpstan-ignore-next-line
+            if ($filter($this->value)) {
+                //@phpstan-ignore-next-line
+                $handler->bindTo($this, get_class($this))(...$arguments);
+
+                return;
+            }
+
+            $next(...$arguments);
+        });
     }
 
     /**
@@ -42,24 +70,24 @@ trait Extendable
     }
 
     /**
-     * Checks if decorator are registered.
+     * Checks if pipes are registered for a given expectation.
      */
-    public static function hasDecorators(string $name): bool
+    public static function hasPipes(string $name): bool
     {
-        return array_key_exists($name, static::$decorators);
+        return array_key_exists($name, static::$pipes);
     }
 
     /**
      * @return array<int, Closure>
      */
-    public function decorators(string $name, object $context, string $scope): array
+    public function pipes(string $name, object $context, string $scope): array
     {
-        if (!self::hasDecorators($name)) {
+        if (!self::hasPipes($name)) {
             return [];
         }
 
         $decorators = [];
-        foreach (self::$decorators[$name] as $decorator) {
+        foreach (self::$pipes[$name] as $decorator) {
             $decorators[] = $decorator->bindTo($context, $scope);
         }
 

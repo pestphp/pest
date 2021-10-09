@@ -261,7 +261,7 @@ final class Expectation
         }
 
         Pipeline::send(...$parameters)
-            ->through($this->decorators($method, $this, Expectation::class))
+            ->through($this->pipes($method, $this, Expectation::class))
             ->finally(function ($parameters) use ($method): void {
                 $this->callExpectation($method, $parameters);
             });

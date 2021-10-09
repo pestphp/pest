@@ -55,7 +55,9 @@ final class Pipeline
     {
         return function ($stack, $pipe): Closure {
             return function (...$passable) use ($stack, $pipe) {
-                return $pipe($stack, ...$passable);
+                $passable[] = $stack;
+
+                return $pipe(...$passable);
             };
         };
     }
