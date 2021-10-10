@@ -30,12 +30,19 @@ final class Coverage
     }
 
     /**
-     * Runs true there is any code
-     * coverage driver available.
+     * Runs true there is any code coverage driver available.
      */
     public static function isAvailable(): bool
     {
         return (new Runtime())->canCollectCodeCoverage();
+    }
+
+    /**
+     * If the user is using Xdebug.
+     */
+    public static function usingXdebug(): bool
+    {
+        return (new Runtime())->hasXdebug();
     }
 
     /**
@@ -45,6 +52,14 @@ final class Coverage
     public static function report(OutputInterface $output): float
     {
         if (!file_exists($reportPath = self::getPath())) {
+            if (self::usingXdebug()) {
+                $output->writeln(
+                    "  <fg=black;bg=yellow;options=bold> WARN </> Unable to get coverage using Xdebug. Did you set Xdebug's coverage mode?</>",
+                );
+
+                return 0.0;
+            }
+
             throw ShouldNotHappen::fromMessage(sprintf('Coverage not found in path: %s.', $reportPath));
         }
 
