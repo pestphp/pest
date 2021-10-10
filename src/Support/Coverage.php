@@ -54,7 +54,7 @@ final class Coverage
         if (!file_exists($reportPath = self::getPath())) {
             if (self::usingXdebug()) {
                 $output->writeln(
-                    "  <fg=black;bg=yellow;options=bold> WARN </> Unable to get coverage using Xdebug. Did you set Xdebug's coverage mode?</>",
+                    "  <fg=black;bg=yellow;options=bold> WARN </> Unable to get coverage using Xdebug. Did you set <href=https://xdebug.org/docs/code_coverage#mode>Xdebug's coverage mode</>?</>",
                 );
 
                 return 0.0;
