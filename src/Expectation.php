@@ -9,6 +9,7 @@ use Closure;
 use InvalidArgumentException;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\RetrievesValues;
+use Pest\Contracts\Extendability;
 use Pest\Support\Arr;
 use Pest\Support\NullClosure;
 use PHPUnit\Framework\Assert;
@@ -27,12 +28,18 @@ use Throwable;
  * @property Expectation $not  Creates the opposite expectation.
  * @property Each        $each Creates an expectation on each element on the traversable value.
  */
-final class Expectation
+final class Expectation implements Extendability
 {
     use Extendable {
         __call as __extendsCall;
     }
     use RetrievesValues;
+
+    /** {@inheritDoc} */
+    public function extend(string $name, Closure $extend): void
+    {
+        static::macro($name, $extend);
+    }
 
     /**
      * The expectation value.

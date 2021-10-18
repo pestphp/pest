@@ -20,7 +20,7 @@ trait Extendable
     /**
      * Register a custom extend.
      */
-    public static function extend(string $name, Closure $extend): void
+    public static function macro(string $name, Closure $extend): void
     {
         static::$extends[$name] = $extend;
     }
