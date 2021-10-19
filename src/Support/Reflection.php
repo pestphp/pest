@@ -204,4 +204,12 @@ final class Reflection
 
         return $arguments;
     }
+
+    /**
+     * @return mixed
+     */
+    public static function getFunctionVariable(Closure $function, string $key)
+    {
+        return (new ReflectionFunction($function))->getStaticVariables()[$key] ?? null;
+    }
 }

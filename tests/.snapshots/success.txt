@@ -96,11 +96,20 @@
   ✓ more than two datasets with (2) / (4) / (5)
   ✓ more than two datasets with (2) / (4) / (6)
   ✓ more than two datasets did the job right
-  ✓ it can resolve a dataset after the test case is available with (Closure Object (...))
+  ✓ it can resolve a dataset after the test case is available with (Closure Object (...)) #1
+  ✓ it can resolve a dataset after the test case is available with (Closure Object (...)) #2
   ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (...)) #1
   ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (...)) #2
   ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (...)) #1
   ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (...)) #2
+  ✓ it resolves a potential bound dataset logically with ('foo', Closure Object (...))
+  ✓ it resolves a potential bound dataset logically even when the closure comes first with (Closure Object (...), 'bar')
+  ✓ it will not resolve a closure if it is type hinted as a closure with (Closure Object (...)) #1
+  ✓ it will not resolve a closure if it is type hinted as a closure with (Closure Object (...)) #2
+  ✓ it will not resolve a closure if it is type hinted as a callable with (Closure Object (...)) #1
+  ✓ it will not resolve a closure if it is type hinted as a callable with (Closure Object (...)) #2
+  ✓ it can correctly resolve a bound dataset that returns an array with (Closure Object (...))
+  ✓ it can correctly resolve a bound dataset that returns an array but wants to be spread with (Closure Object (...))
 
    PASS  Tests\Features\Exceptions
   ✓ it gives access the the underlying expectException
@@ -720,5 +729,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 478 passed
+  Tests:  4 incompleted, 9 skipped, 487 passed
   
