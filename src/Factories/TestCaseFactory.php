@@ -24,15 +24,11 @@ final class TestCaseFactory
 {
     /**
      * Marks this test case as only.
-     *
-     * @readonly
      */
     public bool $only = false;
 
     /**
      * Holds the test closure.
-     *
-     * @readonly
      */
     public Closure $test;
 
@@ -53,7 +49,7 @@ final class TestCaseFactory
     /**
      * An array of FQN of the class traits.
      *
-     * @var array <int, string>
+     * @var array <int, class-string>
      */
     public array $traits = [
         Concerns\Testable::class,
@@ -61,12 +57,12 @@ final class TestCaseFactory
     ];
 
     /**
-     * Holds the higher order messages for the factory that are proxyble.
+     * Holds the higher order messages for the factory that are proxyable.
      */
     public HigherOrderMessageCollection $factoryProxies;
 
     /**
-     * Holds the higher order messages that are proxyble.
+     * Holds the higher order messages that are proxyable.
      */
     public HigherOrderMessageCollection $proxies;
 
@@ -80,14 +76,10 @@ final class TestCaseFactory
      */
     public function __construct(
         public string $filename,
-        public ?string $description = null,
+        public ?string $description,
         Closure $closure = null)
     {
-        $this->test = $closure ?? function (): void {
-            if (Assert::getCount() === 0) {
-                self::markTestIncomplete(); // @phpstan-ignore-line
-            }
-        };
+        $this->test = $closure ?? fn () => Assert::getCount() > 0 ?: self::markTestIncomplete();
 
         $this->factoryProxies = new HigherOrderMessageCollection();
         $this->proxies        = new HigherOrderMessageCollection();

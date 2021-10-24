@@ -19,6 +19,9 @@ use SebastianBergmann\GlobalState\Snapshot;
  */
 final class DispatchingEmitter implements Emitter
 {
+    /**
+     * Creates a new Emitter instance.
+     */
     public function __construct(private Emitter $baseEmitter)
     {
         // ..

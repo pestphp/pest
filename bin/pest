@@ -1,12 +1,10 @@
 #!/usr/bin/env php
 <?php declare(strict_types=1);
 
-use NunoMaduro\Collision\Provider;
 use Pest\Actions\ValidatesEnvironment;
 use Pest\Support\Container;
-use Pest\Console\Kernel;
+use Pest\Kernel;
 use Pest\TestSuite;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;

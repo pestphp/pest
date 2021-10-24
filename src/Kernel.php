@@ -2,10 +2,8 @@
 
 declare(strict_types=1);
 
-namespace Pest\Console;
+namespace Pest;
 
-use Pest\Actions\InteractsWithPlugins;
-use Pest\Bootstrappers;
 use PHPUnit\TextUI\Application;
 
 /**
@@ -53,13 +51,13 @@ final class Kernel
      */
     public function handle(array $argv): int
     {
-        $argv = InteractsWithPlugins::handleArguments($argv);
+        $argv = (new Plugins\Actions\HandleArguments())->__invoke($argv);
 
         $result = $this->application->run(
             $argv, false,
         );
 
-        return InteractsWithPlugins::addOutput($result);
+        return (new Plugins\Actions\AddsOutput())->__invoke($result);
     }
 
     /**
