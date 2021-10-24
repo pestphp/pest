@@ -23,10 +23,8 @@ final class Each
 
     /**
      * Creates a new expectation.
-     *
-     * @param mixed $value
      */
-    public function and($value): Expectation
+    public function and(mixed $value): Expectation
     {
         return $this->original->and($value);
     }

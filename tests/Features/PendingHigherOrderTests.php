@@ -1,6 +1,6 @@
 <?php
 
-use Pest\PendingObjects\TestCall;
+use Pest\PendingCalls\TestCall;
 use PHPUnit\Framework\TestCase;
 
 uses(Gettable::class);

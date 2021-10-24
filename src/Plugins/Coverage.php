@@ -28,7 +28,7 @@ final class Coverage implements AddsOutput, HandlesArguments
     private const MIN_OPTION = 'min';
 
     /**
-     * Whether should show the coverage or not.
+     * Whether it should show the coverage or not.
      */
     public bool $coverage = false;
 

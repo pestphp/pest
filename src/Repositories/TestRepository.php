@@ -101,7 +101,7 @@ final class TestRepository
 
         foreach ($state as $testFactory) {
             /** @var TestCaseFactory $testFactory */
-            $tests = $testFactory->build($testSuite);
+            $tests = $testFactory->make($testSuite);
             foreach ($tests as $test) {
                 $each($test);
             }

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 use Pest\Datasets;
 use Pest\Expectation;
-use Pest\PendingObjects\AfterEachCall;
-use Pest\PendingObjects\BeforeEachCall;
-use Pest\PendingObjects\TestCall;
-use Pest\PendingObjects\UsesCall;
+use Pest\PendingCalls\AfterEachCall;
+use Pest\PendingCalls\BeforeEachCall;
+use Pest\PendingCalls\TestCall;
+use Pest\PendingCalls\UsesCall;
 use Pest\Support\Backtrace;
 use Pest\Support\Extendable;
 use Pest\Support\HigherOrderTapProxy;

@@ -23,31 +23,31 @@ use RuntimeException;
 final class TestCaseFactory
 {
     /**
-     * Marks this test case as only.
+     * Determines if the Test Case will be the "only" being run.
      */
     public bool $only = false;
 
     /**
-     * Holds the test closure.
+     * The Test Case closure.
      */
     public Closure $test;
 
     /**
-     * Holds the dataset, if any.
+     * The Test Case Dataset, if any.
      *
      * @var array<Closure|iterable<int|string, mixed>|string>
      */
     public array $datasets = [];
 
     /**
-     * The FQN of the test case class.
+     * The FQN of the Test Case class.
      *
      * @var class-string
      */
     public string $class = TestCase::class;
 
     /**
-     * An array of FQN of the class traits.
+     * An array of FQN of the Test Case traits.
      *
      * @var array <int, class-string>
      */
@@ -57,22 +57,22 @@ final class TestCaseFactory
     ];
 
     /**
-     * Holds the higher order messages for the factory that are proxyable.
+     * The higher order messages for the factory that are proxyable.
      */
     public HigherOrderMessageCollection $factoryProxies;
 
     /**
-     * Holds the higher order messages that are proxyable.
+     * The higher order messages that are proxyable.
      */
     public HigherOrderMessageCollection $proxies;
 
     /**
-     * Holds the higher order messages that are chainable.
+     * The higher order messages that are chainable.
      */
     public HigherOrderMessageCollection $chains;
 
     /**
-     * Creates a new anonymous test case pending object.
+     * Creates a new Factory instance.
      */
     public function __construct(
         public string $filename,
@@ -87,11 +87,11 @@ final class TestCaseFactory
     }
 
     /**
-     * Builds the anonymous test case.
+     * Makes the Test Case classes.
      *
      * @return array<int, TestCase>
      */
-    public function build(TestSuite $testSuite): array
+    public function make(): array
     {
         if ($this->description === null) {
             throw ShouldNotHappen::fromMessage('Description can not be empty.');
@@ -101,10 +101,7 @@ final class TestCaseFactory
         $proxies     = $this->proxies;
         $factoryTest = $this->test;
 
-        /**
-         * @return mixed
-         */
-        $test = function () use ($chains, $proxies, $factoryTest) {
+        $testClosure = function () use ($chains, $proxies, $factoryTest): mixed {
             $proxies->proxy($this);
             $chains->chain($this);
 
@@ -114,8 +111,8 @@ final class TestCaseFactory
 
         $className = $this->makeClassFromFilename($this->filename);
 
-        $createTest = function ($description, $data) use ($className, $test) {
-            $testCase = new $className($test, $description, $data);
+        $createTest = function ($description, $data) use ($className, $testClosure) {
+            $testCase = new $className($testClosure, $description, $data);
             $this->factoryProxies->proxy($testCase);
 
             return $testCase;
@@ -127,7 +124,7 @@ final class TestCaseFactory
     }
 
     /**
-     * Makes a fully qualified class name from the given filename.
+     * Makes a Fully Qualified Class Name from the given filename.
      */
     public function makeClassFromFilename(string $filename): string
     {

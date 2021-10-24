@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pest\PendingObjects;
+namespace Pest\PendingCalls;
 
 use Closure;
 use Pest\TestSuite;
@@ -41,7 +41,7 @@ final class UsesCall
     private array $groups = [];
 
     /**
-     * Creates a new instance of a pending test uses.
+     * Creates a new Pending Call.
      *
      * @param array<int, string> $classAndTraits
      */
@@ -135,7 +135,7 @@ final class UsesCall
     }
 
     /**
-     * Dispatch the creation of uses.
+     * Creates the Call.
      */
     public function __destruct()
     {

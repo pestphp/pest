@@ -13,8 +13,7 @@ final class AddsOutput
     /**
      * Executes the Plugin action.
      *
-     * Provides an opportunity for any plugins that want
-     * to provide additional output after test execution.
+     * Provides an opportunity for any plugins that want to provide additional output after test execution.
      */
     public function __invoke(int $exitCode): int
     {

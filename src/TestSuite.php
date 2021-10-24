@@ -60,10 +60,9 @@ final class TestSuite
     /**
      * Creates a new instance of the test suite.
      */
-    public function __construct(string $rootPath, /**
-     * Holds the test path.
-     */
-    public string $testPath)
+    public function __construct(
+        string $rootPath,
+        public string $testPath)
     {
         $this->beforeAll  = new BeforeAllRepository();
         $this->beforeEach = new BeforeEachRepository();
@@ -71,7 +70,7 @@ final class TestSuite
         $this->afterEach  = new AfterEachRepository();
         $this->afterAll   = new AfterAllRepository();
 
-        $this->rootPath   = (string) realpath($rootPath);
+        $this->rootPath = (string) realpath($rootPath);
     }
 
     /**

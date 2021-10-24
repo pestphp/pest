@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pest\PendingObjects;
+namespace Pest\PendingCalls;
 
 use Closure;
 use Pest\Factories\TestCaseFactory;
@@ -20,21 +20,17 @@ use SebastianBergmann\Exporter\Exporter;
 final class TestCall
 {
     /**
-     * Holds the test case factory.
-     *
-     * @readonly
+     * The Test Case Factory.
      */
     private TestCaseFactory $testCaseFactory;
 
     /**
      * If test call is descriptionLess.
-     *
-     * @readonly
      */
-    private bool $descriptionLess = false;
+    private bool $descriptionLess;
 
     /**
-     * Creates a new instance of a pending test call.
+     * Creates a new Pending Call.
      */
     public function __construct(
         private TestSuite $testSuite,
@@ -207,8 +203,7 @@ final class TestCall
     }
 
     /**
-     * Adds the current test case factory
-     * to the tests repository.
+     * Creates the Call.
      */
     public function __destruct()
     {

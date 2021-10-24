@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pest\PendingObjects;
+namespace Pest\PendingCalls;
 
 use Closure;
 use Pest\Support\Backtrace;
@@ -22,12 +22,12 @@ final class BeforeEachCall
     private \Closure $closure;
 
     /**
-     * Holds calls that should be proxied.
+     * The calls that should be proxied.
      */
     private HigherOrderMessageCollection $proxies;
 
     /**
-     * Creates a new instance of before each call.
+     * Creates a new Pending Call.
      */
     public function __construct(
         private TestSuite $testSuite,
@@ -40,7 +40,7 @@ final class BeforeEachCall
     }
 
     /**
-     * Dispatch the creation of each call.
+     * Creates the Call.
      */
     public function __destruct()
     {
