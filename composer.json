@@ -78,7 +78,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "2.x-dev"
+            "dev-next": "2.x-dev"
         },
         "pest": {
             "plugins": [
