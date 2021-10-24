@@ -22,16 +22,9 @@ final class Environment implements HandlesArguments
     public const LOCAL = 'local';
 
     /**
-     * @var \Pest\Plugins\Environment|null
-     */
-    private static $instance;
-
-    /**
      * The current environment.
-     *
-     * @var string|null
      */
-    private static $name;
+    private static ?string $name = null;
 
     /**
      * Allows to handle custom command line arguments.

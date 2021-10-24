@@ -27,9 +27,7 @@ final class DatasetMissing extends BadFunctionCallException implements Exception
             "A test with the description '%s' has %d argument(s) ([%s]) and no dataset(s) provided in %s",
             $name,
             count($args),
-            implode(', ', array_map(static function (string $arg, string $type): string {
-                return sprintf('%s $%s', $type, $arg);
-            }, array_keys($args), $args)),
+            implode(', ', array_map(static fn (string $arg, string $type): string => sprintf('%s $%s', $type, $arg), array_keys($args), $args)),
             $file,
         ));
     }

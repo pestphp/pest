@@ -25,12 +25,9 @@ final class Thanks
         '    <options=bold>https://github.com/sponsors/nunomaduro</>',
     ];
 
-    /** @var OutputInterface */
-    private $output;
-
-    public function __construct(OutputInterface $output)
+    public function __construct(private OutputInterface $output)
     {
-        $this->output = $output;
+        // ..
     }
 
     /**

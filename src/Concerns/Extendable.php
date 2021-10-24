@@ -15,7 +15,7 @@ trait Extendable
     /**
      * @var array<string, Closure>
      */
-    private static $extends = [];
+    private static array $extends = [];
 
     /**
      * Register a custom extend.

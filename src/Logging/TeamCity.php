@@ -16,9 +16,9 @@ use PHPUnit\Framework\TestResult;
 use PHPUnit\Framework\TestSuite;
 use PHPUnit\Framework\Warning;
 use PHPUnit\TextUI\DefaultResultPrinter;
+use PHPUnit\TextUI\XmlConfiguration\Logging\TeamCity as BaseTeamCity;
 use function round;
 use function str_replace;
-use function strlen;
 use Throwable;
 
 final class TeamCity extends DefaultResultPrinter
@@ -34,22 +34,19 @@ final class TeamCity extends DefaultResultPrinter
     private const TEST_STARTED        = 'testStarted';
     private const TEST_FINISHED       = 'testFinished';
 
-    /** @var int */
-    private $flowId;
+    private ?int $flowId = null;
 
-    /** @var bool */
-    private $isSummaryTestCountPrinted = false;
+    private bool $isSummaryTestCountPrinted = false;
 
-    /** @var \PHPUnit\Util\Log\TeamCity */
-    private $phpunitTeamCity;
+    private BaseTeamCity $phpunitTeamCity;
 
     /**
-     * @param resource|string|null $out
+     * Creates a new printer instance.
      */
-    public function __construct($out, bool $verbose, string $colors)
+    public function __construct(resource|string|null $out, bool $verbose, string $colors)
     {
         parent::__construct($out, $verbose, $colors);
-        $this->phpunitTeamCity = new \PHPUnit\Util\Log\TeamCity($out, $verbose, $colors);
+        $this->phpunitTeamCity = new BaseTeamCity($out, $verbose, $colors);
 
         $this->logo();
     }
@@ -74,9 +71,7 @@ final class TeamCity extends DefaultResultPrinter
             'passed'     => ['count' => $this->successfulTestCount($result), 'color' => 'fg-green'],
         ];
 
-        $filteredResults = array_filter($results, function ($item): bool {
-            return $item['count'] > 0;
-        });
+        $filteredResults = array_filter($results, fn ($item): bool => $item['count'] > 0);
 
         foreach ($filteredResults as $key => $info) {
             $this->writeWithColor($info['color'], $info['count'] . " $key", false);
@@ -203,7 +198,7 @@ final class TeamCity extends DefaultResultPrinter
      */
     private static function isPestTestSuite(TestSuite $suite): bool
     {
-        return strncmp($suite->getName(), 'P\\', strlen('P\\')) === 0;
+        return str_starts_with($suite->getName(), 'P\\');
     }
 
     /**

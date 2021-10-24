@@ -17,7 +17,7 @@ final class BeforeAllRepository
     /**
      * @var array<string, Closure>
      */
-    private $state = [];
+    private array $state = [];
 
     /**
      * Runs one before all closure, and unsets it from the repository.

@@ -30,12 +30,12 @@ final class TestRepository
     /**
      * @var array<string, TestCaseFactory>
      */
-    private $state = [];
+    private array $state = [];
 
     /**
      * @var array<string, array<int, array<int, string|Closure>>>
      */
-    private $uses = [];
+    private array $uses = [];
 
     /**
      * Counts the number of test cases.
@@ -54,9 +54,7 @@ final class TestRepository
     {
         $testsWithOnly = $this->testsUsingOnly();
 
-        return array_values(array_map(function (TestCaseFactory $factory): string {
-            return $factory->filename;
-        }, count($testsWithOnly) > 0 ? $testsWithOnly : $this->state));
+        return array_values(array_map(fn (TestCaseFactory $factory): string => $factory->filename, count($testsWithOnly) > 0 ? $testsWithOnly : $this->state));
     }
 
     /**
@@ -64,9 +62,7 @@ final class TestRepository
      */
     public function build(TestSuite $testSuite, callable $each): void
     {
-        $startsWith = function (string $target, string $directory): bool {
-            return Str::startsWith($target, $directory . DIRECTORY_SEPARATOR);
-        };
+        $startsWith = fn (string $target, string $directory): bool => Str::startsWith($target, $directory . DIRECTORY_SEPARATOR);
 
         foreach ($this->uses as $path => $uses) {
             [$classOrTraits, $groups, $hooks] = $uses;
@@ -123,9 +119,7 @@ final class TestRepository
             return [];
         }
 
-        return array_filter($this->state, function ($testFactory): bool {
-            return $testFactory->only;
-        });
+        return array_filter($this->state, fn ($testFactory): bool => $testFactory->only);
     }
 
     /**
@@ -147,8 +141,8 @@ final class TestRepository
         foreach ($paths as $path) {
             if (array_key_exists($path, $this->uses)) {
                 $this->uses[$path] = [
-                    array_merge($this->uses[$path][0], $classOrTraits),
-                    array_merge($this->uses[$path][1], $groups),
+                    [...$this->uses[$path][0], ...$classOrTraits],
+                    [...$this->uses[$path][1], ...$groups],
                     $this->uses[$path][2] + $hooks, // NOTE: array_merge will destroy numeric indices
                 ];
             } else {

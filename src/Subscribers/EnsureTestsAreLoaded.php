@@ -18,7 +18,7 @@ final class EnsureTestsAreLoaded implements LoadedSubscriber
     /**
      * The current test suite, if any.
      */
-    private static ?TestSuite $testSuite;
+    private static ?TestSuite $testSuite = null;
 
     /**
      * Runs the subscriber.
@@ -31,7 +31,7 @@ final class EnsureTestsAreLoaded implements LoadedSubscriber
 
         $testSuite = \Pest\TestSuite::getInstance();
         $testSuite->tests->build($testSuite, function (TestCase $testCase) use (&$testSuites): void {
-            $testCaseClass = get_class($testCase);
+            $testCaseClass = $testCase::class;
             if (!array_key_exists($testCaseClass, $testSuites)) {
                 $testSuites[$testCaseClass] = [];
             }

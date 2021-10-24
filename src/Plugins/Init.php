@@ -29,22 +29,13 @@ final class Init implements HandlesArguments
     ];
 
     /**
-     * @var OutputInterface
-     */
-    private $output;
-
-    /**
-     * @var TestSuite
-     */
-    private $testSuite;
-
-    /**
      * Creates a new Plugin instance.
      */
-    public function __construct(TestSuite $testSuite, OutputInterface $output)
-    {
-        $this->testSuite = $testSuite;
-        $this->output    = $output;
+    public function __construct(
+        private TestSuite $testSuite,
+        private OutputInterface $output
+    ) {
+        // ..
     }
 
     public function handleArguments(array $arguments): array

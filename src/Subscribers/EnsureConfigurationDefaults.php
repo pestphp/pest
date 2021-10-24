@@ -17,6 +17,6 @@ final class EnsureConfigurationDefaults implements ConfiguredSubscriber
      */
     public function notify(Configured $event): void
     {
-        $configuration = $event->configuration();
+        // TODO...
     }
 }

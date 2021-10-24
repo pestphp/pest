@@ -20,12 +20,9 @@ final class Help
         '  <info>--group=<fg=cyan><name></></info>              Only runs tests from the specified group(s)',
     ];
 
-    /** @var OutputInterface */
-    private $output;
-
-    public function __construct(OutputInterface $output)
+    public function __construct(private OutputInterface $output)
     {
-        $this->output = $output;
+        // ..
     }
 
     public function __invoke(): void

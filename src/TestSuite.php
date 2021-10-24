@@ -19,71 +19,51 @@ final class TestSuite
 {
     /**
      * Holds the current test case.
-     *
-     * @var TestCase|null
      */
-    public $test;
+    public ?TestCase $test = null;
 
     /**
      * Holds the tests repository.
-     *
-     * @var TestRepository
      */
-    public $tests;
+    public TestRepository $tests;
 
     /**
      * Holds the before each repository.
-     *
-     * @var BeforeEachRepository
      */
-    public $beforeEach;
+    public BeforeEachRepository $beforeEach;
 
     /**
      * Holds the before all repository.
-     *
-     * @var BeforeAllRepository
      */
-    public $beforeAll;
+    public BeforeAllRepository $beforeAll;
 
     /**
      * Holds the after each repository.
-     *
-     * @var AfterEachRepository
      */
-    public $afterEach;
+    public AfterEachRepository $afterEach;
 
     /**
      * Holds the after all repository.
-     *
-     * @var AfterAllRepository
      */
-    public $afterAll;
+    public AfterAllRepository $afterAll;
 
     /**
      * Holds the root path.
-     *
-     * @var string
      */
-    public $rootPath;
-
-    /**
-     * Holds the test path.
-     *
-     * @var string
-     */
-    public $testPath;
+    public string $rootPath;
 
     /**
      * Holds an instance of the test suite.
-     *
-     * @var TestSuite
      */
-    private static $instance;
+    private static ?TestSuite $instance = null;
 
     /**
      * Creates a new instance of the test suite.
      */
-    public function __construct(string $rootPath, string $testPath)
+    public function __construct(string $rootPath, /**
+     * Holds the test path.
+     */
+    public string $testPath)
     {
         $this->beforeAll  = new BeforeAllRepository();
         $this->beforeEach = new BeforeEachRepository();
@@ -92,7 +72,6 @@ final class TestSuite
         $this->afterAll   = new AfterAllRepository();
 
         $this->rootPath   = (string) realpath($rootPath);
-        $this->testPath   = $testPath;
     }
 
     /**

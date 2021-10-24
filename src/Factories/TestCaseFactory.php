@@ -23,96 +23,67 @@ use RuntimeException;
 final class TestCaseFactory
 {
     /**
-     * Holds the test filename.
-     *
-     * @readonly
-     *
-     * @var string
-     */
-    public $filename;
-
-    /**
      * Marks this test case as only.
      *
      * @readonly
-     *
-     * @var bool
      */
-    public $only = false;
-
-    /**
-     * Holds the test description.
-     *
-     * If the description is null, means that it
-     * will be created with the given assertions.
-     *
-     * @var string|null
-     */
-    public $description;
+    public bool $only = false;
 
     /**
      * Holds the test closure.
      *
      * @readonly
-     *
-     * @var Closure
      */
-    public $test;
+    public Closure $test;
 
     /**
      * Holds the dataset, if any.
      *
      * @var array<Closure|iterable<int|string, mixed>|string>
      */
-    public $datasets = [];
+    public array $datasets = [];
 
     /**
      * The FQN of the test case class.
      *
-     * @var string
+     * @var class-string
      */
-    public $class = TestCase::class;
+    public string $class = TestCase::class;
 
     /**
      * An array of FQN of the class traits.
      *
      * @var array <int, string>
      */
-    public $traits = [
+    public array $traits = [
         Concerns\Testable::class,
         Concerns\Expectable::class,
     ];
 
     /**
-     * Holds the higher order messages
-     *  for the factory that are proxyble.
-     *
-     * @var HigherOrderMessageCollection
+     * Holds the higher order messages for the factory that are proxyble.
      */
-    public $factoryProxies;
+    public HigherOrderMessageCollection $factoryProxies;
 
     /**
      * Holds the higher order messages that are proxyble.
-     *
-     * @var HigherOrderMessageCollection
      */
-    public $proxies;
+    public HigherOrderMessageCollection $proxies;
 
     /**
      * Holds the higher order messages that are chainable.
-     *
-     * @var HigherOrderMessageCollection
      */
-    public $chains;
+    public HigherOrderMessageCollection $chains;
 
     /**
      * Creates a new anonymous test case pending object.
      */
-    public function __construct(string $filename, string $description = null, Closure $closure = null)
+    public function __construct(
+        public string $filename,
+        public ?string $description = null,
+        Closure $closure = null)
     {
-        $this->filename    = $filename;
-        $this->description = $description;
-        $this->test        = $closure ?? function (): void {
+        $this->test = $closure ?? function (): void {
             if (Assert::getCount() === 0) {
                 self::markTestIncomplete(); // @phpstan-ignore-line
             }
@@ -146,7 +117,7 @@ final class TestCaseFactory
             $chains->chain($this);
 
             /* @phpstan-ignore-next-line */
-            return call_user_func(Closure::bind($factoryTest, $this, get_class($this)), ...func_get_args());
+            return call_user_func(Closure::bind($factoryTest, $this, $this::class), ...func_get_args());
         };
 
         $className = $this->makeClassFromFilename($this->filename);
@@ -170,9 +141,7 @@ final class TestCaseFactory
     {
         if ('\\' === DIRECTORY_SEPARATOR) {
             // In case Windows, strtolower drive name, like in UsesCall.
-            $filename = (string) preg_replace_callback('~^(?P<drive>[a-z]+:\\\)~i', function ($match): string {
-                return strtolower($match['drive']);
-            }, $filename);
+            $filename = (string) preg_replace_callback('~^(?P<drive>[a-z]+:\\\)~i', fn ($match): string => strtolower($match['drive']), $filename);
         }
 
         $filename     = str_replace('\\\\', '\\', addslashes((string) realpath($filename)));
@@ -184,9 +153,7 @@ final class TestCaseFactory
         // Strip out any %-encoded octets.
         $relativePath = (string) preg_replace('|%[a-fA-F0-9][a-fA-F0-9]|', '', $relativePath);
         // Remove escaped quote sequences (maintain namespace)
-        $relativePath = str_replace(array_map(function (string $quote): string {
-            return sprintf('\\%s', $quote);
-        }, ['\'', '"']), '', $relativePath);
+        $relativePath = str_replace(array_map(fn (string $quote): string => sprintf('\\%s', $quote), ['\'', '"']), '', $relativePath);
         // Limit to A-Z, a-z, 0-9, '_', '-'.
         $relativePath = (string) preg_replace('/[^A-Za-z0-9\\\\]/', '', $relativePath);
 
@@ -196,9 +163,7 @@ final class TestCaseFactory
         }
 
         $hasPrintableTestCaseClassFQN = sprintf('\%s', HasPrintableTestCaseName::class);
-        $traitsCode                   = sprintf('use %s;', implode(', ', array_map(function ($trait): string {
-            return sprintf('\%s', $trait);
-        }, $this->traits)));
+        $traitsCode                   = sprintf('use %s;', implode(', ', array_map(fn ($trait): string => sprintf('\%s', $trait), $this->traits)));
 
         $partsFQN  = explode('\\', $classFQN);
         $className = array_pop($partsFQN);

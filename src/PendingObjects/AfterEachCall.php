@@ -17,41 +17,23 @@ use Pest\TestSuite;
 final class AfterEachCall
 {
     /**
-     * Holds the test suite.
-     *
-     * @var TestSuite
-     */
-    private $testSuite;
-
-    /**
-     * Holds the filename.
-     *
-     * @var string
-     */
-    private $filename;
-
-    /**
      * Holds the before each closure.
-     *
-     * @var Closure
      */
-    private $closure;
+    private Closure $closure;
 
     /**
      * Holds calls that should be proxied.
-     *
-     * @var HigherOrderMessageCollection
      */
-    private $proxies;
+    private HigherOrderMessageCollection $proxies;
 
     /**
      * Creates a new instance of before each call.
      */
-    public function __construct(TestSuite $testSuite, string $filename, Closure $closure = null)
-    {
-        $this->testSuite = $testSuite;
-        $this->filename  = $filename;
-        $this->closure   = $closure instanceof Closure ? $closure : NullClosure::create();
+    public function __construct(
+        private TestSuite $testSuite,
+        private string $filename, Closure $closure = null
+    ) {
+        $this->closure = $closure instanceof Closure ? $closure : NullClosure::create();
 
         $this->proxies = new HigherOrderMessageCollection();
     }

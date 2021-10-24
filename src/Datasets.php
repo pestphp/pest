@@ -20,14 +20,14 @@ final class Datasets
      *
      * @var array<int|string, Closure|iterable<int|string, mixed>>
      */
-    private static $datasets = [];
+    private static array $datasets = [];
 
     /**
      * Sets the given.
      *
      * @param Closure|iterable<int|string, mixed> $data
      */
-    public static function set(string $name, $data): void
+    public static function set(string $name, Closure|iterable $data): void
     {
         if (array_key_exists($name, self::$datasets)) {
             throw new DatasetAlreadyExist($name);
@@ -39,7 +39,7 @@ final class Datasets
     /**
      * @return Closure|iterable<int|string, mixed>
      */
-    public static function get(string $name)
+    public static function get(string $name): Closure|iterable
     {
         if (!array_key_exists($name, self::$datasets)) {
             throw new DatasetDoesNotExist($name);
@@ -161,10 +161,9 @@ final class Datasets
     }
 
     /**
-     * @param int|string        $key
      * @param array<int, mixed> $data
      */
-    private static function getDataSetDescription($key, array $data): string
+    private static function getDataSetDescription(int|string $key, array $data): string
     {
         $exporter = new Exporter();
 

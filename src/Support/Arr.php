@@ -15,9 +15,8 @@ final class Arr
 {
     /**
      * @param array<mixed> $array
-     * @param string|int   $key
      */
-    public static function has(array $array, $key): bool
+    public static function has(array $array, string|int $key): bool
     {
         $key = (string) $key;
 
@@ -38,12 +37,11 @@ final class Arr
 
     /**
      * @param array<mixed> $array
-     * @param string|int   $key
      * @param null         $default
      *
      * @return array|mixed|null
      */
-    public static function get(array $array, $key, $default = null)
+    public static function get(array $array, string|int $key, $default = null)
     {
         $key = (string) $key;
 
@@ -51,7 +49,7 @@ final class Arr
             return $array[$key];
         }
 
-        if (strpos($key, '.') === false) {
+        if (!str_contains($key, '.')) {
             return $array[$key] ?? $default;
         }
 

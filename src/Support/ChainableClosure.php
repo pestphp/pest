@@ -18,9 +18,9 @@ final class ChainableClosure
     {
         return function () use ($closure, $next): void {
             /* @phpstan-ignore-next-line */
-            call_user_func_array(Closure::bind($closure, $this, get_class($this)), func_get_args());
+            call_user_func_array(Closure::bind($closure, $this, $this::class), func_get_args());
             /* @phpstan-ignore-next-line */
-            call_user_func_array(Closure::bind($next, $this, get_class($this)), func_get_args());
+            call_user_func_array(Closure::bind($next, $this, $this::class), func_get_args());
         };
     }
 

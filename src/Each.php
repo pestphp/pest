@@ -11,22 +11,14 @@ namespace Pest;
  */
 final class Each
 {
-    /**
-     * @var Expectation
-     */
-    private $original;
-
-    /**
-     * @var bool
-     */
-    private $opposite = false;
+    private bool $opposite = false;
 
     /**
      * Creates an expectation on each item of the iterable "value".
      */
-    public function __construct(Expectation $original)
+    public function __construct(private Expectation $original)
     {
-        $this->original = $original;
+        // ..
     }
 
     /**

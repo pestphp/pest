@@ -26,7 +26,6 @@ final class Backtrace
         $current = null;
 
         foreach (debug_backtrace(self::BACKTRACE_OPTIONS) as $trace) {
-
             if (Str::endsWith($trace[self::FILE], 'overrides/Runner/TestSuiteLoader.php')) {
                 break;
             }

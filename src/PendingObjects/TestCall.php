@@ -20,39 +20,29 @@ use SebastianBergmann\Exporter\Exporter;
 final class TestCall
 {
     /**
-     * Holds the test suite.
-     *
-     * @readonly
-     *
-     * @var TestSuite
-     */
-    private $testSuite;
-
-    /**
      * Holds the test case factory.
      *
      * @readonly
-     *
-     * @var TestCaseFactory
      */
-    private $testCaseFactory;
+    private TestCaseFactory $testCaseFactory;
 
     /**
      * If test call is descriptionLess.
      *
      * @readonly
-     *
-     * @var bool
      */
-    private $descriptionLess = false;
+    private bool $descriptionLess = false;
 
     /**
      * Creates a new instance of a pending test call.
      */
-    public function __construct(TestSuite $testSuite, string $filename, string $description = null, Closure $closure = null)
-    {
+    public function __construct(
+        private TestSuite $testSuite,
+        string $filename,
+        string $description = null,
+        Closure $closure = null
+    ) {
         $this->testCaseFactory = new TestCaseFactory($filename, $description, $closure);
-        $this->testSuite       = $testSuite;
         $this->descriptionLess = $description === null;
     }
 
@@ -83,12 +73,12 @@ final class TestCall
      *
      * @param (callable(): bool)|bool $condition
      */
-    public function throwsIf($condition, string $exception, string $exceptionMessage = null): TestCall
+    public function throwsIf(callable|bool $condition, string $exception, string $exceptionMessage = null): TestCall
     {
         $condition = is_callable($condition)
             ? $condition
             : static function () use ($condition): bool {
-                return (bool) $condition; // @phpstan-ignore-line
+                return $condition; // @phpstan-ignore-line
             };
 
         if ($condition()) {
@@ -149,10 +139,8 @@ final class TestCall
 
     /**
      * Skips the current test.
-     *
-     * @param Closure|bool|string $conditionOrMessage
      */
-    public function skip($conditionOrMessage = true, string $message = ''): TestCall
+    public function skip(Closure|bool|string $conditionOrMessage = true, string $message = ''): TestCall
     {
         $condition = is_string($conditionOrMessage)
             ? NullClosure::create()
@@ -160,9 +148,7 @@ final class TestCall
 
         $condition = is_callable($condition)
             ? $condition
-            : function () use ($condition) { /* @phpstan-ignore-line */
-                return $condition;
-            };
+            : fn () => $condition;
 
         $message = is_string($conditionOrMessage)
             ? $conditionOrMessage

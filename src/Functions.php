@@ -18,10 +18,8 @@ use PHPUnit\Framework\TestCase;
  * Creates a new expectation.
  *
  * @param mixed $value the Value
- *
- * @return Expectation|Extendable
  */
-function expect($value = null)
+function expect($value = null): Expectation|Extendable
 {
     if (func_num_args() === 0) {
         return new Extendable(Expectation::class);
@@ -60,7 +58,7 @@ if (!function_exists('dataset')) {
      *
      * @param Closure|iterable<int|string, mixed> $dataset
      */
-    function dataset(string $name, $dataset): void
+    function dataset(string $name, Closure|iterable $dataset): void
     {
         Datasets::set($name, $dataset);
     }
