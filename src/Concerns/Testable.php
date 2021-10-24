@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Concerns;
 
 use Closure;
+use Pest\Support\Backtrace;
 use Pest\Support\ChainableClosure;
 use Pest\Support\ExceptionTrace;
 use Pest\TestSuite;
@@ -12,8 +13,7 @@ use PHPUnit\Framework\ExecutionOrderDependency;
 use Throwable;
 
 /**
- * To avoid inheritance conflicts, all the fields related
- * to Pest only will be prefixed by double underscore.
+ * To avoid inheritance conflicts, all the fields related to Pest only will be prefixed by double underscore.
  *
  * @internal
  */
@@ -40,7 +40,7 @@ trait Testable
      *
      * @var Closure|null
      */
-    private $beforeEach = null;
+    private $__beforeEach = null;
 
     /**
      * Holds a global/shared afterEach ("tear down") closure if one has been
@@ -48,7 +48,7 @@ trait Testable
      *
      * @var Closure|null
      */
-    private $afterEach = null;
+    private $__afterEach = null;
 
     /**
      * Holds a global/shared beforeAll ("set up before") closure if one has been
@@ -56,7 +56,7 @@ trait Testable
      *
      * @var Closure|null
      */
-    private static $beforeAll = null;
+    private static $__beforeAll = null;
 
     /**
      * Holds a global/shared afterAll ("tear down after") closure if one has
@@ -64,19 +64,21 @@ trait Testable
      *
      * @var Closure|null
      */
-    private static $afterAll = null;
+    private static $__afterAll = null;
 
     /**
      * Creates a new instance of the test case.
      */
     public function __construct(Closure $test, string $description, array $data)
     {
-        $this->__test        = $test;
-        $this->__description = $description;
-        self::$beforeAll     = null;
-        self::$afterAll      = null;
+        $this->__test          = $test;
+        $this->__description   = $description;
+        self::$__beforeAll     = null;
+        self::$__afterAll      = null;
 
-        parent::__construct('__test', $data);
+        parent::__construct('__test');
+
+        $this->setData($description, $data);
     }
 
     /**
@@ -84,7 +86,7 @@ trait Testable
      */
     public function addGroups(array $groups): void
     {
-        $groups = array_unique(array_merge($this->getGroups(), $groups));
+        $groups = array_unique(array_merge($this->groups(), $groups));
 
         $this->setGroups($groups);
     }
@@ -101,7 +103,7 @@ trait Testable
                 $test = "{$className}::{$test}";
             }
 
-            return new ExecutionOrderDependency($test, null, '');
+            return new ExecutionOrderDependency($test, '__test');
         }, $tests);
 
         $this->setDependencies($tests);
@@ -111,14 +113,14 @@ trait Testable
      * Add a shared/"global" before all test hook that will execute **before**
      * the test defined `beforeAll` hook(s).
      */
-    public function addBeforeAll(?Closure $hook): void
+    public function __addBeforeAll(?Closure $hook): void
     {
         if (!$hook) {
             return;
         }
 
-        self::$beforeAll = (self::$beforeAll instanceof Closure)
-            ? ChainableClosure::fromStatic(self::$beforeAll, $hook)
+        self::$__beforeAll = (self::$__beforeAll instanceof Closure)
+            ? ChainableClosure::fromStatic(self::$__beforeAll, $hook)
             : $hook;
     }
 
@@ -126,14 +128,14 @@ trait Testable
      * Add a shared/"global" after all test hook that will execute **before**
      * the test defined `afterAll` hook(s).
      */
-    public function addAfterAll(?Closure $hook): void
+    public function __addAfterAll(?Closure $hook): void
     {
         if (!$hook) {
             return;
         }
 
-        self::$afterAll = (self::$afterAll instanceof Closure)
-            ? ChainableClosure::fromStatic(self::$afterAll, $hook)
+        self::$__afterAll = (self::$__afterAll instanceof Closure)
+            ? ChainableClosure::fromStatic(self::$__afterAll, $hook)
             : $hook;
     }
 
@@ -141,24 +143,24 @@ trait Testable
      * Add a shared/"global" before each test hook that will execute **before**
      * the test defined `beforeEach` hook.
      */
-    public function addBeforeEach(?Closure $hook): void
+    public function __addBeforeEach(?Closure $hook): void
     {
-        $this->addHook('beforeEach', $hook);
+        $this->__addHook('__beforeEach', $hook);
     }
 
     /**
      * Add a shared/"global" after each test hook that will execute **before**
      * the test defined `afterEach` hook.
      */
-    public function addAfterEach(?Closure $hook): void
+    public function __addAfterEach(?Closure $hook): void
     {
-        $this->addHook('afterEach', $hook);
+        $this->__addHook('__afterEach', $hook);
     }
 
     /**
      * Add a shared/global hook and compose them if more than one is passed.
      */
-    private function addHook(string $property, ?Closure $hook): void
+    private function __addHook(string $property, ?Closure $hook): void
     {
         if (!$hook) {
             return;
@@ -176,7 +178,9 @@ trait Testable
      */
     public function getName(bool $withDataSet = true): string
     {
-        return $this->__description;
+        return (str_ends_with(Backtrace::file(), 'TestRunner.php') || Backtrace::line() === 277)
+            ? '__test'
+            : $this->__description;
     }
 
     public static function __getFileName(): string
@@ -193,8 +197,8 @@ trait Testable
 
         $beforeAll = TestSuite::getInstance()->beforeAll->get(self::$__filename);
 
-        if (self::$beforeAll instanceof Closure) {
-            $beforeAll = ChainableClosure::fromStatic(self::$beforeAll, $beforeAll);
+        if (self::$__beforeAll instanceof Closure) {
+            $beforeAll = ChainableClosure::fromStatic(self::$__beforeAll, $beforeAll);
         }
 
         call_user_func(Closure::bind($beforeAll, null, self::class));
@@ -207,8 +211,8 @@ trait Testable
     {
         $afterAll = TestSuite::getInstance()->afterAll->get(self::$__filename);
 
-        if (self::$afterAll instanceof Closure) {
-            $afterAll = ChainableClosure::fromStatic(self::$afterAll, $afterAll);
+        if (self::$__afterAll instanceof Closure) {
+            $afterAll = ChainableClosure::fromStatic(self::$__afterAll, $afterAll);
         }
 
         call_user_func(Closure::bind($afterAll, null, self::class));
@@ -227,8 +231,8 @@ trait Testable
 
         $beforeEach = TestSuite::getInstance()->beforeEach->get(self::$__filename);
 
-        if ($this->beforeEach instanceof Closure) {
-            $beforeEach = ChainableClosure::from($this->beforeEach, $beforeEach);
+        if ($this->__beforeEach instanceof Closure) {
+            $beforeEach = ChainableClosure::from($this->__beforeEach, $beforeEach);
         }
 
         $this->__callClosure($beforeEach, func_get_args());
@@ -241,8 +245,8 @@ trait Testable
     {
         $afterEach = TestSuite::getInstance()->afterEach->get(self::$__filename);
 
-        if ($this->afterEach instanceof Closure) {
-            $afterEach = ChainableClosure::from($this->afterEach, $afterEach);
+        if ($this->__afterEach instanceof Closure) {
+            $afterEach = ChainableClosure::from($this->__afterEach, $afterEach);
         }
 
         $this->__callClosure($afterEach, func_get_args());
@@ -273,7 +277,7 @@ trait Testable
      */
     public function __test()
     {
-        return $this->__callClosure($this->__test, $this->resolveTestArguments(func_get_args()));
+        return $this->__callClosure($this->__test, $this->__resolveTestArguments(func_get_args()));
     }
 
     /**
@@ -281,7 +285,7 @@ trait Testable
      *
      * @throws Throwable
      */
-    private function resolveTestArguments(array $arguments): array
+    private function __resolveTestArguments(array $arguments): array
     {
         return array_map(function ($data) {
             return $data instanceof Closure ? $this->__callClosure($data, []) : $data;

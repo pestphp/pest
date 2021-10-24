@@ -92,16 +92,14 @@ final class TestCaseFactory
     public $factoryProxies;
 
     /**
-     * Holds the higher order
-     * messages that are proxyble.
+     * Holds the higher order messages that are proxyble.
      *
      * @var HigherOrderMessageCollection
      */
     public $proxies;
 
     /**
-     * Holds the higher order
-     * messages that are chainable.
+     * Holds the higher order messages that are chainable.
      *
      * @var HigherOrderMessageCollection
      */
@@ -232,7 +230,7 @@ final class TestCaseFactory
     /**
      * Determine if the test case will receive argument input from Pest, or not.
      */
-    public function receivesArguments(): bool
+    public function __receivesArguments(): bool
     {
         return count($this->datasets) > 0
             || $this->factoryProxies->count('addDependencies') > 0;

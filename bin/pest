@@ -4,6 +4,7 @@
 use NunoMaduro\Collision\Provider;
 use Pest\Actions\ValidatesEnvironment;
 use Pest\Support\Container;
+use Pest\Console\Kernel;
 use Pest\TestSuite;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -25,8 +26,6 @@ use Symfony\Component\Console\Output\OutputInterface;
         $autoloadPath = $localPath;
     }
 
-    (new Provider())->register();
-
     // Get $rootPath based on $autoloadPath
     $rootPath = dirname($autoloadPath, 2);
     $argv = new ArgvInput();
@@ -40,8 +39,6 @@ use Symfony\Component\Console\Output\OutputInterface;
     $container->add(TestSuite::class, $testSuite);
     $container->add(OutputInterface::class, $output);
 
-    ValidatesEnvironment::in($testSuite);
-
     $args = $_SERVER['argv'];
 
     // Let's remove any arguments that PHPUnit does not understand
@@ -53,11 +50,11 @@ use Symfony\Component\Console\Output\OutputInterface;
         }
     }
 
-    if (($runInParallel = $argv->hasParameterOption(['--parallel', '-p'])) && !class_exists(\Pest\Parallel\Command::class)) {
-        $output->writeln("Parallel support requires the Pest Parallel plugin. Run <fg=yellow;options=bold>`composer require --dev pestphp/pest-plugin-parallel`</> first.");
-        exit(Command::FAILURE);
-    }
+    $kernel = Kernel::boot();
 
-    $command = $runInParallel ? \Pest\Parallel\Command::class : \Pest\Console\Command::class;
-    exit($container->get($command)->run($args));
+    $result = $kernel->handle($args);
+
+    $kernel->shutdown();
+
+    exit($result);
 })();
