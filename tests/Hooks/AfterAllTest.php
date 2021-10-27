@@ -1,51 +1,45 @@
 <?php
 
-global $globalHook;
-
-// NOTE: this test does not have a $globalHook->calls offset since it is first
-// in the directory and thus will always run before the others. See also the
-// BeforeAllTest.php for details.
-
-uses()->afterAll(function () use ($globalHook) {
-    expect($globalHook)
+uses()->afterAll(function () {
+    expect($_SERVER['globalHook'])
         ->toHaveProperty('afterAll')
-        ->and($globalHook->afterAll)
+        ->and($_SERVER['globalHook']->afterAll)
         ->toBe(0)
-        ->and($globalHook->calls)
+        ->and($_SERVER['globalHook']->calls)
         ->afterAll
         ->toBe(1);
 
-    $globalHook->afterAll = 1;
-    $globalHook->calls->afterAll++;
+    $_SERVER['globalHook']->afterAll = 1;
+    $_SERVER['globalHook']->calls->afterAll++;
 });
 
-afterAll(function () use ($globalHook) {
-    expect($globalHook)
+afterAll(function () {
+    expect($_SERVER['globalHook'])
         ->toHaveProperty('afterAll')
-        ->and($globalHook->afterAll)
+        ->and($_SERVER['globalHook']->afterAll)
         ->toBe(1)
-        ->and($globalHook->calls)
+        ->and($_SERVER['globalHook']->calls)
         ->afterAll
         ->toBe(2);
 
-    $globalHook->afterAll = 2;
-    $globalHook->calls->afterAll++;
+    $_SERVER['globalHook']->afterAll = 2;
+    $_SERVER['globalHook']->calls->afterAll++;
 });
 
-test('global afterAll execution order', function () use ($globalHook) {
-    expect($globalHook)
+test('global afterAll execution order', function () {
+    expect($_SERVER['globalHook'])
         ->not()
         ->toHaveProperty('afterAll')
-        ->and($globalHook->calls)
+        ->and($_SERVER['globalHook']->calls)
         ->afterAll
         ->toBe(0);
 });
 
-it('only gets called once per file', function () use ($globalHook) {
-    expect($globalHook)
+it('only gets called once per file', function () {
+    expect($_SERVER['globalHook'])
         ->not()
         ->toHaveProperty('afterAll')
-        ->and($globalHook->calls)
+        ->and($_SERVER['globalHook']->calls)
         ->afterAll
         ->toBe(0);
 });

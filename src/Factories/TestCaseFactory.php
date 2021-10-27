@@ -23,102 +23,63 @@ use RuntimeException;
 final class TestCaseFactory
 {
     /**
-     * Holds the test filename.
-     *
-     * @readonly
-     *
-     * @var string
+     * Determines if the Test Case will be the "only" being run.
      */
-    public $filename;
+    public bool $only = false;
 
     /**
-     * Marks this test case as only.
-     *
-     * @readonly
-     *
-     * @var bool
+     * The Test Case closure.
      */
-    public $only = false;
+    public Closure $test;
 
     /**
-     * Holds the test description.
-     *
-     * If the description is null, means that it
-     * will be created with the given assertions.
-     *
-     * @var string|null
-     */
-    public $description;
-
-    /**
-     * Holds the test closure.
-     *
-     * @readonly
-     *
-     * @var Closure
-     */
-    public $test;
-
-    /**
-     * Holds the dataset, if any.
+     * The Test Case Dataset, if any.
      *
      * @var array<Closure|iterable<int|string, mixed>|string>
      */
-    public $datasets = [];
+    public array $datasets = [];
 
     /**
-     * The FQN of the test case class.
+     * The FQN of the Test Case class.
      *
-     * @var string
+     * @var class-string
      */
-    public $class = TestCase::class;
+    public string $class = TestCase::class;
 
     /**
-     * An array of FQN of the class traits.
+     * An array of FQN of the Test Case traits.
      *
-     * @var array <int, string>
+     * @var array <int, class-string>
      */
-    public $traits = [
+    public array $traits = [
         Concerns\Testable::class,
         Concerns\Expectable::class,
     ];
 
     /**
-     * Holds the higher order messages
-     *  for the factory that are proxyble.
-     *
-     * @var HigherOrderMessageCollection
+     * The higher order messages for the factory that are proxyable.
      */
-    public $factoryProxies;
+    public HigherOrderMessageCollection $factoryProxies;
 
     /**
-     * Holds the higher order
-     * messages that are proxyble.
-     *
-     * @var HigherOrderMessageCollection
+     * The higher order messages that are proxyable.
      */
-    public $proxies;
+    public HigherOrderMessageCollection $proxies;
 
     /**
-     * Holds the higher order
-     * messages that are chainable.
-     *
-     * @var HigherOrderMessageCollection
+     * The higher order messages that are chainable.
      */
-    public $chains;
+    public HigherOrderMessageCollection $chains;
 
     /**
-     * Creates a new anonymous test case pending object.
+     * Creates a new Factory instance.
      */
-    public function __construct(string $filename, string $description = null, Closure $closure = null)
+    public function __construct(
+        public string $filename,
+        public ?string $description,
+        Closure $closure = null)
     {
-        $this->filename    = $filename;
-        $this->description = $description;
-        $this->test        = $closure ?? function (): void {
-            if (Assert::getCount() === 0) {
-                self::markTestIncomplete(); // @phpstan-ignore-line
-            }
-        };
+        $this->test = $closure ?? fn () => Assert::getCount() > 0 ?: self::markTestIncomplete();
 
         $this->factoryProxies = new HigherOrderMessageCollection();
         $this->proxies        = new HigherOrderMessageCollection();
@@ -126,11 +87,11 @@ final class TestCaseFactory
     }
 
     /**
-     * Builds the anonymous test case.
+     * Makes the Test Case classes.
      *
      * @return array<int, TestCase>
      */
-    public function build(TestSuite $testSuite): array
+    public function make(): array
     {
         if ($this->description === null) {
             throw ShouldNotHappen::fromMessage('Description can not be empty.');
@@ -140,21 +101,18 @@ final class TestCaseFactory
         $proxies     = $this->proxies;
         $factoryTest = $this->test;
 
-        /**
-         * @return mixed
-         */
-        $test = function () use ($chains, $proxies, $factoryTest) {
+        $testClosure = function () use ($chains, $proxies, $factoryTest): mixed {
             $proxies->proxy($this);
             $chains->chain($this);
 
             /* @phpstan-ignore-next-line */
-            return call_user_func(Closure::bind($factoryTest, $this, get_class($this)), ...func_get_args());
+            return call_user_func(Closure::bind($factoryTest, $this, $this::class), ...func_get_args());
         };
 
         $className = $this->makeClassFromFilename($this->filename);
 
-        $createTest = function ($description, $data) use ($className, $test) {
-            $testCase = new $className($test, $description, $data);
+        $createTest = function ($description, $data) use ($className, $testClosure) {
+            $testCase = new $className($testClosure, $description, $data);
             $this->factoryProxies->proxy($testCase);
 
             return $testCase;
@@ -166,15 +124,13 @@ final class TestCaseFactory
     }
 
     /**
-     * Makes a fully qualified class name from the given filename.
+     * Makes a Fully Qualified Class Name from the given filename.
      */
     public function makeClassFromFilename(string $filename): string
     {
         if ('\\' === DIRECTORY_SEPARATOR) {
             // In case Windows, strtolower drive name, like in UsesCall.
-            $filename = (string) preg_replace_callback('~^(?P<drive>[a-z]+:\\\)~i', function ($match): string {
-                return strtolower($match['drive']);
-            }, $filename);
+            $filename = (string) preg_replace_callback('~^(?P<drive>[a-z]+:\\\)~i', fn ($match): string => strtolower($match['drive']), $filename);
         }
 
         $filename     = str_replace('\\\\', '\\', addslashes((string) realpath($filename)));
@@ -186,9 +142,7 @@ final class TestCaseFactory
         // Strip out any %-encoded octets.
         $relativePath = (string) preg_replace('|%[a-fA-F0-9][a-fA-F0-9]|', '', $relativePath);
         // Remove escaped quote sequences (maintain namespace)
-        $relativePath = str_replace(array_map(function (string $quote): string {
-            return sprintf('\\%s', $quote);
-        }, ['\'', '"']), '', $relativePath);
+        $relativePath = str_replace(array_map(fn (string $quote): string => sprintf('\\%s', $quote), ['\'', '"']), '', $relativePath);
         // Limit to A-Z, a-z, 0-9, '_', '-'.
         $relativePath = (string) preg_replace('/[^A-Za-z0-9\\\\]/', '', $relativePath);
 
@@ -198,9 +152,7 @@ final class TestCaseFactory
         }
 
         $hasPrintableTestCaseClassFQN = sprintf('\%s', HasPrintableTestCaseName::class);
-        $traitsCode                   = sprintf('use %s;', implode(', ', array_map(function ($trait): string {
-            return sprintf('\%s', $trait);
-        }, $this->traits)));
+        $traitsCode                   = sprintf('use %s;', implode(', ', array_map(fn ($trait): string => sprintf('\%s', $trait), $this->traits)));
 
         $partsFQN  = explode('\\', $classFQN);
         $className = array_pop($partsFQN);
@@ -232,7 +184,7 @@ final class TestCaseFactory
     /**
      * Determine if the test case will receive argument input from Pest, or not.
      */
-    public function receivesArguments(): bool
+    public function __receivesArguments(): bool
     {
         return count($this->datasets) > 0
             || $this->factoryProxies->count('addDependencies') > 0;

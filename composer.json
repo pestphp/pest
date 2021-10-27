@@ -17,16 +17,21 @@
         }
     ],
     "require": {
-        "php": "^7.3 || ^8.0",
-        "nunomaduro/collision": "^5.4.0|^6.0",
+        "php": "^8.0",
+        "nunomaduro/collision": "^5.10.0|^6.0",
         "pestphp/pest-plugin": "^1.0.0",
-        "phpunit/phpunit": "^9.5.5"
+        "phpunit/phpunit": "10.0.x-dev"
     },
     "autoload": {
         "psr-4": {
             "Pest\\": "src/"
         },
+        "exclude-from-classmap": [
+            "../phpunit/src/Runner/TestSuiteLoader.php",
+            "vendor/phpunit/phpunit/src/Runner/TestSuiteLoader.php"
+        ],
         "files": [
+            "overrides/Runner/TestSuiteLoader.php",
             "src/Functions.php",
             "src/Pest.php"
         ]
@@ -44,7 +49,7 @@
         "illuminate/support": "^8.47.0",
         "laravel/dusk": "^6.15.0",
         "pestphp/pest-dev-tools": "dev-master",
-        "pestphp/pest-plugin-parallel": "^1.0"
+        "pestphp/pest-plugin-mock": "^1.0"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -73,7 +78,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "1.x-dev"
+            "dev-next": "2.x-dev"
         },
         "pest": {
             "plugins": [

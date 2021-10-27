@@ -16,18 +16,12 @@ final class HigherOrderTapProxy
     private const UNDEFINED_PROPERTY = 'Undefined property: P\\';
 
     /**
-     * The target being tapped.
-     *
-     * @var TestCase
-     */
-    public $target;
-
-    /**
      * Create a new tap proxy instance.
      */
-    public function __construct(TestCase $target)
-    {
-        $this->target = $target;
+    public function __construct(
+        public TestCase $target
+    ) {
+        // ..
     }
 
     /**

@@ -14,7 +14,11 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
  */
 final class Thanks
 {
-    /** @var array<int, string> */
+    /**
+     * The Command messages.
+     *
+     * @var array<int, string>
+     */
     private const FUNDING_MESSAGES = [
         '',
         '  - Star or contribute to Pest:',
@@ -25,16 +29,16 @@ final class Thanks
         '    <options=bold>https://github.com/sponsors/nunomaduro</>',
     ];
 
-    /** @var OutputInterface */
-    private $output;
-
-    public function __construct(OutputInterface $output)
+    /**
+     * Creates a new Console Command instance.
+     */
+    public function __construct(private OutputInterface $output)
     {
-        $this->output = $output;
+        // ..
     }
 
     /**
-     * Asks the user to support Pest.
+     * Executes the Console Command.
      */
     public function __invoke(): void
     {

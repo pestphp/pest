@@ -28,32 +28,31 @@ final class Coverage implements AddsOutput, HandlesArguments
     private const MIN_OPTION = 'min';
 
     /**
-     * Whether should show the coverage or not.
-     *
-     * @var bool
+     * Whether it should show the coverage or not.
      */
-    public $coverage = false;
+    public bool $coverage = false;
 
     /**
      * The minimum coverage.
-     *
-     * @var float
      */
-    public $coverageMin = 0.0;
+    public float $coverageMin = 0.0;
 
     /**
-     * @var OutputInterface
+     * Creates a new Plugin instance.
      */
-    private $output;
-
-    public function __construct(OutputInterface $output)
+    public function __construct(private OutputInterface $output)
     {
-        $this->output = $output;
+        // ..
     }
 
+    /**
+     * @param array<int, string> $originals
+     *
+     * @return array<int, string>
+     */
     public function handleArguments(array $originals): array
     {
-        $arguments = array_merge([''], array_values(array_filter($originals, function ($original): bool {
+        $arguments = [...[''], ...array_values(array_filter($originals, function ($original): bool {
             foreach ([self::COVERAGE_OPTION, self::MIN_OPTION] as $option) {
                 if ($original === sprintf('--%s', $option) || Str::startsWith($original, sprintf('--%s=', $option))) {
                     return true;
@@ -61,7 +60,7 @@ final class Coverage implements AddsOutput, HandlesArguments
             }
 
             return false;
-        })));
+        }))];
 
         $originals = array_flip($originals);
         foreach ($arguments as $argument) {
@@ -75,9 +74,9 @@ final class Coverage implements AddsOutput, HandlesArguments
 
         $input = new ArgvInput($arguments, new InputDefinition($inputs));
         if ((bool) $input->getOption(self::COVERAGE_OPTION)) {
-            $this->coverage      = true;
-            $originals[]         = '--coverage-php';
-            $originals[]         = \Pest\Support\Coverage::getPath();
+            $this->coverage = true;
+            $originals[]    = '--coverage-php';
+            $originals[]    = \Pest\Support\Coverage::getPath();
         }
 
         if ($input->getOption(self::MIN_OPTION) !== null) {

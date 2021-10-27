@@ -15,7 +15,7 @@ use Symfony\Component\Console\Exception\ExceptionInterface;
 final class FileOrFolderNotFound extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
 {
     /**
-     * Creates a new instance of file not found.
+     * Creates a new Exception instance.
      */
     public function __construct(string $filename)
     {

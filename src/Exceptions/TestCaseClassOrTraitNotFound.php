@@ -15,7 +15,7 @@ use Symfony\Component\Console\Exception\ExceptionInterface;
 final class TestCaseClassOrTraitNotFound extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
 {
     /**
-     * Creates a new instance of after each already exist exception.
+     * Creates a new Exception instance.
      */
     public function __construct(string $testCaseClass)
     {

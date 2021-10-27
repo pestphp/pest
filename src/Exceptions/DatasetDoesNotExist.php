@@ -15,7 +15,7 @@ use Symfony\Component\Console\Exception\ExceptionInterface;
 final class DatasetDoesNotExist extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
 {
     /**
-     * Creates a new instance of dataset does not exist.
+     * Creates a new Exception instance.
      */
     public function __construct(string $name)
     {

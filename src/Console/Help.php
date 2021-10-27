@@ -11,7 +11,11 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class Help
 {
-    /** @var array<int, string> */
+    /**
+     * The Command messages.
+     *
+     * @var array<int, string>
+     */
     private const HELP_MESSAGES = [
         '<comment>Pest Options:</comment>',
         '  <info>--init</info>                      Initialise a standard Pest configuration',
@@ -20,14 +24,17 @@ final class Help
         '  <info>--group=<fg=cyan><name></></info>              Only runs tests from the specified group(s)',
     ];
 
-    /** @var OutputInterface */
-    private $output;
-
-    public function __construct(OutputInterface $output)
+    /**
+     * Creates a new Console Command instance.
+     */
+    public function __construct(private OutputInterface $output)
     {
-        $this->output = $output;
+        // ..
     }
 
+    /**
+     * Executes the Console Command.
+     */
     public function __invoke(): void
     {
         foreach (self::HELP_MESSAGES as $message) {

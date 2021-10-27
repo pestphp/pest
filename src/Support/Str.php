@@ -33,7 +33,7 @@ final class Str
      */
     public static function startsWith(string $target, string $search): bool
     {
-        return substr($target, 0, strlen($search)) === $search;
+        return str_starts_with($target, $search);
     }
 
     /**
