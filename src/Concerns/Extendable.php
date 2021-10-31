@@ -77,7 +77,7 @@ trait Extendable
     /**
      * Checks if pipes are registered for a given expectation.
      */
-    public static function hasPipes(string $name): bool
+    private static function hasPipes(string $name): bool
     {
         return array_key_exists($name, static::$pipes);
     }
