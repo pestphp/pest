@@ -7,7 +7,6 @@ namespace Pest\Concerns;
 use BadMethodCallException;
 use Closure;
 use Pest\Expectation;
-use PHPStan\Type\CallableType;
 
 /**
  * @internal
@@ -50,6 +49,9 @@ trait Extendable
 
     /**
      * Register an interceptor that should replace an existing expectation.
+     *
+     * @param class-string|Closure(mixed $value, mixed ...$arguments): bool $filter
+     * @param Closure(mixed ...$arguments): void $handler
      */
     public static function intercept(string $name, string|Closure $filter, Closure $handler): void
     {
@@ -58,19 +60,17 @@ trait Extendable
         }
 
         self::pipe($name, function ($next, ...$arguments) use ($handler, $filter): void {
-            /** @phpstan-ignore-next-line  */
-            if ($filter($this->value, ...$arguments)) {
-                /** @phpstan-ignore-next-line  */
-                $handler = $handler->bindTo($this, get_class($this));
-
-                if($handler instanceof Closure){
-                    $handler(...$arguments);
-                }
+            /* @phpstan-ignore-next-line  */
+            if (!$filter($this->value, ...$arguments)) {
+                $next();
 
                 return;
             }
 
-            $next();
+            /** @phpstan-ignore-next-line  */
+            $handler = $handler->bindTo($this, $this::class);
+
+            $handler(...$arguments);
         });
     }
 
@@ -97,7 +97,7 @@ trait Extendable
         foreach (self::$pipes[$name] as $pipe) {
             $pipe = $pipe->bindTo($context, $scope);
 
-            if($pipe instanceof Closure){
+            if ($pipe instanceof Closure) {
                 $pipes[] = $pipe;
             }
         }

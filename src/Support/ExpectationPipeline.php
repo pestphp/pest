@@ -14,7 +14,7 @@ final class ExpectationPipeline
     /** @var array<Closure> */
     private array $pipes = [];
 
-    /** @var array<int|string, mixed>  */
+    /** @var array<int|string, mixed> */
     private array $passable;
 
     public function __construct(
@@ -28,7 +28,7 @@ final class ExpectationPipeline
         return new self($expectationClosure);
     }
 
-    public function send(...$passable): ExpectationPipeline
+    public function send(mixed ...$passable): ExpectationPipeline
     {
         $this->passable = $passable;
 
