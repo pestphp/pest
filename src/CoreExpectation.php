@@ -170,7 +170,7 @@ final class CoreExpectation
      */
     public function toStartWith(string $expected): CoreExpectation
     {
-        Assert::assertStringStartsWith($expected, $this->value);
+        Assert::assertStringStartsWith($expected, $this->value); //@phpstan-ignore-line
 
         return $this;
     }
@@ -180,7 +180,7 @@ final class CoreExpectation
      */
     public function toEndWith(string $expected): CoreExpectation
     {
-        Assert::assertStringEndsWith($expected, $this->value);
+        Assert::assertStringEndsWith($expected, $this->value); //@phpstan-ignore-line
 
         return $this;
     }
@@ -322,7 +322,6 @@ final class CoreExpectation
      */
     public function toBeInstanceOf(string $class): CoreExpectation
     {
-        /* @phpstan-ignore-next-line */
         Assert::assertInstanceOf($class, $this->value);
 
         return $this;

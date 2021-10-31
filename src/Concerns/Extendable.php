@@ -6,6 +6,8 @@ namespace Pest\Concerns;
 
 use BadMethodCallException;
 use Closure;
+use Pest\Expectation;
+use PHPStan\Type\CallableType;
 
 /**
  * @internal
@@ -18,6 +20,9 @@ trait Extendable
      * @var array<string, Closure>
      */
     private static array $extends = [];
+
+    /** @var array<string, array<Closure>> */
+    private static array $pipes = [];
 
     /**
      * Register a new extend.
@@ -33,6 +38,71 @@ trait Extendable
     public static function hasExtend(string $name): bool
     {
         return array_key_exists($name, static::$extends);
+    }
+
+    /**
+     * Register a pipe to be applied before an expectation is checked.
+     */
+    public static function pipe(string $name, Closure $handler): void
+    {
+        self::$pipes[$name][] = $handler;
+    }
+
+    /**
+     * Register an interceptor that should replace an existing expectation.
+     */
+    public static function intercept(string $name, string|Closure $filter, Closure $handler): void
+    {
+        if (is_string($filter)) {
+            $filter = fn ($value, ...$arguments): bool => $value instanceof $filter;
+        }
+
+        self::pipe($name, function ($next, ...$arguments) use ($handler, $filter): void {
+            /** @phpstan-ignore-next-line  */
+            if ($filter($this->value, ...$arguments)) {
+                /** @phpstan-ignore-next-line  */
+                $handler = $handler->bindTo($this, get_class($this));
+
+                if($handler instanceof Closure){
+                    $handler(...$arguments);
+                }
+
+                return;
+            }
+
+            $next();
+        });
+    }
+
+    /**
+     * Checks if pipes are registered for a given expectation.
+     */
+    public static function hasPipes(string $name): bool
+    {
+        return array_key_exists($name, static::$pipes);
+    }
+
+    /**
+     * Gets the pipes that have been registered for a given expectation and binds them to a context and a scope.
+     *
+     * @return array<int, Closure>
+     */
+    private function pipes(string $name, object $context, string $scope): array
+    {
+        if (!self::hasPipes($name)) {
+            return [];
+        }
+
+        $pipes = [];
+        foreach (self::$pipes[$name] as $pipe) {
+            $pipe = $pipe->bindTo($context, $scope);
+
+            if($pipe instanceof Closure){
+                $pipes[] = $pipe;
+            }
+        }
+
+        return $pipes;
     }
 
     /**

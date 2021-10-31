@@ -9,9 +9,9 @@ use Closure;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\RetrievesValues;
 use Pest\Exceptions\ExpectationNotFoundException;
+use Pest\Support\ExpectationPipeline;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\ExpectationFailedException;
-use SebastianBergmann\Exporter\Exporter;
 
 /**
  * @internal
@@ -19,7 +19,7 @@ use SebastianBergmann\Exporter\Exporter;
  * @template TValue
  *
  * @property Expectation $not  Creates the opposite expectation.
- * @property Each $each Creates an expectation on each element on the traversable value.
+ * @property Each        $each Creates an expectation on each element on the traversable value.
  *
  * @mixin CoreExpectation
  */
@@ -81,8 +81,6 @@ final class Expectation
 
     /**
      * Send the expectation value to Ray along with all given arguments.
-     *
-     * @param ...mixed $arguments
      */
     public function ray(mixed ...$arguments): self
     {
@@ -133,16 +131,16 @@ final class Expectation
             throw new BadMethodCallException('Expectation value is not iterable.');
         }
 
-        $value = is_array($this->value) ? $this->value : iterator_to_array($this->value);
-        $keys = array_keys($value);
-        $values = array_values($value);
+        $value          = is_array($this->value) ? $this->value : iterator_to_array($this->value);
+        $keys           = array_keys($value);
+        $values         = array_values($value);
         $callbacksCount = count($callbacks);
 
         $index = 0;
 
         while (count($callbacks) < count($values)) {
             $callbacks[] = $callbacks[$index];
-            $index = $index < count($values) - 1 ? $index + 1 : 0;
+            $index       = $index < count($values) - 1 ? $index + 1 : 0;
         }
 
         if ($callbacksCount > count($values)) {
@@ -214,7 +212,7 @@ final class Expectation
         $condition = is_callable($condition)
             ? $condition
             : static function () use ($condition): bool {
-                return $condition; // @phpstan-ignore-line
+                return $condition;
             };
 
         return $this->when(!$condition(), $callback);
@@ -231,7 +229,7 @@ final class Expectation
         $condition = is_callable($condition)
             ? $condition
             : static function () use ($condition): bool {
-                return $condition; // @phpstan-ignore-line
+                return $condition;
             };
 
         if ($condition()) {
@@ -256,7 +254,10 @@ final class Expectation
             return new HigherOrderExpectation($this, $this->value->$method(...$parameters));
         }
 
-        $this->getExpectationClosure($method)(...$parameters);
+        ExpectationPipeline::for($this->getExpectationClosure($method))
+            ->send(...$parameters)
+            ->through($this->pipes($method, $this, Expectation::class))
+            ->run();
 
         return $this;
     }
@@ -295,7 +296,7 @@ final class Expectation
     private function getExpectationClosure(string $name): Closure
     {
         if (method_exists($this->coreExpectation, $name)) {
-            /** @phpstan-ignore-next-line */
+            /* @phpstan-ignore-next-line */
             return Closure::fromCallable([$this->coreExpectation, $name]);
         }
 

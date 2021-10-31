@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pest\Exceptions;
 
 use InvalidArgumentException;
@@ -11,7 +13,6 @@ final class ExpectationNotFoundException extends InvalidArgumentException
 {
     public function __construct(string $expectationName)
     {
-        parent::__construct(sprintf("Impossible to find [%s] expectation", $expectationName));
+        parent::__construct(sprintf('Impossible to find [%s] expectation', $expectationName));
     }
-
 }
