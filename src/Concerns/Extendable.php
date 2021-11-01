@@ -20,7 +20,7 @@ trait Extendable
      */
     private static array $extends = [];
 
-    /** @var array<string, array<Closure(Closure $next, mixed ...$arguments): void>> */
+    /** @var array<string, array<Closure(Closure, mixed ...$arguments): void>> */
     private static array $pipes = [];
 
     /**
@@ -60,26 +60,18 @@ trait Extendable
         }
 
         self::pipe($name, function ($next, ...$arguments) use ($handler, $filter): void {
-            /* @phpstan-ignore-next-line  */
+            /* @phpstan-ignore-next-line */
             if (!$filter($this->value, ...$arguments)) {
                 $next();
 
                 return;
             }
 
-            /** @phpstan-ignore-next-line  */
+            /** @phpstan-ignore-next-line */
             $handler = $handler->bindTo($this, $this::class);
 
             $handler(...$arguments);
         });
-    }
-
-    /**
-     * Checks if pipes are registered for a given expectation.
-     */
-    private static function hasPipes(string $name): bool
-    {
-        return array_key_exists($name, static::$pipes);
     }
 
     /**
@@ -89,20 +81,7 @@ trait Extendable
      */
     private function pipes(string $name, object $context, string $scope): array
     {
-        if (!self::hasPipes($name)) {
-            return [];
-        }
-
-        $pipes = [];
-        foreach (self::$pipes[$name] as $pipe) {
-            $pipe = $pipe->bindTo($context, $scope);
-
-            if ($pipe instanceof Closure) {
-                $pipes[] = $pipe;
-            }
-        }
-
-        return $pipes;
+        return array_map(fn (Closure $pipe) => $pipe->bindTo($context, $scope), self::$pipes[$name] ?? []);
     }
 
     /**
