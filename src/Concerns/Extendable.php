@@ -20,7 +20,7 @@ trait Extendable
      */
     private static array $extends = [];
 
-    /** @var array<string, array<Closure>> */
+    /** @var array<string, array<Closure(Closure $next, mixed ...$arguments): void>> */
     private static array $pipes = [];
 
     /**
