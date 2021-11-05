@@ -19,6 +19,10 @@
 
 We would like to extend our thanks to the following sponsors for funding Pest development. If you are interested in becoming a sponsor, please visit the Nuno Maduro's [Sponsors page](https://github.com/sponsors/nunomaduro).
 
+### Platinum Sponsors
+
+- **[Worksome](https://www.worksome.com/)**
+
 ### Premium Sponsors
 
 - **[Akaunting](https://akaunting.com)**
