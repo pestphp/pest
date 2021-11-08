@@ -21,6 +21,7 @@ We would like to extend our thanks to the following sponsors for funding Pest de
 
 ### Platinum Sponsors
 
+- **[Spatie](https://spatie.be)**
 - **[Worksome](https://www.worksome.com/)**
 
 ### Premium Sponsors
@@ -31,6 +32,5 @@ We would like to extend our thanks to the following sponsors for funding Pest de
 - **[Fathom Analytics](https://usefathom.com/)**
 - **[Meema](https://meema.io)**
 - **[Scout APM](https://scoutapm.com)**
-- **[Spatie](https://spatie.be)**
 
 Pest is an open-sourced software licensed under the **[MIT license](https://opensource.org/licenses/MIT)**.
