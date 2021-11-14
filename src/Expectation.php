@@ -29,37 +29,26 @@ use Throwable;
  */
 final class Expectation
 {
-    use Extendable {
+    use RetrievesValues, Extendable {
         __call as __extendsCall;
     }
-    use RetrievesValues;
-
-    /**
-     * The expectation value.
-     *
-     * @readonly
-     *
-     * @var mixed
-     */
-    public $value;
 
     /**
      * The exporter instance, if any.
      *
      * @readonly
-     *
-     * @var Exporter|null
      */
-    private $exporter;
+    private ?Exporter $exporter = null;
 
     /**
      * Creates a new expectation.
      *
      * @param TValue $value
      */
-    public function __construct($value)
-    {
-        $this->value = $value;
+    public function __construct(
+        public mixed $value
+    ) {
+        // ..
     }
 
     /**
@@ -69,7 +58,7 @@ final class Expectation
      *
      * @return Expectation<TValue>
      */
-    public function and($value): Expectation
+    public function and(mixed $value): Expectation
     {
         return new self($value);
     }
@@ -103,9 +92,9 @@ final class Expectation
     /**
      * Send the expectation value to Ray along with all given arguments.
      *
-     * @param mixed $arguments
+     * @param ...mixed $arguments
      */
-    public function ray(...$arguments): self
+    public function ray(mixed ...$arguments): self
     {
         if (function_exists('ray')) {
             // @phpstan-ignore-next-line
@@ -146,9 +135,9 @@ final class Expectation
      *
      * @template TSequenceValue
      *
-     * @param callable(self, self): void|TSequenceValue ...$callbacks
+     * @param (callable(self, self): void)|TSequenceValue ...$callbacks
      */
-    public function sequence(...$callbacks): Expectation
+    public function sequence(mixed ...$callbacks): Expectation
     {
         if (!is_iterable($this->value)) {
             throw new BadMethodCallException('Expectation value is not iterable.');
@@ -187,16 +176,14 @@ final class Expectation
      *
      * @template TMatchSubject of array-key
      *
-     * @param callable(): TMatchSubject|TMatchSubject $subject
+     * @param (callable(): TMatchSubject)|TMatchSubject $subject
      * @param array<TMatchSubject, (callable(Expectation<TValue>): mixed)|TValue> $expressions
      */
-    public function match($subject, array $expressions): Expectation
+    public function match(mixed $subject, array $expressions): Expectation
     {
         $subject = is_callable($subject)
             ? $subject
-            : function () use ($subject) {
-                return $subject;
-            };
+            : fn () => $subject;
 
         $subject   = $subject();
 
@@ -229,15 +216,15 @@ final class Expectation
     /**
      * Apply the callback if the given "condition" is falsy.
      *
-     * @param  (callable(): bool)|bool $condition
+     * @param (callable(): bool)|bool $condition
      * @param callable(Expectation<TValue>): mixed $callback
      */
-    public function unless($condition, callable $callback): Expectation
+    public function unless(callable|bool $condition, callable $callback): Expectation
     {
         $condition = is_callable($condition)
             ? $condition
             : static function () use ($condition): bool {
-                return (bool) $condition; // @phpstan-ignore-line
+                return $condition; // @phpstan-ignore-line
             };
 
         return $this->when(!$condition(), $callback);
@@ -246,15 +233,15 @@ final class Expectation
     /**
      * Apply the callback if the given "condition" is truthy.
      *
-     * @param  (callable(): bool)|bool $condition
+     * @param (callable(): bool)|bool $condition
      * @param callable(Expectation<TValue>): mixed $callback
      */
-    public function when($condition, callable $callback): Expectation
+    public function when(callable|bool $condition, callable $callback): Expectation
     {
         $condition = is_callable($condition)
             ? $condition
             : static function () use ($condition): bool {
-                return (bool) $condition; // @phpstan-ignore-line
+                return $condition; // @phpstan-ignore-line
             };
 
         if ($condition()) {
@@ -268,10 +255,8 @@ final class Expectation
      * Asserts that two variables have the same type and
      * value. Used on objects, it asserts that two
      * variables reference the same object.
-     *
-     * @param mixed $expected
      */
-    public function toBe($expected): Expectation
+    public function toBe(mixed $expected): Expectation
     {
         Assert::assertSame($expected, $this->value);
 
@@ -330,10 +315,8 @@ final class Expectation
 
     /**
      * Asserts that the value is greater than $expected.
-     *
-     * @param int|float $expected
      */
-    public function toBeGreaterThan($expected): Expectation
+    public function toBeGreaterThan(int|float $expected): Expectation
     {
         Assert::assertGreaterThan($expected, $this->value);
 
@@ -342,10 +325,8 @@ final class Expectation
 
     /**
      * Asserts that the value is greater than or equal to $expected.
-     *
-     * @param int|float $expected
      */
-    public function toBeGreaterThanOrEqual($expected): Expectation
+    public function toBeGreaterThanOrEqual(int|float $expected): Expectation
     {
         Assert::assertGreaterThanOrEqual($expected, $this->value);
 
@@ -354,10 +335,8 @@ final class Expectation
 
     /**
      * Asserts that the value is less than or equal to $expected.
-     *
-     * @param int|float $expected
      */
-    public function toBeLessThan($expected): Expectation
+    public function toBeLessThan(int|float $expected): Expectation
     {
         Assert::assertLessThan($expected, $this->value);
 
@@ -366,10 +345,8 @@ final class Expectation
 
     /**
      * Asserts that the value is less than $expected.
-     *
-     * @param int|float $expected
      */
-    public function toBeLessThanOrEqual($expected): Expectation
+    public function toBeLessThanOrEqual(int|float $expected): Expectation
     {
         Assert::assertLessThanOrEqual($expected, $this->value);
 
@@ -378,10 +355,8 @@ final class Expectation
 
     /**
      * Asserts that $needle is an element of the value.
-     *
-     * @param mixed $needles
      */
-    public function toContain(...$needles): Expectation
+    public function toContain(mixed ...$needles): Expectation
     {
         foreach ($needles as $needle) {
             if (is_string($this->value)) {
@@ -456,10 +431,8 @@ final class Expectation
 
     /**
      * Asserts that the value contains the property $name.
-     *
-     * @param mixed $value
      */
-    public function toHaveProperty(string $name, $value = null): Expectation
+    public function toHaveProperty(string $name, mixed $value = null): Expectation
     {
         $this->toBeObject();
 
@@ -489,10 +462,8 @@ final class Expectation
 
     /**
      * Asserts that two variables have the same value.
-     *
-     * @param mixed $expected
      */
-    public function toEqual($expected): Expectation
+    public function toEqual(mixed $expected): Expectation
     {
         Assert::assertEquals($expected, $this->value);
 
@@ -507,10 +478,8 @@ final class Expectation
      * are sorted before they are compared. When $expected and $this->value
      * are objects, each object is converted to an array containing all
      * private, protected and public attributes.
-     *
-     * @param mixed $expected
      */
-    public function toEqualCanonicalizing($expected): Expectation
+    public function toEqualCanonicalizing(mixed $expected): Expectation
     {
         Assert::assertEqualsCanonicalizing($expected, $this->value);
 
@@ -520,10 +489,8 @@ final class Expectation
     /**
      * Asserts that the absolute difference between the value and $expected
      * is lower than $delta.
-     *
-     * @param mixed $expected
      */
-    public function toEqualWithDelta($expected, float $delta): Expectation
+    public function toEqualWithDelta(mixed $expected, float $delta): Expectation
     {
         Assert::assertEqualsWithDelta($expected, $this->value, $delta);
 
@@ -555,9 +522,9 @@ final class Expectation
     /**
      * Asserts that the value is an instance of $class.
      *
-     * @param string $class
+     * @param class-string $class
      */
-    public function toBeInstanceOf($class): Expectation
+    public function toBeInstanceOf(string $class): Expectation
     {
         /* @phpstan-ignore-next-line */
         Assert::assertInstanceOf($class, $this->value);
@@ -708,11 +675,8 @@ final class Expectation
 
     /**
      * Asserts that the value array has the provided $key.
-     *
-     * @param string|int $key
-     * @param mixed      $value
      */
-    public function toHaveKey($key, $value = null): Expectation
+    public function toHaveKey(string|int $key, mixed $value = null): Expectation
     {
         if (is_object($this->value) && method_exists($this->value, 'toArray')) {
             $array = $this->value->toArray();
@@ -812,9 +776,9 @@ final class Expectation
     /**
      * Asserts that the value array matches the given array subset.
      *
-     * @param array<int|string, mixed> $array
+     * @param iterable<int|string, mixed> $array
      */
-    public function toMatchArray($array): Expectation
+    public function toMatchArray(iterable|object $array): Expectation
     {
         if (is_object($this->value) && method_exists($this->value, 'toArray')) {
             $valueAsArray = $this->value->toArray();
@@ -843,9 +807,9 @@ final class Expectation
      * Asserts that the value object matches a subset
      * of the properties of an given object.
      *
-     * @param array<string, mixed>|object $object
+     * @param iterable<string, mixed>|object $object
      */
-    public function toMatchObject($object): Expectation
+    public function toMatchObject(iterable|object $object): Expectation
     {
         foreach ((array) $object as $property => $value) {
             Assert::assertTrue(property_exists($this->value, $property));
@@ -891,7 +855,7 @@ final class Expectation
      *
      * @param (Closure(Throwable): mixed)|string $exception
      */
-    public function toThrow($exception, string $exceptionMessage = null): Expectation
+    public function toThrow(callable|string $exception, string $exceptionMessage = null): Expectation
     {
         $callback = NullClosure::create();
 
@@ -938,10 +902,8 @@ final class Expectation
 
     /**
      * Exports the given value.
-     *
-     * @param mixed $value
      */
-    private function export($value): string
+    private function export(mixed $value): string
     {
         if ($this->exporter === null) {
             $this->exporter = new Exporter();
@@ -971,10 +933,8 @@ final class Expectation
     /**
      * Dynamically calls methods on the class without any arguments
      * or creates a new higher order expectation.
-     *
-     * @return Expectation|HigherOrderExpectation
      */
-    public function __get(string $name)
+    public function __get(string $name): Expectation|OppositeExpectation|Each|HigherOrderExpectation
     {
         if (!method_exists($this, $name) && !static::hasExtend($name)) {
             return new HigherOrderExpectation($this, $this->retrieve($name, $this->value));

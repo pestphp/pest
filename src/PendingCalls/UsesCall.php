@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pest\PendingObjects;
+namespace Pest\PendingCalls;
 
 use Closure;
 use Pest\TestSuite;
@@ -24,46 +24,32 @@ final class UsesCall
      *
      * @var array<int, Closure>
      */
-    private $hooks = [];
-
-    /**
-     * Holds the class and traits.
-     *
-     * @var array<int, string>
-     */
-    private $classAndTraits;
-
-    /**
-     * Holds the base dirname here the uses call was performed.
-     *
-     * @var string
-     */
-    private $filename;
+    private array $hooks = [];
 
     /**
      * Holds the targets of the uses.
      *
      * @var array<int, string>
      */
-    private $targets;
+    private array $targets;
 
     /**
      * Holds the groups of the uses.
      *
      * @var array<int, string>
      */
-    private $groups = [];
+    private array $groups = [];
 
     /**
-     * Creates a new instance of a pending test uses.
+     * Creates a new Pending Call.
      *
      * @param array<int, string> $classAndTraits
      */
-    public function __construct(string $filename, array $classAndTraits)
-    {
-        $this->classAndTraits = $classAndTraits;
-        $this->filename       = $filename;
-        $this->targets        = [$filename];
+    public function __construct(
+        private string $filename,
+        private array $classAndTraits
+    ) {
+        $this->targets = [$filename];
     }
 
     /**
@@ -76,14 +62,12 @@ final class UsesCall
             $startChar = DIRECTORY_SEPARATOR;
 
             if ('\\' === DIRECTORY_SEPARATOR || preg_match('~\A[A-Z]:(?![^/\\\\])~i', $path) > 0) {
-                $path = (string) preg_replace_callback('~^(?P<drive>[a-z]+:\\\)~i', function ($match): string {
-                    return strtolower($match['drive']);
-                }, $path);
+                $path = (string) preg_replace_callback('~^(?P<drive>[a-z]+:\\\)~i', fn ($match): string => strtolower($match['drive']), $path);
 
                 $startChar = strtolower((string) preg_replace('~^([a-z]+:\\\).*$~i', '$1', __DIR__));
             }
 
-            return 0 === strpos($path, $startChar)
+            return str_starts_with($path, $startChar)
                 ? $path
                 : implode(DIRECTORY_SEPARATOR, [
                     dirname($this->filename),
@@ -151,7 +135,7 @@ final class UsesCall
     }
 
     /**
-     * Dispatch the creation of uses.
+     * Creates the Call.
      */
     public function __destruct()
     {

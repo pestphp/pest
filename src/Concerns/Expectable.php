@@ -14,13 +14,13 @@ trait Expectable
     /**
      * @template TValue
      *
-     * Creates a new expectation.
+     * Creates a new Expectation.
      *
      * @param TValue $value
      *
      * @return Expectation<TValue>
      */
-    public function expect($value): Expectation
+    public function expect(mixed $value): Expectation
     {
         return new Expectation($value);
     }

@@ -2,53 +2,55 @@
 
 use Pest\Exceptions\DatasetMissing;
 use Pest\Exceptions\TestAlreadyExist;
-use Pest\Factories\TestCaseFactory;
+use Pest\Factories\TestCaseMethodFactory;
 use Pest\Plugins\Environment;
 use Pest\TestSuite;
 
 it('does not allow to add the same test description twice', function () {
     $testSuite = new TestSuite(getcwd(), 'tests');
-    $test = function () {};
-    $testSuite->tests->set(new TestCaseFactory(__FILE__, 'foo', $test));
-    $testSuite->tests->set(new TestCaseFactory(__FILE__, 'foo', $test));
+    $method = new TestCaseMethodFactory('foo', 'bar', null);
+
+    $testSuite->tests->set($method);
+    $testSuite->tests->set($method);
 })->throws(
     TestAlreadyExist::class,
-    sprintf('A test with the description `%s` already exist in the filename `%s`.', 'foo', __FILE__),
+    sprintf('A test with the description `%s` already exist in the filename `%s`.', 'bar', 'foo'),
 );
 
 it('alerts users about tests with arguments but no input', function () {
     $testSuite = new TestSuite(getcwd(), 'tests');
-    $test = function (int $arg) {};
-    $testSuite->tests->set(new TestCaseFactory(__FILE__, 'foo', $test));
+
+    $method = new TestCaseMethodFactory('foo', 'bar', function (int $arg) {});
+
+    $testSuite->tests->set($method);
 })->throws(
     DatasetMissing::class,
-    sprintf("A test with the description '%s' has %d argument(s) ([%s]) and no dataset(s) provided in %s", 'foo', 1, 'int $arg', __FILE__),
+    sprintf("A test with the description '%s' has %d argument(s) ([%s]) and no dataset(s) provided in %s", 'bar', 1, 'int $arg', 'foo'),
 );
 
 it('can return an array of all test suite filenames', function () {
     $testSuite = TestSuite::getInstance(getcwd(), 'tests');
-    $test = function () {};
-    $testSuite->tests->set(new TestCaseFactory(__FILE__, 'foo', $test));
-    $testSuite->tests->set(new TestCaseFactory(__FILE__, 'bar', $test));
+
+    $testSuite->tests->set(new TestCaseMethodFactory('a', 'b', null));
+    $testSuite->tests->set(new TestCaseMethodFactory('c', 'd', null));
 
     expect($testSuite->tests->getFilenames())->toEqual([
-        __FILE__,
-        __FILE__,
+        'a',
+        'c',
     ]);
 });
 
 it('can filter the test suite filenames to those with the only method', function () {
     $testSuite = new TestSuite(getcwd(), 'tests');
-    $test = function () {};
 
-    $testWithOnly = new TestCaseFactory(__FILE__, 'foo', $test);
+    $testWithOnly = new TestCaseMethodFactory('a', 'b', null);
     $testWithOnly->only = true;
     $testSuite->tests->set($testWithOnly);
 
-    $testSuite->tests->set(new TestCaseFactory('Baz/Bar/Boo.php', 'bar', $test));
+    $testSuite->tests->set(new TestCaseMethodFactory('c', 'd', null));
 
     expect($testSuite->tests->getFilenames())->toEqual([
-        __FILE__,
+        'a',
     ]);
 });
 
@@ -59,15 +61,15 @@ it('does not filter the test suite filenames to those with the only method when 
 
     $test = function () {};
 
-    $testWithOnly = new TestCaseFactory(__FILE__, 'foo', $test);
+    $testWithOnly = new TestCaseMethodFactory('a', 'b', null);
     $testWithOnly->only = true;
     $testSuite->tests->set($testWithOnly);
 
-    $testSuite->tests->set(new TestCaseFactory('Baz/Bar/Boo.php', 'bar', $test));
+    $testSuite->tests->set(new TestCaseMethodFactory('c', 'd', null));
 
     expect($testSuite->tests->getFilenames())->toEqual([
-        __FILE__,
-        'Baz/Bar/Boo.php',
+        'a',
+        'c',
     ]);
 
     Environment::name($previousEnvironment);

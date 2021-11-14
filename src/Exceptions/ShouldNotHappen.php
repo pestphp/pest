@@ -13,7 +13,7 @@ use RuntimeException;
 final class ShouldNotHappen extends RuntimeException
 {
     /**
-     * Creates a new instance of should not happen.
+     * Creates a new Exception instance.
      */
     public function __construct(Exception $exception)
     {

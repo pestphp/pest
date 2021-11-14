@@ -15,16 +15,11 @@ use SebastianBergmann\Exporter\Exporter;
 final class OppositeExpectation
 {
     /**
-     * @var Expectation
-     */
-    private $original;
-
-    /**
      * Creates a new opposite expectation.
      */
-    public function __construct(Expectation $original)
+    public function __construct(private Expectation $original)
     {
-        $this->original = $original;
+        // ..
     }
 
     /**
@@ -37,7 +32,7 @@ final class OppositeExpectation
         foreach ($keys as $key) {
             try {
                 $this->original->toHaveKey($key);
-            } catch (ExpectationFailedException $e) {
+            } catch (ExpectationFailedException) {
                 continue;
             }
 
@@ -57,7 +52,7 @@ final class OppositeExpectation
         try {
             /* @phpstan-ignore-next-line */
             $this->original->{$name}(...$arguments);
-        } catch (ExpectationFailedException $e) {
+        } catch (ExpectationFailedException) {
             return $this->original;
         }
 
@@ -73,7 +68,7 @@ final class OppositeExpectation
         try {
             /* @phpstan-ignore-next-line */
             $this->original->{$name};
-        } catch (ExpectationFailedException $e) {
+        } catch (ExpectationFailedException) {
             return $this->original;
         }
 
@@ -90,10 +85,8 @@ final class OppositeExpectation
     {
         $exporter = new Exporter();
 
-        $toString = function ($argument) use ($exporter): string {
-            return $exporter->shortenedExport($argument);
-        };
+        $toString = fn ($argument): string => $exporter->shortenedExport($argument);
 
-        throw new ExpectationFailedException(sprintf('Expecting %s not %s %s.', $toString($this->original->value), strtolower((string) preg_replace('/(?<!\ )[A-Z]/', ' $0', $name)), implode(' ', array_map(function ($argument) use ($toString): string { return $toString($argument); }, $arguments))));
+        throw new ExpectationFailedException(sprintf('Expecting %s not %s %s.', $toString($this->original->value), strtolower((string) preg_replace('/(?<!\ )[A-Z]/', ' $0', $name)), implode(' ', array_map(fn ($argument): string => $toString($argument), $arguments))));
     }
 }

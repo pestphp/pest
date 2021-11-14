@@ -18,7 +18,7 @@ final class AfterEachRepository
     /**
      * @var array<string, Closure>
      */
-    private $state = [];
+    private array $state = [];
 
     /**
      * Sets a after each closure.
@@ -41,6 +41,7 @@ final class AfterEachRepository
 
         return ChainableClosure::from(function (): void {
             if (class_exists(Mockery::class)) {
+                /* @phpstan-ignore-next-line */
                 if ($container = Mockery::getContainer()) {
                     /* @phpstan-ignore-next-line */
                     $this->addToAssertionCount($container->mockery_getExpectationCount());

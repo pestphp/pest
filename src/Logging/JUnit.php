@@ -16,7 +16,6 @@ use function class_exists;
 use DOMDocument;
 use DOMElement;
 use Exception;
-use function get_class;
 use function method_exists;
 use Pest\Concerns\Testable;
 use PHPUnit\Framework\AssertionFailedError;
@@ -42,65 +41,50 @@ use function trim;
  */
 final class JUnit extends Printer implements TestListener
 {
-    /**
-     * @var DOMDocument
-     */
-    private $document;
+    private DOMDocument $document;
+
+    private DOMElement $root;
 
     /**
-     * @var DOMElement
+     * @var array<int, DOMElement>
      */
-    private $root;
-
-    /**
-     * @var DOMElement[]
-     */
-    private $testSuites = [];
+    private array $testSuites = [];
 
     /**
      * @var int[]
      */
-    private $testSuiteTests = [0];
+    private array $testSuiteTests = [0];
 
     /**
      * @var int[]
      */
-    private $testSuiteAssertions = [0];
+    private array $testSuiteAssertions = [0];
 
     /**
      * @var int[]
      */
-    private $testSuiteErrors = [0];
+    private array $testSuiteErrors = [0];
 
     /**
      * @var int[]
      */
-    private $testSuiteWarnings = [0];
+    private array $testSuiteWarnings = [0];
 
     /**
      * @var int[]
      */
-    private $testSuiteFailures = [0];
+    private array $testSuiteFailures = [0];
 
     /**
      * @var int[]
      */
-    private $testSuiteSkipped = [0];
+    private array $testSuiteSkipped = [0];
 
-    /**
-     * @var int[]|float[]
-     */
-    private $testSuiteTimes = [0];
+    private array $testSuiteTimes = [0];
 
-    /**
-     * @var int
-     */
-    private $testSuiteLevel = 0;
+    private int $testSuiteLevel = 0;
 
-    /**
-     * @var DOMElement|null
-     */
-    private $currentTestCase;
+    private ?DOMElement $currentTestCase = null;
 
     public function __construct(string $out)
     {
@@ -190,7 +174,7 @@ final class JUnit extends Printer implements TestListener
                 }
 
                 $testSuite->setAttribute('file', $fileName);
-            } catch (ReflectionException $e) {
+            } catch (ReflectionException) {
                 // @ignoreException
             }
         }
@@ -313,7 +297,7 @@ final class JUnit extends Printer implements TestListener
             $testCase->setAttribute('class', $test->getPrintableTestCaseName());
             $testCase->setAttribute('classname', str_replace('\\', '.', $test->getPrintableTestCaseName()));
             // @phpstan-ignore-next-line
-            $testCase->setAttribute('file', $test->__getFileName());
+            $testCase->setAttribute('file', $test->__getFilename());
         }
 
         $this->currentTestCase = $testCase;
@@ -409,7 +393,7 @@ final class JUnit extends Printer implements TestListener
         if ($t instanceof ExceptionWrapper) {
             $fault->setAttribute('type', $t->getClassName());
         } else {
-            $fault->setAttribute('type', get_class($t));
+            $fault->setAttribute('type', $t::class);
         }
 
         $this->currentTestCase->appendChild($fault);

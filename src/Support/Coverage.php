@@ -162,7 +162,7 @@ final class Coverage
 
             $lastKey = count($array) - 1;
 
-            if (array_key_exists($lastKey, $array) && strpos($array[$lastKey], '..') !== false) {
+            if (array_key_exists($lastKey, $array) && str_contains($array[$lastKey], '..')) {
                 [$from]          = explode('..', $array[$lastKey]);
                 $array[$lastKey] = $line > $from ? sprintf('%s..%s', $from, $line) : sprintf('%s..%s', $line, $from);
 

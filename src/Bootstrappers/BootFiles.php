@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Pest\Actions;
+namespace Pest\Bootstrappers;
 
 use Pest\Support\Str;
 use function Pest\testDirectory;
-use PHPUnit\Util\FileLoader;
+use Pest\TestSuite;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
 /**
  * @internal
  */
-final class LoadStructure
+final class BootFiles
 {
     /**
      * The Pest convention.
@@ -21,23 +21,22 @@ final class LoadStructure
      * @var array<int, string>
      */
     private const STRUCTURE = [
-        'Expectations.php',
+        'Datasets',
         'Datasets.php',
+        'Expectations',
+        'Expectations.php',
+        'Helpers',
         'Helpers.php',
         'Pest.php',
-        'Datasets',
     ];
 
     /**
-     * Validates the configuration in the given `configuration`.
+     * Boots the Subscribers.
      */
-    public static function in(string $rootPath): void
+    public function __invoke(): void
     {
+        $rootPath  = TestSuite::getInstance()->rootPath;
         $testsPath = $rootPath . DIRECTORY_SEPARATOR . testDirectory();
-
-        $load = function ($filename): bool {
-            return file_exists($filename) && (bool) FileLoader::checkAndLoad($filename);
-        };
 
         foreach (self::STRUCTURE as $filename) {
             $filename = sprintf('%s%s%s', $testsPath, DIRECTORY_SEPARATOR, $filename);
@@ -50,14 +49,21 @@ final class LoadStructure
                 $directory = new RecursiveDirectoryIterator($filename);
                 $iterator  = new RecursiveIteratorIterator($directory);
                 foreach ($iterator as $file) {
-                    $filename = $file->__toString();
-                    if (Str::endsWith($filename, '.php') && file_exists($filename)) {
-                        require_once $filename;
-                    }
+                    $this->load($file->__toString());
                 }
             } else {
-                $load($filename);
+                $this->load($filename);
             }
+        }
+    }
+
+    /**
+     * Loads the given filename, if possible.
+     */
+    private function load(string $filename): void
+    {
+        if (Str::endsWith($filename, '.php') && file_exists($filename)) {
+            include_once $filename;
         }
     }
 }

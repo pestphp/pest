@@ -15,7 +15,7 @@ use Symfony\Component\Console\Exception\ExceptionInterface;
 final class TestCaseAlreadyInUse extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
 {
     /**
-     * Creates a new instance of test case already in use.
+     * Creates a new Exception instance.
      */
     public function __construct(string $inUse, string $newOne, string $folder)
     {

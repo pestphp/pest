@@ -7,7 +7,7 @@ namespace Tests\CustomTestCase;
 use function PHPUnit\Framework\assertTrue;
 use PHPUnit\Framework\TestCase;
 
-class CustomTestCase extends TestCase
+abstract class CustomTestCase extends TestCase
 {
     public function assertCustomTrue()
     {

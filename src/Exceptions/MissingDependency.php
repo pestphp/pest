@@ -15,7 +15,7 @@ use Symfony\Component\Console\Exception\ExceptionInterface;
 final class MissingDependency extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
 {
     /**
-     * Creates a new instance of missing dependency.
+     * Creates a new Exception instance.
      */
     public function __construct(string $feature, string $dependency)
     {

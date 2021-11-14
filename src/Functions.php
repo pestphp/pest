@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 use Pest\Datasets;
 use Pest\Expectation;
-use Pest\PendingObjects\AfterEachCall;
-use Pest\PendingObjects\BeforeEachCall;
-use Pest\PendingObjects\TestCall;
-use Pest\PendingObjects\UsesCall;
+use Pest\PendingCalls\AfterEachCall;
+use Pest\PendingCalls\BeforeEachCall;
+use Pest\PendingCalls\TestCall;
+use Pest\PendingCalls\UsesCall;
 use Pest\Support\Backtrace;
 use Pest\Support\Extendable;
 use Pest\Support\HigherOrderTapProxy;
@@ -18,10 +18,8 @@ use PHPUnit\Framework\TestCase;
  * Creates a new expectation.
  *
  * @param mixed $value the Value
- *
- * @return Expectation|Extendable
  */
-function expect($value = null)
+function expect($value = null): Expectation|Extendable
 {
     if (func_num_args() === 0) {
         return new Extendable(Expectation::class);
@@ -60,7 +58,7 @@ if (!function_exists('dataset')) {
      *
      * @param Closure|iterable<int|string, mixed> $dataset
      */
-    function dataset(string $name, $dataset): void
+    function dataset(string $name, Closure|iterable $dataset): void
     {
         Datasets::set($name, $dataset);
     }

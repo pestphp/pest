@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pest\PendingObjects;
+namespace Pest\PendingCalls;
 
 use Closure;
 use Pest\Support\Backtrace;
@@ -17,47 +17,30 @@ use Pest\TestSuite;
 final class AfterEachCall
 {
     /**
-     * Holds the test suite.
-     *
-     * @var TestSuite
+     * The "afterEach" closure.
      */
-    private $testSuite;
+    private Closure $closure;
 
     /**
-     * Holds the filename.
-     *
-     * @var string
+     * The calls that should be proxied.
      */
-    private $filename;
+    private HigherOrderMessageCollection $proxies;
 
     /**
-     * Holds the before each closure.
-     *
-     * @var Closure
+     * Creates a new Pending Call.
      */
-    private $closure;
-
-    /**
-     * Holds calls that should be proxied.
-     *
-     * @var HigherOrderMessageCollection
-     */
-    private $proxies;
-
-    /**
-     * Creates a new instance of before each call.
-     */
-    public function __construct(TestSuite $testSuite, string $filename, Closure $closure = null)
-    {
-        $this->testSuite = $testSuite;
-        $this->filename  = $filename;
-        $this->closure   = $closure instanceof Closure ? $closure : NullClosure::create();
+    public function __construct(
+        private TestSuite $testSuite,
+        private string $filename,
+        Closure $closure = null
+    ) {
+        $this->closure = $closure instanceof Closure ? $closure : NullClosure::create();
 
         $this->proxies = new HigherOrderMessageCollection();
     }
 
     /**
-     * Dispatch the creation of each call.
+     * Creates the Call.
      */
     public function __destruct()
     {

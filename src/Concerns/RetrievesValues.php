@@ -19,7 +19,7 @@ trait RetrievesValues
      *
      * @return TRetrievableValue|null
      */
-    private function retrieve(string $key, $value, $default = null)
+    private function retrieve(string $key, mixed $value, mixed $default = null): mixed
     {
         if (is_array($value)) {
             return $value[$key] ?? $default;

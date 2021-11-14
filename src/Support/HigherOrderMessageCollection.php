@@ -12,7 +12,7 @@ final class HigherOrderMessageCollection
     /**
      * @var array<int, HigherOrderMessage>
      */
-    private $messages = [];
+    private array $messages = [];
 
     /**
      * Adds a new higher order message to the collection.
@@ -63,9 +63,7 @@ final class HigherOrderMessageCollection
     {
         return array_reduce(
             $this->messages,
-            static function (int $total, HigherOrderMessage $message) use ($name): int {
-                return $total + (int) ($name === $message->name);
-            },
+            static fn (int $total, HigherOrderMessage $message): int => $total + (int) ($name === $message->name),
             0,
         );
     }

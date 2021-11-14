@@ -2,55 +2,53 @@
 
 use Pest\Support\Str;
 
-global $globalHook;
-
-// HACK: we have to determine our $globalHook->calls baseline. This is because
+// HACK: we have to determine our $_SERVER['globalHook-]>calls baseline. This is because
 // two other tests are executed before this one due to filename ordering.
 $args   = $_SERVER['argv'] ?? [];
 $single = (isset($args[1]) && Str::endsWith(__FILE__, $args[1])) || ($_SERVER['PEST_PARALLEL'] ?? false);
 $offset = $single ? 0 : 2;
 
-uses()->beforeAll(function () use ($globalHook, $offset) {
-    expect($globalHook)
+uses()->beforeAll(function () use ($offset) {
+    expect($_SERVER['globalHook'])
         ->toHaveProperty('beforeAll')
-        ->and($globalHook->beforeAll)
+        ->and($_SERVER['globalHook']->beforeAll)
         ->toBe(0)
-        ->and($globalHook->calls)
+        ->and($_SERVER['globalHook']->calls)
         ->beforeAll
         ->toBe(1 + $offset);
 
-    $globalHook->beforeAll = 1;
-    $globalHook->calls->beforeAll++;
+    $_SERVER['globalHook']->beforeAll = 1;
+    $_SERVER['globalHook']->calls->beforeAll++;
 });
 
-beforeAll(function () use ($globalHook, $offset) {
-    expect($globalHook)
+beforeAll(function () use ($offset) {
+    expect($_SERVER['globalHook'])
         ->toHaveProperty('beforeAll')
-        ->and($globalHook->beforeAll)
+        ->and($_SERVER['globalHook']->beforeAll)
         ->toBe(1)
-        ->and($globalHook->calls)
+        ->and($_SERVER['globalHook']->calls)
         ->beforeAll
         ->toBe(2 + $offset);
 
-    $globalHook->beforeAll = 2;
-    $globalHook->calls->beforeAll++;
+    $_SERVER['globalHook']->beforeAll = 2;
+    $_SERVER['globalHook']->calls->beforeAll++;
 });
 
-test('global beforeAll execution order', function () use ($globalHook, $offset) {
-    expect($globalHook)
+test('global beforeAll execution order', function () use ($offset) {
+    expect($_SERVER['globalHook'])
         ->toHaveProperty('beforeAll')
-        ->and($globalHook->beforeAll)
+        ->and($_SERVER['globalHook']->beforeAll)
         ->toBe(2)
-        ->and($globalHook->calls)
+        ->and($_SERVER['globalHook']->calls)
         ->beforeAll
         ->toBe(3 + $offset);
 });
 
-it('only gets called once per file', function () use ($globalHook, $offset) {
-    expect($globalHook)
+it('only gets called once per file', function () use ($offset) {
+    expect($_SERVER['globalHook'])
         ->beforeAll
         ->toBe(2)
-        ->and($globalHook->calls)
+        ->and($_SERVER['globalHook']->calls)
         ->beforeAll
         ->toBe(3 + $offset);
 });

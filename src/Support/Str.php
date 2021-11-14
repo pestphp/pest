@@ -33,7 +33,7 @@ final class Str
      */
     public static function startsWith(string $target, string $search): bool
     {
-        return substr($target, 0, strlen($search)) === $search;
+        return str_starts_with($target, $search);
     }
 
     /**
@@ -47,5 +47,15 @@ final class Str
         }
 
         return substr($target, -$length) === $search;
+    }
+
+    /**
+     * Makes the given string evaluable by an `eval`.
+     */
+    public static function evaluable(string $code): string
+    {
+        $code = str_replace(' ', '_', $code);
+
+        return (string) preg_replace('/[^A-Z_a-z0-9\\\\]/', '', $code);
     }
 }

@@ -13,12 +13,14 @@ use Closure;
 trait Extendable
 {
     /**
+     * The list of extends.
+     *
      * @var array<string, Closure>
      */
-    private static $extends = [];
+    private static array $extends = [];
 
     /**
-     * Register a custom extend.
+     * Register a new extend.
      */
     public static function extend(string $name, Closure $extend): void
     {
@@ -26,7 +28,7 @@ trait Extendable
     }
 
     /**
-     * Checks if extend is registered.
+     * Checks if given extend name is registered.
      */
     public static function hasExtend(string $name): bool
     {
@@ -37,10 +39,8 @@ trait Extendable
      * Dynamically handle calls to the class.
      *
      * @param array<int, mixed> $parameters
-     *
-     * @return mixed
      */
-    public function __call(string $method, array $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         if (!static::hasExtend($method)) {
             throw new BadMethodCallException("$method is not a callable method name.");

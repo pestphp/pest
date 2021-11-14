@@ -10,11 +10,11 @@ namespace Pest\Contracts\Plugins;
 interface HandlesArguments
 {
     /**
-     * Allows to handle custom command line arguments.
+     * Adds arguments before of the Test Suite execution.
      *
-     * @param array<int, string> $arguments
+     * @param array<int, string> $argv
      *
-     * @return array<int, string> the updated list of arguments
+     * @return array<int, string>
      */
-    public function handleArguments(array $arguments): array;
+    public function handleArguments(array $argv): array;
 }
