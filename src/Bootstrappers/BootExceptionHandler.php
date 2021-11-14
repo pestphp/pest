@@ -16,6 +16,8 @@ final class BootExceptionHandler
      */
     public function __invoke(): void
     {
-        (new Collision\Provider())->register();
+        $handler = new Collision\Provider();
+
+        $handler->register();
     }
 }

@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace Pest\Factories;
 
-use Closure;
 use ParseError;
 use Pest\Concerns;
 use Pest\Contracts\HasPrintableTestCaseName;
 use Pest\Datasets;
+use Pest\Exceptions\DatasetMissing;
 use Pest\Exceptions\ShouldNotHappen;
-use Pest\Support\HigherOrderMessageCollection;
+use Pest\Exceptions\TestAlreadyExist;
+use Pest\Factories\Concerns\HigherOrderable;
+use Pest\Plugins\Environment;
+use Pest\Support\Reflection;
 use Pest\Support\Str;
 use Pest\TestSuite;
-use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
@@ -22,22 +24,17 @@ use RuntimeException;
  */
 final class TestCaseFactory
 {
-    /**
-     * Determines if the Test Case will be the "only" being run.
-     */
-    public bool $only = false;
+    use HigherOrderable;
 
     /**
-     * The Test Case closure.
-     */
-    public Closure $test;
-
-    /**
-     * The Test Case Dataset, if any.
+     * The list of annotations.
      *
-     * @var array<Closure|iterable<int|string, mixed>|string>
+     * @var array<int, class-string>
      */
-    public array $datasets = [];
+    private static array $annotations = [
+        Annotations\Depends::class,
+        Annotations\Groups::class,
+    ];
 
     /**
      * The FQN of the Test Case class.
@@ -47,7 +44,14 @@ final class TestCaseFactory
     public string $class = TestCase::class;
 
     /**
-     * An array of FQN of the Test Case traits.
+     * The list of class methods.
+     *
+     * @var array<string, TestCaseMethodFactory>
+     */
+    public array $methods = [];
+
+    /**
+     * The list of class traits.
      *
      * @var array <int, class-string>
      */
@@ -57,80 +61,47 @@ final class TestCaseFactory
     ];
 
     /**
-     * The higher order messages for the factory that are proxyable.
-     */
-    public HigherOrderMessageCollection $factoryProxies;
-
-    /**
-     * The higher order messages that are proxyable.
-     */
-    public HigherOrderMessageCollection $proxies;
-
-    /**
-     * The higher order messages that are chainable.
-     */
-    public HigherOrderMessageCollection $chains;
-
-    /**
      * Creates a new Factory instance.
      */
     public function __construct(
-        public string $filename,
-        public ?string $description,
-        Closure $closure = null)
-    {
-        $this->test = $closure ?? fn () => Assert::getCount() > 0 ?: self::markTestIncomplete();
+        public string $filename
+    ) {
+        $this->bootHigherOrderable();
+    }
 
-        $this->factoryProxies = new HigherOrderMessageCollection();
-        $this->proxies        = new HigherOrderMessageCollection();
-        $this->chains         = new HigherOrderMessageCollection();
+    public function make(): void
+    {
+        $methods = array_filter($this->methods, function ($method) {
+            return count($onlyTestCases = $this->methodsUsingOnly()) === 0 || in_array($method, $onlyTestCases, true);
+        });
+
+        if (count($this->methods) > 0) {
+            $this->evaluate($this->filename, $methods);
+        }
     }
 
     /**
-     * Makes the Test Case classes.
+     * Returns all the "only" methods.
      *
-     * @return array<int, TestCase>
+     * @return array<int, TestCaseMethodFactory>
      */
-    public function make(): array
+    public function methodsUsingOnly(): array
     {
-        if ($this->description === null) {
-            throw ShouldNotHappen::fromMessage('Description can not be empty.');
+        if (Environment::name() === Environment::CI) {
+            return [];
         }
 
-        $chains      = $this->chains;
-        $proxies     = $this->proxies;
-        $factoryTest = $this->test;
-
-        $testClosure = function () use ($chains, $proxies, $factoryTest): mixed {
-            $proxies->proxy($this);
-            $chains->chain($this);
-
-            /* @phpstan-ignore-next-line */
-            return call_user_func(Closure::bind($factoryTest, $this, $this::class), ...func_get_args());
-        };
-
-        $className = $this->makeClassFromFilename($this->filename);
-
-        $createTest = function ($description, $data) use ($className, $testClosure) {
-            $testCase = new $className($testClosure, $description, $data);
-            $this->factoryProxies->proxy($testCase);
-
-            return $testCase;
-        };
-
-        $datasets = Datasets::resolve($this->description, $this->datasets);
-
-        return array_map($createTest, array_keys($datasets), $datasets);
+        return array_filter($this->methods, static fn ($method): bool => $method->only);
     }
 
     /**
-     * Makes a Fully Qualified Class Name from the given filename.
+     * Creates a Test Case class using a runtime evaluate.
      */
-    public function makeClassFromFilename(string $filename): string
+    public function evaluate(string $filename, array $methods): string
     {
         if ('\\' === DIRECTORY_SEPARATOR) {
             // In case Windows, strtolower drive name, like in UsesCall.
-            $filename = (string) preg_replace_callback('~^(?P<drive>[a-z]+:\\\)~i', fn ($match): string => strtolower($match['drive']), $filename);
+            $filename = (string) preg_replace_callback('~^(?P<drive>[a-z]+:\\\)~i', static fn ($match): string => strtolower($match['drive']), $filename);
         }
 
         $filename     = str_replace('\\\\', '\\', addslashes((string) realpath($filename)));
@@ -152,7 +123,9 @@ final class TestCaseFactory
         }
 
         $hasPrintableTestCaseClassFQN = sprintf('\%s', HasPrintableTestCaseName::class);
-        $traitsCode                   = sprintf('use %s;', implode(', ', array_map(fn ($trait): string => sprintf('\%s', $trait), $this->traits)));
+        $traitsCode                   = sprintf('use %s;', implode(', ', array_map(
+                static fn ($trait): string => sprintf('\%s', $trait), $this->traits))
+        );
 
         $partsFQN  = explode('\\', $classFQN);
         $className = array_pop($partsFQN);
@@ -164,14 +137,65 @@ final class TestCaseFactory
             $classFQN .= $className;
         }
 
+        $methodsCode = implode('', array_map(static function (TestCaseMethodFactory $method): string {
+            $methodName = Str::evaluable($method->description);
+
+            $datasetsCode = '';
+            $annotations = ['@test'];
+
+            foreach (self::$annotations as $annotation) {
+                $annotations = (new $annotation())->add($method, $annotations);
+            }
+
+            if (!empty($method->datasets)) {
+                $dataProviderName = $methodName . '_dataset';
+                $annotations[] = "@dataProvider $dataProviderName";
+
+                Datasets::with($method->filename, $methodName, $method->datasets);
+
+                $datasetsCode = <<<EOF
+
+                public function $dataProviderName()
+                {
+                    return __PestDatasets::get(self::\$__filename, "$methodName");
+                }
+
+EOF;
+            }
+
+            $annotations = implode('', array_map(
+                static fn ($annotation) => sprintf("\n                 * %s", $annotation), $annotations,
+            ));
+
+            return <<<EOF
+
+                /**$annotations
+                 */
+                public function $methodName()
+                {
+                    return \$this->__runTest(
+                        \$this->__test,
+                        ...func_get_args(),
+                    );
+                }
+
+                $datasetsCode
+EOF;
+        }, $methods));
+
         try {
             eval("
                 namespace $namespace;
+
+                use Pest\Datasets as __PestDatasets;
+                use Pest\TestSuite as __PestTestSuite;
 
                 final class $className extends $baseClass implements $hasPrintableTestCaseClassFQN {
                     $traitsCode
 
                     private static \$__filename = '$filename';
+
+                    $methodsCode
                 }
             ");
         } catch (ParseError $caught) {
@@ -182,11 +206,40 @@ final class TestCaseFactory
     }
 
     /**
-     * Determine if the test case will receive argument input from Pest, or not.
+     * Adds the given Method to the Test Case.
      */
-    public function __receivesArguments(): bool
+    public function addMethod(TestCaseMethodFactory $method): void
     {
-        return count($this->datasets) > 0
-            || $this->factoryProxies->count('addDependencies') > 0;
+        if ($method->description === null) {
+            throw ShouldNotHappen::fromMessage('The test description may not be empty.');
+        }
+
+        if (isset($this->methods[$method->description])) {
+            throw new TestAlreadyExist($method->filename, $method->description);
+        }
+
+        if (!$method->receivesArguments()) {
+            $arguments = Reflection::getFunctionArguments($method->closure);
+
+            if (count($arguments) > 0) {
+                throw new DatasetMissing($method->filename, $method->description, $arguments);
+            }
+        }
+
+        $this->methods[$method->description] = $method;
+    }
+
+    /**
+     * Gets a Method by the given name.
+     */
+    public function getMethod(string $methodName): TestCaseMethodFactory
+    {
+        foreach ($this->methods as $method) {
+            if (Str::evaluable($method->description) === $methodName) {
+                return $method;
+            }
+        }
+
+        throw ShouldNotHappen::fromMessage(sprintf('Method %s not found.', $methodName));
     }
 }

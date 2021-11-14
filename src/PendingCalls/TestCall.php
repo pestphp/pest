@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pest\PendingCalls;
 
 use Closure;
-use Pest\Factories\TestCaseFactory;
+use Pest\Factories\TestCaseMethodFactory;
 use Pest\Support\Backtrace;
 use Pest\Support\HigherOrderCallables;
 use Pest\Support\NullClosure;
@@ -22,7 +22,7 @@ final class TestCall
     /**
      * The Test Case Factory.
      */
-    private TestCaseFactory $testCaseFactory;
+    private TestCaseMethodFactory $testCaseMethod;
 
     /**
      * If test call is descriptionLess.
@@ -38,7 +38,7 @@ final class TestCall
         string $description = null,
         Closure $closure = null
     ) {
-        $this->testCaseFactory = new TestCaseFactory($filename, $description, $closure);
+        $this->testCaseMethod  = new TestCaseMethodFactory($filename, $description, $closure);
         $this->descriptionLess = $description === null;
     }
 
@@ -48,7 +48,7 @@ final class TestCall
     public function throws(string $exception, string $exceptionMessage = null): TestCall
     {
         if (class_exists($exception)) {
-            $this->testCaseFactory
+            $this->testCaseMethod
                 ->proxies
                 ->add(Backtrace::file(), Backtrace::line(), 'expectException', [$exception]);
         } else {
@@ -56,7 +56,7 @@ final class TestCall
         }
 
         if (is_string($exceptionMessage)) {
-            $this->testCaseFactory
+            $this->testCaseMethod
                 ->proxies
                 ->add(Backtrace::file(), Backtrace::line(), 'expectExceptionMessage', [$exceptionMessage]);
         }
@@ -90,10 +90,10 @@ final class TestCall
      *
      * @param array<\Closure|iterable<int|string, mixed>|string> $data
      */
-    public function with(...$data): TestCall
+    public function with(Closure|iterable|string ...$data): TestCall
     {
         foreach ($data as $dataset) {
-            $this->testCaseFactory->datasets[] = $dataset;
+            $this->testCaseMethod->datasets[] = $dataset;
         }
 
         return $this;
@@ -102,11 +102,11 @@ final class TestCall
     /**
      * Sets the test depends.
      */
-    public function depends(string ...$tests): TestCall
+    public function depends(string ...$depends): TestCall
     {
-        $this->testCaseFactory
-            ->factoryProxies
-            ->add(Backtrace::file(), Backtrace::line(), 'addDependencies', [$tests]);
+        foreach ($depends as $depend) {
+            $this->testCaseMethod->depends[] = $depend;
+        }
 
         return $this;
     }
@@ -116,7 +116,7 @@ final class TestCall
      */
     public function only(): TestCall
     {
-        $this->testCaseFactory->only = true;
+        $this->testCaseMethod->only = true;
 
         return $this;
     }
@@ -126,9 +126,9 @@ final class TestCall
      */
     public function group(string ...$groups): TestCall
     {
-        $this->testCaseFactory
-            ->factoryProxies
-            ->add(Backtrace::file(), Backtrace::line(), 'addGroups', [$groups]);
+        foreach ($groups as $group) {
+            $this->testCaseMethod->groups[] = $group;
+        }
 
         return $this;
     }
@@ -153,7 +153,7 @@ final class TestCall
         /** @var callable(): bool $condition */
         $condition = $condition->bindTo(null);
 
-        $this->testCaseFactory
+        $this->testCaseMethod
             ->chains
             ->addWhen($condition, Backtrace::file(), Backtrace::line(), 'markTestSkipped', [$message]);
 
@@ -185,16 +185,16 @@ final class TestCall
      */
     private function addChain(string $name, array $arguments = null): self
     {
-        $this->testCaseFactory
+        $this->testCaseMethod
             ->chains
             ->add(Backtrace::file(), Backtrace::line(), $name, $arguments);
 
         if ($this->descriptionLess) {
             $exporter = new Exporter();
-            if ($this->testCaseFactory->description !== null) {
-                $this->testCaseFactory->description .= ' → ';
+            if ($this->testCaseMethod->description !== null) {
+                $this->testCaseMethod->description .= ' → ';
             }
-            $this->testCaseFactory->description .= $arguments === null
+            $this->testCaseMethod->description .= $arguments === null
                 ? $name
                 : sprintf('%s %s', $name, $exporter->shortenedRecursiveExport($arguments));
         }
@@ -207,6 +207,6 @@ final class TestCall
      */
     public function __destruct()
     {
-        $this->testSuite->tests->set($this->testCaseFactory);
+        $this->testSuite->tests->set($this->testCaseMethod);
     }
 }

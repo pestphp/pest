@@ -23,6 +23,13 @@ final class Datasets
     private static array $datasets = [];
 
     /**
+     * Holds the withs.
+     *
+     * @var array<string, \Closure|iterable|string>
+     */
+    private static array $withs = [];
+
+    /**
      * Sets the given.
      *
      * @param Closure|iterable<int|string, mixed> $data
@@ -37,34 +44,42 @@ final class Datasets
     }
 
     /**
+     * Sets the given.
+     *
+     * @param Closure|iterable<int|string, mixed> $data
+     */
+    public static function with(string $filename, string $description, Closure|iterable|string $with): void
+    {
+        self::$withs[$filename . '>>>' . $description] = $with;
+    }
+
+    /**
      * @return Closure|iterable<int|string, mixed>
      */
-    public static function get(string $name): Closure|iterable
+    public static function get(string $filename, string $description): Closure|iterable
     {
-        if (!array_key_exists($name, self::$datasets)) {
-            throw new DatasetDoesNotExist($name);
-        }
+        $dataset = self::$withs[$filename . '>>>' . $description];
 
-        return self::$datasets[$name];
+        return self::resolve($description, $dataset);
     }
 
     /**
      * Resolves the current dataset to an array value.
      *
-     * @param array<Closure|iterable<int|string, mixed>|string> $datasets
+     * @param array<Closure|iterable<int|string, mixed>|string> $dataset
      *
-     * @return array<string, mixed>
+     * @return array<string, mixed>|null
      */
-    public static function resolve(string $description, array $datasets): array
+    public static function resolve(string $description, array $dataset): array|null
     {
         /* @phpstan-ignore-next-line */
-        if (empty($datasets)) {
-            return [$description => []];
+        if (empty($dataset)) {
+            return null;
         }
 
-        $datasets = self::processDatasets($datasets);
+        $dataset = self::processDatasets($dataset);
 
-        $datasetCombinations = self::getDataSetsCombinations($datasets);
+        $datasetCombinations = self::getDataSetsCombinations($dataset);
 
         $dataSetDescriptions = [];
         $dataSetValues       = [];
@@ -114,7 +129,11 @@ final class Datasets
             $processedDataset = [];
 
             if (is_string($data)) {
-                $datasets[$index] = self::get($data);
+                if (!isset(self::$datasets[$data])) {
+                    throw new DatasetDoesNotExist($data);
+                }
+
+                $datasets[$index] = self::$datasets[$data];
             }
 
             if (is_callable($datasets[$index])) {

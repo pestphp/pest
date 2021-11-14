@@ -43,7 +43,7 @@ final class TeamCity extends DefaultResultPrinter
     /**
      * Creates a new printer instance.
      */
-    public function __construct(resource|string|null $out, bool $verbose, string $colors)
+    public function __construct(string|null $out, bool $verbose, string $colors)
     {
         parent::__construct($out, $verbose, $colors);
         $this->phpunitTeamCity = new BaseTeamCity($out, $verbose, $colors);

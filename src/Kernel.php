@@ -18,7 +18,6 @@ final class Kernel
      */
     private static array $bootstrappers = [
         Bootstrappers\BootExceptionHandler::class,
-        Bootstrappers\BootEmitter::class,
         Bootstrappers\BootSubscribers::class,
         Bootstrappers\BootFiles::class,
     ];

@@ -25,6 +25,8 @@ final class EnsureTestsAreLoaded implements LoadedSubscriber
      */
     public function notify(Loaded $event): void
     {
+        /*
+
         $this->removeWarnings(self::$testSuite);
 
         $testSuites = [];
@@ -47,6 +49,7 @@ final class EnsureTestsAreLoaded implements LoadedSubscriber
             }
             self::$testSuite->addTestSuite($testTestSuite);
         }
+         */
     }
 
     /**

@@ -54,8 +54,7 @@ final class HigherOrderMessage
         try {
             return is_array($this->arguments)
                 ? Reflection::call($target, $this->name, $this->arguments)
-                : $target->{$this->name};
-            /* @phpstan-ignore-line */
+                : $target->{$this->name}; /* @phpstan-ignore-line */
         } catch (Throwable $throwable) {
             Reflection::setPropertyValue($throwable, 'file', $this->filename);
             Reflection::setPropertyValue($throwable, 'line', $this->line);
