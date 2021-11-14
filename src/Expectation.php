@@ -74,11 +74,9 @@ final class Expectation
     /**
      * Dump the expectation value and end the script.
      *
-     * @param mixed $arguments
-     *
      * @return never
      */
-    public function dd(...$arguments): void
+    public function dd(mixed ...$arguments): void
     {
         if (function_exists('dd')) {
             dd($this->value, ...$arguments);
@@ -91,13 +89,10 @@ final class Expectation
 
     /**
      * Send the expectation value to Ray along with all given arguments.
-     *
-     * @param ...mixed $arguments
      */
     public function ray(mixed ...$arguments): self
     {
         if (function_exists('ray')) {
-            // @phpstan-ignore-next-line
             ray($this->value, ...$arguments);
         }
 
@@ -224,7 +219,7 @@ final class Expectation
         $condition = is_callable($condition)
             ? $condition
             : static function () use ($condition): bool {
-                return $condition; // @phpstan-ignore-line
+                return $condition;
             };
 
         return $this->when(!$condition(), $callback);
@@ -241,7 +236,7 @@ final class Expectation
         $condition = is_callable($condition)
             ? $condition
             : static function () use ($condition): bool {
-                return $condition; // @phpstan-ignore-line
+                return $condition;
             };
 
         if ($condition()) {
@@ -371,6 +366,8 @@ final class Expectation
 
     /**
      * Asserts that the value starts with $expected.
+     *
+     * @param non-empty-string $expected
      */
     public function toStartWith(string $expected): Expectation
     {
@@ -381,6 +378,8 @@ final class Expectation
 
     /**
      * Asserts that the value ends with $expected.
+     *
+     * @param non-empty-string $expected
      */
     public function toEndWith(string $expected): Expectation
     {
@@ -526,7 +525,6 @@ final class Expectation
      */
     public function toBeInstanceOf(string $class): Expectation
     {
-        /* @phpstan-ignore-next-line */
         Assert::assertInstanceOf($class, $this->value);
 
         return $this;

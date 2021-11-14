@@ -81,7 +81,7 @@ final class TestCaseMethodFactory
         $method = $this;
 
         return function () use ($testCase, $method, $closure): mixed { // @phpstan-ignore-line
-            /** @var TestCase $this */
+            /* @var TestCase $this */
 
             $testCase->proxies->proxy($this);
             $method->proxies->proxy($this);

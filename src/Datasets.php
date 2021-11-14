@@ -129,7 +129,7 @@ final class Datasets
             $processedDataset = [];
 
             if (is_string($data)) {
-                if (! array_key_exists($data, self::$datasets)) {
+                if (!array_key_exists($data, self::$datasets)) {
                     throw new DatasetDoesNotExist($data);
                 }
 

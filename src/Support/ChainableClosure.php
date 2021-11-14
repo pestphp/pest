@@ -6,7 +6,6 @@ namespace Pest\Support;
 
 use Closure;
 use Pest\Exceptions\ShouldNotHappen;
-use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
@@ -19,7 +18,7 @@ final class ChainableClosure
     public static function from(Closure $closure, Closure $next): Closure
     {
         return function () use ($closure, $next): void {
-            if (! is_object($this)) { // @phpstan-ignore-line
+            if (!is_object($this)) { // @phpstan-ignore-line
                 throw ShouldNotHappen::fromMessage('$this not bound to chainable closure.');
             }
 

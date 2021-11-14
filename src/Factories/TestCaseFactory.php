@@ -71,11 +71,13 @@ final class TestCaseFactory
 
     public function make(): void
     {
-        $methods = array_filter($this->methods, function ($method) {
-            return count($onlyTestCases = $this->methodsUsingOnly()) === 0 || in_array($method, $onlyTestCases, true);
+        $methodsUsingOnly = $this->methodsUsingOnly();
+
+        $methods = array_filter($this->methods, function ($method) use ($methodsUsingOnly) {
+            return count($methodsUsingOnly) === 0 || in_array($method, $methodsUsingOnly, true);
         });
 
-        if (count($this->methods) > 0) {
+        if (count($methods) > 0) {
             $this->evaluate($this->filename, $methods);
         }
     }
@@ -91,7 +93,7 @@ final class TestCaseFactory
             return [];
         }
 
-        return array_filter($this->methods, static fn ($method): bool => $method->only);
+        return array_values(array_filter($this->methods, static fn ($method): bool => $method->only));
     }
 
     /**
@@ -147,7 +149,7 @@ final class TestCaseFactory
                 $annotations = (new $annotation())->add($method, $annotations);
             }
 
-            if (!empty($method->datasets)) {
+            if (count($method->datasets) > 0) {
                 $dataProviderName = $methodName . '_dataset';
                 $annotations[] = "@dataProvider $dataProviderName";
 
@@ -214,7 +216,7 @@ EOF;
             throw ShouldNotHappen::fromMessage('The test description may not be empty.');
         }
 
-        if (isset($this->methods[$method->description])) {
+        if (array_key_exists($method->description, $this->methods)) {
             throw new TestAlreadyExist($method->filename, $method->description);
         }
 

@@ -90,7 +90,7 @@ final class TestRepository
      */
     public function set(TestCaseMethodFactory $method): void
     {
-        if (! array_key_exists($method->filename, $this->testCases)) {
+        if (!array_key_exists($method->filename, $this->testCases)) {
             $this->testCases[$method->filename] = new TestCaseFactory($method->filename);
         }
 

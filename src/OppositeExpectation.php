@@ -69,9 +69,8 @@ final class OppositeExpectation
     public function __get(string $name): Expectation
     {
         try {
-            /** @throws ExpectationFailedException */
             $this->original->{$name}; // @phpstan-ignore-line
-        } catch (ExpectationFailedException) {
+        } catch (ExpectationFailedException) {  // @phpstan-ignore-line
             return $this->original;
         }
 
