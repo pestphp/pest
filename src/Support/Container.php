@@ -63,7 +63,6 @@ final class Container
      */
     private function build(string $id): object
     {
-        /** @phpstan-ignore-next-line */
         $reflectionClass = new ReflectionClass($id);
 
         if ($reflectionClass->isInstantiable()) {

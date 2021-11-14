@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Pest\Support;
 
 use Closure;
+use Pest\Exceptions\ShouldNotHappen;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
@@ -17,9 +19,11 @@ final class ChainableClosure
     public static function from(Closure $closure, Closure $next): Closure
     {
         return function () use ($closure, $next): void {
-            /* @phpstan-ignore-next-line */
+            if (! is_object($this)) { // @phpstan-ignore-line
+                throw ShouldNotHappen::fromMessage('$this not bound to chainable closure.');
+            }
+
             call_user_func_array(Closure::bind($closure, $this, $this::class), func_get_args());
-            /* @phpstan-ignore-next-line */
             call_user_func_array(Closure::bind($next, $this, $this::class), func_get_args());
         };
     }
@@ -30,9 +34,7 @@ final class ChainableClosure
     public static function fromStatic(Closure $closure, Closure $next): Closure
     {
         return static function () use ($closure, $next): void {
-            /* @phpstan-ignore-next-line */
             call_user_func_array(Closure::bind($closure, null, self::class), func_get_args());
-            /* @phpstan-ignore-next-line */
             call_user_func_array(Closure::bind($next, null, self::class), func_get_args());
         };
     }

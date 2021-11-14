@@ -74,7 +74,7 @@ final class TestCall
         $condition = is_callable($condition)
             ? $condition
             : static function () use ($condition): bool {
-                return $condition; // @phpstan-ignore-line
+                return $condition;
             };
 
         if ($condition()) {

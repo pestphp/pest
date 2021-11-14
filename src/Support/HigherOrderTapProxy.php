@@ -31,8 +31,7 @@ final class HigherOrderTapProxy
      */
     public function __set(string $property, $value): void
     {
-        // @phpstan-ignore-next-line
-        $this->target->{$property} = $value;
+        $this->target->{$property} = $value; // @phpstan-ignore-line
     }
 
     /**
@@ -43,8 +42,8 @@ final class HigherOrderTapProxy
     public function __get(string $property)
     {
         try {
-            // @phpstan-ignore-next-line
-            return $this->target->{$property};
+            /** @throws Throwable */
+            return $this->target->{$property}; // @phpstan-ignore-line
         } catch (Throwable $throwable) {
             Reflection::setPropertyValue($throwable, 'file', Backtrace::file());
             Reflection::setPropertyValue($throwable, 'line', Backtrace::line());

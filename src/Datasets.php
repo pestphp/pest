@@ -46,7 +46,7 @@ final class Datasets
     /**
      * Sets the given.
      *
-     * @param Closure|iterable<int|string, mixed> $data
+     * @param Closure|iterable<int|string, mixed>|string $with
      */
     public static function with(string $filename, string $description, Closure|iterable|string $with): void
     {
@@ -129,7 +129,7 @@ final class Datasets
             $processedDataset = [];
 
             if (is_string($data)) {
-                if (!isset(self::$datasets[$data])) {
+                if (! array_key_exists($data, self::$datasets)) {
                     throw new DatasetDoesNotExist($data);
                 }
 

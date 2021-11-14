@@ -64,6 +64,6 @@ final class Kernel
      */
     public function shutdown(): void
     {
-        // TODO
+        // ..
     }
 }

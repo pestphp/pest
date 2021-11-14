@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pest\Plugins\Actions;
 
 use Pest\Contracts\Plugins;
@@ -19,7 +21,7 @@ final class AddsOutput
     {
         $plugins = Loader::getPlugins(Plugins\AddsOutput::class);
 
-        /** @var Plugins\AddsOutpu $plugin */
+        /** @var Plugins\AddsOutput $plugin */
         foreach ($plugins as $plugin) {
             $exitCode = $plugin->addOutput($exitCode);
         }

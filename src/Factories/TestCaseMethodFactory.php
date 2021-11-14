@@ -17,7 +17,6 @@ use PHPUnit\Framework\TestCase;
 final class TestCaseMethodFactory
 {
     use HigherOrderable;
-
     /**
      * Determines if the Test Case will be the "only" being run.
      */
@@ -54,7 +53,7 @@ final class TestCaseMethodFactory
     ) {
         if ($this->closure === null) {
             $this->closure = function () {
-                Assert::getCount() > 0 ?: self::markTestIncomplete();
+                Assert::getCount() > 0 ?: self::markTestIncomplete(); // @phpstan-ignore-line
             };
         }
 
@@ -66,7 +65,7 @@ final class TestCaseMethodFactory
      */
     public function getClosure(TestCase $concrete): Closure
     {
-        $concrete::flush();
+        $concrete::flush(); // @phpstan-ignore-line
 
         if ($this->description === null) {
             throw ShouldNotHappen::fromMessage('Description can not be empty.');
@@ -81,7 +80,9 @@ final class TestCaseMethodFactory
 
         $method = $this;
 
-        return function () use ($testCase, $method, $closure): mixed {
+        return function () use ($testCase, $method, $closure): mixed { // @phpstan-ignore-line
+            /** @var TestCase $this */
+
             $testCase->proxies->proxy($this);
             $method->proxies->proxy($this);
 

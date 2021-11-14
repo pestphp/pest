@@ -18,7 +18,6 @@ final class BootSubscribers
      * @var array<int, class-string>
      */
     private static array $subscribers = [
-        Subscribers\EnsureTestsAreLoaded::class,
         Subscribers\EnsureConfigurationIsValid::class,
         Subscribers\EnsureConfigurationDefaults::class,
     ];

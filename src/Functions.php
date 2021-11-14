@@ -14,18 +14,20 @@ use Pest\Support\HigherOrderTapProxy;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Creates a new expectation.
- *
- * @param mixed $value the Value
- */
-function expect($value = null): Expectation|Extendable
-{
-    if (func_num_args() === 0) {
-        return new Extendable(Expectation::class);
-    }
+if (!function_exists('expect')) {
+    /**
+     * Creates a new expectation.
+     *
+     * @param mixed $value the Value
+     */
+    function expect($value = null): Expectation|Extendable
+    {
+        if (func_num_args() === 0) {
+            return new Extendable(Expectation::class);
+        }
 
-    return new Expectation($value);
+        return new Expectation($value);
+    }
 }
 
 if (!function_exists('beforeAll')) {
