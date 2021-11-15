@@ -80,7 +80,7 @@ final class TestRepository
         }
     }
 
-    public function get($filename): TestCaseFactory
+    public function get(string $filename): TestCaseFactory
     {
         return $this->testCases[$filename];
     }

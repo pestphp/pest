@@ -9,6 +9,7 @@ use Pest\Exceptions\DatasetAlreadyExist;
 use Pest\Exceptions\DatasetDoesNotExist;
 use SebastianBergmann\Exporter\Exporter;
 use Traversable;
+use function sprintf;
 
 /**
  * @internal
@@ -25,14 +26,14 @@ final class Datasets
     /**
      * Holds the withs.
      *
-     * @var array<string, \Closure|iterable|string>
+     * @var array<string, Closure|iterable<mixed>|string>
      */
     private static array $withs = [];
 
     /**
      * Sets the given.
      *
-     * @param Closure|iterable<int|string, mixed> $data
+     * @phpstan-param Closure|iterable<int|string, mixed> $data
      */
     public static function set(string $name, Closure|iterable $data): void
     {
@@ -46,7 +47,7 @@ final class Datasets
     /**
      * Sets the given.
      *
-     * @param Closure|iterable<int|string, mixed>|string $with
+     * @phpstan-param  Closure|iterable<int|string, mixed>|string $with
      */
     public static function with(string $filename, string $description, Closure|iterable|string $with): void
     {
@@ -119,7 +120,7 @@ final class Datasets
     /**
      * @param array<Closure|iterable<int|string, mixed>|string> $datasets
      *
-     * @return array<array>
+     * @return array<array<mixed>>
      */
     private static function processDatasets(array $datasets): array
     {
@@ -159,9 +160,9 @@ final class Datasets
     }
 
     /**
-     * @param array<array> $combinations
+     * @param array<array<mixed>> $combinations
      *
-     * @return array<array>
+     * @return array<array<mixed>>
      */
     private static function getDataSetsCombinations(array $combinations): array
     {
@@ -187,9 +188,9 @@ final class Datasets
         $exporter = new Exporter();
 
         if (is_int($key)) {
-            return \sprintf('(%s)', $exporter->shortenedRecursiveExport($data));
+            return sprintf('(%s)', $exporter->shortenedRecursiveExport($data));
         }
 
-        return \sprintf('data set "%s"', $key);
+        return sprintf('data set "%s"', $key);
     }
 }

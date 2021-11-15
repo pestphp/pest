@@ -98,6 +98,8 @@ final class TestCaseFactory
 
     /**
      * Creates a Test Case class using a runtime evaluate.
+     *
+     * @param array<TestCaseMethodFactory> $methods
      */
     public function evaluate(string $filename, array $methods): string
     {
