@@ -25,20 +25,20 @@ use PHPUnit\Framework\ExpectationFailedException;
  */
 final class Expectation
 {
-    use Extendable {
+    use RetrievesValues, Extendable {
         __call as __extendsCall;
     }
+
     use RetrievesValues;
 
-    /** @var CoreExpectation */
-    private $coreExpectation;
+    private CoreExpectation $coreExpectation;
 
     /**
      * Creates a new Expectation.
      *
      * @param TValue $value
      */
-    public function __construct($value)
+    public function __construct(mixed $value)
     {
         $this->coreExpectation = new CoreExpectation($value);
     }
@@ -50,7 +50,7 @@ final class Expectation
      *
      * @return Expectation<TValue>
      */
-    public function and($value): Expectation
+    public function and(mixed $value): Expectation
     {
         return new self($value);
     }
@@ -66,11 +66,9 @@ final class Expectation
     /**
      * Dump the expectation value and end the script.
      *
-     * @param mixed $arguments
-     *
-     * @return never
+     * @phpstan-return never
      */
-    public function dd(...$arguments): void
+    public function dd(mixed ...$arguments): void
     {
         if (function_exists('dd')) {
             dd($this->value, ...$arguments);
@@ -83,13 +81,10 @@ final class Expectation
 
     /**
      * Send the expectation value to Ray along with all given arguments.
-     *
-     * @param mixed $arguments
      */
-    public function ray(...$arguments): self
+    public function ray(mixed ...$arguments): self
     {
         if (function_exists('ray')) {
-            // @phpstan-ignore-next-line
             ray($this->value, ...$arguments);
         }
 
@@ -127,11 +122,9 @@ final class Expectation
      *
      * @template TSequenceValue
      *
-     * @param callable(self, self): void|TSequenceValue ...$callbacks
-     *
-     * @noinspection PhpParamsInspection
+     * @phpstan-param (callable(self, self): void)|TSequenceValue ...$callbacks
      */
-    public function sequence(...$callbacks): Expectation
+    public function sequence(mixed ...$callbacks): Expectation
     {
         if (!is_iterable($this->value)) {
             throw new BadMethodCallException('Expectation value is not iterable.');
@@ -170,16 +163,14 @@ final class Expectation
      *
      * @template TMatchSubject of array-key
      *
-     * @param callable(): TMatchSubject|TMatchSubject                             $subject
+     * @param (callable(): TMatchSubject)|TMatchSubject $subject
      * @param array<TMatchSubject, (callable(Expectation<TValue>): mixed)|TValue> $expressions
      */
-    public function match($subject, array $expressions): Expectation
+    public function match(mixed $subject, array $expressions): Expectation
     {
         $subject = is_callable($subject)
             ? $subject
-            : function () use ($subject) {
-                return $subject;
-            };
+            : fn () => $subject;
 
         $subject = $subject();
 
@@ -212,15 +203,15 @@ final class Expectation
     /**
      * Apply the callback if the given "condition" is falsy.
      *
-     * @param (callable(): bool)|bool              $condition
-     * @param callable(Expectation<TValue>): mixed $callback
+     * @phpstan-param (callable(): bool)|bool $condition
+     * @phpstan-param callable(Expectation<TValue>): mixed $callback
      */
-    public function unless($condition, callable $callback): Expectation
+    public function unless(callable|bool $condition, callable $callback): Expectation
     {
         $condition = is_callable($condition)
             ? $condition
             : static function () use ($condition): bool {
-                return (bool) $condition; // @phpstan-ignore-line
+                return $condition;
             };
 
         return $this->when(!$condition(), $callback);
@@ -229,15 +220,15 @@ final class Expectation
     /**
      * Apply the callback if the given "condition" is truthy.
      *
-     * @param (callable(): bool)|bool              $condition
-     * @param callable(Expectation<TValue>): mixed $callback
+     * @phpstan-param (callable(): bool)|bool $condition
+     * @phpstan-param callable(Expectation<TValue>): mixed $callback
      */
-    public function when($condition, callable $callback): Expectation
+    public function when(callable|bool $condition, callable $callback): Expectation
     {
         $condition = is_callable($condition)
             ? $condition
             : static function () use ($condition): bool {
-                return (bool) $condition; // @phpstan-ignore-line
+                return $condition;
             };
 
         if ($condition()) {
@@ -251,7 +242,7 @@ final class Expectation
      * Dynamically handle calls to the class or
      * creates a new higher order expectation.
      *
-     * @param array<int, mixed> $parameters
+     * @phpstan-param array<int, mixed> $parameters
      *
      * @return HigherOrderExpectation|Expectation
      */
@@ -288,6 +279,7 @@ final class Expectation
         throw PipeException::expectationNotFound($name);
     }
 
+
     private function hasExpectation(string $name): bool
     {
         if (method_exists($this->coreExpectation, $name)) {
@@ -304,10 +296,8 @@ final class Expectation
     /**
      * Dynamically calls methods on the class without any arguments
      * or creates a new higher order expectation.
-     *
-     * @return Expectation|HigherOrderExpectation
      */
-    public function __get(string $name)
+    public function __get(string $name): Expectation|OppositeExpectation|Each|HigherOrderExpectation
     {
         if ($name === 'value') {
             return $this->coreExpectation->value;

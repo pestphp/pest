@@ -18,7 +18,7 @@ final class AfterEachRepository
     /**
      * @var array<string, Closure>
      */
-    private $state = [];
+    private array $state = [];
 
     /**
      * Sets a after each closure.

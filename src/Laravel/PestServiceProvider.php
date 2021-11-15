@@ -14,7 +14,7 @@ use Pest\Laravel\Commands\PestTestCommand;
 final class PestServiceProvider extends ServiceProvider
 {
     /**
-     * Register artisan commands.
+     * Register Artisan Commands.
      */
     public function register(): void
     {

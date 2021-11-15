@@ -13,15 +13,12 @@ use ReflectionParameter;
  */
 final class Container
 {
-    /**
-     * @var self
-     */
-    private static $instance;
+    private static ?Container $instance = null;
 
     /**
      * @var array<string, mixed>
      */
-    private $instances = [];
+    private array $instances = [];
 
     /**
      * Gets a new or already existing container.
@@ -66,7 +63,6 @@ final class Container
      */
     private function build(string $id): object
     {
-        /** @phpstan-ignore-next-line */
         $reflectionClass = new ReflectionClass($id);
 
         if ($reflectionClass->isInstantiable()) {

@@ -17,7 +17,7 @@ use Pest\TestSuite;
 final class PestDatasetCommand extends Command
 {
     /**
-     * The console command name.
+     * The Console Command name.
      *
      * @var string
      */
@@ -25,7 +25,7 @@ final class PestDatasetCommand extends Command
                                          {--test-directory=tests : The name of the tests directory}';
 
     /**
-     * The console command description.
+     * The Console Command description.
      *
      * @var string
      */

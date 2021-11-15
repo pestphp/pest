@@ -5,19 +5,14 @@ declare(strict_types=1);
 namespace Pest\Support;
 
 /**
- * Credits: most of this class methods and implementations
- * belongs to the Arr helper of laravel/framework project
- * (https://github.com/laravel/framework).
- *
  * @internal
  */
 final class Arr
 {
     /**
-     * @param array<mixed> $array
-     * @param string|int   $key
+     * Checks if the given array has the given key.
      */
-    public static function has(array $array, $key): bool
+    public static function has(array $array, string|int $key): bool
     {
         $key = (string) $key;
 
@@ -37,13 +32,9 @@ final class Arr
     }
 
     /**
-     * @param array<mixed> $array
-     * @param string|int   $key
-     * @param null         $default
-     *
-     * @return array|mixed|null
+     * Gets the given key value.
      */
-    public static function get(array $array, $key, $default = null)
+    public static function get(array $array, string|int $key, mixed $default = null): mixed
     {
         $key = (string) $key;
 
@@ -51,7 +42,7 @@ final class Arr
             return $array[$key];
         }
 
-        if (strpos($key, '.') === false) {
+        if (!str_contains($key, '.')) {
             return $array[$key] ?? $default;
         }
 

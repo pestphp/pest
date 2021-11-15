@@ -10,7 +10,7 @@ namespace Pest\Contracts\Plugins;
 interface AddsOutput
 {
     /**
-     * Allows to add custom output after the test suite was executed.
+     * Adds output after the Test Suite execution.
      */
-    public function addOutput(int $testReturnCode): int;
+    public function addOutput(int $exitCode): int;
 }

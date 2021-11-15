@@ -15,7 +15,7 @@ use Symfony\Component\Console\Exception\ExceptionInterface;
 final class AttributeNotSupportedYet extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
 {
     /**
-     * Creates a new instance of attribute not supported yet.
+     * Creates a new Exception instance.
      */
     public function __construct(string $attribute, string $value)
     {

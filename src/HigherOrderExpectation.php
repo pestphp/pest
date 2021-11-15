@@ -17,39 +17,17 @@ final class HigherOrderExpectation
     use Expectable;
     use RetrievesValues;
 
-    /**
-     * @var Expectation
-     */
-    private $original;
+    private Expectation|Each $expectation;
 
-    /**
-     * @var Expectation|Each
-     */
-    private $expectation;
+    private bool $opposite = false;
 
-    /**
-     * @var bool
-     */
-    private $opposite = false;
-
-    /**
-     * @var bool
-     */
-    private $shouldReset = false;
-
-    /**
-     * @var string
-     */
-    private $name;
+    private bool $shouldReset = false;
 
     /**
      * Creates a new higher order expectation.
-     *
-     * @param mixed $value
      */
-    public function __construct(Expectation $original, $value)
+    public function __construct(private Expectation $original, mixed $value)
     {
-        $this->original     = $original;
         $this->expectation  = $this->expect($value);
     }
 
@@ -72,7 +50,7 @@ final class HigherOrderExpectation
      *
      * @return Expectation<TValue>
      */
-    public function and($value): Expectation
+    public function and(mixed $value): Expectation
     {
         return $this->expect($value);
     }
@@ -118,10 +96,8 @@ final class HigherOrderExpectation
 
     /**
      * Retrieve the applicable value based on the current reset condition.
-     *
-     * @return mixed
      */
-    private function getValue()
+    private function getValue(): mixed
     {
         return $this->shouldReset ? $this->original->value : $this->expectation->value;
     }

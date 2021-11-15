@@ -15,7 +15,7 @@ use Symfony\Component\Console\Exception\ExceptionInterface;
 final class InvalidConsoleArgument extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
 {
     /**
-     * Creates a new instance of should not happen.
+     * Creates a new Exception instance.
      */
     public function __construct(string $message)
     {

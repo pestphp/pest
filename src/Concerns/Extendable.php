@@ -6,7 +6,6 @@ namespace Pest\Concerns;
 
 use BadMethodCallException;
 use Closure;
-use Pest\Expectation;
 
 /**
  * @internal
@@ -14,15 +13,17 @@ use Pest\Expectation;
 trait Extendable
 {
     /**
+     * The list of extends.
+     *
      * @var array<string, Closure>
      */
-    private static $extends = [];
+    private static array $extends = [];
 
     /** @var array<string, array<Closure>> */
-    private static $pipes = [];
+    private static array $pipes = [];
 
     /**
-     * Register a custom extend.
+     * Register a new extend.
      */
     public static function extend(string $name, Closure $extend): void
     {
@@ -30,7 +31,7 @@ trait Extendable
     }
 
     /**
-     * Register a a pipe to be applied before an expectation is checked.
+     * Register a pipe to be applied before an expectation is checked.
      */
     public static function pipe(string $name, Closure $pipe): void
     {
@@ -39,10 +40,8 @@ trait Extendable
 
     /**
      * Recister an interceptor that should replace an existing expectation.
-     *
-     * @param string|Closure $filter
      */
-    public static function intercept(string $name, $filter, Closure $handler): void
+    public static function intercept(string $name, string|Closure $filter, Closure $handler): void
     {
         if (is_string($filter)) {
             $filter = function ($value) use ($filter): bool {
@@ -65,7 +64,7 @@ trait Extendable
     }
 
     /**
-     * Checks if extend is registered.
+     * Checks if given extend name is registered.
      */
     public static function hasExtend(string $name): bool
     {
@@ -102,10 +101,8 @@ trait Extendable
      * Dynamically handle calls to the class.
      *
      * @param array<int, mixed> $parameters
-     *
-     * @return mixed
      */
-    public function __call(string $method, array $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         if (!static::hasExtend($method)) {
             throw new BadMethodCallException("$method is not a callable method name.");

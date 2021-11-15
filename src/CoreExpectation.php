@@ -34,25 +34,23 @@ final class CoreExpectation
      *
      * @readonly
      *
-     * @var mixed
+     * @var TValue
      */
-    public $value;
+    public mixed $value;
 
     /**
      * The exporter instance, if any.
      *
      * @readonly
-     *
-     * @var Exporter|null
      */
-    private $exporter;
+    private Exporter|null $exporter;
 
     /**
      * Creates a new expectation.
      *
      * @param TValue $value
      */
-    public function __construct($value)
+    public function __construct(mixed $value)
     {
         $this->value = $value;
     }
@@ -61,10 +59,8 @@ final class CoreExpectation
      * Asserts that two variables have the same type and
      * value. Used on objects, it asserts that two
      * variables reference the same object.
-     *
-     * @param mixed $expected
      */
-    public function toBe($expected): CoreExpectation
+    public function toBe(mixed $expected): CoreExpectation
     {
         Assert::assertSame($expected, $this->value);
 
@@ -123,10 +119,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is greater than $expected.
-     *
-     * @param int|float $expected
      */
-    public function toBeGreaterThan($expected): CoreExpectation
+    public function toBeGreaterThan(int|float $expected): CoreExpectation
     {
         Assert::assertGreaterThan($expected, $this->value);
 
@@ -135,10 +129,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is greater than or equal to $expected.
-     *
-     * @param int|float $expected
      */
-    public function toBeGreaterThanOrEqual($expected): CoreExpectation
+    public function toBeGreaterThanOrEqual(int|float $expected): CoreExpectation
     {
         Assert::assertGreaterThanOrEqual($expected, $this->value);
 
@@ -147,10 +139,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is less than or equal to $expected.
-     *
-     * @param int|float $expected
      */
-    public function toBeLessThan($expected): CoreExpectation
+    public function toBeLessThan(int|float $expected): CoreExpectation
     {
         Assert::assertLessThan($expected, $this->value);
 
@@ -159,10 +149,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is less than $expected.
-     *
-     * @param int|float $expected
      */
-    public function toBeLessThanOrEqual($expected): CoreExpectation
+    public function toBeLessThanOrEqual(int|float $expected): CoreExpectation
     {
         Assert::assertLessThanOrEqual($expected, $this->value);
 
@@ -171,10 +159,8 @@ final class CoreExpectation
 
     /**
      * Asserts that $needle is an element of the value.
-     *
-     * @param mixed $needles
      */
-    public function toContain(...$needles): CoreExpectation
+    public function toContain(mixed ...$needles): CoreExpectation
     {
         foreach ($needles as $needle) {
             if (is_string($this->value)) {
@@ -189,6 +175,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value starts with $expected.
+     *
+     * @param non-empty-string $expected
      */
     public function toStartWith(string $expected): CoreExpectation
     {
@@ -199,6 +187,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value ends with $expected.
+     *
+     * @param non-empty-string $expected
      */
     public function toEndWith(string $expected): CoreExpectation
     {
@@ -234,7 +224,7 @@ final class CoreExpectation
             return $this;
         }
 
-        throw new BadMethodCallException('Expectation value length is not countable.');
+        throw new BadMethodCallException('CoreExpectation value length is not countable.');
     }
 
     /**
@@ -249,10 +239,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value contains the property $name.
-     *
-     * @param mixed $value
      */
-    public function toHaveProperty(string $name, $value = null): CoreExpectation
+    public function toHaveProperty(string $name, mixed $value = null): CoreExpectation
     {
         $this->toBeObject();
 
@@ -282,10 +270,8 @@ final class CoreExpectation
 
     /**
      * Asserts that two variables have the same value.
-     *
-     * @param mixed $expected
      */
-    public function toEqual($expected): CoreExpectation
+    public function toEqual(mixed $expected): CoreExpectation
     {
         Assert::assertEquals($expected, $this->value);
 
@@ -300,10 +286,8 @@ final class CoreExpectation
      * are sorted before they are compared. When $expected and $this->value
      * are objects, each object is converted to an array containing all
      * private, protected and public attributes.
-     *
-     * @param mixed $expected
      */
-    public function toEqualCanonicalizing($expected): CoreExpectation
+    public function toEqualCanonicalizing(mixed $expected): CoreExpectation
     {
         Assert::assertEqualsCanonicalizing($expected, $this->value);
 
@@ -313,10 +297,8 @@ final class CoreExpectation
     /**
      * Asserts that the absolute difference between the value and $expected
      * is lower than $delta.
-     *
-     * @param mixed $expected
      */
-    public function toEqualWithDelta($expected, float $delta): CoreExpectation
+    public function toEqualWithDelta(mixed $expected, float $delta): CoreExpectation
     {
         Assert::assertEqualsWithDelta($expected, $this->value, $delta);
 
@@ -347,10 +329,11 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is an instance of $class.
+     *
+     * @param class-string $class
      */
     public function toBeInstanceOf(string $class): CoreExpectation
     {
-        /* @phpstan-ignore-next-line */
         Assert::assertInstanceOf($class, $this->value);
 
         return $this;
@@ -499,11 +482,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value array has the provided $key.
-     *
-     * @param string|int $key
-     * @param mixed      $value
      */
-    public function toHaveKey($key, $value = null): CoreExpectation
+    public function toHaveKey(string|int $key, mixed $value = null): CoreExpectation
     {
         if (is_object($this->value) && method_exists($this->value, 'toArray')) {
             $array = $this->value->toArray();
@@ -513,8 +493,6 @@ final class CoreExpectation
 
         try {
             Assert::assertTrue(Arr::has($array, $key));
-
-            /* @phpstan-ignore-next-line */
         } catch (ExpectationFailedException $exception) {
             throw new ExpectationFailedException("Failed asserting that an array has the key '$key'", $exception->getComparisonFailure());
         }
@@ -603,9 +581,9 @@ final class CoreExpectation
     /**
      * Asserts that the value array matches the given array subset.
      *
-     * @param array<int|string, mixed> $array
+     * @phpstan-param iterable<int|string, mixed> $array
      */
-    public function toMatchArray(array $array): CoreExpectation
+    public function toMatchArray(iterable|object $array): CoreExpectation
     {
         if (is_object($this->value) && method_exists($this->value, 'toArray')) {
             $valueAsArray = $this->value->toArray();
@@ -634,9 +612,9 @@ final class CoreExpectation
      * Asserts that the value object matches a subset
      * of the properties of an given object.
      *
-     * @param array<string, mixed>|object $object
+     * @phpstan-param iterable<string, mixed>|object $object
      */
-    public function toMatchObject($object): CoreExpectation
+    public function toMatchObject(iterable|object $object): CoreExpectation
     {
         foreach ((array) $object as $property => $value) {
             Assert::assertTrue(property_exists($this->value, $property));
@@ -672,6 +650,7 @@ final class CoreExpectation
      */
     public function toMatchConstraint(Constraint $constraint): CoreExpectation
     {
+
         Assert::assertThat($this->value, $constraint);
 
         return $this;
@@ -680,9 +659,9 @@ final class CoreExpectation
     /**
      * Asserts that executing value throws an exception.
      *
-     * @param (Closure(Throwable): mixed)|string $exception
+     * @phpstan-param (Closure(Throwable): mixed)|string $exception
      */
-    public function toThrow($exception, string $exceptionMessage = null): CoreExpectation
+    public function toThrow(callable|string $exception, string $exceptionMessage = null): CoreExpectation
     {
         $callback = NullClosure::create();
 
@@ -729,10 +708,8 @@ final class CoreExpectation
 
     /**
      * Exports the given value.
-     *
-     * @param mixed $value
      */
-    private function export($value): string
+    private function export(mixed $value): string
     {
         if ($this->exporter === null) {
             $this->exporter = new Exporter();

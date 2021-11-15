@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Pest\PendingObjects;
+namespace Pest\PendingCalls;
 
 use Closure;
-use Pest\Factories\TestCaseFactory;
+use Pest\Factories\TestCaseMethodFactory;
 use Pest\Support\Backtrace;
 use Pest\Support\HigherOrderCallables;
 use Pest\Support\NullClosure;
@@ -20,39 +20,25 @@ use SebastianBergmann\Exporter\Exporter;
 final class TestCall
 {
     /**
-     * Holds the test suite.
-     *
-     * @readonly
-     *
-     * @var TestSuite
+     * The Test Case Factory.
      */
-    private $testSuite;
-
-    /**
-     * Holds the test case factory.
-     *
-     * @readonly
-     *
-     * @var TestCaseFactory
-     */
-    private $testCaseFactory;
+    private TestCaseMethodFactory $testCaseMethod;
 
     /**
      * If test call is descriptionLess.
-     *
-     * @readonly
-     *
-     * @var bool
      */
-    private $descriptionLess = false;
+    private bool $descriptionLess;
 
     /**
-     * Creates a new instance of a pending test call.
+     * Creates a new Pending Call.
      */
-    public function __construct(TestSuite $testSuite, string $filename, string $description = null, Closure $closure = null)
-    {
-        $this->testCaseFactory = new TestCaseFactory($filename, $description, $closure);
-        $this->testSuite       = $testSuite;
+    public function __construct(
+        private TestSuite $testSuite,
+        string $filename,
+        string $description = null,
+        Closure $closure = null
+    ) {
+        $this->testCaseMethod  = new TestCaseMethodFactory($filename, $description, $closure);
         $this->descriptionLess = $description === null;
     }
 
@@ -62,7 +48,7 @@ final class TestCall
     public function throws(string $exception, string $exceptionMessage = null): TestCall
     {
         if (class_exists($exception)) {
-            $this->testCaseFactory
+            $this->testCaseMethod
                 ->proxies
                 ->add(Backtrace::file(), Backtrace::line(), 'expectException', [$exception]);
         } else {
@@ -70,7 +56,7 @@ final class TestCall
         }
 
         if (is_string($exceptionMessage)) {
-            $this->testCaseFactory
+            $this->testCaseMethod
                 ->proxies
                 ->add(Backtrace::file(), Backtrace::line(), 'expectExceptionMessage', [$exceptionMessage]);
         }
@@ -83,12 +69,12 @@ final class TestCall
      *
      * @param (callable(): bool)|bool $condition
      */
-    public function throwsIf($condition, string $exception, string $exceptionMessage = null): TestCall
+    public function throwsIf(callable|bool $condition, string $exception, string $exceptionMessage = null): TestCall
     {
         $condition = is_callable($condition)
             ? $condition
             : static function () use ($condition): bool {
-                return (bool) $condition; // @phpstan-ignore-line
+                return $condition;
             };
 
         if ($condition()) {
@@ -104,10 +90,10 @@ final class TestCall
      *
      * @param array<\Closure|iterable<int|string, mixed>|string> $data
      */
-    public function with(...$data): TestCall
+    public function with(Closure|iterable|string ...$data): TestCall
     {
         foreach ($data as $dataset) {
-            $this->testCaseFactory->datasets[] = $dataset;
+            $this->testCaseMethod->datasets[] = $dataset;
         }
 
         return $this;
@@ -116,11 +102,11 @@ final class TestCall
     /**
      * Sets the test depends.
      */
-    public function depends(string ...$tests): TestCall
+    public function depends(string ...$depends): TestCall
     {
-        $this->testCaseFactory
-            ->factoryProxies
-            ->add(Backtrace::file(), Backtrace::line(), 'addDependencies', [$tests]);
+        foreach ($depends as $depend) {
+            $this->testCaseMethod->depends[] = $depend;
+        }
 
         return $this;
     }
@@ -130,7 +116,7 @@ final class TestCall
      */
     public function only(): TestCall
     {
-        $this->testCaseFactory->only = true;
+        $this->testCaseMethod->only = true;
 
         return $this;
     }
@@ -140,19 +126,17 @@ final class TestCall
      */
     public function group(string ...$groups): TestCall
     {
-        $this->testCaseFactory
-            ->factoryProxies
-            ->add(Backtrace::file(), Backtrace::line(), 'addGroups', [$groups]);
+        foreach ($groups as $group) {
+            $this->testCaseMethod->groups[] = $group;
+        }
 
         return $this;
     }
 
     /**
      * Skips the current test.
-     *
-     * @param Closure|bool|string $conditionOrMessage
      */
-    public function skip($conditionOrMessage = true, string $message = ''): TestCall
+    public function skip(Closure|bool|string $conditionOrMessage = true, string $message = ''): TestCall
     {
         $condition = is_string($conditionOrMessage)
             ? NullClosure::create()
@@ -160,9 +144,7 @@ final class TestCall
 
         $condition = is_callable($condition)
             ? $condition
-            : function () use ($condition) { /* @phpstan-ignore-line */
-                return $condition;
-            };
+            : fn () => $condition;
 
         $message = is_string($conditionOrMessage)
             ? $conditionOrMessage
@@ -171,7 +153,7 @@ final class TestCall
         /** @var callable(): bool $condition */
         $condition = $condition->bindTo(null);
 
-        $this->testCaseFactory
+        $this->testCaseMethod
             ->chains
             ->addWhen($condition, Backtrace::file(), Backtrace::line(), 'markTestSkipped', [$message]);
 
@@ -203,16 +185,16 @@ final class TestCall
      */
     private function addChain(string $name, array $arguments = null): self
     {
-        $this->testCaseFactory
+        $this->testCaseMethod
             ->chains
             ->add(Backtrace::file(), Backtrace::line(), $name, $arguments);
 
         if ($this->descriptionLess) {
             $exporter = new Exporter();
-            if ($this->testCaseFactory->description !== null) {
-                $this->testCaseFactory->description .= ' → ';
+            if ($this->testCaseMethod->description !== null) {
+                $this->testCaseMethod->description .= ' → ';
             }
-            $this->testCaseFactory->description .= $arguments === null
+            $this->testCaseMethod->description .= $arguments === null
                 ? $name
                 : sprintf('%s %s', $name, $exporter->shortenedRecursiveExport($arguments));
         }
@@ -221,11 +203,10 @@ final class TestCall
     }
 
     /**
-     * Adds the current test case factory
-     * to the tests repository.
+     * Creates the Call.
      */
     public function __destruct()
     {
-        $this->testSuite->tests->set($this->testCaseFactory);
+        $this->testSuite->tests->set($this->testCaseMethod);
     }
 }

@@ -16,7 +16,7 @@ final class BeforeEachRepository
     /**
      * @var array<string, Closure>
      */
-    private $state = [];
+    private array $state = [];
 
     /**
      * Sets a before each closure.

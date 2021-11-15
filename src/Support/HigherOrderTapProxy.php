@@ -13,21 +13,15 @@ use Throwable;
  */
 final class HigherOrderTapProxy
 {
-    private const UNDEFINED_PROPERTY = 'Undefined property: P\\';
-
-    /**
-     * The target being tapped.
-     *
-     * @var TestCase
-     */
-    public $target;
+    private const UNDEFINED_PROPERTY = 'Undefined property: P\\';  // @phpstan-ignore-line
 
     /**
      * Create a new tap proxy instance.
      */
-    public function __construct(TestCase $target)
-    {
-        $this->target = $target;
+    public function __construct(
+        public TestCase $target
+    ) {
+        // ..
     }
 
     /**
@@ -37,8 +31,7 @@ final class HigherOrderTapProxy
      */
     public function __set(string $property, $value): void
     {
-        // @phpstan-ignore-next-line
-        $this->target->{$property} = $value;
+        $this->target->{$property} = $value; // @phpstan-ignore-line
     }
 
     /**
@@ -49,9 +42,8 @@ final class HigherOrderTapProxy
     public function __get(string $property)
     {
         try {
-            // @phpstan-ignore-next-line
-            return $this->target->{$property};
-        } catch (Throwable $throwable) {
+            return $this->target->{$property}; // @phpstan-ignore-line
+        } catch (Throwable $throwable) {  // @phpstan-ignore-line
             Reflection::setPropertyValue($throwable, 'file', Backtrace::file());
             Reflection::setPropertyValue($throwable, 'line', Backtrace::line());
 

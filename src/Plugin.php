@@ -14,7 +14,7 @@ final class Plugin
      *
      * @internal
      */
-    public static $callables = [];
+    public static array $callables = [];
 
     /**
      * Lazy loads an `uses` call on the context of plugins.

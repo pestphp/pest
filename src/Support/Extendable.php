@@ -9,18 +9,12 @@ use Closure;
 final class Extendable
 {
     /**
-     * The extendable class.
-     *
-     * @var string
-     */
-    private $extendableClass;
-
-    /**
      * Creates a new extendable instance.
      */
-    public function __construct(string $extendableClass)
-    {
-        $this->extendableClass = $extendableClass;
+    public function __construct(
+        private string $extendableClass
+    ) {
+        // ..
     }
 
     /**

@@ -15,7 +15,7 @@ use Symfony\Component\Console\Exception\ExceptionInterface;
 final class AfterAllAlreadyExist extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
 {
     /**
-     * Creates a new instance of after all already exist exception.
+     * Creates a new Exception instance.
      */
     public function __construct(string $filename)
     {

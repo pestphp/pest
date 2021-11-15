@@ -15,16 +15,11 @@ use SebastianBergmann\Exporter\Exporter;
 final class OppositeExpectation
 {
     /**
-     * @var Expectation
-     */
-    private $original;
-
-    /**
      * Creates a new opposite expectation.
      */
-    public function __construct(Expectation $original)
+    public function __construct(private Expectation $original)
     {
-        $this->original = $original;
+        // ..
     }
 
     /**
@@ -37,7 +32,7 @@ final class OppositeExpectation
         foreach ($keys as $key) {
             try {
                 $this->original->toHaveKey($key);
-            } catch (ExpectationFailedException $e) {
+            } catch (ExpectationFailedException) {
                 continue;
             }
 
@@ -51,33 +46,34 @@ final class OppositeExpectation
      * Handle dynamic method calls into the original expectation.
      *
      * @param array<int, mixed> $arguments
+     *
+     * @return Expectation|never
      */
     public function __call(string $name, array $arguments): Expectation
     {
         try {
             /* @phpstan-ignore-next-line */
             $this->original->{$name}(...$arguments);
-        } catch (ExpectationFailedException $e) {
+        } catch (ExpectationFailedException) {
             return $this->original;
         }
 
-        // @phpstan-ignore-next-line
         $this->throwExpectationFailedException($name, $arguments);
     }
 
     /**
      * Handle dynamic properties gets into the original expectation.
+     *
+     * @return Expectation|never
      */
     public function __get(string $name): Expectation
     {
         try {
-            /* @phpstan-ignore-next-line */
-            $this->original->{$name};
-        } catch (ExpectationFailedException $e) {
+            $this->original->{$name}; // @phpstan-ignore-line
+        } catch (ExpectationFailedException) {  // @phpstan-ignore-line
             return $this->original;
         }
 
-        // @phpstan-ignore-next-line
         $this->throwExpectationFailedException($name);
     }
 
@@ -85,15 +81,15 @@ final class OppositeExpectation
      * Creates a new expectation failed exception with a nice readable message.
      *
      * @param array<int, mixed> $arguments
+     *
+     * @return never
      */
     private function throwExpectationFailedException(string $name, array $arguments = []): void
     {
         $exporter = new Exporter();
 
-        $toString = function ($argument) use ($exporter): string {
-            return $exporter->shortenedExport($argument);
-        };
+        $toString = fn ($argument): string => $exporter->shortenedExport($argument);
 
-        throw new ExpectationFailedException(sprintf('Expecting %s not %s %s.', $toString($this->original->value), strtolower((string) preg_replace('/(?<!\ )[A-Z]/', ' $0', $name)), implode(' ', array_map(function ($argument) use ($toString): string { return $toString($argument); }, $arguments))));
+        throw new ExpectationFailedException(sprintf('Expecting %s not %s %s.', $toString($this->original->value), strtolower((string) preg_replace('/(?<!\ )[A-Z]/', ' $0', $name)), implode(' ', array_map(fn ($argument): string => $toString($argument), $arguments))));
     }
 }

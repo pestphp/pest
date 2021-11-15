@@ -4,7 +4,7 @@ includes:
     - vendor/thecodingmachine/phpstan-strict-rules/phpstan-strict-rules.neon
 
 parameters:
-    level: max
+    level: 5
     paths:
         - src
 
@@ -13,6 +13,7 @@ parameters:
     reportUnmatchedIgnoredErrors: true
 
     ignoreErrors:
+        - "#with a nullable type declaration#"
         - "#type mixed is not subtype of native#"
         - "#is not allowed to extend#"
         - "#Language construct eval#"
@@ -20,15 +21,3 @@ parameters:
         - "#has parameter \\$closure with default value.#"
         - "#has parameter \\$description with default value.#"
         - "#Method Pest\\\\Support\\\\Reflection::getParameterClassName\\(\\) has a nullable return type declaration.#"
-        -
-            message: '#Call to an undefined method PHPUnit\\Framework\\Test::getName\(\)#'
-            path: src/Logging
-        -
-            message: '#invalid typehint type Pest\\Concerns\\Testable#'
-            path: src/Logging
-        -
-            message: '#is not subtype of native type PHPUnit\\Framework\\Test#'
-            path: src/Logging
-        -
-            message: '#Call to an undefined method PHPUnit\\Framework\\Test::getPrintableTestCaseName\(\)#'
-            path: src/Logging
