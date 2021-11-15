@@ -35,6 +35,8 @@ final class Container
     /**
      * Gets a dependency from the container.
      *
+     * @param class-string $id
+     *
      * @return object
      */
     public function get(string $id)
@@ -60,6 +62,8 @@ final class Container
 
     /**
      * Tries to build the given instance.
+     *
+     * @param class-string $id
      */
     private function build(string $id): object
     {
@@ -83,6 +87,7 @@ final class Container
                             }
                         }
 
+                        //@phpstan-ignore-next-line
                         return $this->get($candidate);
                     },
                     $constructor->getParameters()

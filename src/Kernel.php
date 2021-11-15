@@ -37,6 +37,7 @@ final class Kernel
     public static function boot(): self
     {
         foreach (self::$bootstrappers as $bootstrapper) {
+            //@phpstan-ignore-next-line
             (new $bootstrapper())->__invoke();
         }
 

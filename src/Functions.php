@@ -70,6 +70,8 @@ if (!function_exists('uses')) {
     /**
      * The uses function binds the given
      * arguments to test closures.
+     *
+     * @param class-string ...$classAndTraits
      */
     function uses(string ...$classAndTraits): UsesCall
     {

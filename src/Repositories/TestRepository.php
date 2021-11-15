@@ -23,7 +23,7 @@ final class TestRepository
     private array $testCases = [];
 
     /**
-     * @var array<string, array<int, array<int, string|Closure>>>
+     * @var array<string, array{0: array<int, string>, 1: array<int, string>, 2: array<int, string|Closure>}>
      */
     private array $uses = [];
 

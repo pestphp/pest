@@ -8,8 +8,8 @@ use Closure;
 use Pest\Exceptions\DatasetAlreadyExist;
 use Pest\Exceptions\DatasetDoesNotExist;
 use SebastianBergmann\Exporter\Exporter;
-use Traversable;
 use function sprintf;
+use Traversable;
 
 /**
  * @internal
@@ -19,14 +19,14 @@ final class Datasets
     /**
      * Holds the datasets.
      *
-     * @var array<int|string, Closure|iterable<int|string, mixed>>
+     * @var array<string, Closure|iterable<int|string, mixed>>
      */
     private static array $datasets = [];
 
     /**
      * Holds the withs.
      *
-     * @var array<string, Closure|iterable<mixed>|string>
+     * @var array<array<string, Closure|iterable<int|string, mixed>|string>>
      */
     private static array $withs = [];
 
@@ -47,9 +47,9 @@ final class Datasets
     /**
      * Sets the given.
      *
-     * @phpstan-param  Closure|iterable<int|string, mixed>|string $with
+     * @phpstan-param  array<Closure|iterable<int|string, mixed>|string> $with
      */
-    public static function with(string $filename, string $description, Closure|iterable|string $with): void
+    public static function with(string $filename, string $description, array $with): void
     {
         self::$withs[$filename . '>>>' . $description] = $with;
     }
