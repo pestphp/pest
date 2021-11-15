@@ -13,6 +13,10 @@ final class Groups
 {
     /**
      * Adds annotations regarding the "groups" feature.
+     *
+     * @param array<string> $annotations
+     *
+     * @return array<string>
      */
     public function add(TestCaseMethodFactory $method, array $annotations): array
     {

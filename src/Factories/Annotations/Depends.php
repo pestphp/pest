@@ -14,6 +14,10 @@ final class Depends
 {
     /**
      * Adds annotations regarding the "depends" feature.
+     *
+     * @param array<string> $annotations
+     *
+     * @return array<string>
      */
     public function add(TestCaseMethodFactory $method, array $annotations): array
     {
