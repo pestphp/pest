@@ -77,7 +77,7 @@ final class HigherOrderMessage
      */
     public function when(callable $condition): self
     {
-        $this->condition = $condition;
+        $this->condition = Closure::fromCallable($condition);
 
         return $this;
     }

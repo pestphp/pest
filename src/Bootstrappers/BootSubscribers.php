@@ -29,7 +29,7 @@ final class BootSubscribers
     {
         foreach (self::$subscribers as $subscriber) {
             Event\Facade::registerSubscriber(
-                new $subscriber()
+                new $subscriber() //@phpstan-ignore-line
             );
         }
     }

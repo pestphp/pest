@@ -148,6 +148,7 @@ final class TestCaseFactory
             $annotations = ['@test'];
 
             foreach (self::$annotations as $annotation) {
+                //@phpstan-ignore-next-line
                 $annotations = (new $annotation())->add($method, $annotations);
             }
 
