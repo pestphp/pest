@@ -2,12 +2,12 @@ name: Changelog
 
 on:
   push:
-    branches: [ master ]
+    branches: [ 1.x ]
     paths:
       - CHANGELOG.md
       - .github/workflows/changelog.yml
   pull_request:
-    branches: [ master ]
+    branches: [ 1.x ]
     paths:
       - CHANGELOG.md
 jobs:
