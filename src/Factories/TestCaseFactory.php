@@ -142,6 +142,10 @@ final class TestCaseFactory
         }
 
         $methodsCode = implode('', array_map(static function (TestCaseMethodFactory $method): string {
+            if ($method->description === null) {
+                throw ShouldNotHappen::fromMessage('The test description may not be empty.');
+            }
+
             $methodName = Str::evaluable($method->description);
 
             $datasetsCode = '';
@@ -224,6 +228,10 @@ EOF;
         }
 
         if (!$method->receivesArguments()) {
+            if ($method->closure === null) {
+                throw ShouldNotHappen::fromMessage('The test closure may not be empty.');
+            }
+
             $arguments = Reflection::getFunctionArguments($method->closure);
 
             if (count($arguments) > 0) {
@@ -240,6 +248,10 @@ EOF;
     public function getMethod(string $methodName): TestCaseMethodFactory
     {
         foreach ($this->methods as $method) {
+            if ($method->description === null) {
+                throw ShouldNotHappen::fromMessage('The test description may not be empty.');
+            }
+
             if (Str::evaluable($method->description) === $methodName) {
                 return $method;
             }

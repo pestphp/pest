@@ -89,7 +89,7 @@ final class TestCaseMethodFactory
             $testCase->chains->chain($this);
             $method->chains->chain($this);
 
-            return call_user_func(Closure::bind($closure, $this, $this::class), ...func_get_args());
+            return \Pest\Support\Closure::safeBind($closure, $this, $this::class)(...func_get_args());
         };
     }
 
