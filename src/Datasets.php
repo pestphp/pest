@@ -7,6 +7,7 @@ namespace Pest;
 use Closure;
 use Pest\Exceptions\DatasetAlreadyExist;
 use Pest\Exceptions\DatasetDoesNotExist;
+use Pest\Exceptions\ShouldNotHappen;
 use SebastianBergmann\Exporter\Exporter;
 use function sprintf;
 use Traversable;
@@ -61,7 +62,13 @@ final class Datasets
     {
         $dataset = self::$withs[$filename . '>>>' . $description];
 
-        return self::resolve($description, $dataset);
+        $dataset = self::resolve($description, $dataset);
+
+        if ($dataset === null) {
+            throw ShouldNotHappen::fromMessage('Could not resolve dataset.');
+        }
+
+        return $dataset;
     }
 
     /**
