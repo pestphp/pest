@@ -108,7 +108,6 @@ final class Expectation
     public function ray(...$arguments): self
     {
         if (function_exists('ray')) {
-            // @phpstan-ignore-next-line
             ray($this->value, ...$arguments);
         }
 

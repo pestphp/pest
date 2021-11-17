@@ -283,7 +283,6 @@ final class JUnit extends Printer implements TestListener
             $class = new ReflectionClass($test);
             // @codeCoverageIgnoreStart
         } catch (ReflectionException $e) {
-            // @phpstan-ignore-next-line
             throw new Exception($e->getMessage(), (int) $e->getCode(), $e);
         }
         // @codeCoverageIgnoreEnd

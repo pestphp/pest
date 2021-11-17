@@ -51,6 +51,8 @@ final class OppositeExpectation
      * Handle dynamic method calls into the original expectation.
      *
      * @param array<int, mixed> $arguments
+     *
+     * @return Expectation|never
      */
     public function __call(string $name, array $arguments): Expectation
     {
@@ -61,12 +63,13 @@ final class OppositeExpectation
             return $this->original;
         }
 
-        // @phpstan-ignore-next-line
         $this->throwExpectationFailedException($name, $arguments);
     }
 
     /**
      * Handle dynamic properties gets into the original expectation.
+     *
+     * @return Expectation|never
      */
     public function __get(string $name): Expectation
     {
@@ -77,7 +80,6 @@ final class OppositeExpectation
             return $this->original;
         }
 
-        // @phpstan-ignore-next-line
         $this->throwExpectationFailedException($name);
     }
 
@@ -85,6 +87,8 @@ final class OppositeExpectation
      * Creates a new expectation failed exception with a nice readable message.
      *
      * @param array<int, mixed> $arguments
+     *
+     * @return never
      */
     private function throwExpectationFailedException(string $name, array $arguments = []): void
     {

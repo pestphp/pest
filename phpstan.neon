@@ -2,6 +2,7 @@ includes:
     - vendor/phpstan/phpstan-strict-rules/rules.neon
     - vendor/ergebnis/phpstan-rules/rules.neon
     - vendor/thecodingmachine/phpstan-strict-rules/phpstan-strict-rules.neon
+    - phpstan-baseline.neon
 
 parameters:
     level: max
@@ -22,9 +23,6 @@ parameters:
         - "#Method Pest\\\\Support\\\\Reflection::getParameterClassName\\(\\) has a nullable return type declaration.#"
         -
             message: '#Call to an undefined method PHPUnit\\Framework\\Test::getName\(\)#'
-            path: src/Logging
-        -
-            message: '#invalid typehint type Pest\\Concerns\\Testable#'
             path: src/Logging
         -
             message: '#is not subtype of native type PHPUnit\\Framework\\Test#'

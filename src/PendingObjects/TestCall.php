@@ -160,7 +160,7 @@ final class TestCall
 
         $condition = is_callable($condition)
             ? $condition
-            : function () use ($condition) { /* @phpstan-ignore-line */
+            : function () use ($condition) {
                 return $condition;
             };
 

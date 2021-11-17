@@ -1,0 +1,292 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Cannot access an offset on mixed\\.$#"
+			count: 1
+			path: src/Actions/AddsDefaults.php
+
+		-
+			message: "#^Parameter \\#1 \\$out of class Pest\\\\Logging\\\\JUnit constructor expects string, mixed given\\.$#"
+			count: 1
+			path: src/Actions/AddsDefaults.php
+
+		-
+			message: "#^Parameter \\#2 \\$verbose of class NunoMaduro\\\\Collision\\\\Adapters\\\\Phpunit\\\\Printer constructor expects bool, mixed given\\.$#"
+			count: 1
+			path: src/Actions/AddsDefaults.php
+
+		-
+			message: "#^Parameter \\#2 \\$verbose of class Pest\\\\Logging\\\\TeamCity constructor expects bool, mixed given\\.$#"
+			count: 1
+			path: src/Actions/AddsDefaults.php
+
+		-
+			message: "#^Parameter \\#3 \\$colors of class NunoMaduro\\\\Collision\\\\Adapters\\\\Phpunit\\\\Printer constructor expects string, mixed given\\.$#"
+			count: 1
+			path: src/Actions/AddsDefaults.php
+
+		-
+			message: "#^Parameter \\#3 \\$colors of class Pest\\\\Logging\\\\TeamCity constructor expects string, mixed given\\.$#"
+			count: 1
+			path: src/Actions/AddsDefaults.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of function file_exists expects string, mixed given\\.$#"
+			count: 1
+			path: src/Actions/ValidatesConfiguration.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of method PHPUnit\\\\TextUI\\\\XmlConfiguration\\\\Loader\\:\\:load\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: src/Actions/ValidatesConfiguration.php
+
+		-
+			message: "#^Parameter \\#1 \\$loader of class PHPUnit\\\\TextUI\\\\TestRunner constructor expects PHPUnit\\\\Runner\\\\TestSuiteLoader\\|null, mixed given\\.$#"
+			count: 1
+			path: src/Console/Command.php
+
+		-
+			message: "#^Parameter \\#1 \\$testSuite of static method Pest\\\\Actions\\\\AddsTests\\:\\:to\\(\\) expects iterable\\<PHPUnit\\\\Framework\\\\TestCase\\>&PHPUnit\\\\Framework\\\\TestSuite, mixed given\\.$#"
+			count: 1
+			path: src/Console/Command.php
+
+		-
+			message: "#^Parameter \\#2 \\$suffixes of method SebastianBergmann\\\\FileIterator\\\\Facade\\:\\:getFilesAsArray\\(\\) expects array\\|string, mixed given\\.$#"
+			count: 1
+			path: src/Console/Command.php
+
+		-
+			message: "#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\\.$#"
+			count: 1
+			path: src/Datasets.php
+
+		-
+			message: "#^Method Pest\\\\Datasets\\:\\:getDataSetsCombinations\\(\\) has parameter \\$combinations with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/Datasets.php
+
+		-
+			message: "#^Method Pest\\\\Datasets\\:\\:getDataSetsCombinations\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/Datasets.php
+
+		-
+			message: "#^Method Pest\\\\Datasets\\:\\:processDatasets\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/Datasets.php
+
+		-
+			message: "#^Parameter \\#1 \\$key of static method Pest\\\\Datasets\\:\\:getDataSetDescription\\(\\) expects int\\|string, mixed given\\.$#"
+			count: 1
+			path: src/Datasets.php
+
+		-
+			message: "#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\\.$#"
+			count: 1
+			path: src/Each.php
+
+		-
+			message: "#^Parameter \\#1 \\$ of callable callable\\(Pest\\\\Expectation\\<TValue\\>\\)\\: mixed expects Pest\\\\Expectation\\<TValue\\>, Pest\\\\Expectation\\<mixed\\> given\\.$#"
+			count: 1
+			path: src/Expectation.php
+
+		-
+			message: "#^Parameter \\#1 \\$actualJson of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertJson\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: src/Expectation.php
+
+		-
+			message: "#^Parameter \\#1 \\$directory of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertDirectoryExists\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: src/Expectation.php
+
+		-
+			message: "#^Parameter \\#1 \\$directory of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertDirectoryIsReadable\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: src/Expectation.php
+
+		-
+			message: "#^Parameter \\#1 \\$directory of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertDirectoryIsWritable\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: src/Expectation.php
+
+		-
+			message: "#^Parameter \\#1 \\$file of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertFileIsReadable\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: src/Expectation.php
+
+		-
+			message: "#^Parameter \\#1 \\$file of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertFileIsWritable\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: src/Expectation.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertFileExists\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: src/Expectation.php
+
+		-
+			message: "#^Parameter \\#1 \\$json of function json_decode expects string, mixed given\\.$#"
+			count: 1
+			path: src/Expectation.php
+
+		-
+			message: "#^Parameter \\#1 \\$needle of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertStringContainsString\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: src/Expectation.php
+
+		-
+			message: "#^Parameter \\#1 \\$object_or_class of function property_exists expects object\\|string, mixed given\\.$#"
+			count: 2
+			path: src/Expectation.php
+
+		-
+			message: "#^Parameter \\#1 \\$value of method Pest\\\\Expectation\\<TValue\\>\\:\\:and\\(\\) expects TValue, mixed given\\.$#"
+			count: 2
+			path: src/Expectation.php
+
+		-
+			message: "#^Parameter \\#2 \\$haystack of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertContains\\(\\) expects iterable, mixed given\\.$#"
+			count: 1
+			path: src/Expectation.php
+
+		-
+			message: "#^Parameter \\#2 \\$haystack of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertCount\\(\\) expects Countable\\|iterable, mixed given\\.$#"
+			count: 1
+			path: src/Expectation.php
+
+		-
+			message: "#^Parameter \\#2 \\$string of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertMatchesRegularExpression\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: src/Expectation.php
+
+		-
+			message: "#^Parameter \\#2 \\$string of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertStringEndsWith\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: src/Expectation.php
+
+		-
+			message: "#^Parameter \\#2 \\$string of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertStringStartsWith\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: src/Expectation.php
+
+		-
+			message: "#^Parameter \\#2 \\$value of method Pest\\\\Expectation\\<TValue\\>\\:\\:retrieve\\(\\) expects array\\<string, null\\>\\|object, mixed given\\.$#"
+			count: 1
+			path: src/Expectation.php
+
+		-
+			message: "#^Trying to invoke mixed but it's not a callable\\.$#"
+			count: 1
+			path: src/Expectation.php
+
+		-
+			message: "#^Method Pest\\\\Factories\\\\TestCaseFactory\\:\\:build\\(\\) should return array\\<int, PHPUnit\\\\Framework\\\\TestCase\\> but returns array\\<int, object\\>\\.$#"
+			count: 1
+			path: src/Factories/TestCaseFactory.php
+
+		-
+			message: "#^Function it\\(\\) should return Pest\\\\PendingObjects\\\\TestCall but returns mixed\\.$#"
+			count: 1
+			path: src/Functions.php
+
+		-
+			message: "#^Parameter \\#2 \\$classAndTraits of class Pest\\\\PendingObjects\\\\UsesCall constructor expects array\\<int, string\\>, array\\<int\\|string, string\\> given\\.$#"
+			count: 1
+			path: src/Functions.php
+
+		-
+			message: "#^Parameter \\#2 \\$value of method Pest\\\\HigherOrderExpectation\\:\\:retrieve\\(\\) expects array\\<string, null\\>\\|object, mixed given\\.$#"
+			count: 1
+			path: src/HigherOrderExpectation.php
+
+		-
+			message: "#^Dead catch \\- ReflectionException is never thrown in the try block\\.$#"
+			count: 1
+			path: src/Logging/JUnit.php
+
+		-
+			message: "#^Parameter \\#2 \\$value of method DOMElement\\:\\:setAttribute\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: src/Logging/JUnit.php
+
+		-
+			message: "#^Parameter \\$test of method Pest\\\\Logging\\\\JUnit\\:\\:startTest\\(\\) has invalid type Pest\\\\Concerns\\\\Testable\\.$#"
+			count: 1
+			path: src/Logging/JUnit.php
+
+		-
+			message: "#^Parameter \\$test of method Pest\\\\Logging\\\\TeamCity\\:\\:endTest\\(\\) has invalid type Pest\\\\Concerns\\\\Testable\\.$#"
+			count: 1
+			path: src/Logging/TeamCity.php
+
+		-
+			message: "#^Parameter \\$test of method Pest\\\\Logging\\\\TeamCity\\:\\:startTest\\(\\) has invalid type Pest\\\\Concerns\\\\Testable\\.$#"
+			count: 1
+			path: src/Logging/TeamCity.php
+
+		-
+			message: "#^Dead catch \\- PHPUnit\\\\Framework\\\\ExpectationFailedException is never thrown in the try block\\.$#"
+			count: 1
+			path: src/OppositeExpectation.php
+
+		-
+			message: "#^Property Pest\\\\PendingObjects\\\\UsesCall\\:\\:\\$groups \\(array\\<int, string\\>\\) does not accept array\\<int\\|string, string\\>\\.$#"
+			count: 1
+			path: src/PendingObjects/UsesCall.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 1
+			path: src/Plugins/Coverage.php
+
+		-
+			message: "#^Static property Pest\\\\Plugins\\\\Environment\\:\\:\\$instance is unused\\.$#"
+			count: 1
+			path: src/Plugins/Environment.php
+
+		-
+			message: "#^Method Pest\\\\Support\\\\Container\\:\\:get\\(\\) should return object but returns mixed\\.$#"
+			count: 1
+			path: src/Support/Container.php
+
+		-
+			message: "#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\\.$#"
+			count: 1
+			path: src/Support/ExceptionTrace.php
+
+		-
+			message: "#^Cannot access offset 'file' on mixed\\.$#"
+			count: 1
+			path: src/Support/ExceptionTrace.php
+
+		-
+			message: "#^Parameter \\#1 \\$haystack of function mb_strpos expects string, mixed given\\.$#"
+			count: 1
+			path: src/Support/ExceptionTrace.php
+
+		-
+			message: "#^Parameter \\#2 \\$array of function key_exists expects array, mixed given\\.$#"
+			count: 1
+			path: src/Support/ExceptionTrace.php
+
+		-
+			message: "#^Method Pest\\\\Support\\\\HigherOrderCallables\\:\\:expect\\(\\) should return Pest\\\\Expectation\\<TValue\\> but returns Pest\\\\Expectation\\<mixed\\>\\.$#"
+			count: 1
+			path: src/Support/HigherOrderCallables.php
+
+		-
+			message: "#^Parameter \\#1 \\$target of method Pest\\\\Support\\\\HigherOrderMessage\\:\\:call\\(\\) expects object, mixed given\\.$#"
+			count: 1
+			path: src/Support/HigherOrderMessageCollection.php
+
+		-
+			message: "#^Constant Pest\\\\Support\\\\HigherOrderTapProxy\\:\\:UNDEFINED_PROPERTY is unused\\.$#"
+			count: 1
+			path: src/Support/HigherOrderTapProxy.php
+
+		-
+			message: "#^Dead catch \\- Throwable is never thrown in the try block\\.$#"
+			count: 1
+			path: src/Support/HigherOrderTapProxy.php
+
