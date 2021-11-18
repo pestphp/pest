@@ -32,7 +32,7 @@ final class OppositeExpectation
         foreach ($keys as $key) {
             try {
                 $this->original->toHaveKey($key);
-            } catch (ExpectationFailedException) {
+            } catch (ExpectationFailedException $exception) {
                 continue;
             }
 
@@ -54,7 +54,7 @@ final class OppositeExpectation
         try {
             /* @phpstan-ignore-next-line */
             $this->original->{$name}(...$arguments);
-        } catch (ExpectationFailedException) {
+        } catch (ExpectationFailedException $exception) {
             return $this->original;
         }
 
@@ -70,7 +70,7 @@ final class OppositeExpectation
     {
         try {
             $this->original->{$name}; // @phpstan-ignore-line
-        } catch (ExpectationFailedException) {  // @phpstan-ignore-line
+        } catch (ExpectationFailedException $exception) {  // @phpstan-ignore-line
             return $this->original;
         }
 

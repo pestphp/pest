@@ -7,8 +7,6 @@ parameters:
     level: 8
     paths:
         - src
-    parallel:
-        maximumNumberOfProcesses: 1
 
     checkMissingIterableValueType: true
     checkGenericClassInNonGenericObjectType: false
