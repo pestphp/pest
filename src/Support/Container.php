@@ -37,7 +37,7 @@ final class Container
      *
      * @param class-string $id
      *
-     * @return object
+     * @return mixed
      */
     public function get(string $id)
     {

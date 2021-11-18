@@ -98,7 +98,8 @@ final class Datasets
 
             foreach ($datasetCombination as $dataset_data) {
                 $partialDescriptions[] = $dataset_data['label'];
-                $values                = array_merge($values, $dataset_data['values']);
+                //@phpstan-ignore-next-line
+                $values = array_merge($values, $dataset_data['values']);
             }
 
             $dataSetDescriptions[] = $description . ' with ' . implode(' / ', $partialDescriptions);
@@ -152,10 +153,11 @@ final class Datasets
                 $datasets[$index] = iterator_to_array($datasets[$index]);
             }
 
+            //@phpstan-ignore-next-line
             foreach ($datasets[$index] as $key => $values) {
                 $values             = is_array($values) ? $values : [$values];
                 $processedDataset[] = [
-                    'label'  => self::getDataSetDescription($key, $values),
+                    'label'  => self::getDataSetDescription($key, $values), //@phpstan-ignore-line
                     'values' => $values,
                 ];
             }
@@ -169,7 +171,7 @@ final class Datasets
     /**
      * @param array<array<mixed>> $combinations
      *
-     * @return array<array<mixed>>
+     * @return array<array<array<mixed>>>
      */
     private static function getDataSetsCombinations(array $combinations): array
     {
@@ -184,6 +186,7 @@ final class Datasets
             $result = $tmp;
         }
 
+        //@phpstan-ignore-next-line
         return $result;
     }
 
