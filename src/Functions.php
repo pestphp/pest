@@ -113,7 +113,10 @@ if (!function_exists('it')) {
     {
         $description = sprintf('it %s', $description);
 
-        return test($description, $closure);
+        /** @var TestCall $test */
+        $test = test($description, $closure);
+
+        return $test;
     }
 }
 

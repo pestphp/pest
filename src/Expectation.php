@@ -9,6 +9,7 @@ use Closure;
 use InvalidArgumentException;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\RetrievesValues;
+use Pest\Exceptions\ExpectationException;
 use Pest\Support\Arr;
 use Pest\Support\NullClosure;
 use PHPUnit\Framework\Assert;
@@ -68,6 +69,10 @@ final class Expectation
      */
     public function json(): Expectation
     {
+        if (!is_string($this->value)) {
+            throw ExpectationException::invalidValue('json', 'string');
+        }
+
         return $this->toBeJson()->and(json_decode($this->value, true));
     }
 

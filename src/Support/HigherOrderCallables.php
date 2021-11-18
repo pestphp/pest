@@ -31,7 +31,10 @@ final class HigherOrderCallables
      */
     public function expect(mixed $value): Expectation
     {
-        return new Expectation($value instanceof Closure ? Reflection::bindCallableWithData($value) : $value);
+        /** @var TValue $value */
+        $value = $value instanceof Closure ? Reflection::bindCallableWithData($value) : $value;
+
+        return new Expectation($value);
     }
 
     /**
