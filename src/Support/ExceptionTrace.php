@@ -51,7 +51,7 @@ final class ExceptionTrace
         $property = new ReflectionProperty($t, 'serializableTrace');
         $property->setAccessible(true);
 
-        /** @var array<array<string>> $trace */
+        /** @var array<int, array<string, string>> $trace */
         $trace = $property->getValue($t);
 
         $cleanedTrace = [];

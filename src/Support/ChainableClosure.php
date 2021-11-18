@@ -22,8 +22,8 @@ final class ChainableClosure
                 throw ShouldNotHappen::fromMessage('$this not bound to chainable closure.');
             }
 
-            \Pest\Support\Closure::safeBind($closure, $this, $this::class)(...func_get_args());
-            \Pest\Support\Closure::safeBind($next, $this, $this::class)(...func_get_args());
+            \Pest\Support\Closure::bind($closure, $this, $this::class)(...func_get_args());
+            \Pest\Support\Closure::bind($next, $this, $this::class)(...func_get_args());
         };
     }
 
@@ -33,8 +33,8 @@ final class ChainableClosure
     public static function fromStatic(Closure $closure, Closure $next): Closure
     {
         return static function () use ($closure, $next): void {
-            \Pest\Support\Closure::safeBind($closure, null, self::class)(...func_get_args());
-            \Pest\Support\Closure::safeBind($next, null, self::class)(...func_get_args());
+            \Pest\Support\Closure::bind($closure, null, self::class)(...func_get_args());
+            \Pest\Support\Closure::bind($next, null, self::class)(...func_get_args());
         };
     }
 }

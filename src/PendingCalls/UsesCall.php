@@ -36,14 +36,14 @@ final class UsesCall
     /**
      * Holds the groups of the uses.
      *
-     * @var array<string>
+     * @var array<int, string>
      */
     private array $groups = [];
 
     /**
      * Creates a new Pending Call.
      *
-     * @param array<string> $classAndTraits
+     * @param array<int, string> $classAndTraits
      */
     public function __construct(
         private string $filename,
@@ -89,7 +89,7 @@ final class UsesCall
      */
     public function group(string ...$groups): UsesCall
     {
-        $this->groups = $groups;
+        $this->groups = array_values($groups);
 
         return $this;
     }

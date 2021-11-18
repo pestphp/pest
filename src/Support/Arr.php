@@ -12,7 +12,7 @@ final class Arr
     /**
      * Checks if the given array has the given key.
      *
-     * @param array<mixed> $array
+     * @param array<array-key, mixed> $array
      */
     public static function has(array $array, string|int $key): bool
     {
@@ -36,7 +36,7 @@ final class Arr
     /**
      * Gets the given key value.
      *
-     * @param array<mixed> $array
+     * @param array<array-key, mixed> $array
      */
     public static function get(array $array, string|int $key, mixed $default = null): mixed
     {

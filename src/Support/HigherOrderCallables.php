@@ -25,7 +25,7 @@ final class HigherOrderCallables
      *
      * Create a new expectation. Callable values will be executed prior to returning the new expectation.
      *
-     * @param (callable():TValue)|TValue $value
+     * @param (Closure():TValue)|TValue $value
      *
      * @return Expectation<TValue>
      */

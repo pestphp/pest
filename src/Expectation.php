@@ -9,7 +9,7 @@ use Closure;
 use InvalidArgumentException;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\RetrievesValues;
-use Pest\Exceptions\ExpectationException;
+use Pest\Exceptions\InvalidExpectationValue;
 use Pest\Support\Arr;
 use Pest\Support\NullClosure;
 use PHPUnit\Framework\Assert;
@@ -70,7 +70,7 @@ final class Expectation
     public function json(): Expectation
     {
         if (!is_string($this->value)) {
-            throw ExpectationException::invalidCurrentValueType('json', 'string');
+            InvalidExpectationValue::expected('string');
         }
 
         return $this->toBeJson()->and(json_decode($this->value, true));
@@ -360,13 +360,11 @@ final class Expectation
     {
         foreach ($needles as $needle) {
             if (is_string($this->value)) {
-                if (!is_string($needle)) {
-                    throw ExpectationException::invalidExpectedValueType('toContain', 'string');
-                }
-                Assert::assertStringContainsString($needle, $this->value);
+                // @phpstan-ignore-next-line
+                Assert::assertStringContainsString((string) $needle, $this->value);
             } else {
                 if (!is_iterable($this->value)) {
-                    throw ExpectationException::invalidCurrentValueType('toContain', 'iterable');
+                    InvalidExpectationValue::expected('iterable');
                 }
                 Assert::assertContains($needle, $this->value);
             }
@@ -383,7 +381,7 @@ final class Expectation
     public function toStartWith(string $expected): Expectation
     {
         if (!is_string($this->value)) {
-            throw ExpectationException::invalidCurrentValueType('toStartWith', 'string');
+            InvalidExpectationValue::expected('string');
         }
 
         Assert::assertStringStartsWith($expected, $this->value);
@@ -399,7 +397,7 @@ final class Expectation
     public function toEndWith(string $expected): Expectation
     {
         if (!is_string($this->value)) {
-            throw ExpectationException::invalidCurrentValueType('toEndWith', 'string');
+            InvalidExpectationValue::expected('string');
         }
 
         Assert::assertStringEndsWith($expected, $this->value);
@@ -443,7 +441,7 @@ final class Expectation
     public function toHaveCount(int $count): Expectation
     {
         if (!is_countable($this->value) && !is_iterable($this->value)) {
-            throw ExpectationException::invalidCurrentValueType('toHaveCount', 'string');
+            InvalidExpectationValue::expected('string');
         }
 
         Assert::assertCount($count, $this->value);
@@ -743,7 +741,7 @@ final class Expectation
     public function toBeDirectory(): Expectation
     {
         if (!is_string($this->value)) {
-            throw ExpectationException::invalidCurrentValueType('toBeDirectory', 'string');
+            InvalidExpectationValue::expected('string');
         }
 
         Assert::assertDirectoryExists($this->value);
@@ -757,7 +755,7 @@ final class Expectation
     public function toBeReadableDirectory(): Expectation
     {
         if (!is_string($this->value)) {
-            throw ExpectationException::invalidCurrentValueType('toBeReadableDirectory', 'string');
+            InvalidExpectationValue::expected('string');
         }
 
         Assert::assertDirectoryIsReadable($this->value);
@@ -771,7 +769,7 @@ final class Expectation
     public function toBeWritableDirectory(): Expectation
     {
         if (!is_string($this->value)) {
-            throw ExpectationException::invalidCurrentValueType('toBeWritableDirectory', 'string');
+            InvalidExpectationValue::expected('string');
         }
 
         Assert::assertDirectoryIsWritable($this->value);
@@ -785,7 +783,7 @@ final class Expectation
     public function toBeFile(): Expectation
     {
         if (!is_string($this->value)) {
-            throw ExpectationException::invalidCurrentValueType('toBeFile', 'string');
+            InvalidExpectationValue::expected('string');
         }
 
         Assert::assertFileExists($this->value);
@@ -799,8 +797,9 @@ final class Expectation
     public function toBeReadableFile(): Expectation
     {
         if (!is_string($this->value)) {
-            throw ExpectationException::invalidCurrentValueType('toBeReadableFile', 'string');
+            InvalidExpectationValue::expected('string');
         }
+
         Assert::assertFileIsReadable($this->value);
 
         return $this;
@@ -812,7 +811,7 @@ final class Expectation
     public function toBeWritableFile(): Expectation
     {
         if (!is_string($this->value)) {
-            throw ExpectationException::invalidCurrentValueType('toBeWritableFile', 'string');
+            InvalidExpectationValue::expected('string');
         }
         Assert::assertFileIsWritable($this->value);
 
@@ -859,8 +858,9 @@ final class Expectation
     {
         foreach ((array) $object as $property => $value) {
             if (!is_object($this->value) && !is_string($this->value)) {
-                throw ExpectationException::invalidCurrentValueType('toMatchObject', 'object|string');
+                InvalidExpectationValue::expected('object|string');
             }
+
             Assert::assertTrue(property_exists($this->value, $property));
 
             /* @phpstan-ignore-next-line */
@@ -885,7 +885,7 @@ final class Expectation
     public function toMatch(string $expression): Expectation
     {
         if (!is_string($this->value)) {
-            throw ExpectationException::invalidCurrentValueType('toMatch', 'string');
+            InvalidExpectationValue::expected('string');
         }
         Assert::assertMatchesRegularExpression($expression, $this->value);
 

@@ -15,7 +15,7 @@ final class BootSubscribers
     /**
      * The Kernel subscribers.
      *
-     * @var array<int, class-string>
+     * @var array<int, class-string<\PHPUnit\Event\Subscriber>>
      */
     private static array $subscribers = [
         Subscribers\EnsureConfigurationIsValid::class,
@@ -29,7 +29,7 @@ final class BootSubscribers
     {
         foreach (self::$subscribers as $subscriber) {
             Event\Facade::registerSubscriber(
-                new $subscriber() //@phpstan-ignore-line
+                new $subscriber()
             );
         }
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Support;
 
+use Closure as BaseClosure;
 use Pest\Exceptions\ShouldNotHappen;
 
 /**
@@ -11,13 +12,20 @@ use Pest\Exceptions\ShouldNotHappen;
  */
 final class Closure
 {
-    public static function safeBind(\Closure|null $closure, ?object $newThis, object|string|null $newScope = 'static'): \Closure
+    /**
+     * Binds the given closure to the given "this".
+     *
+     * @return BaseClosure|never
+     *
+     * @throws ShouldNotHappen
+     */
+    public static function bind(BaseClosure|null $closure, ?object $newThis, object|string|null $newScope = 'static'): BaseClosure
     {
         if ($closure == null) {
             throw ShouldNotHappen::fromMessage('Could not bind null closure.');
         }
 
-        $closure = \Closure::bind($closure, $newThis, $newScope);
+        $closure = BaseClosure::bind($closure, $newThis, $newScope);
 
         if ($closure == false) {
             throw ShouldNotHappen::fromMessage('Could not bind closure.');
