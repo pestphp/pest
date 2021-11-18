@@ -73,9 +73,9 @@ final class TestCaseFactory
     {
         $methodsUsingOnly = $this->methodsUsingOnly();
 
-        $methods = array_filter($this->methods, function ($method) use ($methodsUsingOnly) {
+        $methods = array_values(array_filter($this->methods, function ($method) use ($methodsUsingOnly) {
             return count($methodsUsingOnly) === 0 || in_array($method, $methodsUsingOnly, true);
-        });
+        }));
 
         if (count($methods) > 0) {
             $this->evaluate($this->filename, $methods);
@@ -99,7 +99,7 @@ final class TestCaseFactory
     /**
      * Creates a Test Case class using a runtime evaluate.
      *
-     * @param array<TestCaseMethodFactory> $methods
+     * @param array<int, TestCaseMethodFactory> $methods
      */
     public function evaluate(string $filename, array $methods): string
     {
@@ -152,8 +152,8 @@ final class TestCaseFactory
             $annotations = ['@test'];
 
             foreach (self::$annotations as $annotation) {
-                //@phpstan-ignore-next-line
-                $annotations = (new $annotation())->add($method, $annotations);
+                /** @phpstan-ignore-next-line */
+                $annotations = (new $annotation())->__invoke($method, $annotations);
             }
 
             if (count($method->datasets) > 0) {

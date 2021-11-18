@@ -77,7 +77,7 @@ if (!function_exists('uses')) {
     {
         $filename = Backtrace::file();
 
-        return new UsesCall($filename, $classAndTraits);
+        return new UsesCall($filename, array_values($classAndTraits));
     }
 }
 

@@ -34,7 +34,7 @@ final class Datasets
     /**
      * Sets the given.
      *
-     * @phpstan-param Closure|iterable<int|string, mixed> $data
+     * @param Closure|iterable<int|string, mixed> $data
      */
     public static function set(string $name, Closure|iterable $data): void
     {
@@ -46,9 +46,9 @@ final class Datasets
     }
 
     /**
-     * Sets the given.
+     * Sets the given "with".
      *
-     * @phpstan-param  array<Closure|iterable<int|string, mixed>|string> $with
+     * @param array<Closure|iterable<int|string, mixed>|string> $with
      */
     public static function with(string $filename, string $description, array $with): void
     {
@@ -56,7 +56,9 @@ final class Datasets
     }
 
     /**
-     * @return Closure|iterable<int|string, mixed>
+     * @return Closure|iterable<int|string, mixed>|never
+     *
+     * @throws ShouldNotHappen
      */
     public static function get(string $filename, string $description): Closure|iterable
     {
@@ -65,7 +67,7 @@ final class Datasets
         $dataset = self::resolve($description, $dataset);
 
         if ($dataset === null) {
-            throw ShouldNotHappen::fromMessage('Could not resolve dataset.');
+            throw ShouldNotHappen::fromMessage('Dataset [%s] not resolvable.');
         }
 
         return $dataset;
@@ -87,39 +89,40 @@ final class Datasets
 
         $dataset = self::processDatasets($dataset);
 
-        $datasetCombinations = self::getDataSetsCombinations($dataset);
+        $datasetCombinations = self::getDatasetsCombinations($dataset);
 
-        $dataSetDescriptions = [];
-        $dataSetValues       = [];
+        $datasetDescriptions = [];
+        $datasetValues       = [];
 
         foreach ($datasetCombinations as $datasetCombination) {
             $partialDescriptions = [];
             $values              = [];
 
-            foreach ($datasetCombination as $dataset_data) {
-                $partialDescriptions[] = $dataset_data['label'];
-                //@phpstan-ignore-next-line
-                $values = array_merge($values, $dataset_data['values']);
+            foreach ($datasetCombination as $datasetCombinationElement) {
+                $partialDescriptions[] = $datasetCombinationElement['label'];
+
+                // @phpstan-ignore-next-line
+                $values = array_merge($values, $datasetCombinationElement['values']);
             }
 
-            $dataSetDescriptions[] = $description . ' with ' . implode(' / ', $partialDescriptions);
-            $dataSetValues[]       = $values;
+            $datasetDescriptions[] = $description . ' with ' . implode(' / ', $partialDescriptions);
+            $datasetValues[]       = $values;
         }
 
-        foreach (array_count_values($dataSetDescriptions) as $descriptionToCheck => $count) {
+        foreach (array_count_values($datasetDescriptions) as $descriptionToCheck => $count) {
             if ($count > 1) {
                 $index = 1;
-                foreach ($dataSetDescriptions as $i => $dataSetDescription) {
-                    if ($dataSetDescription === $descriptionToCheck) {
-                        $dataSetDescriptions[$i] .= sprintf(' #%d', $index++);
+                foreach ($datasetDescriptions as $i => $datasetDescription) {
+                    if ($datasetDescription === $descriptionToCheck) {
+                        $datasetDescriptions[$i] .= sprintf(' #%d', $index++);
                     }
                 }
             }
         }
 
         $namedData = [];
-        foreach ($dataSetDescriptions as $i => $dataSetDescription) {
-            $namedData[$dataSetDescription] = $dataSetValues[$i];
+        foreach ($datasetDescriptions as $i => $datasetDescription) {
+            $namedData[$datasetDescription] = $datasetValues[$i];
         }
 
         return $namedData;
@@ -157,7 +160,7 @@ final class Datasets
             foreach ($datasets[$index] as $key => $values) {
                 $values             = is_array($values) ? $values : [$values];
                 $processedDataset[] = [
-                    'label'  => self::getDataSetDescription($key, $values), //@phpstan-ignore-line
+                    'label'  => self::getDatasetDescription($key, $values), //@phpstan-ignore-line
                     'values' => $values,
                 ];
             }
@@ -173,7 +176,7 @@ final class Datasets
      *
      * @return array<array<array<mixed>>>
      */
-    private static function getDataSetsCombinations(array $combinations): array
+    private static function getDatasetsCombinations(array $combinations): array
     {
         $result = [[]];
         foreach ($combinations as $index => $values) {
@@ -193,7 +196,7 @@ final class Datasets
     /**
      * @param array<int, mixed> $data
      */
-    private static function getDataSetDescription(int|string $key, array $data): string
+    private static function getDatasetDescription(int|string $key, array $data): string
     {
         $exporter = new Exporter();
 
