@@ -14,8 +14,12 @@ final class Depends
 {
     /**
      * Adds annotations regarding the "depends" feature.
+     *
+     * @param array<int, string> $annotations
+     *
+     * @return array<int, string>
      */
-    public function add(TestCaseMethodFactory $method, array $annotations): array
+    public function __invoke(TestCaseMethodFactory $method, array $annotations): array
     {
         foreach ($method->depends as $depend) {
             $depend = Str::evaluable($depend);

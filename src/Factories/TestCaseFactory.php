@@ -73,9 +73,9 @@ final class TestCaseFactory
     {
         $methodsUsingOnly = $this->methodsUsingOnly();
 
-        $methods = array_filter($this->methods, function ($method) use ($methodsUsingOnly) {
+        $methods = array_values(array_filter($this->methods, function ($method) use ($methodsUsingOnly) {
             return count($methodsUsingOnly) === 0 || in_array($method, $methodsUsingOnly, true);
-        });
+        }));
 
         if (count($methods) > 0) {
             $this->evaluate($this->filename, $methods);
@@ -98,6 +98,8 @@ final class TestCaseFactory
 
     /**
      * Creates a Test Case class using a runtime evaluate.
+     *
+     * @param array<int, TestCaseMethodFactory> $methods
      */
     public function evaluate(string $filename, array $methods): string
     {
@@ -140,13 +142,18 @@ final class TestCaseFactory
         }
 
         $methodsCode = implode('', array_map(static function (TestCaseMethodFactory $method): string {
+            if ($method->description === null) {
+                throw ShouldNotHappen::fromMessage('The test description may not be empty.');
+            }
+
             $methodName = Str::evaluable($method->description);
 
             $datasetsCode = '';
             $annotations = ['@test'];
 
             foreach (self::$annotations as $annotation) {
-                $annotations = (new $annotation())->add($method, $annotations);
+                /** @phpstan-ignore-next-line */
+                $annotations = (new $annotation())->__invoke($method, $annotations);
             }
 
             if (count($method->datasets) > 0) {
@@ -221,6 +228,10 @@ EOF;
         }
 
         if (!$method->receivesArguments()) {
+            if ($method->closure === null) {
+                throw ShouldNotHappen::fromMessage('The test closure may not be empty.');
+            }
+
             $arguments = Reflection::getFunctionArguments($method->closure);
 
             if (count($arguments) > 0) {
@@ -237,6 +248,10 @@ EOF;
     public function getMethod(string $methodName): TestCaseMethodFactory
     {
         foreach ($this->methods as $method) {
+            if ($method->description === null) {
+                throw ShouldNotHappen::fromMessage('The test description may not be empty.');
+            }
+
             if (Str::evaluable($method->description) === $methodName) {
                 return $method;
             }

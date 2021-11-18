@@ -35,15 +35,15 @@ final class Container
     /**
      * Gets a dependency from the container.
      *
-     * @return object
+     * @param class-string $id
+     *
+     * @return mixed
      */
     public function get(string $id)
     {
-        if (array_key_exists($id, $this->instances)) {
-            return $this->instances[$id];
+        if (!array_key_exists($id, $this->instances)) {
+            $this->instances[$id] = $this->build($id);
         }
-
-        $this->instances[$id] = $this->build($id);
 
         return $this->instances[$id];
     }
@@ -60,6 +60,8 @@ final class Container
 
     /**
      * Tries to build the given instance.
+     *
+     * @param class-string $id
      */
     private function build(string $id): object
     {
@@ -83,6 +85,7 @@ final class Container
                             }
                         }
 
+                        //@phpstan-ignore-next-line
                         return $this->get($candidate);
                     },
                     $constructor->getParameters()

@@ -13,8 +13,12 @@ final class Groups
 {
     /**
      * Adds annotations regarding the "groups" feature.
+     *
+     * @param array<int, string> $annotations
+     *
+     * @return array<int, string>
      */
-    public function add(TestCaseMethodFactory $method, array $annotations): array
+    public function __invoke(TestCaseMethodFactory $method, array $annotations): array
     {
         foreach ($method->groups as $group) {
             $annotations[] = "@group $group";

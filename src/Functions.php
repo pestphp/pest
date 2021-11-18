@@ -70,12 +70,14 @@ if (!function_exists('uses')) {
     /**
      * The uses function binds the given
      * arguments to test closures.
+     *
+     * @param class-string ...$classAndTraits
      */
     function uses(string ...$classAndTraits): UsesCall
     {
         $filename = Backtrace::file();
 
-        return new UsesCall($filename, $classAndTraits);
+        return new UsesCall($filename, array_values($classAndTraits));
     }
 }
 
@@ -111,7 +113,10 @@ if (!function_exists('it')) {
     {
         $description = sprintf('it %s', $description);
 
-        return test($description, $closure);
+        /** @var TestCall $test */
+        $test = test($description, $closure);
+
+        return $test;
     }
 }
 

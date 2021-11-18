@@ -15,7 +15,7 @@ final class BootSubscribers
     /**
      * The Kernel subscribers.
      *
-     * @var array<int, class-string>
+     * @var array<int, class-string<\PHPUnit\Event\Subscriber>>
      */
     private static array $subscribers = [
         Subscribers\EnsureConfigurationIsValid::class,

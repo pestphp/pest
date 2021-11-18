@@ -23,7 +23,7 @@ final class TestRepository
     private array $testCases = [];
 
     /**
-     * @var array<string, array<int, array<int, string|Closure>>>
+     * @var array<string, array{0: array<int, string>, 1: array<int, string>, 2: array<int, string|Closure>}>
      */
     private array $uses = [];
 
@@ -80,7 +80,7 @@ final class TestRepository
         }
     }
 
-    public function get($filename): TestCaseFactory
+    public function get(string $filename): TestCaseFactory
     {
         return $this->testCases[$filename];
     }
