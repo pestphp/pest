@@ -41,11 +41,13 @@ final class Container
      */
     public function get(string $id)
     {
-        if (array_key_exists($id, $this->instances)) {
-            return $this->instances[$id];
+        if (!array_key_exists($id, $this->instances)) {
+            $this->instances[$id] = $this->build($id);
         }
 
-        $this->instances[$id] = $this->build($id);
+        if (!is_object($this->instances[$id])) {
+            throw ShouldNotHappen::fromMessage('Cannot resolve a non-object from container');
+        }
 
         return $this->instances[$id];
     }
