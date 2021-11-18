@@ -4,7 +4,7 @@ includes:
     - vendor/thecodingmachine/phpstan-strict-rules/phpstan-strict-rules.neon
 
 parameters:
-    level: 8
+    level: 9
     paths:
         - src
 

@@ -40,6 +40,7 @@ final class HigherOrderMessageCollection
     public function chain(object $target): void
     {
         foreach ($this->messages as $message) {
+            //@phpstan-ignore-next-line
             $target = $message->call($target) ?? $target;
         }
     }
