@@ -45,10 +45,6 @@ final class Container
             $this->instances[$id] = $this->build($id);
         }
 
-        if (!is_object($this->instances[$id])) {
-            throw ShouldNotHappen::fromMessage('Cannot resolve a non-object from container');
-        }
-
         return $this->instances[$id];
     }
 
