@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.21.1 (2021-11-25)](https://github.com/pestphp/pest/compare/v1.21.0...v1.21.1)
+### Fixed
+- sequence callables causing problems ([#442](https://github.com/pestphp/pest/pull/442))
+
 ## [v1.21.0 (2021-11-17)](https://github.com/pestphp/pest/compare/v1.20.0...v1.21.0)
 ### Added
 - warn about xdebug modes ([1e011c](https://github.com/pestphp/pest/commit/1e011c7b4074d08f5dabab1f927d45383c85d210))
