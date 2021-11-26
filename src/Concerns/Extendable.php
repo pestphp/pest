@@ -19,7 +19,7 @@ trait Extendable
      */
     private static array $extends = [];
 
-    /** @var array<string, array<Closure>> */
+    /** @var array<string, array<Closure(Closure $next, mixed ...$arguments): void>> */
     private static array $pipes = [];
 
     /**
@@ -49,9 +49,8 @@ trait Extendable
             };
         }
 
-        //@phpstan-ignore-next-line
         self::pipe($name, function ($next, ...$arguments) use ($handler, $filter) {
-            //@phpstan-ignore-next-line
+            /** @phpstan-ignore-next-line */
             if ($filter($this->value)) {
                 //@phpstan-ignore-next-line
                 $handler->bindTo($this, get_class($this))(...$arguments);
@@ -72,29 +71,11 @@ trait Extendable
     }
 
     /**
-     * Checks if pipes are registered for a given expectation.
-     */
-    public static function hasPipes(string $name): bool
-    {
-        return array_key_exists($name, static::$pipes);
-    }
-
-    /**
      * @return array<int, Closure>
      */
-    public function pipes(string $name, object $context, string $scope): array
+    private function pipes(string $name, object $context, string $scope): array
     {
-        if (!self::hasPipes($name)) {
-            return [];
-        }
-
-        $decorators = [];
-        foreach (self::$pipes[$name] as $decorator) {
-            $decorators[] = $decorator->bindTo($context, $scope);
-        }
-
-        //@phpstan-ignore-next-line
-        return $decorators;
+        return array_map(fn(Closure $pipe) => $pipe->bindTo($context, $scope), self::$pipes[$name] ?? []);
     }
 
     /**
