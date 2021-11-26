@@ -39,7 +39,9 @@ trait Extendable
     }
 
     /**
-     * Recister an interceptor that should replace an existing expectation.
+     * Register an interceptor that should replace an existing expectation.
+     *
+     * @param string|Closure(mixed $value, mixed ...$arguments):bool $filter
      */
     public static function intercept(string $name, string|Closure $filter, Closure $handler): void
     {
@@ -51,7 +53,7 @@ trait Extendable
 
         self::pipe($name, function ($next, ...$arguments) use ($handler, $filter) {
             /* @phpstan-ignore-next-line */
-            if ($filter($this->value)) {
+            if ($filter($this->value, ...$arguments)) {
                 //@phpstan-ignore-next-line
                 $handler->bindTo($this, get_class($this))(...$arguments);
 
