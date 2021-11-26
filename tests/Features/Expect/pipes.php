@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use function PHPUnit\Framework\assertEquals;
 use function PHPUnit\Framework\assertEqualsIgnoringCase;
 use function PHPUnit\Framework\assertInstanceOf;
@@ -34,8 +36,8 @@ class Symbol
 
 class State
 {
-    public $runCount     = [];
-    public $appliedCount = [];
+    public array $runCount     = [];
+    public array $appliedCount = [];
 
     public function __construct()
     {
@@ -143,7 +145,7 @@ test('pipe is applied and can stop pipeline', function () use ($state) {
         ]);
 });
 
-test('pipe is run and lets the pipeline to keep going', function () use ($state) {
+test('pipe is run and can let the pipeline keep going', function () use ($state) {
     $state->reset();
 
     expect(3)->toBe(3)

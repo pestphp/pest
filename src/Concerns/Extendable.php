@@ -19,7 +19,7 @@ trait Extendable
      */
     private static array $extends = [];
 
-    /** @var array<string, array<Closure(Closure $next, mixed ...$arguments): void>> */
+    /** @var array<string, array<Closure(Closure, mixed ...$arguments): void>> */
     private static array $pipes = [];
 
     /**
@@ -50,7 +50,7 @@ trait Extendable
         }
 
         self::pipe($name, function ($next, ...$arguments) use ($handler, $filter) {
-            /** @phpstan-ignore-next-line */
+            /* @phpstan-ignore-next-line */
             if ($filter($this->value)) {
                 //@phpstan-ignore-next-line
                 $handler->bindTo($this, get_class($this))(...$arguments);
@@ -75,7 +75,7 @@ trait Extendable
      */
     private function pipes(string $name, object $context, string $scope): array
     {
-        return array_map(fn(Closure $pipe) => $pipe->bindTo($context, $scope), self::$pipes[$name] ?? []);
+        return array_map(fn (Closure $pipe) => $pipe->bindTo($context, $scope), self::$pipes[$name] ?? []);
     }
 
     /**
