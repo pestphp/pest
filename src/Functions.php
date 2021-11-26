@@ -14,18 +14,20 @@ use Pest\Support\HigherOrderTapProxy;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Creates a new expectation.
- *
- * @param mixed $value the Value
- */
-function expect($value = null): Expectation|Extendable
-{
-    if (func_num_args() === 0) {
-        return new Extendable(Expectation::class);
-    }
+if (!function_exists('expect')) {
+    /**
+     * Creates a new expectation.
+     *
+     * @param mixed $value the Value
+     */
+    function expect($value = null): Expectation|Extendable
+    {
+        if (func_num_args() === 0) {
+            return new Extendable(Expectation::class);
+        }
 
-    return new Expectation($value);
+        return new Expectation($value);
+    }
 }
 
 if (!function_exists('beforeAll')) {
@@ -68,12 +70,14 @@ if (!function_exists('uses')) {
     /**
      * The uses function binds the given
      * arguments to test closures.
+     *
+     * @param class-string ...$classAndTraits
      */
     function uses(string ...$classAndTraits): UsesCall
     {
         $filename = Backtrace::file();
 
-        return new UsesCall($filename, $classAndTraits);
+        return new UsesCall($filename, array_values($classAndTraits));
     }
 }
 
@@ -109,7 +113,10 @@ if (!function_exists('it')) {
     {
         $description = sprintf('it %s', $description);
 
-        return test($description, $closure);
+        /** @var TestCall $test */
+        $test = test($description, $closure);
+
+        return $test;
     }
 }
 

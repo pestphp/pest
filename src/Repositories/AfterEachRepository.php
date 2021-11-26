@@ -41,7 +41,6 @@ final class AfterEachRepository
 
         return ChainableClosure::from(function (): void {
             if (class_exists(Mockery::class)) {
-                /* @phpstan-ignore-next-line */
                 if ($container = Mockery::getContainer()) {
                     /* @phpstan-ignore-next-line */
                     $this->addToAssertionCount($container->mockery_getExpectationCount());

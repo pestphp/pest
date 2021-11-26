@@ -8,7 +8,8 @@ use BadMethodCallException;
 use Closure;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\RetrievesValues;
-use Pest\Exceptions\ExpectationNotFoundException;
+use Pest\Exceptions\InvalidExpectationValue;
+use Pest\Exceptions\PipeException;
 use Pest\Support\ExpectationPipeline;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\ExpectationFailedException;
@@ -58,17 +59,19 @@ final class Expectation
      */
     public function json(): Expectation
     {
+        if (!is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
         return $this->toBeJson()->and(json_decode($this->value, true));
     }
 
     /**
      * Dump the expectation value and end the script.
      *
-     * @param mixed $arguments
-     *
      * @return never
      */
-    public function dd(...$arguments): void
+    public function dd(mixed ...$arguments): void
     {
         if (function_exists('dd')) {
             dd($this->value, ...$arguments);
@@ -85,7 +88,6 @@ final class Expectation
     public function ray(mixed ...$arguments): self
     {
         if (function_exists('ray')) {
-            // @phpstan-ignore-next-line
             ray($this->value, ...$arguments);
         }
 
@@ -148,7 +150,7 @@ final class Expectation
         }
 
         foreach ($values as $key => $item) {
-            if (is_callable($callbacks[$key])) {
+            if ($callbacks[$key] instanceof Closure) {
                 call_user_func($callbacks[$key], new self($item), new self($keys[$key]));
                 continue;
             }
@@ -173,7 +175,7 @@ final class Expectation
             ? $subject
             : fn () => $subject;
 
-        $subject = $subject();
+        $subject   = $subject();
 
         $matched = false;
 
@@ -244,10 +246,8 @@ final class Expectation
      * creates a new higher order expectation.
      *
      * @param array<int, mixed> $parameters
-     *
-     * @return HigherOrderExpectation|mixed
      */
-    public function __call(string $method, array $parameters)
+    public function __call(string $method, array $parameters): Expectation|HigherOrderExpectation
     {
         if (!$this->hasExpectation($method)) {
             /* @phpstan-ignore-next-line */
@@ -262,22 +262,22 @@ final class Expectation
         return $this;
     }
 
-    /**
-     * Dynamically calls methods on the class without any arguments
-     * or creates a new higher order expectation.
-     */
-    public function __get(string $name): mixed
+    private function getExpectationClosure(string $name): Closure
     {
-        if ($name === 'value') {
-            return $this->coreExpectation->value;
+        if (method_exists($this->coreExpectation, $name)) {
+            //@phpstan-ignore-next-line
+            return Closure::fromCallable([$this->coreExpectation, $name]);
         }
 
-        if (!method_exists($this, $name) && !method_exists($this->coreExpectation, $name) && !self::hasExtend($name)) {
-            return new HigherOrderExpectation($this, $this->retrieve($name, $this->value));
+        if (self::hasExtend($name)) {
+            $extend = self::$extends[$name]->bindTo($this, Expectation::class);
+
+            if ($extend != false) {
+                return $extend;
+            }
         }
 
-        /* @phpstan-ignore-next-line */
-        return $this->{$name}();
+        throw PipeException::expectationNotFound($name);
     }
 
     private function hasExpectation(string $name): bool
@@ -293,22 +293,24 @@ final class Expectation
         return false;
     }
 
-    private function getExpectationClosure(string $name): Closure
+    /**
+     * Dynamically calls methods on the class without any arguments
+     * or creates a new higher order expectation.
+     *
+     * @return Expectation|OppositeExpectation|Each|HigherOrderExpectation|TValue
+     */
+    public function __get(string $name)
     {
-        if (method_exists($this->coreExpectation, $name)) {
-            /* @phpstan-ignore-next-line */
-            return Closure::fromCallable([$this->coreExpectation, $name]);
+        if ($name === 'value') {
+            return $this->coreExpectation->value;
         }
 
-        if (self::hasExtend($name)) {
-            $extend = self::$extends[$name]->bindTo($this, Expectation::class);
-
-            if ($extend != false) {
-                return $extend;
-            }
+        if (!method_exists($this, $name) && !method_exists($this->coreExpectation, $name) && !Expectation::hasExtend($name)) {
+            return new HigherOrderExpectation($this, $this->retrieve($name, $this->value));
         }
 
-        throw new ExpectationNotFoundException($name);
+        /* @phpstan-ignore-next-line */
+        return $this->{$name}();
     }
 
     public static function hasMethod(string $name): bool

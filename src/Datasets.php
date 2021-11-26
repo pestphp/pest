@@ -7,7 +7,9 @@ namespace Pest;
 use Closure;
 use Pest\Exceptions\DatasetAlreadyExist;
 use Pest\Exceptions\DatasetDoesNotExist;
+use Pest\Exceptions\ShouldNotHappen;
 use SebastianBergmann\Exporter\Exporter;
+use function sprintf;
 use Traversable;
 
 /**
@@ -18,9 +20,16 @@ final class Datasets
     /**
      * Holds the datasets.
      *
-     * @var array<int|string, Closure|iterable<int|string, mixed>>
+     * @var array<string, Closure|iterable<int|string, mixed>>
      */
     private static array $datasets = [];
+
+    /**
+     * Holds the withs.
+     *
+     * @var array<array<string, Closure|iterable<int|string, mixed>|string>>
+     */
+    private static array $withs = [];
 
     /**
      * Sets the given.
@@ -37,65 +46,83 @@ final class Datasets
     }
 
     /**
-     * @return Closure|iterable<int|string, mixed>
+     * Sets the given "with".
+     *
+     * @param array<Closure|iterable<int|string, mixed>|string> $with
      */
-    public static function get(string $name): Closure|iterable
+    public static function with(string $filename, string $description, array $with): void
     {
-        if (!array_key_exists($name, self::$datasets)) {
-            throw new DatasetDoesNotExist($name);
+        self::$withs[$filename . '>>>' . $description] = $with;
+    }
+
+    /**
+     * @return Closure|iterable<int|string, mixed>|never
+     *
+     * @throws ShouldNotHappen
+     */
+    public static function get(string $filename, string $description): Closure|iterable
+    {
+        $dataset = self::$withs[$filename . '>>>' . $description];
+
+        $dataset = self::resolve($description, $dataset);
+
+        if ($dataset === null) {
+            throw ShouldNotHappen::fromMessage('Dataset [%s] not resolvable.');
         }
 
-        return self::$datasets[$name];
+        return $dataset;
     }
 
     /**
      * Resolves the current dataset to an array value.
      *
-     * @param array<Closure|iterable<int|string, mixed>|string> $datasets
+     * @param array<Closure|iterable<int|string, mixed>|string> $dataset
      *
-     * @return array<string, mixed>
+     * @return array<string, mixed>|null
      */
-    public static function resolve(string $description, array $datasets): array
+    public static function resolve(string $description, array $dataset): array|null
     {
         /* @phpstan-ignore-next-line */
-        if (empty($datasets)) {
-            return [$description => []];
+        if (empty($dataset)) {
+            return null;
         }
 
-        $datasets = self::processDatasets($datasets);
+        $dataset = self::processDatasets($dataset);
 
-        $datasetCombinations = self::getDataSetsCombinations($datasets);
+        $datasetCombinations = self::getDatasetsCombinations($dataset);
 
-        $dataSetDescriptions = [];
-        $dataSetValues       = [];
+        $datasetDescriptions = [];
+        $datasetValues       = [];
 
         foreach ($datasetCombinations as $datasetCombination) {
             $partialDescriptions = [];
             $values              = [];
 
-            foreach ($datasetCombination as $dataset_data) {
-                $partialDescriptions[] = $dataset_data['label'];
-                $values                = array_merge($values, $dataset_data['values']);
+            foreach ($datasetCombination as $datasetCombinationElement) {
+                $partialDescriptions[] = $datasetCombinationElement['label'];
+
+                // @phpstan-ignore-next-line
+                $values = array_merge($values, $datasetCombinationElement['values']);
             }
 
-            $dataSetDescriptions[] = $description . ' with ' . implode(' / ', $partialDescriptions);
-            $dataSetValues[]       = $values;
+            $datasetDescriptions[] = $description . ' with ' . implode(' / ', $partialDescriptions);
+            $datasetValues[]       = $values;
         }
 
-        foreach (array_count_values($dataSetDescriptions) as $descriptionToCheck => $count) {
+        foreach (array_count_values($datasetDescriptions) as $descriptionToCheck => $count) {
             if ($count > 1) {
                 $index = 1;
-                foreach ($dataSetDescriptions as $i => $dataSetDescription) {
-                    if ($dataSetDescription === $descriptionToCheck) {
-                        $dataSetDescriptions[$i] .= sprintf(' #%d', $index++);
+                foreach ($datasetDescriptions as $i => $datasetDescription) {
+                    if ($datasetDescription === $descriptionToCheck) {
+                        $datasetDescriptions[$i] .= sprintf(' #%d', $index++);
                     }
                 }
             }
         }
 
         $namedData = [];
-        foreach ($dataSetDescriptions as $i => $dataSetDescription) {
-            $namedData[$dataSetDescription] = $dataSetValues[$i];
+        foreach ($datasetDescriptions as $i => $datasetDescription) {
+            $namedData[$datasetDescription] = $datasetValues[$i];
         }
 
         return $namedData;
@@ -104,7 +131,7 @@ final class Datasets
     /**
      * @param array<Closure|iterable<int|string, mixed>|string> $datasets
      *
-     * @return array<array>
+     * @return array<array<mixed>>
      */
     private static function processDatasets(array $datasets): array
     {
@@ -114,7 +141,11 @@ final class Datasets
             $processedDataset = [];
 
             if (is_string($data)) {
-                $datasets[$index] = self::get($data);
+                if (!array_key_exists($data, self::$datasets)) {
+                    throw new DatasetDoesNotExist($data);
+                }
+
+                $datasets[$index] = self::$datasets[$data];
             }
 
             if (is_callable($datasets[$index])) {
@@ -125,10 +156,11 @@ final class Datasets
                 $datasets[$index] = iterator_to_array($datasets[$index]);
             }
 
+            //@phpstan-ignore-next-line
             foreach ($datasets[$index] as $key => $values) {
                 $values             = is_array($values) ? $values : [$values];
                 $processedDataset[] = [
-                    'label'  => self::getDataSetDescription($key, $values),
+                    'label'  => self::getDatasetDescription($key, $values), //@phpstan-ignore-line
                     'values' => $values,
                 ];
             }
@@ -140,11 +172,11 @@ final class Datasets
     }
 
     /**
-     * @param array<array> $combinations
+     * @param array<array<mixed>> $combinations
      *
-     * @return array<array>
+     * @return array<array<array<mixed>>>
      */
-    private static function getDataSetsCombinations(array $combinations): array
+    private static function getDatasetsCombinations(array $combinations): array
     {
         $result = [[]];
         foreach ($combinations as $index => $values) {
@@ -157,20 +189,21 @@ final class Datasets
             $result = $tmp;
         }
 
+        //@phpstan-ignore-next-line
         return $result;
     }
 
     /**
      * @param array<int, mixed> $data
      */
-    private static function getDataSetDescription(int|string $key, array $data): string
+    private static function getDatasetDescription(int|string $key, array $data): string
     {
         $exporter = new Exporter();
 
         if (is_int($key)) {
-            return \sprintf('(%s)', $exporter->shortenedRecursiveExport($data));
+            return sprintf('(%s)', $exporter->shortenedRecursiveExport($data));
         }
 
-        return \sprintf('data set "%s"', $key);
+        return sprintf('data set "%s"', $key);
     }
 }

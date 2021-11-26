@@ -18,14 +18,14 @@ final class HigherOrderMessage
     /**
      * An optional condition that will determine if the message will be executed.
      *
-     * @var (callable(): bool)|null
+     * @var (Closure(): bool)|null
      */
-    public $condition;
+    public ?Closure $condition = null;
 
     /**
      * Creates a new higher order message.
      *
-     * @param array<int, mixed>|null $arguments
+     * @param array<int, mixed> $arguments
      */
     public function __construct(
         public string $filename,
@@ -41,7 +41,6 @@ final class HigherOrderMessage
      */
     public function call(object $target): mixed
     {
-        /* @phpstan-ignore-next-line */
         if (is_callable($this->condition) && call_user_func(Closure::bind($this->condition, $target)) === false) {
             return $target;
         }
@@ -54,8 +53,7 @@ final class HigherOrderMessage
         try {
             return is_array($this->arguments)
                 ? Reflection::call($target, $this->name, $this->arguments)
-                : $target->{$this->name};
-            /* @phpstan-ignore-line */
+                : $target->{$this->name}; /* @phpstan-ignore-line */
         } catch (Throwable $throwable) {
             Reflection::setPropertyValue($throwable, 'file', $this->filename);
             Reflection::setPropertyValue($throwable, 'line', $this->line);
@@ -79,7 +77,7 @@ final class HigherOrderMessage
      */
     public function when(callable $condition): self
     {
-        $this->condition = $condition;
+        $this->condition = Closure::fromCallable($condition);
 
         return $this;
     }

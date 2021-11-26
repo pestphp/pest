@@ -25,15 +25,15 @@ final class Extendable
         $this->extendableClass::extend($name, $extend);
     }
 
-    /**
-     * Register pipe to be applied to the given expectation.
-     */
-    public function pipe(string $name, Closure $handler): void
+    public function pipe(string $name, Closure $pipe): void
     {
-        $this->extendableClass::pipe($name, $handler);
+        $this->extendableClass::pipe($name, $pipe);
     }
 
-    public function intercept(string $name, string|Closure $filter, Closure $handler): void
+    /**
+     * @param string|Closure $filter
+     */
+    public function intercept(string $name, $filter, Closure $handler): void
     {
         $this->extendableClass::intercept($name, $filter, $handler);
     }

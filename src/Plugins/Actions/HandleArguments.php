@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pest\Plugins\Actions;
 
 use Pest\Contracts\Plugins;

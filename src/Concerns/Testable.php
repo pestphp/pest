@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace Pest\Concerns;
 
 use Closure;
-use Pest\Support\Backtrace;
 use Pest\Support\ChainableClosure;
 use Pest\Support\ExceptionTrace;
 use Pest\TestSuite;
-use PHPUnit\Framework\ExecutionOrderDependency;
 use Throwable;
 
 /**
@@ -17,11 +15,6 @@ use Throwable;
  */
 trait Testable
 {
-    /**
-     * The Test Case description.
-     */
-    private string $__description;
-
     /**
      * The Test Case "test" closure.
      */
@@ -48,46 +41,22 @@ trait Testable
     private static ?Closure $__afterAll = null;
 
     /**
+     * Resets the test case static properties.
+     */
+    public static function flush(): void
+    {
+        self::$__beforeAll = null;
+        self::$__afterAll  = null;
+    }
+
+    /**
      * Creates a new Test Case instance.
      */
-    public function __construct(Closure $test, string $description, array $data)
+    public function __construct(string $name)
     {
-        $this->__test          = $test;
-        $this->__description   = $description;
-        self::$__beforeAll     = null;
-        self::$__afterAll      = null;
+        parent::__construct($name);
 
-        parent::__construct('__test');
-
-        $this->setData($description, $data);
-    }
-
-    /**
-     * Adds groups to the Test Case.
-     */
-    public function addGroups(array $groups): void
-    {
-        $groups = array_unique(array_merge($this->groups(), $groups));
-
-        $this->setGroups($groups);
-    }
-
-    /**
-     * Adds dependencies to the Test Case.
-     */
-    public function addDependencies(array $tests): void
-    {
-        $className = $this::class;
-
-        $tests = array_map(static function (string $test) use ($className): ExecutionOrderDependency {
-            if (!str_contains($test, '::')) {
-                $test = "{$className}::{$test}";
-            }
-
-            return new ExecutionOrderDependency($test, '__test');
-        }, $tests);
-
-        $this->setDependencies($tests);
+        $this->__test = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($name)->getClosure($this);
     }
 
     /**
@@ -146,16 +115,6 @@ trait Testable
         $this->{$property} = ($this->{$property} instanceof Closure)
             ? ChainableClosure::from($this->{$property}, $hook)
             : $hook;
-    }
-
-    /**
-     * Gets the Test Case name.
-     */
-    public function getName(bool $withDataSet = true): string
-    {
-        return (str_ends_with(Backtrace::file(), 'TestRunner.php') || Backtrace::line() === 277)
-            ? '__test'
-            : $this->__description;
     }
 
     /**
@@ -235,25 +194,13 @@ trait Testable
     }
 
     /**
-     * Gets the Test Case filename and description.
-     */
-    public function toString(): string
-    {
-        return \sprintf(
-            '%s::%s',
-            self::$__filename,
-            $this->__description
-        );
-    }
-
-    /**
      * Executes the Test Case current test.
      *
      * @throws Throwable
      */
-    public function __test(): mixed
+    private function __runTest(Closure $closure, ...$args): mixed
     {
-        return $this->__callClosure($this->__test, $this->__resolveTestArguments(func_get_args()));
+        return $this->__callClosure($closure, $this->__resolveTestArguments($args));
     }
 
     /**

@@ -12,7 +12,8 @@ beforeEach(function () {
 it('throws exception if dataset does not exist', function () {
     $this->expectException(DatasetDoesNotExist::class);
     $this->expectExceptionMessage("A dataset with the name `first` does not exist. You can create it using `dataset('first', ['a', 'b']);`.");
-    Datasets::get('first');
+
+    Datasets::resolve('foo', ['first']);
 });
 
 it('throws exception if dataset already exist', function () {
@@ -27,13 +28,13 @@ it('sets closures', function () {
         yield [1];
     });
 
-    expect(iterator_to_array(Datasets::get('foo')()))->toBe([[1]]);
+    expect(Datasets::resolve('foo', ['foo']))->toBe(['foo with (1)' => [1]]);
 });
 
 it('sets arrays', function () {
     Datasets::set('bar', [[2]]);
 
-    expect(Datasets::get('bar'))->toBe([[2]]);
+    expect(Datasets::resolve('bar', ['bar']))->toBe(['bar with (2)' => [2]]);
 });
 
 it('gets bound to test case object', function () {
@@ -52,6 +53,7 @@ $datasets = [[1], [2]];
 
 test('lazy datasets', function ($text) use ($state, $datasets) {
     $state->text .= $text;
+
     expect(in_array([$text], $datasets))->toBe(true);
 })->with($datasets);
 

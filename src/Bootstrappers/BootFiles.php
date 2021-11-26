@@ -35,8 +35,7 @@ final class BootFiles
      */
     public function __invoke(): void
     {
-        $rootPath = TestSuite::getInstance()->rootPath;
-
+        $rootPath  = TestSuite::getInstance()->rootPath;
         $testsPath = $rootPath . DIRECTORY_SEPARATOR . testDirectory();
 
         foreach (self::STRUCTURE as $filename) {

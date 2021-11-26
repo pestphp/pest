@@ -18,7 +18,6 @@ final class Kernel
      */
     private static array $bootstrappers = [
         Bootstrappers\BootExceptionHandler::class,
-        Bootstrappers\BootEmitter::class,
         Bootstrappers\BootSubscribers::class,
         Bootstrappers\BootFiles::class,
     ];
@@ -38,6 +37,7 @@ final class Kernel
     public static function boot(): self
     {
         foreach (self::$bootstrappers as $bootstrapper) {
+            //@phpstan-ignore-next-line
             (new $bootstrapper())->__invoke();
         }
 
@@ -65,6 +65,6 @@ final class Kernel
      */
     public function shutdown(): void
     {
-        // TODO
+        // ..
     }
 }

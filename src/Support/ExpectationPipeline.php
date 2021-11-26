@@ -14,21 +14,22 @@ final class ExpectationPipeline
     /** @var array<Closure> */
     private array $pipes = [];
 
-    /** @var array<int|string, mixed> */
+    /** @var array<mixed> */
     private array $passable;
 
-    public function __construct(
-        private Closure $expectationClosure
-    ) {
-        //..
+    private Closure $expectationClosure;
+
+    public function __construct(Closure $expectationClosure)
+    {
+        $this->expectationClosure = $expectationClosure;
     }
 
-    public static function for(Closure $expectationClosure): ExpectationPipeline
+    public static function for(Closure $expectationClosure): self
     {
         return new self($expectationClosure);
     }
 
-    public function send(mixed ...$passable): ExpectationPipeline
+    public function send(mixed ...$passable): self
     {
         $this->passable = $passable;
 
@@ -38,7 +39,7 @@ final class ExpectationPipeline
     /**
      * @param array<Closure> $pipes
      */
-    public function through(array $pipes): ExpectationPipeline
+    public function through(array $pipes): self
     {
         $this->pipes = $pipes;
 
@@ -48,11 +49,11 @@ final class ExpectationPipeline
     public function run(): void
     {
         $pipeline = array_reduce(
-          array_reverse($this->pipes),
-          $this->carry(),
-          function (): void {
-              ($this->expectationClosure)(...$this->passable);
-          }
+            array_reverse($this->pipes),
+            $this->carry(),
+            function (): void {
+                ($this->expectationClosure)(...$this->passable);
+            }
         );
 
         $pipeline();
@@ -60,6 +61,10 @@ final class ExpectationPipeline
 
     public function carry(): Closure
     {
-        return fn ($stack, $pipe): Closure => fn () => $pipe($stack, ...$this->passable);
+        return function ($stack, $pipe): Closure {
+            return function () use ($stack, $pipe) {
+                return $pipe($stack, ...$this->passable);
+            };
+        };
     }
 }
