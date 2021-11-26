@@ -6,35 +6,30 @@ namespace Pest\Support;
 
 use Closure;
 
+/**
+ * @internal
+ */
 final class ExpectationPipeline
 {
     /** @var array<Closure> */
-    private $pipes = [];
+    private array $pipes = [];
 
     /** @var array<mixed> */
-    private $passable;
+    private array $passable;
 
-    /** @var Closure */
-    private $expectationClosure;
+    private Closure $expectationClosure;
 
-    /** @var string */
-    private $expectationName;
-
-    public function __construct(string $expectationName, Closure $expectationClosure)
+    public function __construct(Closure $expectationClosure)
     {
         $this->expectationClosure = $expectationClosure;
-        $this->expectationName    = $expectationName;
     }
 
-    public static function for(string $expectationName, Closure $expectationClosure): self
+    public static function for(Closure $expectationClosure): self
     {
-        return new self($expectationName, $expectationClosure);
+        return new self($expectationClosure);
     }
 
-    /**
-     * @param array<mixed> $passable
-     */
-    public function send(...$passable): self
+    public function send(mixed ...$passable): self
     {
         $this->passable = $passable;
 
