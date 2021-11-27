@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Pest\Factories;
 
 use Closure;
+use Pest\Datasets;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Factories\Concerns\HigherOrderable;
+use Pest\Support\Str;
 use Pest\TestSuite;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
@@ -98,5 +100,69 @@ final class TestCaseMethodFactory
     public function receivesArguments(): bool
     {
         return count($this->datasets) > 0 || count($this->depends) > 0;
+    }
+
+    /**
+     * Creates a PHPUnit method as a string ready for evaluation.
+     *
+     * @param array<int, class-string> $annotationsToUse
+     */
+    public function buildForEvaluation(array $annotationsToUse): string
+    {
+        if ($this->description === null) {
+            throw ShouldNotHappen::fromMessage('The test description may not be empty.');
+        }
+
+        $methodName = Str::evaluable($this->description);
+
+        $datasetsCode = '';
+        $annotations  = ['@test'];
+
+        foreach ($annotationsToUse as $annotation) {
+            /** @phpstan-ignore-next-line */
+            $annotations = (new $annotation())->__invoke($this, $annotations);
+        }
+
+        if (count($this->datasets) > 0) {
+            $dataProviderName = $methodName . '_dataset';
+            $annotations[]    = "@dataProvider $dataProviderName";
+            $datasetsCode     = $this->buildDatasetForEvaluation($methodName, $dataProviderName);
+        }
+
+        $annotations = implode('', array_map(
+            static fn ($annotation) => sprintf("\n                 * %s", $annotation), $annotations,
+        ));
+
+        return <<<EOF
+
+                /**$annotations
+                 */
+                public function $methodName()
+                {
+                    return \$this->__runTest(
+                        \$this->__test,
+                        ...func_get_args(),
+                    );
+                }
+
+                $datasetsCode
+        EOF;
+    }
+
+    /**
+     * Creates a PHPUnit Data Provider as a string ready for evaluation.
+     */
+    private function buildDatasetForEvaluation(string $methodName, string $dataProviderName): string
+    {
+        Datasets::with($this->filename, $methodName, $this->datasets);
+
+        return <<<EOF
+
+                public function $dataProviderName()
+                {
+                    return __PestDatasets::get(self::\$__filename, "$methodName");
+                }
+
+        EOF;
     }
 }

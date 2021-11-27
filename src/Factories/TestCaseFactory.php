@@ -7,7 +7,6 @@ namespace Pest\Factories;
 use ParseError;
 use Pest\Concerns;
 use Pest\Contracts\HasPrintableTestCaseName;
-use Pest\Datasets;
 use Pest\Exceptions\DatasetMissing;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Exceptions\TestAlreadyExist;
@@ -142,56 +141,10 @@ final class TestCaseFactory
             $classFQN .= $className;
         }
 
-        $methodsCode = implode('', array_map(static function (TestCaseMethodFactory $method): string {
-            if ($method->description === null) {
-                throw ShouldNotHappen::fromMessage('The test description may not be empty.');
-            }
-
-            $methodName = Str::evaluable($method->description);
-
-            $datasetsCode = '';
-            $annotations = ['@test'];
-
-            foreach (self::$annotations as $annotation) {
-                /** @phpstan-ignore-next-line */
-                $annotations = (new $annotation())->__invoke($method, $annotations);
-            }
-
-            if (count($method->datasets) > 0) {
-                $dataProviderName = $methodName . '_dataset';
-                $annotations[] = "@dataProvider $dataProviderName";
-
-                Datasets::with($method->filename, $methodName, $method->datasets);
-
-                $datasetsCode = <<<EOF
-
-                public function $dataProviderName()
-                {
-                    return __PestDatasets::get(self::\$__filename, "$methodName");
-                }
-
-EOF;
-            }
-
-            $annotations = implode('', array_map(
-                static fn ($annotation) => sprintf("\n                 * %s", $annotation), $annotations,
-            ));
-
-            return <<<EOF
-
-                /**$annotations
-                 */
-                public function $methodName()
-                {
-                    return \$this->__runTest(
-                        \$this->__test,
-                        ...func_get_args(),
-                    );
-                }
-
-                $datasetsCode
-EOF;
-        }, $methods));
+        $methodsCode = implode('', array_map(
+            fn (TestCaseMethodFactory $methodFactory) => $methodFactory->buildForEvaluation(self::$annotations),
+            $methods
+        ));
 
         try {
             eval("
