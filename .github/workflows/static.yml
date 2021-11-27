@@ -40,7 +40,7 @@ jobs:
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: 8.0
+        php-version: 8.1
         tools: composer:v2
         coverage: none
 
@@ -48,4 +48,4 @@ jobs:
       run: composer update --prefer-stable --no-interaction --no-progress
 
     - name: Run PHPStan
-      run: vendor/bin/phpstan analyse --no-progress
+      run: vendor/bin/phpstan analyse --no-progress --debug
