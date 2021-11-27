@@ -46,18 +46,18 @@ final class Expectation
      *
      * @param TValue $value
      */
-    public function __construct(
-        public mixed $value
-    ) {
-        // ..
+    public function __construct(public mixed $value)
+    {
     }
 
     /**
      * Creates a new expectation.
      *
-     * @param TValue $value
+     * @template TAndValue
      *
-     * @return Expectation<TValue>
+     * @param TAndValue $value
+     *
+     * @return self<TAndValue>
      */
     public function and(mixed $value): Expectation
     {
@@ -66,6 +66,8 @@ final class Expectation
 
     /**
      * Creates a new expectation with the decoded JSON value.
+     *
+     * @return self<mixed>
      */
     public function json(): Expectation
     {
@@ -94,6 +96,8 @@ final class Expectation
 
     /**
      * Send the expectation value to Ray along with all given arguments.
+     *
+     * @return self<TValue>
      */
     public function ray(mixed ...$arguments): self
     {
@@ -106,6 +110,8 @@ final class Expectation
 
     /**
      * Creates the opposite expectation for the value.
+     *
+     * @return OppositeExpectation<TValue>
      */
     public function not(): OppositeExpectation
     {
@@ -114,6 +120,8 @@ final class Expectation
 
     /**
      * Creates an expectation on each item of the iterable "value".
+     *
+     * @return Each<TValue>
      */
     public function each(callable $callback = null): Each
     {
@@ -135,7 +143,9 @@ final class Expectation
      *
      * @template TSequenceValue
      *
-     * @param (callable(self, self): void)|TSequenceValue ...$callbacks
+     * @param (callable(self<TValue>, self<string|int>): void)|TSequenceValue ...$callbacks
+     *
+     * @return self<TValue>
      */
     public function sequence(mixed ...$callbacks): Expectation
     {
@@ -177,15 +187,13 @@ final class Expectation
      * @template TMatchSubject of array-key
      *
      * @param (callable(): TMatchSubject)|TMatchSubject $subject
-     * @param array<TMatchSubject, (callable(Expectation<TValue>): mixed)|TValue> $expressions
+     * @param array<TMatchSubject, (callable(self<TValue>): mixed)|TValue> $expressions
+     *
+     * @return self<TValue>
      */
     public function match(mixed $subject, array $expressions): Expectation
     {
-        $subject = is_callable($subject)
-            ? $subject
-            : fn () => $subject;
-
-        $subject   = $subject();
+        $subject = $subject instanceof Closure ? $subject() : $subject;
 
         $matched = false;
 
@@ -218,6 +226,8 @@ final class Expectation
      *
      * @param (callable(): bool)|bool $condition
      * @param callable(Expectation<TValue>): mixed $callback
+     *
+     * @return self<TValue>
      */
     public function unless(callable|bool $condition, callable $callback): Expectation
     {
@@ -234,7 +244,9 @@ final class Expectation
      * Apply the callback if the given "condition" is truthy.
      *
      * @param (callable(): bool)|bool $condition
-     * @param callable(Expectation<TValue>): mixed $callback
+     * @param callable(self<TValue>): mixed $callback
+     *
+     * @return self<TValue>
      */
     public function when(callable|bool $condition, callable $callback): Expectation
     {
@@ -255,6 +267,8 @@ final class Expectation
      * Asserts that two variables have the same type and
      * value. Used on objects, it asserts that two
      * variables reference the same object.
+     *
+     * @return self<TValue>
      */
     public function toBe(mixed $expected): Expectation
     {
@@ -265,6 +279,8 @@ final class Expectation
 
     /**
      * Asserts that the value is empty.
+     *
+     * @return self<TValue>
      */
     public function toBeEmpty(): Expectation
     {
@@ -275,6 +291,8 @@ final class Expectation
 
     /**
      * Asserts that the value is true.
+     *
+     * @return self<TValue>
      */
     public function toBeTrue(): Expectation
     {
@@ -285,6 +303,8 @@ final class Expectation
 
     /**
      * Asserts that the value is truthy.
+     *
+     * @return self<TValue>
      */
     public function toBeTruthy(): Expectation
     {
@@ -295,6 +315,8 @@ final class Expectation
 
     /**
      * Asserts that the value is false.
+     *
+     * @return self<TValue>
      */
     public function toBeFalse(): Expectation
     {
@@ -305,6 +327,8 @@ final class Expectation
 
     /**
      * Asserts that the value is falsy.
+     *
+     * @return self<TValue>
      */
     public function toBeFalsy(): Expectation
     {
@@ -315,6 +339,8 @@ final class Expectation
 
     /**
      * Asserts that the value is greater than $expected.
+     *
+     * @return self<TValue>
      */
     public function toBeGreaterThan(int|float $expected): Expectation
     {
@@ -325,6 +351,8 @@ final class Expectation
 
     /**
      * Asserts that the value is greater than or equal to $expected.
+     *
+     * @return self<TValue>
      */
     public function toBeGreaterThanOrEqual(int|float $expected): Expectation
     {
@@ -335,6 +363,8 @@ final class Expectation
 
     /**
      * Asserts that the value is less than or equal to $expected.
+     *
+     * @return self<TValue>
      */
     public function toBeLessThan(int|float $expected): Expectation
     {
@@ -345,6 +375,8 @@ final class Expectation
 
     /**
      * Asserts that the value is less than $expected.
+     *
+     * @return self<TValue>
      */
     public function toBeLessThanOrEqual(int|float $expected): Expectation
     {
@@ -355,6 +387,8 @@ final class Expectation
 
     /**
      * Asserts that $needle is an element of the value.
+     *
+     * @return self<TValue>
      */
     public function toContain(mixed ...$needles): Expectation
     {
@@ -377,6 +411,8 @@ final class Expectation
      * Asserts that the value starts with $expected.
      *
      * @param non-empty-string $expected
+     *
+     * @return self<TValue>
      */
     public function toStartWith(string $expected): Expectation
     {
@@ -393,6 +429,8 @@ final class Expectation
      * Asserts that the value ends with $expected.
      *
      * @param non-empty-string $expected
+     *
+     * @return self<TValue>
      */
     public function toEndWith(string $expected): Expectation
     {
@@ -407,6 +445,8 @@ final class Expectation
 
     /**
      * Asserts that $number matches value's Length.
+     *
+     * @return self<TValue>
      */
     public function toHaveLength(int $number): Expectation
     {
@@ -437,6 +477,8 @@ final class Expectation
 
     /**
      * Asserts that $count matches the number of elements of the value.
+     *
+     * @return self<TValue>
      */
     public function toHaveCount(int $count): Expectation
     {
@@ -451,6 +493,8 @@ final class Expectation
 
     /**
      * Asserts that the value contains the property $name.
+     *
+     * @return self<TValue>
      */
     public function toHaveProperty(string $name, mixed $value = null): Expectation
     {
@@ -471,6 +515,8 @@ final class Expectation
      * Asserts that the value contains the provided properties $names.
      *
      * @param iterable<array-key, string> $names
+     *
+     * @return self<TValue>
      */
     public function toHaveProperties(iterable $names): Expectation
     {
@@ -483,6 +529,8 @@ final class Expectation
 
     /**
      * Asserts that two variables have the same value.
+     *
+     * @return self<TValue>
      */
     public function toEqual(mixed $expected): Expectation
     {
@@ -499,6 +547,8 @@ final class Expectation
      * are sorted before they are compared. When $expected and $this->value
      * are objects, each object is converted to an array containing all
      * private, protected and public attributes.
+     *
+     * @return self<TValue>
      */
     public function toEqualCanonicalizing(mixed $expected): Expectation
     {
@@ -510,6 +560,8 @@ final class Expectation
     /**
      * Asserts that the absolute difference between the value and $expected
      * is lower than $delta.
+     *
+     * @return self<TValue>
      */
     public function toEqualWithDelta(mixed $expected, float $delta): Expectation
     {
@@ -522,6 +574,8 @@ final class Expectation
      * Asserts that the value is one of the given values.
      *
      * @param iterable<int|string, mixed> $values
+     *
+     * @return self<TValue>
      */
     public function toBeIn(iterable $values): Expectation
     {
@@ -532,6 +586,8 @@ final class Expectation
 
     /**
      * Asserts that the value is infinite.
+     *
+     * @return self<TValue>
      */
     public function toBeInfinite(): Expectation
     {
@@ -544,6 +600,8 @@ final class Expectation
      * Asserts that the value is an instance of $class.
      *
      * @param class-string $class
+     *
+     * @return self<TValue>
      */
     public function toBeInstanceOf(string $class): Expectation
     {
@@ -554,6 +612,8 @@ final class Expectation
 
     /**
      * Asserts that the value is an array.
+     *
+     * @return self<TValue>
      */
     public function toBeArray(): Expectation
     {
@@ -564,6 +624,8 @@ final class Expectation
 
     /**
      * Asserts that the value is of type bool.
+     *
+     * @return self<TValue>
      */
     public function toBeBool(): Expectation
     {
@@ -574,6 +636,8 @@ final class Expectation
 
     /**
      * Asserts that the value is of type callable.
+     *
+     * @return self<TValue>
      */
     public function toBeCallable(): Expectation
     {
@@ -584,6 +648,8 @@ final class Expectation
 
     /**
      * Asserts that the value is of type float.
+     *
+     * @return self<TValue>
      */
     public function toBeFloat(): Expectation
     {
@@ -594,6 +660,8 @@ final class Expectation
 
     /**
      * Asserts that the value is of type int.
+     *
+     * @return self<TValue>
      */
     public function toBeInt(): Expectation
     {
@@ -604,6 +672,8 @@ final class Expectation
 
     /**
      * Asserts that the value is of type iterable.
+     *
+     * @return self<TValue>
      */
     public function toBeIterable(): Expectation
     {
@@ -614,6 +684,8 @@ final class Expectation
 
     /**
      * Asserts that the value is of type numeric.
+     *
+     * @return self<TValue>
      */
     public function toBeNumeric(): Expectation
     {
@@ -624,6 +696,8 @@ final class Expectation
 
     /**
      * Asserts that the value is of type object.
+     *
+     * @return self<TValue>
      */
     public function toBeObject(): Expectation
     {
@@ -634,6 +708,8 @@ final class Expectation
 
     /**
      * Asserts that the value is of type resource.
+     *
+     * @return self<TValue>
      */
     public function toBeResource(): Expectation
     {
@@ -644,6 +720,8 @@ final class Expectation
 
     /**
      * Asserts that the value is of type scalar.
+     *
+     * @return self<TValue>
      */
     public function toBeScalar(): Expectation
     {
@@ -654,6 +732,8 @@ final class Expectation
 
     /**
      * Asserts that the value is of type string.
+     *
+     * @return self<TValue>
      */
     public function toBeString(): Expectation
     {
@@ -664,6 +744,8 @@ final class Expectation
 
     /**
      * Asserts that the value is a JSON string.
+     *
+     * @return self<TValue>
      */
     public function toBeJson(): Expectation
     {
@@ -677,6 +759,8 @@ final class Expectation
 
     /**
      * Asserts that the value is NAN.
+     *
+     * @return self<TValue>
      */
     public function toBeNan(): Expectation
     {
@@ -687,6 +771,8 @@ final class Expectation
 
     /**
      * Asserts that the value is null.
+     *
+     * @return self<TValue>
      */
     public function toBeNull(): Expectation
     {
@@ -697,6 +783,8 @@ final class Expectation
 
     /**
      * Asserts that the value array has the provided $key.
+     *
+     * @return self<TValue>
      */
     public function toHaveKey(string|int $key, mixed $value = null): Expectation
     {
@@ -725,6 +813,8 @@ final class Expectation
      * Asserts that the value array has the provided $keys.
      *
      * @param array<int, int|string> $keys
+     *
+     * @return self<TValue>
      */
     public function toHaveKeys(array $keys): Expectation
     {
@@ -737,6 +827,8 @@ final class Expectation
 
     /**
      * Asserts that the value is a directory.
+     *
+     * @return self<TValue>
      */
     public function toBeDirectory(): Expectation
     {
@@ -751,6 +843,8 @@ final class Expectation
 
     /**
      * Asserts that the value is a directory and is readable.
+     *
+     * @return self<TValue>
      */
     public function toBeReadableDirectory(): Expectation
     {
@@ -765,6 +859,8 @@ final class Expectation
 
     /**
      * Asserts that the value is a directory and is writable.
+     *
+     * @return self<TValue>
      */
     public function toBeWritableDirectory(): Expectation
     {
@@ -779,6 +875,8 @@ final class Expectation
 
     /**
      * Asserts that the value is a file.
+     *
+     * @return self<TValue>
      */
     public function toBeFile(): Expectation
     {
@@ -793,6 +891,8 @@ final class Expectation
 
     /**
      * Asserts that the value is a file and is readable.
+     *
+     * @return self<TValue>
      */
     public function toBeReadableFile(): Expectation
     {
@@ -807,6 +907,8 @@ final class Expectation
 
     /**
      * Asserts that the value is a file and is writable.
+     *
+     * @return self<TValue>
      */
     public function toBeWritableFile(): Expectation
     {
@@ -822,6 +924,8 @@ final class Expectation
      * Asserts that the value array matches the given array subset.
      *
      * @param iterable<int|string, mixed> $array
+     *
+     * @return self<TValue>
      */
     public function toMatchArray(iterable|object $array): Expectation
     {
@@ -853,6 +957,8 @@ final class Expectation
      * of the properties of an given object.
      *
      * @param iterable<string, mixed>|object $object
+     *
+     * @return self<TValue>
      */
     public function toMatchObject(iterable|object $object): Expectation
     {
@@ -881,6 +987,8 @@ final class Expectation
 
     /**
      * Asserts that the value matches a regular expression.
+     *
+     * @return self<TValue>
      */
     public function toMatch(string $expression): Expectation
     {
@@ -894,6 +1002,8 @@ final class Expectation
 
     /**
      * Asserts that the value matches a constraint.
+     *
+     * @return self<TValue>
      */
     public function toMatchConstraint(Constraint $constraint): Expectation
     {
@@ -906,6 +1016,8 @@ final class Expectation
      * Asserts that executing value throws an exception.
      *
      * @param (Closure(Throwable): mixed)|string $exception
+     *
+     * @return self<TValue>
      */
     public function toThrow(callable|string $exception, string $exceptionMessage = null): Expectation
     {
@@ -970,7 +1082,7 @@ final class Expectation
      *
      * @param array<int, mixed> $parameters
      *
-     * @return HigherOrderExpectation|mixed
+     * @return HigherOrderExpectation<TValue, mixed>|self<TValue>|mixed
      */
     public function __call(string $method, array $parameters)
     {
@@ -985,6 +1097,8 @@ final class Expectation
     /**
      * Dynamically calls methods on the class without any arguments
      * or creates a new higher order expectation.
+     *
+     * @return self<TValue>|OppositeExpectation<TValue>|Each<TValue>|HigherOrderExpectation<TValue, mixed>
      */
     public function __get(string $name): Expectation|OppositeExpectation|Each|HigherOrderExpectation
     {
