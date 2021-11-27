@@ -73,9 +73,10 @@ final class TestCaseFactory
     {
         $methodsUsingOnly = $this->methodsUsingOnly();
 
-        $methods = array_values(array_filter($this->methods, function ($method) use ($methodsUsingOnly) {
-            return count($methodsUsingOnly) === 0 || in_array($method, $methodsUsingOnly, true);
-        }));
+        $methods = array_values(array_filter(
+            $this->methods,
+            fn ($method) => count($methodsUsingOnly) === 0 || in_array($method, $methodsUsingOnly, true)
+        ));
 
         if (count($methods) > 0) {
             $this->evaluate($this->filename, $methods);

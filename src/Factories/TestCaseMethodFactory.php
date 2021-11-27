@@ -17,6 +17,7 @@ use PHPUnit\Framework\TestCase;
 final class TestCaseMethodFactory
 {
     use HigherOrderable;
+
     /**
      * Determines if the Test Case will be the "only" being run.
      */
@@ -51,11 +52,9 @@ final class TestCaseMethodFactory
         public ?string $description,
         public ?Closure $closure,
     ) {
-        if ($this->closure === null) {
-            $this->closure = function () {
-                Assert::getCount() > 0 ?: self::markTestIncomplete(); // @phpstan-ignore-line
-            };
-        }
+        $this->closure ??= function () {
+            Assert::getCount() > 0 ?: self::markTestIncomplete(); // @phpstan-ignore-line
+        };
 
         $this->bootHigherOrderable();
     }
