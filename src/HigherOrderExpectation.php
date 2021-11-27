@@ -131,6 +131,7 @@ final class HigherOrderExpectation
      */
     private function getValue(): mixed
     {
+        // @phpstan-ignore-next-line
         return $this->shouldReset ? $this->original->value : $this->expectation->value;
     }
 
