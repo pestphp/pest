@@ -38,6 +38,10 @@ final class HigherOrderMessage
 
     /**
      * Re-throws the given `$throwable` with the good line and filename.
+     *
+     * @template TValue of object
+     *
+     * @param TValue $target
      */
     public function call(object $target): mixed
     {
@@ -59,7 +63,7 @@ final class HigherOrderMessage
             Reflection::setPropertyValue($throwable, 'line', $this->line);
 
             if ($throwable->getMessage() === self::getUndefinedMethodMessage($target, $this->name)) {
-                /** @var ReflectionClass $reflection */
+                /** @var ReflectionClass<TValue> $reflection */
                 $reflection = new ReflectionClass($target);
                 /* @phpstan-ignore-next-line */
                 $reflection = $reflection->getParentClass() ?: $reflection;

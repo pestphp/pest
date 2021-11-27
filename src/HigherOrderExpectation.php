@@ -4,19 +4,23 @@ declare(strict_types=1);
 
 namespace Pest;
 
-use Pest\Concerns\Expectable;
 use Pest\Concerns\RetrievesValues;
 
 /**
  * @internal
  *
- * @mixin Expectation
+ * @template TOriginalValue
+ * @template TValue
+ *
+ * @mixin Expectation<TOriginalValue>
  */
 final class HigherOrderExpectation
 {
-    use Expectable;
     use RetrievesValues;
 
+    /**
+     * @var Expectation<TValue>|Each<TValue>
+     */
     private Expectation|Each $expectation;
 
     private bool $opposite = false;
@@ -25,6 +29,9 @@ final class HigherOrderExpectation
 
     /**
      * Creates a new higher order expectation.
+     *
+     * @param Expectation<TOriginalValue> $original
+     * @param TValue                      $value
      */
     public function __construct(private Expectation $original, mixed $value)
     {
@@ -33,6 +40,8 @@ final class HigherOrderExpectation
 
     /**
      * Creates the opposite expectation for the value.
+     *
+     * @return self<TOriginalValue, TValue>
      */
     public function not(): HigherOrderExpectation
     {
@@ -42,13 +51,27 @@ final class HigherOrderExpectation
     }
 
     /**
+     * Creates a new Expectation.
+     *
+     * @template TExpectValue
+     *
+     * @param TExpectValue $value
+     *
+     * @return Expectation<TExpectValue>
+     */
+    public function expect(mixed $value): Expectation
+    {
+        return new Expectation($value);
+    }
+
+    /**
      * Creates a new expectation.
      *
-     * @template TValue
+     * @template TExpectValue
      *
-     * @param TValue $value
+     * @param TExpectValue $value
      *
-     * @return Expectation<TValue>
+     * @return Expectation<TExpectValue>
      */
     public function and(mixed $value): Expectation
     {
@@ -59,6 +82,8 @@ final class HigherOrderExpectation
      * Dynamically calls methods on the class with the given arguments.
      *
      * @param array<int, mixed> $arguments
+     *
+     * @return self<TOriginalValue, mixed>|self<TOriginalValue, TValue>
      */
     public function __call(string $name, array $arguments): self
     {
@@ -72,6 +97,8 @@ final class HigherOrderExpectation
 
     /**
      * Accesses properties in the value or in the expectation.
+     *
+     * @return self<TOriginalValue, mixed>|self<TOriginalValue, TValue>
      */
     public function __get(string $name): self
     {
@@ -99,9 +126,12 @@ final class HigherOrderExpectation
 
     /**
      * Retrieve the applicable value based on the current reset condition.
+     *
+     * @return TOriginalValue|TValue
      */
     private function getValue(): mixed
     {
+        // @phpstan-ignore-next-line
         return $this->shouldReset ? $this->original->value : $this->expectation->value;
     }
 
@@ -109,6 +139,8 @@ final class HigherOrderExpectation
      * Performs the given assertion with the current expectation.
      *
      * @param array<int, mixed> $arguments
+     *
+     * @return self<TOriginalValue, TValue>
      */
     private function performAssertion(string $name, array $arguments): self
     {

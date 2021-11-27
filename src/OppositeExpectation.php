@@ -10,29 +10,34 @@ use SebastianBergmann\Exporter\Exporter;
 /**
  * @internal
  *
- * @mixin Expectation
+ * @template TValue
+ *
+ * @mixin Expectation<TValue>
  */
 final class OppositeExpectation
 {
     /**
      * Creates a new opposite expectation.
+     *
+     * @param Expectation<TValue> $original
      */
     public function __construct(private Expectation $original)
     {
-        // ..
     }
 
     /**
      * Asserts that the value array not has the provided $keys.
      *
      * @param array<int, int|string> $keys
+     *
+     * @return Expectation<TValue>
      */
     public function toHaveKeys(array $keys): Expectation
     {
         foreach ($keys as $key) {
             try {
                 $this->original->toHaveKey($key);
-            } catch (ExpectationFailedException $exception) {
+            } catch (ExpectationFailedException) {
                 continue;
             }
 
@@ -47,14 +52,14 @@ final class OppositeExpectation
      *
      * @param array<int, mixed> $arguments
      *
-     * @return Expectation|never
+     * @return Expectation<TValue>|Expectation<mixed>|never
      */
     public function __call(string $name, array $arguments): Expectation
     {
         try {
             /* @phpstan-ignore-next-line */
             $this->original->{$name}(...$arguments);
-        } catch (ExpectationFailedException $exception) {
+        } catch (ExpectationFailedException) {
             return $this->original;
         }
 
@@ -64,13 +69,13 @@ final class OppositeExpectation
     /**
      * Handle dynamic properties gets into the original expectation.
      *
-     * @return Expectation|never
+     * @return Expectation<TValue>|Expectation<mixed>|never
      */
     public function __get(string $name): Expectation
     {
         try {
             $this->original->{$name}; // @phpstan-ignore-line
-        } catch (ExpectationFailedException $exception) {  // @phpstan-ignore-line
+        } catch (ExpectationFailedException) {  // @phpstan-ignore-line
             return $this->original;
         }
 
