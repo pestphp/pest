@@ -19,14 +19,18 @@
 
 We would like to extend our thanks to the following sponsors for funding Pest development. If you are interested in becoming a sponsor, please visit the Nuno Maduro's [Sponsors page](https://github.com/sponsors/nunomaduro).
 
+### Platinum Sponsors
+
+- **[Spatie](https://spatie.be)**
+- **[Worksome](https://www.worksome.com/)**
+
 ### Premium Sponsors
 
-- **[Akaunting](https://akaunting.com)**
-- **[Auth0](https://auth0.com)**
-- **[Codecourse](https://codecourse.com/)**
-- **[Fathom Analytics](https://usefathom.com/)**
-- **[Meema](https://meema.io)**
-- **[Scout APM](https://scoutapm.com)**
-- **[Spatie](https://spatie.be)**
+- [Akaunting](https://akaunting.com)
+- [Auth0](https://auth0.com)
+- [Codecourse](https://codecourse.com/)
+- [Fathom Analytics](https://usefathom.com/)
+- [Meema](https://meema.io)
+- [Scout APM](https://scoutapm.com)
 
 Pest is an open-sourced software licensed under the **[MIT license](https://opensource.org/licenses/MIT)**.

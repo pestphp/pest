@@ -80,7 +80,10 @@ final class Coverage implements AddsOutput, HandlesArguments
         }
 
         if ($input->getOption(self::MIN_OPTION) !== null) {
-            $this->coverageMin = (float) $input->getOption(self::MIN_OPTION);
+            /** @var int|float $minOption */
+            $minOption = $input->getOption(self::MIN_OPTION);
+
+            $this->coverageMin = (float) $minOption;
         }
 
         return $originals;

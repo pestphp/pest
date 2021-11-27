@@ -19,7 +19,7 @@ final class HigherOrderMessageCollection
      *
      * @param array<int, mixed>|null $arguments
      */
-    public function add(string $filename, int $line, string $name, array $arguments = null): void
+    public function add(string $filename, int $line, string $name, ?array $arguments): void
     {
         $this->messages[] = new HigherOrderMessage($filename, $line, $name, $arguments);
     }
@@ -29,7 +29,7 @@ final class HigherOrderMessageCollection
      *
      * @param array<int, mixed>|null $arguments
      */
-    public function addWhen(callable $condition, string $filename, int $line, string $name, array $arguments = null): void
+    public function addWhen(callable $condition, string $filename, int $line, string $name, ?array $arguments): void
     {
         $this->messages[] = (new HigherOrderMessage($filename, $line, $name, $arguments))->when($condition);
     }
@@ -40,6 +40,7 @@ final class HigherOrderMessageCollection
     public function chain(object $target): void
     {
         foreach ($this->messages as $message) {
+            //@phpstan-ignore-next-line
             $target = $message->call($target) ?? $target;
         }
     }

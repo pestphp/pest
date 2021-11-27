@@ -1,22 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
-namespace PHPUnit\Runner;
-
-use function array_diff;
-use function array_values;
-use function basename;
-use function class_exists;
-use function get_declared_classes;
-use function stripos;
-use function strlen;
-use function substr;
-use PHPUnit\Framework\TestCase;
-use ReflectionClass;
-use ReflectionException;
-use PHPUnit\Framework\WarningTestCase;
-
 /**
  * Copyright (c) 2001-2021, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
@@ -51,35 +34,82 @@ use PHPUnit\Framework\WarningTestCase;
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+declare(strict_types=1);
+
+namespace PHPUnit\Runner;
+
+use function array_diff;
+use function array_values;
+use function basename;
+use function class_exists;
+use function get_declared_classes;
+use Pest\IgnorableTestCase;
+use Pest\TestSuite;
+use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use ReflectionException;
+use function stripos;
+use function strlen;
+use function substr;
+
+/**
+ * @internal This class is not covered by the backward compatibility promise for PHPUnit
+ */
 final class TestSuiteLoader
 {
     /**
-     * Loads the test suite.
+     * @psalm-var list<class-string>
+     */
+    private static array $loadedClasses = [];
+
+    /**
+     * @psalm-var list<class-string>
+     */
+    private static array $declaredClasses = [];
+
+    public function __construct()
+    {
+        if (empty(self::$declaredClasses)) {
+            self::$declaredClasses = get_declared_classes();
+        }
+    }
+
+    /**
+     * @throws Exception
      */
     public function load(string $suiteClassFile): ReflectionClass
     {
-        $suiteClassName = basename($suiteClassFile, '.php');
-        $loadedClasses  = get_declared_classes();
+        $suiteClassName = $this->classNameFromFileName($suiteClassFile);
 
         if (!class_exists($suiteClassName, false)) {
             (static function () use ($suiteClassFile) {
                 include_once $suiteClassFile;
+
+                TestSuite::getInstance()->tests->makeIfExists($suiteClassFile);
             })();
 
             $loadedClasses = array_values(
-                array_diff(get_declared_classes(), $loadedClasses)
+                array_diff(
+                    get_declared_classes(),
+                    array_merge(
+                        self::$declaredClasses,
+                        self::$loadedClasses
+                    )
+                )
             );
 
-            if (empty($loadedClasses)) {
-                return new ReflectionClass(WarningTestCase::class);
+            self::$loadedClasses = array_merge($loadedClasses, self::$loadedClasses);
+
+            if (empty(self::$loadedClasses)) {
+                return $this->exceptionFor($suiteClassName, $suiteClassFile);
             }
         }
 
         if (!class_exists($suiteClassName, false)) {
+            // this block will handle namespaced classes
             $offset = 0 - strlen($suiteClassName);
 
-            foreach ($loadedClasses as $loadedClass) {
-
+            foreach (self::$loadedClasses as $loadedClass) {
                 if (stripos(substr($loadedClass, $offset - 1), '\\' . $suiteClassName) === 0) {
                     $suiteClassName = $loadedClass;
 
@@ -89,18 +119,16 @@ final class TestSuiteLoader
         }
 
         if (!class_exists($suiteClassName, false)) {
-            return new ReflectionClass(WarningTestCase::class);
+            return $this->exceptionFor($suiteClassName, $suiteClassFile);
         }
 
         try {
             $class = new ReflectionClass($suiteClassName);
+            // @codeCoverageIgnoreStart
         } catch (ReflectionException $e) {
-            throw new Exception(
-                $e->getMessage(),
-                (int) $e->getCode(),
-                $e
-            );
+            throw new Exception($e->getMessage(), (int) $e->getCode(), $e);
         }
+        // @codeCoverageIgnoreEnd
 
         if ($class->isSubclassOf(TestCase::class) && !$class->isAbstract()) {
             return $class;
@@ -109,19 +137,39 @@ final class TestSuiteLoader
         if ($class->hasMethod('suite')) {
             try {
                 $method = $class->getMethod('suite');
+                // @codeCoverageIgnoreStart
             } catch (ReflectionException $e) {
-                throw new Exception(
-                    $e->getMessage(),
-                    (int) $e->getCode(),
-                    $e
-                );
+                throw new Exception($e->getMessage(), (int) $e->getCode(), $e);
             }
+            // @codeCoverageIgnoreEnd
 
             if (!$method->isAbstract() && $method->isPublic() && $method->isStatic()) {
                 return $class;
             }
         }
 
-        return new ReflectionClass(WarningTestCase::class);
+        return $this->exceptionFor($suiteClassName, $suiteClassFile);
+    }
+
+    public function reload(ReflectionClass $aClass): ReflectionClass
+    {
+        return $aClass;
+    }
+
+    private function classNameFromFileName(string $suiteClassFile): string
+    {
+        $className = basename($suiteClassFile, '.php');
+        $dotPos    = strpos($className, '.');
+
+        if ($dotPos !== false) {
+            $className = substr($className, 0, $dotPos);
+        }
+
+        return $className;
+    }
+
+    private function exceptionFor(string $className, string $filename): ReflectionClass
+    {
+        return new ReflectionClass(IgnorableTestCase::class);
     }
 }

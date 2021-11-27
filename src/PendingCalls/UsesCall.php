@@ -89,7 +89,7 @@ final class UsesCall
      */
     public function group(string ...$groups): UsesCall
     {
-        $this->groups = $groups;
+        $this->groups = array_values($groups);
 
         return $this;
     }

@@ -80,7 +80,10 @@ final class HigherOrderExpectation
         }
 
         if (!$this->expectationHasMethod($name)) {
-            return new self($this->original, $this->retrieve($name, $this->getValue()));
+            /** @var array<string, mixed>|object $value */
+            $value = $this->getValue();
+
+            return new self($this->original, $this->retrieve($name, $value));
         }
 
         return $this->performAssertion($name, []);

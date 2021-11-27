@@ -9,6 +9,7 @@ use Closure;
 use InvalidArgumentException;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\RetrievesValues;
+use Pest\Exceptions\InvalidExpectationValue;
 use Pest\Support\Arr;
 use Pest\Support\NullClosure;
 use PHPUnit\Framework\Assert;
@@ -68,17 +69,19 @@ final class Expectation
      */
     public function json(): Expectation
     {
+        if (!is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
         return $this->toBeJson()->and(json_decode($this->value, true));
     }
 
     /**
      * Dump the expectation value and end the script.
      *
-     * @param mixed $arguments
-     *
      * @return never
      */
-    public function dd(...$arguments): void
+    public function dd(mixed ...$arguments): void
     {
         if (function_exists('dd')) {
             dd($this->value, ...$arguments);
@@ -91,13 +94,10 @@ final class Expectation
 
     /**
      * Send the expectation value to Ray along with all given arguments.
-     *
-     * @param ...mixed $arguments
      */
     public function ray(mixed ...$arguments): self
     {
         if (function_exists('ray')) {
-            // @phpstan-ignore-next-line
             ray($this->value, ...$arguments);
         }
 
@@ -160,7 +160,7 @@ final class Expectation
         }
 
         foreach ($values as $key => $item) {
-            if (is_callable($callbacks[$key])) {
+            if ($callbacks[$key] instanceof Closure) {
                 call_user_func($callbacks[$key], new self($item), new self($keys[$key]));
                 continue;
             }
@@ -224,7 +224,7 @@ final class Expectation
         $condition = is_callable($condition)
             ? $condition
             : static function () use ($condition): bool {
-                return $condition; // @phpstan-ignore-line
+                return $condition;
             };
 
         return $this->when(!$condition(), $callback);
@@ -241,7 +241,7 @@ final class Expectation
         $condition = is_callable($condition)
             ? $condition
             : static function () use ($condition): bool {
-                return $condition; // @phpstan-ignore-line
+                return $condition;
             };
 
         if ($condition()) {
@@ -360,8 +360,12 @@ final class Expectation
     {
         foreach ($needles as $needle) {
             if (is_string($this->value)) {
-                Assert::assertStringContainsString($needle, $this->value);
+                // @phpstan-ignore-next-line
+                Assert::assertStringContainsString((string) $needle, $this->value);
             } else {
+                if (!is_iterable($this->value)) {
+                    InvalidExpectationValue::expected('iterable');
+                }
                 Assert::assertContains($needle, $this->value);
             }
         }
@@ -371,9 +375,15 @@ final class Expectation
 
     /**
      * Asserts that the value starts with $expected.
+     *
+     * @param non-empty-string $expected
      */
     public function toStartWith(string $expected): Expectation
     {
+        if (!is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
         Assert::assertStringStartsWith($expected, $this->value);
 
         return $this;
@@ -381,9 +391,15 @@ final class Expectation
 
     /**
      * Asserts that the value ends with $expected.
+     *
+     * @param non-empty-string $expected
      */
     public function toEndWith(string $expected): Expectation
     {
+        if (!is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
         Assert::assertStringEndsWith($expected, $this->value);
 
         return $this;
@@ -424,6 +440,10 @@ final class Expectation
      */
     public function toHaveCount(int $count): Expectation
     {
+        if (!is_countable($this->value) && !is_iterable($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
         Assert::assertCount($count, $this->value);
 
         return $this;
@@ -436,6 +456,7 @@ final class Expectation
     {
         $this->toBeObject();
 
+        //@phpstan-ignore-next-line
         Assert::assertTrue(property_exists($this->value, $name));
 
         if (func_num_args() > 1) {
@@ -526,7 +547,6 @@ final class Expectation
      */
     public function toBeInstanceOf(string $class): Expectation
     {
-        /* @phpstan-ignore-next-line */
         Assert::assertInstanceOf($class, $this->value);
 
         return $this;
@@ -648,6 +668,8 @@ final class Expectation
     public function toBeJson(): Expectation
     {
         Assert::assertIsString($this->value);
+
+        //@phpstan-ignore-next-line
         Assert::assertJson($this->value);
 
         return $this;
@@ -718,6 +740,10 @@ final class Expectation
      */
     public function toBeDirectory(): Expectation
     {
+        if (!is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
         Assert::assertDirectoryExists($this->value);
 
         return $this;
@@ -728,6 +754,10 @@ final class Expectation
      */
     public function toBeReadableDirectory(): Expectation
     {
+        if (!is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
         Assert::assertDirectoryIsReadable($this->value);
 
         return $this;
@@ -738,6 +768,10 @@ final class Expectation
      */
     public function toBeWritableDirectory(): Expectation
     {
+        if (!is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
         Assert::assertDirectoryIsWritable($this->value);
 
         return $this;
@@ -748,6 +782,10 @@ final class Expectation
      */
     public function toBeFile(): Expectation
     {
+        if (!is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
         Assert::assertFileExists($this->value);
 
         return $this;
@@ -758,6 +796,10 @@ final class Expectation
      */
     public function toBeReadableFile(): Expectation
     {
+        if (!is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
         Assert::assertFileIsReadable($this->value);
 
         return $this;
@@ -768,6 +810,9 @@ final class Expectation
      */
     public function toBeWritableFile(): Expectation
     {
+        if (!is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
         Assert::assertFileIsWritable($this->value);
 
         return $this;
@@ -812,6 +857,10 @@ final class Expectation
     public function toMatchObject(iterable|object $object): Expectation
     {
         foreach ((array) $object as $property => $value) {
+            if (!is_object($this->value) && !is_string($this->value)) {
+                InvalidExpectationValue::expected('object|string');
+            }
+
             Assert::assertTrue(property_exists($this->value, $property));
 
             /* @phpstan-ignore-next-line */
@@ -835,6 +884,9 @@ final class Expectation
      */
     public function toMatch(string $expression): Expectation
     {
+        if (!is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
         Assert::assertMatchesRegularExpression($expression, $this->value);
 
         return $this;
@@ -894,10 +946,10 @@ final class Expectation
         }
 
         if (!class_exists($exception)) {
-            throw new ExpectationFailedException("Exception with message \"{$exception}\" not thrown.");
+            throw new ExpectationFailedException("Exception with message \"$exception\" not thrown.");
         }
 
-        throw new ExpectationFailedException("Exception \"{$exception}\" not thrown.");
+        throw new ExpectationFailedException("Exception \"$exception\" not thrown.");
     }
 
     /**
@@ -922,7 +974,7 @@ final class Expectation
      */
     public function __call(string $method, array $parameters)
     {
-        if (!static::hasExtend($method)) {
+        if (!Expectation::hasExtend($method)) {
             /* @phpstan-ignore-next-line */
             return new HigherOrderExpectation($this, $this->value->$method(...$parameters));
         }
@@ -936,7 +988,8 @@ final class Expectation
      */
     public function __get(string $name): Expectation|OppositeExpectation|Each|HigherOrderExpectation
     {
-        if (!method_exists($this, $name) && !static::hasExtend($name)) {
+        if (!method_exists($this, $name) && !Expectation::hasExtend($name)) {
+            //@phpstan-ignore-next-line
             return new HigherOrderExpectation($this, $this->retrieve($name, $this->value));
         }
 
