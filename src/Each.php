@@ -7,7 +7,9 @@ namespace Pest;
 /**
  * @internal
  *
- * @mixin Expectation
+ * @template TEachValue
+ *
+ * @mixin Expectation<TEachValue>
  */
 final class Each
 {
@@ -15,14 +17,21 @@ final class Each
 
     /**
      * Creates an expectation on each item of the iterable "value".
+     *
+     * @param Expectation<TEachValue> $original
      */
     public function __construct(private Expectation $original)
     {
-        // ..
     }
 
     /**
      * Creates a new expectation.
+     *
+     * @template TValue
+     *
+     * @param TValue $value
+     *
+     * @return Expectation<TValue>
      */
     public function and(mixed $value): Expectation
     {
@@ -31,6 +40,8 @@ final class Each
 
     /**
      * Creates the opposite expectation for the value.
+     *
+     * @return self<TEachValue>
      */
     public function not(): Each
     {
@@ -43,6 +54,8 @@ final class Each
      * Dynamically calls methods on the class with the given arguments on each item.
      *
      * @param array<int|string, mixed> $arguments
+     *
+     * @return self<TEachValue>
      */
     public function __call(string $name, array $arguments): Each
     {
@@ -58,6 +71,8 @@ final class Each
 
     /**
      * Dynamically calls methods on the class without any arguments on each item.
+     *
+     * @return self<TEachValue>
      */
     public function __get(string $name): Each
     {

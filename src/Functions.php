@@ -18,7 +18,11 @@ if (!function_exists('expect')) {
     /**
      * Creates a new expectation.
      *
-     * @param mixed $value the Value
+     * @template TValue
+     *
+     * @param TValue $value the Value
+     *
+     * @return Expectation<TValue>|Extendable
      */
     function expect($value = null): Expectation|Extendable
     {

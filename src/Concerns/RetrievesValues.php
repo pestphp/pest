@@ -14,6 +14,8 @@ trait RetrievesValues
      *
      * Safely retrieve the value at the given key from an object or array.
      *
+     * @template TRetrievableValue
+     *
      * @param array<string, TRetrievableValue>|object $value
      * @param TRetrievableValue|null                  $default
      *
