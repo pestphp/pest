@@ -22,7 +22,7 @@ use PHPUnit\Framework\ExpectationFailedException;
  * @property Expectation $not  Creates the opposite expectation.
  * @property Each        $each Creates an expectation on each element on the traversable value.
  *
- * @mixin CoreExpectation
+ * @mixin CoreExpectation<TValue>
  */
 final class Expectation
 {
@@ -30,6 +30,7 @@ final class Expectation
         __call as __extendsCall;
     }
 
+    /** @var CoreExpectation<TValue> */
     private CoreExpectation $coreExpectation;
 
     /**
@@ -260,6 +261,8 @@ final class Expectation
      * creates a new higher order expectation.
      *
      * @param array<int, mixed> $parameters
+     *
+     * @return Expectation<TValue>|HigherOrderExpectation<TValue, TValue>
      */
     public function __call(string $method, array $parameters): Expectation|HigherOrderExpectation
     {
@@ -311,7 +314,7 @@ final class Expectation
      * Dynamically calls methods on the class without any arguments
      * or creates a new higher order expectation.
      *
-     * @return Expectation|OppositeExpectation|Each|HigherOrderExpectation|TValue
+     * @return Expectation<TValue>|OppositeExpectation<TValue>|Each<TValue>|HigherOrderExpectation<TValue, null>|TValue
      */
     public function __get(string $name)
     {
@@ -320,6 +323,7 @@ final class Expectation
         }
 
         if (!method_exists($this, $name) && !method_exists($this->coreExpectation, $name) && !Expectation::hasExtend($name)) {
+            /* @phpstan-ignore-next-line */
             return new HigherOrderExpectation($this, $this->retrieve($name, $this->value));
         }
 
