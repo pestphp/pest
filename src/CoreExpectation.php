@@ -24,7 +24,7 @@ use Throwable;
  *
  * @template TValue
  *
- * @mixin Expectation
+ * @mixin Expectation<TValue>
  */
 final class CoreExpectation
 {
