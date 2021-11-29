@@ -52,6 +52,8 @@ final class CoreExpectation
      * Asserts that two variables have the same type and
      * value. Used on objects, it asserts that two
      * variables reference the same object.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBe(mixed $expected): CoreExpectation
     {
@@ -62,6 +64,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is empty.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeEmpty(): CoreExpectation
     {
@@ -72,6 +76,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is true.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeTrue(): CoreExpectation
     {
@@ -82,6 +88,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is truthy.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeTruthy(): CoreExpectation
     {
@@ -92,6 +100,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is false.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeFalse(): CoreExpectation
     {
@@ -102,6 +112,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is falsy.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeFalsy(): CoreExpectation
     {
@@ -112,6 +124,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is greater than $expected.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeGreaterThan(int|float $expected): CoreExpectation
     {
@@ -122,6 +136,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is greater than or equal to $expected.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeGreaterThanOrEqual(int|float $expected): CoreExpectation
     {
@@ -132,6 +148,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is less than or equal to $expected.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeLessThan(int|float $expected): CoreExpectation
     {
@@ -142,6 +160,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is less than $expected.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeLessThanOrEqual(int|float $expected): CoreExpectation
     {
@@ -152,6 +172,8 @@ final class CoreExpectation
 
     /**
      * Asserts that $needle is an element of the value.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toContain(mixed ...$needles): CoreExpectation
     {
@@ -173,6 +195,8 @@ final class CoreExpectation
     /**
      * Asserts that the value starts with $expected.
      *
+     * @return CoreExpectation<TValue>
+     *
      * @param non-empty-string $expected
      */
     public function toStartWith(string $expected): CoreExpectation
@@ -189,6 +213,8 @@ final class CoreExpectation
     /**
      * Asserts that the value ends with $expected.
      *
+     * @return CoreExpectation<TValue>
+     *
      * @param non-empty-string $expected
      */
     public function toEndWith(string $expected): CoreExpectation
@@ -204,6 +230,8 @@ final class CoreExpectation
 
     /**
      * Asserts that $number matches value's Length.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toHaveLength(int $number): CoreExpectation
     {
@@ -234,6 +262,8 @@ final class CoreExpectation
 
     /**
      * Asserts that $count matches the number of elements of the value.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toHaveCount(int $count): CoreExpectation
     {
@@ -248,6 +278,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value contains the property $name.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toHaveProperty(string $name, mixed $value = null): CoreExpectation
     {
@@ -267,6 +299,8 @@ final class CoreExpectation
     /**
      * Asserts that the value contains the provided properties $names.
      *
+     * @return CoreExpectation<TValue>
+     *
      * @param iterable<array-key, string> $names
      */
     public function toHaveProperties(iterable $names): CoreExpectation
@@ -280,6 +314,8 @@ final class CoreExpectation
 
     /**
      * Asserts that two variables have the same value.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toEqual(mixed $expected): CoreExpectation
     {
@@ -296,6 +332,8 @@ final class CoreExpectation
      * are sorted before they are compared. When $expected and $this->value
      * are objects, each object is converted to an array containing all
      * private, protected and public attributes.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toEqualCanonicalizing(mixed $expected): CoreExpectation
     {
@@ -307,6 +345,8 @@ final class CoreExpectation
     /**
      * Asserts that the absolute difference between the value and $expected
      * is lower than $delta.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toEqualWithDelta(mixed $expected, float $delta): CoreExpectation
     {
@@ -319,6 +359,8 @@ final class CoreExpectation
      * Asserts that the value is one of the given values.
      *
      * @param iterable<int|string, mixed> $values
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeIn(iterable $values): CoreExpectation
     {
@@ -329,6 +371,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is infinite.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeInfinite(): CoreExpectation
     {
@@ -341,6 +385,8 @@ final class CoreExpectation
      * Asserts that the value is an instance of $class.
      *
      * @param class-string $class
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeInstanceOf(string $class): CoreExpectation
     {
@@ -351,6 +397,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is an array.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeArray(): CoreExpectation
     {
@@ -361,6 +409,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is of type bool.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeBool(): CoreExpectation
     {
@@ -371,6 +421,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is of type callable.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeCallable(): CoreExpectation
     {
@@ -381,6 +433,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is of type float.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeFloat(): CoreExpectation
     {
@@ -391,6 +445,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is of type int.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeInt(): CoreExpectation
     {
@@ -401,6 +457,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is of type iterable.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeIterable(): CoreExpectation
     {
@@ -411,6 +469,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is of type numeric.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeNumeric(): CoreExpectation
     {
@@ -421,6 +481,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is of type object.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeObject(): CoreExpectation
     {
@@ -431,6 +493,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is of type resource.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeResource(): CoreExpectation
     {
@@ -441,6 +505,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is of type scalar.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeScalar(): CoreExpectation
     {
@@ -451,6 +517,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is of type string.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeString(): CoreExpectation
     {
@@ -461,6 +529,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is a JSON string.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeJson(): CoreExpectation
     {
@@ -474,6 +544,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is NAN.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeNan(): CoreExpectation
     {
@@ -484,6 +556,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is null.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeNull(): CoreExpectation
     {
@@ -494,6 +568,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value array has the provided $key.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toHaveKey(string|int $key, mixed $value = null): CoreExpectation
     {
@@ -522,6 +598,8 @@ final class CoreExpectation
      * Asserts that the value array has the provided $keys.
      *
      * @param array<int, int|string> $keys
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toHaveKeys(array $keys): CoreExpectation
     {
@@ -534,6 +612,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is a directory.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeDirectory(): CoreExpectation
     {
@@ -548,6 +628,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is a directory and is readable.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeReadableDirectory(): CoreExpectation
     {
@@ -562,6 +644,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is a directory and is writable.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeWritableDirectory(): CoreExpectation
     {
@@ -576,6 +660,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is a file.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeFile(): CoreExpectation
     {
@@ -590,6 +676,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is a file and is readable.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeReadableFile(): CoreExpectation
     {
@@ -604,6 +692,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value is a file and is writable.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toBeWritableFile(): CoreExpectation
     {
@@ -619,6 +709,8 @@ final class CoreExpectation
      * Asserts that the value array matches the given array subset.
      *
      * @param iterable<int|string, mixed> $array
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toMatchArray(iterable|object $array): CoreExpectation
     {
@@ -650,6 +742,8 @@ final class CoreExpectation
      * of the properties of an given object.
      *
      * @param iterable<string, mixed>|object $object
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toMatchObject(iterable|object $object): CoreExpectation
     {
@@ -678,6 +772,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value matches a regular expression.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toMatch(string $expression): CoreExpectation
     {
@@ -691,6 +787,8 @@ final class CoreExpectation
 
     /**
      * Asserts that the value matches a constraint.
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toMatchConstraint(Constraint $constraint): CoreExpectation
     {
@@ -703,6 +801,8 @@ final class CoreExpectation
      * Asserts that executing value throws an exception.
      *
      * @param (Closure(Throwable): mixed)|string $exception
+     *
+     * @return CoreExpectation<TValue>
      */
     public function toThrow(callable|string $exception, string $exceptionMessage = null): CoreExpectation
     {
