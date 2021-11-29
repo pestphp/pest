@@ -118,11 +118,14 @@ final class Reflection
     /**
      * Sets the property value of the given object.
      *
-     * @param mixed $value
+     * @template TValue of object
+     *
+     * @param TValue $object
+     * @param mixed  $value
      */
     public static function setPropertyValue(object $object, string $property, $value): void
     {
-        /** @var ReflectionClass $reflectionClass */
+        /** @var ReflectionClass<TValue> $reflectionClass */
         $reflectionClass = new ReflectionClass($object);
 
         $reflectionProperty = null;
@@ -201,5 +204,13 @@ final class Reflection
         }
 
         return $arguments;
+    }
+
+    /**
+     * @return mixed
+     */
+    public static function getFunctionVariable(Closure $function, string $key)
+    {
+        return (new ReflectionFunction($function))->getStaticVariables()[$key] ?? null;
     }
 }

@@ -45,9 +45,11 @@ final class Expectation
     /**
      * Creates a new expectation.
      *
-     * @param TValue $value
+     * @template TAndValue
      *
-     * @return Expectation<TValue>
+     * @param TAndValue $value
+     *
+     * @return self<TAndValue>
      */
     public function and(mixed $value): Expectation
     {
@@ -56,6 +58,8 @@ final class Expectation
 
     /**
      * Creates a new expectation with the decoded JSON value.
+     *
+     * @return self<mixed>
      */
     public function json(): Expectation
     {
@@ -84,6 +88,8 @@ final class Expectation
 
     /**
      * Send the expectation value to Ray along with all given arguments.
+     *
+     * @return self<TValue>
      */
     public function ray(mixed ...$arguments): self
     {
@@ -96,6 +102,8 @@ final class Expectation
 
     /**
      * Creates the opposite expectation for the value.
+     *
+     * @return OppositeExpectation<TValue>
      */
     public function not(): OppositeExpectation
     {
@@ -104,6 +112,8 @@ final class Expectation
 
     /**
      * Creates an expectation on each item of the iterable "value".
+     *
+     * @return Each<TValue>
      */
     public function each(callable $callback = null): Each
     {
@@ -125,7 +135,9 @@ final class Expectation
      *
      * @template TSequenceValue
      *
-     * @param (callable(self, self): void)|TSequenceValue ...$callbacks
+     * @param (callable(self<TValue>, self<string|int>): void)|TSequenceValue ...$callbacks
+     *
+     * @return self<TValue>
      */
     public function sequence(mixed ...$callbacks): Expectation
     {
@@ -167,15 +179,13 @@ final class Expectation
      * @template TMatchSubject of array-key
      *
      * @param (callable(): TMatchSubject)|TMatchSubject $subject
-     * @param array<TMatchSubject, (callable(Expectation<TValue>): mixed)|TValue> $expressions
+     * @param array<TMatchSubject, (callable(self<TValue>): mixed)|TValue> $expressions
+     *
+     * @return self<TValue>
      */
     public function match(mixed $subject, array $expressions): Expectation
     {
-        $subject = is_callable($subject)
-            ? $subject
-            : fn () => $subject;
-
-        $subject   = $subject();
+        $subject = $subject instanceof Closure ? $subject() : $subject;
 
         $matched = false;
 
@@ -208,6 +218,8 @@ final class Expectation
      *
      * @param (callable(): bool)|bool $condition
      * @param callable(Expectation<TValue>): mixed $callback
+     *
+     * @return self<TValue>
      */
     public function unless(callable|bool $condition, callable $callback): Expectation
     {
@@ -224,7 +236,9 @@ final class Expectation
      * Apply the callback if the given "condition" is truthy.
      *
      * @param (callable(): bool)|bool $condition
-     * @param callable(Expectation<TValue>): mixed $callback
+     * @param callable(self<TValue>): mixed $callback
+     *
+     * @return self<TValue>
      */
     public function when(callable|bool $condition, callable $callback): Expectation
     {
