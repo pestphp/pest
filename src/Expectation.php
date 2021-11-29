@@ -262,7 +262,7 @@ final class Expectation
      *
      * @param array<int, mixed> $parameters
      *
-     * @return Expectation<TValue>|HigherOrderExpectation<TValue, TValue>
+     * @return Expectation<TValue>|HigherOrderExpectation<Expectation<TValue>, TValue>
      */
     public function __call(string $method, array $parameters): Expectation|HigherOrderExpectation
     {
@@ -314,7 +314,7 @@ final class Expectation
      * Dynamically calls methods on the class without any arguments
      * or creates a new higher order expectation.
      *
-     * @return Expectation<TValue>|OppositeExpectation<TValue>|Each<TValue>|HigherOrderExpectation<TValue, null>|TValue
+     * @return Expectation<TValue>|OppositeExpectation<TValue>|Each<TValue>|HigherOrderExpectation<Expectation<TValue>, TValue|null>|TValue
      */
     public function __get(string $name)
     {
