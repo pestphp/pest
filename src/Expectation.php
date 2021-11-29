@@ -258,6 +258,7 @@ final class Expectation
             ->send(...$parameters)
             ->through($this->pipes($method, $this, Expectation::class))
             ->run();
+
         return $this;
     }
 
