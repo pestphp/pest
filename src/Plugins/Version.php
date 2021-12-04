@@ -13,6 +13,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class Version implements HandlesArguments
 {
+    use Concerns\HandleArguments;
+
     /**
      * Creates a new instance of the plugin.
      */
@@ -24,7 +26,7 @@ final class Version implements HandlesArguments
 
     public function handleArguments(array $arguments): array
     {
-        if (in_array('--version', $arguments, true)) {
+        if ($this->hasArgument('--version', $arguments)) {
             $this->output->writeln(
                 sprintf('Pest    %s', version()),
             );

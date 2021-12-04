@@ -100,7 +100,7 @@ final class TestRepository
     /**
      * Makes a Test Case from the given filename, if exists.
      */
-    public function makeIfExists(string $filename): void
+    public function makeIfNeeded(string $filename): void
     {
         if (array_key_exists($filename, $this->testCases)) {
             $this->make($this->testCases[$filename]);

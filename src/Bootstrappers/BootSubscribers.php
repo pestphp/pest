@@ -20,6 +20,8 @@ final class BootSubscribers
     private static array $subscribers = [
         Subscribers\EnsureConfigurationIsValid::class,
         Subscribers\EnsureConfigurationDefaults::class,
+        Subscribers\EnsureRetryRepositoryExists::class,
+        Subscribers\EnsureFailedTestsAreStoredForRetry::class,
     ];
 
     /**

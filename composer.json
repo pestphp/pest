@@ -82,7 +82,8 @@
                 "Pest\\Plugins\\Coverage",
                 "Pest\\Plugins\\Init",
                 "Pest\\Plugins\\Version",
-                "Pest\\Plugins\\Environment"
+                "Pest\\Plugins\\Environment",
+                "Pest\\Plugins\\Retry"
             ]
         },
         "laravel": {

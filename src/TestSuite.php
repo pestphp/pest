@@ -9,6 +9,7 @@ use Pest\Repositories\AfterAllRepository;
 use Pest\Repositories\AfterEachRepository;
 use Pest\Repositories\BeforeAllRepository;
 use Pest\Repositories\BeforeEachRepository;
+use Pest\Repositories\TempRepository;
 use Pest\Repositories\TestRepository;
 use PHPUnit\Framework\TestCase;
 
@@ -48,6 +49,11 @@ final class TestSuite
     public AfterAllRepository $afterAll;
 
     /**
+     * Holds the retry temp repository.
+     */
+    public TempRepository $retryTempRepository;
+
+    /**
      * Holds the root path.
      */
     public string $rootPath;
@@ -64,11 +70,12 @@ final class TestSuite
         string $rootPath,
         public string $testPath)
     {
-        $this->beforeAll  = new BeforeAllRepository();
-        $this->beforeEach = new BeforeEachRepository();
-        $this->tests      = new TestRepository();
-        $this->afterEach  = new AfterEachRepository();
-        $this->afterAll   = new AfterAllRepository();
+        $this->beforeAll             = new BeforeAllRepository();
+        $this->beforeEach            = new BeforeEachRepository();
+        $this->tests                 = new TestRepository();
+        $this->afterEach             = new AfterEachRepository();
+        $this->afterAll              = new AfterAllRepository();
+        $this->retryTempRepository   = new TempRepository('retry');
 
         $this->rootPath = (string) realpath($rootPath);
     }
