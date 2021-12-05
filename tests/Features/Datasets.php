@@ -1,9 +1,9 @@
 <?php
 
-use Pest\Datasets;
 use Pest\Exceptions\DatasetAlreadyExist;
 use Pest\Exceptions\DatasetDoesNotExist;
 use Pest\Plugin;
+use Pest\Repositories\DatasetsRepository;
 
 beforeEach(function () {
     $this->foo = 'bar';
@@ -13,28 +13,28 @@ it('throws exception if dataset does not exist', function () {
     $this->expectException(DatasetDoesNotExist::class);
     $this->expectExceptionMessage("A dataset with the name `first` does not exist. You can create it using `dataset('first', ['a', 'b']);`.");
 
-    Datasets::resolve('foo', ['first']);
+    DatasetsRepository::resolve('foo', ['first']);
 });
 
 it('throws exception if dataset already exist', function () {
-    Datasets::set('second', [[]]);
+    DatasetsRepository::set('second', [[]]);
     $this->expectException(DatasetAlreadyExist::class);
     $this->expectExceptionMessage('A dataset with the name `second` already exist.');
-    Datasets::set('second', [[]]);
+    DatasetsRepository::set('second', [[]]);
 });
 
 it('sets closures', function () {
-    Datasets::set('foo', function () {
+    DatasetsRepository::set('foo', function () {
         yield [1];
     });
 
-    expect(Datasets::resolve('foo', ['foo']))->toBe(['foo with (1)' => [1]]);
+    expect(DatasetsRepository::resolve('foo', ['foo']))->toBe(['foo with (1)' => [1]]);
 });
 
 it('sets arrays', function () {
-    Datasets::set('bar', [[2]]);
+    DatasetsRepository::set('bar', [[2]]);
 
-    expect(Datasets::resolve('bar', ['bar']))->toBe(['bar with (2)' => [2]]);
+    expect(DatasetsRepository::resolve('bar', ['bar']))->toBe(['bar with (2)' => [2]]);
 });
 
 it('gets bound to test case object', function () {

@@ -150,7 +150,7 @@ final class TestCaseFactory
             eval("
                 namespace $namespace;
 
-                use Pest\Datasets as __PestDatasets;
+                use Pest\Repositories\DatasetsRepository as __PestDatasets;
                 use Pest\TestSuite as __PestTestSuite;
 
                 final class $className extends $baseClass implements $hasPrintableTestCaseClassFQN {

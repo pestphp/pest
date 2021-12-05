@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Pest;
+namespace Pest\Expectations;
 
+use Pest\Expectation;
 use PHPUnit\Framework\ExpectationFailedException;
 use SebastianBergmann\Exporter\Exporter;
 

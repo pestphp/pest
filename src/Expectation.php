@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace Pest;
 
 use BadMethodCallException;
-use Carbon\Traits\Mixin;
 use Closure;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\Pipeable;
 use Pest\Concerns\Retrievable;
+use Pest\Exceptions\ExpectationNotFound;
 use Pest\Exceptions\InvalidExpectationValue;
-use Pest\Exceptions\PipeException;
+use Pest\Expectations\EachExpectation;
+use Pest\Expectations\HigherOrderExpectation;
+use Pest\Expectations\OppositeExpectation;
 use Pest\Support\ExpectationPipeline;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\ExpectationFailedException;
@@ -21,16 +23,16 @@ use PHPUnit\Framework\ExpectationFailedException;
  *
  * @template TValue
  *
- * @property Expectation $not  Creates the opposite expectation.
- * @property Each        $each Creates an expectation on each element on the traversable value.
+ * @property Expectation     $not  Creates the opposite expectation.
+ * @property EachExpectation $each Creates an expectation on each element on the traversable value.
  *
  * @mixin Mixins\Expectation<TValue>
  */
 final class Expectation
 {
-    use Retrievable;
-    use Pipeable;
     use Extendable;
+    use Pipeable;
+    use Retrievable;
 
     /**
      * Creates a new expectation.
@@ -114,9 +116,9 @@ final class Expectation
     /**
      * Creates an expectation on each item of the iterable "value".
      *
-     * @return Each<TValue>
+     * @return EachExpectation<TValue>
      */
-    public function each(callable $callback = null): Each
+    public function each(callable $callback = null): EachExpectation
     {
         if (!is_iterable($this->value)) {
             throw new BadMethodCallException('Expectation value is not iterable.');
@@ -128,7 +130,7 @@ final class Expectation
             }
         }
 
-        return new Each($this);
+        return new EachExpectation($this);
     }
 
     /**
@@ -278,6 +280,11 @@ final class Expectation
         return $this;
     }
 
+    /**
+     * Creates a new expectation closure from the given name.
+     *
+     * @throws ExpectationNotFound
+     */
     private function getExpectationClosure(string $name): Closure
     {
         if (method_exists(Mixins\Expectation::class, $name)) {
@@ -293,13 +300,13 @@ final class Expectation
             }
         }
 
-        throw PipeException::expectationNotFound($name);
+        throw ExpectationNotFound::fromName($name);
     }
 
     /**
      * Dynamically calls methods on the class without any arguments or creates a new higher order expectation.
      *
-     * @return Expectation<TValue>|OppositeExpectation<TValue>|Each<TValue>|HigherOrderExpectation<Expectation<TValue>, TValue|null>|TValue
+     * @return Expectation<TValue>|OppositeExpectation<TValue>|EachExpectation<TValue>|HigherOrderExpectation<Expectation<TValue>, TValue|null>|TValue
      */
     public function __get(string $name)
     {

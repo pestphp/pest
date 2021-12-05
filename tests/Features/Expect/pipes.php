@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Pest\Exceptions\ExpectationNotFound;
 use function PHPUnit\Framework\assertEquals;
 use function PHPUnit\Framework\assertEqualsIgnoringCase;
 use function PHPUnit\Framework\assertInstanceOf;

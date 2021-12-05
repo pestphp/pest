@@ -1,9 +1,9 @@
 <?php
 
-use Pest\Datasets;
+use Pest\Repositories\DatasetsRepository;
 
 it('show only the names of named datasets in their description', function () {
-    $descriptions = array_keys(Datasets::resolve('test description', [
+    $descriptions = array_keys(DatasetsRepository::resolve('test description', [
         [
             'one' => [1],
             'two' => [[2]],
@@ -15,7 +15,7 @@ it('show only the names of named datasets in their description', function () {
 });
 
 it('show the actual dataset of non-named datasets in their description', function () {
-    $descriptions = array_keys(Datasets::resolve('test description', [
+    $descriptions = array_keys(DatasetsRepository::resolve('test description', [
         [
             [1],
             [[2]],
@@ -27,7 +27,7 @@ it('show the actual dataset of non-named datasets in their description', functio
 });
 
 it('show only the names of multiple named datasets in their description', function () {
-    $descriptions = array_keys(Datasets::resolve('test description', [
+    $descriptions = array_keys(DatasetsRepository::resolve('test description', [
         [
             'one' => [1],
             'two' => [[2]],
@@ -45,7 +45,7 @@ it('show only the names of multiple named datasets in their description', functi
 });
 
 it('show the actual dataset of multiple non-named datasets in their description', function () {
-    $descriptions = array_keys(Datasets::resolve('test description', [
+    $descriptions = array_keys(DatasetsRepository::resolve('test description', [
         [
             [1],
             [[2]],
@@ -63,7 +63,7 @@ it('show the actual dataset of multiple non-named datasets in their description'
 });
 
 it('show the correct description for mixed named and not-named datasets', function () {
-    $descriptions = array_keys(Datasets::resolve('test description', [
+    $descriptions = array_keys(DatasetsRepository::resolve('test description', [
         [
             'one' => [1],
             [[2]],

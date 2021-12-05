@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use Pest\Datasets;
 use Pest\Expectation;
 use Pest\PendingCalls\AfterEachCall;
 use Pest\PendingCalls\BeforeEachCall;
 use Pest\PendingCalls\TestCall;
 use Pest\PendingCalls\UsesCall;
+use Pest\Repositories\DatasetsRepository;
 use Pest\Support\Backtrace;
 use Pest\Support\HigherOrderTapProxy;
 use Pest\TestSuite;
@@ -61,7 +61,7 @@ if (!function_exists('dataset')) {
      */
     function dataset(string $name, Closure|iterable $dataset): void
     {
-        Datasets::set($name, $dataset);
+        DatasetsRepository::set($name, $dataset);
     }
 }
 

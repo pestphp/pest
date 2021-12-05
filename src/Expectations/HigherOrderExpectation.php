@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Pest;
+namespace Pest\Expectations;
 
 use Pest\Concerns\Retrievable;
+use Pest\Expectation;
 
 /**
  * @internal
@@ -19,9 +20,9 @@ final class HigherOrderExpectation
     use Retrievable;
 
     /**
-     * @var Expectation<TValue>|Each<TValue>
+     * @var Expectation<TValue>|EachExpectation<TValue>
      */
-    private Expectation|Each $expectation;
+    private Expectation|EachExpectation $expectation;
 
     private bool $opposite = false;
 
