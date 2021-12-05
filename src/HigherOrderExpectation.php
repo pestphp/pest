@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pest;
 
-use Pest\Concerns\RetrievesValues;
+use Pest\Concerns\Retrievable;
 
 /**
  * @internal
@@ -16,7 +16,7 @@ use Pest\Concerns\RetrievesValues;
  */
 final class HigherOrderExpectation
 {
-    use RetrievesValues;
+    use Retrievable;
 
     /**
      * @var Expectation<TValue>|Each<TValue>

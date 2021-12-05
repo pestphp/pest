@@ -9,7 +9,6 @@ use Pest\PendingCalls\BeforeEachCall;
 use Pest\PendingCalls\TestCall;
 use Pest\PendingCalls\UsesCall;
 use Pest\Support\Backtrace;
-use Pest\Support\Extendable;
 use Pest\Support\HigherOrderTapProxy;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestCase;
@@ -22,14 +21,10 @@ if (!function_exists('expect')) {
      *
      * @param TValue $value the Value
      *
-     * @return Expectation<TValue>|Extendable
+     * @return Expectation<TValue>
      */
-    function expect($value = null): Expectation|Extendable
+    function expect($value = null): Expectation
     {
-        if (func_num_args() === 0) {
-            return new Extendable(Expectation::class);
-        }
-
         return new Expectation($value);
     }
 }

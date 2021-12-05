@@ -11,33 +11,55 @@ use Closure;
  */
 final class ExpectationPipeline
 {
-    /** @var array<Closure> */
+    /**
+     * The list of pipes.
+     *
+     * @var array<int, Closure>
+     */
     private array $pipes = [];
 
-    /** @var array<mixed> */
-    private array $passable;
+    /**
+     * The list of passables.
+     *
+     * @var array<int, mixed>
+     */
+    private array $passables;
 
-    private Closure $expectationClosure;
+    /**
+     * The expectation closure.
+     */
+    private Closure $closure;
 
-    public function __construct(Closure $expectationClosure)
+    /**
+     * Creates a new instance of Expectation Pipeline.
+     */
+    public function __construct(Closure $closure)
     {
-        $this->expectationClosure = $expectationClosure;
+        $this->closure = $closure;
     }
 
-    public static function for(Closure $expectationClosure): self
+    /**
+     * Creates a new instance of Expectation Pipeline with given closure.
+     */
+    public static function for(Closure $closure): self
     {
-        return new self($expectationClosure);
+        return new self($closure);
     }
 
-    public function send(mixed ...$passable): self
+    /**
+     * Sets the list of passables.
+     */
+    public function send(mixed ...$passables): self
     {
-        $this->passable = $passable;
+        $this->passables = array_values($passables);
 
         return $this;
     }
 
     /**
-     * @param array<Closure> $pipes
+     * Sets the list of pipes.
+     *
+     * @param array<int, Closure> $pipes
      */
     public function through(array $pipes): self
     {
@@ -46,24 +68,30 @@ final class ExpectationPipeline
         return $this;
     }
 
+    /**
+     * Runs the pipeline.
+     */
     public function run(): void
     {
         $pipeline = array_reduce(
             array_reverse($this->pipes),
             $this->carry(),
             function (): void {
-                ($this->expectationClosure)(...$this->passable);
+                ($this->closure)(...$this->passables);
             }
         );
 
         $pipeline();
     }
 
+    /**
+     * Get a Closure that will carry of the expectation.
+     */
     public function carry(): Closure
     {
         return function ($stack, $pipe): Closure {
             return function () use ($stack, $pipe) {
-                return $pipe($stack, ...$this->passable);
+                return $pipe($stack, ...$this->passables);
             };
         };
     }

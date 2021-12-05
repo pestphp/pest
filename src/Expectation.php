@@ -7,7 +7,8 @@ namespace Pest;
 use BadMethodCallException;
 use Closure;
 use Pest\Concerns\Extendable;
-use Pest\Concerns\RetrievesValues;
+use Pest\Concerns\Pipeable;
+use Pest\Concerns\Retrievable;
 use Pest\Exceptions\InvalidExpectationValue;
 use Pest\Exceptions\PipeException;
 use Pest\Support\ExpectationPipeline;
@@ -22,25 +23,23 @@ use PHPUnit\Framework\ExpectationFailedException;
  * @property Expectation $not  Creates the opposite expectation.
  * @property Each        $each Creates an expectation on each element on the traversable value.
  *
- * @mixin CoreExpectation<TValue>
+ * @mixin BaseExpectation<TValue>
  */
 final class Expectation
 {
-    use RetrievesValues, Extendable {
-        __call as __extendsCall;
-    }
-
-    /** @var CoreExpectation<TValue> */
-    private CoreExpectation $coreExpectation;
+    use Retrievable;
+    use Pipeable;
+    use Extendable;
 
     /**
      * Creates a new expectation.
      *
      * @param TValue $value
      */
-    public function __construct(mixed $value)
-    {
-        $this->coreExpectation = new CoreExpectation($value);
+    public function __construct(
+        public mixed $value
+    ) {
+        // ..
     }
 
     /**
@@ -257,8 +256,7 @@ final class Expectation
     }
 
     /**
-     * Dynamically handle calls to the class or
-     * creates a new higher order expectation.
+     * Dynamically calls methods on the class or creates a new higher order expectation.
      *
      * @param array<int, mixed> $parameters
      *
@@ -266,7 +264,7 @@ final class Expectation
      */
     public function __call(string $method, array $parameters): Expectation|HigherOrderExpectation
     {
-        if (!$this->hasExpectation($method)) {
+        if (!self::hasMethod($method)) {
             /* @phpstan-ignore-next-line */
             return new HigherOrderExpectation($this, $this->value->$method(...$parameters));
         }
@@ -281,9 +279,9 @@ final class Expectation
 
     private function getExpectationClosure(string $name): Closure
     {
-        if (method_exists($this->coreExpectation, $name)) {
+        if (method_exists(BaseExpectation::class, $name)) {
             //@phpstan-ignore-next-line
-            return Closure::fromCallable([$this->coreExpectation, $name]);
+            return Closure::fromCallable([new BaseExpectation($this->value), $name]);
         }
 
         if (self::hasExtend($name)) {
@@ -297,32 +295,14 @@ final class Expectation
         throw PipeException::expectationNotFound($name);
     }
 
-    private function hasExpectation(string $name): bool
-    {
-        if (method_exists($this->coreExpectation, $name)) {
-            return true;
-        }
-
-        if (self::hasExtend($name)) {
-            return true;
-        }
-
-        return false;
-    }
-
     /**
-     * Dynamically calls methods on the class without any arguments
-     * or creates a new higher order expectation.
+     * Dynamically calls methods on the class without any arguments or creates a new higher order expectation.
      *
      * @return Expectation<TValue>|OppositeExpectation<TValue>|Each<TValue>|HigherOrderExpectation<Expectation<TValue>, TValue|null>|TValue
      */
     public function __get(string $name)
     {
-        if ($name === 'value') {
-            return $this->coreExpectation->value;
-        }
-
-        if (!method_exists($this, $name) && !method_exists($this->coreExpectation, $name) && !Expectation::hasExtend($name)) {
+        if (!self::hasMethod($name)) {
             /* @phpstan-ignore-next-line */
             return new HigherOrderExpectation($this, $this->retrieve($name, $this->value));
         }
@@ -331,8 +311,13 @@ final class Expectation
         return $this->{$name}();
     }
 
+    /**
+     * Checks if the given expectation method exists.
+     */
     public static function hasMethod(string $name): bool
     {
-        return method_exists(CoreExpectation::class, $name);
+        return method_exists(self::class, $name)
+            || method_exists(BaseExpectation::class, $name)
+            || self::hasExtend($name);
     }
 }
