@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pest;
+namespace Pest\Mixins;
 
 use BadMethodCallException;
 use Closure;
@@ -23,9 +23,9 @@ use Throwable;
  *
  * @template TValue
  *
- * @mixin Expectation<TValue>
+ * @mixin \Pest\Expectation<TValue>
  */
-final class BaseExpectation
+final class Expectation
 {
     /**
      * The exporter instance, if any.
@@ -50,9 +50,9 @@ final class BaseExpectation
      * value. Used on objects, it asserts that two
      * variables reference the same object.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBe(mixed $expected): BaseExpectation
+    public function toBe(mixed $expected): Expectation
     {
         Assert::assertSame($expected, $this->value);
 
@@ -62,9 +62,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is empty.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeEmpty(): BaseExpectation
+    public function toBeEmpty(): Expectation
     {
         Assert::assertEmpty($this->value);
 
@@ -74,9 +74,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is true.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeTrue(): BaseExpectation
+    public function toBeTrue(): Expectation
     {
         Assert::assertTrue($this->value);
 
@@ -86,9 +86,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is truthy.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeTruthy(): BaseExpectation
+    public function toBeTruthy(): Expectation
     {
         Assert::assertTrue((bool) $this->value);
 
@@ -98,9 +98,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is false.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeFalse(): BaseExpectation
+    public function toBeFalse(): Expectation
     {
         Assert::assertFalse($this->value);
 
@@ -110,9 +110,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is falsy.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeFalsy(): BaseExpectation
+    public function toBeFalsy(): Expectation
     {
         Assert::assertFalse((bool) $this->value);
 
@@ -122,9 +122,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is greater than $expected.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeGreaterThan(int|float $expected): BaseExpectation
+    public function toBeGreaterThan(int|float $expected): Expectation
     {
         Assert::assertGreaterThan($expected, $this->value);
 
@@ -134,9 +134,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is greater than or equal to $expected.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeGreaterThanOrEqual(int|float $expected): BaseExpectation
+    public function toBeGreaterThanOrEqual(int|float $expected): Expectation
     {
         Assert::assertGreaterThanOrEqual($expected, $this->value);
 
@@ -146,9 +146,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is less than or equal to $expected.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeLessThan(int|float $expected): BaseExpectation
+    public function toBeLessThan(int|float $expected): Expectation
     {
         Assert::assertLessThan($expected, $this->value);
 
@@ -158,9 +158,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is less than $expected.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeLessThanOrEqual(int|float $expected): BaseExpectation
+    public function toBeLessThanOrEqual(int|float $expected): Expectation
     {
         Assert::assertLessThanOrEqual($expected, $this->value);
 
@@ -170,9 +170,9 @@ final class BaseExpectation
     /**
      * Asserts that $needle is an element of the value.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toContain(mixed ...$needles): BaseExpectation
+    public function toContain(mixed ...$needles): Expectation
     {
         foreach ($needles as $needle) {
             if (is_string($this->value)) {
@@ -194,9 +194,9 @@ final class BaseExpectation
      *
      * @param non-empty-string $expected
      *
-     *@return BaseExpectation<TValue>
+     *@return Expectation<TValue>
      */
-    public function toStartWith(string $expected): BaseExpectation
+    public function toStartWith(string $expected): Expectation
     {
         if (!is_string($this->value)) {
             InvalidExpectationValue::expected('string');
@@ -212,9 +212,9 @@ final class BaseExpectation
      *
      * @param non-empty-string $expected
      *
-     *@return BaseExpectation<TValue>
+     *@return Expectation<TValue>
      */
-    public function toEndWith(string $expected): BaseExpectation
+    public function toEndWith(string $expected): Expectation
     {
         if (!is_string($this->value)) {
             InvalidExpectationValue::expected('string');
@@ -228,9 +228,9 @@ final class BaseExpectation
     /**
      * Asserts that $number matches value's Length.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toHaveLength(int $number): BaseExpectation
+    public function toHaveLength(int $number): Expectation
     {
         if (is_string($this->value)) {
             Assert::assertEquals($number, mb_strlen($this->value));
@@ -260,9 +260,9 @@ final class BaseExpectation
     /**
      * Asserts that $count matches the number of elements of the value.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toHaveCount(int $count): BaseExpectation
+    public function toHaveCount(int $count): Expectation
     {
         if (!is_countable($this->value) && !is_iterable($this->value)) {
             InvalidExpectationValue::expected('string');
@@ -276,9 +276,9 @@ final class BaseExpectation
     /**
      * Asserts that the value contains the property $name.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toHaveProperty(string $name, mixed $value = null): BaseExpectation
+    public function toHaveProperty(string $name, mixed $value = null): Expectation
     {
         $this->toBeObject();
 
@@ -298,9 +298,9 @@ final class BaseExpectation
      *
      * @param iterable<array-key, string> $names
      *
-     *@return BaseExpectation<TValue>
+     *@return Expectation<TValue>
      */
-    public function toHaveProperties(iterable $names): BaseExpectation
+    public function toHaveProperties(iterable $names): Expectation
     {
         foreach ($names as $name) {
             $this->toHaveProperty($name);
@@ -312,9 +312,9 @@ final class BaseExpectation
     /**
      * Asserts that two variables have the same value.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toEqual(mixed $expected): BaseExpectation
+    public function toEqual(mixed $expected): Expectation
     {
         Assert::assertEquals($expected, $this->value);
 
@@ -330,9 +330,9 @@ final class BaseExpectation
      * are objects, each object is converted to an array containing all
      * private, protected and public attributes.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toEqualCanonicalizing(mixed $expected): BaseExpectation
+    public function toEqualCanonicalizing(mixed $expected): Expectation
     {
         Assert::assertEqualsCanonicalizing($expected, $this->value);
 
@@ -343,9 +343,9 @@ final class BaseExpectation
      * Asserts that the absolute difference between the value and $expected
      * is lower than $delta.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toEqualWithDelta(mixed $expected, float $delta): BaseExpectation
+    public function toEqualWithDelta(mixed $expected, float $delta): Expectation
     {
         Assert::assertEqualsWithDelta($expected, $this->value, $delta);
 
@@ -357,9 +357,9 @@ final class BaseExpectation
      *
      * @param iterable<int|string, mixed> $values
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeIn(iterable $values): BaseExpectation
+    public function toBeIn(iterable $values): Expectation
     {
         Assert::assertContains($this->value, $values);
 
@@ -369,9 +369,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is infinite.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeInfinite(): BaseExpectation
+    public function toBeInfinite(): Expectation
     {
         Assert::assertInfinite($this->value);
 
@@ -383,9 +383,9 @@ final class BaseExpectation
      *
      * @param class-string $class
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeInstanceOf(string $class): BaseExpectation
+    public function toBeInstanceOf(string $class): Expectation
     {
         Assert::assertInstanceOf($class, $this->value);
 
@@ -395,9 +395,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is an array.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeArray(): BaseExpectation
+    public function toBeArray(): Expectation
     {
         Assert::assertIsArray($this->value);
 
@@ -407,9 +407,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is of type bool.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeBool(): BaseExpectation
+    public function toBeBool(): Expectation
     {
         Assert::assertIsBool($this->value);
 
@@ -419,9 +419,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is of type callable.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeCallable(): BaseExpectation
+    public function toBeCallable(): Expectation
     {
         Assert::assertIsCallable($this->value);
 
@@ -431,9 +431,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is of type float.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeFloat(): BaseExpectation
+    public function toBeFloat(): Expectation
     {
         Assert::assertIsFloat($this->value);
 
@@ -443,9 +443,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is of type int.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeInt(): BaseExpectation
+    public function toBeInt(): Expectation
     {
         Assert::assertIsInt($this->value);
 
@@ -455,9 +455,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is of type iterable.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeIterable(): BaseExpectation
+    public function toBeIterable(): Expectation
     {
         Assert::assertIsIterable($this->value);
 
@@ -467,9 +467,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is of type numeric.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeNumeric(): BaseExpectation
+    public function toBeNumeric(): Expectation
     {
         Assert::assertIsNumeric($this->value);
 
@@ -479,9 +479,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is of type object.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeObject(): BaseExpectation
+    public function toBeObject(): Expectation
     {
         Assert::assertIsObject($this->value);
 
@@ -491,9 +491,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is of type resource.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeResource(): BaseExpectation
+    public function toBeResource(): Expectation
     {
         Assert::assertIsResource($this->value);
 
@@ -503,9 +503,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is of type scalar.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeScalar(): BaseExpectation
+    public function toBeScalar(): Expectation
     {
         Assert::assertIsScalar($this->value);
 
@@ -515,9 +515,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is of type string.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeString(): BaseExpectation
+    public function toBeString(): Expectation
     {
         Assert::assertIsString($this->value);
 
@@ -527,9 +527,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is a JSON string.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeJson(): BaseExpectation
+    public function toBeJson(): Expectation
     {
         Assert::assertIsString($this->value);
 
@@ -542,9 +542,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is NAN.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeNan(): BaseExpectation
+    public function toBeNan(): Expectation
     {
         Assert::assertNan($this->value);
 
@@ -554,9 +554,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is null.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeNull(): BaseExpectation
+    public function toBeNull(): Expectation
     {
         Assert::assertNull($this->value);
 
@@ -566,9 +566,9 @@ final class BaseExpectation
     /**
      * Asserts that the value array has the provided $key.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toHaveKey(string|int $key, mixed $value = null): BaseExpectation
+    public function toHaveKey(string|int $key, mixed $value = null): Expectation
     {
         if (is_object($this->value) && method_exists($this->value, 'toArray')) {
             $array = $this->value->toArray();
@@ -596,9 +596,9 @@ final class BaseExpectation
      *
      * @param array<int, int|string> $keys
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toHaveKeys(array $keys): BaseExpectation
+    public function toHaveKeys(array $keys): Expectation
     {
         foreach ($keys as $key) {
             $this->toHaveKey($key);
@@ -610,9 +610,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is a directory.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeDirectory(): BaseExpectation
+    public function toBeDirectory(): Expectation
     {
         if (!is_string($this->value)) {
             InvalidExpectationValue::expected('string');
@@ -626,9 +626,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is a directory and is readable.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeReadableDirectory(): BaseExpectation
+    public function toBeReadableDirectory(): Expectation
     {
         if (!is_string($this->value)) {
             InvalidExpectationValue::expected('string');
@@ -642,9 +642,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is a directory and is writable.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeWritableDirectory(): BaseExpectation
+    public function toBeWritableDirectory(): Expectation
     {
         if (!is_string($this->value)) {
             InvalidExpectationValue::expected('string');
@@ -658,9 +658,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is a file.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeFile(): BaseExpectation
+    public function toBeFile(): Expectation
     {
         if (!is_string($this->value)) {
             InvalidExpectationValue::expected('string');
@@ -674,9 +674,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is a file and is readable.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeReadableFile(): BaseExpectation
+    public function toBeReadableFile(): Expectation
     {
         if (!is_string($this->value)) {
             InvalidExpectationValue::expected('string');
@@ -690,9 +690,9 @@ final class BaseExpectation
     /**
      * Asserts that the value is a file and is writable.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toBeWritableFile(): BaseExpectation
+    public function toBeWritableFile(): Expectation
     {
         if (!is_string($this->value)) {
             InvalidExpectationValue::expected('string');
@@ -707,9 +707,9 @@ final class BaseExpectation
      *
      * @param iterable<int|string, mixed> $array
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toMatchArray(iterable|object $array): BaseExpectation
+    public function toMatchArray(iterable|object $array): Expectation
     {
         if (is_object($this->value) && method_exists($this->value, 'toArray')) {
             $valueAsArray = $this->value->toArray();
@@ -740,9 +740,9 @@ final class BaseExpectation
      *
      * @param iterable<string, mixed>|object $object
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toMatchObject(iterable|object $object): BaseExpectation
+    public function toMatchObject(iterable|object $object): Expectation
     {
         foreach ((array) $object as $property => $value) {
             if (!is_object($this->value) && !is_string($this->value)) {
@@ -770,9 +770,9 @@ final class BaseExpectation
     /**
      * Asserts that the value matches a regular expression.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toMatch(string $expression): BaseExpectation
+    public function toMatch(string $expression): Expectation
     {
         if (!is_string($this->value)) {
             InvalidExpectationValue::expected('string');
@@ -785,9 +785,9 @@ final class BaseExpectation
     /**
      * Asserts that the value matches a constraint.
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toMatchConstraint(Constraint $constraint): BaseExpectation
+    public function toMatchConstraint(Constraint $constraint): Expectation
     {
         Assert::assertThat($this->value, $constraint);
 
@@ -799,9 +799,9 @@ final class BaseExpectation
      *
      * @param (Closure(Throwable): mixed)|string $exception
      *
-     * @return BaseExpectation<TValue>
+     * @return Expectation<TValue>
      */
-    public function toThrow(callable|string $exception, string $exceptionMessage = null): BaseExpectation
+    public function toThrow(callable|string $exception, string $exceptionMessage = null): Expectation
     {
         $callback = NullClosure::create();
 

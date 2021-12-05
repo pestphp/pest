@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest;
 
 use BadMethodCallException;
+use Carbon\Traits\Mixin;
 use Closure;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\Pipeable;
@@ -23,7 +24,7 @@ use PHPUnit\Framework\ExpectationFailedException;
  * @property Expectation $not  Creates the opposite expectation.
  * @property Each        $each Creates an expectation on each element on the traversable value.
  *
- * @mixin BaseExpectation<TValue>
+ * @mixin Mixins\Expectation<TValue>
  */
 final class Expectation
 {
@@ -279,9 +280,9 @@ final class Expectation
 
     private function getExpectationClosure(string $name): Closure
     {
-        if (method_exists(BaseExpectation::class, $name)) {
+        if (method_exists(Mixins\Expectation::class, $name)) {
             //@phpstan-ignore-next-line
-            return Closure::fromCallable([new BaseExpectation($this->value), $name]);
+            return Closure::fromCallable([new Mixins\Expectation($this->value), $name]);
         }
 
         if (self::hasExtend($name)) {
@@ -317,7 +318,7 @@ final class Expectation
     public static function hasMethod(string $name): bool
     {
         return method_exists(self::class, $name)
-            || method_exists(BaseExpectation::class, $name)
+            || method_exists(Mixins\Expectation::class, $name)
             || self::hasExtend($name);
     }
 }

@@ -19,11 +19,11 @@ if (!function_exists('expect')) {
      *
      * @template TValue
      *
-     * @param TValue $value the Value
+     * @param TValue $value
      *
      * @return Expectation<TValue>
      */
-    function expect($value = null): Expectation
+    function expect(mixed $value = null): Expectation
     {
         return new Expectation($value);
     }
