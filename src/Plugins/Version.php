@@ -16,7 +16,7 @@ final class Version implements HandlesArguments
     use Concerns\HandleArguments;
 
     /**
-     * Creates a new instance of the plugin.
+     * Creates a new Plugin instance.
      */
     public function __construct(
         private OutputInterface $output
@@ -24,6 +24,9 @@ final class Version implements HandlesArguments
         // ..
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function handleArguments(array $arguments): array
     {
         if ($this->hasArgument('--version', $arguments)) {

@@ -27,11 +27,7 @@ final class Environment implements HandlesArguments
     private static ?string $name = null;
 
     /**
-     * Allows to handle custom command line arguments.
-     *
-     * @param array<int, string> $arguments
-     *
-     * @return array<int, string> the updated list of arguments
+     * {@inheritdoc}
      */
     public function handleArguments(array $arguments): array
     {

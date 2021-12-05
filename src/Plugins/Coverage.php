@@ -46,9 +46,7 @@ final class Coverage implements AddsOutput, HandlesArguments
     }
 
     /**
-     * @param array<int, string> $originals
-     *
-     * @return array<int, string>
+     * {@inheritdoc}
      */
     public function handleArguments(array $originals): array
     {
@@ -90,11 +88,11 @@ final class Coverage implements AddsOutput, HandlesArguments
     }
 
     /**
-     * Allows to add custom output after the test suite was executed.
+     * {@inheritdoc}
      */
-    public function addOutput(int $result): int
+    public function addOutput(int $exitCode): int
     {
-        if ($result === 0 && $this->coverage) {
+        if ($exitCode === 0 && $this->coverage) {
             if (!\Pest\Support\Coverage::isAvailable()) {
                 $this->output->writeln(
                     "\n  <fg=white;bg=red;options=bold> ERROR </> No code coverage driver is available.</>",
@@ -104,9 +102,9 @@ final class Coverage implements AddsOutput, HandlesArguments
 
             $coverage = \Pest\Support\Coverage::report($this->output);
 
-            $result = (int) ($coverage < $this->coverageMin);
+            $exitCode = (int) ($coverage < $this->coverageMin);
 
-            if ($result === 1) {
+            if ($exitCode === 1) {
                 $this->output->writeln(sprintf(
                     "\n  <fg=white;bg=red;options=bold> FAIL </> Code coverage below expected:<fg=red;options=bold> %s %%</>. Minimum:<fg=white;options=bold> %s %%</>.",
                     number_format($coverage, 1),
@@ -115,6 +113,6 @@ final class Coverage implements AddsOutput, HandlesArguments
             }
         }
 
-        return $result;
+        return $exitCode;
     }
 }

@@ -13,30 +13,36 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class Memory implements AddsOutput, HandlesArguments
 {
-    /** @var OutputInterface */
-    private $output;
+    use Concerns\HandleArguments;
 
+    /**
+     * If memory should be displayed.
+     */
     private bool $enabled = false;
 
-    public function __construct(OutputInterface $output)
-    {
-        $this->output = $output;
+    /**
+     * Creates a new Plugin instance.
+     */
+    public function __construct(
+        private OutputInterface $output
+    ) {
+        // ..
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function handleArguments(array $arguments): array
     {
-        foreach ($arguments as $index => $argument) {
-            if ($argument === '--memory') {
-                unset($arguments[$index]);
+        $this->enabled = $this->hasArgument('--memory', $arguments);
 
-                $this->enabled = true;
-            }
-        }
-
-        return array_values($arguments);
+        return $this->popArgument('--memory', $arguments);
     }
 
-    public function addOutput(int $result): int
+    /**
+     * {@inheritdoc}
+     */
+    public function addOutput(int $exitCode): int
     {
         if ($this->enabled) {
             $this->output->writeln(sprintf(
@@ -45,6 +51,6 @@ final class Memory implements AddsOutput, HandlesArguments
             ));
         }
 
-        return $result;
+        return $exitCode;
     }
 }

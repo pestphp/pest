@@ -38,6 +38,9 @@ final class Init implements HandlesArguments
         // ..
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function handleArguments(array $arguments): array
     {
         if (!array_key_exists(1, $arguments) || $arguments[1] !== self::INIT_OPTION) {

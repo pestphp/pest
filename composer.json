@@ -79,12 +79,12 @@
         },
         "pest": {
             "plugins": [
-                "Pest\\Plugins\\Memory",
                 "Pest\\Plugins\\Coverage",
                 "Pest\\Plugins\\Init",
-                "Pest\\Plugins\\Version",
                 "Pest\\Plugins\\Environment",
-                "Pest\\Plugins\\Retry"
+                "Pest\\Plugins\\Memory",
+                "Pest\\Plugins\\Retry",
+                "Pest\\Plugins\\Version"
             ]
         },
         "laravel": {
