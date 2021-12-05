@@ -7,7 +7,7 @@ namespace Pest\Concerns;
 /**
  * @internal
  */
-trait RetrievesValues
+trait Retrievable
 {
     /**
      * @template TRetrievableValue

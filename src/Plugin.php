@@ -7,8 +7,7 @@ namespace Pest;
 final class Plugin
 {
     /**
-     * The lazy callables to be executed
-     * once the test suite boots.
+     * The lazy callables to be executed once the test suite boots.
      *
      * @var array<int, callable>
      *

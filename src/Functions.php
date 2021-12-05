@@ -2,14 +2,13 @@
 
 declare(strict_types=1);
 
-use Pest\Datasets;
 use Pest\Expectation;
 use Pest\PendingCalls\AfterEachCall;
 use Pest\PendingCalls\BeforeEachCall;
 use Pest\PendingCalls\TestCall;
 use Pest\PendingCalls\UsesCall;
+use Pest\Repositories\DatasetsRepository;
 use Pest\Support\Backtrace;
-use Pest\Support\Extendable;
 use Pest\Support\HigherOrderTapProxy;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestCase;
@@ -20,16 +19,12 @@ if (!function_exists('expect')) {
      *
      * @template TValue
      *
-     * @param TValue $value the Value
+     * @param TValue $value
      *
-     * @return Expectation<TValue>|Extendable
+     * @return Expectation<TValue>
      */
-    function expect($value = null): Expectation|Extendable
+    function expect(mixed $value = null): Expectation
     {
-        if (func_num_args() === 0) {
-            return new Extendable(Expectation::class);
-        }
-
         return new Expectation($value);
     }
 }
@@ -66,7 +61,7 @@ if (!function_exists('dataset')) {
      */
     function dataset(string $name, Closure|iterable $dataset): void
     {
-        Datasets::set($name, $dataset);
+        DatasetsRepository::set($name, $dataset);
     }
 }
 

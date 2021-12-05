@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Pest;
+namespace Pest\Expectations;
 
-use Pest\Concerns\RetrievesValues;
+use Pest\Concerns\Retrievable;
+use Pest\Expectation;
 
 /**
  * @internal
@@ -16,12 +17,12 @@ use Pest\Concerns\RetrievesValues;
  */
 final class HigherOrderExpectation
 {
-    use RetrievesValues;
+    use Retrievable;
 
     /**
-     * @var Expectation<TValue>|Each<TValue>
+     * @var Expectation<TValue>|EachExpectation<TValue>
      */
-    private Expectation|Each $expectation;
+    private Expectation|EachExpectation $expectation;
 
     private bool $opposite = false;
 
@@ -121,7 +122,7 @@ final class HigherOrderExpectation
      */
     private function expectationHasMethod(string $name): bool
     {
-        return method_exists($this->original, $name) || $this->original::hasExtend($name);
+        return method_exists($this->original, $name) || $this->original::hasMethod($name) || $this->original::hasExtend($name);
     }
 
     /**

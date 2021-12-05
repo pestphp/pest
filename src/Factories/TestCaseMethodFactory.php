@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Pest\Factories;
 
 use Closure;
-use Pest\Datasets;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Factories\Concerns\HigherOrderable;
 use Pest\Plugins\Retry;
+use Pest\Repositories\DatasetsRepository;
 use Pest\Support\Str;
 use Pest\TestSuite;
 use PHPUnit\Framework\Assert;
@@ -159,7 +159,7 @@ final class TestCaseMethodFactory
      */
     private function buildDatasetForEvaluation(string $methodName, string $dataProviderName): string
     {
-        Datasets::with($this->filename, $methodName, $this->datasets);
+        DatasetsRepository::with($this->filename, $methodName, $this->datasets);
 
         return <<<EOF
 

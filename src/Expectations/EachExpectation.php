@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Pest;
+namespace Pest\Expectations;
+
+use function expect;
+use Pest\Expectation;
 
 /**
  * @internal
@@ -11,7 +14,7 @@ namespace Pest;
  *
  * @mixin Expectation<TValue>
  */
-final class Each
+final class EachExpectation
 {
     private bool $opposite = false;
 
@@ -43,7 +46,7 @@ final class Each
      *
      * @return self<TValue>
      */
-    public function not(): Each
+    public function not(): EachExpectation
     {
         $this->opposite = true;
 
@@ -57,7 +60,7 @@ final class Each
      *
      * @return self<TValue>
      */
-    public function __call(string $name, array $arguments): Each
+    public function __call(string $name, array $arguments): EachExpectation
     {
         foreach ($this->original->value as $item) {
             /* @phpstan-ignore-next-line */
@@ -74,7 +77,7 @@ final class Each
      *
      * @return self<TValue>
      */
-    public function __get(string $name): Each
+    public function __get(string $name): EachExpectation
     {
         /* @phpstan-ignore-next-line */
         return $this->$name();

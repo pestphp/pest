@@ -7,6 +7,7 @@ namespace Pest\Concerns;
 use Closure;
 use Pest\Support\ChainableClosure;
 use Pest\Support\ExceptionTrace;
+use Pest\Support\Reflection;
 use Pest\TestSuite;
 use Throwable;
 
@@ -210,7 +211,28 @@ trait Testable
      */
     private function __resolveTestArguments(array $arguments): array
     {
-        return array_map(fn ($data) => $data instanceof Closure ? $this->__callClosure($data, []) : $data, $arguments);
+        if (count($arguments) !== 1) {
+            return $arguments;
+        }
+
+        if (!$arguments[0] instanceof Closure) {
+            return $arguments;
+        }
+
+        $underlyingTest     = Reflection::getFunctionVariable($this->__test, 'closure');
+        $testParameterTypes = array_values(Reflection::getFunctionArguments($underlyingTest));
+
+        if (in_array($testParameterTypes[0], ['Closure', 'callable'])) {
+            return $arguments;
+        }
+
+        $boundDatasetResult = $this->__callClosure($arguments[0], []);
+
+        if (count($testParameterTypes) === 1 || !is_array($boundDatasetResult)) {
+            return [$boundDatasetResult];
+        }
+
+        return array_values($boundDatasetResult);
     }
 
     /**

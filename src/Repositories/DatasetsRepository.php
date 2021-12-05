@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pest;
+namespace Pest\Repositories;
 
 use Closure;
 use Pest\Exceptions\DatasetAlreadyExist;
@@ -15,7 +15,7 @@ use Traversable;
 /**
  * @internal
  */
-final class Datasets
+final class DatasetsRepository
 {
     /**
      * Holds the datasets.

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pest\Concerns;
 
-use BadMethodCallException;
 use Closure;
 
 /**
@@ -22,7 +21,7 @@ trait Extendable
     /**
      * Register a new extend.
      */
-    public static function extend(string $name, Closure $extend): void
+    public function extend(string $name, Closure $extend): void
     {
         static::$extends[$name] = $extend;
     }
@@ -33,22 +32,5 @@ trait Extendable
     public static function hasExtend(string $name): bool
     {
         return array_key_exists($name, static::$extends);
-    }
-
-    /**
-     * Dynamically handle calls to the class.
-     *
-     * @param array<int, mixed> $parameters
-     */
-    public function __call(string $method, array $parameters): mixed
-    {
-        if (!static::hasExtend($method)) {
-            throw new BadMethodCallException("$method is not a callable method name.");
-        }
-
-        /** @var Closure $extend */
-        $extend = static::$extends[$method]->bindTo($this, static::class);
-
-        return $extend(...$parameters);
     }
 }

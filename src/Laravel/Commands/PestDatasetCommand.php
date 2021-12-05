@@ -42,7 +42,7 @@ final class PestDatasetCommand extends Command
         /** @var string $name */
         $name = $this->argument('name');
 
-        $relativePath   = sprintf(testDirectory('Datasets/%s.php'), ucfirst($name));
+        $relativePath   = sprintf(testDirectory('DatasetsRepository/%s.php'), ucfirst($name));
 
         /* @phpstan-ignore-next-line */
         $target         = base_path($relativePath);
