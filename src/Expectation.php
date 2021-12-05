@@ -6,19 +6,13 @@ namespace Pest;
 
 use BadMethodCallException;
 use Closure;
-use InvalidArgumentException;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\RetrievesValues;
 use Pest\Exceptions\InvalidExpectationValue;
-use Pest\Support\Arr;
-use Pest\Support\NullClosure;
+use Pest\Exceptions\PipeException;
+use Pest\Support\ExpectationPipeline;
 use PHPUnit\Framework\Assert;
-use PHPUnit\Framework\Constraint\Constraint;
 use PHPUnit\Framework\ExpectationFailedException;
-use ReflectionFunction;
-use ReflectionNamedType;
-use SebastianBergmann\Exporter\Exporter;
-use Throwable;
 
 /**
  * @internal
@@ -27,6 +21,8 @@ use Throwable;
  *
  * @property Expectation $not  Creates the opposite expectation.
  * @property Each        $each Creates an expectation on each element on the traversable value.
+ *
+ * @mixin CoreExpectation<TValue>
  */
 final class Expectation
 {
@@ -34,20 +30,17 @@ final class Expectation
         __call as __extendsCall;
     }
 
-    /**
-     * The exporter instance, if any.
-     *
-     * @readonly
-     */
-    private ?Exporter $exporter = null;
+    /** @var CoreExpectation<TValue> */
+    private CoreExpectation $coreExpectation;
 
     /**
      * Creates a new expectation.
      *
      * @param TValue $value
      */
-    public function __construct(public mixed $value)
+    public function __construct(mixed $value)
     {
+        $this->coreExpectation = new CoreExpectation($value);
     }
 
     /**
@@ -264,850 +257,82 @@ final class Expectation
     }
 
     /**
-     * Asserts that two variables have the same type and
-     * value. Used on objects, it asserts that two
-     * variables reference the same object.
-     *
-     * @return self<TValue>
-     */
-    public function toBe(mixed $expected): Expectation
-    {
-        Assert::assertSame($expected, $this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is empty.
-     *
-     * @return self<TValue>
-     */
-    public function toBeEmpty(): Expectation
-    {
-        Assert::assertEmpty($this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is true.
-     *
-     * @return self<TValue>
-     */
-    public function toBeTrue(): Expectation
-    {
-        Assert::assertTrue($this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is truthy.
-     *
-     * @return self<TValue>
-     */
-    public function toBeTruthy(): Expectation
-    {
-        Assert::assertTrue((bool) $this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is false.
-     *
-     * @return self<TValue>
-     */
-    public function toBeFalse(): Expectation
-    {
-        Assert::assertFalse($this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is falsy.
-     *
-     * @return self<TValue>
-     */
-    public function toBeFalsy(): Expectation
-    {
-        Assert::assertFalse((bool) $this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is greater than $expected.
-     *
-     * @return self<TValue>
-     */
-    public function toBeGreaterThan(int|float $expected): Expectation
-    {
-        Assert::assertGreaterThan($expected, $this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is greater than or equal to $expected.
-     *
-     * @return self<TValue>
-     */
-    public function toBeGreaterThanOrEqual(int|float $expected): Expectation
-    {
-        Assert::assertGreaterThanOrEqual($expected, $this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is less than or equal to $expected.
-     *
-     * @return self<TValue>
-     */
-    public function toBeLessThan(int|float $expected): Expectation
-    {
-        Assert::assertLessThan($expected, $this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is less than $expected.
-     *
-     * @return self<TValue>
-     */
-    public function toBeLessThanOrEqual(int|float $expected): Expectation
-    {
-        Assert::assertLessThanOrEqual($expected, $this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that $needle is an element of the value.
-     *
-     * @return self<TValue>
-     */
-    public function toContain(mixed ...$needles): Expectation
-    {
-        foreach ($needles as $needle) {
-            if (is_string($this->value)) {
-                // @phpstan-ignore-next-line
-                Assert::assertStringContainsString((string) $needle, $this->value);
-            } else {
-                if (!is_iterable($this->value)) {
-                    InvalidExpectationValue::expected('iterable');
-                }
-                Assert::assertContains($needle, $this->value);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value starts with $expected.
-     *
-     * @param non-empty-string $expected
-     *
-     * @return self<TValue>
-     */
-    public function toStartWith(string $expected): Expectation
-    {
-        if (!is_string($this->value)) {
-            InvalidExpectationValue::expected('string');
-        }
-
-        Assert::assertStringStartsWith($expected, $this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value ends with $expected.
-     *
-     * @param non-empty-string $expected
-     *
-     * @return self<TValue>
-     */
-    public function toEndWith(string $expected): Expectation
-    {
-        if (!is_string($this->value)) {
-            InvalidExpectationValue::expected('string');
-        }
-
-        Assert::assertStringEndsWith($expected, $this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that $number matches value's Length.
-     *
-     * @return self<TValue>
-     */
-    public function toHaveLength(int $number): Expectation
-    {
-        if (is_string($this->value)) {
-            Assert::assertEquals($number, mb_strlen($this->value));
-
-            return $this;
-        }
-
-        if (is_iterable($this->value)) {
-            return $this->toHaveCount($number);
-        }
-
-        if (is_object($this->value)) {
-            if (method_exists($this->value, 'toArray')) {
-                $array = $this->value->toArray();
-            } else {
-                $array = (array) $this->value;
-            }
-
-            Assert::assertCount($number, $array);
-
-            return $this;
-        }
-
-        throw new BadMethodCallException('Expectation value length is not countable.');
-    }
-
-    /**
-     * Asserts that $count matches the number of elements of the value.
-     *
-     * @return self<TValue>
-     */
-    public function toHaveCount(int $count): Expectation
-    {
-        if (!is_countable($this->value) && !is_iterable($this->value)) {
-            InvalidExpectationValue::expected('string');
-        }
-
-        Assert::assertCount($count, $this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value contains the property $name.
-     *
-     * @return self<TValue>
-     */
-    public function toHaveProperty(string $name, mixed $value = null): Expectation
-    {
-        $this->toBeObject();
-
-        //@phpstan-ignore-next-line
-        Assert::assertTrue(property_exists($this->value, $name));
-
-        if (func_num_args() > 1) {
-            /* @phpstan-ignore-next-line */
-            Assert::assertEquals($value, $this->value->{$name});
-        }
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value contains the provided properties $names.
-     *
-     * @param iterable<array-key, string> $names
-     *
-     * @return self<TValue>
-     */
-    public function toHaveProperties(iterable $names): Expectation
-    {
-        foreach ($names as $name) {
-            $this->toHaveProperty($name);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Asserts that two variables have the same value.
-     *
-     * @return self<TValue>
-     */
-    public function toEqual(mixed $expected): Expectation
-    {
-        Assert::assertEquals($expected, $this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that two variables have the same value.
-     * The contents of $expected and the $this->value are
-     * canonicalized before they are compared. For instance, when the two
-     * variables $expected and $this->value are arrays, then these arrays
-     * are sorted before they are compared. When $expected and $this->value
-     * are objects, each object is converted to an array containing all
-     * private, protected and public attributes.
-     *
-     * @return self<TValue>
-     */
-    public function toEqualCanonicalizing(mixed $expected): Expectation
-    {
-        Assert::assertEqualsCanonicalizing($expected, $this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the absolute difference between the value and $expected
-     * is lower than $delta.
-     *
-     * @return self<TValue>
-     */
-    public function toEqualWithDelta(mixed $expected, float $delta): Expectation
-    {
-        Assert::assertEqualsWithDelta($expected, $this->value, $delta);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is one of the given values.
-     *
-     * @param iterable<int|string, mixed> $values
-     *
-     * @return self<TValue>
-     */
-    public function toBeIn(iterable $values): Expectation
-    {
-        Assert::assertContains($this->value, $values);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is infinite.
-     *
-     * @return self<TValue>
-     */
-    public function toBeInfinite(): Expectation
-    {
-        Assert::assertInfinite($this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is an instance of $class.
-     *
-     * @param class-string $class
-     *
-     * @return self<TValue>
-     */
-    public function toBeInstanceOf(string $class): Expectation
-    {
-        Assert::assertInstanceOf($class, $this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is an array.
-     *
-     * @return self<TValue>
-     */
-    public function toBeArray(): Expectation
-    {
-        Assert::assertIsArray($this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is of type bool.
-     *
-     * @return self<TValue>
-     */
-    public function toBeBool(): Expectation
-    {
-        Assert::assertIsBool($this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is of type callable.
-     *
-     * @return self<TValue>
-     */
-    public function toBeCallable(): Expectation
-    {
-        Assert::assertIsCallable($this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is of type float.
-     *
-     * @return self<TValue>
-     */
-    public function toBeFloat(): Expectation
-    {
-        Assert::assertIsFloat($this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is of type int.
-     *
-     * @return self<TValue>
-     */
-    public function toBeInt(): Expectation
-    {
-        Assert::assertIsInt($this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is of type iterable.
-     *
-     * @return self<TValue>
-     */
-    public function toBeIterable(): Expectation
-    {
-        Assert::assertIsIterable($this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is of type numeric.
-     *
-     * @return self<TValue>
-     */
-    public function toBeNumeric(): Expectation
-    {
-        Assert::assertIsNumeric($this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is of type object.
-     *
-     * @return self<TValue>
-     */
-    public function toBeObject(): Expectation
-    {
-        Assert::assertIsObject($this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is of type resource.
-     *
-     * @return self<TValue>
-     */
-    public function toBeResource(): Expectation
-    {
-        Assert::assertIsResource($this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is of type scalar.
-     *
-     * @return self<TValue>
-     */
-    public function toBeScalar(): Expectation
-    {
-        Assert::assertIsScalar($this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is of type string.
-     *
-     * @return self<TValue>
-     */
-    public function toBeString(): Expectation
-    {
-        Assert::assertIsString($this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is a JSON string.
-     *
-     * @return self<TValue>
-     */
-    public function toBeJson(): Expectation
-    {
-        Assert::assertIsString($this->value);
-
-        //@phpstan-ignore-next-line
-        Assert::assertJson($this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is NAN.
-     *
-     * @return self<TValue>
-     */
-    public function toBeNan(): Expectation
-    {
-        Assert::assertNan($this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is null.
-     *
-     * @return self<TValue>
-     */
-    public function toBeNull(): Expectation
-    {
-        Assert::assertNull($this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value array has the provided $key.
-     *
-     * @return self<TValue>
-     */
-    public function toHaveKey(string|int $key, mixed $value = null): Expectation
-    {
-        if (is_object($this->value) && method_exists($this->value, 'toArray')) {
-            $array = $this->value->toArray();
-        } else {
-            $array = (array) $this->value;
-        }
-
-        try {
-            Assert::assertTrue(Arr::has($array, $key));
-
-            /* @phpstan-ignore-next-line  */
-        } catch (ExpectationFailedException $exception) {
-            throw new ExpectationFailedException("Failed asserting that an array has the key '$key'", $exception->getComparisonFailure());
-        }
-
-        if (func_num_args() > 1) {
-            Assert::assertEquals($value, Arr::get($array, $key));
-        }
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value array has the provided $keys.
-     *
-     * @param array<int, int|string> $keys
-     *
-     * @return self<TValue>
-     */
-    public function toHaveKeys(array $keys): Expectation
-    {
-        foreach ($keys as $key) {
-            $this->toHaveKey($key);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is a directory.
-     *
-     * @return self<TValue>
-     */
-    public function toBeDirectory(): Expectation
-    {
-        if (!is_string($this->value)) {
-            InvalidExpectationValue::expected('string');
-        }
-
-        Assert::assertDirectoryExists($this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is a directory and is readable.
-     *
-     * @return self<TValue>
-     */
-    public function toBeReadableDirectory(): Expectation
-    {
-        if (!is_string($this->value)) {
-            InvalidExpectationValue::expected('string');
-        }
-
-        Assert::assertDirectoryIsReadable($this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is a directory and is writable.
-     *
-     * @return self<TValue>
-     */
-    public function toBeWritableDirectory(): Expectation
-    {
-        if (!is_string($this->value)) {
-            InvalidExpectationValue::expected('string');
-        }
-
-        Assert::assertDirectoryIsWritable($this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is a file.
-     *
-     * @return self<TValue>
-     */
-    public function toBeFile(): Expectation
-    {
-        if (!is_string($this->value)) {
-            InvalidExpectationValue::expected('string');
-        }
-
-        Assert::assertFileExists($this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is a file and is readable.
-     *
-     * @return self<TValue>
-     */
-    public function toBeReadableFile(): Expectation
-    {
-        if (!is_string($this->value)) {
-            InvalidExpectationValue::expected('string');
-        }
-
-        Assert::assertFileIsReadable($this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value is a file and is writable.
-     *
-     * @return self<TValue>
-     */
-    public function toBeWritableFile(): Expectation
-    {
-        if (!is_string($this->value)) {
-            InvalidExpectationValue::expected('string');
-        }
-        Assert::assertFileIsWritable($this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value array matches the given array subset.
-     *
-     * @param iterable<int|string, mixed> $array
-     *
-     * @return self<TValue>
-     */
-    public function toMatchArray(iterable|object $array): Expectation
-    {
-        if (is_object($this->value) && method_exists($this->value, 'toArray')) {
-            $valueAsArray = $this->value->toArray();
-        } else {
-            $valueAsArray = (array) $this->value;
-        }
-
-        foreach ($array as $key => $value) {
-            Assert::assertArrayHasKey($key, $valueAsArray);
-
-            Assert::assertEquals(
-                $value,
-                $valueAsArray[$key],
-                sprintf(
-                    'Failed asserting that an array has a key %s with the value %s.',
-                    $this->export($key),
-                    $this->export($valueAsArray[$key]),
-                ),
-            );
-        }
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value object matches a subset
-     * of the properties of an given object.
-     *
-     * @param iterable<string, mixed>|object $object
-     *
-     * @return self<TValue>
-     */
-    public function toMatchObject(iterable|object $object): Expectation
-    {
-        foreach ((array) $object as $property => $value) {
-            if (!is_object($this->value) && !is_string($this->value)) {
-                InvalidExpectationValue::expected('object|string');
-            }
-
-            Assert::assertTrue(property_exists($this->value, $property));
-
-            /* @phpstan-ignore-next-line */
-            $propertyValue = $this->value->{$property};
-            Assert::assertEquals(
-                $value,
-                $propertyValue,
-                sprintf(
-                    'Failed asserting that an object has a property %s with the value %s.',
-                    $this->export($property),
-                    $this->export($propertyValue),
-                ),
-            );
-        }
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value matches a regular expression.
-     *
-     * @return self<TValue>
-     */
-    public function toMatch(string $expression): Expectation
-    {
-        if (!is_string($this->value)) {
-            InvalidExpectationValue::expected('string');
-        }
-        Assert::assertMatchesRegularExpression($expression, $this->value);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that the value matches a constraint.
-     *
-     * @return self<TValue>
-     */
-    public function toMatchConstraint(Constraint $constraint): Expectation
-    {
-        Assert::assertThat($this->value, $constraint);
-
-        return $this;
-    }
-
-    /**
-     * Asserts that executing value throws an exception.
-     *
-     * @param (Closure(Throwable): mixed)|string $exception
-     *
-     * @return self<TValue>
-     */
-    public function toThrow(callable|string $exception, string $exceptionMessage = null): Expectation
-    {
-        $callback = NullClosure::create();
-
-        if ($exception instanceof Closure) {
-            $callback   = $exception;
-            $parameters = (new ReflectionFunction($exception))->getParameters();
-
-            if (1 !== count($parameters)) {
-                throw new InvalidArgumentException('The given closure must have a single parameter type-hinted as the class string.');
-            }
-
-            if (!($type = $parameters[0]->getType()) instanceof ReflectionNamedType) {
-                throw new InvalidArgumentException('The given closure\'s parameter must be type-hinted as the class string.');
-            }
-
-            $exception = $type->getName();
-        }
-
-        try {
-            ($this->value)();
-        } catch (Throwable $e) { // @phpstan-ignore-line
-            if (!class_exists($exception)) {
-                Assert::assertStringContainsString($exception, $e->getMessage());
-
-                return $this;
-            }
-
-            if ($exceptionMessage !== null) {
-                Assert::assertStringContainsString($exceptionMessage, $e->getMessage());
-            }
-
-            Assert::assertInstanceOf($exception, $e);
-            $callback($e);
-
-            return $this;
-        }
-
-        if (!class_exists($exception)) {
-            throw new ExpectationFailedException("Exception with message \"$exception\" not thrown.");
-        }
-
-        throw new ExpectationFailedException("Exception \"$exception\" not thrown.");
-    }
-
-    /**
-     * Exports the given value.
-     */
-    private function export(mixed $value): string
-    {
-        if ($this->exporter === null) {
-            $this->exporter = new Exporter();
-        }
-
-        return $this->exporter->export($value);
-    }
-
-    /**
      * Dynamically handle calls to the class or
      * creates a new higher order expectation.
      *
      * @param array<int, mixed> $parameters
      *
-     * @return HigherOrderExpectation<TValue, mixed>|self<TValue>|mixed
+     * @return Expectation<TValue>|HigherOrderExpectation<Expectation<TValue>, TValue>
      */
-    public function __call(string $method, array $parameters)
+    public function __call(string $method, array $parameters): Expectation|HigherOrderExpectation
     {
-        if (!Expectation::hasExtend($method)) {
+        if (!$this->hasExpectation($method)) {
             /* @phpstan-ignore-next-line */
             return new HigherOrderExpectation($this, $this->value->$method(...$parameters));
         }
 
-        return $this->__extendsCall($method, $parameters);
+        ExpectationPipeline::for($this->getExpectationClosure($method))
+            ->send(...$parameters)
+            ->through($this->pipes($method, $this, Expectation::class))
+            ->run();
+
+        return $this;
+    }
+
+    private function getExpectationClosure(string $name): Closure
+    {
+        if (method_exists($this->coreExpectation, $name)) {
+            //@phpstan-ignore-next-line
+            return Closure::fromCallable([$this->coreExpectation, $name]);
+        }
+
+        if (self::hasExtend($name)) {
+            $extend = self::$extends[$name]->bindTo($this, Expectation::class);
+
+            if ($extend != false) {
+                return $extend;
+            }
+        }
+
+        throw PipeException::expectationNotFound($name);
+    }
+
+    private function hasExpectation(string $name): bool
+    {
+        if (method_exists($this->coreExpectation, $name)) {
+            return true;
+        }
+
+        if (self::hasExtend($name)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
      * Dynamically calls methods on the class without any arguments
      * or creates a new higher order expectation.
      *
-     * @return self<TValue>|OppositeExpectation<TValue>|Each<TValue>|HigherOrderExpectation<TValue, mixed>
+     * @return Expectation<TValue>|OppositeExpectation<TValue>|Each<TValue>|HigherOrderExpectation<Expectation<TValue>, TValue|null>|TValue
      */
-    public function __get(string $name): Expectation|OppositeExpectation|Each|HigherOrderExpectation
+    public function __get(string $name)
     {
-        if (!method_exists($this, $name) && !Expectation::hasExtend($name)) {
-            //@phpstan-ignore-next-line
+        if ($name === 'value') {
+            return $this->coreExpectation->value;
+        }
+
+        if (!method_exists($this, $name) && !method_exists($this->coreExpectation, $name) && !Expectation::hasExtend($name)) {
+            /* @phpstan-ignore-next-line */
             return new HigherOrderExpectation($this, $this->retrieve($name, $this->value));
         }
 
         /* @phpstan-ignore-next-line */
         return $this->{$name}();
+    }
+
+    public static function hasMethod(string $name): bool
+    {
+        return method_exists(CoreExpectation::class, $name);
     }
 }

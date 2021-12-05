@@ -24,4 +24,17 @@ final class Extendable
     {
         $this->extendableClass::extend($name, $extend);
     }
+
+    public function pipe(string $name, Closure $pipe): void
+    {
+        $this->extendableClass::pipe($name, $pipe);
+    }
+
+    /**
+     * @param string|Closure $filter
+     */
+    public function intercept(string $name, $filter, Closure $handler): void
+    {
+        $this->extendableClass::intercept($name, $filter, $handler);
+    }
 }
