@@ -7,6 +7,7 @@ coverage.xml
 /.php-cs-fixer.php
 .php-cs-fixer.cache
 .temp/coverage.php
+.temp/retry.json
 *.swp
 *.swo
 .vscode/

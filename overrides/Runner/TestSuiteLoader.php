@@ -85,7 +85,7 @@ final class TestSuiteLoader
             (static function () use ($suiteClassFile) {
                 include_once $suiteClassFile;
 
-                TestSuite::getInstance()->tests->makeIfExists($suiteClassFile);
+                TestSuite::getInstance()->tests->makeIfNeeded($suiteClassFile);
             })();
 
             $loadedClasses = array_values(

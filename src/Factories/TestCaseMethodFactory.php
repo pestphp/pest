@@ -7,6 +7,7 @@ namespace Pest\Factories;
 use Closure;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Factories\Concerns\HigherOrderable;
+use Pest\Plugins\Retry;
 use Pest\Repositories\DatasetsRepository;
 use Pest\Support\Str;
 use Pest\TestSuite;
@@ -107,13 +108,17 @@ final class TestCaseMethodFactory
      *
      * @param array<int, class-string> $annotationsToUse
      */
-    public function buildForEvaluation(array $annotationsToUse): string
+    public function buildForEvaluation(string $classFQN, array $annotationsToUse): string
     {
         if ($this->description === null) {
             throw ShouldNotHappen::fromMessage('The test description may not be empty.');
         }
 
         $methodName = Str::evaluable($this->description);
+
+        if (Retry::$retrying && !TestSuite::getInstance()->retryTempRepository->exists(sprintf('%s::%s', $classFQN, $methodName))) {
+            return '';
+        }
 
         $datasetsCode = '';
         $annotations  = ['@test'];

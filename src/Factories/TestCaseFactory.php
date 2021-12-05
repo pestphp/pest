@@ -101,7 +101,7 @@ final class TestCaseFactory
      *
      * @param array<int, TestCaseMethodFactory> $methods
      */
-    public function evaluate(string $filename, array $methods): string
+    public function evaluate(string $filename, array $methods): void
     {
         if ('\\' === DIRECTORY_SEPARATOR) {
             // In case Windows, strtolower drive name, like in UsesCall.
@@ -123,7 +123,7 @@ final class TestCaseFactory
 
         $classFQN = 'P\\' . $relativePath;
         if (class_exists($classFQN)) {
-            return $classFQN;
+            return;
         }
 
         $hasPrintableTestCaseClassFQN = sprintf('\%s', HasPrintableTestCaseName::class);
@@ -142,7 +142,7 @@ final class TestCaseFactory
         }
 
         $methodsCode = implode('', array_map(
-            fn (TestCaseMethodFactory $methodFactory) => $methodFactory->buildForEvaluation(self::$annotations),
+            fn (TestCaseMethodFactory $methodFactory) => $methodFactory->buildForEvaluation($classFQN, self::$annotations),
             $methods
         ));
 
@@ -164,8 +164,6 @@ final class TestCaseFactory
         } catch (ParseError $caught) {
             throw new RuntimeException(sprintf('Unable to create test case for test file at %s', $filename), 1, $caught);
         }
-
-        return $classFQN;
     }
 
     /**
