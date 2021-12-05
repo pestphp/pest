@@ -79,6 +79,7 @@
         },
         "pest": {
             "plugins": [
+                "Pest\\Plugins\\Memory",
                 "Pest\\Plugins\\Coverage",
                 "Pest\\Plugins\\Init",
                 "Pest\\Plugins\\Version",
