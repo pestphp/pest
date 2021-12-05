@@ -7,7 +7,6 @@ namespace Pest;
 use BadMethodCallException;
 use Closure;
 use InvalidArgumentException;
-use Pest\Concerns\Retrievable;
 use Pest\Exceptions\InvalidExpectationValue;
 use Pest\Support\Arr;
 use Pest\Support\NullClosure;
