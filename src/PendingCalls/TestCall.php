@@ -160,6 +160,13 @@ final class TestCall
         return $this;
     }
 
+    public function hasNoExpectations(): TestCall
+    {
+        $this->testCaseMethod->proxies->add(Backtrace::file(), Backtrace::line(), 'expectNotToPerformAssertions', []);
+
+        return $this;
+    }
+
     /**
      * Saves the property accessors to be used on the target.
      */
