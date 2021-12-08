@@ -160,6 +160,9 @@ final class TestCall
         return $this;
     }
 
+    /**
+     * Informs the test runner that no expectations happen in this test.
+     */
     public function hasNoExpectations(): TestCall
     {
         $this->testCaseMethod->proxies->add(Backtrace::file(), Backtrace::line(), 'expectNotToPerformAssertions', []);
