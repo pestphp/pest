@@ -284,3 +284,12 @@ it('can correctly resolve a bound dataset that returns an array but wants to be 
 })->with([
     function () { return ['foo', 'bar', 'baz']; },
 ]);
+
+it('can specify a single item in the dataset to run', function (Closure $closure) {
+    $closure();
+})->throws('This should run')->with([
+    'this should not run' => fn () => throw new Exception('This should have been skipped'),
+    '>>>this should run' => fn () => throw new Exception('This should run'),
+    'this also should not run' => fn () => throw new Exception('This should have been skipped'),
+    '>>> but this one should run' => fn () => throw new Exception('This should run'),
+]);

@@ -156,6 +156,14 @@ final class DatasetsRepository
                 $datasets[$index] = iterator_to_array($datasets[$index]);
             }
 
+            $filteredDataset = array_filter(
+                $datasets[$index],
+                fn ($key) => str_starts_with(strval($key), '>>>'),
+                ARRAY_FILTER_USE_KEY
+            );
+
+            $datasets[$index] = count($filteredDataset) > 0 ? $filteredDataset : $datasets[$index];
+
             //@phpstan-ignore-next-line
             foreach ($datasets[$index] as $key => $values) {
                 $values             = is_array($values) ? $values : [$values];
