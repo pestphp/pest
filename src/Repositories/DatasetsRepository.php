@@ -157,6 +157,7 @@ final class DatasetsRepository
             }
 
             $filteredDataset = array_filter(
+                // @phpstan-ignore-next-line
                 $datasets[$index],
                 fn ($key) => str_starts_with(strval($key), '>>>'),
                 ARRAY_FILTER_USE_KEY
