@@ -18,7 +18,7 @@
     ],
     "require": {
         "php": "^8.0",
-        "nunomaduro/collision": "^5.10.0|^6.0",
+        "nunomaduro/collision": "^5.11.0|^6.0.0",
         "pestphp/pest-plugin": "^1.0.0",
         "phpunit/phpunit": "10.0.x-dev"
     },
@@ -54,7 +54,10 @@
     "prefer-stable": true,
     "config": {
         "sort-packages": true,
-        "preferred-install": "dist"
+        "preferred-install": "dist",
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
     },
     "bin": [
         "bin/pest"
