@@ -44,7 +44,7 @@ final class HigherOrderCallables
      *
      * @param callable|TValue $value
      *
-     * @return Expectation<TValue>
+     * @return Expectation<(callable(): mixed)|TValue>
      */
     public function and(mixed $value)
     {
