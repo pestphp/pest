@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Support;
 
 use Closure;
+use Pest\Contracts\IsHigherOrderCallable;
 use Pest\Expectation;
 
 /**
@@ -31,6 +32,10 @@ final class HigherOrderCallables
      */
     public function expect(mixed $value): Expectation
     {
+        if ($value instanceof IsHigherOrderCallable) {
+            $value = fn (...$data) => $value(...$data);
+        }
+
         /** @var TValue $value */
         $value = $value instanceof Closure ? Reflection::bindCallableWithData($value) : $value;
 
