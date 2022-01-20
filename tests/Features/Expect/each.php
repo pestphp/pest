@@ -87,3 +87,11 @@ it('accepts callables', function () {
 
     expect(static::getCount())->toBe(12);
 });
+
+it('passes the key of the current item to callables', function () {
+    expect([1, 2, 3])->each(function ($number, $key) {
+        expect($key)->toBeInt();
+    });
+
+    expect(static::getCount())->toBe(3);
+});
