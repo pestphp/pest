@@ -79,11 +79,13 @@ it('can add expectations via "and"', function () {
 });
 
 it('accepts callables', function () {
-    expect([1, 2, 3])->each(function ($number) {
+    expect([1, 2, 3])->each(function ($number, $key) {
         expect($number)->toBeInstanceOf(Expectation::class);
         expect($number->value)->toBeInt();
         $number->toBeInt->not->toBeString;
+
+        expect($key)->toBeInt();
     });
 
-    expect(static::getCount())->toBe(12);
+    expect(static::getCount())->toBe(15);
 });
