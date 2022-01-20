@@ -125,8 +125,8 @@ final class Expectation
         }
 
         if (is_callable($callback)) {
-            foreach ($this->value as $item) {
-                $callback(new self($item));
+            foreach ($this->value as $key => $item) {
+                $callback(new self($item), $key);
             }
         }
 
