@@ -77,14 +77,14 @@ it('works with higher order tests')
 it('can call the json method in higher order expectations', function () {
     expect(new HasMethods())
         ->getJsonContent()->json()->id->toBe(1)->toBeGreaterThan(0)
-        ->getJsonContent()->json()->email->toBe('amenophis@leherpeur.net');
+        ->getJsonContent()->json()->email->toBe('foo@bar.com');
 });
 
 class HasMethods
 {
     public function getJsonContent(): string
     {
-        return '{"id":1,"username":"amenophis","email":"amenophis@leherpeur.net"}';
+        return '{"id":1,"username":"dan","email":"foo@bar.com"}';
     }
 
     public function name()
