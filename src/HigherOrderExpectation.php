@@ -77,11 +77,6 @@ final class HigherOrderExpectation
         return $this->expect($value);
     }
 
-    public function json(): HigherOrderExpectation
-    {
-        return new self($this->original, $this->expectation->json()->value);
-    }
-
     /**
      * Dynamically calls methods on the class with the given arguments.
      *
