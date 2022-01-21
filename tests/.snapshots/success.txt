@@ -124,7 +124,6 @@
   ✓ it can compose complex expectations
   ✓ it can handle nested method calls
   ✓ it works with higher order tests
-  ✓ it can call the json method in higher order expectations
 
    PASS  Tests\Features\Expect\HigherOrder\methodsAndProperties
   ✓ it can access methods and properties
@@ -721,5 +720,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 479 passed
+  Tests:  4 incompleted, 9 skipped, 478 passed
   
