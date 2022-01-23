@@ -62,7 +62,7 @@ final class Expectation
     /**
      * Creates a new expectation with the decoded JSON value.
      *
-     * @return self<mixed>
+     * @return self<array<int|string, mixed>|bool>
      */
     public function json(): Expectation
     {
@@ -70,7 +70,10 @@ final class Expectation
             InvalidExpectationValue::expected('string');
         }
 
-        return $this->toBeJson()->and(json_decode($this->value, true));
+        /** @var array<int|string, mixed>|bool $value */
+        $value = json_decode($this->value, true);
+
+        return $this->toBeJson()->and($value);
     }
 
     /**
