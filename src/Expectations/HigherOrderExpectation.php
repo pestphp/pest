@@ -96,6 +96,16 @@ final class HigherOrderExpectation
     }
 
     /**
+     * Creates a new expectation with the decoded JSON value.
+     *
+     * @return self<TOriginalValue, array<string|int, mixed>|bool>
+     */
+    public function json(): self
+    {
+        return new self($this->original, $this->expectation->json()->value);
+    }
+
+    /**
      * Dynamically calls methods on the class with the given arguments.
      *
      * @param array<int, mixed> $arguments
