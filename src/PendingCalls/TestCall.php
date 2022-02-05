@@ -88,13 +88,11 @@ final class TestCall
      * Runs the current test multiple times with
      * each item of the given `iterable`.
      *
-     * @param array<\Closure|iterable<int|string, mixed>|string> $data
+     * @param Closure|iterable<int|string, mixed>|string $dataset
      */
-    public function with(Closure|iterable|string ...$data): TestCall
+    public function with(Closure|iterable|string $dataset): TestCall
     {
-        foreach ($data as $dataset) {
-            $this->testCaseMethod->datasets[] = $dataset;
-        }
+        $this->testCaseMethod->datasets[] = $dataset;
 
         return $this;
     }
