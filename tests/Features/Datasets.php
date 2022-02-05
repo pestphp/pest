@@ -1,5 +1,6 @@
 <?php
 
+use Pest\Dataset;
 use Pest\Exceptions\DatasetAlreadyExist;
 use Pest\Exceptions\DatasetDoesNotExist;
 use Pest\Plugin;
@@ -13,28 +14,28 @@ it('throws exception if dataset does not exist', function () {
     $this->expectException(DatasetDoesNotExist::class);
     $this->expectExceptionMessage("A dataset with the name `first` does not exist. You can create it using `dataset('first', ['a', 'b']);`.");
 
-    DatasetsRepository::resolve('foo', ['first']);
+    DatasetsRepository::resolve('foo', [new Dataset('first')]);
 });
 
 it('throws exception if dataset already exist', function () {
-    DatasetsRepository::set('second', [[]]);
+    Dataset::setGlobalDataset('second', [[]]);
     $this->expectException(DatasetAlreadyExist::class);
     $this->expectExceptionMessage('A dataset with the name `second` already exist.');
-    DatasetsRepository::set('second', [[]]);
+    Dataset::setGlobalDataset('second', [[]]);
 });
 
 it('sets closures', function () {
-    DatasetsRepository::set('foo', function () {
+    Dataset::setGlobalDataset('foo', function () {
         yield [1];
     });
 
-    expect(DatasetsRepository::resolve('foo', ['foo']))->toBe(['foo with (1)' => [1]]);
+    expect(DatasetsRepository::resolve('foo', [new Dataset('foo')]))->toBe(['foo with (1)' => [1]]);
 });
 
 it('sets arrays', function () {
-    DatasetsRepository::set('bar', [[2]]);
+    Dataset::setGlobalDataset('bar', [[2]]);
 
-    expect(DatasetsRepository::resolve('bar', ['bar']))->toBe(['bar with (2)' => [2]]);
+    expect(DatasetsRepository::resolve('bar', [new Dataset('bar')]))->toBe(['bar with (2)' => [2]]);
 });
 
 it('gets bound to test case object', function () {
@@ -342,3 +343,60 @@ it('supports dataset named parameters', function ($name) use ($state) {
 test('dataset named parameters did the job right', function () use ($state) {
     expect($state->iterations)->toBe(8);
 });
+
+it('can pluck a dataset', function ($name, $title = null) {
+    expect($title)->toBeNull();
+})->with([
+    ['name' => 'foo', 'title' => 'bar'],
+    ['name' => 'baz', 'title' => 'quuz'],
+], pluck: 'name');
+
+it('can filter a dataset by key', function ($accepted) {
+    expect($accepted)->toBeTrue();
+})->with([
+    'foo'  => ['accepted' => false],
+    'baz'  => ['accepted' => true],
+    'quuz' => ['accepted' => false],
+], only: 'baz');
+
+it('can filter a dataset by keys', function ($accepted) {
+    expect($accepted)->toBeTrue();
+})->with([
+    'foo'  => ['accepted' => true],
+    'baz'  => ['accepted' => true],
+    'quuz' => ['accepted' => false],
+], only: ['baz', 'foo']);
+
+it('can exclude a dataset key', function ($accepted) {
+    expect($accepted)->toBeTrue();
+})->with([
+    'foo'  => ['accepted' => true],
+    'baz'  => ['accepted' => true],
+    'quuz' => ['accepted' => false],
+], except: 'quuz');
+
+it('can exclude a group of dataset keys', function ($accepted) {
+    expect($accepted)->toBeTrue();
+})->with([
+    'foo'  => ['accepted' => false],
+    'baz'  => ['accepted' => true],
+    'quuz' => ['accepted' => false],
+], except: ['quuz', 'foo']);
+
+$state->datasetText = '';
+it('can map a dataset', function ($name) use ($state) {
+    $state->datasetText .= $name;
+
+    expect(true)->toBeTrue();
+})->with([
+    'foo',
+    'baz',
+], map: fn ($value) => strtoupper($value));
+
+test('dataset map did the job right', function () use ($state) {
+    expect($state->datasetText)->toBe('FOOBAZ');
+});
+
+test('dataset parameters are not overriden by preprocessing functions', function ($name, $title, $except) {
+    expect($except)->toBe('test');
+})->with('with_arguments', except: 'test');

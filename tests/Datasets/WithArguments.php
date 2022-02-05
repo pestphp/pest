@@ -1,12 +1,12 @@
 <?php
 
-dataset('with_arguments', function (int $count = 3, bool $uppercase = false) {
+dataset('with_arguments', function (int $count = 3, bool $uppercase = false, string $except = '') {
     $dataset = [
-        'foo'    => ['name' => 'bar'],
-        'baz'    => ['name' => 'baz', 'title' => 'quux'],
-        'quuz'   => ['name' => 'corge', 'title' => 'grault'],
-        'garply' => ['name' => 'waldo', 'title' => 'plugh'],
-        'xyzzy'  => ['name' => 'thud'],
+        'foo'    => ['name' => 'bar', 'title' => 'seee', 'except' => $except],
+        'baz'    => ['name' => 'baz', 'title' => 'quux', 'except' => $except],
+        'quuz'   => ['name' => 'corge', 'title' => 'grault', 'except' => $except],
+        'garply' => ['name' => 'waldo', 'title' => 'plugh', 'except' => $except],
+        'xyzzy'  => ['name' => 'thud', 'title' => 'wooo', 'except' => $except],
     ];
 
     if ($uppercase) {

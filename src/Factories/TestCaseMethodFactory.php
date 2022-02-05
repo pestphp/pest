@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Factories;
 
 use Closure;
+use Pest\Dataset;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Factories\Concerns\HigherOrderable;
 use Pest\Plugins\Retry;
@@ -29,16 +30,9 @@ final class TestCaseMethodFactory
     /**
      * The Test Case Dataset, if any.
      *
-     * @var array<Closure|iterable<int|string, mixed>|string>
+     * @var array<Dataset>
      */
     public array $datasets = [];
-
-    /**
-     * The Test Case Dataset's parameters, if any.
-     *
-     * @var array<array<mixed>>
-     */
-    public array $datasetParameters = [];
 
     /**
      * The Test Case depends, if any.
@@ -166,7 +160,7 @@ final class TestCaseMethodFactory
      */
     private function buildDatasetForEvaluation(string $methodName, string $dataProviderName): string
     {
-        DatasetsRepository::with($this->filename, $methodName, $this->datasets, $this->datasetParameters);
+        DatasetsRepository::with($this->filename, $methodName, $this->datasets);
 
         return <<<EOF
 

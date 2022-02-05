@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace Pest\Repositories;
 
 use Closure;
-use Pest\Exceptions\DatasetAlreadyExist;
-use Pest\Exceptions\DatasetDoesNotExist;
+use Pest\Dataset;
 use Pest\Exceptions\ShouldNotHappen;
 use SebastianBergmann\Exporter\Exporter;
 use function sprintf;
-use Traversable;
 
 /**
  * @internal
@@ -18,50 +16,20 @@ use Traversable;
 final class DatasetsRepository
 {
     /**
-     * Holds the datasets.
-     *
-     * @var array<string, Closure|iterable<int|string, mixed>>
-     */
-    private static array $datasets = [];
-
-    /**
      * Holds the withs.
      *
-     * @var array<string, array<string, Closure|iterable<int|string, mixed>|string>>
+     * @var array<string, array<string, Dataset>>
      */
     private static array $withs = [];
 
     /**
-     * Hold the withs' parameters.
-     *
-     * @var array<string, array<array<int|string, mixed>>>
-     */
-    private static array $withsParameters = [];
-
-    /**
-     * Sets the given.
-     *
-     * @param Closure|iterable<int|string, mixed> $data
-     */
-    public static function set(string $name, Closure|iterable $data): void
-    {
-        if (array_key_exists($name, self::$datasets)) {
-            throw new DatasetAlreadyExist($name);
-        }
-
-        self::$datasets[$name] = $data;
-    }
-
-    /**
      * Sets the given "with".
      *
-     * @param array<Closure|iterable<int|string, mixed>|string> $with
-     * @param array<array<int|string, mixed>>                   $parameters
+     * @param array<Dataset> $with
      */
-    public static function with(string $filename, string $description, array $with, array $parameters): void
+    public static function with(string $filename, string $description, array $with): void
     {
-        self::$withs[$filename . '>>>' . $description]           = $with;
-        self::$withsParameters[$filename . '>>>' . $description] = $parameters;
+        self::$withs[$filename . '>>>' . $description] = $with;
     }
 
     /**
@@ -71,10 +39,9 @@ final class DatasetsRepository
      */
     public static function get(string $filename, string $description): Closure|iterable
     {
-        $datasets           = self::$withs[$filename . '>>>' . $description];
-        $datasetParameters  = self::$withsParameters[$filename . '>>>' . $description];
+        $datasets = self::$withs[$filename . '>>>' . $description];
 
-        $dataset = self::resolve($description, $datasets, $datasetParameters);
+        $dataset = self::resolve($description, $datasets);
 
         if ($dataset === null) {
             throw ShouldNotHappen::fromMessage('Dataset [%s] not resolvable.');
@@ -86,21 +53,20 @@ final class DatasetsRepository
     /**
      * Resolves the current dataset to an array value.
      *
-     * @param array<Closure|iterable<int|string, mixed>|string> $dataset
-     * @param array<array<int|string, mixed>>                   $datasetParameters
+     * @param array<Dataset> $datasets
      *
      * @return array<string, mixed>|null
      */
-    public static function resolve(string $description, array $dataset, array $datasetParameters = []): array|null
+    public static function resolve(string $description, array $datasets): array|null
     {
         /* @phpstan-ignore-next-line */
-        if (empty($dataset)) {
+        if (empty($datasets)) {
             return null;
         }
 
-        $dataset = self::processDatasets($dataset, $datasetParameters);
+        $datasets = self::processDatasets($datasets);
 
-        $datasetCombinations = self::getDatasetsCombinations($dataset);
+        $datasetCombinations = self::getDatasetsCombinations($datasets);
 
         $datasetDescriptions = [];
         $datasetValues       = [];
@@ -140,39 +106,21 @@ final class DatasetsRepository
     }
 
     /**
-     * @param array<Closure|iterable<int|string, mixed>|string> $datasets
-     * @param array<array<int|string, mixed>>                   $datasetParameters
+     * @param array<Dataset> $datasets
      *
      * @return array<array<mixed>>
      */
-    private static function processDatasets(array $datasets, array $datasetParameters): array
+    private static function processDatasets(array $datasets): array
     {
         $processedDatasets = [];
 
-        foreach ($datasets as $index => $data) {
+        foreach ($datasets as $dataset) {
             $processedDataset = [];
 
-            if (is_string($data)) {
-                if (!array_key_exists($data, self::$datasets)) {
-                    throw new DatasetDoesNotExist($data);
-                }
-
-                $datasets[$index] = self::$datasets[$data];
-            }
-
-            if (is_callable($datasets[$index])) {
-                $datasets[$index] = call_user_func_array($datasets[$index], $datasetParameters[$index] ?? []);
-            }
-
-            if ($datasets[$index] instanceof Traversable) {
-                $datasets[$index] = iterator_to_array($datasets[$index]);
-            }
-
-            //@phpstan-ignore-next-line
-            foreach ($datasets[$index] as $key => $values) {
+            foreach ($dataset->resolve() as $key => $values) {
                 $values             = is_array($values) ? $values : [$values];
                 $processedDataset[] = [
-                    'label'  => self::getDatasetDescription($key, $values), //@phpstan-ignore-line
+                    'label'  => self::getDatasetDescription($key, $values),
                     'values' => $values,
                 ];
             }
