@@ -27,9 +27,16 @@ final class DatasetsRepository
     /**
      * Holds the withs.
      *
-     * @var array<array<string, Closure|iterable<int|string, mixed>|string>>
+     * @var array<string, array<string, Closure|iterable<int|string, mixed>|string>>
      */
     private static array $withs = [];
+
+    /**
+     * Hold the withs' parameters.
+     *
+     * @var array<string, array<array<int|string, mixed>>>
+     */
+    private static array $withsParameters = [];
 
     /**
      * Sets the given.
@@ -49,10 +56,12 @@ final class DatasetsRepository
      * Sets the given "with".
      *
      * @param array<Closure|iterable<int|string, mixed>|string> $with
+     * @param array<array<int|string, mixed>>                   $parameters
      */
-    public static function with(string $filename, string $description, array $with): void
+    public static function with(string $filename, string $description, array $with, array $parameters): void
     {
-        self::$withs[$filename . '>>>' . $description] = $with;
+        self::$withs[$filename . '>>>' . $description]           = $with;
+        self::$withsParameters[$filename . '>>>' . $description] = $parameters;
     }
 
     /**
@@ -62,9 +71,10 @@ final class DatasetsRepository
      */
     public static function get(string $filename, string $description): Closure|iterable
     {
-        $dataset = self::$withs[$filename . '>>>' . $description];
+        $datasets           = self::$withs[$filename . '>>>' . $description];
+        $datasetParameters  = self::$withsParameters[$filename . '>>>' . $description];
 
-        $dataset = self::resolve($description, $dataset);
+        $dataset = self::resolve($description, $datasets, $datasetParameters);
 
         if ($dataset === null) {
             throw ShouldNotHappen::fromMessage('Dataset [%s] not resolvable.');
@@ -77,17 +87,18 @@ final class DatasetsRepository
      * Resolves the current dataset to an array value.
      *
      * @param array<Closure|iterable<int|string, mixed>|string> $dataset
+     * @param array<array<int|string, mixed>>                   $datasetParameters
      *
      * @return array<string, mixed>|null
      */
-    public static function resolve(string $description, array $dataset): array|null
+    public static function resolve(string $description, array $dataset, array $datasetParameters = []): array|null
     {
         /* @phpstan-ignore-next-line */
         if (empty($dataset)) {
             return null;
         }
 
-        $dataset = self::processDatasets($dataset);
+        $dataset = self::processDatasets($dataset, $datasetParameters);
 
         $datasetCombinations = self::getDatasetsCombinations($dataset);
 
@@ -130,10 +141,11 @@ final class DatasetsRepository
 
     /**
      * @param array<Closure|iterable<int|string, mixed>|string> $datasets
+     * @param array<array<int|string, mixed>>                   $datasetParameters
      *
      * @return array<array<mixed>>
      */
-    private static function processDatasets(array $datasets): array
+    private static function processDatasets(array $datasets, array $datasetParameters): array
     {
         $processedDatasets = [];
 
@@ -149,7 +161,7 @@ final class DatasetsRepository
             }
 
             if (is_callable($datasets[$index])) {
-                $datasets[$index] = call_user_func($datasets[$index]);
+                $datasets[$index] = call_user_func_array($datasets[$index], $datasetParameters[$index] ?? []);
             }
 
             if ($datasets[$index] instanceof Traversable) {

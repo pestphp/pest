@@ -151,7 +151,7 @@ test('lazy multiple datasets', function ($text_a, $text_b) use ($state, $dataset
     $state->text .= $text_a . $text_b;
     expect($datasets_a)->toContain([$text_a]);
     expect($datasets_b)->toContain([$text_b]);
-})->with($datasets_a, $datasets_b);
+})->with($datasets_a)->with($datasets_b);
 
 test('lazy multiple datasets did the job right', function () use ($state) {
     expect($state->text)->toBe('12121212121213142324');
@@ -224,7 +224,7 @@ test('more than two datasets', function ($text_a, $text_b, $text_c) use ($state,
     expect($datasets_a)->toContain([$text_a]);
     expect($datasets_b)->toContain([$text_b]);
     expect([5, 6])->toContain($text_c);
-})->with($datasets_a, $datasets_b)->with([5, 6]);
+})->with($datasets_a)->with($datasets_b)->with([5, 6]);
 
 test('more than two datasets did the job right', function () use ($state) {
     expect($state->text)->toBe('121212121212131423241314232411122122111221221112212213142324135136145146235236245246');
@@ -284,3 +284,15 @@ it('can correctly resolve a bound dataset that returns an array but wants to be 
 })->with([
     function () { return ['foo', 'bar', 'baz']; },
 ]);
+
+$state->iterations = 0;
+
+it('can pass params to the dataset', function (string $name, string $title = '') use ($state) {
+    $state->iterations++;
+
+    expect($name)->toBe(strtoupper($name));
+})->with('with_arguments', 2, true);
+
+test('dataset parameters did the job right', function () use ($state) {
+    expect($state->iterations)->toBe(2);
+});

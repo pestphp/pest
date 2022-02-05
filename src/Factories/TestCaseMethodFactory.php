@@ -34,6 +34,13 @@ final class TestCaseMethodFactory
     public array $datasets = [];
 
     /**
+     * The Test Case Dataset's parameters, if any.
+     *
+     * @var array<array<mixed>>
+     */
+    public array $datasetParameters = [];
+
+    /**
      * The Test Case depends, if any.
      *
      * @var array<int, string>
@@ -159,7 +166,7 @@ final class TestCaseMethodFactory
      */
     private function buildDatasetForEvaluation(string $methodName, string $dataProviderName): string
     {
-        DatasetsRepository::with($this->filename, $methodName, $this->datasets);
+        DatasetsRepository::with($this->filename, $methodName, $this->datasets, $this->datasetParameters);
 
         return <<<EOF
 
