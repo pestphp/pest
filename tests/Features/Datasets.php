@@ -233,8 +233,14 @@ test('more than two datasets did the job right', function () use ($state) {
 it('can resolve a dataset after the test case is available', function ($result) {
     expect($result)->toBe('bar');
 })->with([
-    function () { return $this->foo; },
-    [function () { return $this->foo; }],
+    function () {
+        return $this->foo;
+    },
+    [
+        function () {
+            return $this->foo;
+        },
+    ],
 ]);
 
 it('can resolve a dataset after the test case is available with shared yield sets', function ($result) {
@@ -249,45 +255,65 @@ it('resolves a potential bound dataset logically', function ($foo, $bar) {
     expect($foo)->toBe('foo');
     expect($bar())->toBe('bar');
 })->with([
-    ['foo', function () { return 'bar'; }], // This should be passed as a closure because we've passed multiple arguments
+    [
+        'foo', function () {
+            return 'bar';
+        },
+    ], // This should be passed as a closure because we've passed multiple arguments
 ]);
 
 it('resolves a potential bound dataset logically even when the closure comes first', function ($foo, $bar) {
     expect($foo())->toBe('foo');
     expect($bar)->toBe('bar');
 })->with([
-    [function () { return 'foo'; }, 'bar'], // This should be passed as a closure because we've passed multiple arguments
+    [
+        function () {
+            return 'foo';
+        }, 'bar',
+    ], // This should be passed as a closure because we've passed multiple arguments
 ]);
 
 it('will not resolve a closure if it is type hinted as a closure', function (Closure $data) {
     expect($data())->toBeString();
 })->with([
-    function () { return 'foo'; },
-    function () { return 'bar'; },
+    function () {
+        return 'foo';
+    },
+    function () {
+        return 'bar';
+    },
 ]);
 
 it('will not resolve a closure if it is type hinted as a callable', function (callable $data) {
     expect($data())->toBeString();
 })->with([
-    function () { return 'foo'; },
-    function () { return 'bar'; },
+    function () {
+        return 'foo';
+    },
+    function () {
+        return 'bar';
+    },
 ]);
 
 it('can correctly resolve a bound dataset that returns an array', function (array $data) {
     expect($data)->toBe(['foo', 'bar', 'baz']);
 })->with([
-    function () { return ['foo', 'bar', 'baz']; },
+    function () {
+        return ['foo', 'bar', 'baz'];
+    },
 ]);
 
 it('can correctly resolve a bound dataset that returns an array but wants to be spread', function (string $foo, string $bar, string $baz) {
     expect([$foo, $bar, $baz])->toBe(['foo', 'bar', 'baz']);
 })->with([
-    function () { return ['foo', 'bar', 'baz']; },
+    function () {
+        return ['foo', 'bar', 'baz'];
+    },
 ]);
 
 $state->iterations = 0;
 
-it('can pass params to the dataset', function (string $name, string $title = '') use ($state) {
+it('supports dataset parameters', function (string $name) use ($state) {
     $state->iterations++;
 
     expect($name)->toBe(strtoupper($name));
@@ -295,4 +321,24 @@ it('can pass params to the dataset', function (string $name, string $title = '')
 
 test('dataset parameters did the job right', function () use ($state) {
     expect($state->iterations)->toBe(2);
+});
+
+it('supports dataset optional parameters', function ($name) use ($state) {
+    $state->iterations++;
+
+    expect($name)->toBe(strtolower($name));
+})->with('with_arguments');
+
+test('dataset optional parameters did the job right', function () use ($state) {
+    expect($state->iterations)->toBe(5);
+});
+
+it('supports dataset named parameters', function ($name) use ($state) {
+    $state->iterations++;
+
+    expect($name)->toBe(strtoupper($name));
+})->with('with_arguments', uppercase: true);
+
+test('dataset named parameters did the job right', function () use ($state) {
+    expect($state->iterations)->toBe(8);
 });
