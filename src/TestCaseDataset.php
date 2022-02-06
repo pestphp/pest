@@ -5,29 +5,21 @@ declare(strict_types=1);
 namespace Pest;
 
 use Closure;
-use Pest\Exceptions\DatasetAlreadyExist;
-use Pest\Exceptions\DatasetDoesNotExist;
+use Pest\Repositories\DatasetsRepository;
 use ReflectionException;
 use ReflectionFunction;
 use ReflectionParameter;
 use Traversable;
 
-final class Dataset
+final class TestCaseDataset
 {
-    /**
-     * Holds global datasets.
-     *
-     * @var array<string, Closure|iterable<int|string, mixed>>
-     */
-    private static array $globalDatasets = [];
-
     /**
      * @param Closure|iterable<int|string, mixed>|string $dataset
      * @param array<int|string, mixed>                   $parameters
      */
     public function __construct(
         private Closure|iterable|string $dataset,
-        private array $parameters = [],
+        private array $parameters,
     ) {
     }
 
@@ -60,20 +52,6 @@ final class Dataset
         ];
     }
 
-    /**
-     * Sets a new global dataset.
-     *
-     * @param Closure|iterable<int|string, mixed> $data
-     */
-    public static function setGlobalDataset(string $name, Closure|iterable $data): void
-    {
-        if (array_key_exists($name, self::$globalDatasets)) {
-            throw new DatasetAlreadyExist($name);
-        }
-
-        self::$globalDatasets[$name] = $data;
-    }
-
     public function isNamedDataset(): bool
     {
         return is_string($this->dataset);
@@ -99,11 +77,7 @@ final class Dataset
             return;
         }
 
-        if (!array_key_exists($this->dataset, self::$globalDatasets)) {
-            throw new DatasetDoesNotExist($this->dataset);
-        }
-
-        $this->dataset = self::$globalDatasets[$this->dataset];
+        $this->dataset = DatasetsRepository::getGlobalDataset($this->dataset);
     }
 
     private function resolveFromCallable(): void

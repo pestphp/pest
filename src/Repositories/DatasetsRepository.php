@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Pest\Repositories;
 
 use Closure;
-use Pest\Dataset;
+use Pest\Exceptions\DatasetAlreadyExist;
+use Pest\Exceptions\DatasetDoesNotExist;
 use Pest\Exceptions\ShouldNotHappen;
+use Pest\TestCaseDataset;
 use SebastianBergmann\Exporter\Exporter;
 use function sprintf;
 
@@ -16,16 +18,49 @@ use function sprintf;
 final class DatasetsRepository
 {
     /**
+     * Holds the datasets.
+     *
+     * @var array<string, Closure|iterable<int|string, mixed>>
+     */
+    private static array $globalDatasets = [];
+
+    /**
      * Holds the withs.
      *
-     * @var array<string, array<string, Dataset>>
+     * @var array<string, array<string, TestCaseDataset>>
      */
     private static array $withs = [];
 
     /**
+     * Sets the given.
+     *
+     * @param Closure|iterable<int|string, mixed> $data
+     */
+    public static function setGlobalDataset(string $name, Closure|iterable $data): void
+    {
+        if (array_key_exists($name, self::$globalDatasets)) {
+            throw new DatasetAlreadyExist($name);
+        }
+
+        self::$globalDatasets[$name] = $data;
+    }
+
+    /**
+     * @return Closure|iterable<int|string, mixed>
+     */
+    public static function getGlobalDataset(string $name): Closure|iterable
+    {
+        if (!array_key_exists($name, self::$globalDatasets)) {
+            throw new DatasetDoesNotExist($name);
+        }
+
+        return self::$globalDatasets[$name];
+    }
+
+    /**
      * Sets the given "with".
      *
-     * @param array<Dataset> $with
+     * @param array<TestCaseDataset> $with
      */
     public static function with(string $filename, string $description, array $with): void
     {
@@ -53,7 +88,7 @@ final class DatasetsRepository
     /**
      * Resolves the current dataset to an array value.
      *
-     * @param array<Dataset> $datasets
+     * @param array<TestCaseDataset> $datasets
      *
      * @return array<string, mixed>|null
      */
@@ -106,7 +141,7 @@ final class DatasetsRepository
     }
 
     /**
-     * @param array<Dataset> $datasets
+     * @param array<TestCaseDataset> $datasets
      *
      * @return array<array<mixed>>
      */

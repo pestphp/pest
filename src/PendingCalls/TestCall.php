@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Pest\PendingCalls;
 
 use Closure;
-use Pest\Dataset;
 use Pest\Factories\TestCaseMethodFactory;
 use Pest\Support\Backtrace;
 use Pest\Support\HigherOrderCallables;
 use Pest\Support\NullClosure;
+use Pest\TestCaseDataset;
 use Pest\TestSuite;
 use SebastianBergmann\Exporter\Exporter;
 
@@ -93,7 +93,7 @@ final class TestCall
      */
     public function with(Closure|iterable|string $dataset, mixed ...$parameters): TestCall
     {
-        $this->testCaseMethod->datasets[] = new Dataset($dataset, $parameters);
+        $this->testCaseMethod->datasets[] = new TestCaseDataset($dataset, $parameters);
 
         return $this;
     }

@@ -1,14 +1,14 @@
 <?php
 
-use Pest\Dataset;
 use Pest\Repositories\DatasetsRepository;
+use Pest\TestCaseDataset;
 
 it('show only the names of named datasets in their description', function () {
     $descriptions = array_keys(DatasetsRepository::resolve('test description', [
-        new Dataset([
+        new TestCaseDataset([
             'one' => [1],
             'two' => [[2]],
-        ]),
+        ], []),
     ]));
 
     expect($descriptions[0])->toBe('test description with data set "one"');
@@ -17,10 +17,10 @@ it('show only the names of named datasets in their description', function () {
 
 it('show the actual dataset of non-named datasets in their description', function () {
     $descriptions = array_keys(DatasetsRepository::resolve('test description', [
-        new Dataset([
+        new TestCaseDataset([
             [1],
             [[2]],
-        ]),
+        ], []),
     ]));
 
     expect($descriptions[0])->toBe('test description with (1)');
@@ -29,14 +29,14 @@ it('show the actual dataset of non-named datasets in their description', functio
 
 it('show only the names of multiple named datasets in their description', function () {
     $descriptions = array_keys(DatasetsRepository::resolve('test description', [
-        new Dataset([
+        new TestCaseDataset([
             'one' => [1],
             'two' => [[2]],
-        ]),
-        new Dataset([
+        ], []),
+        new TestCaseDataset([
             'three' => [3],
             'four'  => [[4]],
-        ]),
+        ], []),
     ]));
 
     expect($descriptions[0])->toBe('test description with data set "one" / data set "three"');
@@ -47,14 +47,14 @@ it('show only the names of multiple named datasets in their description', functi
 
 it('show the actual dataset of multiple non-named datasets in their description', function () {
     $descriptions = array_keys(DatasetsRepository::resolve('test description', [
-        new Dataset([
+        new TestCaseDataset([
             [1],
             [[2]],
-        ]),
-        new Dataset([
+        ], []),
+        new TestCaseDataset([
             [3],
             [[4]],
-        ]),
+        ], []),
     ]));
 
     expect($descriptions[0])->toBe('test description with (1) / (3)');
@@ -65,14 +65,14 @@ it('show the actual dataset of multiple non-named datasets in their description'
 
 it('show the correct description for mixed named and not-named datasets', function () {
     $descriptions = array_keys(DatasetsRepository::resolve('test description', [
-        new Dataset([
+        new TestCaseDataset([
             'one' => [1],
             [[2]],
-        ]),
-        new Dataset([
+        ], []),
+        new TestCaseDataset([
             [3],
             'four' => [[4]],
-        ]),
+        ], []),
     ]));
 
     expect($descriptions[0])->toBe('test description with data set "one" / (3)');

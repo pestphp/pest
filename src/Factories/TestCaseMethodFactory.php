@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Pest\Factories;
 
 use Closure;
-use Pest\Dataset;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Factories\Concerns\HigherOrderable;
 use Pest\Plugins\Retry;
 use Pest\Repositories\DatasetsRepository;
 use Pest\Support\Str;
+use Pest\TestCaseDataset;
 use Pest\TestSuite;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
@@ -30,7 +30,7 @@ final class TestCaseMethodFactory
     /**
      * The Test Case Dataset, if any.
      *
-     * @var array<Dataset>
+     * @var array<TestCaseDataset>
      */
     public array $datasets = [];
 
