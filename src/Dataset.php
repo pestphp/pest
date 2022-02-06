@@ -7,6 +7,7 @@ namespace Pest;
 use Closure;
 use Pest\Exceptions\DatasetAlreadyExist;
 use Pest\Exceptions\DatasetDoesNotExist;
+use ReflectionException;
 use ReflectionFunction;
 use ReflectionParameter;
 use Traversable;
@@ -44,7 +45,7 @@ final class Dataset
                 }
 
                 return array_filter($dataset, function ($key) use ($allowedKeys) {
-                    return in_array($key, $allowedKeys);
+                    return in_array($key, $allowedKeys, true);
                 }, ARRAY_FILTER_USE_KEY);
             },
             'except' => function (array $dataset, string|array $allowedKeys) {
@@ -53,7 +54,7 @@ final class Dataset
                 }
 
                 return array_filter($dataset, function ($key) use ($allowedKeys) {
-                    return !in_array($key, $allowedKeys);
+                    return !in_array($key, $allowedKeys, true);
                 }, ARRAY_FILTER_USE_KEY);
             },
         ];
@@ -88,6 +89,7 @@ final class Dataset
         $this->resolveFromTraversable();
         $this->preprocess();
 
+        //@phpstan-ignore-next-line
         return $this->dataset;
     }
 
@@ -110,7 +112,10 @@ final class Dataset
             return;
         }
 
-        $this->dataset = call_user_func_array($this->dataset, $this->getActualParameters());
+        /** @var iterable<int|string, mixed> $dataset */
+        $dataset = call_user_func_array($this->dataset, $this->getActualParameters());
+
+        $this->dataset = $dataset;
     }
 
     private function resolveFromTraversable(): void
@@ -131,6 +136,7 @@ final class Dataset
             return [];
         }
 
+        //@phpstan-ignore-next-line
         $reflection        = new ReflectionFunction($this->dataset);
         $datasetParameters = array_map(function (ReflectionParameter $reflectionParameter) {
             return $reflectionParameter->getName();
@@ -141,7 +147,7 @@ final class Dataset
                 return true;
             }
 
-            if (in_array($key, $datasetParameters)) {
+            if (in_array($key, $datasetParameters, true)) {
                 return true;
             }
 
@@ -149,9 +155,15 @@ final class Dataset
         }, ARRAY_FILTER_USE_KEY);
     }
 
+    /**
+     * @return array<int|string, mixed>
+     *
+     * @throws ReflectionException
+     */
     private function getPreprocessParameters(): array
     {
         if (is_callable($this->dataset)) {
+            //@phpstan-ignore-next-line
             $reflection        = new ReflectionFunction($this->dataset);
             $datasetParameters = array_map(function (ReflectionParameter $reflectionParameter) {
                 return $reflectionParameter->getName();
@@ -161,7 +173,7 @@ final class Dataset
         }
 
         return array_filter($this->parameters, function ($key) use ($datasetParameters): bool {
-            if (in_array($key, $datasetParameters)) {
+            if (in_array($key, $datasetParameters, true)) {
                 return false;
             }
 
@@ -176,7 +188,10 @@ final class Dataset
     private function preprocess(): void
     {
         foreach ($this->getPreprocessParameters() as $functionName => $parameter) {
-            $this->dataset = call_user_func(self::preprocessingFunctions()[$functionName], $this->dataset, $parameter);
+            /** @var array<int|string, mixed> $dataset */
+            $dataset = call_user_func(self::preprocessingFunctions()[$functionName], $this->dataset, $parameter);
+
+            $this->dataset = $dataset;
         }
     }
 }
