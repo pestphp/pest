@@ -44,7 +44,7 @@ final class HigherOrderCallables
      *
      * @param callable|TValue $value
      *
-     * @return Expectation<TValue>
+     * @return Expectation<(callable(): mixed)|TValue>
      */
     public function and(mixed $value)
     {
@@ -52,9 +52,9 @@ final class HigherOrderCallables
     }
 
     /**
-     * Tap into the test case to perform an action and return the test case.
+     * Execute the given callable after the test has executed the setup method.
      */
-    public function tap(callable $callable): object
+    public function defer(callable $callable): object
     {
         Reflection::bindCallableWithData($callable);
 

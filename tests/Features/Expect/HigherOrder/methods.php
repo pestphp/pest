@@ -74,8 +74,37 @@ it('works with higher order tests')
     ->name()->toEqual('Has Methods')
     ->books()->each->toBeArray;
 
+it('can use the scoped method to lock into the given level for expectations', function () {
+    expect(new HasMethods())
+        ->attributes()->scoped(fn ($attributes) => $attributes
+            ->name->toBe('Has Methods')
+            ->quantity->toBe(20)
+        )
+        ->name()->toBeString()->toBe('Has Methods')
+        ->newInstance()->newInstance()->scoped(fn ($instance) => $instance
+            ->name()->toBe('Has Methods')
+            ->quantity()->toBe(20)
+            ->attributes()->scoped(fn ($attributes) => $attributes
+                ->name->toBe('Has Methods')
+                ->quantity->toBe(20)
+            )
+        );
+});
+
+it('works consistently with the json expectation method', function () {
+    expect(new HasMethods())
+        ->jsonString()->json()->id->toBe(1)
+        ->jsonString()->json()->name->toBe('Has Methods')->toBeString()
+        ->jsonString()->json()->quantity->toBe(20)->toBeInt();
+});
+
 class HasMethods
 {
+    public function jsonString(): string
+    {
+        return '{ "id": 1, "name": "Has Methods", "quantity": 20 }';
+    }
+
     public function name()
     {
         return 'Has Methods';

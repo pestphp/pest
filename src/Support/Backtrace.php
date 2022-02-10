@@ -26,6 +26,8 @@ final class Backtrace
         $current = null;
 
         foreach (debug_backtrace(self::BACKTRACE_OPTIONS) as $trace) {
+            assert(array_key_exists(self::FILE, $trace));
+
             if (Str::endsWith($trace[self::FILE], 'overrides/Runner/TestSuiteLoader.php')) {
                 break;
             }
@@ -45,7 +47,11 @@ final class Backtrace
      */
     public static function file(): string
     {
-        return debug_backtrace(self::BACKTRACE_OPTIONS)[1][self::FILE];
+        $trace = debug_backtrace(self::BACKTRACE_OPTIONS)[1];
+
+        assert(array_key_exists(self::FILE, $trace));
+
+        return $trace[self::FILE];
     }
 
     /**
@@ -53,7 +59,11 @@ final class Backtrace
      */
     public static function dirname(): string
     {
-        return dirname(debug_backtrace(self::BACKTRACE_OPTIONS)[1][self::FILE]);
+        $trace = debug_backtrace(self::BACKTRACE_OPTIONS)[1];
+
+        assert(array_key_exists(self::FILE, $trace));
+
+        return dirname($trace[self::FILE]);
     }
 
     /**
@@ -61,6 +71,10 @@ final class Backtrace
      */
     public static function line(): int
     {
-        return debug_backtrace(self::BACKTRACE_OPTIONS)[1]['line'];
+        $trace = debug_backtrace(self::BACKTRACE_OPTIONS)[1];
+
+        assert(array_key_exists('line', $trace));
+
+        return $trace['line'];
     }
 }

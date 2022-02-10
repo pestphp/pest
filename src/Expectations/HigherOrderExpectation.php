@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Expectations;
 
+use Closure;
 use Pest\Concerns\Retrievable;
 use Pest\Expectation;
 
@@ -77,6 +78,31 @@ final class HigherOrderExpectation
     public function and(mixed $value): Expectation
     {
         return $this->expect($value);
+    }
+
+    /**
+     * Scope an expectation callback to the current value in
+     * the HigherOrderExpectation chain.
+     *
+     * @param Closure(Expectation<TValue>): void $expectation
+     *
+     * @return HigherOrderExpectation<TOriginalValue, TOriginalValue>
+     */
+    public function scoped(Closure $expectation): self
+    {
+        $expectation->__invoke($this->expectation);
+
+        return new self($this->original, $this->original->value);
+    }
+
+    /**
+     * Creates a new expectation with the decoded JSON value.
+     *
+     * @return self<TOriginalValue, array<string|int, mixed>|bool>
+     */
+    public function json(): self
+    {
+        return new self($this->original, $this->expectation->json()->value);
     }
 
     /**

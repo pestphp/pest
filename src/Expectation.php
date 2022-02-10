@@ -56,13 +56,13 @@ final class Expectation
      */
     public function and(mixed $value): Expectation
     {
-        return new self($value);
+        return $value instanceof static ? $value : new self($value);
     }
 
     /**
      * Creates a new expectation with the decoded JSON value.
      *
-     * @return self<mixed>
+     * @return self<array<int|string, mixed>|bool>
      */
     public function json(): Expectation
     {
@@ -70,7 +70,10 @@ final class Expectation
             InvalidExpectationValue::expected('string');
         }
 
-        return $this->toBeJson()->and(json_decode($this->value, true));
+        /** @var array<int|string, mixed>|bool $value */
+        $value = json_decode($this->value, true);
+
+        return $this->toBeJson()->and($value);
     }
 
     /**
@@ -125,8 +128,8 @@ final class Expectation
         }
 
         if (is_callable($callback)) {
-            foreach ($this->value as $item) {
-                $callback(new self($item));
+            foreach ($this->value as $key => $item) {
+                $callback(new self($item), $key);
             }
         }
 
@@ -148,6 +151,7 @@ final class Expectation
             throw new BadMethodCallException('Expectation value is not iterable.');
         }
 
+        //@phpstan-ignore-next-line
         $value          = is_array($this->value) ? $this->value : iterator_to_array($this->value);
         $keys           = array_keys($value);
         $values         = array_values($value);

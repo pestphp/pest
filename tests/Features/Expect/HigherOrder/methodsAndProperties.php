@@ -48,6 +48,15 @@ it('can start a new higher order expectation using the and syntax in higher orde
     ->toBeArray()
     ->foo->toEqual('bar');
 
+it('can start a new higher order expectation using the and syntax without nesting expectations', function () {
+    expect(new HasMethodsAndProperties())
+        ->toBeInstanceOf(HasMethodsAndProperties::class)
+        ->meta
+        ->sequence(
+            function ($value, $key) { $value->toBeArray()->and($key)->toBe('foo'); },
+        );
+});
+
 class HasMethodsAndProperties
 {
     public $name = 'Has Methods and Properties';
