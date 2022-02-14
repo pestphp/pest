@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest;
 
 use Closure;
+use Pest\Datasets\PreprocessorRepository;
 use Pest\Repositories\DatasetsRepository;
 use ReflectionException;
 use ReflectionFunction;
@@ -13,6 +14,8 @@ use Traversable;
 
 final class TestCaseDataset
 {
+    private PreprocessorRepository $preprocessorRepository;
+
     /**
      * @param Closure|iterable<int|string, mixed>|string $dataset
      * @param array<int|string, mixed>                   $parameters
@@ -21,35 +24,7 @@ final class TestCaseDataset
         private Closure|iterable|string $dataset,
         private array $parameters,
     ) {
-    }
-
-    /**
-     * @return array<string, Closure>
-     */
-    private static function preprocessingFunctions(): array
-    {
-        return [
-            'map'   => fn (array $dataset, Closure $mapCallback) => array_map($mapCallback, $dataset),
-            'pluck' => fn (array $dataset, string $key) => array_map(fn (array $values) => $values[$key], $dataset),
-            'only'  => function (array $dataset, string|array $allowedKeys) {
-                if (!is_array($allowedKeys)) {
-                    $allowedKeys = [$allowedKeys];
-                }
-
-                return array_filter($dataset, function ($key) use ($allowedKeys) {
-                    return in_array($key, $allowedKeys, true);
-                }, ARRAY_FILTER_USE_KEY);
-            },
-            'except' => function (array $dataset, string|array $allowedKeys) {
-                if (!is_array($allowedKeys)) {
-                    $allowedKeys = [$allowedKeys];
-                }
-
-                return array_filter($dataset, function ($key) use ($allowedKeys) {
-                    return !in_array($key, $allowedKeys, true);
-                }, ARRAY_FILTER_USE_KEY);
-            },
-        ];
+        $this->preprocessorRepository = new PreprocessorRepository();
     }
 
     public function isNamedDataset(): bool
@@ -117,7 +92,7 @@ final class TestCaseDataset
         }, $reflection->getParameters());
 
         return array_filter($this->parameters, function ($key) use ($datasetParameters): bool {
-            if (!array_key_exists($key, self::preprocessingFunctions())) {
+            if (!$this->preprocessorRepository->has($key)) {
                 return true;
             }
 
@@ -151,7 +126,7 @@ final class TestCaseDataset
                 return false;
             }
 
-            if (!array_key_exists($key, self::preprocessingFunctions())) {
+            if (!$this->preprocessorRepository->has($key)) {
                 return false;
             }
 
@@ -163,7 +138,11 @@ final class TestCaseDataset
     {
         foreach ($this->getPreprocessParameters() as $functionName => $parameter) {
             /** @var array<int|string, mixed> $dataset */
-            $dataset = call_user_func(self::preprocessingFunctions()[$functionName], $this->dataset, $parameter);
+            $dataset = $this->dataset;
+
+            $dataset = $this->preprocessorRepository
+                ->get($functionName)
+                ->process($dataset, $parameter);
 
             $this->dataset = $dataset;
         }
