@@ -12,7 +12,7 @@ use ReflectionFunction;
 use ReflectionParameter;
 use Traversable;
 
-final class TestCaseDataset
+final class TestDataset
 {
     private PreprocessorRepository $preprocessorRepository;
 
@@ -37,56 +37,71 @@ final class TestCaseDataset
      */
     public function resolve(): array
     {
-        $this->resolveFromString();
-        $this->resolveFromCallable();
-        $this->resolveFromTraversable();
-        $this->preprocess();
+        $dataset = $this->resolveFromString($this->dataset);
+        $dataset = $this->resolveFromCallable($dataset);
+        $dataset = $this->resolveFromTraversable($dataset);
 
-        //@phpstan-ignore-next-line
-        return $this->dataset;
-    }
-
-    private function resolveFromString(): void
-    {
-        if (!is_string($this->dataset)) {
-            return;
-        }
-
-        $this->dataset = DatasetsRepository::getGlobalDataset($this->dataset);
-    }
-
-    private function resolveFromCallable(): void
-    {
-        if (!is_callable($this->dataset)) {
-            return;
-        }
-
-        /** @var iterable<int|string, mixed> $dataset */
-        $dataset = call_user_func_array($this->dataset, $this->getActualParameters());
-
-        $this->dataset = $dataset;
-    }
-
-    private function resolveFromTraversable(): void
-    {
-        if (!($this->dataset instanceof Traversable)) {
-            return;
-        }
-
-        $this->dataset = iterator_to_array($this->dataset);
+        return $this->preprocess($dataset);
     }
 
     /**
+     * @param Closure|iterable<int|string, mixed>|string $dataset
+     *
+     * @return Closure|iterable<int|string, mixed>
+     */
+    private function resolveFromString(Closure|iterable|string $dataset): Closure|iterable
+    {
+        if (!is_string($dataset)) {
+            return $dataset;
+        }
+
+        return DatasetsRepository::getGlobalDataset($dataset);
+    }
+
+    /**
+     * @param Closure|iterable<int|string, mixed> $dataset
+     *
+     * @return iterable<int|string, mixed>
+     */
+    private function resolveFromCallable(Closure|iterable $dataset): iterable
+    {
+        if (!is_callable($dataset)) {
+            return $dataset;
+        }
+
+        /** @var iterable<int|string, mixed> $dataset */
+        $dataset = call_user_func_array($dataset, $this->getActualParameters($dataset));
+
+        return $dataset;
+    }
+
+    /**
+     * @param iterable<int|string, mixed> $dataset
+     *
      * @return array<int|string, mixed>
      */
-    private function getActualParameters(): array
+    private function resolveFromTraversable(iterable $dataset): array
     {
-        if (!is_callable($this->dataset)) {
+        if (!($dataset instanceof Traversable)) {
+            return $dataset;
+        }
+
+        return iterator_to_array($dataset);
+    }
+
+    /**
+     * @param Closure|iterable<int|string, mixed> $dataset
+     *
+     * @return array<int|string, mixed>
+     */
+    private function getActualParameters(Closure|iterable $dataset): array
+    {
+        if (!is_callable($dataset)) {
             return [];
         }
 
         //@phpstan-ignore-next-line
-        $reflection        = new ReflectionFunction($this->dataset);
+        $reflection        = new ReflectionFunction($dataset);
         $datasetParameters = array_map(function (ReflectionParameter $reflectionParameter) {
             return $reflectionParameter->getName();
         }, $reflection->getParameters());
@@ -111,9 +126,10 @@ final class TestCaseDataset
      */
     private function getPreprocessParameters(): array
     {
-        if (is_callable($this->dataset)) {
+        $dataset = $this->resolveFromString($this->dataset);
+        if (is_callable($dataset)) {
             //@phpstan-ignore-next-line
-            $reflection        = new ReflectionFunction($this->dataset);
+            $reflection        = new ReflectionFunction($dataset);
             $datasetParameters = array_map(function (ReflectionParameter $reflectionParameter) {
                 return $reflectionParameter->getName();
             }, $reflection->getParameters());
@@ -134,17 +150,21 @@ final class TestCaseDataset
         }, ARRAY_FILTER_USE_KEY);
     }
 
-    private function preprocess(): void
+    /**
+     * @param array<int|string, mixed> $dataset
+     *
+     * @return array<int|string, mixed>
+     *
+     * @throws ReflectionException
+     */
+    private function preprocess(array $dataset): array
     {
         foreach ($this->getPreprocessParameters() as $functionName => $parameter) {
-            /** @var array<int|string, mixed> $dataset */
-            $dataset = $this->dataset;
-
             $dataset = $this->preprocessorRepository
                 ->get($functionName)
                 ->process($dataset, $parameter);
-
-            $this->dataset = $dataset;
         }
+
+        return $dataset;
     }
 }

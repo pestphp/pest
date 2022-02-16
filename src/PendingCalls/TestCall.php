@@ -9,7 +9,7 @@ use Pest\Factories\TestCaseMethodFactory;
 use Pest\Support\Backtrace;
 use Pest\Support\HigherOrderCallables;
 use Pest\Support\NullClosure;
-use Pest\TestCaseDataset;
+use Pest\TestDataset;
 use Pest\TestSuite;
 use SebastianBergmann\Exporter\Exporter;
 
@@ -93,7 +93,7 @@ final class TestCall
      */
     public function with(Closure|iterable|string $dataset, mixed ...$parameters): TestCall
     {
-        $this->testCaseMethod->datasets[] = new TestCaseDataset($dataset, $parameters);
+        $this->testCaseMethod->datasets[] = new TestDataset($dataset, $parameters);
 
         return $this;
     }

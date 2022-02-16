@@ -10,7 +10,7 @@ use Pest\Factories\Concerns\HigherOrderable;
 use Pest\Plugins\Retry;
 use Pest\Repositories\DatasetsRepository;
 use Pest\Support\Str;
-use Pest\TestCaseDataset;
+use Pest\TestDataset;
 use Pest\TestSuite;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
@@ -30,7 +30,7 @@ final class TestCaseMethodFactory
     /**
      * The Test Case Dataset, if any.
      *
-     * @var array<TestCaseDataset>
+     * @var array<TestDataset>
      */
     public array $datasets = [];
 

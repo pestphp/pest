@@ -151,7 +151,6 @@ final class Expectation
             throw new BadMethodCallException('Expectation value is not iterable.');
         }
 
-        //@phpstan-ignore-next-line
         $value          = is_array($this->value) ? $this->value : iterator_to_array($this->value);
         $keys           = array_keys($value);
         $values         = array_values($value);

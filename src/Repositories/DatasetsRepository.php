@@ -8,7 +8,7 @@ use Closure;
 use Pest\Exceptions\DatasetAlreadyExist;
 use Pest\Exceptions\DatasetDoesNotExist;
 use Pest\Exceptions\ShouldNotHappen;
-use Pest\TestCaseDataset;
+use Pest\TestDataset;
 use SebastianBergmann\Exporter\Exporter;
 use function sprintf;
 
@@ -27,7 +27,7 @@ final class DatasetsRepository
     /**
      * Holds the withs.
      *
-     * @var array<string, array<string, TestCaseDataset>>
+     * @var array<string, array<string, TestDataset>>
      */
     private static array $withs = [];
 
@@ -60,7 +60,7 @@ final class DatasetsRepository
     /**
      * Sets the given "with".
      *
-     * @param array<TestCaseDataset> $with
+     * @param array<TestDataset> $with
      */
     public static function with(string $filename, string $description, array $with): void
     {
@@ -88,7 +88,7 @@ final class DatasetsRepository
     /**
      * Resolves the current dataset to an array value.
      *
-     * @param array<TestCaseDataset> $datasets
+     * @param array<TestDataset> $datasets
      *
      * @return array<string, mixed>|null
      */
@@ -141,7 +141,7 @@ final class DatasetsRepository
     }
 
     /**
-     * @param array<TestCaseDataset> $datasets
+     * @param array<TestDataset> $datasets
      *
      * @return array<array<mixed>>
      */
