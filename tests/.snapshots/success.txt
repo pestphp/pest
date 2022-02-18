@@ -496,6 +496,8 @@
   ✓ not failures
   ✓ closure missing parameter
   ✓ closure missing type-hint
+  ✓ it can handle a non-defined exception
+  ✓ it can handle a class not found Error
 
    PASS  Tests\Features\Expect\unless
   ✓ it pass
@@ -720,5 +722,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 478 passed
+  Tests:  4 incompleted, 9 skipped, 480 passed
   
