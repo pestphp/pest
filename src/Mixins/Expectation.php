@@ -823,7 +823,7 @@ final class Expectation
 
         try {
             ($this->value)();
-        } catch (Throwable $e) { // @phpstan-ignore-line
+        } catch (Throwable $e) {
             if (!class_exists($exception)) {
                 if ($e instanceof Error && $e->getMessage() === "Class \"$exception\" not found") {
                     throw $e;
