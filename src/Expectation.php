@@ -6,6 +6,7 @@ namespace Pest;
 
 use BadMethodCallException;
 use Closure;
+use Error;
 use InvalidArgumentException;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\RetrievesValues;
@@ -911,8 +912,12 @@ final class Expectation
 
         try {
             ($this->value)();
-        } catch (Throwable $e) { // @phpstan-ignore-line
+        } catch (Throwable $e) {
             if (!class_exists($exception)) {
+                if ($e instanceof Error && (bool) preg_match("/Class [\"']{$exception}[\"'] not found/", $e->getMessage())) {
+                    throw $e;
+                }
+
                 Assert::assertStringContainsString($exception, $e->getMessage());
 
                 return $this;

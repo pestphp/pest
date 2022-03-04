@@ -106,7 +106,6 @@ final class TeamCity extends DefaultResultPrinter
             - $result->riskyCount();
     }
 
-    /** @phpstan-ignore-next-line */
     public function startTestSuite(TestSuite $suite): void
     {
         $suiteName = $suite->getName();
@@ -164,7 +163,6 @@ final class TeamCity extends DefaultResultPrinter
         );
     }
 
-    /** @phpstan-ignore-next-line */
     public function endTestSuite(TestSuite $suite): void
     {
         $suiteName = $suite->getName();

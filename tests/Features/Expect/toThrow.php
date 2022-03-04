@@ -58,3 +58,15 @@ test('closure missing parameter', function () {
 test('closure missing type-hint', function () {
     expect(function () {})->toThrow(function ($e) {});
 })->throws(InvalidArgumentException::class, 'The given closure\'s parameter must be type-hinted as the class string.');
+
+it('can handle a non-defined exception', function () {
+    expect(function () {
+        throw new NonExistingException();
+    })->toThrow(NonExistingException::class);
+})->throws(Error::class);
+
+it('can handle a class not found Error', function () {
+    expect(function () {
+        throw new NonExistingException();
+    })->toThrow(Error::class);
+});
