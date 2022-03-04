@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\PendingCalls;
 
 use Closure;
+use InvalidArgumentException;
 use Pest\Factories\TestCaseMethodFactory;
 use Pest\Support\Backtrace;
 use Pest\Support\HigherOrderCallables;
@@ -164,6 +165,25 @@ final class TestCall
         $this->testCaseMethod
             ->chains
             ->addWhen($condition, Backtrace::file(), Backtrace::line(), 'markTestSkipped', [$message]);
+
+        return $this;
+    }
+
+    /**
+     * Sets the covered class and method.
+     */
+    public function covers(string|array ...$classes): TestCall
+    {
+        foreach ($classes as $i => $class) {
+            if (is_array($class) && count($class) !== 2) {
+                throw new InvalidArgumentException(sprintf(
+                    'The #%s covered class must be an array with exactly 2 items: class and method name.',
+                    $i
+                ));
+            }
+
+            $this->testCaseMethod->covers[] = $class;
+        }
 
         return $this;
     }

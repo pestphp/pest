@@ -48,6 +48,13 @@ final class TestCaseMethodFactory
     public array $groups = [];
 
     /**
+     * The covered classes and methods, if any.
+     *
+     * @var array<int, string>
+     */
+    public array $covers = [];
+
+    /**
      * Creates a new Factory instance.
      */
     public function __construct(
@@ -108,7 +115,7 @@ final class TestCaseMethodFactory
      *
      * @param array<int, class-string> $annotationsToUse
      */
-    public function buildForEvaluation(string $classFQN, array $annotationsToUse): string
+    public function buildForEvaluation(string $classFQN, array $annotationsToUse, array $attributesToUse): string
     {
         if ($this->description === null) {
             throw ShouldNotHappen::fromMessage('The test description may not be empty.');
@@ -122,10 +129,16 @@ final class TestCaseMethodFactory
 
         $datasetsCode = '';
         $annotations  = ['@test'];
+        $attributes  = [];
 
         foreach ($annotationsToUse as $annotation) {
             /** @phpstan-ignore-next-line */
             $annotations = (new $annotation())->__invoke($this, $annotations);
+        }
+
+        foreach ($attributesToUse as $attribute) {
+            /** @phpstan-ignore-next-line */
+            $attributes = (new $attribute())->__invoke($this, $attributes);
         }
 
         if (count($this->datasets) > 0) {
@@ -138,10 +151,15 @@ final class TestCaseMethodFactory
             static fn ($annotation) => sprintf("\n                 * %s", $annotation), $annotations,
         ));
 
+        $attributes = implode('', array_map(
+            static fn ($attribute) => sprintf("\n                 %s", $attribute), $attributes,
+        ));
+
         return <<<EOF
 
                 /**$annotations
                  */
+                $attributes
                 public function $methodName()
                 {
                     return \$this->__runTest(
