@@ -14,9 +14,17 @@ it('catch exceptions and messages', function () {
     throw new Exception('Something bad happened');
 })->throws(Exception::class, 'Something bad happened');
 
+it('catch exceptions, messages and code', function () {
+    throw new Exception('Something bad happened', 1);
+})->throws(Exception::class, 'Something bad happened', 1);
+
 it('can just define the message', function () {
     throw new Exception('Something bad happened');
 })->throws('Something bad happened');
+
+it('can just define the code', function () {
+    throw new Exception('Something bad happened', 1);
+})->throws(1);
 
 it('not catch exceptions if given condition is false', function () {
     $this->assertTrue(true);
@@ -30,10 +38,22 @@ it('catch exceptions and messages if given condition is true', function () {
     throw new Exception('Something bad happened');
 })->throwsIf(true, Exception::class, 'Something bad happened');
 
+it('catch exceptions, messages and code if given condition is true', function () {
+    throw new Exception('Something bad happened', 1);
+})->throwsIf(true, Exception::class, 'Something bad happened', 1);
+
 it('can just define the message if given condition is true', function () {
     throw new Exception('Something bad happened');
 })->throwsIf(true, 'Something bad happened');
 
+it('can just define the code if given condition is true', function () {
+    throw new Exception('Something bad happened', 1);
+})->throwsIf(true, 1);
+
 it('can just define the message if given condition is 1', function () {
     throw new Exception('Something bad happened');
 })->throwsIf(1, 'Something bad happened');
+
+it('can just define the code if given condition is 1', function () {
+    throw new Exception('Something bad happened', 1);
+})->throwsIf(1, 1);
