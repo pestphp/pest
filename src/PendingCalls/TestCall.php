@@ -49,7 +49,7 @@ final class TestCall
     {
         if (is_int($exception)) {
             $exceptionCode = $exception;
-        } else if (class_exists($exception)) {
+        } elseif (class_exists($exception)) {
             $this->testCaseMethod
                 ->proxies
                 ->add(Backtrace::file(), Backtrace::line(), 'expectException', [$exception]);
