@@ -36,6 +36,15 @@ final class TestCaseFactory
     ];
 
     /**
+     * The list of annotations.
+     *
+     * @var array<int, class-string>
+     */
+    private static array $attributes = [
+        Attributes\Covers::class,
+    ];
+
+    /**
      * The FQN of the Test Case class.
      *
      * @var class-string
@@ -142,7 +151,7 @@ final class TestCaseFactory
         }
 
         $methodsCode = implode('', array_map(
-            fn (TestCaseMethodFactory $methodFactory) => $methodFactory->buildForEvaluation($classFQN, self::$annotations),
+            fn (TestCaseMethodFactory $methodFactory) => $methodFactory->buildForEvaluation($classFQN, self::$annotations, self::$attributes),
             $methods
         ));
 

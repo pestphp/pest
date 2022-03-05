@@ -50,7 +50,7 @@ final class TestCaseMethodFactory
     /**
      * The covered classes and methods, if any.
      *
-     * @var array<int, string>
+     * @var array<int, \Pest\Factories\Covers\CoversClass|\Pest\Factories\Covers\CoversFunction|\Pest\Factories\Covers\CoversNothing>
      */
     public array $covers = [];
 

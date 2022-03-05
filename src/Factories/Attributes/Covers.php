@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pest\Factories\Attributes;
 
+use Pest\Factories\Covers\CoversClass;
+use Pest\Factories\Covers\CoversFunction;
 use Pest\Factories\TestCaseMethodFactory;
 
 /**
@@ -22,11 +24,16 @@ final class Covers
     public function __invoke(TestCaseMethodFactory $method, array $attributes): array
     {
         foreach ($method->covers as $covering) {
-            if (is_array($covering)) {
-                $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversClass({$covering[0]}]";
-                $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversFunction({$covering[1]}]";
+            if ($covering instanceof CoversClass) {
+                $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversClass({$covering->class}]";
+
+                if (!is_null($covering->method)) {
+                    $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversFunction({$covering->method}]";
+                }
+            } else if ($covering instanceof CoversFunction) {
+                $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversFunction({$covering->function}]";
             } else {
-                $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversClass($covering)]";
+                $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversNothing]";
             }
         }
 

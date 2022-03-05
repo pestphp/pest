@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Pest\PendingCalls;
 
 use Closure;
-use InvalidArgumentException;
+use Pest\Factories\Covers\CoversClass;
+use Pest\Factories\Covers\CoversFunction;
+use Pest\Factories\Covers\CoversNothing;
 use Pest\Factories\TestCaseMethodFactory;
 use Pest\Support\Backtrace;
 use Pest\Support\HigherOrderCallables;
@@ -171,19 +173,35 @@ final class TestCall
 
     /**
      * Sets the covered class and method.
+     *
+     * @param class-string $class
+     * @param string|null $method
      */
-    public function covers(string|array ...$classes): TestCall
+    public function covers(string $class, ?string $method = null): TestCall
     {
-        foreach ($classes as $i => $class) {
-            if (is_array($class) && count($class) !== 2) {
-                throw new InvalidArgumentException(sprintf(
-                    'The #%s covered class must be an array with exactly 2 items: class and method name.',
-                    $i
-                ));
-            }
+        $this->testCaseMethod->covers[] = new CoversClass(...func_get_args());
 
-            $this->testCaseMethod->covers[] = $class;
-        }
+        return $this;
+    }
+
+    /**
+     * Sets the covered function.
+     *
+     * @param string $method
+     */
+    public function coversFunction(string $method): TestCall
+    {
+        $this->testCaseMethod->covers[] = new CoversFunction(...func_get_args());
+
+        return $this;
+    }
+
+    /**
+     * Sets that the current test covers nothing.
+     */
+    public function coversNothing(): TestCall
+    {
+        $this->testCaseMethod->covers[] = new CoversNothing();
 
         return $this;
     }
