@@ -28,10 +28,10 @@ final class Covers
                 $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversClass({$covering->class}]";
 
                 if (!is_null($covering->method)) {
-                    $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversFunction({$covering->method}]";
+                    $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversFunction('{$covering->method}']";
                 }
             } else if ($covering instanceof CoversFunction) {
-                $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversFunction({$covering->function}]";
+                $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversFunction('{$covering->function}']";
             } else {
                 $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversNothing]";
             }
