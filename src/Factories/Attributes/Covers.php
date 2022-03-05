@@ -26,10 +26,6 @@ final class Covers
         foreach ($method->covers as $covering) {
             if ($covering instanceof CoversClass) {
                 $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversClass({$covering->class}]";
-
-                if (!is_null($covering->method)) {
-                    $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversFunction('{$covering->method}']";
-                }
             } else if ($covering instanceof CoversFunction) {
                 $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversFunction('{$covering->function}']";
             } else {

@@ -175,9 +175,8 @@ final class TestCall
      * Sets the covered class and method.
      *
      * @param class-string $class
-     * @param string|null $method
      */
-    public function covers(string $class, ?string $method = null): TestCall
+    public function covers(string $class): TestCall
     {
         $this->testCaseMethod->covers[] = new CoversClass(...func_get_args());
 

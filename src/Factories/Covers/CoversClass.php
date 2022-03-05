@@ -9,7 +9,7 @@ namespace Pest\Factories\Covers;
  */
 final class CoversClass
 {
-    public function __construct(public string $class, public ?string $method = null)
+    public function __construct(public string $class)
     {
         //
     }
