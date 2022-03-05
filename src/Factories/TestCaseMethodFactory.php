@@ -48,7 +48,7 @@ final class TestCaseMethodFactory
     public array $groups = [];
 
     /**
-     * The covered classes and methods, if any.
+     * The covered classes and functions, if any.
      *
      * @var array<int, \Pest\Factories\Covers\CoversClass|\Pest\Factories\Covers\CoversFunction|\Pest\Factories\Covers\CoversNothing>
      */
@@ -115,7 +115,7 @@ final class TestCaseMethodFactory
      *
      * @param array<int, class-string> $annotationsToUse
      */
-    public function buildForEvaluation(string $classFQN, array $annotationsToUse, array $attributesToUse): string
+    public function buildForEvaluation(string $classFQN, array $annotationsToUse): string
     {
         if ($this->description === null) {
             throw ShouldNotHappen::fromMessage('The test description may not be empty.');

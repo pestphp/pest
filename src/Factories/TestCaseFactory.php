@@ -151,7 +151,7 @@ final class TestCaseFactory
         }
 
         $methodsCode = implode('', array_map(
-            fn (TestCaseMethodFactory $methodFactory) => $methodFactory->buildForEvaluation($classFQN, self::$annotations, self::$attributes),
+            fn (TestCaseMethodFactory $methodFactory) => $methodFactory->buildForEvaluation($classFQN, self::$annotations),
             $methods
         ));
 
