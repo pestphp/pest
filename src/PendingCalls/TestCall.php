@@ -172,25 +172,29 @@ final class TestCall
     }
 
     /**
-     * Sets the covered class and method.
+     * Sets the covered classes.
      *
-     * @param class-string $class
+     * @param class-string..., $classes
      */
-    public function covers(string $class): TestCall
+    public function coversClass(string ...$classes): TestCall
     {
-        $this->testCaseMethod->covers[] = new CoversClass(...func_get_args());
+        foreach ($classes as $class) {
+            $this->testCaseMethod->covers[] = new CoversClass($class);
+        }
 
         return $this;
     }
 
     /**
-     * Sets the covered function.
+     * Sets the covered functions.
      *
-     * @param string $method
+     * @param string..., $functions
      */
-    public function coversFunction(string $method): TestCall
+    public function coversFunction(string ...$functions): TestCall
     {
-        $this->testCaseMethod->covers[] = new CoversFunction(...func_get_args());
+        foreach ($functions as $function) {
+            $this->testCaseMethod->covers[] = new CoversFunction($function);
+        }
 
         return $this;
     }
