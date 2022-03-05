@@ -129,16 +129,10 @@ final class TestCaseMethodFactory
 
         $datasetsCode = '';
         $annotations  = ['@test'];
-        $attributes  = [];
 
         foreach ($annotationsToUse as $annotation) {
             /** @phpstan-ignore-next-line */
             $annotations = (new $annotation())->__invoke($this, $annotations);
-        }
-
-        foreach ($attributesToUse as $attribute) {
-            /** @phpstan-ignore-next-line */
-            $attributes = (new $attribute())->__invoke($this, $attributes);
         }
 
         if (count($this->datasets) > 0) {
@@ -151,15 +145,10 @@ final class TestCaseMethodFactory
             static fn ($annotation) => sprintf("\n                 * %s", $annotation), $annotations,
         ));
 
-        $attributes = implode('', array_map(
-            static fn ($attribute) => sprintf("\n                 %s", $attribute), $attributes,
-        ));
-
         return <<<EOF
 
                 /**$annotations
                  */
-                $attributes
                 public function $methodName()
                 {
                     return \$this->__runTest(

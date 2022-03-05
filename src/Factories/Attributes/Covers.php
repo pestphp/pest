@@ -11,8 +11,15 @@ use Pest\Factories\TestCaseMethodFactory;
 /**
  * @internal
  */
-final class Covers
+final class Covers extends Attribute
 {
+    /**
+     * Determine if the attribute should be placed above the classe instead of above the method.
+     *
+     * @var bool
+     */
+    public const ABOVE_CLASS = true;
+
     /**
      * Adds attributes regarding the "covers" feature.
      *

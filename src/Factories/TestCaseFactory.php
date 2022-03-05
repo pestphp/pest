@@ -38,7 +38,7 @@ final class TestCaseFactory
     /**
      * The list of annotations.
      *
-     * @var array<int, class-string>
+     * @var array<int, \Pest\Factories\Attributes\Attribute>
      */
     private static array $attributes = [
         Attributes\Covers::class,
@@ -155,6 +155,19 @@ final class TestCaseFactory
             $methods
         ));
 
+        $classAttributes = [];
+
+        foreach (self::$attributes as $attribute) {
+            if ($attribute::ABOVE_CLASS) {
+                /** @phpstan-ignore-next-line */
+                $classAttributes = (new $attribute())->__invoke($this, $classAttributes);
+            }
+        }
+
+        $classAttributes = implode('', array_map(
+            static fn ($attribute) => sprintf("\n                 %s", $attribute), $classAttributes,
+        ));
+
         try {
             eval("
                 namespace $namespace;
@@ -162,6 +175,7 @@ final class TestCaseFactory
                 use Pest\Repositories\DatasetsRepository as __PestDatasets;
                 use Pest\TestSuite as __PestTestSuite;
 
+                $classAttributes
                 final class $className extends $baseClass implements $hasPrintableTestCaseClassFQN {
                     $traitsCode
 
