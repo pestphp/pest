@@ -141,11 +141,6 @@ parameters:
 			path: src/Expectation.php
 
 		-
-			message: "#^Parameter \\#1 \\$value of method Pest\\\\Expectation\\<TValue\\>\\:\\:and\\(\\) expects TValue, mixed given\\.$#"
-			count: 2
-			path: src/Expectation.php
-
-		-
 			message: "#^Parameter \\#2 \\$haystack of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertContains\\(\\) expects iterable, mixed given\\.$#"
 			count: 1
 			path: src/Expectation.php

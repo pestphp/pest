@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.21.2 (2022-03-05)](https://github.com/pestphp/pest/compare/v1.21.1...v1.21.2)
+### Fixed
+- `toThrow` expectation when exception does not exist ([#487](https://github.com/pestphp/pest/pull/487))
+
 ## [v1.21.1 (2021-11-25)](https://github.com/pestphp/pest/compare/v1.21.0...v1.21.1)
 ### Fixed
 - sequence callables causing problems ([#442](https://github.com/pestphp/pest/pull/442))
