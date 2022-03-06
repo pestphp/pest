@@ -173,8 +173,6 @@ final class TestCall
 
     /**
      * Sets the covered classes.
-     *
-     * @param class-string..., $classes
      */
     public function coversClass(string ...$classes): TestCall
     {
@@ -187,8 +185,6 @@ final class TestCall
 
     /**
      * Sets the covered functions.
-     *
-     * @param string..., $functions
      */
     public function coversFunction(string ...$functions): TestCall
     {

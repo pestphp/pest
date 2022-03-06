@@ -38,7 +38,7 @@ final class TestCaseFactory
     /**
      * The list of annotations.
      *
-     * @var array<int, \Pest\Factories\Attributes\Attribute>
+     * @var array<int, class-string>
      */
     private static array $attributes = [
         Attributes\Covers::class,
