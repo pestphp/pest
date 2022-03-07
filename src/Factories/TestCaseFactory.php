@@ -166,7 +166,7 @@ final class TestCaseFactory
         }
 
         $classAttributes = implode('', array_map(
-            static fn ($attribute) => sprintf("\n                 %s", $attribute),
+            static fn (string $attribute) => sprintf("\n                 %s", $attribute),
             array_unique($classAttributes),
         ));
 

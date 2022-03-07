@@ -32,6 +32,11 @@ final class Covers extends Attribute
     {
         foreach ($method->covers as $covering) {
             if ($covering instanceof CoversClass) {
+                // Prepend a backslash for FQN classes
+                if (str_contains($covering->class, '\\')) {
+                    $covering->class = '\\' . $covering->class;
+                }
+
                 $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversClass({$covering->class}::class)]";
             } else if ($covering instanceof CoversFunction) {
                 $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversFunction('{$covering->function}')]";
