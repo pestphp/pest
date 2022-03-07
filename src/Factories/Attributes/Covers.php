@@ -23,7 +23,6 @@ final class Covers extends Attribute
     /**
      * Adds attributes regarding the "covers" feature.
      *
-     * @param \Pest\Factories\TestCaseMethodFactory $method
      * @param array<int, string> $attributes
      *
      * @return array<int, string>
@@ -38,7 +37,7 @@ final class Covers extends Attribute
                 }
 
                 $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversClass({$covering->class}::class)]";
-            } else if ($covering instanceof CoversFunction) {
+            } elseif ($covering instanceof CoversFunction) {
                 $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversFunction('{$covering->function}')]";
             } else {
                 $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversNothing]";

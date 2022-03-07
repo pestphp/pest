@@ -4,8 +4,14 @@ use Pest\Factories\Attributes\Covers;
 
 $runCounter = 0;
 
-class TestCoversClass1 {}
-class TestCoversClass2 {}
+class TestCoversClass1
+{
+
+}
+class TestCoversClass2
+{
+
+}
 
 it('uses the correct PHPUnit attribute for class', function () {
     $attributes = (new ReflectionClass($this))->getAttributes();

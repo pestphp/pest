@@ -11,6 +11,5 @@ final class CoversFunction
 {
     public function __construct(public string $function)
     {
-        //
     }
 }

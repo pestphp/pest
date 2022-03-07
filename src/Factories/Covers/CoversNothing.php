@@ -9,5 +9,4 @@ namespace Pest\Factories\Covers;
  */
 final class CoversNothing
 {
-    //
 }
