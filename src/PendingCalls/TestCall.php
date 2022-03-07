@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\PendingCalls;
 
 use Closure;
+use InvalidArgumentException;
 use Pest\Factories\Covers\CoversClass;
 use Pest\Factories\Covers\CoversFunction;
 use Pest\Factories\Covers\CoversNothing;
@@ -167,6 +168,31 @@ final class TestCall
         $this->testCaseMethod
             ->chains
             ->addWhen($condition, Backtrace::file(), Backtrace::line(), 'markTestSkipped', [$message]);
+
+        return $this;
+    }
+
+    /**
+     * Sets the covered classes or methods.
+     */
+    public function covers(string ...$classesOrFunctions): TestCall
+    {
+        foreach ($classesOrFunctions as $classOrFunction) {
+            $isClass = class_exists($classOrFunction);
+            $isMethod = function_exists($classOrFunction);
+
+            if (!$isClass && !$isMethod) {
+                throw new InvalidArgumentException(
+                    sprintf('No class or method named "%s" has been found.', $classOrFunction)
+                );
+            }
+
+            if ($isClass) {
+                $this->coversClass($classOrFunction);
+            } else {
+                $this->coversFunction($classOrFunction);
+            }
+        }
 
         return $this;
     }

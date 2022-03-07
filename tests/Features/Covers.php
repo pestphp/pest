@@ -1,17 +1,23 @@
 <?php
 
 use Pest\Factories\Attributes\Covers;
+use Pest\PendingCalls\TestCall;
+use Pest\TestSuite;
 
 $runCounter = 0;
 
 class TestCoversClass1
 {
-
 }
 class TestCoversClass2
 {
-
 }
+
+class TestCoversClass3
+{
+}
+
+function testCoversFunction() { }
 
 it('uses the correct PHPUnit attribute for class', function () {
     $attributes = (new ReflectionClass($this))->getAttributes();
@@ -36,8 +42,6 @@ it('uses the correct PHPUnit attribute for nothing', function () {
 it('removes duplicated attributes', function () {
     $attributes = (new ReflectionClass($this))->getAttributes();
 
-    expect($attributes)->toHaveCount(7); // 3 classes, 3 functions, 1 nothing
-
     expect($attributes[3]->getName())->toBe('PHPUnit\Framework\Attributes\CoversClass');
     expect($attributes[3]->getArguments()[0])->toBe('P\Tests\Features\TestCoversClass2');
     expect($attributes[4]->getName())->toBe('PHPUnit\Framework\Attributes\CoversClass');
@@ -50,3 +54,18 @@ it('removes duplicated attributes', function () {
     ->coversClass(TestCoversClass2::class, TestCoversClass1::class, Covers::class)
     ->coversNothing()
     ->coversFunction('bar', 'foo', 'baz');
+
+it('guesses if the given argument is a class or function', function () {
+    $attributes = (new ReflectionClass($this))->getAttributes();
+
+    expect($attributes[7]->getName())->toBe('PHPUnit\Framework\Attributes\CoversClass');
+    expect($attributes[7]->getArguments()[0])->toBe('P\Tests\Features\TestCoversClass3');
+    expect($attributes[8]->getName())->toBe('PHPUnit\Framework\Attributes\CoversFunction');
+    expect($attributes[8]->getArguments()[0])->toBe('testCoversFunction');
+})->covers(TestCoversClass3::class, 'testCoversFunction');
+
+it('throws exception if no class nor method has been found', function () {
+    $testCall = new TestCall(TestSuite::getInstance(), 'filename', 'description', fn () => 'closure');
+
+    $testCall->covers('fakeName');
+})->throws(InvalidArgumentException::class, 'No class or method named "fakeName" has been found.');
