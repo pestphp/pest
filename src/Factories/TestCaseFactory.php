@@ -155,19 +155,20 @@ final class TestCaseFactory
             $methods
         ));
 
-        $classAttributes = [];
+        $classAttributesCode      = [];
+        $classAvailableAttributes = array_filter(self::$attributes, fn (string $attribute) => $attribute::ABOVE_CLASS);
 
-        foreach (self::$attributes as $attribute) {
-            if ($attribute::ABOVE_CLASS) {
-                foreach ($methods as $methodFactory) {
-                    $classAttributes = (new $attribute())->__invoke($methodFactory, $classAttributes);
-                }
-            }
+        foreach ($classAvailableAttributes as $attribute) {
+            $classAttributesCode = array_reduce(
+                $methods,
+                fn (array $carry, TestCaseMethodFactory $methodFactory) => (new $attribute())->__invoke($methodFactory, $carry),
+                $classAttributesCode
+            );
         }
 
-        $classAttributes = implode('', array_map(
+        $classAttributesCode = implode('', array_map(
             static fn (string $attribute) => sprintf("\n                 %s", $attribute),
-            array_unique($classAttributes),
+            array_unique($classAttributesCode),
         ));
 
         try {
@@ -177,7 +178,7 @@ final class TestCaseFactory
                 use Pest\Repositories\DatasetsRepository as __PestDatasets;
                 use Pest\TestSuite as __PestTestSuite;
 
-                $classAttributes
+                $classAttributesCode
                 final class $className extends $baseClass implements $hasPrintableTestCaseClassFQN {
                     $traitsCode
 
