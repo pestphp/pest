@@ -178,13 +178,11 @@ final class TestCall
     public function covers(string ...$classesOrFunctions): TestCall
     {
         foreach ($classesOrFunctions as $classOrFunction) {
-            $isClass = class_exists($classOrFunction);
+            $isClass  = class_exists($classOrFunction);
             $isMethod = function_exists($classOrFunction);
 
             if (!$isClass && !$isMethod) {
-                throw new InvalidArgumentException(
-                    sprintf('No class or method named "%s" has been found.', $classOrFunction)
-                );
+                throw new InvalidArgumentException(sprintf('No class or method named "%s" has been found.', $classOrFunction));
             }
 
             if ($isClass) {

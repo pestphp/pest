@@ -17,7 +17,9 @@ class TestCoversClass3
 {
 }
 
-function testCoversFunction() { }
+function testCoversFunction()
+{
+}
 
 it('uses the correct PHPUnit attribute for class', function () {
     $attributes = (new ReflectionClass($this))->getAttributes();
