@@ -159,13 +159,15 @@ final class TestCaseFactory
 
         foreach (self::$attributes as $attribute) {
             if ($attribute::ABOVE_CLASS) {
-                /** @phpstan-ignore-next-line */
-                $classAttributes = (new $attribute())->__invoke($this, $classAttributes);
+                foreach ($methods as $methodFactory) {
+                    $classAttributes = (new $attribute())->__invoke($methodFactory, $classAttributes);
+                }
             }
         }
 
         $classAttributes = implode('', array_map(
-            static fn ($attribute) => sprintf("\n                 %s", $attribute), $classAttributes,
+            static fn ($attribute) => sprintf("\n                 %s", $attribute),
+            array_unique($classAttributes),
         ));
 
         try {

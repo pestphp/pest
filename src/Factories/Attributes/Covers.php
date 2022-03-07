@@ -32,9 +32,9 @@ final class Covers extends Attribute
     {
         foreach ($method->covers as $covering) {
             if ($covering instanceof CoversClass) {
-                $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversClass({$covering->class}]";
+                $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversClass({$covering->class}::class)]";
             } else if ($covering instanceof CoversFunction) {
-                $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversFunction('{$covering->function}']";
+                $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversFunction('{$covering->function}')]";
             } else {
                 $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversNothing]";
             }
