@@ -283,7 +283,7 @@ final class Expectation
     {
         $this->toBeObject();
 
-        //@phpstan-ignore-next-line
+        // @phpstan-ignore-next-line
         Assert::assertTrue(property_exists($this->value, $name));
 
         if (func_num_args() > 1) {
@@ -534,7 +534,7 @@ final class Expectation
     {
         Assert::assertIsString($this->value);
 
-        //@phpstan-ignore-next-line
+        // @phpstan-ignore-next-line
         Assert::assertJson($this->value);
 
         return $this;
@@ -580,7 +580,7 @@ final class Expectation
         try {
             Assert::assertTrue(Arr::has($array, $key));
 
-            /* @phpstan-ignore-next-line  */
+            /* @phpstan-ignore-next-line */
         } catch (ExpectationFailedException $exception) {
             throw new ExpectationFailedException("Failed asserting that an array has the key '$key'", $exception->getComparisonFailure());
         }

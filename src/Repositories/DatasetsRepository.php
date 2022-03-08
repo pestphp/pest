@@ -156,11 +156,11 @@ final class DatasetsRepository
                 $datasets[$index] = iterator_to_array($datasets[$index]);
             }
 
-            //@phpstan-ignore-next-line
+            // @phpstan-ignore-next-line
             foreach ($datasets[$index] as $key => $values) {
                 $values             = is_array($values) ? $values : [$values];
                 $processedDataset[] = [
-                    'label'  => self::getDatasetDescription($key, $values), //@phpstan-ignore-line
+                    'label'  => self::getDatasetDescription($key, $values), // @phpstan-ignore-line
                     'values' => $values,
                 ];
             }
@@ -189,7 +189,7 @@ final class DatasetsRepository
             $result = $tmp;
         }
 
-        //@phpstan-ignore-next-line
+        // @phpstan-ignore-next-line
         return $result;
     }
 
