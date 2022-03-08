@@ -307,7 +307,7 @@ final class Expectation
     private function getExpectationClosure(string $name): Closure
     {
         if (method_exists(Mixins\Expectation::class, $name)) {
-            //@phpstan-ignore-next-line
+            // @phpstan-ignore-next-line
             return Closure::fromCallable([new Mixins\Expectation($this->value), $name]);
         }
 
