@@ -77,6 +77,22 @@ final class Expectation
     }
 
     /**
+     * Dump the expectation value.
+     *
+     * @return self<TValue>
+     */
+    public function dump(mixed ...$arguments): self
+    {
+        if (function_exists('dump')) {
+            dump($this->value, ...$arguments);
+        } else {
+            var_dump($this->value);
+        }
+
+        return $this;
+    }
+
+    /**
      * Dump the expectation value and end the script.
      *
      * @return never
