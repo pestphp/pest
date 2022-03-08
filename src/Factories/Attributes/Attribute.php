@@ -10,7 +10,7 @@ namespace Pest\Factories\Attributes;
 abstract class Attribute
 {
     /**
-     * Determine if the attribute should be placed above the classe instead of above the method.
+     * Determine if the attribute should be placed above the class instead of above the method.
      *
      * @var bool
      */
