@@ -46,9 +46,11 @@ final class TestCall
     /**
      * Asserts that the test throws the given `$exceptionClass` when called.
      */
-    public function throws(string $exception, string $exceptionMessage = null): TestCall
+    public function throws(string|int $exception, string $exceptionMessage = null, int $exceptionCode = null): TestCall
     {
-        if (class_exists($exception)) {
+        if (is_int($exception)) {
+            $exceptionCode = $exception;
+        } elseif (class_exists($exception)) {
             $this->testCaseMethod
                 ->proxies
                 ->add(Backtrace::file(), Backtrace::line(), 'expectException', [$exception]);
@@ -62,6 +64,12 @@ final class TestCall
                 ->add(Backtrace::file(), Backtrace::line(), 'expectExceptionMessage', [$exceptionMessage]);
         }
 
+        if (is_int($exceptionCode)) {
+            $this->testCaseMethod
+                ->proxies
+                ->add(Backtrace::file(), Backtrace::line(), 'expectExceptionCode', [$exceptionCode]);
+        }
+
         return $this;
     }
 
@@ -70,7 +78,7 @@ final class TestCall
      *
      * @param (callable(): bool)|bool $condition
      */
-    public function throwsIf(callable|bool $condition, string $exception, string $exceptionMessage = null): TestCall
+    public function throwsIf(callable|bool $condition, string|int $exception, string $exceptionMessage = null, int $exceptionCode = null): TestCall
     {
         $condition = is_callable($condition)
             ? $condition
@@ -79,7 +87,7 @@ final class TestCall
             };
 
         if ($condition()) {
-            return $this->throws($exception, $exceptionMessage);
+            return $this->throws($exception, $exceptionMessage, $exceptionCode);
         }
 
         return $this;

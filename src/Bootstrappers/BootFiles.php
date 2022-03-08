@@ -48,6 +48,7 @@ final class BootFiles
             if (is_dir($filename)) {
                 $directory = new RecursiveDirectoryIterator($filename);
                 $iterator  = new RecursiveIteratorIterator($directory);
+                /** @var \DirectoryIterator $file */
                 foreach ($iterator as $file) {
                     $this->load($file->__toString());
                 }
