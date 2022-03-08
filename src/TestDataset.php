@@ -100,7 +100,7 @@ final class TestDataset
             return [];
         }
 
-        //@phpstan-ignore-next-line
+        // @phpstan-ignore-next-line
         $reflection        = new ReflectionFunction($dataset);
         $datasetParameters = array_map(function (ReflectionParameter $reflectionParameter) {
             return $reflectionParameter->getName();
@@ -128,7 +128,7 @@ final class TestDataset
     {
         $dataset = $this->resolveFromString($this->dataset);
         if (is_callable($dataset)) {
-            //@phpstan-ignore-next-line
+            // @phpstan-ignore-next-line
             $reflection        = new ReflectionFunction($dataset);
             $datasetParameters = array_map(function (ReflectionParameter $reflectionParameter) {
                 return $reflectionParameter->getName();
