@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace Pest\PendingCalls;
 
 use Closure;
+use InvalidArgumentException;
+use Pest\Factories\Covers\CoversClass;
+use Pest\Factories\Covers\CoversFunction;
+use Pest\Factories\Covers\CoversNothing;
 use Pest\Factories\TestCaseMethodFactory;
 use Pest\Support\Backtrace;
 use Pest\Support\HigherOrderCallables;
@@ -164,6 +168,63 @@ final class TestCall
         $this->testCaseMethod
             ->chains
             ->addWhen($condition, Backtrace::file(), Backtrace::line(), 'markTestSkipped', [$message]);
+
+        return $this;
+    }
+
+    /**
+     * Sets the covered classes or methods.
+     */
+    public function covers(string ...$classesOrFunctions): TestCall
+    {
+        foreach ($classesOrFunctions as $classOrFunction) {
+            $isClass  = class_exists($classOrFunction);
+            $isMethod = function_exists($classOrFunction);
+
+            if (!$isClass && !$isMethod) {
+                throw new InvalidArgumentException(sprintf('No class or method named "%s" has been found.', $classOrFunction));
+            }
+
+            if ($isClass) {
+                $this->coversClass($classOrFunction);
+            } else {
+                $this->coversFunction($classOrFunction);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Sets the covered classes.
+     */
+    public function coversClass(string ...$classes): TestCall
+    {
+        foreach ($classes as $class) {
+            $this->testCaseMethod->covers[] = new CoversClass($class);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Sets the covered functions.
+     */
+    public function coversFunction(string ...$functions): TestCall
+    {
+        foreach ($functions as $function) {
+            $this->testCaseMethod->covers[] = new CoversFunction($function);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Sets that the current test covers nothing.
+     */
+    public function coversNothing(): TestCall
+    {
+        $this->testCaseMethod->covers = [new CoversNothing()];
 
         return $this;
     }
