@@ -37,7 +37,7 @@ final class TestCaseFactory
     ];
 
     /**
-     * The list of annotations.
+     * The list of attributes.
      *
      * @var array<int, class-string<\Pest\Factories\Attributes\Attribute>>
      */
