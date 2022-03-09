@@ -138,7 +138,6 @@ final class TestCaseMethodFactory
         }
 
         foreach ($attributesToUse as $attribute) {
-            /** @phpstan-ignore-next-line */
             $attributes = (new $attribute())->__invoke($this, $attributes);
         }
 
