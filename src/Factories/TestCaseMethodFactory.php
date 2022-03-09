@@ -113,7 +113,7 @@ final class TestCaseMethodFactory
     /**
      * Creates a PHPUnit method as a string ready for evaluation.
      *
-     * @param array<int, class-string> $annotationsToUse
+     * @param array<int, class-string>                                       $annotationsToUse
      * @param array<int, class-string<\Pest\Factories\Attributes\Attribute>> $attributesToUse
      */
     public function buildForEvaluation(string $classFQN, array $annotationsToUse, array $attributesToUse): string
