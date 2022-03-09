@@ -33,6 +33,7 @@ final class TestCaseFactory
     private static array $annotations = [
         Annotations\Depends::class,
         Annotations\Groups::class,
+        Annotations\CoversNothing::class,
     ];
 
     /**
@@ -150,25 +151,31 @@ final class TestCaseFactory
             $classFQN .= $className;
         }
 
-        $methodsCode = implode('', array_map(
-            fn (TestCaseMethodFactory $methodFactory) => $methodFactory->buildForEvaluation($classFQN, self::$annotations),
-            $methods
-        ));
+        $classAvailableAttributes  = array_filter(self::$attributes, fn (string $attribute) => $attribute::ABOVE_CLASS);
+        $methodAvailableAttributes = array_filter(self::$attributes, fn (string $attribute) => !$attribute::ABOVE_CLASS);
 
-        $classAttributesCode      = [];
-        $classAvailableAttributes = array_filter(self::$attributes, fn (string $attribute) => $attribute::ABOVE_CLASS);
+        $classAttributes = [];
 
         foreach ($classAvailableAttributes as $attribute) {
-            $classAttributesCode = array_reduce(
+            $classAttributes = array_reduce(
                 $methods,
                 fn (array $carry, TestCaseMethodFactory $methodFactory) => (new $attribute())->__invoke($methodFactory, $carry),
-                $classAttributesCode
+                $classAttributes
             );
         }
 
+        $methodsCode = implode('', array_map(
+            fn (TestCaseMethodFactory $methodFactory) => $methodFactory->buildForEvaluation(
+                $classFQN,
+                self::$annotations,
+                $methodAvailableAttributes
+            ),
+            $methods
+        ));
+
         $classAttributesCode = implode('', array_map(
-            static fn (string $attribute) => sprintf("\n                 %s", $attribute),
-            array_unique($classAttributesCode),
+            static fn (string $attribute) => sprintf("\n                    %s", $attribute),
+            array_unique($classAttributes),
         ));
 
         try {
