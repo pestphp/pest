@@ -8,4 +8,4 @@ it('allows access to the underlying expectNotToPerformAssertions method', functi
 
 it('allows performing no expectations without being risky', function () {
     $result = 1 + 1;
-})->hasNoExpectations();
+})->throwsNoExceptions();

@@ -161,9 +161,11 @@ final class TestCall
     }
 
     /**
-     * Informs the test runner that no expectations happen in this test.
+     * Informs the test runner that no expectations happen in this test,
+     * and its purpose is simply to check whether the given code can
+     * be executed without throwing exceptions.
      */
-    public function hasNoExpectations(): TestCall
+    public function throwsNoExceptions(): TestCall
     {
         $this->testCaseMethod->proxies->add(Backtrace::file(), Backtrace::line(), 'expectNotToPerformAssertions', []);
 
