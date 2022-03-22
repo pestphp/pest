@@ -346,9 +346,24 @@ test('dataset named parameters did the job right', function () use ($state) {
 
 it('can pluck a dataset', function ($name, $title = null) {
     expect($title)->toBeNull();
+    expect($name)->toBeIn(['foo', 'baz']);
 })->with([
     ['name' => 'foo', 'title' => 'bar'],
     ['name' => 'baz', 'title' => 'quuz'],
+], pluck: 'name');
+
+it('can pluck from a dataset of objects', function ($name, $title = null) {
+    expect($title)->toBeNull();
+    expect($name)->toBeIn(['foo', 'baz']);
+})->with([
+    new class() {
+        public string $name = 'foo';
+        public string $title = 'bar';
+    },
+    new class() {
+        public string $name = 'baz';
+        public string $title = 'quuz';
+    },
 ], pluck: 'name');
 
 it('can filter a dataset by key', function ($accepted) {

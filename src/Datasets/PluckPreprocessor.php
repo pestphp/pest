@@ -23,7 +23,7 @@ final class PluckPreprocessor implements Preprocessor
             throw new InvalidArgumentException('The pluck preprocessor should be given a string.');
         }
 
-        // @phpstan-ignore-next-line
-        return array_map(fn (array|object $values) => $values[$value], $dataset);
+        /* @phpstan-ignore-next-line */
+        return array_map(fn (array|object $values) => is_array($values) ? $values[$value] : $values->{$value}, $dataset);
     }
 }
