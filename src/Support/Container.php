@@ -85,7 +85,7 @@ final class Container
                             }
                         }
 
-                        //@phpstan-ignore-next-line
+                        // @phpstan-ignore-next-line
                         return $this->get($candidate);
                     },
                     $constructor->getParameters()

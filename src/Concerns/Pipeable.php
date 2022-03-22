@@ -43,7 +43,7 @@ trait Pipeable
         $this->pipe($name, function ($next, ...$arguments) use ($handler, $filter) {
             /* @phpstan-ignore-next-line */
             if ($filter($this->value, ...$arguments)) {
-                //@phpstan-ignore-next-line
+                // @phpstan-ignore-next-line
                 $handler->bindTo($this, get_class($this))(...$arguments);
 
                 return;

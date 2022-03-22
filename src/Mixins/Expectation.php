@@ -6,6 +6,7 @@ namespace Pest\Mixins;
 
 use BadMethodCallException;
 use Closure;
+use Error;
 use InvalidArgumentException;
 use Pest\Exceptions\InvalidExpectationValue;
 use Pest\Support\Arr;
@@ -282,7 +283,7 @@ final class Expectation
     {
         $this->toBeObject();
 
-        //@phpstan-ignore-next-line
+        // @phpstan-ignore-next-line
         Assert::assertTrue(property_exists($this->value, $name));
 
         if (func_num_args() > 1) {
@@ -533,7 +534,7 @@ final class Expectation
     {
         Assert::assertIsString($this->value);
 
-        //@phpstan-ignore-next-line
+        // @phpstan-ignore-next-line
         Assert::assertJson($this->value);
 
         return $this;
@@ -579,7 +580,7 @@ final class Expectation
         try {
             Assert::assertTrue(Arr::has($array, $key));
 
-            /* @phpstan-ignore-next-line  */
+            /* @phpstan-ignore-next-line */
         } catch (ExpectationFailedException $exception) {
             throw new ExpectationFailedException("Failed asserting that an array has the key '$key'", $exception->getComparisonFailure());
         }
@@ -822,8 +823,12 @@ final class Expectation
 
         try {
             ($this->value)();
-        } catch (Throwable $e) { // @phpstan-ignore-line
+        } catch (Throwable $e) {
             if (!class_exists($exception)) {
+                if ($e instanceof Error && $e->getMessage() === "Class \"$exception\" not found") {
+                    throw $e;
+                }
+
                 Assert::assertStringContainsString($exception, $e->getMessage());
 
                 return $this;

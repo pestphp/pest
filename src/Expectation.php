@@ -77,6 +77,22 @@ final class Expectation
     }
 
     /**
+     * Dump the expectation value.
+     *
+     * @return self<TValue>
+     */
+    public function dump(mixed ...$arguments): self
+    {
+        if (function_exists('dump')) {
+            dump($this->value, ...$arguments);
+        } else {
+            var_dump($this->value);
+        }
+
+        return $this;
+    }
+
+    /**
      * Dump the expectation value and end the script.
      *
      * @return never
@@ -151,7 +167,6 @@ final class Expectation
             throw new BadMethodCallException('Expectation value is not iterable.');
         }
 
-        //@phpstan-ignore-next-line
         $value          = is_array($this->value) ? $this->value : iterator_to_array($this->value);
         $keys           = array_keys($value);
         $values         = array_values($value);
@@ -292,7 +307,7 @@ final class Expectation
     private function getExpectationClosure(string $name): Closure
     {
         if (method_exists(Mixins\Expectation::class, $name)) {
-            //@phpstan-ignore-next-line
+            // @phpstan-ignore-next-line
             return Closure::fromCallable([new Mixins\Expectation($this->value), $name]);
         }
 

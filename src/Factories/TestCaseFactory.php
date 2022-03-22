@@ -33,6 +33,16 @@ final class TestCaseFactory
     private static array $annotations = [
         Annotations\Depends::class,
         Annotations\Groups::class,
+        Annotations\CoversNothing::class,
+    ];
+
+    /**
+     * The list of attributes.
+     *
+     * @var array<int, class-string<\Pest\Factories\Attributes\Attribute>>
+     */
+    private static array $attributes = [
+        Attributes\Covers::class,
     ];
 
     /**
@@ -141,9 +151,31 @@ final class TestCaseFactory
             $classFQN .= $className;
         }
 
+        $classAvailableAttributes  = array_filter(self::$attributes, fn (string $attribute) => $attribute::ABOVE_CLASS);
+        $methodAvailableAttributes = array_filter(self::$attributes, fn (string $attribute) => !$attribute::ABOVE_CLASS);
+
+        $classAttributes = [];
+
+        foreach ($classAvailableAttributes as $attribute) {
+            $classAttributes = array_reduce(
+                $methods,
+                fn (array $carry, TestCaseMethodFactory $methodFactory) => (new $attribute())->__invoke($methodFactory, $carry),
+                $classAttributes
+            );
+        }
+
         $methodsCode = implode('', array_map(
-            fn (TestCaseMethodFactory $methodFactory) => $methodFactory->buildForEvaluation($classFQN, self::$annotations),
+            fn (TestCaseMethodFactory $methodFactory) => $methodFactory->buildForEvaluation(
+                $classFQN,
+                self::$annotations,
+                $methodAvailableAttributes
+            ),
             $methods
+        ));
+
+        $classAttributesCode = implode('', array_map(
+            static fn (string $attribute) => sprintf("\n                    %s", $attribute),
+            array_unique($classAttributes),
         ));
 
         try {
@@ -153,6 +185,7 @@ final class TestCaseFactory
                 use Pest\Repositories\DatasetsRepository as __PestDatasets;
                 use Pest\TestSuite as __PestTestSuite;
 
+                $classAttributesCode
                 final class $className extends $baseClass implements $hasPrintableTestCaseClassFQN {
                     $traitsCode
 

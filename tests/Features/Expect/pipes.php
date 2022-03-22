@@ -12,7 +12,7 @@ class Number
     public function __construct(
         public int $value
     ) {
-        //..
+        // ..
     }
 }
 
@@ -21,7 +21,7 @@ class Char
     public function __construct(
         public string $value
     ) {
-        //..
+        // ..
     }
 }
 
@@ -30,7 +30,7 @@ class Symbol
     public function __construct(
         public string $value
     ) {
-        //..
+        // ..
     }
 }
 
@@ -69,11 +69,11 @@ expect()->pipe('toBe', function ($next, $expected) use ($state) {
         assertInstanceOf(Char::class, $expected);
         assertEquals($this->value->value, $expected->value);
 
-        //returning nothing stops pipeline execution
+        // returning nothing stops pipeline execution
         return;
     }
 
-    //calling $next(); let the pipeline to keep running
+    // calling $next(); let the pipeline to keep running
     $next();
 });
 
