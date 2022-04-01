@@ -58,4 +58,22 @@ final class Str
 
         return (string) preg_replace('/[^A-Z_a-z0-9\\\\]/', '', $code);
     }
+
+    /**
+     * Get the portion of a string before the last occurrence of a given value.
+     */
+    public static function beforeLast(string $subject, string $search): string
+    {
+        if ($search === '') {
+            return $subject;
+        }
+
+        $pos = mb_strrpos($subject, $search);
+
+        if ($pos === false) {
+            return $subject;
+        }
+
+        return substr($subject, 0, $pos);
+    }
 }

@@ -2,6 +2,7 @@
 <?php declare(strict_types=1);
 
 use Pest\Actions\ValidatesEnvironment;
+use Pest\ConfigLoader;
 use Pest\Support\Container;
 use Pest\Kernel;
 use Pest\TestSuite;
@@ -28,7 +29,10 @@ use Symfony\Component\Console\Output\OutputInterface;
     $rootPath = dirname($autoloadPath, 2);
     $argv = new ArgvInput();
 
-    $testSuite = TestSuite::getInstance($rootPath, $argv->getParameterOption('--test-directory', 'tests'));
+    $testSuite = TestSuite::getInstance(
+        $rootPath,
+        $argv->getParameterOption('--test-directory', (new ConfigLoader($rootPath))->getTestsDirectory())
+    );
 
     $isDecorated = $argv->getParameterOption('--colors', 'always') !== 'never';
     $output = new ConsoleOutput(ConsoleOutput::VERBOSITY_NORMAL, $isDecorated);
