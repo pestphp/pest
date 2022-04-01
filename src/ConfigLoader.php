@@ -13,14 +13,17 @@ use Throwable;
  */
 final class ConfigLoader
 {
-    private ?SimpleXMLElement $config = null;
-
     /**
      * Default path if config loading went wrong.
      *
      * @var string
      */
-    private const DEFAULT_TESTS_PATH = 'tests';
+    public const DEFAULT_TESTS_PATH = 'tests';
+
+    /**
+     * XML tree of the PHPUnit configuration file.
+     */
+    private ?SimpleXMLElement $config = null;
 
     /**
      * Creates a new instance of the config loader.
@@ -63,6 +66,26 @@ final class ConfigLoader
     }
 
     /**
+     * Get the configuration file path.
+     */
+    public function getConfigurationFilePath(): string|false
+    {
+        $candidates = [
+            $this->rootPath . '/phpunit.xml',
+            $this->rootPath . '/phpunit.dist.xml',
+            $this->rootPath . '/phpunit.xml.dist',
+        ];
+
+        foreach ($candidates as $candidate) {
+            if (is_file($candidate)) {
+                return realpath($candidate);
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Load the configuration file.
      */
     private function loadConfiguration(): void
@@ -86,25 +109,5 @@ final class ConfigLoader
 
         // Restore the correct error reporting
         error_reporting($oldReportingLevel);
-    }
-
-    /**
-     * Get the configuration file path.
-     */
-    private function getConfigurationFilePath(): string|false
-    {
-        $candidates = [
-            $this->rootPath . '/phpunit.xml',
-            $this->rootPath . '/phpunit.dist.xml',
-            $this->rootPath . '/phpunit.xml.dist',
-        ];
-
-        foreach ($candidates as $candidate) {
-            if (is_file($candidate)) {
-                return realpath($candidate);
-            }
-        }
-
-        return false;
     }
 }
