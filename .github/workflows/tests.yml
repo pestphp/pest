@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest] # (macos-latest, windows-latest) 2.x-dev is under development
-        php: ['8.0', '8.1']
+        php: ['8.1']
         dependency-version: [prefer-lowest, prefer-stable]
         parallel: ['', '--parallel']
         exclude:
