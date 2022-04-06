@@ -723,7 +723,7 @@ final class Expectation
         try {
             Assert::assertTrue(Arr::has($array, $key));
 
-            /* @phpstan-ignore-next-line  */
+            /* @phpstan-ignore-next-line */
         } catch (ExpectationFailedException $exception) {
             throw new ExpectationFailedException("Failed asserting that an array has the key '$key'", $exception->getComparisonFailure());
         }
@@ -882,6 +882,16 @@ final class Expectation
     public function toMatchConstraint(Constraint $constraint): Expectation
     {
         Assert::assertThat($this->value, $constraint);
+
+        return $this;
+    }
+
+    /**
+     * @param class-string $class
+     */
+    public function toContainOnlyInstancesOf(string $class): Expectation
+    {
+        Assert::assertContainsOnlyInstancesOf($class, $this->value);
 
         return $this;
     }

@@ -146,6 +146,11 @@ parameters:
 			path: src/Expectation.php
 
 		-
+			message: "#^Parameter \\#2 \\$haystack of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertContainsOnlyInstancesOf\\(\\) expects iterable, mixed given\\.$#"
+			count: 1
+			path: src/Expectation.php
+
+		-
 			message: "#^Parameter \\#2 \\$haystack of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertCount\\(\\) expects Countable\\|iterable, mixed given\\.$#"
 			count: 1
 			path: src/Expectation.php

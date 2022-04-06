@@ -385,6 +385,11 @@
   ✓ not failures with multiple needles (all failing)
   ✓ not failures with multiple needles (some failing)
 
+   PASS  Tests\Features\Expect\toContainOnlyInstancesOf
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
    PASS  Tests\Features\Expect\toEndWith
   ✓ pass
   ✓ failures
@@ -722,5 +727,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 480 passed
+  Tests:  4 incompleted, 9 skipped, 483 passed
   

@@ -2,7 +2,7 @@
 
 test('visual snapshot of test suite on success', function () {
     $testsPath = dirname(__DIR__);
-    $snapshot = implode(DIRECTORY_SEPARATOR, [
+    $snapshot  = implode(DIRECTORY_SEPARATOR, [
         $testsPath,
         '.snapshots',
         'success.txt',
