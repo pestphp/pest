@@ -181,11 +181,6 @@ parameters:
 			path: src/Factories/TestCaseFactory.php
 
 		-
-			message: "#^Function it\\(\\) should return Pest\\\\PendingObjects\\\\TestCall but returns mixed\\.$#"
-			count: 1
-			path: src/Functions.php
-
-		-
 			message: "#^Parameter \\#2 \\$classAndTraits of class Pest\\\\PendingObjects\\\\UsesCall constructor expects array\\<int, string\\>, array\\<int\\|string, string\\> given\\.$#"
 			count: 1
 			path: src/Functions.php
