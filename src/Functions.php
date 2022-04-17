@@ -107,7 +107,7 @@ if (!function_exists('it')) {
      *
      * @return TestCall|TestCase|mixed
      */
-    function it(string $description, Closure $closure = null): TestCall
+    function it(string $description, Closure $closure = null)
     {
         $description = sprintf('it %s', $description);
 
