@@ -60,4 +60,26 @@ final class Arr
 
         return $array;
     }
+
+    /**
+     * Flatten a multi-dimensional associative array with dots.
+     *
+     * @param array<array-key, mixed> $array
+     *
+     * @return array<int|string, mixed>
+     */
+    public static function dot(array $array, string $prepend = ''): array
+    {
+        $results = [];
+
+        foreach ($array as $key => $value) {
+            if (is_array($value) && count($value) > 0) {
+                $results = array_merge($results, static::dot($value, $prepend . $key . '.'));
+            } else {
+                $results[$prepend . $value] = $value;
+            }
+        }
+
+        return $results;
+    }
 }

@@ -595,14 +595,18 @@ final class Expectation
     /**
      * Asserts that the value array has the provided $keys.
      *
-     * @param array<int, int|string> $keys
+     * @param array<int, int|string|array> $keys
      *
      * @return Expectation<TValue>
      */
     public function toHaveKeys(array $keys): Expectation
     {
-        foreach ($keys as $key) {
-            $this->toHaveKey($key);
+        foreach ($keys as $k => $key) {
+            if (is_array($key)) {
+                $this->toHaveKeys(array_keys(Arr::dot($key, $k . '.')));
+            } else {
+                $this->toHaveKey($key);
+            }
         }
 
         return $this;
