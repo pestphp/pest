@@ -595,7 +595,7 @@ final class Expectation
     /**
      * Asserts that the value array has the provided $keys.
      *
-     * @param array<int, int|string|array<int[]|string[]>> $keys
+     * @param array<int, int|string|array<int-string, mixed>> $keys
      *
      * @return Expectation<TValue>
      */

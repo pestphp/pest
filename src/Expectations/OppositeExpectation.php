@@ -30,7 +30,7 @@ final class OppositeExpectation
     /**
      * Asserts that the value array not has the provided $keys.
      *
-     * @param array<int, int|string|array<int[]|string[]>> $keys
+     * @param array<int, int|string|array<int-string, mixed>> $keys
      *
      * @return Expectation<TValue>
      */
