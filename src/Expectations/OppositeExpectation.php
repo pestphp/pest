@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Expectations;
 
 use Pest\Expectation;
+use Pest\Support\Arr;
 use PHPUnit\Framework\ExpectationFailedException;
 use SebastianBergmann\Exporter\Exporter;
 
@@ -29,15 +30,19 @@ final class OppositeExpectation
     /**
      * Asserts that the value array not has the provided $keys.
      *
-     * @param array<int, int|string> $keys
+     * @param array<int, int|string|array<int-string, mixed>> $keys
      *
      * @return Expectation<TValue>
      */
     public function toHaveKeys(array $keys): Expectation
     {
-        foreach ($keys as $key) {
+        foreach ($keys as $k => $key) {
             try {
-                $this->original->toHaveKey($key);
+                if (is_array($key)) {
+                    $this->toHaveKeys(array_keys(Arr::dot($key, $k . '.')));
+                } else {
+                    $this->original->toHaveKey($key);
+                }
             } catch (ExpectationFailedException) {
                 continue;
             }
