@@ -246,7 +246,7 @@ final class TestCall
      */
     public function __get(string $name): self
     {
-        return $this->addChain($name);
+        return $this->addChain(Backtrace::file(), Backtrace::line(), $name);
     }
 
     /**
@@ -256,7 +256,7 @@ final class TestCall
      */
     public function __call(string $name, array $arguments): self
     {
-        return $this->addChain($name, $arguments);
+        return $this->addChain(Backtrace::file(), Backtrace::line(), $name, $arguments);
     }
 
     /**
@@ -264,11 +264,11 @@ final class TestCall
      *
      * @param array<int, mixed>|null $arguments
      */
-    private function addChain(string $name, array $arguments = null): self
+    private function addChain(string $file, int $line, string $name, array $arguments = null): self
     {
         $this->testCaseMethod
             ->chains
-            ->add(Backtrace::file(), Backtrace::line(), $name, $arguments);
+            ->add($file, $line, $name, $arguments);
 
         if ($this->descriptionLess) {
             $exporter = new Exporter();
