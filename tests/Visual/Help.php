@@ -8,7 +8,7 @@ test('visual snapshot of help command output', function () {
 
     if (getenv('REBUILD_SNAPSHOTS')) {
         $outputBuffer = new BufferedOutput();
-        $plugin = new Help($outputBuffer);
+        $plugin       = new Help($outputBuffer);
 
         $plugin();
 
