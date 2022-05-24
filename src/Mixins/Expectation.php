@@ -800,6 +800,22 @@ final class Expectation
     }
 
     /**
+     * @param class-string $class
+     *
+     * @return Expectation<TValue>
+     */
+    public function toContainOnlyInstancesOf(string $class): Expectation
+    {
+        if (!is_iterable($this->value)) {
+            InvalidExpectationValue::expected('iterable');
+        }
+
+        Assert::assertContainsOnlyInstancesOf($class, $this->value);
+
+        return $this;
+    }
+
+    /**
      * Asserts that executing value throws an exception.
      *
      * @param (Closure(Throwable): mixed)|string $exception
