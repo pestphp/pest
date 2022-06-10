@@ -45,8 +45,8 @@
         ]
     },
     "require-dev": {
-        "illuminate/console": "^9.13.0",
-        "illuminate/support": "^9.13.0",
+        "illuminate/console": "^9.17.0",
+        "illuminate/support": "^9.17.0",
         "laravel/dusk": "^6.24.0",
         "pestphp/pest-dev-tools": "dev-master"
     },
