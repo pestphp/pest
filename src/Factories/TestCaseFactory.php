@@ -138,7 +138,7 @@ final class TestCaseFactory
 
         $hasPrintableTestCaseClassFQN = sprintf('\%s', HasPrintableTestCaseName::class);
         $traitsCode                   = sprintf('use %s;', implode(', ', array_map(
-                static fn ($trait): string => sprintf('\%s', $trait), $this->traits))
+            static fn ($trait): string => sprintf('\%s', $trait), $this->traits))
         );
 
         $partsFQN  = explode('\\', $classFQN);
