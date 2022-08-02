@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace Pest\Logging;
 
-use PHPUnit\Util\Printer;
+use Pest\Support\Printer;
 
 /**
  * @internal This class is not covered by the backward compatibility promise for PHPUnit

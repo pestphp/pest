@@ -8,8 +8,15 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
+ * @phpstan-ignore-next-line
  */
-abstract class IgnorableTestCase extends TestCase
+class IgnorableTestCase extends TestCase
 {
-    // ..
+    /**
+     * @test
+     */
+    public function fake(): void
+    {
+        self::markTestIncomplete();
+    }
 }
