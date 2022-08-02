@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Pest\Bootstrappers;
 
 use Pest\Support\Str;
+
 use function Pest\testDirectory;
+
 use Pest\TestSuite;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
