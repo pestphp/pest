@@ -40,8 +40,14 @@ test('fails if the number of iterable items is greater than the number of expect
 test('it works with associative arrays', function () {
     expect(['foo' => 'bar', 'baz' => 'boom'])
         ->sequence(
-            function ($expectation, $key) { $expectation->toEqual('bar'); $key->toEqual('foo'); },
-            function ($expectation, $key) { $expectation->toEqual('boom'); $key->toEqual('baz'); },
+            function ($expectation, $key) {
+                $expectation->toEqual('bar');
+                $key->toEqual('foo');
+            },
+            function ($expectation, $key) {
+                $expectation->toEqual('boom');
+                $key->toEqual('baz');
+            },
         );
 });
 

@@ -15,7 +15,7 @@ test('visual snapshot of help command output', function () {
         file_put_contents($snapshot, $outputBuffer->fetch());
     }
 
-    $output = function () {
+    $output      = function () {
         $process = (new Symfony\Component\Process\Process(['php', 'bin/pest', '--help']));
 
         $process->run();

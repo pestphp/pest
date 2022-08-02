@@ -1,7 +1,9 @@
 <?php
 
 use Pest\Plugins\Version;
+
 use function Pest\version;
+
 use Symfony\Component\Console\Output\BufferedOutput;
 
 it('outputs the version when --version is used', function () {

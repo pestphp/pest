@@ -58,7 +58,7 @@ final class UsesCall
      */
     public function in(string ...$targets): void
     {
-        $targets = array_map(function ($path): string {
+        $targets       = array_map(function ($path): string {
             $startChar = DIRECTORY_SEPARATOR;
 
             if ('\\' === DIRECTORY_SEPARATOR || preg_match('~\A[A-Z]:(?![^/\\\\])~i', $path) > 0) {

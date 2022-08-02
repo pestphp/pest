@@ -8,7 +8,7 @@ test('visual snapshot of test suite on success', function () {
         'success.txt',
     ]);
 
-    $output = function () use ($testsPath) {
+    $output      = function () use ($testsPath) {
         $process = (new Symfony\Component\Process\Process(['php', 'bin/pest'], dirname($testsPath), ['EXCLUDE' => 'integration', 'REBUILD_SNAPSHOTS' => false, 'PARATEST' => 0]));
 
         $process->run();

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Expectations;
 
 use function expect;
+
 use Pest\Expectation;
 
 /**

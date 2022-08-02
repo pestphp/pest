@@ -2,7 +2,7 @@
 
 use Symfony\Component\Process\Process;
 
-$run = function (string $target, $decorated = false) {
+$run         = function (string $target, $decorated = false) {
     $process = new Process(['php', 'bin/pest', $target], dirname(__DIR__, 2));
 
     $process->run();
@@ -10,7 +10,7 @@ $run = function (string $target, $decorated = false) {
     return $decorated ? $process->getOutput() : preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $process->getOutput());
 };
 
-$snapshot = function ($name) {
+$snapshot      = function ($name) {
     $testsPath = dirname(__DIR__);
 
     return file_get_contents(implode(DIRECTORY_SEPARATOR, [
