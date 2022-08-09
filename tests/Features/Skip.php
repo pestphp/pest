@@ -44,3 +44,7 @@ it('can user higher order callables and skip')
     ->skip(function () { return $this->shouldSkip; })
     ->expect(function () { return $this->shouldSkip; })
     ->toBeFalse();
+
+it('skip unless group integration')
+    ->skipUnlessGroup('integration')
+    ->assertTrue(true);

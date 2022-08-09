@@ -15,6 +15,7 @@ use Pest\Support\HigherOrderCallables;
 use Pest\Support\NullClosure;
 use Pest\TestSuite;
 use SebastianBergmann\Exporter\Exporter;
+use Symfony\Component\Console\Input\ArgvInput;
 
 /**
  * @internal
@@ -170,6 +171,17 @@ final class TestCall
             ->addWhen($condition, Backtrace::file(), Backtrace::line(), 'markTestSkipped', [$message]);
 
         return $this;
+    }
+
+    /**
+     * Skips the current test when no set group.
+     */
+    public function skipUnlessGroup(string $group, string $message = ''): TestCall
+    {
+        $has = (new ArgvInput())->hasParameterOption("--group={$group}");
+
+        return $this->skip(!$has, $message)
+            ->group($group);
     }
 
     /**
