@@ -178,7 +178,7 @@ final class TestCall
      */
     public function skipUnlessGroup(string $group, string $message = ''): TestCall
     {
-        $has = (new ArgvInput())->hasParameterOption("--group={$group}");
+        $has = ((new ArgvInput())->getParameterOption('--group') === $group);
 
         return $this->skip(!$has, $message)
             ->group($group);
