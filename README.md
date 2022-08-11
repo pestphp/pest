@@ -26,6 +26,7 @@ We would like to extend our thanks to the following sponsors for funding Pest de
 ### Platinum Sponsors
 
 - **[Advent](https://advent.dev)**
+- **[Localazy](https://localazy.com)**
 - **[Spatie](https://spatie.be)**
 - **[Worksome](https://www.worksome.com/)**
 
