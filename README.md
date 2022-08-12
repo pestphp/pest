@@ -36,6 +36,7 @@ We would like to extend our thanks to the following sponsors for funding Pest de
 - [Auth0](https://auth0.com)
 - [Codecourse](https://codecourse.com/)
 - [Fathom Analytics](https://usefathom.com/)
+- [Laracasts](https://laracasts.com/)
 - [Meema](https://meema.io)
 - [Scout APM](https://scoutapm.com)
 
