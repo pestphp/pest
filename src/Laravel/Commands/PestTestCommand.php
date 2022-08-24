@@ -16,7 +16,7 @@ use Pest\TestSuite;
 /**
  * @internal
  */
-final class PestTestCommand extends Command
+class PestTestCommand extends Command
 {
     /**
      * The console command name.
