@@ -220,6 +220,31 @@ final class TestCaseFactory
                     $traitsCode
 
                     private static \$__filename = '$filename';
+
+                    private array \$dynamicProperties = [];
+
+                    public function __set(\$name, \$value)
+                    {
+                        \$this->dynamicProperties[\$name] = \$value;
+
+
+                        dump(\$this->dynamicProperties);
+
+                    }
+
+                    public function __get(\$name)
+                    {
+                        if(isset(\$this->dynamicProperties[\$name])){
+                            return \$this->dynamicProperties[\$name];
+                        }
+
+                        return \$this->\$name;
+                    }
+
+                    public function __isset(\$name)
+                    {
+                        return isset(\$this->dynamicProperties[\$name]);
+                    }
                 }
             ");
         } catch (ParseError $caught) {
