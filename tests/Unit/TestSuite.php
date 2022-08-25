@@ -8,7 +8,7 @@ use Pest\TestSuite;
 
 it('does not allow to add the same test description twice', function () {
     $testSuite = new TestSuite(getcwd(), 'tests');
-    $test = function () {};
+    $test      = function () {};
     $testSuite->tests->set(new TestCaseFactory(__FILE__, 'foo', $test));
     $testSuite->tests->set(new TestCaseFactory(__FILE__, 'foo', $test));
 })->throws(
@@ -18,7 +18,7 @@ it('does not allow to add the same test description twice', function () {
 
 it('alerts users about tests with arguments but no input', function () {
     $testSuite = new TestSuite(getcwd(), 'tests');
-    $test = function (int $arg) {};
+    $test      = function (int $arg) {};
     $testSuite->tests->set(new TestCaseFactory(__FILE__, 'foo', $test));
 })->throws(
     DatasetMissing::class,
@@ -27,7 +27,7 @@ it('alerts users about tests with arguments but no input', function () {
 
 it('can return an array of all test suite filenames', function () {
     $testSuite = TestSuite::getInstance(getcwd(), 'tests');
-    $test = function () {};
+    $test      = function () {};
     $testSuite->tests->set(new TestCaseFactory(__FILE__, 'foo', $test));
     $testSuite->tests->set(new TestCaseFactory(__FILE__, 'bar', $test));
 
@@ -39,9 +39,9 @@ it('can return an array of all test suite filenames', function () {
 
 it('can filter the test suite filenames to those with the only method', function () {
     $testSuite = new TestSuite(getcwd(), 'tests');
-    $test = function () {};
+    $test      = function () {};
 
-    $testWithOnly = new TestCaseFactory(__FILE__, 'foo', $test);
+    $testWithOnly       = new TestCaseFactory(__FILE__, 'foo', $test);
     $testWithOnly->only = true;
     $testSuite->tests->set($testWithOnly);
 
@@ -59,7 +59,7 @@ it('does not filter the test suite filenames to those with the only method when 
 
     $test = function () {};
 
-    $testWithOnly = new TestCaseFactory(__FILE__, 'foo', $test);
+    $testWithOnly       = new TestCaseFactory(__FILE__, 'foo', $test);
     $testWithOnly->only = true;
     $testSuite->tests->set($testWithOnly);
 

@@ -23,7 +23,7 @@ test('default php unit tests', function () {
 });
 
 it('removes warnings', function () {
-    $testSuite = new TestSuite();
+    $testSuite       = new TestSuite();
     $warningTestCase = new WarningTestCase('No tests found in class "Pest\TestCase".');
     $testSuite->addTest($warningTestCase);
 

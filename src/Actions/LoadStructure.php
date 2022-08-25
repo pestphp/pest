@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace Pest\Actions;
 
 use Pest\Support\Str;
+
 use function Pest\testDirectory;
+
 use PHPUnit\Util\FileLoader;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use SplFileInfo;
 
 /**
  * @internal
@@ -50,6 +53,7 @@ final class LoadStructure
                 $directory = new RecursiveDirectoryIterator($filename);
                 $iterator  = new RecursiveIteratorIterator($directory);
                 foreach ($iterator as $file) {
+                    /** @var SplFileInfo $file */
                     $filename = $file->__toString();
                     if (Str::endsWith($filename, '.php') && file_exists($filename)) {
                         require_once $filename;
