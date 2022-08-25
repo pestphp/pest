@@ -11,7 +11,6 @@ use function Pest\testDirectory;
 use PHPUnit\Util\FileLoader;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use SplFileInfo;
 
 /**
  * @internal
