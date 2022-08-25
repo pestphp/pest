@@ -179,7 +179,6 @@ final class JUnit extends Printer implements TestListener
         $this->doAddSkipped();
     }
 
-    /** @phpstan-ignore-next-line */
     public function startTestSuite(TestSuite $suite): void
     {
         $testSuite = $this->document->createElement('testsuite');
@@ -218,7 +217,6 @@ final class JUnit extends Printer implements TestListener
         $this->testSuiteTimes[$this->testSuiteLevel]      = 0;
     }
 
-    /** @phpstan-ignore-next-line */
     public function endTestSuite(TestSuite $suite): void
     {
         $this->testSuites[$this->testSuiteLevel]->setAttribute(

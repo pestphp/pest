@@ -10,7 +10,7 @@ it('gets file name from closure', function () {
 });
 
 it('gets property values', function () {
-    $class = new class() {
+    $class           = new class() {
         private $foo = 'bar';
     };
 
