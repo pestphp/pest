@@ -73,7 +73,7 @@ final class Reflection
 
         return $test === null
             ? static::bindCallable($callable)
-            : Closure::fromCallable($callable)->bindTo($test)(...$test->getProvidedData());
+            : Closure::fromCallable($callable)->bindTo($test)(...$test->providedData());
     }
 
     /**

@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="./vendor/phpunit/phpunit/phpunit.xsd"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd"
          colors="true"
+         cacheDirectory=".phpunit.cache"
 >
-    <testsuites>
-        <testsuite name="default">
-            <directory suffix=".php">./tests</directory>
-        </testsuite>
-    </testsuites>
-    <coverage processUncoveredFiles="true">
-        <include>
-            <directory suffix=".php">./src</directory>
-        </include>
-    </coverage>
+  <testsuites>
+    <testsuite name="default">
+      <directory suffix=".php">./tests</directory>
+    </testsuite>
+  </testsuites>
+  <coverage>
+    <include>
+      <directory suffix=".php">./src</directory>
+    </include>
+  </coverage>
 </phpunit>
