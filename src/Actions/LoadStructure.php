@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Pest\Actions;
 
 use Pest\Support\Str;
+
 use function Pest\testDirectory;
+
 use PHPUnit\Util\FileLoader;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
