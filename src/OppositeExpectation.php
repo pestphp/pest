@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Pest;
 
+use Pest\Support\Exporter;
 use PHPUnit\Framework\ExpectationFailedException;
-use SebastianBergmann\Exporter\Exporter;
 
 /**
  * @internal

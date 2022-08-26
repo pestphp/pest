@@ -7,7 +7,7 @@ namespace Pest;
 use Closure;
 use Pest\Exceptions\DatasetAlreadyExist;
 use Pest\Exceptions\DatasetDoesNotExist;
-use SebastianBergmann\Exporter\Exporter;
+use Pest\Support\Exporter;
 use Traversable;
 
 /**

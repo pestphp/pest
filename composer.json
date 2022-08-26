@@ -33,7 +33,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/PHPUnit/"
+            "Tests\\": "tests/PHPUnit/",
+            "Tests\\Support\\": "tests/Support/"
         },
         "files": [
             "tests/Autoload.php"

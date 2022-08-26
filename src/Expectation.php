@@ -11,13 +11,13 @@ use InvalidArgumentException;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\RetrievesValues;
 use Pest\Support\Arr;
+use Pest\Support\Exporter;
 use Pest\Support\NullClosure;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Constraint\Constraint;
 use PHPUnit\Framework\ExpectationFailedException;
 use ReflectionFunction;
 use ReflectionNamedType;
-use SebastianBergmann\Exporter\Exporter;
 use Throwable;
 
 /**
