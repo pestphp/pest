@@ -101,12 +101,6 @@
   ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (...)) #2
   ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (...)) #1
   ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (...)) #2
-  ✓ it formats enums data with (array(Tests\Support\Colors Enum (green), Tests\Support\Colors Enum (white), Tests\Support\BackedColors Enum (green, 'Green')))
-  ✓ it formats enums data with (Tests\Support\Colors Enum (red))
-  ✓ it formats enums data with (Tests\Support\Colors Enum (white))
-  ✓ it formats enums data with (Tests\Support\BackedColors Enum (green, 'Green'))
-  ✓ it formats enums data with (Tests\Support\BackedColors Enum (red, 'Red'))
-  ✓ it formats enums data with (Tests\Support\BackedColors Enum (white, 'White'))
 
    PASS  Tests\Features\Exceptions
   ✓ it gives access the the underlying expectException
@@ -561,8 +555,8 @@
 
    PASS  Tests\Features\PendingHigherOrderTests
   ✓ get 'foo'
-  ✓ get 'foo' → get 'bar' → expect true → toBeTrue 
-  ✓ get 'foo' → expect true → toBeTrue 
+  ✓ get 'foo' → get 'bar' → expect true → toBeTrue
+  ✓ get 'foo' → expect true → toBeTrue
 
    WARN  Tests\Features\Skip
   ✓ it do not skips
@@ -728,5 +722,4 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 486 passed
-  
+  Tests:  4 incompleted, 9 skipped, 480 passed

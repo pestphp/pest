@@ -4,8 +4,7 @@ use Pest\Datasets;
 use Pest\Exceptions\DatasetAlreadyExist;
 use Pest\Exceptions\DatasetDoesNotExist;
 use Pest\Plugin;
-use Tests\Support\BackedColors;
-use Tests\Support\Colors;
+
 
 beforeEach(function () {
     $this->foo = 'bar';
@@ -245,16 +244,3 @@ it('can resolve a dataset after the test case is available with shared yield set
 it('can resolve a dataset after the test case is available with shared array sets', function ($result) {
     expect($result)->toBeInt()->toBeLessThan(3);
 })->with('bound.array');
-
-if (version_compare('8.1.0', PHP_VERSION, '<')) {
-    it('formats enums data', function () {
-        expect(true)->toBeTrue();
-    })->with([
-        [[Colors::green, Colors::white, BackedColors::green]],
-        Colors::red,
-        Colors::white,
-        BackedColors::green,
-        BackedColors::red,
-        BackedColors::white,
-    ]);
-}
