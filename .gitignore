@@ -4,6 +4,7 @@ composer.lock
 /vendor/
 coverage.xml
 .phpunit.result.cache
+.phpunit.cache
 /.php-cs-fixer.php
 .php-cs-fixer.cache
 .temp/coverage.php

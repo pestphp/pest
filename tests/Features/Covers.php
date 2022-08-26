@@ -60,13 +60,13 @@ it('guesses if the given argument is a class or function', function () {
 })->covers(TestCoversClass3::class, 'testCoversFunction');
 
 it('appends CoversNothing to method attributes', function () {
-    $phpDoc = (new ReflectionClass($this))->getMethod($this->getName());
+    $phpDoc = (new ReflectionClass($this))->getMethod($this->name());
 
     expect(str_contains($phpDoc->getDocComment(), '* @coversNothing'))->toBeTrue();
 })->coversNothing();
 
 it('does not append CoversNothing to other methods', function () {
-    $phpDoc = (new ReflectionClass($this))->getMethod($this->getName());
+    $phpDoc = (new ReflectionClass($this))->getMethod($this->name());
 
     expect(str_contains($phpDoc->getDocComment(), '* @coversNothing'))->toBeFalse();
 });

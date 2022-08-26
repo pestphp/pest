@@ -186,6 +186,7 @@ final class TestCaseFactory
                 use Pest\TestSuite as __PestTestSuite;
 
                 $classAttributesCode
+                #[AllowDynamicProperties]
                 final class $className extends $baseClass implements $hasPrintableTestCaseClassFQN {
                     $traitsCode
 
