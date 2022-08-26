@@ -216,7 +216,7 @@ final class TestCaseFactory
             eval("
                 namespace $namespace;
 
-                #[AllowDynamicProperties]
+                #[\AllowDynamicProperties]
                 final class $className extends $baseClass implements $hasPrintableTestCaseClassFQN {
                     $traitsCode
 

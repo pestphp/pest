@@ -86,6 +86,7 @@ final class TeamCity extends DefaultResultPrinter
         foreach ($filteredResults as $key => $info) {
             $this->writeWithColor($info['color'], $info['count'] . " $key", false);
 
+            /* @phpstan-ignore-next-line */
             if ($key !== array_reverse(array_keys($filteredResults))[0]) {
                 $this->write(', ');
             }

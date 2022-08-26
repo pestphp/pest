@@ -102,6 +102,14 @@
   ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (...)) #1
   ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (...)) #2
 
+   PASS  Tests\Features\EnumDatasets
+  ✓ it formats enums data with (array(Colors Enum (green), Colors Enum (white), BackedColors Enum (green, 'Green')))
+  ✓ it formats enums data with (Colors Enum (red))
+  ✓ it formats enums data with (Colors Enum (white))
+  ✓ it formats enums data with (BackedColors Enum (green, 'Green'))
+  ✓ it formats enums data with (BackedColors Enum (red, 'Red'))
+  ✓ it formats enums data with (BackedColors Enum (white, 'White'))
+
    PASS  Tests\Features\Exceptions
   ✓ it gives access the the underlying expectException
   ✓ it catch exceptions
@@ -722,5 +730,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 480 passed
+  Tests:  4 incompleted, 9 skipped, 486 passed
   
