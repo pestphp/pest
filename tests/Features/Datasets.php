@@ -5,7 +5,6 @@ use Pest\Exceptions\DatasetAlreadyExist;
 use Pest\Exceptions\DatasetDoesNotExist;
 use Pest\Plugin;
 
-
 beforeEach(function () {
     $this->foo = 'bar';
 });
