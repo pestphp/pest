@@ -555,8 +555,8 @@
 
    PASS  Tests\Features\PendingHigherOrderTests
   ✓ get 'foo'
-  ✓ get 'foo' → get 'bar' → expect true → toBeTrue
-  ✓ get 'foo' → expect true → toBeTrue
+  ✓ get 'foo' → get 'bar' → expect true → toBeTrue 
+  ✓ get 'foo' → expect true → toBeTrue 
 
    WARN  Tests\Features\Skip
   ✓ it do not skips
@@ -723,3 +723,4 @@
   ✓ it uses correct parent class
 
   Tests:  4 incompleted, 9 skipped, 480 passed
+  
