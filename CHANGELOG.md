@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.22.0 (2022-08-28)](https://github.com/pestphp/pest/compare/v1.21.3...v1.22.0)
+### Added
+- Initial PHP 8.2 support ([#563](https://github.com/pestphp/pest/pull/563))
+
 ## [v1.21.3 (2022-05-12)](https://github.com/pestphp/pest/compare/v1.21.2...v1.21.3)
 ### Fixed
 - Debug of high order tests ([c1b32b9](https://github.com/pestphp/pest/commit/c1b32b9ffb5134803c490592454b11b8c05ea27d))
