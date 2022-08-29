@@ -722,10 +722,6 @@ final class Expectation
             $valueAsArray = (array) $this->value;
         }
 
-        if (is_object($array) && method_exists($array, 'toArray')) {
-            $array = $array->toArray();
-        }
-
         foreach ($array as $key => $value) {
             Assert::assertArrayHasKey($key, $valueAsArray);
 
