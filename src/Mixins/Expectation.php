@@ -714,7 +714,7 @@ final class Expectation
      *
      * @return Expectation<TValue>
      */
-    public function toMatchArray(iterable|object $array): Expectation
+    public function toMatchArray(iterable $array): Expectation
     {
         if (is_object($this->value) && method_exists($this->value, 'toArray')) {
             $valueAsArray = $this->value->toArray();
@@ -743,11 +743,11 @@ final class Expectation
      * Asserts that the value object matches a subset
      * of the properties of an given object.
      *
-     * @param iterable<string, mixed>|object $object
+     * @param iterable<string, mixed> $object
      *
      * @return Expectation<TValue>
      */
-    public function toMatchObject(iterable|object $object): Expectation
+    public function toMatchObject(iterable $object): Expectation
     {
         foreach ((array) $object as $property => $value) {
             if (!is_object($this->value) && !is_string($this->value)) {

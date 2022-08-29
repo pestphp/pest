@@ -17,6 +17,16 @@ test('pass', function () {
     ]);
 });
 
+test('pass with class', function () {
+    expect(new class() {
+        public $name  = 'Nuno';
+        public $email = 'enunomaduro@gmail.com';
+    })->toMatchObject([
+        'name'  => 'Nuno',
+        'email' => 'enunomaduro@gmail.com',
+    ]);
+});
+
 test('failures', function () {
     expect($this->user)->toMatchObject([
         'name'  => 'Not the same name',
