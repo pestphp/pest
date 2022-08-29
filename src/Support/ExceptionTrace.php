@@ -44,6 +44,7 @@ final class ExceptionTrace
      */
     public static function removePestReferences(Throwable $t): void
     {
+        /* @phpstan-ignore-next-line */
         if (!property_exists($t, 'serializableTrace')) {
             return;
         }
