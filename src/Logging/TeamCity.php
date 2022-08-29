@@ -101,7 +101,6 @@ final class TeamCity extends DefaultResultPrinter
     public function startTestSuite(TestSuite $suite): void
     {
         $this->testSuite = $suite;
-        $this->state->testCaseName = $this->testSuite->getName();
 
         if ($this->state->suiteTotalTests === null) {
             $this->state->suiteTotalTests = $suite->count();
@@ -139,6 +138,8 @@ final class TeamCity extends DefaultResultPrinter
             $this->storedTests[] = ['test' => $test, 'status' => '', 'time' => $time];
             $this->state->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::PASS));
         }
+
+        $this->state->testCaseName = $this->state->suiteTests[0]->testCaseName;
     }
 
     /**
@@ -445,35 +446,7 @@ final class TeamCity extends DefaultResultPrinter
                 // Write error headline for test
                 $this->style->writeErrorsSummary($currentState, false);
 
-                // Add comparison info
-                // Taken from vendor/phpunit/phpunit/src/Util/Log/TeamCity.php:104:126
-                // Added to handle comparisonFailure type events.
-                $parameters = [];
-                if (isset($testData['error']) && $testData['error'] instanceof ExpectationFailedException) {
-                    $comparisonFailure = $testData['error']->getComparisonFailure();
-
-                    if ($comparisonFailure instanceof ComparisonFailure) {
-                        $expectedString = $comparisonFailure->getExpectedAsString();
-
-                        if ($expectedString === null || empty($expectedString)) {
-                            $expectedString = self::getPrimitiveValueAsString($comparisonFailure->getExpected());
-                        }
-
-                        $actualString = $comparisonFailure->getActualAsString();
-
-                        if ($actualString === null || empty($actualString)) {
-                            $actualString = self::getPrimitiveValueAsString($comparisonFailure->getActual());
-                        }
-
-                        if ($actualString !== null && $expectedString !== null) {
-                            $parameters['type'] = 'comparisonFailure';
-                            $parameters['actual'] = $actualString;
-                            $parameters['expected'] = $expectedString;
-                        }
-                    }
-                }
-
-                $this->printEventTestFailed($testData, $message, $parameters);
+                $this->printEventTestFailed($testData, $message, []);
             } elseif (in_array($testData['status'], [CollisionTestResult::SKIPPED, CollisionTestResult::INCOMPLETE])) {
                 // Write PHPUnit output for skipped and incomplete tests.
                 $this->phpunitTeamCity->printIgnoredTest($testData['test']->getName(), $testData['throwable'], $testData['time']);
