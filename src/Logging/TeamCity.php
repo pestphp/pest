@@ -61,7 +61,10 @@ final class TeamCity extends DefaultResultPrinter
     private $bufferedOutput;
 
     /** @var State */
-    private $state;
+    private $stateForCurrentTestSuite;
+
+    /** @var State */
+    private $stateForAllTestsSuites;
 
     /**
      * If the test suite has failed.
@@ -75,12 +78,19 @@ final class TeamCity extends DefaultResultPrinter
      *
      * @var array
      */
-    private $storedTests = [];
+    private $storedTestSuites = [];
 
     /**
      * @var TestSuite
      */
-    private $testSuite;
+    private $currentTestSuite;
+
+    /**
+     * Total time of all run tests.
+     *
+     * @var float
+     */
+    private $totalTestsTime = 0;
 
     /**
      * @param resource|string|null $out
@@ -95,15 +105,16 @@ final class TeamCity extends DefaultResultPrinter
 
         $this->phpunitTeamCity = new \PHPUnit\Util\Log\TeamCity($out, $verbose, $colors);
 
-        $this->state = $this->createNewEmptyState();
+        $this->stateForAllTestsSuites = $this->createNewEmptyState();
     }
 
     public function startTestSuite(TestSuite $suite): void
     {
-        $this->testSuite = $suite;
+        $this->stateForCurrentTestSuite = $this->createNewEmptyState();
+        $this->currentTestSuite         = $suite;
 
-        if ($this->state->suiteTotalTests === null) {
-            $this->state->suiteTotalTests = $suite->count();
+        if ($this->stateForCurrentTestSuite->suiteTotalTests === null) {
+            $this->stateForCurrentTestSuite->suiteTotalTests = $suite->count();
         }
     }
 
@@ -114,6 +125,13 @@ final class TeamCity extends DefaultResultPrinter
      */
     public function endTestSuite(TestSuite $suite): void
     {
+        // Store current state of test suite so we are prepared for a new one
+        $this->storedTestSuites[$this->currentTestSuite->getName()]['state'] = $this->stateForCurrentTestSuite;
+
+        // Prevent test suite which is only a directory to change name
+        if (!is_dir($suite->getName()) && !file_exists($suite->getName())) {
+            $this->storedTestSuites[$this->currentTestSuite->getName()]['name'] = $this->getReadableTestSuiteName($suite);
+        }
     }
 
     /**
@@ -129,12 +147,25 @@ final class TeamCity extends DefaultResultPrinter
      */
     public function endTest(Test $test, float $time): void
     {
-        if (!$this->state->existsInTestCase($test)) {
-            $this->storedTests[] = ['test' => $test, 'status' => '', 'time' => $time];
-            $this->state->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::PASS));
+        // If current test is not yet in current test suite tests, it means it is a passing test.
+        // Still, we need to add it now.
+        if (!$this->stateForCurrentTestSuite->existsInTestCase($test)) {
+            $this->storedTestSuites[$this->currentTestSuite->getName()]['tests'][] = [
+                'test'   => $test,
+                'status' => '',
+                'time'   => $time,
+                'state'  => CollisionTestResult::fromTestCase($test, CollisionTestResult::PASS),
+            ];
+
+            $this->stateForCurrentTestSuite->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::PASS));
+            $this->stateForAllTestsSuites->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::PASS));
         }
 
-        $this->state->testCaseName = $this->state->suiteTests[0]->testCaseName;
+        // Add passing tests to state for all tests too.
+        if (!$this->stateForAllTestsSuites->existsInTestCase($test)) {
+            $this->stateForCurrentTestSuite->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::PASS));
+            $this->stateForAllTestsSuites->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::PASS));
+        }
     }
 
     /**
@@ -173,25 +204,35 @@ final class TeamCity extends DefaultResultPrinter
     public function printResult(TestResult $result): void
     {
         // Write a list showing the status of all tests (passed, failed, skipped, etc.).
-        $this->style->writeCurrentTestCaseSummary($this->state);
-
-        if ($this->state->suiteTotalTests === null) {
-            $this->state->suiteTotalTests = $this->testSuite->count();
+        // For all test suites.
+        foreach ($this->storedTestSuites as $testSuiteWithTests) {
+            $currentState                = $testSuiteWithTests['state'];
+            $currentState->headerPrinted = false;
+            $currentState->testCaseName  = $testSuiteWithTests['name'];
+            $this->style->writeCurrentTestCaseSummary($currentState);
         }
 
-        $this->printTestSuiteStartedEvent();
-
-        if ($result->count() === 0) {
-            $this->style->writeWarning('No tests executed!');
+        if ($this->stateForCurrentTestSuite->suiteTotalTests === null) {
+            $this->stateForCurrentTestSuite->suiteTotalTests = $this->currentTestSuite->count();
         }
 
-        // Loop through all tests, start them, write output, and end them
-        $totalTime = $this->handleStoredTestsAndWriteOutput();
+        // Write test output for each test-suite
+        foreach ($this->storedTestSuites as $testSuiteWithTests) {
+            $this->printTestSuiteStartedEvent($testSuiteWithTests['name']);
+
+            if ($result->count() === 0) {
+                $this->style->writeWarning('No tests executed!');
+            }
+
+            // Loop through all tests, start them, write output, and end them
+            $totalTime = $this->handleStoredTestsAndWriteOutput($testSuiteWithTests['tests']);
+
+            $this->printTestSuiteFinishedEvent($testSuiteWithTests['name']);
+        }
 
         // Show how many tests passed, failed, etc. and the time
-        $this->style->writeRecap($this->state, $this->createTimerWithTotalTime($totalTime));
-
-        $this->printTestSuiteFinishedEvent();
+        $this->stateForAllTestsSuites->suiteTotalTests = $this->stateForAllTestsSuites->testSuiteTestsCount();
+        $this->style->writeRecap($this->stateForAllTestsSuites, $this->createTimerWithTotalTime($this->totalTestsTime));
     }
 
     /**
@@ -199,15 +240,16 @@ final class TeamCity extends DefaultResultPrinter
      */
     public function addFailure(Test $test, AssertionFailedError $error, float $time): void
     {
-        $this->failed        = true;
-        $this->storedTests[] = [
+        $this->failed                                                          = true;
+        $this->storedTestSuites[$this->currentTestSuite->getName()]['tests'][] = [
             'test'   => $test,
             'status' => CollisionTestResult::FAIL,
             'error'  => $error,
             'time'   => $time,
             'state'  => CollisionTestResult::fromTestCase($test, CollisionTestResult::FAIL, $error),
         ];
-        $this->state->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::FAIL, $error));
+        $this->stateForCurrentTestSuite->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::FAIL, $error));
+        $this->stateForAllTestsSuites->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::FAIL, $error));
     }
 
     /**
@@ -215,13 +257,14 @@ final class TeamCity extends DefaultResultPrinter
      */
     public function addSkippedTest(Test $test, Throwable $t, float $time): void
     {
-        $this->storedTests[] = [
+        $this->storedTestSuites[$this->currentTestSuite->getName()]['tests'][] = [
             'test'      => $test,
             'status'    => CollisionTestResult::SKIPPED,
             'throwable' => $t,
             'time'      => $time,
         ];
-        $this->state->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::SKIPPED, $t));
+        $this->stateForCurrentTestSuite->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::SKIPPED, $t));
+        $this->stateForAllTestsSuites->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::SKIPPED, $t));
     }
 
     /**
@@ -229,8 +272,8 @@ final class TeamCity extends DefaultResultPrinter
      */
     public function addError(Test $test, Throwable $t, float $time): void
     {
-        $this->failed        = true;
-        $this->storedTests[] = [
+        $this->failed                                                          = true;
+        $this->storedTestSuites[$this->currentTestSuite->getName()]['tests'][] = [
             'test'      => $test,
             'status'    => CollisionTestResult::FAIL,
             'throwable' => $t,
@@ -238,7 +281,8 @@ final class TeamCity extends DefaultResultPrinter
             'state'     => CollisionTestResult::fromTestCase($test, CollisionTestResult::FAIL, $t),
         ];
 
-        $this->state->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::FAIL, $t));
+        $this->stateForCurrentTestSuite->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::FAIL, $t));
+        $this->stateForAllTestsSuites->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::FAIL, $t));
     }
 
     /**
@@ -246,13 +290,14 @@ final class TeamCity extends DefaultResultPrinter
      */
     public function addWarning(Test $test, Warning $e, float $time): void
     {
-        $this->storedTests[] = [
+        $this->storedTestSuites[$this->currentTestSuite->getName()]['tests'][] = [
             'test'    => $test,
             'status'  => CollisionTestResult::WARN,
             'warning' => $e,
             'time'    => $time,
         ];
-        $this->state->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::WARN, $e));
+        $this->stateForCurrentTestSuite->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::WARN, $e));
+        $this->stateForAllTestsSuites->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::WARN, $e));
     }
 
     /**
@@ -260,13 +305,14 @@ final class TeamCity extends DefaultResultPrinter
      */
     public function addRiskyTest(Test $test, Throwable $t, float $time): void
     {
-        $this->storedTests[] = [
+        $this->storedTestSuites[$this->currentTestSuite->getName()]['tests'][] = [
             'test'      => $test,
             'status'    => CollisionTestResult::RISKY,
             'throwable' => $t,
             'time'      => $time,
         ];
-        $this->state->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::RISKY, $t));
+        $this->stateForCurrentTestSuite->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::RISKY, $t));
+        $this->stateForAllTestsSuites->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::RISKY, $t));
     }
 
     /**
@@ -274,22 +320,18 @@ final class TeamCity extends DefaultResultPrinter
      */
     public function addIncompleteTest(Test $test, Throwable $t, float $time): void
     {
-        $this->storedTests[] = [
+        $this->storedTestSuites[$this->currentTestSuite->getName()]['tests'][] = [
             'test'      => $test,
             'status'    => CollisionTestResult::INCOMPLETE,
             'throwable' => $t,
             'time'      => $time,
         ];
 
-        $this->state->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::INCOMPLETE, $t));
+        $this->stateForCurrentTestSuite->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::INCOMPLETE, $t));
+        $this->stateForAllTestsSuites->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::INCOMPLETE, $t));
     }
 
-    /**
-     * Determine if the test suite is made up of multiple smaller test suites.
-     *
-     * @param TestSuite<Test> $suite
-     */
-    private static function isCompoundTestSuite(TestSuite $suite): bool
+    private static function isPhpUnitTestSuite(TestSuite $suite): bool
     {
         return file_exists($suite->getName()) || !method_exists($suite->getName(), '__getFileName');
     }
@@ -357,74 +399,73 @@ final class TeamCity extends DefaultResultPrinter
         return State::from($dummyTest);
     }
 
-    protected function printTestSuiteStartedEvent()
+    protected function printTestSuiteStartedEvent(string $testSuiteName)
     {
-        $suiteName = $this->testSuite->getName();
+        $suiteName = $this->currentTestSuite->getName();
+
+        // TODO: check location hint
         $this->printEvent(self::TEST_SUITE_STARTED, [
-            self::NAME          => TeamCity::isCompoundTestSuite($this->testSuite) ? $suiteName : substr($suiteName, 2),
-            self::LOCATION_HINT => self::PROTOCOL . (TeamCity::isCompoundTestSuite($this->testSuite) ? $suiteName : $suiteName::__getFileName()),
+            self::NAME          => $testSuiteName,
+            self::LOCATION_HINT => self::PROTOCOL . (TeamCity::isPhpUnitTestSuite($this->currentTestSuite) ? $suiteName : $suiteName::__getFileName()),
         ]);
     }
 
-    protected function printTestStartedEvent($test1): void
+    protected function printTestSuiteFinishedEvent(string $testSuiteName): void
+    {
+        $suiteName = $this->currentTestSuite->getName();
+
+        // TODO: check location hint
+        $this->printEvent(self::TEST_SUITE_FINISHED, [
+            self::NAME          => $testSuiteName,
+            self::LOCATION_HINT => self::PROTOCOL . (TeamCity::isPhpUnitTestSuite($this->currentTestSuite) ? $suiteName : $suiteName::__getFileName()),
+        ]);
+    }
+
+    protected function printTestStartedEvent($test): void
     {
         $this->printEvent(self::TEST_STARTED, [
-            self::NAME => $test1->getName(),
+            self::NAME => $test->getName(),
             // @phpstan-ignore-next-line
-            self::LOCATION_HINT => self::PROTOCOL . $test1->toString(),
+            self::LOCATION_HINT => self::PROTOCOL . $test->toString(),
         ]);
     }
 
-    protected function handleStoredTestsAndWriteOutput()
+    protected function handleStoredTestsAndWriteOutput(array $testSuiteWithTests)
     {
-        $totalTime = 0;
-
-        foreach ($this->storedTests as $testData) {
-            $totalTime += $testData['time'];
+        foreach ($testSuiteWithTests as $testSuitTest) {
+            $this->totalTestsTime += $testSuitTest['time'];
 
             // Let's check first if the testCase is over.
-            if ($this->state->testCaseHasChanged($testData['test'])) {
-                $this->state->moveTo($testData['test']);
+            if ($this->stateForCurrentTestSuite->testCaseHasChanged($testSuitTest['test'])) {
+                $this->stateForCurrentTestSuite->moveTo($testSuitTest['test']);
             }
 
-            $this->printTestStartedEvent($testData['test']);
+            $this->printTestStartedEvent($testSuitTest['test']);
 
             // Write output depending on which type of test it is.
-            if ($testData['status'] === CollisionTestResult::FAIL) {
+            if ($testSuitTest['status'] === CollisionTestResult::FAIL) {
                 // Create message and details for TeamCity event.
-                $this->bufferedStyle->writeError($testData['error'] ?? $testData['throwable']);
+                $this->bufferedStyle->writeError($testSuitTest['error'] ?? $testSuitTest['throwable']);
                 $output              = $this->bufferedOutput->fetch();
                 [$message, $details] = explode("\n", $output, 2);
 
                 $currentState = $this->createNewEmptyState();
-                $currentState->add($testData['state']);
+                $currentState->add($testSuitTest['state']);
 
                 // Write error headline for test
                 $this->style->writeErrorsSummary($currentState, false);
 
-                $this->printEventTestFailed($testData, $message, []);
-            } elseif (in_array($testData['status'], [CollisionTestResult::SKIPPED, CollisionTestResult::INCOMPLETE])) {
+                $this->printEventTestFailed($testSuitTest, $message, []);
+            } elseif (in_array($testSuitTest['status'], [CollisionTestResult::SKIPPED, CollisionTestResult::INCOMPLETE])) {
                 // Write PHPUnit output for skipped and incomplete tests.
-                $this->phpunitTeamCity->printIgnoredTest($testData['test']->getName(), $testData['throwable'], $testData['time']);
-            } elseif ($testData['status'] === CollisionTestResult::WARN) {
+                $this->phpunitTeamCity->printIgnoredTest($testSuitTest['test']->getName(), $testSuitTest['throwable'], $testSuitTest['time']);
+            } elseif ($testSuitTest['status'] === CollisionTestResult::WARN) {
                 // Write PHPUnit output for test with warning.
-                $this->phpunitTeamCity->addWarning($testData['test'], $testData['warning'], $testData['time']);
+                $this->phpunitTeamCity->addWarning($testSuitTest['test'], $testSuitTest['warning'], $testSuitTest['time']);
             }
 
-            $this->printEventTestEnded($testData);
+            $this->printEventTestEnded($testSuitTest);
         }
-
-        return $totalTime;
-    }
-
-    protected function printTestSuiteFinishedEvent(): void
-    {
-        $suiteName = $this->testSuite->getName();
-
-        $this->printEvent(self::TEST_SUITE_FINISHED, [
-            self::NAME          => TeamCity::isCompoundTestSuite($this->testSuite) ? $suiteName : substr($suiteName, 2),
-            self::LOCATION_HINT => self::PROTOCOL . (TeamCity::isCompoundTestSuite($this->testSuite) ? $suiteName : $suiteName::__getFileName()),
-        ]);
     }
 
     protected function printEventTestFailed($testData, $message, array $parameters): void
@@ -454,5 +495,12 @@ final class TeamCity extends DefaultResultPrinter
         $uses = class_uses($test);
 
         return in_array(Testable::class, $uses, true);
+    }
+
+    public function getReadableTestSuiteName(TestSuite $testSuite): string
+    {
+        $testSuiteName = $testSuite->getName();
+
+        return $this->isPhpUnitTestSuite($testSuite) ? $testSuiteName : substr($testSuiteName, 2);
     }
 }
