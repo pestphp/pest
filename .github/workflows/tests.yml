@@ -8,13 +8,17 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        php: ['7.3', '7.4', '8.0', '8.1']
+        php: ['7.3', '7.4', '8.0', '8.1', '8.2']
         dependency-version: [prefer-lowest, prefer-stable]
         parallel: ['', '--parallel']
         exclude:
           - php: 8.1
             os: macos-latest
           - php: 8.1
+            os: windows-latest
+          - php: 8.2
+            os: macos-latest
+          - php: 8.2
             os: windows-latest
 
     name: PHP ${{ matrix.php }} - ${{ matrix.os }} - ${{ matrix.dependency-version }} - ${{ matrix.parallel }}
