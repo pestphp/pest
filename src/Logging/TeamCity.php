@@ -11,8 +11,10 @@ use NunoMaduro\Collision\Adapters\Phpunit\TestResult as CollisionTestResult;
 use NunoMaduro\Collision\Adapters\Phpunit\Timer;
 use Pest\Concerns\Logging\WritesToConsole;
 use Pest\Concerns\Testable;
+
+use const PHP_EOL;
+
 use PHPUnit\Framework\AssertionFailedError;
-use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\Test;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\TestResult;
@@ -22,28 +24,26 @@ use PHPUnit\TextUI\DefaultResultPrinter;
 use ReflectionClass;
 use ReflectionException;
 
-use SebastianBergmann\Comparator\ComparisonFailure;
 use function round;
 use function str_replace;
 
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
-use const PHP_EOL;
 
 final class TeamCity extends DefaultResultPrinter
 {
     use WritesToConsole;
 
-    private const PROTOCOL = 'pest_qn://';
-    private const NAME = 'name';
-    private const LOCATION_HINT = 'locationHint';
-    private const DURATION = 'duration';
-    private const TEST_SUITE_STARTED = 'testSuiteStarted';
+    private const PROTOCOL            = 'pest_qn://';
+    private const NAME                = 'name';
+    private const LOCATION_HINT       = 'locationHint';
+    private const DURATION            = 'duration';
+    private const TEST_SUITE_STARTED  = 'testSuiteStarted';
     private const TEST_SUITE_FINISHED = 'testSuiteFinished';
-    private const TEST_COUNT = 'testCount';
-    private const TEST_STARTED = 'testStarted';
-    private const TEST_FINISHED = 'testFinished';
+    private const TEST_COUNT          = 'testCount';
+    private const TEST_STARTED        = 'testStarted';
+    private const TEST_FINISHED       = 'testFinished';
 
     /** @var int */
     private $flowId;
@@ -118,8 +118,6 @@ final class TeamCity extends DefaultResultPrinter
 
     /**
      * Leave empty because we deal with tests in printResult.
-     * @param Test $test
-     * @return void
      */
     public function startTest(Test $test): void
     {
@@ -128,13 +126,10 @@ final class TeamCity extends DefaultResultPrinter
     /**
      * Leave almost empty because we deal with tests in printResult.
      * We just check if the test wasn't handled yet, which means it is a passing test.
-     * @param Test $test
-     * @param float $time
-     * @return void
      */
     public function endTest(Test $test, float $time): void
     {
-        if (! $this->state->existsInTestCase($test)) {
+        if (!$this->state->existsInTestCase($test)) {
             $this->storedTests[] = ['test' => $test, 'status' => '', 'time' => $time];
             $this->state->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::PASS));
         }
@@ -143,7 +138,8 @@ final class TeamCity extends DefaultResultPrinter
     }
 
     /**
-     * Print TeamCity event
+     * Print TeamCity event.
+     *
      * @param array<string, string|int> $params
      */
     private function printEvent(string $eventName, array $params = []): void
@@ -155,7 +151,7 @@ final class TeamCity extends DefaultResultPrinter
         }
 
         foreach ($params as $key => $value) {
-            $escapedValue = self::escapeValue((string)$value);
+            $escapedValue = self::escapeValue((string) $value);
             $this->style->write(" {$key}='{$escapedValue}'");
         }
 
@@ -164,8 +160,6 @@ final class TeamCity extends DefaultResultPrinter
 
     /**
      * Leave empty so we can better override the output.
-     * @param string $buffer
-     * @return void
      */
     public function write(string $buffer): void
     {
@@ -174,8 +168,6 @@ final class TeamCity extends DefaultResultPrinter
     /**
      * Here we deal with all the tests and write the output.
      *
-     * @param TestResult $result
-     * @return void
      * @throws ReflectionException
      */
     public function printResult(TestResult $result): void
@@ -204,121 +196,89 @@ final class TeamCity extends DefaultResultPrinter
 
     /**
      * Failure listener we use to store the run test and add it to the state.
-     *
-     * @param Test $test
-     * @param AssertionFailedError $error
-     * @param float $time
-     * @return void
      */
     public function addFailure(Test $test, AssertionFailedError $error, float $time): void
     {
-        $this->failed = true;
+        $this->failed        = true;
         $this->storedTests[] = [
-            'test' => $test,
+            'test'   => $test,
             'status' => CollisionTestResult::FAIL,
-            'error' => $error,
-            'time' => $time,
-            'state' => CollisionTestResult::fromTestCase($test, CollisionTestResult::FAIL, $error)
+            'error'  => $error,
+            'time'   => $time,
+            'state'  => CollisionTestResult::fromTestCase($test, CollisionTestResult::FAIL, $error),
         ];
         $this->state->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::FAIL, $error));
     }
 
     /**
      * Skipped listener we use to store the run test and add it to the state.
-     *
-     * @param Test $test
-     * @param Throwable $t
-     * @param float $time
-     * @return void
      */
     public function addSkippedTest(Test $test, Throwable $t, float $time): void
     {
         $this->storedTests[] = [
-            'test' => $test,
-            'status' => CollisionTestResult::SKIPPED,
+            'test'      => $test,
+            'status'    => CollisionTestResult::SKIPPED,
             'throwable' => $t,
-            'time' => $time,
+            'time'      => $time,
         ];
         $this->state->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::SKIPPED, $t));
     }
 
     /**
      * Error listener we use to store the run test and add it to the state.
-     *
-     * @param Test $test
-     * @param Throwable $t
-     * @param float $time
-     * @return void
      */
     public function addError(Test $test, Throwable $t, float $time): void
     {
-        $this->failed = true;
+        $this->failed        = true;
         $this->storedTests[] = [
-            'test' => $test,
-            'status' => CollisionTestResult::FAIL,
+            'test'      => $test,
+            'status'    => CollisionTestResult::FAIL,
             'throwable' => $t,
-            'time' => $time,
-            'state' => CollisionTestResult::fromTestCase($test, CollisionTestResult::FAIL, $t)
+            'time'      => $time,
+            'state'     => CollisionTestResult::fromTestCase($test, CollisionTestResult::FAIL, $t),
         ];
 
         $this->state->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::FAIL, $t));
-
     }
 
     /**
      * Warning listener we use to store the run test and add it to the state.
-     *
-     * @param Test $test
-     * @param Warning $e
-     * @param float $time
-     * @return void
      */
     public function addWarning(Test $test, Warning $e, float $time): void
     {
         $this->storedTests[] = [
-            'test' => $test,
-            'status' => CollisionTestResult::WARN,
+            'test'    => $test,
+            'status'  => CollisionTestResult::WARN,
             'warning' => $e,
-            'time' => $time,
+            'time'    => $time,
         ];
         $this->state->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::WARN, $e));
-
     }
 
     /**
      * Risky listener we use to store the run test and add it to the state.
-     *
-     * @param Test $test
-     * @param Throwable $t
-     * @param float $time
-     * @return void
      */
     public function addRiskyTest(Test $test, Throwable $t, float $time): void
     {
         $this->storedTests[] = [
-            'test' => $test,
-            'status' => CollisionTestResult::RISKY,
+            'test'      => $test,
+            'status'    => CollisionTestResult::RISKY,
             'throwable' => $t,
-            'time' => $time,
+            'time'      => $time,
         ];
         $this->state->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::RISKY, $t));
     }
 
     /**
      * Incomplete listener we use to store the run test and add it to the state.
-     *
-     * @param Test $test
-     * @param Throwable $t
-     * @param float $time
-     * @return void
      */
     public function addIncompleteTest(Test $test, Throwable $t, float $time): void
     {
         $this->storedTests[] = [
-            'test' => $test,
-            'status' => CollisionTestResult::INCOMPLETE,
+            'test'      => $test,
+            'status'    => CollisionTestResult::INCOMPLETE,
             'throwable' => $t,
-            'time' => $time,
+            'time'      => $time,
         ];
 
         $this->state->add(CollisionTestResult::fromTestCase($test, CollisionTestResult::INCOMPLETE, $t));
@@ -328,11 +288,10 @@ final class TeamCity extends DefaultResultPrinter
      * Determine if the test suite is made up of multiple smaller test suites.
      *
      * @param TestSuite<Test> $suite
-     * @return bool
      */
     private static function isCompoundTestSuite(TestSuite $suite): bool
     {
-        return file_exists($suite->getName()) || ! method_exists($suite->getName(), '__getFileName');
+        return file_exists($suite->getName()) || !method_exists($suite->getName(), '__getFileName');
     }
 
     private static function escapeValue(string $text): string
@@ -346,14 +305,12 @@ final class TeamCity extends DefaultResultPrinter
 
     private static function toMilliseconds(float $time): int
     {
-        return (int)round($time * 1000);
+        return (int) round($time * 1000);
     }
 
     /**
      * Create timer for a specific time back in time.
      *
-     * @param float $totalTime
-     * @return object
      * @throws ReflectionException
      */
     private function createTimerWithTotalTime(float $totalTime): object
@@ -372,13 +329,13 @@ final class TeamCity extends DefaultResultPrinter
 
     protected function createNewStyleWriter(): void
     {
-        $output = new ConsoleOutput(OutputInterface::VERBOSITY_NORMAL, true);
+        $output      = new ConsoleOutput(OutputInterface::VERBOSITY_NORMAL, true);
         $this->style = new Style($output);
     }
 
     protected function createNewBufferedStyleWriter(): void
     {
-        $this->bufferedOutput = new class extends BufferedConsoleOutput {
+        $this->bufferedOutput = new class() extends BufferedConsoleOutput {
             protected function doWrite(string $message, bool $newline)
             {
                 $this->buffer .= $message;
@@ -404,7 +361,7 @@ final class TeamCity extends DefaultResultPrinter
     {
         $suiteName = $this->testSuite->getName();
         $this->printEvent(self::TEST_SUITE_STARTED, [
-            self::NAME => TeamCity::isCompoundTestSuite($this->testSuite) ? $suiteName : substr($suiteName, 2),
+            self::NAME          => TeamCity::isCompoundTestSuite($this->testSuite) ? $suiteName : substr($suiteName, 2),
             self::LOCATION_HINT => self::PROTOCOL . (TeamCity::isCompoundTestSuite($this->testSuite) ? $suiteName : $suiteName::__getFileName()),
         ]);
     }
@@ -434,10 +391,9 @@ final class TeamCity extends DefaultResultPrinter
 
             // Write output depending on which type of test it is.
             if ($testData['status'] === CollisionTestResult::FAIL) {
-
                 // Create message and details for TeamCity event.
                 $this->bufferedStyle->writeError($testData['error'] ?? $testData['throwable']);
-                $output = $this->bufferedOutput->fetch();
+                $output              = $this->bufferedOutput->fetch();
                 [$message, $details] = explode("\n", $output, 2);
 
                 $currentState = $this->createNewEmptyState();
@@ -466,7 +422,7 @@ final class TeamCity extends DefaultResultPrinter
         $suiteName = $this->testSuite->getName();
 
         $this->printEvent(self::TEST_SUITE_FINISHED, [
-            self::NAME => TeamCity::isCompoundTestSuite($this->testSuite) ? $suiteName : substr($suiteName, 2),
+            self::NAME          => TeamCity::isCompoundTestSuite($this->testSuite) ? $suiteName : substr($suiteName, 2),
             self::LOCATION_HINT => self::PROTOCOL . (TeamCity::isCompoundTestSuite($this->testSuite) ? $suiteName : $suiteName::__getFileName()),
         ]);
     }
@@ -474,11 +430,11 @@ final class TeamCity extends DefaultResultPrinter
     protected function printEventTestFailed($testData, $message, array $parameters): void
     {
         $this->printEvent('testFailed', array_merge([
-            'name' => $testData['test']->getName(),
+            'name'    => $testData['test']->getName(),
             'message' => trim($message),
             // to do add time
             'duration' => self::toMilliseconds($testData['time']),
-            'details' => '',
+            'details'  => '',
         ], $parameters));
     }
 
