@@ -154,7 +154,7 @@ final class TestCaseFactory
         $className = $this->makeClassFromFilename($this->filename);
 
         $createTest = function ($description, $data) use ($className, $test) {
-            $testCase = new $className($test, $description, $data);
+            $testCase = new $className($test, $description, $data, $this->description);
             $this->factoryProxies->proxy($testCase);
 
             return $testCase;

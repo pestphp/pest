@@ -28,6 +28,13 @@ trait Testable
     private $__description;
 
     /**
+     * The test case description without dataset.
+     *
+     * @var string
+     */
+    private $__originalDescription;
+
+    /**
      * Holds the test closure function.
      *
      * @var Closure
@@ -69,10 +76,12 @@ trait Testable
     /**
      * Creates a new instance of the test case.
      */
-    public function __construct(Closure $test, string $description, array $data)
+    public function __construct(Closure $test, string $description, array $data, string $originalDescription)
     {
-        $this->__test        = $test;
-        $this->__description = $description;
+        $this->__test                = $test;
+        $this->__description         = $description;
+        $this->__originalDescription = $originalDescription;
+
         self::$beforeAll     = null;
         self::$afterAll      = null;
 
@@ -182,6 +191,11 @@ trait Testable
     public static function __getFileName(): string
     {
         return self::$__filename;
+    }
+
+    public function __getOriginalDescription(): string
+    {
+        return $this->__originalDescription;
     }
 
     /**
