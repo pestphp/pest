@@ -125,13 +125,14 @@ final class TeamCity extends DefaultResultPrinter
      */
     public function endTestSuite(TestSuite $suite): void
     {
-        // Store current state of test suite so we are prepared for a new one
-        $this->storedTestSuites[$this->currentTestSuite->getName()]['state'] = $this->stateForCurrentTestSuite;
-
-        // Prevent test suite which is only a directory to change name
-        if (!is_dir($suite->getName()) && !file_exists($suite->getName())) {
-            $this->storedTestSuites[$this->currentTestSuite->getName()]['name'] = $this->getReadableTestSuiteName($suite);
+        // Skip test suites that are directories.
+        if (is_dir($suite->getName())) {
+            return;
         }
+
+        // Store current state of test suite so we are prepared for a new one
+        $this->storedTestSuites[$this->currentTestSuite->getName()]['state']     = $this->stateForCurrentTestSuite;
+        $this->storedTestSuites[$this->currentTestSuite->getName()]['testSuite'] = $suite;
     }
 
     /**
@@ -204,11 +205,11 @@ final class TeamCity extends DefaultResultPrinter
     public function printResult(TestResult $result): void
     {
         // Write a list showing the status of all tests (passed, failed, skipped, etc.).
-        // For all test suites.
+        // For all test suites (files).
         foreach ($this->storedTestSuites as $testSuiteWithTests) {
             $currentState                = $testSuiteWithTests['state'];
             $currentState->headerPrinted = false;
-            $currentState->testCaseName  = $testSuiteWithTests['name'];
+            $currentState->testCaseName  = $this->getReadableTestSuiteName($testSuiteWithTests['testSuite']);
             $this->style->writeCurrentTestCaseSummary($currentState);
         }
 
@@ -218,16 +219,16 @@ final class TeamCity extends DefaultResultPrinter
 
         // Write test output for each test-suite
         foreach ($this->storedTestSuites as $testSuiteWithTests) {
-            $this->printTestSuiteStartedEvent($testSuiteWithTests['name']);
+            $this->printTestSuiteStartedEvent($testSuiteWithTests['testSuite']);
 
             if ($result->count() === 0) {
                 $this->style->writeWarning('No tests executed!');
             }
 
             // Loop through all tests, start them, write output, and end them
-            $totalTime = $this->handleStoredTestsAndWriteOutput($testSuiteWithTests['tests']);
+            $this->handleStoredTestsAndWriteOutput($testSuiteWithTests['tests']);
 
-            $this->printTestSuiteFinishedEvent($testSuiteWithTests['name']);
+            $this->printTestSuiteFinishedEvent($testSuiteWithTests['testSuite']);
         }
 
         // Show how many tests passed, failed, etc. and the time
@@ -399,28 +400,40 @@ final class TeamCity extends DefaultResultPrinter
         return State::from($dummyTest);
     }
 
-    protected function printTestSuiteStartedEvent(string $testSuiteName)
+    /**
+     * Print test suite started event for TeamCity.
+     *
+     * @param TestSuite $testSuite
+     * @return void
+     */
+    protected function printTestSuiteStartedEvent(TestSuite $testSuite)
     {
-        $suiteName = $this->currentTestSuite->getName();
-
-        // TODO: check location hint
         $this->printEvent(self::TEST_SUITE_STARTED, [
-            self::NAME          => $testSuiteName,
-            self::LOCATION_HINT => self::PROTOCOL . (TeamCity::isPhpUnitTestSuite($this->currentTestSuite) ? $suiteName : $suiteName::__getFileName()),
+            self::NAME          => $this->getReadableTestSuiteName($testSuite),
+            self::LOCATION_HINT => $this->getTestSuitePath($testSuite),
         ]);
     }
 
-    protected function printTestSuiteFinishedEvent(string $testSuiteName): void
+    /**
+     * Print test suite finished event for TeamCity.
+     *
+     * @param TestSuite $testSuite
+     * @return void
+     */
+    protected function printTestSuiteFinishedEvent(TestSuite $testSuite): void
     {
-        $suiteName = $this->currentTestSuite->getName();
-
-        // TODO: check location hint
         $this->printEvent(self::TEST_SUITE_FINISHED, [
-            self::NAME          => $testSuiteName,
-            self::LOCATION_HINT => self::PROTOCOL . (TeamCity::isPhpUnitTestSuite($this->currentTestSuite) ? $suiteName : $suiteName::__getFileName()),
+            self::NAME          => $this->getReadableTestSuiteName($testSuite),
+            self::LOCATION_HINT => $this->getTestSuitePath($testSuite),
         ]);
     }
 
+    /**
+     * Print a test started event for TeamCity.
+     *
+     * @param $test
+     * @return void
+     */
     protected function printTestStartedEvent($test): void
     {
         $this->printEvent(self::TEST_STARTED, [
@@ -430,7 +443,27 @@ final class TeamCity extends DefaultResultPrinter
         ]);
     }
 
-    protected function handleStoredTestsAndWriteOutput(array $testSuiteWithTests)
+    /**
+     * Print a test ended event for TeamCity.
+     *
+     * @param $testData
+     * @return void
+     */
+    protected function printTestEndedEvent($testData): void
+    {
+        $this->printEvent(self::TEST_FINISHED, [
+            self::NAME => $testData['test']->getName(),
+            self::DURATION => self::toMilliseconds($testData['time']),
+        ]);
+    }
+
+    /**
+     * For every test we write the corresponding start and end events and the error output.
+     *
+     * @param array $testSuiteWithTests
+     * @return void
+     */
+    protected function handleStoredTestsAndWriteOutput(array $testSuiteWithTests): void
     {
         foreach ($testSuiteWithTests as $testSuitTest) {
             $this->totalTestsTime += $testSuitTest['time'];
@@ -464,7 +497,7 @@ final class TeamCity extends DefaultResultPrinter
                 $this->phpunitTeamCity->addWarning($testSuitTest['test'], $testSuitTest['warning'], $testSuitTest['time']);
             }
 
-            $this->printEventTestEnded($testSuitTest);
+            $this->printTestEndedEvent($testSuitTest);
         }
     }
 
@@ -473,20 +506,9 @@ final class TeamCity extends DefaultResultPrinter
         $this->printEvent('testFailed', array_merge([
             'name'    => $testData['test']->getName(),
             'message' => trim($message),
-            // to do add time
             'duration' => self::toMilliseconds($testData['time']),
             'details'  => '',
         ], $parameters));
-    }
-
-    protected function printEventTestEnded($testData): void
-    {
-        $this->printEvent(self::TEST_FINISHED, [
-            self::NAME => $testData['test']->getName(),
-            // Todo: add time
-
-            self::DURATION => self::toMilliseconds($testData['time'] ?? 0),
-        ]);
     }
 
     public static function isPestTest(Test $test): bool
@@ -502,5 +524,22 @@ final class TeamCity extends DefaultResultPrinter
         $testSuiteName = $testSuite->getName();
 
         return $this->isPhpUnitTestSuite($testSuite) ? $testSuiteName : substr($testSuiteName, 2);
+    }
+
+    public function getTestSuitePath(TestSuite $testSuite): string
+    {
+        $testSuiteName = $testSuite->getName();
+
+        if (file_exists($testSuiteName)) {
+            $path = $testSuiteName;
+        } elseif (substr($testSuiteName, 0, 2) === 'P\\') {
+            $path = $testSuiteName::__getFileName();
+        } elseif (class_exists($testSuiteName)) {
+            $path = (new ReflectionClass($testSuiteName))->getFileName();
+        } else {
+            $path = '';
+        }
+
+        return self::PROTOCOL . $path;
     }
 }

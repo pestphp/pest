@@ -2,12 +2,12 @@
 
 beforeEach(function () {
     $this->snapshotPath = __DIR__ . '/../.snapshots/teamcity.txt';
-    $this->snapshot = file_get_contents($this->snapshotPath);
+    $this->snapshot     = file_get_contents($this->snapshotPath);
 });
 
 afterEach(function () {
     if (getenv('REBUILD_SNAPSHOTS')) {
-        echo "Rebuilding snapshots...";
+        echo 'Rebuilding snapshots...';
         file_put_contents($this->snapshotPath, $this->output);
     }
 });

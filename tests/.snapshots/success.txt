@@ -705,8 +705,8 @@
    WARN  Tests\Visual\Success
   - visual snapshot of test suite on success
 
-   PASS  Tests\Visual\TeamCity
-  ✓ it is can successfully call all public methods
+   FAIL  Tests\Visual\TeamCity
+  ⨯ teamcity snapshot test
 
    PASS  Tests\Features\Depends
   ✓ first
@@ -722,5 +722,30 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 480 passed
+  ---
+
+  • Tests\Visual\TeamCity > teamcity snapshot test
+   Whoops\Exception\ErrorException 
+
+  Undefined property: P\Tests\Visual\TeamCity::$snapshot
+
+  at tests/Visual/TeamCity.php:27
+     23▕ 
+     24▕     $this->output = $process->getOutput();
+     25▕     $this->output = sanitizeOutput($this->output);
+     26▕ 
+  ➜  27▕     expect($this->output)->toEqual($this->snapshot);
+     28▕ });
+     29▕ 
+     30▕ function sanitizeOutput(string $output): string
+     31▕ {
+
+  1   tests/Visual/TeamCity.php:27
+      Whoops\Run::handleError("Undefined property: P\Tests\Visual\TeamCity::$snapshot", "/Users/christophrumpel/Sites/Forks/pest/tests/Visual/TeamCity.php")
+
+  2   src/Factories/TestCaseFactory.php:151
+      P\Tests\Visual\TeamCity::{closure}()
+
+
+  Tests:  1 failed, 4 incompleted, 9 skipped, 479 passed
   
