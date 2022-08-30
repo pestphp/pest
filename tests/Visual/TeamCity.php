@@ -1,32 +1,39 @@
 <?php
 
-use Pest\Logging\TeamCity;
-use PHPUnit\Framework\AssertionFailedError;
-use PHPUnit\Framework\TestResult;
-use PHPUnit\Framework\TestSuite;
-use PHPUnit\Framework\Warning;
-use PHPUnit\TextUI\DefaultResultPrinter;
-
 beforeEach(function () {
-    file_put_contents(__DIR__ . '/output.txt', '');
-});
-
-it('is can successfully call all public methods', function () {
-    $teamCity = new TeamCity(__DIR__ . '/output.txt', false, DefaultResultPrinter::COLOR_ALWAYS);
-    expect($teamCity::isPestTest($this))->toBeTrue();
-    $teamCity->startTestSuite(new TestSuite());
-    $teamCity->startTest($this);
-    $teamCity->addError($this, new Exception('Don\'t worry about this error. Its purposeful.'), 0);
-    $teamCity->addFailure($this, new AssertionFailedError('Don\'t worry about this error. Its purposeful.'), 0);
-    $teamCity->addWarning($this, new Warning(), 0);
-    $teamCity->addIncompleteTest($this, new Exception(), 0);
-    $teamCity->addRiskyTest($this, new Exception(), 0);
-    $teamCity->addSkippedTest($this, new Exception(), 0);
-    $teamCity->endTest($this, 0);
-    $teamCity->printResult(new TestResult());
-    $teamCity->endTestSuite(new TestSuite());
+    $this->snapshotPath = __DIR__ . '/../.snapshots/teamcity.txt';
+    $this->snapshot = file_get_contents($this->snapshotPath);
 });
 
 afterEach(function () {
-    unlink(__DIR__ . '/output.txt');
+    if (getenv('REBUILD_SNAPSHOTS')) {
+        echo "Rebuilding snapshots...";
+        file_put_contents($this->snapshotPath, $this->output);
+    }
 });
+
+test('teamcity snapshot test', function () {
+    $process = new Symfony\Component\Process\Process(
+        ['php', 'bin/pest', '--teamcity', 'tests/Unit/Datasets.php'],
+        __DIR__ . '/../..',
+        ['EXCLUDE' => 'integration', 'REBUILD_SNAPSHOTS' => false, 'PARATEST' => 0]
+    );
+
+    $process->run();
+
+    $this->output = $process->getOutput();
+    $this->output = sanitizeOutput($this->output);
+
+    expect($this->output)->toEqual($this->snapshot);
+});
+
+function sanitizeOutput(string $output): string
+{
+    // Sanitize time-specific data as that can vary per run.
+    $output = preg_replace("/duration='\d+'/", "duration='10'", $output);
+    $output = preg_replace("/(Time:.*?)\d+.\d+s/", '${1}10.10s', $output);
+    // Sanitize location hints as that contains full paths
+    $output = preg_replace("/(locationHint='pest_qn:\/\/)(.*?)(\/tests\/.*?')/", '${1}${3}', $output);
+
+    return $output;
+}

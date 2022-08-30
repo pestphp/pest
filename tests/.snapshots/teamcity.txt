@@ -1,0 +1,23 @@
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Datasets[39m
+  [32;1m✓[39;22m[39m [2mit show only the names of named datasets in their description[22m[39m
+  [32;1m✓[39;22m[39m [2mit show the actual dataset of non-named datasets in their description[22m[39m
+  [32;1m✓[39;22m[39m [2mit show only the names of multiple named datasets in their description[22m[39m
+  [32;1m✓[39;22m[39m [2mit show the actual dataset of multiple non-named datasets in their description[22m[39m
+  [32;1m✓[39;22m[39m [2mit show the correct description for mixed named and not-named datasets[22m[39m
+##teamcity[testSuiteStarted name='Tests\Unit\Datasets' locationHint='pest_qn:///tests/Unit/Datasets.php' flowId='']
+##teamcity[testStarted name='it show only the names of named datasets in their description' locationHint='pest_qn:///tests/Unit/Datasets.php::it show only the names of named datasets in their description' flowId='']
+##teamcity[testFinished name='it show only the names of named datasets in their description' duration='10' flowId='']
+##teamcity[testStarted name='it show the actual dataset of non-named datasets in their description' locationHint='pest_qn:///tests/Unit/Datasets.php::it show the actual dataset of non-named datasets in their description' flowId='']
+##teamcity[testFinished name='it show the actual dataset of non-named datasets in their description' duration='10' flowId='']
+##teamcity[testStarted name='it show only the names of multiple named datasets in their description' locationHint='pest_qn:///tests/Unit/Datasets.php::it show only the names of multiple named datasets in their description' flowId='']
+##teamcity[testFinished name='it show only the names of multiple named datasets in their description' duration='10' flowId='']
+##teamcity[testStarted name='it show the actual dataset of multiple non-named datasets in their description' locationHint='pest_qn:///tests/Unit/Datasets.php::it show the actual dataset of multiple non-named datasets in their description' flowId='']
+##teamcity[testFinished name='it show the actual dataset of multiple non-named datasets in their description' duration='10' flowId='']
+##teamcity[testStarted name='it show the correct description for mixed named and not-named datasets' locationHint='pest_qn:///tests/Unit/Datasets.php::it show the correct description for mixed named and not-named datasets' flowId='']
+##teamcity[testFinished name='it show the correct description for mixed named and not-named datasets' duration='10' flowId='']
+##teamcity[testSuiteFinished name='Tests\Unit\Datasets' locationHint='pest_qn:///tests/Unit/Datasets.php' flowId='']
+
+  [37;1mTests:  [39;22m[32;1m5 passed[39;22m
+  [37;1mTime:   [39;22m[39m10.10s[39m
+
