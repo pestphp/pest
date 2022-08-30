@@ -403,7 +403,6 @@ final class TeamCity extends DefaultResultPrinter
     /**
      * Print test suite started event for TeamCity.
      *
-     * @param TestSuite $testSuite
      * @return void
      */
     protected function printTestSuiteStartedEvent(TestSuite $testSuite)
@@ -416,9 +415,6 @@ final class TeamCity extends DefaultResultPrinter
 
     /**
      * Print test suite finished event for TeamCity.
-     *
-     * @param TestSuite $testSuite
-     * @return void
      */
     protected function printTestSuiteFinishedEvent(TestSuite $testSuite): void
     {
@@ -432,7 +428,6 @@ final class TeamCity extends DefaultResultPrinter
      * Print a test started event for TeamCity.
      *
      * @param $test
-     * @return void
      */
     protected function printTestStartedEvent($test): void
     {
@@ -447,21 +442,17 @@ final class TeamCity extends DefaultResultPrinter
      * Print a test ended event for TeamCity.
      *
      * @param $testData
-     * @return void
      */
     protected function printTestEndedEvent($testData): void
     {
         $this->printEvent(self::TEST_FINISHED, [
-            self::NAME => $testData['test']->getName(),
+            self::NAME     => $testData['test']->getName(),
             self::DURATION => self::toMilliseconds($testData['time']),
         ]);
     }
 
     /**
      * For every test we write the corresponding start and end events and the error output.
-     *
-     * @param array $testSuiteWithTests
-     * @return void
      */
     protected function handleStoredTestsAndWriteOutput(array $testSuiteWithTests): void
     {
@@ -504,8 +495,8 @@ final class TeamCity extends DefaultResultPrinter
     protected function printEventTestFailed($testData, $message, array $parameters): void
     {
         $this->printEvent('testFailed', array_merge([
-            'name'    => $testData['test']->getName(),
-            'message' => trim($message),
+            'name'     => $testData['test']->getName(),
+            'message'  => trim($message),
             'duration' => self::toMilliseconds($testData['time']),
             'details'  => '',
         ], $parameters));
