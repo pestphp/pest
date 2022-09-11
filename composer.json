@@ -18,7 +18,7 @@
     ],
     "require": {
         "php": "^8.1.0",
-        "nunomaduro/collision": "^6.2.1",
+        "nunomaduro/collision": "^6.3",
         "pestphp/pest-plugin": "^1.0.0",
         "phpunit/phpunit": "10.0.x-dev"
     },
@@ -45,8 +45,8 @@
         ]
     },
     "require-dev": {
-        "illuminate/console": "^9.23",
-        "illuminate/support": "^9.23",
+        "illuminate/console": "^9.29",
+        "illuminate/support": "^9.29",
         "laravel/dusk": "^6.25.1",
         "pestphp/pest-dev-tools": "dev-master"
     },
