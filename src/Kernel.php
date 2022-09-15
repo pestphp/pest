@@ -20,8 +20,6 @@ final class Kernel
 
     private const EXCEPTION_EXIT = 2;
 
-    private const CRASH_EXIT = 255;
-
     /**
      * The Kernel bootstrappers.
      *
@@ -112,7 +110,7 @@ final class Kernel
                 + $result->numberOfTestsWithTestTriggeredWarningEvents()
                 + $result->numberOfTestsWithTestTriggeredPhpWarningEvents();
 
-            if ($configuration->failOnWarning() && ! empty($warnings)) {
+            if ($configuration->failOnWarning() && $warnings > 0) {
                 $returnCode = self::FAILURE_EXIT;
             }
 
