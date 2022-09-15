@@ -68,7 +68,9 @@ trait Testable
         $test = TestSuite::getInstance()->tests->get(self::$__filename);
 
         if ($test->hasMethod($name)) {
-            $this->__test = $test->getMethod($name)->getClosure($this);
+            $method              = $test->getMethod($name);
+            self::$__description = $method->description;
+            $this->__test        = $method->getClosure($this);
         }
     }
 

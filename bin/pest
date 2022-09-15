@@ -46,7 +46,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
     $args = $_SERVER['argv'];
 
-    // Let's remove any arguments that PHPUnit does not understand
     if ($argv->hasParameterOption('--test-directory')) {
         foreach ($args as $key => $value) {
             if (strpos($value, '--test-directory') !== false) {
