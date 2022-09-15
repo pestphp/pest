@@ -111,9 +111,9 @@ final class Coverage implements AddsOutput, HandlesArguments
                     number_format($this->coverageMin, 1)
                 ));
             }
-        }
 
-        $this->output->writeln(['']);
+            $this->output->writeln(['']);
+        }
 
         return $exitCode;
     }
