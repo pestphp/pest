@@ -46,7 +46,7 @@ final class Memory implements AddsOutput, HandlesArguments
     {
         if ($this->enabled) {
             $this->output->writeln(sprintf(
-                '  <fg=white;options=bold>Memory: </><fg=default>%s MB</>',
+                '  <fg=gray;options=bold>Memory:</>   <fg=default>%s MB</>',
                 round(memory_get_usage(true) / pow(1000, 2), 3)
             ));
         }
