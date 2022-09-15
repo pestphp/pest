@@ -31,7 +31,6 @@ test('allows to run a directory', function () use ($run, $snapshot) {
 })->skip(PHP_OS_FAMILY === 'Windows');
 
 it('has ascii chars', function () use ($run, $snapshot) {
-    file_put_contents(__DIR__ . '/output.txt', $run('tests/Fixtures/DirectoryWithTests/ExampleTest.php', true));
     expect($run('tests/Fixtures/DirectoryWithTests/ExampleTest.php', true))->toContain($snapshot('has-ascii-chars'));
 })->skip(PHP_OS_FAMILY === 'Windows');
 
