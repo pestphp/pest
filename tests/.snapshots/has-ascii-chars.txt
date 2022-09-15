@@ -1,5 +1,4 @@
-
   [30;42;1m PASS [39;49;22m[39m Tests\Fixtures\DirectoryWithTests\ExampleTest[39m
-  [32;1m✓[39;22m[39m [2mit example 1[22m[39m
+  [32;1m✓[39;22m[38;5;103m [39m[38;5;103mit example 1[39m
 
-  [37;1mTests:  [39;22m[32;1m1 passed[39;22m
+  [90;1mTests:[39;22m    [32;1m1 passed[39;22m[90m (1 assertions)[39m

@@ -1,5 +1,5 @@
 
    PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest
-  ✓ [2mit example 1[22m
+  ✓ it example 1
 
-  Tests:  1 passed
+  Tests:    1 passed (1 assertions)

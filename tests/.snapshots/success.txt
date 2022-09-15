@@ -482,8 +482,8 @@
   ✓ not failures with nested key
   ✓ not failures with plain key with dots
   ✓ not failures with correct value
-  ✓ not failures with correct value and  with nested key
-  ✓ not failures with correct value and  with plain key with dots
+  ✓ not failures with correct value and with nested key
+  ✓ not failures with correct value and with plain key with dots
 
    PASS  Tests\Features\Expect\toHaveKeys
   ✓ pass
@@ -614,8 +614,8 @@
 
    PASS  Tests\Features\PendingHigherOrderTests
   ✓ get 'foo'
-  ✓ get 'foo' → get 'bar' → expect true → toBeTrue 
-  ✓ get 'foo' → expect true → toBeTrue 
+  ✓ get 'foo' → get 'bar' → expect true → toBeTrue
+  ✓ get 'foo' → expect true → toBeTrue
 
    WARN  Tests\Features\Skip
   ✓ it do not skips
@@ -770,5 +770,4 @@
    WARN  Tests\Visual\TeamCity
   - it is can successfully call all public methods → Not supported yet.
 
-  Tests:  4 incompleted, 18 skipped, 515 passed
-  
+  Tests:    4 incompleted, 18 skipped, 515 passed (1299 assertions)

@@ -4,4 +4,4 @@
    PASS  Tests\Fixtures\ExampleTest
   ✓ it example 2
 
-  Tests:  2 passed
+  Tests:    2 passed (2 assertions)

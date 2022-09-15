@@ -1,4 +1,4 @@
    PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest
   ✓ it example 1
 
-  Tests:  1 passed
+  Tests:    1 passed (1 assertions)

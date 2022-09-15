@@ -19,6 +19,6 @@ final class InvalidPestCommand extends InvalidArgumentException implements Excep
      */
     public function __construct()
     {
-        parent::__construct('Please run `./vendor/bin/pest` instead of `/vendor/bin/phpunit`.');
+        parent::__construct('Please run [./vendor/bin/pest] instead.');
     }
 }

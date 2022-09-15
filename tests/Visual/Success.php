@@ -12,7 +12,7 @@ test('visual snapshot of test suite on success', function () {
         $process = (new Symfony\Component\Process\Process(
             ['php', 'bin/pest'],
             dirname($testsPath),
-            ['EXCLUDE' => 'integration', 'REBUILD_SNAPSHOTS' => false, 'PARATEST' => 0, 'COLLISION_PRINTER' => 'DefaultPrinter'],
+            ['EXCLUDE' => 'integration', 'REBUILD_SNAPSHOTS' => false, 'PARATEST' => 0, 'COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true'],
         ));
 
         $process->run();

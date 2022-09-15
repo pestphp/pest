@@ -113,6 +113,9 @@ final class Coverage implements AddsOutput, HandlesArguments
             }
         }
 
+
+        $this->output->writeln(['']);
+
         return $exitCode;
     }
 }

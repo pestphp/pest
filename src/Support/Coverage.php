@@ -11,6 +11,8 @@ use SebastianBergmann\CodeCoverage\Node\File;
 use SebastianBergmann\Environment\Runtime;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
+use function Termwind\render;
+use function Termwind\renderUsing;
 
 /**
  * @internal
@@ -73,15 +75,6 @@ final class Coverage
 
         $totalCoverage = $codeCoverage->getReport()->percentageOfExecutedLines();
 
-        $output->writeln(
-            sprintf(
-                '  <fg=white;options=bold>Cov:    </><fg=default>%s</>',
-                $totalCoverage->asString()
-            )
-        );
-
-        $output->writeln('');
-
         /** @var Directory<File|Directory> $report */
         $report = $codeCoverage->getReport();
 
@@ -112,7 +105,7 @@ final class Coverage
                 ? '100.0'
                 : number_format($file->percentageOfExecutedLines()->asFloat(), 1, '.', '');
 
-            $takenSize = strlen($rawName . $percentage) + 4 + $linesExecutedTakenSize; // adding 3 space and percent sign
+            $takenSize = strlen($rawName . $percentage) + 2 + $linesExecutedTakenSize; // adding 3 space and percent sign
 
             $percentage = sprintf(
                 '<fg=%s>%s</>',
@@ -121,12 +114,27 @@ final class Coverage
             );
 
             $output->writeln(sprintf(
-                '  %s %s %s %%',
+                '  %s <fg=gray>%s</> %s <fg=gray>%%</>',
                 $name,
                 str_repeat('.', max($dottedLineLength - $takenSize, 1)),
                 $percentage
             ));
         }
+
+
+        $totalCoverageAsString = $totalCoverage->asFloat() === 0.0
+            ? '0.0'
+            : number_format($totalCoverage->asFloat(), 1, '.', '');
+
+        renderUsing($output);
+        render(<<<HTML
+            <div class="mx-2">
+                <hr class="text-gray" />
+                <div class="w-full text-right">
+                    <span class="ml-1 font-bold">Total: {$totalCoverageAsString} %</span>
+                </div>
+            </div>
+        HTML);
 
         return $totalCoverage->asFloat();
     }

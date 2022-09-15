@@ -3,7 +3,9 @@
 use Symfony\Component\Process\Process;
 
 $run         = function (string $target, $decorated = false) {
-    $process = new Process(['php', 'bin/pest', $target, '--colors=always'], dirname(__DIR__, 2));
+    $process = new Process(['php', 'bin/pest', $target, '--colors=always'], dirname(__DIR__, 2),
+        ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true'],
+    );
 
     $process->run();
 
@@ -29,6 +31,7 @@ test('allows to run a directory', function () use ($run, $snapshot) {
 })->skip(PHP_OS_FAMILY === 'Windows');
 
 it('has ascii chars', function () use ($run, $snapshot) {
+    file_put_contents(__DIR__.'/output.txt', $run('tests/Fixtures/DirectoryWithTests/ExampleTest.php', true));
     expect($run('tests/Fixtures/DirectoryWithTests/ExampleTest.php', true))->toContain($snapshot('has-ascii-chars'));
 })->skip(PHP_OS_FAMILY === 'Windows');
 
@@ -38,7 +41,7 @@ it('disable decorating printer when colors is set to never', function () use ($s
         './bin/pest',
         '--colors=never',
         'tests/Fixtures/DirectoryWithTests/ExampleTest.php',
-    ], dirname(__DIR__, 2));
+    ], dirname(__DIR__, 2), ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true']);
     $process->run();
     $output = $process->getOutput();
     expect($output)->toContain($snapshot('disable-decorating-printer'));
