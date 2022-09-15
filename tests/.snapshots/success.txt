@@ -761,7 +761,6 @@
    PASS  Tests\Visual\SingleTestOrDirectory
   ✓ allows to run a single test
   ✓ allows to run a directory
-  ✓ it has ascii chars
   ✓ it disable decorating printer when colors is set to never
 
    WARN  Tests\Visual\Success
@@ -770,4 +769,4 @@
    WARN  Tests\Visual\TeamCity
   - it is can successfully call all public methods → Not supported yet.
 
-  Tests:    4 incompleted, 18 skipped, 515 passed (1299 assertions)
+  Tests:    4 incompleted, 18 skipped, 514 passed (1298 assertions)
