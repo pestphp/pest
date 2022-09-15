@@ -45,8 +45,8 @@
         ]
     },
     "require-dev": {
-        "illuminate/console": "^9.30",
-        "illuminate/support": "^9.30",
+        "illuminate/console": "^9.30.1",
+        "illuminate/support": "^9.30.1",
         "laravel/dusk": "^6.25.1",
         "pestphp/pest-dev-tools": "dev-master"
     },
@@ -68,7 +68,7 @@
         "test:types": "phpstan analyse --ansi --memory-limit=-1 --debug",
         "test:unit": "php bin/pest --colors=always --exclude-group=integration",
         "test:parallel": "exit 1",
-        "test:integration": "php bin/pest --colors=always --group=integration",
+        "test:integration": "php bin/pest --colors=always --group=integration -v",
         "update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --colors=always",
         "test": [
             "@test:lint",
