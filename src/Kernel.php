@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pest;
 
 use PHPUnit\TestRunner\TestResult\Facade;
-use PHPUnit\TestRunner\TestResult\TestResult;
 use PHPUnit\TextUI\Application;
 use PHPUnit\TextUI\Configuration\Registry;
 
@@ -91,7 +90,7 @@ final class Kernel
         $returnCode = self::FAILURE_EXIT;
 
         if ($result->wasSuccessfulIgnoringPhpunitWarnings()
-            && ! $result->hasTestTriggeredPhpunitWarningEvents()) {
+            && !$result->hasTestTriggeredPhpunitWarningEvents()) {
             $returnCode = self::SUCCESS_EXIT;
         }
 
@@ -118,11 +117,9 @@ final class Kernel
                 $returnCode = self::FAILURE_EXIT;
             }
 
-
             if ($configuration->failOnSkipped() && $result->hasTestSkippedEvents()) {
                 $returnCode = self::FAILURE_EXIT;
             }
-
         }
 
         if ($result->hasTestErroredEvents()) {
