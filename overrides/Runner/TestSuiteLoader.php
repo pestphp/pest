@@ -45,7 +45,7 @@ use function class_exists;
 use function get_declared_classes;
 
 use Pest\Contracts\HasPrintableTestCaseName;
-use Pest\TestCases\IgnorableTestCase;
+use Pest\TestCases\IgnorableTest;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
@@ -178,6 +178,6 @@ final class TestSuiteLoader
 
     private function exceptionFor(string $className, string $filename): ReflectionClass
     {
-        return new ReflectionClass(IgnorableTestCase::class);
+        return new ReflectionClass(IgnorableTest::class);
     }
 }

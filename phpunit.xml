@@ -7,7 +7,7 @@
          bootstrap="vendor/autoload.php"
          cacheResult="false"
          colors="true"
-         failOnRisky="true"
+         failOnRisky="false"
          failOnWarning="true"
          processIsolation="false"
          stopOnError="false"

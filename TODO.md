@@ -1,7 +1,7 @@
-1. Support for `--help` pest options.
-2. Support for `default` printer.
-3. Support for `TeamCity` printer.
-4. Support for `JUnit` log.
-5. Plugins
-6. Parallel
-7. Collision's todo...
+1. TeamCity
+2. Junit
+3. Help display
+4. Thanks display
+5. Check all plugins
+6. Parallel testing.
+7. Finish Collision's todo

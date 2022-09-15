@@ -3,7 +3,7 @@
 use Symfony\Component\Process\Process;
 
 $run         = function (string $target, $decorated = false) {
-    $process = new Process(['php', 'bin/pest', $target], dirname(__DIR__, 2));
+    $process = new Process(['php', 'bin/pest', $target, '--colors=always'], dirname(__DIR__, 2));
 
     $process->run();
 
