@@ -12,4 +12,5 @@ use PHPUnit\Framework\TestCase;
  */
 class IgnorableTestCase extends TestCase
 {
+    // ..
 }
