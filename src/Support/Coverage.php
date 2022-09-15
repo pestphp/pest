@@ -11,6 +11,7 @@ use SebastianBergmann\CodeCoverage\Node\File;
 use SebastianBergmann\Environment\Runtime;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
+
 use function Termwind\render;
 use function Termwind\renderUsing;
 
@@ -120,7 +121,6 @@ final class Coverage
                 $percentage
             ));
         }
-
 
         $totalCoverageAsString = $totalCoverage->asFloat() === 0.0
             ? '0.0'
