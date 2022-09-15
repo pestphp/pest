@@ -30,10 +30,6 @@ test('allows to run a directory', function () use ($run, $snapshot) {
     expect($run('tests/Fixtures'))->toContain($snapshot('allows-to-run-a-directory'));
 })->skip(PHP_OS_FAMILY === 'Windows');
 
-it('has ascii chars', function () use ($run, $snapshot) {
-    expect($run('tests/Fixtures/DirectoryWithTests/ExampleTest.php', true))->toContain($snapshot('has-ascii-chars'));
-})->skip(PHP_OS_FAMILY === 'Windows');
-
 it('disable decorating printer when colors is set to never', function () use ($snapshot) {
     $process = new Process([
         'php',
