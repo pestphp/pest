@@ -637,6 +637,10 @@
   ✓ it allows access to the underlying expectNotToPerformAssertions method
   ✓ it allows performing no expectations without being risky
 
+   PASS  Tests\Features\Todo
+  ↓ something todo later
+  ✓ it does something within a file with a todo
+
    PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest
   ✓ it example 1
 
@@ -769,4 +773,4 @@
    WARN  Tests\Visual\TeamCity
   - it is can successfully call all public methods → Not supported yet.
 
-  Tests:    4 incompleted, 18 skipped, 514 passed (1298 assertions)
+  Tests:    4 incompleted, 1 todo, 18 skipped, 515 passed (1299 assertions)
