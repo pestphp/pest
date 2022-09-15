@@ -18,7 +18,7 @@ final class Printer implements HandlesArguments
      */
     public function handleArguments(array $arguments): array
     {
-        if (! array_key_exists('COLLISION_PRINTER', $_SERVER)) {
+        if (!array_key_exists('COLLISION_PRINTER', $_SERVER)) {
             return $arguments;
         }
 

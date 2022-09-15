@@ -2,13 +2,12 @@
 
 use Pest\Plugins\Coverage as CoveragePlugin;
 use Pest\Support\Coverage;
-use Pest\TestSuite;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
 it('has plugin')->assertTrue(class_exists(CoveragePlugin::class));
 
 it('adds coverage if --coverage exist', function () {
-    $plugin    = new CoveragePlugin(new ConsoleOutput());
+    $plugin = new CoveragePlugin(new ConsoleOutput());
 
     expect($plugin->coverage)->toBeFalse();
     $arguments = $plugin->handleArguments([]);

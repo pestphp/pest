@@ -241,6 +241,24 @@ final class TestCaseFactory
     }
 
     /**
+     * Checks if a test case has a method.
+     */
+    public function hasMethod(string $methodName): bool
+    {
+        foreach ($this->methods as $method) {
+            if ($method->description === null) {
+                throw ShouldNotHappen::fromMessage('The test description may not be empty.');
+            }
+
+            if (Str::evaluable($method->description) === $methodName) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Gets a Method by the given name.
      */
     public function getMethod(string $methodName): TestCaseMethodFactory

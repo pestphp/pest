@@ -65,7 +65,11 @@ trait Testable
     {
         parent::__construct($name);
 
-        $this->__test = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($name)->getClosure($this);
+        $test = TestSuite::getInstance()->tests->get(self::$__filename);
+
+        if ($test->hasMethod($name)) {
+            $this->__test = $test->getMethod($name)->getClosure($this);
+        }
     }
 
     /**
@@ -163,6 +167,8 @@ trait Testable
      */
     protected function setUp(): void
     {
+        self::$__description = $this->name();
+
         TestSuite::getInstance()->test = $this;
 
         parent::setUp();
@@ -212,6 +218,7 @@ trait Testable
     private function __resolveTestArguments(array $arguments): array
     {
         $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
+
         if ($this->dataName()) {
             self::$__description = $method->description . ' with ' . $this->dataName();
         } else {
