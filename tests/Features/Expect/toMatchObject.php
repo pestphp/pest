@@ -19,7 +19,8 @@ test('pass', function () {
 
 test('pass with class', function () {
     expect(new class() {
-        public $name  = 'Nuno';
+        public $name = 'Nuno';
+
         public $email = 'enunomaduro@gmail.com';
     })->toMatchObject([
         'name'  => 'Nuno',

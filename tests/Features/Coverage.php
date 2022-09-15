@@ -9,7 +9,6 @@ it('has plugin')->assertTrue(class_exists(CoveragePlugin::class));
 
 it('adds coverage if --coverage exist', function () {
     $plugin    = new CoveragePlugin(new ConsoleOutput());
-    $testSuite = TestSuite::getInstance();
 
     expect($plugin->coverage)->toBeFalse();
     $arguments = $plugin->handleArguments([]);

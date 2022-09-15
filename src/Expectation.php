@@ -186,6 +186,7 @@ final class Expectation
         foreach ($values as $key => $item) {
             if ($callbacks[$key] instanceof Closure) {
                 call_user_func($callbacks[$key], new self($item), new self($keys[$key]));
+
                 continue;
             }
 
@@ -220,6 +221,7 @@ final class Expectation
 
             if (is_callable($callback)) {
                 $callback(new self($this->value));
+
                 continue;
             }
 

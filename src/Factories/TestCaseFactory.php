@@ -121,7 +121,17 @@ final class TestCaseFactory
         $filename     = str_replace('\\\\', '\\', addslashes((string) realpath($filename)));
         $rootPath     = TestSuite::getInstance()->rootPath;
         $relativePath = str_replace($rootPath . DIRECTORY_SEPARATOR, '', $filename);
-        $relativePath = dirname(ucfirst($relativePath)) . DIRECTORY_SEPARATOR . basename($relativePath, '.php');
+
+        $basename = basename($relativePath, '.php');
+
+        $dotPos = strpos($basename, '.');
+
+        if ($dotPos !== false) {
+            $basename = substr($basename, 0, $dotPos);
+        }
+
+        $relativePath = dirname(ucfirst($relativePath)) . DIRECTORY_SEPARATOR . $basename;
+
         $relativePath = str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath);
 
         // Strip out any %-encoded octets.
@@ -132,6 +142,7 @@ final class TestCaseFactory
         $relativePath = (string) preg_replace('/[^A-Za-z0-9\\\\]/', '', $relativePath);
 
         $classFQN = 'P\\' . $relativePath;
+
         if (class_exists($classFQN)) {
             return;
         }
@@ -174,27 +185,28 @@ final class TestCaseFactory
         ));
 
         $classAttributesCode = implode('', array_map(
-            static fn (string $attribute) => sprintf("\n                    %s", $attribute),
+            static fn (string $attribute) => sprintf("\n%s", $attribute),
             array_unique($classAttributes),
         ));
 
         try {
-            eval("
-                namespace $namespace;
+            $classCode = <<<PHP
+            namespace $namespace;
 
-                use Pest\Repositories\DatasetsRepository as __PestDatasets;
-                use Pest\TestSuite as __PestTestSuite;
+            use Pest\Repositories\DatasetsRepository as __PestDatasets;
+            use Pest\TestSuite as __PestTestSuite;
+            $classAttributesCode
+            #[\AllowDynamicProperties]
+            final class $className extends $baseClass implements $hasPrintableTestCaseClassFQN {
+                $traitsCode
 
-                $classAttributesCode
-                #[\AllowDynamicProperties]
-                final class $className extends $baseClass implements $hasPrintableTestCaseClassFQN {
-                    $traitsCode
+                private static \$__filename = '$filename';
 
-                    private static \$__filename = '$filename';
+                $methodsCode
+            }
+            PHP;
 
-                    $methodsCode
-                }
-            ");
+            eval($classCode);
         } catch (ParseError $caught) {
             throw new RuntimeException(sprintf('Unable to create test case for test file at %s', $filename), 1, $caught);
         }

@@ -18,7 +18,7 @@
     ],
     "require": {
         "php": "^8.1.0",
-        "nunomaduro/collision": "^6.3",
+        "nunomaduro/collision": "dev-next",
         "pestphp/pest-plugin": "^1.0.0",
         "phpunit/phpunit": "10.0.x-dev"
     },
@@ -86,6 +86,7 @@
                 "Pest\\Plugins\\Init",
                 "Pest\\Plugins\\Environment",
                 "Pest\\Plugins\\Memory",
+                "Pest\\Plugins\\Printer",
                 "Pest\\Plugins\\Retry",
                 "Pest\\Plugins\\Version"
             ]

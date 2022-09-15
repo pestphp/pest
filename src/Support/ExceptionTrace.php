@@ -56,7 +56,7 @@ final class ExceptionTrace
 
         $cleanedTrace = [];
         foreach ($trace as $item) {
-            if (key_exists('file', $item) && mb_strpos($item['file'], 'vendor/pestphp/pest/') > 0) {
+            if (array_key_exists('file', $item) && mb_strpos($item['file'], 'vendor/pestphp/pest/') > 0) {
                 continue;
             }
 

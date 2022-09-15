@@ -14,7 +14,7 @@ final class Environment implements HandlesArguments
     /**
      * The continuous integration environment.
      */
-    public const CI    = 'ci';
+    public const CI = 'ci';
 
     /**
      * The local environment.

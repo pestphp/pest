@@ -57,6 +57,11 @@ final class DatasetsRepository
         self::$withs[$filename . '>>>' . $description] = $with;
     }
 
+    public static function has(string $filename, string $description): bool
+    {
+        return array_key_exists($filename . '>>>' . $description, self::$withs);
+    }
+
     /**
      * @return Closure|iterable<int|string, mixed>|never
      *
@@ -107,7 +112,7 @@ final class DatasetsRepository
                 $values = array_merge($values, $datasetCombinationElement['values']);
             }
 
-            $datasetDescriptions[] = $description . ' with ' . implode(' / ', $partialDescriptions);
+            $datasetDescriptions[] = implode(' / ', $partialDescriptions);
             $datasetValues[]       = $values;
         }
 

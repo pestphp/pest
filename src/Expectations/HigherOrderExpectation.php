@@ -37,7 +37,7 @@ final class HigherOrderExpectation
      */
     public function __construct(private Expectation $original, mixed $value)
     {
-        $this->expectation  = $this->expect($value);
+        $this->expectation = $this->expect($value);
     }
 
     /**

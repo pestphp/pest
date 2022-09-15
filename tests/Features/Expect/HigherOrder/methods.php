@@ -40,8 +40,12 @@ it('works inside of each', function () {
 it('works with sequence', function () {
     expect(new HasMethods())
         ->books()->sequence(
-            function ($book) { $book->title->toEqual('Foo')->cost->toEqual(20); },
-            function ($book) { $book->title->toEqual('Bar')->cost->toEqual(30); },
+            function ($book) {
+                $book->title->toEqual('Foo')->cost->toEqual(20);
+            },
+            function ($book) {
+                $book->title->toEqual('Bar')->cost->toEqual(30);
+            },
         );
 });
 
@@ -54,8 +58,12 @@ it('can compose complex expectations', function () {
         ->attributes()->toBeArray()
         ->books()->toBeArray->each->not->toBeEmpty
         ->books()->sequence(
-            function ($book) { $book->title->toEqual('Foo')->cost->toEqual(20); },
-            function ($book) { $book->title->toEqual('Bar')->cost->toEqual(30); },
+            function ($book) {
+                $book->title->toEqual('Foo')->cost->toEqual(20);
+            },
+            function ($book) {
+                $book->title->toEqual('Bar')->cost->toEqual(30);
+            },
         );
 });
 

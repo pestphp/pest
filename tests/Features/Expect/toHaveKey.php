@@ -3,10 +3,10 @@
 use PHPUnit\Framework\ExpectationFailedException;
 
 $test_array = [
-    'a'             => 1,
+    'a' => 1,
     'b',
-    'c'             => 'world',
-    'd'             => [
+    'c' => 'world',
+    'd' => [
         'e' => 'hello',
     ],
     'key.with.dots' => false,

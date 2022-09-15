@@ -44,14 +44,13 @@ use function basename;
 use function class_exists;
 use function get_declared_classes;
 
+use Pest\Contracts\HasPrintableTestCaseName;
 use Pest\TestCases\IgnorableTestCase;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use ReflectionException;
 
-use function stripos;
-use function strlen;
 use function substr;
 
 /**
@@ -83,36 +82,43 @@ final class TestSuiteLoader
     {
         $suiteClassName = $this->classNameFromFileName($suiteClassFile);
 
-        if (!class_exists($suiteClassName, false)) {
-            (static function () use ($suiteClassFile) {
-                include_once $suiteClassFile;
+        (static function () use ($suiteClassFile) {
+            include_once $suiteClassFile;
 
-                TestSuite::getInstance()->tests->makeIfNeeded($suiteClassFile);
-            })();
+            TestSuite::getInstance()->tests->makeIfNeeded($suiteClassFile);
+        })();
 
-            $loadedClasses = array_values(
-                array_diff(
-                    get_declared_classes(),
-                    array_merge(
-                        self::$declaredClasses,
-                        self::$loadedClasses
-                    )
+        $loadedClasses = array_values(
+            array_diff(
+                get_declared_classes(),
+                array_merge(
+                    self::$declaredClasses,
+                    self::$loadedClasses
                 )
-            );
+            )
+        );
 
-            self::$loadedClasses = array_merge($loadedClasses, self::$loadedClasses);
+        self::$loadedClasses = array_merge($loadedClasses, self::$loadedClasses);
 
-            if (empty(self::$loadedClasses)) {
-                return $this->exceptionFor($suiteClassName, $suiteClassFile);
+        if (empty(self::$loadedClasses)) {
+            return $this->exceptionFor($suiteClassName, $suiteClassFile);
+        }
+
+        $testCaseFound = false;
+
+        foreach (self::$loadedClasses as $loadedClass) {
+            if (is_subclass_of($loadedClass, HasPrintableTestCaseName::class)) {
+                $suiteClassName = $loadedClass;
+
+                $testCaseFound = true;
+
+                break;
             }
         }
 
-        if (!class_exists($suiteClassName, false)) {
-            // this block will handle namespaced classes
-            $offset = 0 - strlen($suiteClassName);
-
+        if (!$testCaseFound) {
             foreach (self::$loadedClasses as $loadedClass) {
-                if (stripos(substr($loadedClass, $offset - 1), '\\' . $suiteClassName) === 0) {
+                if (is_subclass_of($loadedClass, TestCase::class)) {
                     $suiteClassName = $loadedClass;
 
                     break;

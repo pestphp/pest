@@ -41,8 +41,8 @@ final class PestInstallCommand extends Command
         TestSuite::getInstance(base_path(), $this->option('test-directory'));
 
         /* @phpstan-ignore-next-line */
-        $pest    = base_path(testDirectory('Pest.php'));
-        $stubs   = 'stubs/Laravel';
+        $pest  = base_path(testDirectory('Pest.php'));
+        $stubs = 'stubs/Laravel';
 
         if (File::exists($pest)) {
             throw new InvalidConsoleArgument(sprintf('%s already exist', $pest));

@@ -67,7 +67,9 @@ it('skips with falsy', function () {
 it('runs with truthy closure condition', function () {
     expect($this->whenObject)
         ->when(
-            function () { return '1'; },
+            function () {
+                return '1';
+            },
             function ($value) {
                 return $value->trueValue->toBeTrue();
             }
@@ -80,7 +82,9 @@ it('runs with truthy closure condition', function () {
 it('skips with falsy closure condition', function () {
     expect($this->whenObject)
         ->when(
-            function () { return '0'; },
+            function () {
+                return '0';
+            },
             function ($value) {
                 return $value->trueValue->toBeFalse(); // fails
             }
@@ -93,7 +97,9 @@ it('skips with falsy closure condition', function () {
 it('can be used in higher order tests')
     ->expect(false)
     ->when(
-        function () { return true; },
+        function () {
+            return true;
+        },
         function ($value) {
             return $value->toBeTrue();
         }

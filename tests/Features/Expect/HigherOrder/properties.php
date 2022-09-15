@@ -35,8 +35,12 @@ it('works inside of each', function () {
 it('works with sequence', function () {
     expect(['books' => [['title' => 'Foo', 'cost' => 20], ['title' => 'Bar', 'cost' => 30]]])
         ->books->sequence(
-            function ($book) { $book->title->toEqual('Foo')->cost->toEqual(20); },
-            function ($book) { $book->title->toEqual('Bar')->cost->toEqual(30); },
+            function ($book) {
+                $book->title->toEqual('Foo')->cost->toEqual(20);
+            },
+            function ($book) {
+                $book->title->toEqual('Bar')->cost->toEqual(30);
+            },
         );
 });
 
@@ -51,10 +55,16 @@ it('can compose complex expectations', function () {
 it('works with objects', function () {
     expect(new HasProperties())
         ->name->toEqual('foo')->not->toEqual('world')
-        ->posts->toHaveCount(2)->each(function ($post) { $post->is_published->toBeTrue(); })
+        ->posts->toHaveCount(2)->each(function ($post) {
+            $post->is_published->toBeTrue();
+        })
         ->posts->sequence(
-            function ($post) { $post->title->toEqual('Foo'); },
-            function ($post) { $post->title->toEqual('Bar'); },
+            function ($post) {
+                $post->title->toEqual('Foo');
+            },
+            function ($post) {
+                $post->title->toEqual('Bar');
+            },
         );
 });
 

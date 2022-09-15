@@ -11,6 +11,9 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
 (static function () {
+    // Ensures Collision's Printer is registered.
+    $_SERVER['COLLISION_PRINTER'] = 'DefaultPrinter';
+
     // Used when Pest is required using composer.
     $vendorPath = dirname(__DIR__, 4) . '/vendor/autoload.php';
 

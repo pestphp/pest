@@ -9,13 +9,21 @@ use Pest\Support\ChainableClosure;
 use Pest\Support\ExceptionTrace;
 use Pest\Support\Reflection;
 use Pest\TestSuite;
+use PHPUnit\Framework\TestCase;
 use Throwable;
 
 /**
  * @internal
+ *
+ * @mixin TestCase
  */
 trait Testable
 {
+    /**
+     * Test method description.
+     */
+    private static string $__description;
+
     /**
      * The Test Case "test" closure.
      */
@@ -119,14 +127,6 @@ trait Testable
     }
 
     /**
-     * Gets the Test Case filename.
-     */
-    public static function __getFilename(): string
-    {
-        return self::$__filename;
-    }
-
-    /**
      * This method is called before the first test of this Test Case is run.
      */
     public static function setUpBeforeClass(): void
@@ -211,6 +211,13 @@ trait Testable
      */
     private function __resolveTestArguments(array $arguments): array
     {
+        $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
+        if ($this->dataName()) {
+            self::$__description = $method->description . ' with ' . $this->dataName();
+        } else {
+            self::$__description = $method->description;
+        }
+
         if (count($arguments) !== 1) {
             return $arguments;
         }
@@ -246,8 +253,16 @@ trait Testable
     /**
      * Gets the Test Case name that should be used by printers.
      */
-    public function getPrintableTestCaseName(): string
+    public static function getPrintableTestCaseName(): string
     {
         return ltrim(self::class, 'P\\');
+    }
+
+    /**
+     * Gets the Test Case name that should be used by printers.
+     */
+    public static function getPrintableTestCaseMethodName(): string
+    {
+        return self::$__description;
     }
 }

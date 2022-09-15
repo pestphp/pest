@@ -12,11 +12,4 @@ use PHPUnit\Framework\TestCase;
  */
 class IgnorableTestCase extends TestCase
 {
-    /**
-     * @test
-     */
-    public function fake(): void
-    {
-        self::markTestIncomplete();
-    }
 }

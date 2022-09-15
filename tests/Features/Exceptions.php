@@ -32,7 +32,9 @@ it('not catch exceptions if given condition is false', function () {
 
 it('catch exceptions if given condition is true', function () {
     throw new Exception('Something bad happened');
-})->throwsIf(function () { return true; }, Exception::class);
+})->throwsIf(function () {
+    return true;
+}, Exception::class);
 
 it('catch exceptions and messages if given condition is true', function () {
     throw new Exception('Something bad happened');

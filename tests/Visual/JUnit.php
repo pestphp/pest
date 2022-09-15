@@ -22,7 +22,7 @@ it('is can successfully call all public methods', function () {
     $junit->endTest($this, 0);
     $junit->endTestSuite(new TestSuite());
     $this->expectNotToPerformAssertions();
-});
+})->skip('Not supported yet.');
 
 afterEach(function () {
     unlink(__DIR__ . '/junit.html');

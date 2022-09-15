@@ -9,8 +9,12 @@ it('can access methods and properties', function () {
         })->books()->toBeArray()
         ->posts->toBeArray->each->not->toBeEmpty
         ->books()->sequence(
-            function ($book) { $book->title->toEqual('Foo')->cost->toEqual(20); },
-            function ($book) { $book->title->toEqual('Bar')->cost->toEqual(30); },
+            function ($book) {
+                $book->title->toEqual('Foo')->cost->toEqual(20);
+            },
+            function ($book) {
+                $book->title->toEqual('Bar')->cost->toEqual(30);
+            },
         );
 });
 
@@ -53,7 +57,9 @@ it('can start a new higher order expectation using the and syntax without nestin
         ->toBeInstanceOf(HasMethodsAndProperties::class)
         ->meta
         ->sequence(
-            function ($value, $key) { $value->toBeArray()->and($key)->toBe('foo'); },
+            function ($value, $key) {
+                $value->toBeArray()->and($key)->toBe('foo');
+            },
         );
 });
 

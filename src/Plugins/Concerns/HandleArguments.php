@@ -20,6 +20,20 @@ trait HandleArguments
     }
 
     /**
+     * Adds the given argument and value to the list of arguments.
+     *
+     * @param array<int, string> $arguments
+     *
+     * @return array<int, string>
+     */
+    public function pushArgument(string $argument, array $arguments): array
+    {
+        $arguments[] = $argument;
+
+        return $arguments;
+    }
+
+    /**
      * Pops the given argument from the arguments.
      *
      * @param array<int, string> $arguments

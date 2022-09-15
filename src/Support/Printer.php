@@ -13,6 +13,7 @@ abstract class Printer implements \PHPUnit\Util\Printer
     private $stream;
 
     private bool $isPhpStream;
+
     private bool $isOpen;
 
     private function __construct(string $out)

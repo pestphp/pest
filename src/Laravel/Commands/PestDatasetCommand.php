@@ -44,10 +44,10 @@ final class PestDatasetCommand extends Command
         /** @var string $name */
         $name = $this->argument('name');
 
-        $relativePath   = sprintf(testDirectory('DatasetsRepository/%s.php'), ucfirst($name));
+        $relativePath = sprintf(testDirectory('DatasetsRepository/%s.php'), ucfirst($name));
 
         /* @phpstan-ignore-next-line */
-        $target         = base_path($relativePath);
+        $target = base_path($relativePath);
 
         if (File::exists($target)) {
             throw new InvalidConsoleArgument(sprintf('%s already exist', $target));

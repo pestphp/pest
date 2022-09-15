@@ -91,7 +91,6 @@ final class TestCaseMethodFactory
 
         return function () use ($testCase, $method, $closure): mixed { // @phpstan-ignore-line
             /* @var TestCase $this */
-
             $testCase->proxies->proxy($this);
             $method->proxies->proxy($this);
 
@@ -148,28 +147,29 @@ final class TestCaseMethodFactory
         }
 
         $annotations = implode('', array_map(
-            static fn ($annotation) => sprintf("\n                 * %s", $annotation), $annotations,
+            static fn ($annotation) => sprintf("\n     * %s", $annotation), $annotations,
         ));
 
         $attributes = implode('', array_map(
             static fn ($attribute) => sprintf("\n        %s", $attribute), $attributes,
         ));
 
-        return <<<EOF
+        return <<<PHP
 
                 /**$annotations
                  */
                 $attributes
                 public function $methodName()
                 {
+                    \$test = \Pest\TestSuite::getInstance()->tests->get(self::\$__filename)->getMethod(\$this->name())->getClosure(\$this);
+
                     return \$this->__runTest(
-                        \$this->__test,
+                        \$test,
                         ...func_get_args(),
                     );
                 }
-
                 $datasetsCode
-        EOF;
+            PHP;
     }
 
     /**
