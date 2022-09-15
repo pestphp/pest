@@ -42,4 +42,3 @@ jobs:
 
     - name: Integration Tests
       run: php bin/pest --colors=always --group=integration
-      if: ${{ false }}  # 2.x-dev is under development
