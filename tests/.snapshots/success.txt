@@ -692,9 +692,6 @@
   ✓ custom traits can be used
   ✓ trait applied in this file
 
-   WARN  Tests\Playground
-  ! basic → This test did not perform any assertions
-
    PASS  Tests\Plugins\Traits
   ✓ it allows global uses
   ✓ it allows multiple global uses registered in the same path
@@ -770,5 +767,5 @@
    WARN  Tests\Visual\TeamCity
   - it is can successfully call all public methods → Not supported yet.
 
-  Tests:  1 risky, 4 incompleted, 18 skipped, 514 passed
+  Tests:  4 incompleted, 18 skipped, 514 passed
   
