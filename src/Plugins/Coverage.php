@@ -66,15 +66,15 @@ final class Coverage implements AddsOutput, HandlesArguments
         }
         $originals = array_flip($originals);
 
-        $inputs   = [];
+        $inputs = [];
         $inputs[] = new InputOption(self::COVERAGE_OPTION, null, InputOption::VALUE_NONE);
         $inputs[] = new InputOption(self::MIN_OPTION, null, InputOption::VALUE_REQUIRED);
 
         $input = new ArgvInput($arguments, new InputDefinition($inputs));
         if ((bool) $input->getOption(self::COVERAGE_OPTION)) {
             $this->coverage = true;
-            $originals[]    = '--coverage-php';
-            $originals[]    = \Pest\Support\Coverage::getPath();
+            $originals[] = '--coverage-php';
+            $originals[] = \Pest\Support\Coverage::getPath();
         }
 
         if ($input->getOption(self::MIN_OPTION) !== null) {
@@ -93,7 +93,7 @@ final class Coverage implements AddsOutput, HandlesArguments
     public function addOutput(int $exitCode): int
     {
         if ($exitCode === 0 && $this->coverage) {
-            if (!\Pest\Support\Coverage::isAvailable()) {
+            if (! \Pest\Support\Coverage::isAvailable()) {
                 $this->output->writeln(
                     "\n  <fg=white;bg=red;options=bold> ERROR </> No code coverage driver is available.</>",
                 );

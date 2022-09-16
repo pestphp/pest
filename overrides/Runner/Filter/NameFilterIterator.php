@@ -37,22 +37,16 @@
 namespace PHPUnit\Runner\Filter;
 
 use function end;
-
 use Exception;
-
 use function implode;
-
 use Pest\Contracts\HasPrintableTestCaseName;
 use PHPUnit\Framework\SelfDescribing;
 use PHPUnit\Framework\Test;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\TestSuite;
-
 use function preg_match;
-
 use RecursiveFilterIterator;
 use RecursiveIterator;
-
 use function sprintf;
 use function str_replace;
 
@@ -62,7 +56,9 @@ use function str_replace;
 final class NameFilterIterator extends RecursiveFilterIterator
 {
     private ?string $filter = null;
+
     private ?int $filterMin = null;
+
     private ?int $filterMax = null;
 
     /**
@@ -94,7 +90,7 @@ final class NameFilterIterator extends RecursiveFilterIterator
         $accepted = @preg_match($this->filter, $name, $matches);
 
         if ($accepted && isset($this->filterMax)) {
-            $set      = end($matches);
+            $set = end($matches);
             $accepted = $set >= $this->filterMin && $set <= $this->filterMax;
         }
 

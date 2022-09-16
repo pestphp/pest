@@ -6,11 +6,11 @@ use PHPUnit\Framework\TestSuite;
 use PHPUnit\Framework\Warning;
 
 beforeEach(function () {
-    file_put_contents(__DIR__ . '/junit.html', '');
+    file_put_contents(__DIR__.'/junit.html', '');
 });
 
 it('is can successfully call all public methods', function () {
-    $junit = new JUnit(__DIR__ . '/junit.html');
+    $junit = new JUnit(__DIR__.'/junit.html');
     $junit->startTestSuite(new TestSuite());
     $junit->startTest($this);
     $junit->addError($this, new Exception(), 0);
@@ -25,5 +25,5 @@ it('is can successfully call all public methods', function () {
 })->skip('Not supported yet.');
 
 afterEach(function () {
-    unlink(__DIR__ . '/junit.html');
+    unlink(__DIR__.'/junit.html');
 });

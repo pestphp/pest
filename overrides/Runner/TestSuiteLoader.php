@@ -43,14 +43,12 @@ use function array_values;
 use function basename;
 use function class_exists;
 use function get_declared_classes;
-
 use Pest\Contracts\HasPrintableTestCaseName;
 use Pest\TestCases\IgnorableTest;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use ReflectionException;
-
 use function substr;
 
 /**
@@ -116,7 +114,7 @@ final class TestSuiteLoader
             }
         }
 
-        if (!$testCaseFound) {
+        if (! $testCaseFound) {
             foreach (self::$loadedClasses as $loadedClass) {
                 if (is_subclass_of($loadedClass, TestCase::class)) {
                     $suiteClassName = $loadedClass;
@@ -126,7 +124,7 @@ final class TestSuiteLoader
             }
         }
 
-        if (!class_exists($suiteClassName, false)) {
+        if (! class_exists($suiteClassName, false)) {
             return $this->exceptionFor($suiteClassName, $suiteClassFile);
         }
 
@@ -138,7 +136,7 @@ final class TestSuiteLoader
         }
         // @codeCoverageIgnoreEnd
 
-        if ($class->isSubclassOf(TestCase::class) && !$class->isAbstract()) {
+        if ($class->isSubclassOf(TestCase::class) && ! $class->isAbstract()) {
             return $class;
         }
 
@@ -151,7 +149,7 @@ final class TestSuiteLoader
             }
             // @codeCoverageIgnoreEnd
 
-            if (!$method->isAbstract() && $method->isPublic() && $method->isStatic()) {
+            if (! $method->isAbstract() && $method->isPublic() && $method->isStatic()) {
                 return $class;
             }
         }
@@ -167,7 +165,7 @@ final class TestSuiteLoader
     private function classNameFromFileName(string $suiteClassFile): string
     {
         $className = basename($suiteClassFile, '.php');
-        $dotPos    = strpos($className, '.');
+        $dotPos = strpos($className, '.');
 
         if ($dotPos !== false) {
             $className = substr($className, 0, $dotPos);

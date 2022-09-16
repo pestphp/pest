@@ -3,7 +3,7 @@
 use PHPUnit\Framework\ExpectationFailedException;
 
 beforeEach(function () {
-    touch($this->tempFile = sys_get_temp_dir() . '/fake.file');
+    touch($this->tempFile = sys_get_temp_dir().'/fake.file');
 });
 
 afterEach(function () {

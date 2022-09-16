@@ -59,7 +59,7 @@ final class ExpectationPipeline
     /**
      * Sets the list of pipes.
      *
-     * @param array<int, Closure> $pipes
+     * @param  array<int, Closure>  $pipes
      */
     public function through(array $pipes): self
     {

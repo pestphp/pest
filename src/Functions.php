@@ -13,14 +13,13 @@ use Pest\Support\HigherOrderTapProxy;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestCase;
 
-if (!function_exists('expect')) {
+if (! function_exists('expect')) {
     /**
      * Creates a new expectation.
      *
      * @template TValue
      *
-     * @param TValue $value
-     *
+     * @param  TValue  $value
      * @return Expectation<TValue>
      */
     function expect(mixed $value = null): Expectation
@@ -29,7 +28,7 @@ if (!function_exists('expect')) {
     }
 }
 
-if (!function_exists('beforeAll')) {
+if (! function_exists('beforeAll')) {
     /**
      * Runs the given closure before all tests in the current file.
      */
@@ -39,7 +38,7 @@ if (!function_exists('beforeAll')) {
     }
 }
 
-if (!function_exists('beforeEach')) {
+if (! function_exists('beforeEach')) {
     /**
      * Runs the given closure before each test in the current file.
      *
@@ -53,11 +52,11 @@ if (!function_exists('beforeEach')) {
     }
 }
 
-if (!function_exists('dataset')) {
+if (! function_exists('dataset')) {
     /**
      * Registers the given dataset.
      *
-     * @param Closure|iterable<int|string, mixed> $dataset
+     * @param  Closure|iterable<int|string, mixed>  $dataset
      */
     function dataset(string $name, Closure|iterable $dataset): void
     {
@@ -65,12 +64,12 @@ if (!function_exists('dataset')) {
     }
 }
 
-if (!function_exists('uses')) {
+if (! function_exists('uses')) {
     /**
      * The uses function binds the given
      * arguments to test closures.
      *
-     * @param class-string ...$classAndTraits
+     * @param  class-string  ...$classAndTraits
      */
     function uses(string ...$classAndTraits): UsesCall
     {
@@ -80,7 +79,7 @@ if (!function_exists('uses')) {
     }
 }
 
-if (!function_exists('test')) {
+if (! function_exists('test')) {
     /**
      * Adds the given closure as a test. The first argument
      * is the test description; the second argument is
@@ -100,7 +99,7 @@ if (!function_exists('test')) {
     }
 }
 
-if (!function_exists('it')) {
+if (! function_exists('it')) {
     /**
      * Adds the given closure as a test. The first argument
      * is the test description; the second argument is
@@ -119,7 +118,7 @@ if (!function_exists('it')) {
     }
 }
 
-if (!function_exists('todo')) {
+if (! function_exists('todo')) {
     /**
      * Adds the given todo test. Internally, this test
      * is marked as incomplete. Yet, Collision, Pest's
@@ -136,7 +135,7 @@ if (!function_exists('todo')) {
     }
 }
 
-if (!function_exists('afterEach')) {
+if (! function_exists('afterEach')) {
     /**
      * Runs the given closure after each test in the current file.
      *
@@ -150,7 +149,7 @@ if (!function_exists('afterEach')) {
     }
 }
 
-if (!function_exists('afterAll')) {
+if (! function_exists('afterAll')) {
     /**
      * Runs the given closure after all tests in the current file.
      */

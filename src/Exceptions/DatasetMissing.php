@@ -17,7 +17,7 @@ final class DatasetMissing extends BadFunctionCallException implements Exception
     /**
      * Creates a new Exception instance.
      *
-     * @param array<string, string> $arguments
+     * @param  array<string, string>  $arguments
      */
     public function __construct(string $file, string $name, array $arguments)
     {

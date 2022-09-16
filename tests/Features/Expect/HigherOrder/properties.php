@@ -86,11 +86,11 @@ class HasProperties
     public $posts = [
         [
             'is_published' => true,
-            'title'        => 'Foo',
+            'title' => 'Foo',
         ],
         [
             'is_published' => true,
-            'title'        => 'Bar',
+            'title' => 'Bar',
         ],
     ];
 

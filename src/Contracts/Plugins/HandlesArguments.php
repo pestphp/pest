@@ -12,8 +12,7 @@ interface HandlesArguments
     /**
      * Adds arguments before of the Test Suite execution.
      *
-     * @param array<int, string> $arguments
-     *
+     * @param  array<int, string>  $arguments
      * @return array<int, string>
      */
     public function handleArguments(array $arguments): array;

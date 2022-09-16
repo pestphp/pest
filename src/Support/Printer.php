@@ -33,7 +33,7 @@ abstract class Printer implements \PHPUnit\Util\Printer
 
         $this->isPhpStream = str_starts_with($out, 'php://');
 
-        if (!$this->isPhpStream && !Filesystem::createDirectory(dirname($out))) {
+        if (! $this->isPhpStream && ! Filesystem::createDirectory(dirname($out))) {
             throw new Exception(sprintf('Directory "%s" was not created', dirname($out)));
         }
 

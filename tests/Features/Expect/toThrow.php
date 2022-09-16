@@ -38,13 +38,13 @@ test('passes', function () {
 test('failures 1', function () {
     expect(function () {
     })->toThrow(RuntimeException::class);
-})->throws(ExpectationFailedException::class, 'Exception "' . RuntimeException::class . '" not thrown.');
+})->throws(ExpectationFailedException::class, 'Exception "'.RuntimeException::class.'" not thrown.');
 
 test('failures 2', function () {
     expect(function () {
     })->toThrow(function (RuntimeException $e) {
     });
-})->throws(ExpectationFailedException::class, 'Exception "' . RuntimeException::class . '" not thrown.');
+})->throws(ExpectationFailedException::class, 'Exception "'.RuntimeException::class.'" not thrown.');
 
 test('failures 3', function () {
     expect(function () {

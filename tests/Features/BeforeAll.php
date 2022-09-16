@@ -1,6 +1,6 @@
 <?php
 
-$foo      = new \stdClass();
+$foo = new \stdClass();
 $foo->bar = 0;
 
 beforeAll(function () use ($foo) {

@@ -11,7 +11,6 @@ use SebastianBergmann\CodeCoverage\Node\File;
 use SebastianBergmann\Environment\Runtime;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
-
 use function Termwind\render;
 use function Termwind\renderUsing;
 
@@ -54,7 +53,7 @@ final class Coverage
      */
     public static function report(OutputInterface $output): float
     {
-        if (!file_exists($reportPath = self::getPath())) {
+        if (! file_exists($reportPath = self::getPath())) {
             if (self::usingXdebug()) {
                 $output->writeln(
                     "  <fg=black;bg=yellow;options=bold> WARN </> Unable to get coverage using Xdebug. Did you set <href=https://xdebug.org/docs/code_coverage#mode>Xdebug's coverage mode</>?</>",
@@ -80,10 +79,10 @@ final class Coverage
         $report = $codeCoverage->getReport();
 
         foreach ($report->getIterator() as $file) {
-            if (!$file instanceof File) {
+            if (! $file instanceof File) {
                 continue;
             }
-            $dirname  = dirname($file->id());
+            $dirname = dirname($file->id());
             $basename = basename($file->id(), '.php');
 
             $name = $dirname === '.' ? $basename : implode(DIRECTORY_SEPARATOR, [
@@ -106,7 +105,7 @@ final class Coverage
                 ? '100.0'
                 : number_format($file->percentageOfExecutedLines()->asFloat(), 1, '.', '');
 
-            $takenSize = strlen($rawName . $percentage) + 2 + $linesExecutedTakenSize; // adding 3 space and percent sign
+            $takenSize = strlen($rawName.$percentage) + 2 + $linesExecutedTakenSize; // adding 3 space and percent sign
 
             $percentage = sprintf(
                 '<fg=%s>%s</>',
@@ -146,8 +145,7 @@ final class Coverage
      * ['11', '20..25', '50', '60..80'];
      * ```
      *
-     * @param File $file
-     *
+     * @param  File  $file
      * @return array<int, string>
      */
     public static function getMissingCoverage($file): array
@@ -162,7 +160,7 @@ final class Coverage
             }
 
             if ($shouldBeNewLine) {
-                $array[]         = (string) $line;
+                $array[] = (string) $line;
                 $shouldBeNewLine = false;
 
                 return $array;
@@ -171,7 +169,7 @@ final class Coverage
             $lastKey = count($array) - 1;
 
             if (array_key_exists($lastKey, $array) && str_contains($array[$lastKey], '..')) {
-                [$from]          = explode('..', $array[$lastKey]);
+                [$from] = explode('..', $array[$lastKey]);
                 $array[$lastKey] = $line > $from ? sprintf('%s..%s', $from, $line) : sprintf('%s..%s', $line, $from);
 
                 return $array;

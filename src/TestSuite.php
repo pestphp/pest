@@ -70,11 +70,11 @@ final class TestSuite
         string $rootPath,
         public string $testPath)
     {
-        $this->beforeAll           = new BeforeAllRepository();
-        $this->beforeEach          = new BeforeEachRepository();
-        $this->tests               = new TestRepository();
-        $this->afterEach           = new AfterEachRepository();
-        $this->afterAll            = new AfterAllRepository();
+        $this->beforeAll = new BeforeAllRepository();
+        $this->beforeEach = new BeforeEachRepository();
+        $this->tests = new TestRepository();
+        $this->afterEach = new AfterEachRepository();
+        $this->afterAll = new AfterAllRepository();
         $this->retryTempRepository = new TempRepository('retry');
 
         $this->rootPath = (string) realpath($rootPath);

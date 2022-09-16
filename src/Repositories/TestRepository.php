@@ -54,15 +54,15 @@ final class TestRepository
     /**
      * Uses the given `$testCaseClass` on the given `$paths`.
      *
-     * @param array<int, string>  $classOrTraits
-     * @param array<int, string>  $groups
-     * @param array<int, string>  $paths
-     * @param array<int, Closure> $hooks
+     * @param  array<int, string>  $classOrTraits
+     * @param  array<int, string>  $groups
+     * @param  array<int, string>  $paths
+     * @param  array<int, Closure>  $hooks
      */
     public function use(array $classOrTraits, array $groups, array $paths, array $hooks): void
     {
         foreach ($classOrTraits as $classOrTrait) {
-            if (!class_exists($classOrTrait) && !trait_exists($classOrTrait)) {
+            if (! class_exists($classOrTrait) && ! trait_exists($classOrTrait)) {
                 throw new TestCaseClassOrTraitNotFound($classOrTrait);
             }
         }
@@ -90,7 +90,7 @@ final class TestRepository
      */
     public function set(TestCaseMethodFactory $method): void
     {
-        if (!array_key_exists($method->filename, $this->testCases)) {
+        if (! array_key_exists($method->filename, $this->testCases)) {
             $this->testCases[$method->filename] = new TestCaseFactory($method->filename);
         }
 
@@ -112,12 +112,12 @@ final class TestRepository
      */
     private function make(TestCaseFactory $testCase): void
     {
-        $startsWith = static fn (string $target, string $directory): bool => Str::startsWith($target, $directory . DIRECTORY_SEPARATOR);
+        $startsWith = static fn (string $target, string $directory): bool => Str::startsWith($target, $directory.DIRECTORY_SEPARATOR);
 
         foreach ($this->uses as $path => $uses) {
             [$classOrTraits, $groups, $hooks] = $uses;
 
-            if ((!is_dir($path) && $testCase->filename === $path) || (is_dir($path) && $startsWith($testCase->filename, $path))) {
+            if ((! is_dir($path) && $testCase->filename === $path) || (is_dir($path) && $startsWith($testCase->filename, $path))) {
                 foreach ($classOrTraits as $class) {
                     /** @var string $class */
                     if (class_exists($class)) {

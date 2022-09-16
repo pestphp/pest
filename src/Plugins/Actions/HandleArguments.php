@@ -17,8 +17,7 @@ final class HandleArguments
      *
      * Transform the input arguments by passing it to the relevant plugins.
      *
-     * @param array<int, string> $argv
-     *
+     * @param  array<int, string>  $argv
      * @return array<int, string>
      */
     public function __invoke(array $argv): array

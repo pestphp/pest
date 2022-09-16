@@ -9,7 +9,7 @@ namespace Pest\Repositories;
  */
 final class TempRepository
 {
-    private const FOLDER = __DIR__ . '/../../.temp';
+    private const FOLDER = __DIR__.'/../../.temp';
 
     /**
      * Creates a new Temp Repository instance.
@@ -35,7 +35,7 @@ final class TempRepository
      */
     public function boot(): void
     {
-        @unlink(self::FOLDER . '/' . $this->filename . '.json'); // @phpstan-ignore-line
+        @unlink(self::FOLDER.'/'.$this->filename.'.json'); // @phpstan-ignore-line
 
         $this->save([]);
     }
@@ -55,7 +55,7 @@ final class TempRepository
      */
     private function all(): array
     {
-        $contents = file_get_contents(self::FOLDER . '/' . $this->filename . '.json');
+        $contents = file_get_contents(self::FOLDER.'/'.$this->filename.'.json');
 
         assert(is_string($contents));
 
@@ -67,12 +67,12 @@ final class TempRepository
     /**
      * Save the given elements.
      *
-     * @param array<int, string> $elements
+     * @param  array<int, string>  $elements
      */
     private function save(array $elements): void
     {
         $contents = json_encode($elements);
 
-        file_put_contents(self::FOLDER . '/' . $this->filename . '.json', $contents);
+        file_put_contents(self::FOLDER.'/'.$this->filename.'.json', $contents);
     }
 }

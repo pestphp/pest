@@ -34,11 +34,11 @@ jobs:
       run: composer update --${{ matrix.dependency-version }} --no-interaction --no-progress --ansi
 
     - name: Unit Tests
-      run: php bin/pest --colors=always --exclude-group=integration
+      run: composer test:unit
 
     - name: Unit Tests
-      run: php bin/pest --colors=always --exclude-group=integration ${{ matrix.parallel }}
+      run: test:parallel
       if: ${{ false }}  # 2.x-dev is under development
 
     - name: Integration Tests
-      run: php bin/pest --colors=always --group=integration -v
+      run: composer test:integration

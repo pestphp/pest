@@ -23,8 +23,8 @@ final class Init implements HandlesArguments
      * The files that will be created.
      */
     private const STUBS = [
-        'phpunit.xml'     => 'phpunit.xml',
-        'Pest.php'        => 'tests/Pest.php',
+        'phpunit.xml' => 'phpunit.xml',
+        'Pest.php' => 'tests/Pest.php',
         'ExampleTest.php' => 'tests/ExampleTest.php',
     ];
 
@@ -43,7 +43,7 @@ final class Init implements HandlesArguments
      */
     public function handleArguments(array $arguments): array
     {
-        if (!array_key_exists(1, $arguments) || $arguments[1] !== self::INIT_OPTION) {
+        if (! array_key_exists(1, $arguments) || $arguments[1] !== self::INIT_OPTION) {
             return $arguments;
         }
 
@@ -58,8 +58,8 @@ final class Init implements HandlesArguments
     {
         $testsBaseDir = "{$this->testSuite->rootPath}/tests";
 
-        if (!is_dir($testsBaseDir)) {
-            if (!mkdir($testsBaseDir) && !is_dir($testsBaseDir)) {
+        if (! is_dir($testsBaseDir)) {
+            if (! mkdir($testsBaseDir) && ! is_dir($testsBaseDir)) {
                 $this->output->writeln(sprintf(
                     "\n  <fg=white;bg=red;options=bold> ERROR </> Directory `%s` was not created.</>",
                     $testsBaseDir
@@ -74,8 +74,8 @@ final class Init implements HandlesArguments
         }
 
         foreach (self::STUBS as $from => $to) {
-            $fromPath = __DIR__ . "/../../stubs/init/{$from}";
-            $toPath   = "{$this->testSuite->rootPath}/{$to}";
+            $fromPath = __DIR__."/../../stubs/init/{$from}";
+            $toPath = "{$this->testSuite->rootPath}/{$to}";
 
             if (file_exists($toPath)) {
                 $this->output->writeln(sprintf(
@@ -86,16 +86,16 @@ final class Init implements HandlesArguments
                 continue;
             }
 
-            if ($from === 'phpunit.xml' && file_exists($toPath . '.dist')) {
+            if ($from === 'phpunit.xml' && file_exists($toPath.'.dist')) {
                 $this->output->writeln(sprintf(
                     '  <fg=black;bg=yellow;options=bold> INFO </> File `%s` already exists, skipped.</>',
-                    $to . '.dist'
+                    $to.'.dist'
                 ));
 
                 continue;
             }
 
-            if (!copy($fromPath, $toPath)) {
+            if (! copy($fromPath, $toPath)) {
                 $this->output->writeln(sprintf(
                     '<fg=black;bg=red>[WARNING] Failed to copy stub `%s` to `%s`</>',
                     $from,

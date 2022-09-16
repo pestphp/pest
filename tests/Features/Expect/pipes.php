@@ -48,10 +48,10 @@ class State
     public function reset(): void
     {
         $this->appliedCount = $this->runCount = [
-            'char'     => 0,
-            'number'   => 0,
+            'char' => 0,
+            'number' => 0,
             'wildcard' => 0,
-            'symbol'   => 0,
+            'symbol' => 0,
         ];
     }
 }
@@ -133,16 +133,16 @@ test('pipe is applied and can stop pipeline', function () use ($state) {
     expect($char)->toBe(new Char('A'))
         ->and($state)
         ->runCount->toMatchArray([
-            'char'     => 1,
-            'number'   => 0,
+            'char' => 1,
+            'number' => 0,
             'wildcard' => 0,
-            'symbol'   => 0,
+            'symbol' => 0,
         ])
         ->appliedCount->toMatchArray([
-            'char'     => 1,
-            'number'   => 0,
+            'char' => 1,
+            'number' => 0,
             'wildcard' => 0,
-            'symbol'   => 0,
+            'symbol' => 0,
         ]);
 });
 
@@ -152,16 +152,16 @@ test('pipe is run and can let the pipeline keep going', function () use ($state)
     expect(3)->toBe(3)
         ->and($state)
         ->runCount->toMatchArray([
-            'char'     => 1,
-            'number'   => 0,
+            'char' => 1,
+            'number' => 0,
             'wildcard' => 0,
-            'symbol'   => 1,
+            'symbol' => 1,
         ])
         ->appliedCount->toMatchArray([
-            'char'     => 0,
-            'number'   => 0,
+            'char' => 0,
+            'number' => 0,
             'wildcard' => 0,
-            'symbol'   => 0,
+            'symbol' => 0,
         ]);
 });
 
@@ -173,16 +173,16 @@ test('pipe works with negated expectation', function () use ($state) {
     expect($char)->not->toBe(new Char('B'))
        ->and($state)
        ->runCount->toMatchArray([
-           'char'     => 1,
-           'number'   => 0,
+           'char' => 1,
+           'number' => 0,
            'wildcard' => 0,
-           'symbol'   => 0,
+           'symbol' => 0,
        ])
        ->appliedCount->toMatchArray([
-           'char'     => 1,
-           'number'   => 0,
+           'char' => 1,
+           'number' => 0,
            'wildcard' => 0,
-           'symbol'   => 0,
+           'symbol' => 0,
        ]);
 });
 
@@ -205,16 +205,16 @@ test('interceptor stops the pipeline', function () use ($state) {
     expect($number)->toBe(new Number(1))
         ->and($state)
         ->runCount->toMatchArray([
-            'char'     => 1,
-            'number'   => 1,
+            'char' => 1,
+            'number' => 1,
             'wildcard' => 0,
-            'symbol'   => 0,
+            'symbol' => 0,
         ])
         ->appliedCount->toMatchArray([
-            'char'     => 0,
-            'number'   => 1,
+            'char' => 0,
+            'number' => 1,
             'wildcard' => 0,
-            'symbol'   => 0,
+            'symbol' => 0,
         ]);
 });
 

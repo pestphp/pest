@@ -25,7 +25,7 @@ final class HigherOrderMessage
     /**
      * Creates a new higher order message.
      *
-     * @param array<int, mixed> $arguments
+     * @param  array<int, mixed>  $arguments
      */
     public function __construct(
         public string $filename,
@@ -41,7 +41,7 @@ final class HigherOrderMessage
      *
      * @template TValue of object
      *
-     * @param TValue $target
+     * @param  TValue  $target
      */
     public function call(object $target): mixed
     {
@@ -77,7 +77,7 @@ final class HigherOrderMessage
     /**
      * Indicates that this message should only be called when the given condition is true.
      *
-     * @param callable(): bool $condition
+     * @param  callable(): bool  $condition
      */
     public function when(callable $condition): self
     {

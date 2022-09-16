@@ -2,8 +2,8 @@
 
 use PHPUnit\Framework\ExpectationFailedException;
 
-$obj          = new stdClass();
-$obj->foo     = 'bar';
+$obj = new stdClass();
+$obj->foo = 'bar';
 $obj->fooNull = null;
 
 test('pass', function () use ($obj) {

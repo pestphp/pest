@@ -42,7 +42,7 @@ final class TestCall
         string $description = null,
         Closure $closure = null
     ) {
-        $this->testCaseMethod  = new TestCaseMethodFactory($filename, $description, $closure);
+        $this->testCaseMethod = new TestCaseMethodFactory($filename, $description, $closure);
         $this->descriptionLess = $description === null;
     }
 
@@ -100,7 +100,7 @@ final class TestCall
      * Runs the current test multiple times with
      * each item of the given `iterable`.
      *
-     * @param array<\Closure|iterable<int|string, mixed>|string> $data
+     * @param  array<\Closure|iterable<int|string, mixed>|string>  $data
      */
     public function with(Closure|iterable|string ...$data): TestCall
     {
@@ -178,10 +178,10 @@ final class TestCall
     public function covers(string ...$classesOrFunctions): TestCall
     {
         foreach ($classesOrFunctions as $classOrFunction) {
-            $isClass  = class_exists($classOrFunction);
+            $isClass = class_exists($classOrFunction);
             $isMethod = function_exists($classOrFunction);
 
-            if (!$isClass && !$isMethod) {
+            if (! $isClass && ! $isMethod) {
                 throw new InvalidArgumentException(sprintf('No class or method named "%s" has been found.', $classOrFunction));
             }
 
@@ -252,7 +252,7 @@ final class TestCall
     /**
      * Saves the calls to be used on the target.
      *
-     * @param array<int, mixed> $arguments
+     * @param  array<int, mixed>  $arguments
      */
     public function __call(string $name, array $arguments): self
     {
@@ -262,7 +262,7 @@ final class TestCall
     /**
      * Add a chain to the test case factory. Omitting the arguments will treat it as a property accessor.
      *
-     * @param array<int, mixed>|null $arguments
+     * @param  array<int, mixed>|null  $arguments
      */
     private function addChain(string $file, int $line, string $name, array $arguments = null): self
     {

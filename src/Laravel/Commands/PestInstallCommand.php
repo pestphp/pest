@@ -8,9 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Pest\Console\Thanks;
 use Pest\Exceptions\InvalidConsoleArgument;
-
 use function Pest\testDirectory;
-
 use Pest\TestSuite;
 
 /**
@@ -41,7 +39,7 @@ final class PestInstallCommand extends Command
         TestSuite::getInstance(base_path(), $this->option('test-directory'));
 
         /* @phpstan-ignore-next-line */
-        $pest  = base_path(testDirectory('Pest.php'));
+        $pest = base_path(testDirectory('Pest.php'));
         $stubs = 'stubs/Laravel';
 
         if (File::exists($pest)) {
@@ -56,7 +54,7 @@ final class PestInstallCommand extends Command
 
         $this->output->success('`tests/Pest.php` created successfully.');
 
-        if (!(bool) $this->option('no-interaction')) {
+        if (! (bool) $this->option('no-interaction')) {
             (new Thanks($this->output))();
         }
     }

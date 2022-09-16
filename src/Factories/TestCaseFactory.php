@@ -109,7 +109,7 @@ final class TestCaseFactory
     /**
      * Creates a Test Case class using a runtime evaluate.
      *
-     * @param array<int, TestCaseMethodFactory> $methods
+     * @param  array<int, TestCaseMethodFactory>  $methods
      */
     public function evaluate(string $filename, array $methods): void
     {
@@ -118,9 +118,9 @@ final class TestCaseFactory
             $filename = (string) preg_replace_callback('~^(?P<drive>[a-z]+:\\\)~i', static fn ($match): string => strtolower($match['drive']), $filename);
         }
 
-        $filename     = str_replace('\\\\', '\\', addslashes((string) realpath($filename)));
-        $rootPath     = TestSuite::getInstance()->rootPath;
-        $relativePath = str_replace($rootPath . DIRECTORY_SEPARATOR, '', $filename);
+        $filename = str_replace('\\\\', '\\', addslashes((string) realpath($filename)));
+        $rootPath = TestSuite::getInstance()->rootPath;
+        $relativePath = str_replace($rootPath.DIRECTORY_SEPARATOR, '', $filename);
 
         $basename = basename($relativePath, '.php');
 
@@ -130,7 +130,7 @@ final class TestCaseFactory
             $basename = substr($basename, 0, $dotPos);
         }
 
-        $relativePath = dirname(ucfirst($relativePath)) . DIRECTORY_SEPARATOR . $basename;
+        $relativePath = dirname(ucfirst($relativePath)).DIRECTORY_SEPARATOR.$basename;
 
         $relativePath = str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath);
 
@@ -141,29 +141,29 @@ final class TestCaseFactory
         // Limit to A-Z, a-z, 0-9, '_', '-'.
         $relativePath = (string) preg_replace('/[^A-Za-z0-9\\\\]/', '', $relativePath);
 
-        $classFQN = 'P\\' . $relativePath;
+        $classFQN = 'P\\'.$relativePath;
 
         if (class_exists($classFQN)) {
             return;
         }
 
         $hasPrintableTestCaseClassFQN = sprintf('\%s', HasPrintableTestCaseName::class);
-        $traitsCode                   = sprintf('use %s;', implode(', ', array_map(
+        $traitsCode = sprintf('use %s;', implode(', ', array_map(
             static fn ($trait): string => sprintf('\%s', $trait), $this->traits))
         );
 
-        $partsFQN  = explode('\\', $classFQN);
+        $partsFQN = explode('\\', $classFQN);
         $className = array_pop($partsFQN);
         $namespace = implode('\\', $partsFQN);
         $baseClass = sprintf('\%s', $this->class);
 
         if ('' === trim($className)) {
-            $className = 'InvalidTestName' . Str::random();
+            $className = 'InvalidTestName'.Str::random();
             $classFQN .= $className;
         }
 
-        $classAvailableAttributes  = array_filter(self::$attributes, fn (string $attribute) => $attribute::ABOVE_CLASS);
-        $methodAvailableAttributes = array_filter(self::$attributes, fn (string $attribute) => !$attribute::ABOVE_CLASS);
+        $classAvailableAttributes = array_filter(self::$attributes, fn (string $attribute) => $attribute::ABOVE_CLASS);
+        $methodAvailableAttributes = array_filter(self::$attributes, fn (string $attribute) => ! $attribute::ABOVE_CLASS);
 
         $classAttributes = [];
 
@@ -225,7 +225,7 @@ final class TestCaseFactory
             throw new TestAlreadyExist($method->filename, $method->description);
         }
 
-        if (!$method->receivesArguments()) {
+        if (! $method->receivesArguments()) {
             if ($method->closure === null) {
                 throw ShouldNotHappen::fromMessage('The test closure may not be empty.');
             }

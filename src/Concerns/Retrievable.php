@@ -16,9 +16,8 @@ trait Retrievable
      *
      * @template TRetrievableValue
      *
-     * @param array<string, TRetrievableValue>|object $value
-     * @param TRetrievableValue|null                  $default
-     *
+     * @param  array<string, TRetrievableValue>|object  $value
+     * @param  TRetrievableValue|null  $default
      * @return TRetrievableValue|null
      */
     private function retrieve(string $key, mixed $value, mixed $default = null): mixed

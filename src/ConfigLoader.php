@@ -45,7 +45,7 @@ final class ConfigLoader
         $suiteDirectory = $this->config->xpath('/phpunit/testsuites/testsuite/directory');
 
         // @phpstan-ignore-next-line
-        if (!$suiteDirectory || count($suiteDirectory) === 0) {
+        if (! $suiteDirectory || count($suiteDirectory) === 0) {
             return self::DEFAULT_TESTS_PATH;
         }
 
@@ -71,9 +71,9 @@ final class ConfigLoader
     public function getConfigurationFilePath(): string|false
     {
         $candidates = [
-            $this->rootPath . '/phpunit.xml',
-            $this->rootPath . '/phpunit.dist.xml',
-            $this->rootPath . '/phpunit.xml.dist',
+            $this->rootPath.'/phpunit.xml',
+            $this->rootPath.'/phpunit.dist.xml',
+            $this->rootPath.'/phpunit.xml.dist',
         ];
 
         foreach ($candidates as $candidate) {
@@ -97,7 +97,7 @@ final class ConfigLoader
         }
 
         $oldReportingLevel = error_reporting(0);
-        $content           = file_get_contents($configPath);
+        $content = file_get_contents($configPath);
 
         if ($content !== false) {
             try {

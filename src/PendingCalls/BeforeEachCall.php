@@ -57,7 +57,7 @@ final class BeforeEachCall
     /**
      * Saves the calls to be used on the target.
      *
-     * @param array<int, mixed> $arguments
+     * @param  array<int, mixed>  $arguments
      */
     public function __call(string $name, array $arguments): self
     {

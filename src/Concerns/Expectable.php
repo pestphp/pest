@@ -16,8 +16,7 @@ trait Expectable
      *
      * Creates a new Expectation.
      *
-     * @param TValue $value
-     *
+     * @param  TValue  $value
      * @return Expectation<TValue>
      */
     public function expect(mixed $value): Expectation

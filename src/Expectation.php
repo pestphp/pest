@@ -37,7 +37,7 @@ final class Expectation
     /**
      * Creates a new expectation.
      *
-     * @param TValue $value
+     * @param  TValue  $value
      */
     public function __construct(
         public mixed $value
@@ -50,8 +50,7 @@ final class Expectation
      *
      * @template TAndValue
      *
-     * @param TAndValue $value
-     *
+     * @param  TAndValue  $value
      * @return self<TAndValue>
      */
     public function and(mixed $value): Expectation
@@ -66,7 +65,7 @@ final class Expectation
      */
     public function json(): Expectation
     {
-        if (!is_string($this->value)) {
+        if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
         }
 
@@ -139,7 +138,7 @@ final class Expectation
      */
     public function each(callable $callback = null): EachExpectation
     {
-        if (!is_iterable($this->value)) {
+        if (! is_iterable($this->value)) {
             throw new BadMethodCallException('Expectation value is not iterable.');
         }
 
@@ -158,25 +157,24 @@ final class Expectation
      * @template TSequenceValue
      *
      * @param (callable(self<TValue>, self<string|int>): void)|TSequenceValue ...$callbacks
-     *
      * @return self<TValue>
      */
     public function sequence(mixed ...$callbacks): Expectation
     {
-        if (!is_iterable($this->value)) {
+        if (! is_iterable($this->value)) {
             throw new BadMethodCallException('Expectation value is not iterable.');
         }
 
-        $value          = is_array($this->value) ? $this->value : iterator_to_array($this->value);
-        $keys           = array_keys($value);
-        $values         = array_values($value);
+        $value = is_array($this->value) ? $this->value : iterator_to_array($this->value);
+        $keys = array_keys($value);
+        $values = array_values($value);
         $callbacksCount = count($callbacks);
 
         $index = 0;
 
         while (count($callbacks) < count($values)) {
             $callbacks[] = $callbacks[$index];
-            $index       = $index < count($values) - 1 ? $index + 1 : 0;
+            $index = $index < count($values) - 1 ? $index + 1 : 0;
         }
 
         if ($callbacksCount > count($values)) {
@@ -203,7 +201,6 @@ final class Expectation
      *
      * @param (callable(): TMatchSubject)|TMatchSubject $subject
      * @param array<TMatchSubject, (callable(self<TValue>): mixed)|TValue> $expressions
-     *
      * @return self<TValue>
      */
     public function match(mixed $subject, array $expressions): Expectation
@@ -241,8 +238,7 @@ final class Expectation
      * Apply the callback if the given "condition" is falsy.
      *
      * @param (callable(): bool)|bool $condition
-     * @param callable(Expectation<TValue>): mixed $callback
-     *
+     * @param  callable(Expectation<TValue>): mixed  $callback
      * @return self<TValue>
      */
     public function unless(callable|bool $condition, callable $callback): Expectation
@@ -253,15 +249,14 @@ final class Expectation
                 return $condition;
             };
 
-        return $this->when(!$condition(), $callback);
+        return $this->when(! $condition(), $callback);
     }
 
     /**
      * Apply the callback if the given "condition" is truthy.
      *
      * @param (callable(): bool)|bool $condition
-     * @param callable(self<TValue>): mixed $callback
-     *
+     * @param  callable(self<TValue>): mixed  $callback
      * @return self<TValue>
      */
     public function when(callable|bool $condition, callable $callback): Expectation
@@ -282,13 +277,12 @@ final class Expectation
     /**
      * Dynamically calls methods on the class or creates a new higher order expectation.
      *
-     * @param array<int, mixed> $parameters
-     *
+     * @param  array<int, mixed>  $parameters
      * @return Expectation<TValue>|HigherOrderExpectation<Expectation<TValue>, TValue>
      */
     public function __call(string $method, array $parameters): Expectation|HigherOrderExpectation
     {
-        if (!self::hasMethod($method)) {
+        if (! self::hasMethod($method)) {
             /* @phpstan-ignore-next-line */
             return new HigherOrderExpectation($this, $this->value->$method(...$parameters));
         }
@@ -331,7 +325,7 @@ final class Expectation
      */
     public function __get(string $name)
     {
-        if (!self::hasMethod($name)) {
+        if (! self::hasMethod($name)) {
             /* @phpstan-ignore-next-line */
             return new HigherOrderExpectation($this, $this->retrieve($name, $this->value));
         }

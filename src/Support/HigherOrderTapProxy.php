@@ -27,7 +27,7 @@ final class HigherOrderTapProxy
     /**
      * Dynamically sets properties on the target.
      *
-     * @param mixed $value
+     * @param  mixed  $value
      */
     public function __set(string $property, $value): void
     {
@@ -60,14 +60,13 @@ final class HigherOrderTapProxy
     /**
      * Dynamically pass method calls to the target.
      *
-     * @param array<int, mixed> $arguments
-     *
+     * @param  array<int, mixed>  $arguments
      * @return mixed
      */
     public function __call(string $methodName, array $arguments)
     {
         $filename = Backtrace::file();
-        $line     = Backtrace::line();
+        $line = Backtrace::line();
 
         return (new HigherOrderMessage($filename, $line, $methodName, $arguments))
             ->call($this->target);

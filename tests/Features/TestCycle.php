@@ -2,11 +2,11 @@
 
 use function PHPUnit\Framework\assertFalse;
 
-$foo             = new stdClass();
-$foo->beforeAll  = false;
+$foo = new stdClass();
+$foo->beforeAll = false;
 $foo->beforeEach = false;
-$foo->afterEach  = false;
-$foo->afterAll   = false;
+$foo->afterEach = false;
+$foo->afterAll = false;
 
 beforeAll(function () {
     $foo->beforeAll = true;

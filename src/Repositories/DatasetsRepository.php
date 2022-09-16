@@ -9,9 +9,7 @@ use Pest\Exceptions\DatasetAlreadyExist;
 use Pest\Exceptions\DatasetDoesNotExist;
 use Pest\Exceptions\ShouldNotHappen;
 use SebastianBergmann\Exporter\Exporter;
-
 use function sprintf;
-
 use Traversable;
 
 /**
@@ -36,7 +34,7 @@ final class DatasetsRepository
     /**
      * Sets the given.
      *
-     * @param Closure|iterable<int|string, mixed> $data
+     * @param  Closure|iterable<int|string, mixed>  $data
      */
     public static function set(string $name, Closure|iterable $data): void
     {
@@ -50,16 +48,16 @@ final class DatasetsRepository
     /**
      * Sets the given "with".
      *
-     * @param array<Closure|iterable<int|string, mixed>|string> $with
+     * @param  array<Closure|iterable<int|string, mixed>|string>  $with
      */
     public static function with(string $filename, string $description, array $with): void
     {
-        self::$withs[$filename . '>>>' . $description] = $with;
+        self::$withs[$filename.'>>>'.$description] = $with;
     }
 
     public static function has(string $filename, string $description): bool
     {
-        return array_key_exists($filename . '>>>' . $description, self::$withs);
+        return array_key_exists($filename.'>>>'.$description, self::$withs);
     }
 
     /**
@@ -69,7 +67,7 @@ final class DatasetsRepository
      */
     public static function get(string $filename, string $description): Closure|iterable
     {
-        $dataset = self::$withs[$filename . '>>>' . $description];
+        $dataset = self::$withs[$filename.'>>>'.$description];
 
         $dataset = self::resolve($description, $dataset);
 
@@ -83,8 +81,7 @@ final class DatasetsRepository
     /**
      * Resolves the current dataset to an array value.
      *
-     * @param array<Closure|iterable<int|string, mixed>|string> $dataset
-     *
+     * @param  array<Closure|iterable<int|string, mixed>|string>  $dataset
      * @return array<string, mixed>|null
      */
     public static function resolve(string $description, array $dataset): array|null
@@ -99,11 +96,11 @@ final class DatasetsRepository
         $datasetCombinations = self::getDatasetsCombinations($dataset);
 
         $datasetDescriptions = [];
-        $datasetValues       = [];
+        $datasetValues = [];
 
         foreach ($datasetCombinations as $datasetCombination) {
             $partialDescriptions = [];
-            $values              = [];
+            $values = [];
 
             foreach ($datasetCombination as $datasetCombinationElement) {
                 $partialDescriptions[] = $datasetCombinationElement['label'];
@@ -113,7 +110,7 @@ final class DatasetsRepository
             }
 
             $datasetDescriptions[] = implode(' / ', $partialDescriptions);
-            $datasetValues[]       = $values;
+            $datasetValues[] = $values;
         }
 
         foreach (array_count_values($datasetDescriptions) as $descriptionToCheck => $count) {
@@ -136,8 +133,7 @@ final class DatasetsRepository
     }
 
     /**
-     * @param array<Closure|iterable<int|string, mixed>|string> $datasets
-     *
+     * @param  array<Closure|iterable<int|string, mixed>|string>  $datasets
      * @return array<array<mixed>>
      */
     private static function processDatasets(array $datasets): array
@@ -148,7 +144,7 @@ final class DatasetsRepository
             $processedDataset = [];
 
             if (is_string($data)) {
-                if (!array_key_exists($data, self::$datasets)) {
+                if (! array_key_exists($data, self::$datasets)) {
                     throw new DatasetDoesNotExist($data);
                 }
 
@@ -165,9 +161,9 @@ final class DatasetsRepository
 
             // @phpstan-ignore-next-line
             foreach ($datasets[$index] as $key => $values) {
-                $values             = is_array($values) ? $values : [$values];
+                $values = is_array($values) ? $values : [$values];
                 $processedDataset[] = [
-                    'label'  => self::getDatasetDescription($key, $values), // @phpstan-ignore-line
+                    'label' => self::getDatasetDescription($key, $values), // @phpstan-ignore-line
                     'values' => $values,
                 ];
             }
@@ -179,8 +175,7 @@ final class DatasetsRepository
     }
 
     /**
-     * @param array<array<mixed>> $combinations
-     *
+     * @param  array<array<mixed>>  $combinations
      * @return array<array<array<mixed>>>
      */
     private static function getDatasetsCombinations(array $combinations): array
@@ -201,7 +196,7 @@ final class DatasetsRepository
     }
 
     /**
-     * @param array<int, mixed> $data
+     * @param  array<int, mixed>  $data
      */
     private static function getDatasetDescription(int|string $key, array $data): string
     {

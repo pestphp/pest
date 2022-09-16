@@ -46,7 +46,7 @@ test('it truncates the description', function () {
     // it gets tested by the integration test
 })->with([str_repeat('Fooo', 10)]);
 
-$state       = new stdClass();
+$state = new stdClass();
 $state->text = '';
 
 $datasets = [[1], [2]];
@@ -148,7 +148,7 @@ $datasets_a = [[1], [2]];
 $datasets_b = [[3], [4]];
 
 test('lazy multiple datasets', function ($text_a, $text_b) use ($state, $datasets_a, $datasets_b) {
-    $state->text .= $text_a . $text_b;
+    $state->text .= $text_a.$text_b;
     expect($datasets_a)->toContain([$text_a]);
     expect($datasets_b)->toContain([$text_b]);
 })->with($datasets_a, $datasets_b);
@@ -160,7 +160,7 @@ test('lazy multiple datasets did the job right', function () use ($state) {
 $state->text = '';
 
 test('eager multiple datasets', function ($text_a, $text_b) use ($state, $datasets_a, $datasets_b) {
-    $state->text .= $text_a . $text_b;
+    $state->text .= $text_a.$text_b;
     expect($datasets_a)->toContain([$text_a]);
     expect($datasets_b)->toContain([$text_b]);
 })->with(function () use ($datasets_a) {
@@ -174,7 +174,7 @@ test('eager multiple datasets did the job right', function () use ($state) {
 });
 
 test('lazy registered multiple datasets', function ($text_a, $text_b) use ($state, $datasets) {
-    $state->text .= $text_a . $text_b;
+    $state->text .= $text_a.$text_b;
     expect($datasets)->toContain([$text_a]);
     expect($datasets)->toContain([$text_b]);
 })->with('numbers.array')->with('numbers.array');
@@ -184,7 +184,7 @@ test('lazy registered multiple datasets did the job right', function () use ($st
 });
 
 test('eager registered multiple datasets', function ($text_a, $text_b) use ($state, $datasets) {
-    $state->text .= $text_a . $text_b;
+    $state->text .= $text_a.$text_b;
     expect($datasets)->toContain([$text_a]);
     expect($datasets)->toContain([$text_b]);
 })->with('numbers.array')->with('numbers.closure');
@@ -194,7 +194,7 @@ test('eager registered multiple datasets did the job right', function () use ($s
 });
 
 test('eager wrapped registered multiple datasets', function ($text_a, $text_b) use ($state, $datasets) {
-    $state->text .= $text_a . $text_b;
+    $state->text .= $text_a.$text_b;
     expect($datasets)->toContain([$text_a]);
     expect($datasets)->toContain([$text_b]);
 })->with('numbers.closure.wrapped')->with('numbers.closure');
@@ -204,7 +204,7 @@ test('eager wrapped registered multiple datasets did the job right', function ()
 });
 
 test('named multiple datasets', function ($text_a, $text_b) use ($state, $datasets_a, $datasets_b) {
-    $state->text .= $text_a . $text_b;
+    $state->text .= $text_a.$text_b;
     expect($datasets_a)->toContain([$text_a]);
     expect($datasets_b)->toContain([$text_b]);
 })->with([
@@ -212,7 +212,7 @@ test('named multiple datasets', function ($text_a, $text_b) use ($state, $datase
     'two' => [2],
 ])->with([
     'three' => [3],
-    'four'  => [4],
+    'four' => [4],
 ]);
 
 test('named multiple datasets did the job right', function () use ($state) {
@@ -220,7 +220,7 @@ test('named multiple datasets did the job right', function () use ($state) {
 });
 
 test('more than two datasets', function ($text_a, $text_b, $text_c) use ($state, $datasets_a, $datasets_b) {
-    $state->text .= $text_a . $text_b . $text_c;
+    $state->text .= $text_a.$text_b.$text_c;
     expect($datasets_a)->toContain([$text_a]);
     expect($datasets_b)->toContain([$text_b]);
     expect([5, 6])->toContain($text_c);

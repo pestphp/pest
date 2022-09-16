@@ -23,8 +23,7 @@ final class Covers extends Attribute
     /**
      * Adds attributes regarding the "covers" feature.
      *
-     * @param array<int, string> $attributes
-     *
+     * @param  array<int, string>  $attributes
      * @return array<int, string>
      */
     public function __invoke(TestCaseMethodFactory $method, array $attributes): array
@@ -33,7 +32,7 @@ final class Covers extends Attribute
             if ($covering instanceof CoversClass) {
                 // Prepend a backslash for FQN classes
                 if (str_contains($covering->class, '\\')) {
-                    $covering->class = '\\' . $covering->class;
+                    $covering->class = '\\'.$covering->class;
                 }
 
                 $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversClass({$covering->class}::class)]";

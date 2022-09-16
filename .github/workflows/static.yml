@@ -47,5 +47,11 @@ jobs:
     - name: Install Dependencies
       run: composer update --prefer-stable --no-interaction --no-progress --ansi
 
-    - name: Run PHPStan
-      run: vendor/bin/phpstan analyse --no-progress --debug --ansi
+    - name: Types
+      run: composer test:types
+
+    - name: Style
+      run: composer test:lint
+
+    - name: Recfato
+      run: composer test:refacto

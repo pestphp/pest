@@ -4,18 +4,18 @@ use Pest\Console\Help;
 use Symfony\Component\Console\Output\BufferedOutput;
 
 test('visual snapshot of help command output', function () {
-    $snapshot = __DIR__ . '/../.snapshots/help-command.txt';
+    $snapshot = __DIR__.'/../.snapshots/help-command.txt';
 
     if (getenv('REBUILD_SNAPSHOTS')) {
         $outputBuffer = new BufferedOutput();
-        $plugin       = new Help($outputBuffer);
+        $plugin = new Help($outputBuffer);
 
         $plugin();
 
         file_put_contents($snapshot, $outputBuffer->fetch());
     }
 
-    $output      = function () {
+    $output = function () {
         $process = (new Symfony\Component\Process\Process(['php', 'bin/pest', '--help'], null, ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true']));
 
         $process->run();

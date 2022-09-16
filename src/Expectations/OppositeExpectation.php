@@ -21,7 +21,7 @@ final class OppositeExpectation
     /**
      * Creates a new opposite expectation.
      *
-     * @param Expectation<TValue> $original
+     * @param  Expectation<TValue>  $original
      */
     public function __construct(private Expectation $original)
     {
@@ -30,8 +30,7 @@ final class OppositeExpectation
     /**
      * Asserts that the value array not has the provided $keys.
      *
-     * @param array<int, int|string|array<int-string, mixed>> $keys
-     *
+     * @param  array<int, int|string|array<int-string, mixed>>  $keys
      * @return Expectation<TValue>
      */
     public function toHaveKeys(array $keys): Expectation
@@ -39,7 +38,7 @@ final class OppositeExpectation
         foreach ($keys as $k => $key) {
             try {
                 if (is_array($key)) {
-                    $this->toHaveKeys(array_keys(Arr::dot($key, $k . '.')));
+                    $this->toHaveKeys(array_keys(Arr::dot($key, $k.'.')));
                 } else {
                     $this->original->toHaveKey($key);
                 }
@@ -56,8 +55,7 @@ final class OppositeExpectation
     /**
      * Handle dynamic method calls into the original expectation.
      *
-     * @param array<int, mixed> $arguments
-     *
+     * @param  array<int, mixed>  $arguments
      * @return Expectation<TValue>|Expectation<mixed>|never
      */
     public function __call(string $name, array $arguments): Expectation
@@ -91,8 +89,7 @@ final class OppositeExpectation
     /**
      * Creates a new expectation failed exception with a nice readable message.
      *
-     * @param array<int, mixed> $arguments
-     *
+     * @param  array<int, mixed>  $arguments
      * @return never
      */
     private function throwExpectationFailedException(string $name, array $arguments = []): void

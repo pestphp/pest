@@ -22,8 +22,7 @@ final class Reflection
     /**
      * Calls the given method with args on the given object.
      *
-     * @param array<int, mixed> $args
-     *
+     * @param  array<int, mixed>  $args
      * @return mixed
      */
     public static function call(object $object, string $method, array $args = [])
@@ -52,8 +51,7 @@ final class Reflection
     /**
      * Bind a callable to the TestCase and return the result.
      *
-     * @param array<int, mixed> $args
-     *
+     * @param  array<int, mixed>  $args
      * @return mixed
      */
     public static function bindCallable(callable $callable, array $args = [])
@@ -104,7 +102,7 @@ final class Reflection
             } catch (ReflectionException $reflectionException) {
                 $reflectionClass = $reflectionClass->getParentClass();
 
-                if (!$reflectionClass instanceof ReflectionClass) {
+                if (! $reflectionClass instanceof ReflectionClass) {
                     throw new ShouldNotHappen($reflectionException);
                 }
             }
@@ -120,8 +118,8 @@ final class Reflection
      *
      * @template TValue of object
      *
-     * @param TValue $object
-     * @param mixed  $value
+     * @param  TValue  $object
+     * @param  mixed  $value
      */
     public static function setPropertyValue(object $object, string $property, $value): void
     {
@@ -137,7 +135,7 @@ final class Reflection
             } catch (ReflectionException $reflectionException) {
                 $reflectionClass = $reflectionClass->getParentClass();
 
-                if (!$reflectionClass instanceof ReflectionClass) {
+                if (! $reflectionClass instanceof ReflectionClass) {
                     throw new ShouldNotHappen($reflectionException);
                 }
             }
@@ -156,7 +154,7 @@ final class Reflection
     {
         $type = $parameter->getType();
 
-        if (!$type instanceof ReflectionNamedType || $type->isBuiltin()) {
+        if (! $type instanceof ReflectionNamedType || $type->isBuiltin()) {
             return null;
         }
 
@@ -183,7 +181,7 @@ final class Reflection
     public static function getFunctionArguments(Closure $function): array
     {
         $parameters = (new ReflectionFunction($function))->getParameters();
-        $arguments  = [];
+        $arguments = [];
 
         foreach ($parameters as $parameter) {
             /** @var ReflectionNamedType|ReflectionUnionType|null $types */

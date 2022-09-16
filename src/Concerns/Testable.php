@@ -55,7 +55,7 @@ trait Testable
     public static function flush(): void
     {
         self::$__beforeAll = null;
-        self::$__afterAll  = null;
+        self::$__afterAll = null;
     }
 
     /**
@@ -68,9 +68,9 @@ trait Testable
         $test = TestSuite::getInstance()->tests->get(self::$__filename);
 
         if ($test->hasMethod($name)) {
-            $method              = $test->getMethod($name);
+            $method = $test->getMethod($name);
             self::$__description = $method->description;
-            $this->__test        = $method->getClosure($this);
+            $this->__test = $method->getClosure($this);
         }
     }
 
@@ -79,7 +79,7 @@ trait Testable
      */
     public function __addBeforeAll(?Closure $hook): void
     {
-        if (!$hook) {
+        if (! $hook) {
             return;
         }
 
@@ -93,7 +93,7 @@ trait Testable
      */
     public function __addAfterAll(?Closure $hook): void
     {
-        if (!$hook) {
+        if (! $hook) {
             return;
         }
 
@@ -123,7 +123,7 @@ trait Testable
      */
     private function __addHook(string $property, ?Closure $hook): void
     {
-        if (!$hook) {
+        if (! $hook) {
             return;
         }
 
@@ -222,7 +222,7 @@ trait Testable
         $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
 
         if ($this->dataName()) {
-            self::$__description = $method->description . ' with ' . $this->dataName();
+            self::$__description = $method->description.' with '.$this->dataName();
         } else {
             self::$__description = $method->description;
         }
@@ -231,11 +231,11 @@ trait Testable
             return $arguments;
         }
 
-        if (!$arguments[0] instanceof Closure) {
+        if (! $arguments[0] instanceof Closure) {
             return $arguments;
         }
 
-        $underlyingTest     = Reflection::getFunctionVariable($this->__test, 'closure');
+        $underlyingTest = Reflection::getFunctionVariable($this->__test, 'closure');
         $testParameterTypes = array_values(Reflection::getFunctionArguments($underlyingTest));
 
         if (in_array($testParameterTypes[0], ['Closure', 'callable'])) {
@@ -244,7 +244,7 @@ trait Testable
 
         $boundDatasetResult = $this->__callClosure($arguments[0], []);
 
-        if (count($testParameterTypes) === 1 || !is_array($boundDatasetResult)) {
+        if (count($testParameterTypes) === 1 || ! is_array($boundDatasetResult)) {
             return [$boundDatasetResult];
         }
 

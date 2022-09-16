@@ -8,9 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Pest\Exceptions\InvalidConsoleArgument;
-
 use function Pest\testDirectory;
-
 use Pest\TestSuite;
 
 /**
@@ -53,7 +51,7 @@ final class PestDatasetCommand extends Command
             throw new InvalidConsoleArgument(sprintf('%s already exist', $target));
         }
 
-        if (!File::exists(dirname($relativePath))) {
+        if (! File::exists(dirname($relativePath))) {
             File::makeDirectory(dirname($relativePath));
         }
 
@@ -63,10 +61,10 @@ final class PestDatasetCommand extends Command
             'Dataset.php',
         ]));
 
-        $name     = mb_strtolower($name);
+        $name = mb_strtolower($name);
         $contents = str_replace('{dataset_name}', $name, $contents);
 
-        $element  = Str::singular($name);
+        $element = Str::singular($name);
         $contents = str_replace('{dataset_element}', $element, $contents);
         File::put($target, str_replace('{dataset_name}', $name, $contents));
         $message = sprintf('`%s` created successfully.', $relativePath);

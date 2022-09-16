@@ -19,8 +19,7 @@ abstract class Attribute
     public const ABOVE_CLASS = false;
 
     /**
-     * @param array<int, string> $attributes
-     *
+     * @param  array<int, string>  $attributes
      * @return array<int, string>
      */
     public function __invoke(TestCaseMethodFactory $method, array $attributes): array // @phpstan-ignore-line

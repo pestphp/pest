@@ -8,9 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Pest\Exceptions\InvalidConsoleArgument;
 use Pest\Support\Str;
-
 use function Pest\testDirectory;
-
 use Pest\TestSuite;
 
 /**
@@ -54,11 +52,11 @@ final class PestTestCommand extends Command
         /* @phpstan-ignore-next-line */
         $target = base_path($relativePath);
 
-        if (!File::isDirectory(dirname($target))) {
+        if (! File::isDirectory(dirname($target))) {
             File::makeDirectory(dirname($target), 0777, true, true);
         }
 
-        if (File::exists($target) && !(bool) $this->option('force')) {
+        if (File::exists($target) && ! (bool) $this->option('force')) {
             throw new InvalidConsoleArgument(sprintf('%s already exist', $target));
         }
 

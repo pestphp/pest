@@ -1,6 +1,6 @@
 <?php
 
-$file = __DIR__ . DIRECTORY_SEPARATOR . 'after-all-test';
+$file = __DIR__.DIRECTORY_SEPARATOR.'after-all-test';
 
 beforeAll(function () use ($file) {
     @unlink($file);

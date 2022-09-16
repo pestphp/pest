@@ -38,7 +38,7 @@ final class Expectation
     /**
      * Creates a new expectation.
      *
-     * @param TValue $value
+     * @param  TValue  $value
      */
     public function __construct(
         public mixed $value
@@ -180,7 +180,7 @@ final class Expectation
                 // @phpstan-ignore-next-line
                 Assert::assertStringContainsString((string) $needle, $this->value);
             } else {
-                if (!is_iterable($this->value)) {
+                if (! is_iterable($this->value)) {
                     InvalidExpectationValue::expected('iterable');
                 }
                 Assert::assertContains($needle, $this->value);
@@ -193,13 +193,12 @@ final class Expectation
     /**
      * Asserts that the value starts with $expected.
      *
-     * @param non-empty-string $expected
-     *
+     * @param  non-empty-string  $expected
      *@return Expectation<TValue>
      */
     public function toStartWith(string $expected): Expectation
     {
-        if (!is_string($this->value)) {
+        if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
         }
 
@@ -211,13 +210,12 @@ final class Expectation
     /**
      * Asserts that the value ends with $expected.
      *
-     * @param non-empty-string $expected
-     *
+     * @param  non-empty-string  $expected
      *@return Expectation<TValue>
      */
     public function toEndWith(string $expected): Expectation
     {
-        if (!is_string($this->value)) {
+        if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
         }
 
@@ -265,7 +263,7 @@ final class Expectation
      */
     public function toHaveCount(int $count): Expectation
     {
-        if (!is_countable($this->value) && !is_iterable($this->value)) {
+        if (! is_countable($this->value) && ! is_iterable($this->value)) {
             InvalidExpectationValue::expected('string');
         }
 
@@ -297,8 +295,7 @@ final class Expectation
     /**
      * Asserts that the value contains the provided properties $names.
      *
-     * @param iterable<array-key, string> $names
-     *
+     * @param  iterable<array-key, string>  $names
      *@return Expectation<TValue>
      */
     public function toHaveProperties(iterable $names): Expectation
@@ -356,8 +353,7 @@ final class Expectation
     /**
      * Asserts that the value is one of the given values.
      *
-     * @param iterable<int|string, mixed> $values
-     *
+     * @param  iterable<int|string, mixed>  $values
      * @return Expectation<TValue>
      */
     public function toBeIn(iterable $values): Expectation
@@ -382,8 +378,7 @@ final class Expectation
     /**
      * Asserts that the value is an instance of $class.
      *
-     * @param class-string $class
-     *
+     * @param  class-string  $class
      * @return Expectation<TValue>
      */
     public function toBeInstanceOf(string $class): Expectation
@@ -595,15 +590,14 @@ final class Expectation
     /**
      * Asserts that the value array has the provided $keys.
      *
-     * @param array<int, int|string|array<int-string, mixed>> $keys
-     *
+     * @param  array<int, int|string|array<int-string, mixed>>  $keys
      * @return Expectation<TValue>
      */
     public function toHaveKeys(array $keys): Expectation
     {
         foreach ($keys as $k => $key) {
             if (is_array($key)) {
-                $this->toHaveKeys(array_keys(Arr::dot($key, $k . '.')));
+                $this->toHaveKeys(array_keys(Arr::dot($key, $k.'.')));
             } else {
                 $this->toHaveKey($key);
             }
@@ -619,7 +613,7 @@ final class Expectation
      */
     public function toBeDirectory(): Expectation
     {
-        if (!is_string($this->value)) {
+        if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
         }
 
@@ -635,7 +629,7 @@ final class Expectation
      */
     public function toBeReadableDirectory(): Expectation
     {
-        if (!is_string($this->value)) {
+        if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
         }
 
@@ -651,7 +645,7 @@ final class Expectation
      */
     public function toBeWritableDirectory(): Expectation
     {
-        if (!is_string($this->value)) {
+        if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
         }
 
@@ -667,7 +661,7 @@ final class Expectation
      */
     public function toBeFile(): Expectation
     {
-        if (!is_string($this->value)) {
+        if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
         }
 
@@ -683,7 +677,7 @@ final class Expectation
      */
     public function toBeReadableFile(): Expectation
     {
-        if (!is_string($this->value)) {
+        if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
         }
 
@@ -699,7 +693,7 @@ final class Expectation
      */
     public function toBeWritableFile(): Expectation
     {
-        if (!is_string($this->value)) {
+        if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
         }
         Assert::assertFileIsWritable($this->value);
@@ -710,8 +704,7 @@ final class Expectation
     /**
      * Asserts that the value array matches the given array subset.
      *
-     * @param iterable<int|string, mixed> $array
-     *
+     * @param  iterable<int|string, mixed>  $array
      * @return Expectation<TValue>
      */
     public function toMatchArray(iterable $array): Expectation
@@ -743,14 +736,13 @@ final class Expectation
      * Asserts that the value object matches a subset
      * of the properties of an given object.
      *
-     * @param iterable<string, mixed> $object
-     *
+     * @param  iterable<string, mixed>  $object
      * @return Expectation<TValue>
      */
     public function toMatchObject(iterable $object): Expectation
     {
         foreach ((array) $object as $property => $value) {
-            if (!is_object($this->value) && !is_string($this->value)) {
+            if (! is_object($this->value) && ! is_string($this->value)) {
                 InvalidExpectationValue::expected('object|string');
             }
 
@@ -779,7 +771,7 @@ final class Expectation
      */
     public function toMatch(string $expression): Expectation
     {
-        if (!is_string($this->value)) {
+        if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
         }
         Assert::assertMatchesRegularExpression($expression, $this->value);
@@ -800,13 +792,12 @@ final class Expectation
     }
 
     /**
-     * @param class-string $class
-     *
+     * @param  class-string  $class
      * @return Expectation<TValue>
      */
     public function toContainOnlyInstancesOf(string $class): Expectation
     {
-        if (!is_iterable($this->value)) {
+        if (! is_iterable($this->value)) {
             InvalidExpectationValue::expected('iterable');
         }
 
@@ -819,7 +810,6 @@ final class Expectation
      * Asserts that executing value throws an exception.
      *
      * @param (Closure(Throwable): mixed)|string $exception
-     *
      * @return Expectation<TValue>
      */
     public function toThrow(callable|string $exception, string $exceptionMessage = null): Expectation
@@ -827,14 +817,14 @@ final class Expectation
         $callback = NullClosure::create();
 
         if ($exception instanceof Closure) {
-            $callback   = $exception;
+            $callback = $exception;
             $parameters = (new ReflectionFunction($exception))->getParameters();
 
             if (1 !== count($parameters)) {
                 throw new InvalidArgumentException('The given closure must have a single parameter type-hinted as the class string.');
             }
 
-            if (!($type = $parameters[0]->getType()) instanceof ReflectionNamedType) {
+            if (! ($type = $parameters[0]->getType()) instanceof ReflectionNamedType) {
                 throw new InvalidArgumentException('The given closure\'s parameter must be type-hinted as the class string.');
             }
 
@@ -844,7 +834,7 @@ final class Expectation
         try {
             ($this->value)();
         } catch (Throwable $e) {
-            if (!class_exists($exception)) {
+            if (! class_exists($exception)) {
                 if ($e instanceof Error && $e->getMessage() === "Class \"$exception\" not found") {
                     throw $e;
                 }
@@ -864,7 +854,7 @@ final class Expectation
             return $this;
         }
 
-        if (!class_exists($exception)) {
+        if (! class_exists($exception)) {
             throw new ExpectationFailedException("Exception with message \"$exception\" not thrown.");
         }
 

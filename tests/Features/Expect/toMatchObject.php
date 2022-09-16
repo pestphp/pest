@@ -4,33 +4,34 @@ use PHPUnit\Framework\ExpectationFailedException;
 
 beforeEach(function () {
     $this->user = (object) [
-        'id'    => 1,
-        'name'  => 'Nuno',
+        'id' => 1,
+        'name' => 'Nuno',
         'email' => 'enunomaduro@gmail.com',
     ];
 });
 
 test('pass', function () {
     expect($this->user)->toMatchObject([
-        'name'  => 'Nuno',
+        'name' => 'Nuno',
         'email' => 'enunomaduro@gmail.com',
     ]);
 });
 
 test('pass with class', function () {
-    expect(new class() {
+    expect(new class()
+    {
         public $name = 'Nuno';
 
         public $email = 'enunomaduro@gmail.com';
     })->toMatchObject([
-        'name'  => 'Nuno',
+        'name' => 'Nuno',
         'email' => 'enunomaduro@gmail.com',
     ]);
 });
 
 test('failures', function () {
     expect($this->user)->toMatchObject([
-        'name'  => 'Not the same name',
+        'name' => 'Not the same name',
         'email' => 'enunomaduro@gmail.com',
     ]);
 })->throws(ExpectationFailedException::class);

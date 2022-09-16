@@ -34,7 +34,7 @@ it('show only the names of multiple named datasets in their description', functi
         ],
         [
             'three' => [3],
-            'four'  => [[4]],
+            'four' => [[4]],
         ],
     ]));
 

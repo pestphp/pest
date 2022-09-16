@@ -18,12 +18,12 @@ final class Plugin
     /**
      * Lazy loads an `uses` call on the context of plugins.
      *
-     * @param class-string ...$traits
+     * @param  class-string  ...$traits
      */
     public static function uses(string ...$traits): void
     {
         self::$callables[] = function () use ($traits): void {
-            uses(...$traits)->in(TestSuite::getInstance()->rootPath . DIRECTORY_SEPARATOR . testDirectory());
+            uses(...$traits)->in(TestSuite::getInstance()->rootPath.DIRECTORY_SEPARATOR.testDirectory());
         };
     }
 }

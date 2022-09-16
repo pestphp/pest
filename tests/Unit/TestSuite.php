@@ -8,7 +8,7 @@ use Pest\TestSuite;
 
 it('does not allow to add the same test description twice', function () {
     $testSuite = new TestSuite(getcwd(), 'tests');
-    $method    = new TestCaseMethodFactory('foo', 'bar', null);
+    $method = new TestCaseMethodFactory('foo', 'bar', null);
 
     $testSuite->tests->set($method);
     $testSuite->tests->set($method);
@@ -44,7 +44,7 @@ it('can return an array of all test suite filenames', function () {
 it('can filter the test suite filenames to those with the only method', function () {
     $testSuite = new TestSuite(getcwd(), 'tests');
 
-    $testWithOnly       = new TestCaseMethodFactory('a', 'b', null);
+    $testWithOnly = new TestCaseMethodFactory('a', 'b', null);
     $testWithOnly->only = true;
     $testSuite->tests->set($testWithOnly);
 
@@ -63,7 +63,7 @@ it('does not filter the test suite filenames to those with the only method when 
     $test = function () {
     };
 
-    $testWithOnly       = new TestCaseMethodFactory('a', 'b', null);
+    $testWithOnly = new TestCaseMethodFactory('a', 'b', null);
     $testWithOnly->only = true;
     $testSuite->tests->set($testWithOnly);
 

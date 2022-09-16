@@ -26,7 +26,6 @@ final class HigherOrderCallables
      * Create a new expectation. Callable values will be executed prior to returning the new expectation.
      *
      * @param (Closure():TValue)|TValue $value
-     *
      * @return Expectation<TValue>
      */
     public function expect(mixed $value): Expectation
@@ -42,8 +41,7 @@ final class HigherOrderCallables
      *
      * Create a new expectation. Callable values will be executed prior to returning the new expectation.
      *
-     * @param callable|TValue $value
-     *
+     * @param  callable|TValue  $value
      * @return Expectation<(callable(): mixed)|TValue>
      */
     public function and(mixed $value)

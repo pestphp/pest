@@ -55,7 +55,7 @@ final class Kernel
     /**
      * Handles the given argv.
      *
-     * @param array<int, string> $argv
+     * @param  array<int, string>  $argv
      */
     public function handle(array $argv): int
     {
@@ -90,7 +90,7 @@ final class Kernel
         $returnCode = self::FAILURE_EXIT;
 
         if ($result->wasSuccessfulIgnoringPhpunitWarnings()
-            && !$result->hasTestTriggeredPhpunitWarningEvents()) {
+            && ! $result->hasTestTriggeredPhpunitWarningEvents()) {
             $returnCode = self::SUCCESS_EXIT;
         }
 

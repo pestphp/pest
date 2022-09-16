@@ -128,7 +128,7 @@ it('runs with falsy closure condition', function () {
 it('can be passed non-callable values', function () {
     expect('foo')
         ->match('pest', [
-            'bar'  => 'foo',
+            'bar' => 'foo',
             'pest' => 'baz',
         ]
         );

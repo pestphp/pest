@@ -44,7 +44,7 @@ final class ExceptionTrace
      */
     public static function removePestReferences(Throwable $t): void
     {
-        if (!property_exists($t, 'serializableTrace')) {
+        if (! property_exists($t, 'serializableTrace')) {
             return;
         }
 

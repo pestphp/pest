@@ -1,9 +1,7 @@
 <?php
 
 use Pest\Plugins\Version;
-
 use function Pest\version;
-
 use Symfony\Component\Console\Output\BufferedOutput;
 
 it('outputs the version when --version is used', function () {
@@ -11,7 +9,7 @@ it('outputs the version when --version is used', function () {
     $plugin = new Version($output);
 
     $plugin->handleArguments(['foo', '--version']);
-    expect($output->fetch())->toContain('Pest    ' . version());
+    expect($output->fetch())->toContain('Pest    '.version());
 });
 
 it('do not outputs version when --version is not used', function () {

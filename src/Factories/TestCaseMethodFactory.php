@@ -90,7 +90,7 @@ final class TestCaseMethodFactory
         $method = $this;
 
         return function () use ($testCase, $method, $closure): mixed { // @phpstan-ignore-line
-            /* @var TestCase $this */
+        /* @var TestCase $this */
             $testCase->proxies->proxy($this);
             $method->proxies->proxy($this);
 
@@ -112,8 +112,8 @@ final class TestCaseMethodFactory
     /**
      * Creates a PHPUnit method as a string ready for evaluation.
      *
-     * @param array<int, class-string>                                       $annotationsToUse
-     * @param array<int, class-string<\Pest\Factories\Attributes\Attribute>> $attributesToUse
+     * @param  array<int, class-string>  $annotationsToUse
+     * @param  array<int, class-string<\Pest\Factories\Attributes\Attribute>>  $attributesToUse
      */
     public function buildForEvaluation(string $classFQN, array $annotationsToUse, array $attributesToUse): string
     {
@@ -123,13 +123,13 @@ final class TestCaseMethodFactory
 
         $methodName = Str::evaluable($this->description);
 
-        if (Retry::$retrying && !TestSuite::getInstance()->retryTempRepository->exists(sprintf('%s::%s', $classFQN, $methodName))) {
+        if (Retry::$retrying && ! TestSuite::getInstance()->retryTempRepository->exists(sprintf('%s::%s', $classFQN, $methodName))) {
             return '';
         }
 
         $datasetsCode = '';
-        $annotations  = ['@test'];
-        $attributes   = [];
+        $annotations = ['@test'];
+        $attributes = [];
 
         foreach ($annotationsToUse as $annotation) {
             /** @phpstan-ignore-next-line */
@@ -141,9 +141,9 @@ final class TestCaseMethodFactory
         }
 
         if (count($this->datasets) > 0) {
-            $dataProviderName = $methodName . '_dataset';
-            $annotations[]    = "@dataProvider $dataProviderName";
-            $datasetsCode     = $this->buildDatasetForEvaluation($methodName, $dataProviderName);
+            $dataProviderName = $methodName.'_dataset';
+            $annotations[] = "@dataProvider $dataProviderName";
+            $datasetsCode = $this->buildDatasetForEvaluation($methodName, $dataProviderName);
         }
 
         $annotations = implode('', array_map(

@@ -32,8 +32,8 @@ final class HigherOrderExpectation
     /**
      * Creates a new higher order expectation.
      *
-     * @param Expectation<TOriginalValue> $original
-     * @param TValue                      $value
+     * @param  Expectation<TOriginalValue>  $original
+     * @param  TValue  $value
      */
     public function __construct(private Expectation $original, mixed $value)
     {
@@ -47,7 +47,7 @@ final class HigherOrderExpectation
      */
     public function not(): HigherOrderExpectation
     {
-        $this->opposite = !$this->opposite;
+        $this->opposite = ! $this->opposite;
 
         return $this;
     }
@@ -57,8 +57,7 @@ final class HigherOrderExpectation
      *
      * @template TExpectValue
      *
-     * @param TExpectValue $value
-     *
+     * @param  TExpectValue  $value
      * @return Expectation<TExpectValue>
      */
     public function expect(mixed $value): Expectation
@@ -71,8 +70,7 @@ final class HigherOrderExpectation
      *
      * @template TExpectValue
      *
-     * @param TExpectValue $value
-     *
+     * @param  TExpectValue  $value
      * @return Expectation<TExpectValue>
      */
     public function and(mixed $value): Expectation
@@ -84,8 +82,7 @@ final class HigherOrderExpectation
      * Scope an expectation callback to the current value in
      * the HigherOrderExpectation chain.
      *
-     * @param Closure(Expectation<TValue>): void $expectation
-     *
+     * @param  Closure(Expectation<TValue>): void  $expectation
      * @return HigherOrderExpectation<TOriginalValue, TOriginalValue>
      */
     public function scoped(Closure $expectation): self
@@ -108,13 +105,12 @@ final class HigherOrderExpectation
     /**
      * Dynamically calls methods on the class with the given arguments.
      *
-     * @param array<int, mixed> $arguments
-     *
+     * @param  array<int, mixed>  $arguments
      * @return self<TOriginalValue, mixed>|self<TOriginalValue, TValue>
      */
     public function __call(string $name, array $arguments): self
     {
-        if (!$this->expectationHasMethod($name)) {
+        if (! $this->expectationHasMethod($name)) {
             /* @phpstan-ignore-next-line */
             return new self($this->original, $this->getValue()->$name(...$arguments));
         }
@@ -133,7 +129,7 @@ final class HigherOrderExpectation
             return $this->not();
         }
 
-        if (!$this->expectationHasMethod($name)) {
+        if (! $this->expectationHasMethod($name)) {
             /** @var array<string, mixed>|object $value */
             $value = $this->getValue();
 
@@ -165,8 +161,7 @@ final class HigherOrderExpectation
     /**
      * Performs the given assertion with the current expectation.
      *
-     * @param array<int, mixed> $arguments
-     *
+     * @param  array<int, mixed>  $arguments
      * @return self<TOriginalValue, TValue>
      */
     private function performAssertion(string $name, array $arguments): self
@@ -174,7 +169,7 @@ final class HigherOrderExpectation
         /* @phpstan-ignore-next-line */
         $this->expectation = ($this->opposite ? $this->expectation->not() : $this->expectation)->{$name}(...$arguments);
 
-        $this->opposite    = false;
+        $this->opposite = false;
         $this->shouldReset = true;
 
         return $this;

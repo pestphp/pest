@@ -14,8 +14,7 @@ final class Groups
     /**
      * Adds annotations regarding the "groups" feature.
      *
-     * @param array<int, string> $annotations
-     *
+     * @param  array<int, string>  $annotations
      * @return array<int, string>
      */
     public function __invoke(TestCaseMethodFactory $method, array $annotations): array

@@ -8,11 +8,11 @@ use PHPUnit\Framework\Warning;
 use PHPUnit\TextUI\DefaultResultPrinter;
 
 beforeEach(function () {
-    file_put_contents(__DIR__ . '/output.txt', '');
+    file_put_contents(__DIR__.'/output.txt', '');
 });
 
 it('is can successfully call all public methods', function () {
-    $teamCity = new TeamCity(__DIR__ . '/output.txt', false, DefaultResultPrinter::COLOR_ALWAYS);
+    $teamCity = new TeamCity(__DIR__.'/output.txt', false, DefaultResultPrinter::COLOR_ALWAYS);
     expect($teamCity::isPestTest($this))->toBeTrue();
     $teamCity->startTestSuite(new TestSuite());
     $teamCity->startTest($this);
@@ -28,5 +28,5 @@ it('is can successfully call all public methods', function () {
 })->skip('Not supported yet.');
 
 afterEach(function () {
-    unlink(__DIR__ . '/output.txt');
+    unlink(__DIR__.'/output.txt');
 });

@@ -4,22 +4,22 @@ use PHPUnit\Framework\ExpectationFailedException;
 
 beforeEach(function () {
     $this->user = [
-        'id'    => 1,
-        'name'  => 'Nuno',
+        'id' => 1,
+        'name' => 'Nuno',
         'email' => 'enunomaduro@gmail.com',
     ];
 });
 
 test('pass', function () {
     expect($this->user)->toMatchArray([
-        'name'  => 'Nuno',
+        'name' => 'Nuno',
         'email' => 'enunomaduro@gmail.com',
     ]);
 });
 
 test('failures', function () {
     expect($this->user)->toMatchArray([
-        'name'  => 'Not the same name',
+        'name' => 'Not the same name',
         'email' => 'enunomaduro@gmail.com',
     ]);
 })->throws(ExpectationFailedException::class);

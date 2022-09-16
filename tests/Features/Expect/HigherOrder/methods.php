@@ -131,7 +131,7 @@ class HasMethods
     public function attributes()
     {
         return [
-            'name'     => $this->name(),
+            'name' => $this->name(),
             'quantity' => $this->quantity(),
         ];
     }
@@ -141,11 +141,11 @@ class HasMethods
         return [
             [
                 'title' => 'Foo',
-                'cost'  => 20,
+                'cost' => 20,
             ],
             [
                 'title' => 'Bar',
-                'cost'  => 30,
+                'cost' => 30,
             ],
         ];
     }
