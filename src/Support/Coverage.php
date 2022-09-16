@@ -36,7 +36,21 @@ final class Coverage
      */
     public static function isAvailable(): bool
     {
-        return (new Runtime())->canCollectCodeCoverage();
+        $runtime = new Runtime();
+
+        if (! $runtime->canCollectCodeCoverage()) {
+            return false;
+        }
+
+        if ($runtime->hasXdebug()) {
+            if (version_compare((string) phpversion('xdebug'), '3.1', '>=')) {
+                if (! in_array('coverage', xdebug_info('mode'), true)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     /**
