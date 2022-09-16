@@ -14,6 +14,16 @@ use Symfony\Component\Console\Output\OutputInterface;
     // Ensures Collision's Printer is registered.
     $_SERVER['COLLISION_PRINTER'] = 'DefaultPrinter';
 
+    $args = $_SERVER['argv'];
+
+    foreach ($args as $key => $value) {
+        if (str_contains($value, '--compact')) {
+            $_SERVER['COLLISION_PRINTER_COMPACT'] = 'true';
+
+            break;
+        }
+    }
+
     // Used when Pest is required using composer.
     $vendorPath = dirname(__DIR__, 4) . '/vendor/autoload.php';
 
@@ -38,19 +48,20 @@ use Symfony\Component\Console\Output\OutputInterface;
     );
 
     $isDecorated = $argv->getParameterOption('--colors', 'always') !== 'never';
+
     $output = new ConsoleOutput(ConsoleOutput::VERBOSITY_NORMAL, $isDecorated);
 
     $container = Container::getInstance();
     $container->add(TestSuite::class, $testSuite);
     $container->add(OutputInterface::class, $output);
 
-    $args = $_SERVER['argv'];
+    foreach ($args as $key => $value) {
+        if (str_contains($value, '--test-directory')) {
+            unset($args[$key]);
+        }
 
-    if ($argv->hasParameterOption('--test-directory')) {
-        foreach ($args as $key => $value) {
-            if (strpos($value, '--test-directory') !== false) {
-                unset($args[$key]);
-            }
+        if (str_contains($value, '--compact')) {
+            unset($args[$key]);
         }
     }
 

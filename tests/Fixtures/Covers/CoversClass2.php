@@ -2,4 +2,6 @@
 
 namespace Tests\Fixtures\Covers;
 
-class CoversClass2 {}
+class CoversClass2
+{
+}

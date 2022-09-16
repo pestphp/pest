@@ -1,10 +1,8 @@
 <?php
 
-use Pest\Factories\Attributes\Covers;
 use Pest\PendingCalls\TestCall;
 use Pest\TestSuite;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\CoversFunction;
 use Tests\Fixtures\Covers\CoversClass1;
 use Tests\Fixtures\Covers\CoversClass2;
 use Tests\Fixtures\Covers\CoversClass3;

@@ -773,4 +773,6 @@
    WARN  Tests\Visual\TeamCity
   - it is can successfully call all public methods → Not supported yet.
 
-  Tests:    4 incompleted, 1 todo, 18 skipped, 515 passed (1299 assertions)
+  Tests:    4 incomplete, 1 todo, 18 skipped, 515 passed (1294 assertions)
+  Duration: 1.01s
+

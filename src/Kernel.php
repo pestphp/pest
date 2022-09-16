@@ -4,21 +4,14 @@ declare(strict_types=1);
 
 namespace Pest;
 
-use PHPUnit\TestRunner\TestResult\Facade;
 use PHPUnit\TextUI\Application;
-use PHPUnit\TextUI\Configuration\Registry;
+use PHPUnit\TextUI\Exception;
 
 /**
  * @internal
  */
 final class Kernel
 {
-    private const SUCCESS_EXIT = 0;
-
-    private const FAILURE_EXIT = 1;
-
-    private const EXCEPTION_EXIT = 2;
-
     /**
      * The Kernel bootstrappers.
      *
@@ -55,6 +48,8 @@ final class Kernel
      * Handles the given argv.
      *
      * @param  array<int, string>  $argv
+     *
+     * @throws Exception
      */
     public function handle(array $argv): int
     {
@@ -64,10 +59,8 @@ final class Kernel
             $argv, false,
         );
 
-        $returnCode = $this->returnCode();
-
         return (new Plugins\Actions\AddsOutput())->__invoke(
-            $returnCode,
+            Result::exitCode(),
         );
     }
 
@@ -77,54 +70,5 @@ final class Kernel
     public function shutdown(): void
     {
         // ..
-    }
-
-    /**
-     * Returns the exit code, based on the facade's result.
-     */
-    private function returnCode(): int
-    {
-        $result = Facade::result();
-
-        $returnCode = self::FAILURE_EXIT;
-
-        if ($result->wasSuccessfulIgnoringPhpunitWarnings()
-            && ! $result->hasTestTriggeredPhpunitWarningEvents()) {
-            $returnCode = self::SUCCESS_EXIT;
-        }
-
-        $configuration = Registry::get();
-
-        if ($configuration->failOnEmptyTestSuite() && $result->numberOfTests() === 0) {
-            $returnCode = self::FAILURE_EXIT;
-        }
-
-        if ($result->wasSuccessfulIgnoringPhpunitWarnings()) {
-            if ($configuration->failOnRisky() && $result->hasTestConsideredRiskyEvents()) {
-                $returnCode = self::FAILURE_EXIT;
-            }
-
-            $warnings = $result->numberOfTestsWithTestTriggeredPhpunitWarningEvents()
-                + $result->numberOfTestsWithTestTriggeredWarningEvents()
-                + $result->numberOfTestsWithTestTriggeredPhpWarningEvents();
-
-            if ($configuration->failOnWarning() && $warnings > 0) {
-                $returnCode = self::FAILURE_EXIT;
-            }
-
-            if ($configuration->failOnIncomplete() && $result->hasTestMarkedIncompleteEvents()) {
-                $returnCode = self::FAILURE_EXIT;
-            }
-
-            if ($configuration->failOnSkipped() && $result->hasTestSkippedEvents()) {
-                $returnCode = self::FAILURE_EXIT;
-            }
-        }
-
-        if ($result->hasTestErroredEvents()) {
-            return self::EXCEPTION_EXIT;
-        }
-
-        return $returnCode;
     }
 }

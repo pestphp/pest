@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\PendingCalls;
 
 use Closure;
+use NunoMaduro\Collision\Adapters\Phpunit\Printers\DefaultPrinter;
 use Pest\TestSuite;
 
 /**
@@ -50,6 +51,13 @@ final class UsesCall
         private readonly array $classAndTraits
     ) {
         $this->targets = [$filename];
+    }
+
+    public function compact(): self
+    {
+        DefaultPrinter::compact(true);
+
+        return $this;
     }
 
     /**
