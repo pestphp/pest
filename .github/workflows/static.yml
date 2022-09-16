@@ -11,8 +11,6 @@ jobs:
       matrix:
         dependency-version: [prefer-lowest, prefer-stable]
 
-    name: PHPStan ${{ matrix.dependency-version }}
-
     steps:
     - name: Checkout
       uses: actions/checkout@v2
