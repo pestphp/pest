@@ -42,9 +42,9 @@ final class TestRepository
      */
     public function getFilenames(): array
     {
-        $testCases = array_filter($this->testCases, static fn (TestCaseFactory $testCase) => count($testCase->methodsUsingOnly()) > 0);
+        $testCases = array_filter($this->testCases, static fn (TestCaseFactory $testCase) => $testCase->methodsUsingOnly() !== []);
 
-        if (count($testCases) === 0) {
+        if ($testCases === []) {
             $testCases = $this->testCases;
         }
 
@@ -62,9 +62,13 @@ final class TestRepository
     public function use(array $classOrTraits, array $groups, array $paths, array $hooks): void
     {
         foreach ($classOrTraits as $classOrTrait) {
-            if (! class_exists($classOrTrait) && ! trait_exists($classOrTrait)) {
-                throw new TestCaseClassOrTraitNotFound($classOrTrait);
+            if (class_exists($classOrTrait)) {
+                continue;
             }
+            if (trait_exists($classOrTrait)) {
+                continue;
+            }
+            throw new TestCaseClassOrTraitNotFound($classOrTrait);
         }
 
         foreach ($paths as $path) {
@@ -137,7 +141,7 @@ final class TestRepository
                 }
 
                 foreach ($testCase->methods as $method) {
-                    $method->groups = array_merge($groups, $method->groups);
+                    $method->groups = [...$groups, ...$method->groups];
                 }
 
                 $testCase->factoryProxies->add($testCase->filename, 0, '__addBeforeAll', [$hooks[0] ?? null]);

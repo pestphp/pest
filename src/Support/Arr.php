@@ -72,7 +72,7 @@ final class Arr
         $results = [];
 
         foreach ($array as $key => $value) {
-            if (is_array($value) && count($value) > 0) {
+            if (is_array($value) && $value !== []) {
                 $results = array_merge($results, static::dot($value, $prepend.$key.'.'));
             } else {
                 $results[$prepend.$value] = $value;

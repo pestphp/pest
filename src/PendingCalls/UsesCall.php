@@ -46,8 +46,8 @@ final class UsesCall
      * @param  array<int, string>  $classAndTraits
      */
     public function __construct(
-        private string $filename,
-        private array $classAndTraits
+        private readonly string $filename,
+        private readonly array $classAndTraits
     ) {
         $this->targets = [$filename];
     }
@@ -87,7 +87,7 @@ final class UsesCall
     /**
      * Sets the test group(s).
      */
-    public function group(string ...$groups): UsesCall
+    public function group(string ...$groups): self
     {
         $this->groups = array_values($groups);
 
@@ -97,7 +97,7 @@ final class UsesCall
     /**
      * Sets the global beforeAll test hook.
      */
-    public function beforeAll(Closure $hook): UsesCall
+    public function beforeAll(Closure $hook): self
     {
         $this->hooks[0] = $hook;
 
@@ -107,7 +107,7 @@ final class UsesCall
     /**
      * Sets the global beforeEach test hook.
      */
-    public function beforeEach(Closure $hook): UsesCall
+    public function beforeEach(Closure $hook): self
     {
         $this->hooks[1] = $hook;
 
@@ -117,7 +117,7 @@ final class UsesCall
     /**
      * Sets the global afterEach test hook.
      */
-    public function afterEach(Closure $hook): UsesCall
+    public function afterEach(Closure $hook): self
     {
         $this->hooks[2] = $hook;
 
@@ -127,7 +127,7 @@ final class UsesCall
     /**
      * Sets the global afterAll test hook.
      */
-    public function afterAll(Closure $hook): UsesCall
+    public function afterAll(Closure $hook): self
     {
         $this->hooks[3] = $hook;
 

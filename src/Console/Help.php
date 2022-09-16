@@ -27,7 +27,7 @@ final class Help
     /**
      * Creates a new Console Command instance.
      */
-    public function __construct(private OutputInterface $output)
+    public function __construct(private readonly OutputInterface $output)
     {
         // ..
     }

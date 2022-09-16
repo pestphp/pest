@@ -24,7 +24,7 @@ final class Kernel
      *
      * @var array<int, class-string>
      */
-    private static array $bootstrappers = [
+    private const BOOTSTRAPPERS = [
         Bootstrappers\BootExceptionHandler::class,
         Bootstrappers\BootSubscribers::class,
         Bootstrappers\BootFiles::class,
@@ -34,7 +34,7 @@ final class Kernel
      * Creates a new Kernel instance.
      */
     public function __construct(
-        private Application $application
+        private readonly Application $application
     ) {
         // ..
     }
@@ -44,8 +44,7 @@ final class Kernel
      */
     public static function boot(): self
     {
-        foreach (self::$bootstrappers as $bootstrapper) {
-            // @phpstan-ignore-next-line
+        foreach (self::BOOTSTRAPPERS as $bootstrapper) {
             (new $bootstrapper())->__invoke();
         }
 
@@ -123,7 +122,7 @@ final class Kernel
         }
 
         if ($result->hasTestErroredEvents()) {
-            $returnCode = self::EXCEPTION_EXIT;
+            return self::EXCEPTION_EXIT;
         }
 
         return $returnCode;

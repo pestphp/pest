@@ -9,10 +9,10 @@ use PHPUnit\Util\Filesystem;
 
 abstract class Printer implements \PHPUnit\Util\Printer
 {
-    /** @var resource|false */
+    /** @var resource|bool */
     private $stream;
 
-    private bool $isPhpStream;
+    private readonly bool $isPhpStream;
 
     private bool $isOpen;
 
@@ -46,12 +46,14 @@ abstract class Printer implements \PHPUnit\Util\Printer
         assert($this->isOpen);
         assert($this->stream !== false);
 
+        // @phpstan-ignore-next-line
         fwrite($this->stream, $buffer);
     }
 
     final public function flush(): void
     {
         if ($this->isOpen && $this->isPhpStream && $this->stream !== false) {
+            // @phpstan-ignore-next-line
             fclose($this->stream);
 
             $this->isOpen = false;

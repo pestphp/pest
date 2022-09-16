@@ -26,10 +26,8 @@ final class HigherOrderTapProxy
 
     /**
      * Dynamically sets properties on the target.
-     *
-     * @param  mixed  $value
      */
-    public function __set(string $property, $value): void
+    public function __set(string $property, mixed $value): void
     {
         $this->target->{$property} = $value; // @phpstan-ignore-line
     }

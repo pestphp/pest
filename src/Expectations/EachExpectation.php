@@ -23,7 +23,7 @@ final class EachExpectation
      *
      * @param  Expectation<TValue>  $original
      */
-    public function __construct(private Expectation $original)
+    public function __construct(private readonly Expectation $original)
     {
     }
 
@@ -45,7 +45,7 @@ final class EachExpectation
      *
      * @return self<TValue>
      */
-    public function not(): EachExpectation
+    public function not(): self
     {
         $this->opposite = true;
 
@@ -58,7 +58,7 @@ final class EachExpectation
      * @param  array<int|string, mixed>  $arguments
      * @return self<TValue>
      */
-    public function __call(string $name, array $arguments): EachExpectation
+    public function __call(string $name, array $arguments): self
     {
         foreach ($this->original->value as $item) {
             /* @phpstan-ignore-next-line */
@@ -75,7 +75,7 @@ final class EachExpectation
      *
      * @return self<TValue>
      */
-    public function __get(string $name): EachExpectation
+    public function __get(string $name): self
     {
         /* @phpstan-ignore-next-line */
         return $this->$name();

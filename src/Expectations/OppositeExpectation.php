@@ -23,7 +23,7 @@ final class OppositeExpectation
      *
      * @param  Expectation<TValue>  $original
      */
-    public function __construct(private Expectation $original)
+    public function __construct(private readonly Expectation $original)
     {
     }
 

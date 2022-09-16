@@ -14,7 +14,7 @@ final class TempRepository
     /**
      * Creates a new Temp Repository instance.
      */
-    public function __construct(private string $filename)
+    public function __construct(private readonly string $filename)
     {
         // ..
     }
@@ -24,10 +24,7 @@ final class TempRepository
      */
     public function add(string $element): void
     {
-        $this->save(array_merge(
-            $this->all(),
-            [$element]
-        ));
+        $this->save([...$this->all(), ...[$element]]);
     }
 
     /**
@@ -59,7 +56,7 @@ final class TempRepository
 
         assert(is_string($contents));
 
-        $all = json_decode($contents, true);
+        $all = json_decode($contents, true, 512, JSON_THROW_ON_ERROR);
 
         return is_array($all) ? $all : [];
     }
@@ -71,7 +68,7 @@ final class TempRepository
      */
     private function save(array $elements): void
     {
-        $contents = json_encode($elements);
+        $contents = json_encode($elements, JSON_THROW_ON_ERROR);
 
         file_put_contents(self::FOLDER.'/'.$this->filename.'.json', $contents);
     }

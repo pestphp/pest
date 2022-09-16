@@ -63,8 +63,12 @@ final class BootFiles
      */
     private function load(string $filename): void
     {
-        if (Str::endsWith($filename, '.php') && file_exists($filename)) {
-            include_once $filename;
+        if (! Str::endsWith($filename, '.php')) {
+            return;
         }
+        if (! file_exists($filename)) {
+            return;
+        }
+        include_once $filename;
     }
 }

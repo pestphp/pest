@@ -153,7 +153,7 @@ final class Coverage
         $shouldBeNewLine = true;
 
         $eachLine = function (array $array, array $tests, int $line) use (&$shouldBeNewLine): array {
-            if (count($tests) > 0) {
+            if ($tests !== []) {
                 $shouldBeNewLine = true;
 
                 return $array;
@@ -168,8 +168,8 @@ final class Coverage
 
             $lastKey = count($array) - 1;
 
-            if (array_key_exists($lastKey, $array) && str_contains($array[$lastKey], '..')) {
-                [$from] = explode('..', $array[$lastKey]);
+            if (array_key_exists($lastKey, $array) && str_contains((string) $array[$lastKey], '..')) {
+                [$from] = explode('..', (string) $array[$lastKey]);
                 $array[$lastKey] = $line > $from ? sprintf('%s..%s', $from, $line) : sprintf('%s..%s', $line, $from);
 
                 return $array;

@@ -61,11 +61,11 @@ final class DatasetsRepository
     }
 
     /**
-     * @return Closure|iterable<int|string, mixed>|never
+     * @return Closure|array<int|string, mixed>|never
      *
      * @throws ShouldNotHappen
      */
-    public static function get(string $filename, string $description): Closure|iterable
+    public static function get(string $filename, string $description)
     {
         $dataset = self::$withs[$filename.'>>>'.$description];
 

@@ -32,8 +32,8 @@ final class Init implements HandlesArguments
      * Creates a new Plugin instance.
      */
     public function __construct(
-        private TestSuite $testSuite,
-        private OutputInterface $output
+        private readonly TestSuite $testSuite,
+        private readonly OutputInterface $output
     ) {
         // ..
     }
@@ -43,10 +43,12 @@ final class Init implements HandlesArguments
      */
     public function handleArguments(array $arguments): array
     {
-        if (! array_key_exists(1, $arguments) || $arguments[1] !== self::INIT_OPTION) {
+        if (! array_key_exists(1, $arguments)) {
             return $arguments;
         }
-
+        if ($arguments[1] !== self::INIT_OPTION) {
+            return $arguments;
+        }
         unset($arguments[1]);
 
         $this->init();

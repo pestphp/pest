@@ -25,7 +25,7 @@ final class HigherOrderMessage
     /**
      * Creates a new higher order message.
      *
-     * @param  array<int, mixed>  $arguments
+     * @param  array<int, mixed>|null  $arguments
      */
     public function __construct(
         public string $filename,
@@ -97,7 +97,7 @@ final class HigherOrderMessage
     private static function getUndefinedMethodMessage(object $target, string $methodName): string
     {
         if (\PHP_MAJOR_VERSION >= 8) {
-            return sprintf(sprintf(self::UNDEFINED_METHOD, sprintf('%s::%s()', $target::class, $methodName)));
+            return sprintf(self::UNDEFINED_METHOD, sprintf('%s::%s()', $target::class, $methodName));
         }
 
         return sprintf(self::UNDEFINED_METHOD, $methodName);

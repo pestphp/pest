@@ -32,7 +32,7 @@ final class PestDuskCommand extends DuskCommand
      *
      * @return array<string>
      */
-    protected function binary()
+    protected function binary(): array
     {
         if ('phpdbg' === PHP_SAPI) {
             return [PHP_BINARY, '-qrr', 'vendor/pestphp/pest/bin/pest'];

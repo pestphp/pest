@@ -26,7 +26,7 @@ final class Container
     public static function getInstance(): self
     {
         if (static::$instance === null) {
-            static::$instance = new static();
+            static::$instance = new self();
         }
 
         return static::$instance;
@@ -49,10 +49,8 @@ final class Container
 
     /**
      * Adds the given instance to the container.
-     *
-     * @param  mixed  $instance
      */
-    public function add(string $id, $instance): void
+    public function add(string $id, mixed $instance): void
     {
         $this->instances[$id] = $instance;
     }

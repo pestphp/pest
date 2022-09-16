@@ -62,7 +62,7 @@ final class TestCaseMethodFactory
         public ?string $description,
         public ?Closure $closure,
     ) {
-        $this->closure ??= function () {
+        $this->closure ??= function (): void {
             Assert::getCount() > 0 ?: self::markTestIncomplete(); // @phpstan-ignore-line
         };
 
@@ -106,7 +106,7 @@ final class TestCaseMethodFactory
      */
     public function receivesArguments(): bool
     {
-        return count($this->datasets) > 0 || count($this->depends) > 0;
+        return $this->datasets !== [] || $this->depends !== [];
     }
 
     /**
@@ -140,7 +140,7 @@ final class TestCaseMethodFactory
             $attributes = (new $attribute())->__invoke($this, $attributes);
         }
 
-        if (count($this->datasets) > 0) {
+        if ($this->datasets !== []) {
             $dataProviderName = $methodName.'_dataset';
             $annotations[] = "@dataProvider $dataProviderName";
             $datasetsCode = $this->buildDatasetForEvaluation($methodName, $dataProviderName);

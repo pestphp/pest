@@ -26,16 +26,11 @@ final class ExpectationPipeline
     private array $passables;
 
     /**
-     * The expectation closure.
-     */
-    private Closure $closure;
-
-    /**
      * Creates a new instance of Expectation Pipeline.
      */
-    public function __construct(Closure $closure)
-    {
-        $this->closure = $closure;
+    public function __construct(
+        private readonly Closure $closure
+    ) {
     }
 
     /**
@@ -89,10 +84,6 @@ final class ExpectationPipeline
      */
     public function carry(): Closure
     {
-        return function ($stack, $pipe): Closure {
-            return function () use ($stack, $pipe) {
-                return $pipe($stack, ...$this->passables);
-            };
-        };
+        return fn ($stack, $pipe): Closure => fn () => $pipe($stack, ...$this->passables);
     }
 }

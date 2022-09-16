@@ -52,6 +52,3 @@ jobs:
 
     - name: Style
       run: composer test:lint
-
-    - name: Recfato
-      run: composer test:refacto

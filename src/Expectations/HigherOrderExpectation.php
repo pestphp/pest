@@ -35,7 +35,7 @@ final class HigherOrderExpectation
      * @param  Expectation<TOriginalValue>  $original
      * @param  TValue  $value
      */
-    public function __construct(private Expectation $original, mixed $value)
+    public function __construct(private readonly Expectation $original, mixed $value)
     {
         $this->expectation = $this->expect($value);
     }
@@ -45,7 +45,7 @@ final class HigherOrderExpectation
      *
      * @return self<TOriginalValue, TValue>
      */
-    public function not(): HigherOrderExpectation
+    public function not(): self
     {
         $this->opposite = ! $this->opposite;
 
@@ -144,7 +144,14 @@ final class HigherOrderExpectation
      */
     private function expectationHasMethod(string $name): bool
     {
-        return method_exists($this->original, $name) || $this->original::hasMethod($name) || $this->original::hasExtend($name);
+        if (method_exists($this->original, $name)) {
+            return true;
+        }
+        if ($this->original::hasMethod($name)) {
+            return true;
+        }
+
+        return $this->original::hasExtend($name);
     }
 
     /**

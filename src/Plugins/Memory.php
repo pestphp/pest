@@ -24,7 +24,7 @@ final class Memory implements AddsOutput, HandlesArguments
      * Creates a new Plugin instance.
      */
     public function __construct(
-        private OutputInterface $output
+        private readonly OutputInterface $output
     ) {
         // ..
     }
@@ -47,7 +47,7 @@ final class Memory implements AddsOutput, HandlesArguments
         if ($this->enabled) {
             $this->output->writeln(sprintf(
                 '  <fg=gray;options=bold>Memory:</>   <fg=default>%s MB</>',
-                round(memory_get_usage(true) / pow(1000, 2), 3)
+                round(memory_get_usage(true) / 1000 ** 2, 3)
             ));
         }
 

@@ -15,7 +15,6 @@ final class Closure
     /**
      * Binds the given closure to the given "this".
      *
-     * @return BaseClosure|never
      *
      * @throws ShouldNotHappen
      */

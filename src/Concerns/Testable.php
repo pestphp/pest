@@ -79,7 +79,7 @@ trait Testable
      */
     public function __addBeforeAll(?Closure $hook): void
     {
-        if (! $hook) {
+        if ($hook === null) {
             return;
         }
 
@@ -93,7 +93,7 @@ trait Testable
      */
     public function __addAfterAll(?Closure $hook): void
     {
-        if (! $hook) {
+        if ($hook === null) {
             return;
         }
 
@@ -123,7 +123,7 @@ trait Testable
      */
     private function __addHook(string $property, ?Closure $hook): void
     {
-        if (! $hook) {
+        if ($hook === null) {
             return;
         }
 
@@ -221,11 +221,7 @@ trait Testable
     {
         $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
 
-        if ($this->dataName()) {
-            self::$__description = $method->description.' with '.$this->dataName();
-        } else {
-            self::$__description = $method->description;
-        }
+        self::$__description = $this->dataName() ? $method->description.' with '.$this->dataName() : $method->description;
 
         if (count($arguments) !== 1) {
             return $arguments;
@@ -238,13 +234,15 @@ trait Testable
         $underlyingTest = Reflection::getFunctionVariable($this->__test, 'closure');
         $testParameterTypes = array_values(Reflection::getFunctionArguments($underlyingTest));
 
-        if (in_array($testParameterTypes[0], ['Closure', 'callable'])) {
+        if (in_array($testParameterTypes[0], [\Closure::class, 'callable'])) {
             return $arguments;
         }
 
         $boundDatasetResult = $this->__callClosure($arguments[0], []);
-
-        if (count($testParameterTypes) === 1 || ! is_array($boundDatasetResult)) {
+        if (count($testParameterTypes) === 1) {
+            return [$boundDatasetResult];
+        }
+        if (! is_array($boundDatasetResult)) {
             return [$boundDatasetResult];
         }
 

@@ -70,7 +70,7 @@ final class Expectation
         }
 
         /** @var array<int|string, mixed>|bool $value */
-        $value = json_decode($this->value, true);
+        $value = json_decode($this->value, true, 512);
 
         return $this->toBeJson()->and($value);
     }
@@ -159,7 +159,7 @@ final class Expectation
      * @param (callable(self<TValue>, self<string|int>): void)|TSequenceValue ...$callbacks
      * @return self<TValue>
      */
-    public function sequence(mixed ...$callbacks): Expectation
+    public function sequence(mixed ...$callbacks): self
     {
         if (! is_iterable($this->value)) {
             throw new BadMethodCallException('Expectation value is not iterable.');
@@ -203,7 +203,7 @@ final class Expectation
      * @param array<TMatchSubject, (callable(self<TValue>): mixed)|TValue> $expressions
      * @return self<TValue>
      */
-    public function match(mixed $subject, array $expressions): Expectation
+    public function match(mixed $subject, array $expressions): self
     {
         $subject = $subject instanceof Closure ? $subject() : $subject;
 
@@ -245,9 +245,7 @@ final class Expectation
     {
         $condition = is_callable($condition)
             ? $condition
-            : static function () use ($condition): bool {
-                return $condition;
-            };
+            : static fn (): bool => $condition;
 
         return $this->when(! $condition(), $callback);
     }
@@ -259,13 +257,11 @@ final class Expectation
      * @param  callable(self<TValue>): mixed  $callback
      * @return self<TValue>
      */
-    public function when(callable|bool $condition, callable $callback): Expectation
+    public function when(callable|bool $condition, callable $callback): self
     {
         $condition = is_callable($condition)
             ? $condition
-            : static function () use ($condition): bool {
-                return $condition;
-            };
+            : static fn (): bool => $condition;
 
         if ($condition()) {
             $callback($this->and($this->value));

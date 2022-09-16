@@ -28,7 +28,7 @@ final class ConfigLoader
     /**
      * Creates a new instance of the config loader.
      */
-    public function __construct(private string $rootPath)
+    public function __construct(private readonly string $rootPath)
     {
         $this->loadConfiguration();
     }
@@ -38,14 +38,14 @@ final class ConfigLoader
      */
     public function getTestsDirectory(): string
     {
+        $suiteDirectory = [];
         if (is_null($this->config)) {
             return self::DEFAULT_TESTS_PATH;
         }
 
         $suiteDirectory = $this->config->xpath('/phpunit/testsuites/testsuite/directory');
 
-        // @phpstan-ignore-next-line
-        if (! $suiteDirectory || count($suiteDirectory) === 0) {
+        if ($suiteDirectory === []) {
             return self::DEFAULT_TESTS_PATH;
         }
 
@@ -68,7 +68,7 @@ final class ConfigLoader
     /**
      * Get the configuration file path.
      */
-    public function getConfigurationFilePath(): string|false
+    public function getConfigurationFilePath(): string|bool
     {
         $candidates = [
             $this->rootPath.'/phpunit.xml',
@@ -92,7 +92,7 @@ final class ConfigLoader
     {
         $configPath = $this->getConfigurationFilePath();
 
-        if ($configPath === false) {
+        if (is_bool($configPath)) {
             return;
         }
 

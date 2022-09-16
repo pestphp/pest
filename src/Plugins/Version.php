@@ -19,7 +19,7 @@ final class Version implements HandlesArguments
      * Creates a new Plugin instance.
      */
     public function __construct(
-        private OutputInterface $output
+        private readonly OutputInterface $output
     ) {
         // ..
     }

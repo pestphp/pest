@@ -40,7 +40,7 @@ final class Coverage implements AddsOutput, HandlesArguments
     /**
      * Creates a new Plugin instance.
      */
-    public function __construct(private OutputInterface $output)
+    public function __construct(private readonly OutputInterface $output)
     {
         // ..
     }
@@ -52,7 +52,10 @@ final class Coverage implements AddsOutput, HandlesArguments
     {
         $arguments = [...[''], ...array_values(array_filter($originals, function ($original): bool {
             foreach ([self::COVERAGE_OPTION, self::MIN_OPTION] as $option) {
-                if ($original === sprintf('--%s', $option) || Str::startsWith($original, sprintf('--%s=', $option))) {
+                if ($original === sprintf('--%s', $option)) {
+                    return true;
+                }
+                if (Str::startsWith($original, sprintf('--%s=', $option))) {
                     return true;
                 }
             }

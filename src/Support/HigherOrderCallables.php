@@ -15,7 +15,7 @@ final class HigherOrderCallables
     /**
      * Creates a new Higher Order Callables instances.
      */
-    public function __construct(private object $target)
+    public function __construct(private readonly object $target)
     {
         // ..
     }
@@ -44,7 +44,7 @@ final class HigherOrderCallables
      * @param  callable|TValue  $value
      * @return Expectation<(callable(): mixed)|TValue>
      */
-    public function and(mixed $value)
+    public function and(mixed $value): Expectation
     {
         return $this->expect($value);
     }

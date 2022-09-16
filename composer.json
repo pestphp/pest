@@ -56,8 +56,7 @@
         "phpstan/phpstan": "^1.8.5",
         "phpstan/phpstan-strict-rules": "^1.4.3",
         "symfony/var-dumper": "^6.2.0",
-        "thecodingmachine/phpstan-strict-rules": "^1.0.0",
-        "rector/rector": "^0.14.2"
+        "thecodingmachine/phpstan-strict-rules": "^1.0.0"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -73,9 +72,7 @@
     ],
     "scripts": {
         "lint": "pint --test",
-        "refactor": "rector",
         "test:lint": "pint --test",
-        "test:refactor": "rector --dry-run",
         "test:types": "phpstan analyse --ansi --memory-limit=-1 --debug",
         "test:unit": "php bin/pest --colors=always --exclude-group=integration",
         "test:parallel": "exit 1",
@@ -85,8 +82,7 @@
             "@test:lint",
             "@test:types",
             "@test:unit",
-            "@test:integration",
-            "@test:refactor"
+            "@test:integration"
         ]
     },
     "extra": {

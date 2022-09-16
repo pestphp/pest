@@ -69,9 +69,9 @@ final class Reflection
     {
         $test = TestSuite::getInstance()->test;
 
-        return $test === null
-            ? static::bindCallable($callable)
-            : Closure::fromCallable($callable)->bindTo($test)(...$test->providedData());
+        return $test instanceof \PHPUnit\Framework\TestCase
+            ? Closure::fromCallable($callable)->bindTo($test)(...$test->providedData())
+            : static::bindCallable($callable);
     }
 
     /**
@@ -119,9 +119,8 @@ final class Reflection
      * @template TValue of object
      *
      * @param  TValue  $object
-     * @param  mixed  $value
      */
-    public static function setPropertyValue(object $object, string $property, $value): void
+    public static function setPropertyValue(object $object, string $property, mixed $value): void
     {
         /** @var ReflectionClass<TValue> $reflectionClass */
         $reflectionClass = new ReflectionClass($object);
@@ -153,8 +152,10 @@ final class Reflection
     public static function getParameterClassName(ReflectionParameter $parameter): ?string
     {
         $type = $parameter->getType();
-
-        if (! $type instanceof ReflectionNamedType || $type->isBuiltin()) {
+        if (! $type instanceof ReflectionNamedType) {
+            return null;
+        }
+        if ($type->isBuiltin()) {
             return null;
         }
 

@@ -35,16 +35,14 @@ trait Pipeable
     public function intercept(string $name, string|Closure $filter, Closure $handler): void
     {
         if (is_string($filter)) {
-            $filter = function ($value) use ($filter): bool {
-                return $value instanceof $filter;
-            };
+            $filter = fn ($value): bool => $value instanceof $filter;
         }
 
-        $this->pipe($name, function ($next, ...$arguments) use ($handler, $filter) {
+        $this->pipe($name, function ($next, ...$arguments) use ($handler, $filter): void {
             /* @phpstan-ignore-next-line */
             if ($filter($this->value, ...$arguments)) {
                 // @phpstan-ignore-next-line
-                $handler->bindTo($this, get_class($this))(...$arguments);
+                $handler->bindTo($this, $this::class)(...$arguments);
 
                 return;
             }

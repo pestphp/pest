@@ -52,8 +52,8 @@ final class PestTestCommand extends Command
         /* @phpstan-ignore-next-line */
         $target = base_path($relativePath);
 
-        if (! File::isDirectory(dirname($target))) {
-            File::makeDirectory(dirname($target), 0777, true, true);
+        if (! File::isDirectory(dirname((string) $target))) {
+            File::makeDirectory(dirname((string) $target), 0777, true, true);
         }
 
         if (File::exists($target) && ! (bool) $this->option('force')) {

@@ -26,18 +26,18 @@ final class TestCall
     /**
      * The Test Case Factory.
      */
-    private TestCaseMethodFactory $testCaseMethod;
+    private readonly TestCaseMethodFactory $testCaseMethod;
 
     /**
      * If test call is descriptionLess.
      */
-    private bool $descriptionLess;
+    private readonly bool $descriptionLess;
 
     /**
      * Creates a new Pending Call.
      */
     public function __construct(
-        private TestSuite $testSuite,
+        private readonly TestSuite $testSuite,
         string $filename,
         string $description = null,
         Closure $closure = null
@@ -49,7 +49,7 @@ final class TestCall
     /**
      * Asserts that the test throws the given `$exceptionClass` when called.
      */
-    public function throws(string|int $exception, string $exceptionMessage = null, int $exceptionCode = null): TestCall
+    public function throws(string|int $exception, string $exceptionMessage = null, int $exceptionCode = null): self
     {
         if (is_int($exception)) {
             $exceptionCode = $exception;
@@ -81,13 +81,11 @@ final class TestCall
      *
      * @param (callable(): bool)|bool $condition
      */
-    public function throwsIf(callable|bool $condition, string|int $exception, string $exceptionMessage = null, int $exceptionCode = null): TestCall
+    public function throwsIf(callable|bool $condition, string|int $exception, string $exceptionMessage = null, int $exceptionCode = null): self
     {
         $condition = is_callable($condition)
             ? $condition
-            : static function () use ($condition): bool {
-                return $condition;
-            };
+            : static fn (): bool => $condition;
 
         if ($condition()) {
             return $this->throws($exception, $exceptionMessage, $exceptionCode);
@@ -102,7 +100,7 @@ final class TestCall
      *
      * @param  array<\Closure|iterable<int|string, mixed>|string>  $data
      */
-    public function with(Closure|iterable|string ...$data): TestCall
+    public function with(Closure|iterable|string ...$data): self
     {
         foreach ($data as $dataset) {
             $this->testCaseMethod->datasets[] = $dataset;
@@ -114,7 +112,7 @@ final class TestCall
     /**
      * Sets the test depends.
      */
-    public function depends(string ...$depends): TestCall
+    public function depends(string ...$depends): self
     {
         foreach ($depends as $depend) {
             $this->testCaseMethod->depends[] = $depend;
@@ -126,7 +124,7 @@ final class TestCall
     /**
      * Makes the test suite only this test case.
      */
-    public function only(): TestCall
+    public function only(): self
     {
         $this->testCaseMethod->only = true;
 
@@ -136,7 +134,7 @@ final class TestCall
     /**
      * Sets the test group(s).
      */
-    public function group(string ...$groups): TestCall
+    public function group(string ...$groups): self
     {
         foreach ($groups as $group) {
             $this->testCaseMethod->groups[] = $group;
@@ -148,7 +146,7 @@ final class TestCall
     /**
      * Skips the current test.
      */
-    public function skip(Closure|bool|string $conditionOrMessage = true, string $message = ''): TestCall
+    public function skip(Closure|bool|string $conditionOrMessage = true, string $message = ''): self
     {
         $condition = is_string($conditionOrMessage)
             ? NullClosure::create()
@@ -175,7 +173,7 @@ final class TestCall
     /**
      * Sets the covered classes or methods.
      */
-    public function covers(string ...$classesOrFunctions): TestCall
+    public function covers(string ...$classesOrFunctions): self
     {
         foreach ($classesOrFunctions as $classOrFunction) {
             $isClass = class_exists($classOrFunction);
@@ -198,7 +196,7 @@ final class TestCall
     /**
      * Sets the covered classes.
      */
-    public function coversClass(string ...$classes): TestCall
+    public function coversClass(string ...$classes): self
     {
         foreach ($classes as $class) {
             $this->testCaseMethod->covers[] = new CoversClass($class);
@@ -210,7 +208,7 @@ final class TestCall
     /**
      * Sets the covered functions.
      */
-    public function coversFunction(string ...$functions): TestCall
+    public function coversFunction(string ...$functions): self
     {
         foreach ($functions as $function) {
             $this->testCaseMethod->covers[] = new CoversFunction($function);
@@ -222,7 +220,7 @@ final class TestCall
     /**
      * Sets that the current test covers nothing.
      */
-    public function coversNothing(): TestCall
+    public function coversNothing(): self
     {
         $this->testCaseMethod->covers = [new CoversNothing()];
 
@@ -234,7 +232,7 @@ final class TestCall
      * and its purpose is simply to check whether the given code can
      * be executed without throwing exceptions.
      */
-    public function throwsNoExceptions(): TestCall
+    public function throwsNoExceptions(): self
     {
         $this->testCaseMethod->proxies->add(Backtrace::file(), Backtrace::line(), 'expectNotToPerformAssertions', []);
 

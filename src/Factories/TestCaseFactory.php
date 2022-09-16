@@ -30,7 +30,7 @@ final class TestCaseFactory
      *
      * @var array<int, class-string>
      */
-    private static array $annotations = [
+    private const ANNOTATIONS = [
         Annotations\Depends::class,
         Annotations\Groups::class,
         Annotations\CoversNothing::class,
@@ -41,7 +41,7 @@ final class TestCaseFactory
      *
      * @var array<int, class-string<\Pest\Factories\Attributes\Attribute>>
      */
-    private static array $attributes = [
+    private const ATTRIBUTES = [
         Attributes\Covers::class,
     ];
 
@@ -84,10 +84,10 @@ final class TestCaseFactory
 
         $methods = array_values(array_filter(
             $this->methods,
-            fn ($method) => count($methodsUsingOnly) === 0 || in_array($method, $methodsUsingOnly, true)
+            fn ($method) => $methodsUsingOnly === [] || in_array($method, $methodsUsingOnly, true)
         ));
 
-        if (count($methods) > 0) {
+        if ($methods !== []) {
             $this->evaluate($this->filename, $methods);
         }
     }
@@ -162,8 +162,8 @@ final class TestCaseFactory
             $classFQN .= $className;
         }
 
-        $classAvailableAttributes = array_filter(self::$attributes, fn (string $attribute) => $attribute::ABOVE_CLASS);
-        $methodAvailableAttributes = array_filter(self::$attributes, fn (string $attribute) => ! $attribute::ABOVE_CLASS);
+        $classAvailableAttributes = array_filter(self::ATTRIBUTES, fn (string $attribute) => $attribute::ABOVE_CLASS);
+        $methodAvailableAttributes = array_filter(self::ATTRIBUTES, fn (string $attribute) => ! $attribute::ABOVE_CLASS);
 
         $classAttributes = [];
 
@@ -178,7 +178,7 @@ final class TestCaseFactory
         $methodsCode = implode('', array_map(
             fn (TestCaseMethodFactory $methodFactory) => $methodFactory->buildForEvaluation(
                 $classFQN,
-                self::$annotations,
+                self::ANNOTATIONS,
                 $methodAvailableAttributes
             ),
             $methods
@@ -232,7 +232,7 @@ final class TestCaseFactory
 
             $arguments = Reflection::getFunctionArguments($method->closure);
 
-            if (count($arguments) > 0) {
+            if ($arguments !== []) {
                 throw new DatasetMissing($method->filename, $method->description, $arguments);
             }
         }

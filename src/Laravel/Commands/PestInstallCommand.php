@@ -31,6 +31,11 @@ final class PestInstallCommand extends Command
     protected $description = 'Creates Pest resources in your current PHPUnit test suite';
 
     /**
+     * @var string
+     */
+    private const STUBS = 'stubs/Laravel';
+
+    /**
      * Execute the console command.
      */
     public function handle(): void
@@ -40,7 +45,6 @@ final class PestInstallCommand extends Command
 
         /* @phpstan-ignore-next-line */
         $pest = base_path(testDirectory('Pest.php'));
-        $stubs = 'stubs/Laravel';
 
         if (File::exists($pest)) {
             throw new InvalidConsoleArgument(sprintf('%s already exist', $pest));
@@ -48,7 +52,7 @@ final class PestInstallCommand extends Command
 
         File::copy(implode(DIRECTORY_SEPARATOR, [
             dirname(__DIR__, 3),
-            $stubs,
+            self::STUBS,
             'Pest.php',
         ]), $pest);
 

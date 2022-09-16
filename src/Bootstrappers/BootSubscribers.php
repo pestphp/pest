@@ -17,7 +17,7 @@ final class BootSubscribers
      *
      * @var array<int, class-string<\PHPUnit\Event\Subscriber>>
      */
-    private static array $subscribers = [
+    private const SUBSCRIBERS = [
         Subscribers\EnsureConfigurationIsValid::class,
         Subscribers\EnsureConfigurationDefaults::class,
         Subscribers\EnsureRetryRepositoryExists::class,
@@ -29,7 +29,7 @@ final class BootSubscribers
      */
     public function __invoke(): void
     {
-        foreach (self::$subscribers as $subscriber) {
+        foreach (self::SUBSCRIBERS as $subscriber) {
             Event\Facade::registerSubscriber(
                 new $subscriber()
             );
