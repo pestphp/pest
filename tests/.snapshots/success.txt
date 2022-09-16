@@ -14,9 +14,9 @@
   ✓ it gets executed before each test
   ✓ it gets executed before each test once again
 
-   PASS  Tests\Features\Coverage
+   WARN  Tests\Features\Coverage
   ✓ it has plugin
-  ✓ it adds coverage if --coverage exist
+  - it adds coverage if --coverage exist → Coverage is not available
   ✓ it adds coverage if --min exist
   ✓ it generates coverage based on file input
 
@@ -773,4 +773,4 @@
    WARN  Tests\Visual\TeamCity
   - it is can successfully call all public methods → Not supported yet.
 
-  Tests:    4 incomplete, 1 todo, 18 skipped, 515 passed (1294 assertions)
+  Tests:    4 incomplete, 1 todo, 19 skipped, 514 passed (1289 assertions)
