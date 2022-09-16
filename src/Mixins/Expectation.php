@@ -30,8 +30,6 @@ final class Expectation
 {
     /**
      * The exporter instance, if any.
-     *
-     * @readonly
      */
     private Exporter|null $exporter = null;
 
