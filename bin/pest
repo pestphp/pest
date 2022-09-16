@@ -19,8 +19,10 @@ use Symfony\Component\Console\Output\OutputInterface;
     foreach ($args as $key => $value) {
         if (str_contains($value, '--compact')) {
             $_SERVER['COLLISION_PRINTER_COMPACT'] = 'true';
+        }
 
-            break;
+        if (str_contains($value, '--profile')) {
+            $_SERVER['COLLISION_PRINTER_PROFILE'] = 'true';
         }
     }
 
@@ -61,6 +63,10 @@ use Symfony\Component\Console\Output\OutputInterface;
         }
 
         if (str_contains($value, '--compact')) {
+            unset($args[$key]);
+        }
+
+        if (str_contains($value, '--profile')) {
             unset($args[$key]);
         }
     }

@@ -78,6 +78,24 @@ final class Coverage implements AddsOutput, HandlesArguments
             $this->coverage = true;
             $originals[] = '--coverage-php';
             $originals[] = \Pest\Support\Coverage::getPath();
+
+            if (! \Pest\Support\Coverage::isAvailable()) {
+                if (\Pest\Support\Coverage::usingXdebug()) {
+                    $this->output->writeln([
+                        '',
+                        "  <fg=default;bg=red;options=bold> ERROR </> Unable to get coverage using Xdebug. Did you set <href=https://xdebug.org/docs/code_coverage#mode>Xdebug's coverage mode</>?</>",
+                        '',
+                    ]);
+                } else {
+                    $this->output->writeln([
+                        '',
+                        '  <fg=default;bg=red;options=bold> ERROR </> No code coverage driver is available.</>',
+                        '',
+                    ]);
+                }
+
+                exit(1);
+            }
         }
 
         if ($input->getOption(self::MIN_OPTION) !== null) {
@@ -85,24 +103,6 @@ final class Coverage implements AddsOutput, HandlesArguments
             $minOption = $input->getOption(self::MIN_OPTION);
 
             $this->coverageMin = (float) $minOption;
-        }
-
-        if (! \Pest\Support\Coverage::isAvailable()) {
-            if (\Pest\Support\Coverage::usingXdebug()) {
-                $this->output->writeln([
-                    '',
-                    "  <fg=default;bg=red;options=bold> ERROR </> Unable to get coverage using Xdebug. Did you set <href=https://xdebug.org/docs/code_coverage#mode>Xdebug's coverage mode</>?</>",
-                    '',
-                ]);
-            } else {
-                $this->output->writeln([
-                    '',
-                    '  <fg=default;bg=red;options=bold> ERROR </> No code coverage driver is available.</>',
-                    '',
-                ]);
-            }
-
-            exit(1);
         }
 
         return $originals;
