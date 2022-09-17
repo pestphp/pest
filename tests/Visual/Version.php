@@ -1,10 +1,10 @@
 <?php
 
 test('visual snapshot of help command output', function () {
-    $snapshot = __DIR__.'/../.snapshots/help-command.txt';
+    $snapshot = __DIR__.'/../.snapshots/version-command.txt';
 
     $output = function () {
-        $process = (new Symfony\Component\Process\Process(['php', 'bin/pest', '--help'], null, ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true']));
+        $process = (new Symfony\Component\Process\Process(['php', 'bin/pest', '--version'], null, ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true']));
 
         $process->run();
 

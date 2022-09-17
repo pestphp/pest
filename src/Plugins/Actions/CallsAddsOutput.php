@@ -10,7 +10,7 @@ use Pest\Plugin\Loader;
 /**
  * @internal
  */
-final class AddsOutput
+final class CallsAddsOutput
 {
     /**
      * Executes the Plugin action.

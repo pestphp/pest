@@ -6,6 +6,7 @@ namespace Pest\Bootstrappers;
 
 use Pest\Subscribers;
 use PHPUnit\Event;
+use PHPUnit\Event\Subscriber;
 
 /**
  * @internal
@@ -15,7 +16,7 @@ final class BootSubscribers
     /**
      * The Kernel subscribers.
      *
-     * @var array<int, class-string<\PHPUnit\Event\Subscriber>>
+     * @var array<int, class-string<Subscriber>>
      */
     private const SUBSCRIBERS = [
         Subscribers\EnsureConfigurationIsValid::class,

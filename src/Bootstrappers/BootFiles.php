@@ -59,16 +59,18 @@ final class BootFiles
     }
 
     /**
-     * Loads the given filename, if possible.
+     * Loads, if possible, the given file.
      */
     private function load(string $filename): void
     {
         if (! Str::endsWith($filename, '.php')) {
             return;
         }
+
         if (! file_exists($filename)) {
             return;
         }
+
         include_once $filename;
     }
 }

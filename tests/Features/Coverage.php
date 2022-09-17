@@ -11,19 +11,19 @@ it('adds coverage if --coverage exist', function () {
 
     expect($plugin->coverage)->toBeFalse();
     $arguments = $plugin->handleArguments([]);
-    expect($arguments)->toEqual([]);
-    expect($plugin->coverage)->toBeFalse();
+    expect($arguments)->toEqual([])
+        ->and($plugin->coverage)->toBeFalse();
 
     $arguments = $plugin->handleArguments(['--coverage']);
-    expect($arguments)->toEqual(['--coverage-php', Coverage::getPath()]);
-    expect($plugin->coverage)->toBeTrue();
+    expect($arguments)->toEqual(['--coverage-php', Coverage::getPath()])
+        ->and($plugin->coverage)->toBeTrue();
 })->skip(! \Pest\Support\Coverage::isAvailable() || ! in_array('coverage', xdebug_info('mode'), true), 'Coverage is not available');
 
 it('adds coverage if --min exist', function () {
     $plugin = new CoveragePlugin(new ConsoleOutput());
-    expect($plugin->coverageMin)->toEqual(0.0);
+    expect($plugin->coverageMin)->toEqual(0.0)
+        ->and($plugin->coverage)->toBeFalse();
 
-    expect($plugin->coverage)->toBeFalse();
     $plugin->handleArguments([]);
     expect($plugin->coverageMin)->toEqual(0.0);
 
