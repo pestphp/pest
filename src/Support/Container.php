@@ -35,16 +35,21 @@ final class Container
     /**
      * Gets a dependency from the container.
      *
-     * @param  class-string  $id
-     * @return mixed
+     * @template TObject of object
+     *
+     * @param  class-string<TObject>  $id
+     * @return TObject
      */
-    public function get(string $id)
+    public function get(string $id): mixed
     {
         if (! array_key_exists($id, $this->instances)) {
             $this->instances[$id] = $this->build($id);
         }
 
-        return $this->instances[$id];
+        /** @var TObject $concrete */
+        $concrete = $this->instances[$id];
+
+        return $concrete;
     }
 
     /**
@@ -58,9 +63,12 @@ final class Container
     /**
      * Tries to build the given instance.
      *
-     * @param  class-string  $id
+     * @template TObject of object
+     *
+     * @param  class-string<TObject>  $id
+     * @return TObject
      */
-    private function build(string $id): object
+    private function build(string $id): mixed
     {
         $reflectionClass = new ReflectionClass($id);
 

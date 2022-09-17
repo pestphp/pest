@@ -10,7 +10,7 @@ use Pest\Plugin\Loader;
 /**
  * @internal
  */
-final class HandleArguments
+final class CallsHandleArguments
 {
     /**
      * Executes the Plugin action.

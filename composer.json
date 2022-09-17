@@ -19,7 +19,8 @@
     "require": {
         "php": "^8.1.0",
         "nunomaduro/collision": "dev-next",
-        "pestphp/pest-plugin": "^1.0.0",
+        "nunomaduro/termwind": "^1.14",
+        "pestphp/pest-plugin": "dev-master",
         "phpunit/phpunit": "10.0.x-dev"
     },
     "autoload": {
@@ -95,6 +96,7 @@
                 "Pest\\Plugins\\Coverage",
                 "Pest\\Plugins\\Init",
                 "Pest\\Plugins\\Environment",
+                "Pest\\Plugins\\Help",
                 "Pest\\Plugins\\Memory",
                 "Pest\\Plugins\\Printer",
                 "Pest\\Plugins\\Retry",
