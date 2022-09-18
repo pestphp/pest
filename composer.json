@@ -50,9 +50,6 @@
         ]
     },
     "require-dev": {
-        "illuminate/console": "^9.30.1",
-        "illuminate/support": "^9.30.1",
-        "laravel/dusk": "^7.0.1",
         "pestphp/pest-dev-tools": "^2.0.0"
     },
     "minimum-stability": "dev",
@@ -83,9 +80,6 @@
         ]
     },
     "extra": {
-        "branch-alias": {
-            "dev-next": "2.x-dev"
-        },
         "pest": {
             "plugins": [
                 "Pest\\Plugins\\Coverage",
@@ -96,11 +90,6 @@
                 "Pest\\Plugins\\Printer",
                 "Pest\\Plugins\\Retry",
                 "Pest\\Plugins\\Version"
-            ]
-        },
-        "laravel": {
-            "providers": [
-                "Pest\\Laravel\\PestServiceProvider"
             ]
         }
     }

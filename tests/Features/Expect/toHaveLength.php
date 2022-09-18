@@ -5,9 +5,10 @@ use PHPUnit\Framework\ExpectationFailedException;
 it('passes', function ($value) {
     expect($value)->toHaveLength(9);
 })->with([
-    'Fortaleza', 'Sollefteå', 'Ιεράπετρα',
+    'Fortaleza',
+    'Sollefteå',
+    'Ιεράπετρα',
     (object) [1, 2, 3, 4, 5, 6, 7, 8, 9],
-    collect([1, 2, 3, 4, 5, 6, 7, 8, 9]),
 ]);
 
 it('passes with array', function () {
