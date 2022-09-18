@@ -6,6 +6,7 @@ namespace Pest\Plugins;
 
 use Pest\Console\Thanks;
 use Pest\Contracts\Plugins\HandlesArguments;
+use Pest\Support\View;
 use Pest\TestSuite;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -61,61 +62,37 @@ final class Init implements HandlesArguments
         $testsBaseDir = "{$this->testSuite->rootPath}/tests";
 
         if (! is_dir($testsBaseDir)) {
-            if (! mkdir($testsBaseDir) && ! is_dir($testsBaseDir)) {
-                $this->output->writeln(sprintf(
-                    "\n  <fg=white;bg=red;options=bold> ERROR </> Directory `%s` was not created.</>",
-                    $testsBaseDir
-                ));
-
-                return;
-            }
-
-            $this->output->writeln(
-                '  <fg=black;bg=green;options=bold> DONE </> Created `tests` directory.</>',
-            );
+            mkdir($testsBaseDir);
         }
+
+        $this->output->writeln([
+            '',
+            '  <fg=white;bg=blue;options=bold> INFO </> Preparing tests directory.</>',
+            '',
+        ]);
 
         foreach (self::STUBS as $from => $to) {
             $fromPath = __DIR__."/../../stubs/init/{$from}";
             $toPath = "{$this->testSuite->rootPath}/{$to}";
 
             if (file_exists($toPath)) {
-                $this->output->writeln(sprintf(
-                    '  <fg=black;bg=yellow;options=bold> INFO </> File `%s` already exists, skipped.</>',
-                    $to
-                ));
+                View::render('components.two-column-detail', [
+                    'left' => $to,
+                    'right' => 'File already exists.',
+                ]);
 
                 continue;
             }
 
-            if ($from === 'phpunit.xml' && file_exists($toPath.'.dist')) {
-                $this->output->writeln(sprintf(
-                    '  <fg=black;bg=yellow;options=bold> INFO </> File `%s` already exists, skipped.</>',
-                    $to.'.dist'
-                ));
+            copy($fromPath, $toPath);
 
-                continue;
-            }
-
-            if (! copy($fromPath, $toPath)) {
-                $this->output->writeln(sprintf(
-                    '<fg=black;bg=red>[WARNING] Failed to copy stub `%s` to `%s`</>',
-                    $from,
-                    $toPath
-                ));
-
-                continue;
-            }
-
-            $this->output->writeln(sprintf(
-                '  <fg=black;bg=green;options=bold> DONE </> Created `%s` file.</>',
-                $to
-            ));
+            View::render('components.two-column-detail', [
+                'left' => $to,
+                'right' => 'File created.',
+            ]);
         }
 
-        $this->output->writeln(
-            "\n  <fg=black;bg=green;options=bold> DONE </> Pest initialised.</>\n",
-        );
+        View::render('components.new-line');
 
         (new Thanks($this->output))();
 
