@@ -1,6 +1,5 @@
 1. TeamCity
 2. Junit
-3. Thanks display
-4. Check all plugins
-5. Parallel testing.
-6. Finish Collision's todo
+3. Check all plugins
+4. Parallel testing.
+5. Finish Collision's todo
