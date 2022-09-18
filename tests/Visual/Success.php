@@ -26,17 +26,17 @@ test('visual snapshot of test suite on success', function () {
         ], $process->getOutput());
     };
 
+    $outputContent = explode("\n", $output());
+    $outputContent = array_map(fn (string $line) => trim($line), $outputContent);
+    $outputContent = array_filter($outputContent, fn (string $line) => $line !== '');
+
+    array_pop($outputContent);
+    array_pop($outputContent);
+
     if (getenv('REBUILD_SNAPSHOTS')) {
-        // Strip time from end of snapshot
-        $outputContent = preg_replace('/Time\: \s+\d+\.\d+s\s+/m', '', $output());
-
-        file_put_contents($snapshot, $outputContent);
+        file_put_contents($snapshot, implode("\n", $outputContent));
     } elseif (! getenv('EXCLUDE')) {
-        $output = explode("\n", $output());
-        array_pop($output);
-        array_pop($output);
-
-        expect(implode("\n", $output))->toContain(file_get_contents($snapshot));
+        expect(implode("\n", $outputContent))->toBe(file_get_contents($snapshot));
     }
 })->skip(! getenv('REBUILD_SNAPSHOTS') && getenv('EXCLUDE'))
     ->skip(PHP_OS_FAMILY === 'Windows');
