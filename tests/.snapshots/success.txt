@@ -498,7 +498,6 @@
   ✓ it passes with ('Sollefteå')
   ✓ it passes with ('Ιεράπετρα')
   ✓ it passes with (stdClass Object (...))
-  ✓ it passes with (Illuminate\Support\Collection Object (...))
   ✓ it passes with array
   ✓ it passes with *not*
   ✓ it properly fails with *not*
@@ -607,10 +606,6 @@
    PASS  Tests\Features\It
   ✓ it is a test
   ✓ it is a higher order message test
-
-   PASS  Tests\Features\Macro
-  ✓ it can call chained macro method
-  ✓ it will throw exception from call if no macro exists
 
    PASS  Tests\Features\PendingHigherOrderTests
   ✓ get 'foo'
@@ -772,4 +767,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    4 incomplete, 1 todo, 18 skipped, 514 passed (1289 assertions)
+  Tests:    4 incomplete, 1 todo, 18 skipped, 511 passed (1286 assertions)
