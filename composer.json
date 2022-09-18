@@ -18,9 +18,9 @@
     ],
     "require": {
         "php": "^7.3 || ^8.0",
-        "nunomaduro/collision": "^5.10.0|^6.0",
-        "pestphp/pest-plugin": "^1.0.0",
-        "phpunit/phpunit": "^9.5.5"
+        "nunomaduro/collision": "^5.11.0|^6.3.0",
+        "pestphp/pest-plugin": "^1.1.0",
+        "phpunit/phpunit": "^9.5.24"
     },
     "autoload": {
         "psr-4": {
@@ -40,11 +40,11 @@
         ]
     },
     "require-dev": {
-        "illuminate/console": "^8.47.0",
-        "illuminate/support": "^8.47.0",
-        "laravel/dusk": "^6.15.0",
-        "pestphp/pest-dev-tools": "dev-master",
-        "pestphp/pest-plugin-parallel": "^1.0"
+        "illuminate/console": "^8.83.23",
+        "illuminate/support": "^8.83.23",
+        "laravel/dusk": "^6.25.1",
+        "pestphp/pest-dev-tools": "^1.0.0",
+        "pestphp/pest-plugin-parallel": "^1.2"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
