@@ -777,10 +777,6 @@
    PASS  Tests\Unit\Plugins\Retry
   ✓ it retries if --retry argument is used
 
-   PASS  Tests\Unit\Plugins\Version
-  ✓ it outputs the version when --version is used
-  ✓ it do not outputs version when --version is not used
-
    PASS  Tests\Unit\Support\Backtrace
   ✓ it gets file name from called file
 
@@ -804,8 +800,8 @@
   ✓ it can filter the test suite filenames to those with the only method
   ✓ it does not filter the test suite filenames to those with the only method when working in CI pipeline
 
-   WARN  Tests\Visual\Help
-  - visual snapshot of help command output → Not supported yet.
+   PASS  Tests\Visual\Help
+  ✓ visual snapshot of help command output
 
    WARN  Tests\Visual\JUnit
   - it is can successfully call all public methods → Not supported yet.
@@ -821,6 +817,9 @@
    WARN  Tests\Visual\TeamCity
   - it is can successfully call all public methods → Not supported yet.
 
-  Tests:    4 incomplete, 1 todo, 19 skipped, 562 passed (1453 assertions)
-  Duration: 1.54s
+   PASS  Tests\Visual\Version
+  ✓ visual snapshot of help command output
+
+  Tests:    4 incomplete, 1 todo, 18 skipped, 562 passed (1453 assertions)
+  Duration: 1.65s
 
