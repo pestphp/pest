@@ -17,6 +17,10 @@ test('failures', function () {
     expect(null)->toBeResource();
 })->throws(ExpectationFailedException::class);
 
+test('failures with custom message', function () {
+    expect(null)->toBeResource('oh no!');
+})->throws(ExpectationFailedException::class, 'oh no!');
+
 test('not failures', function () use ($resource) {
     expect($resource)->not->toBeResource();
 })->throws(ExpectationFailedException::class);

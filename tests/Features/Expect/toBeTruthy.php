@@ -14,6 +14,10 @@ test('failures', function () {
     expect(null)->toBeTruthy();
 })->throws(ExpectationFailedException::class);
 
+test('failures with custom message', function () {
+    expect(null)->toBeTruthy('oh no!');
+})->throws(ExpectationFailedException::class, 'oh no!');
+
 test('not failures', function () {
     expect(1)->not->toBeTruthy();
 })->throws(ExpectationFailedException::class);
