@@ -45,7 +45,7 @@ final class Help implements HandlesArguments
 
                 $this->output->writeln([
                     '',
-                    sprintf('  <fg=blue;options=bold>%s:</>', mb_strtoupper($title)),
+                    sprintf('  <fg=yellow;options=bold>%s OPTIONS:</>', mb_strtoupper($title)),
                 ]);
 
                 foreach ($options as $option) {
@@ -57,6 +57,8 @@ final class Help implements HandlesArguments
                         'arg' => $argument,
                         'desc' => $description,
                     ] = $option;
+
+                    $argument = $this->colorizeOptions($argument);
 
                     View::render('components.two-column-detail', [
                         'left' => $argument,
@@ -71,6 +73,16 @@ final class Help implements HandlesArguments
         }
 
         return $arguments;
+    }
+
+    /**
+     * Colorizes the given string options.
+     */
+    private function colorizeOptions(string $argument): string
+    {
+        $argument = (string) preg_replace('/(--\w+)/', '<fg=blue;options=bold>$1</>', $argument);
+
+        return (string) preg_replace('/(-\w+)/', '<fg=blue;options=bold>$1</>', $argument);
     }
 
     /**
