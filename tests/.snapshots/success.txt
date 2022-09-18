@@ -242,36 +242,43 @@
    PASS  Tests\Features\Expect\toBe
   ✓ strict comparisons
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeArray
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeBool
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeCallable
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeDirectory
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeEmpty
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeFalse
   ✓ strict comparisons
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeFalsy
@@ -286,116 +293,139 @@
   ✓ passes as not falsy with (1) #2
   ✓ passes as not falsy with (-1)
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeFile
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeFloat
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeGreatherThan
   ✓ passes
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeGreatherThanOrEqual
   ✓ passes
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeIn
   ✓ passes
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeInfinite
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeInstanceOf
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeInt
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeIterable
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeJson
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeLessThan
   ✓ passes
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeLessThanOrEqual
   ✓ passes
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeNAN
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeNull
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeNumeric
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeObject
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeReadableDirectory
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeReadableFile
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeResource
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeScalar
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeString
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeTrue
   ✓ strict comparisons
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeTruthy
@@ -410,16 +440,19 @@
   ✓ passes as not truthy with (0)
   ✓ passes as not truthy with ('0')
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeWritableDirectory
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeWritableFile
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toContain
@@ -438,31 +471,36 @@
    PASS  Tests\Features\Expect\toContainOnlyInstancesOf
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toEndWith
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toEqual
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toEqualCanonicalizing
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toEqualWithDelta
   ✓ pass
-  ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toHaveCount
   ✓ pass
   ✓ failures
+  ✓ failures with message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toHaveKey
@@ -473,7 +511,9 @@
   ✓ pass with value check and nested key
   ✓ pass with value check and plain key with dots
   ✓ failures
+  ✓ failures with custom message
   ✓ failures with nested key
+  ✓ failures with nested key and custom message
   ✓ failures with plain key with dots
   ✓ fails with wrong value
   ✓ fails with wrong value and nested key
@@ -489,7 +529,9 @@
   ✓ pass
   ✓ pass with multi-dimensional arrays
   ✓ failures
+  ✓ failures with custom message
   ✓ failures with multi-dimensional arrays
+  ✓ failures with multi-dimensional arrays and custom message
   ✓ not failures
   ✓ not failures with multi-dimensional arrays
 
@@ -502,45 +544,50 @@
   ✓ it passes with array
   ✓ it passes with *not*
   ✓ it properly fails with *not*
-  ✓ it fails with (1)
-  ✓ it fails with (1.5)
-  ✓ it fails with (true)
-  ✓ it fails with (null)
+  ✓ it fails
+  ✓ it fails with message
 
    PASS  Tests\Features\Expect\toHaveProperties
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toHaveProperty
   ✓ pass
   ✓ failures
+  ✓ failures with message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toMatch
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toMatchArray
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toMatchConstraint
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toMatchObject
   ✓ pass
   ✓ pass with class
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toStartWith
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toThrow
@@ -552,6 +599,7 @@
   ✓ failures 5
   ✓ failures 6
   ✓ failures 7
+  ✓ failures with custom message
   ✓ not failures
   ✓ closure missing parameter
   ✓ closure missing type-hint
@@ -729,6 +777,10 @@
    PASS  Tests\Unit\Plugins\Retry
   ✓ it retries if --retry argument is used
 
+   PASS  Tests\Unit\Plugins\Version
+  ✓ it outputs the version when --version is used
+  ✓ it do not outputs version when --version is not used
+
    PASS  Tests\Unit\Support\Backtrace
   ✓ it gets file name from called file
 
@@ -752,8 +804,8 @@
   ✓ it can filter the test suite filenames to those with the only method
   ✓ it does not filter the test suite filenames to those with the only method when working in CI pipeline
 
-   PASS  Tests\Visual\Help
-  ✓ visual snapshot of help command output
+   WARN  Tests\Visual\Help
+  - visual snapshot of help command output → Not supported yet.
 
    WARN  Tests\Visual\JUnit
   - it is can successfully call all public methods → Not supported yet.
@@ -769,7 +821,6 @@
    WARN  Tests\Visual\TeamCity
   - it is can successfully call all public methods → Not supported yet.
 
-   PASS  Tests\Visual\Version
-  ✓ visual snapshot of help command output
+  Tests:    4 incomplete, 1 todo, 19 skipped, 562 passed (1453 assertions)
+  Duration: 1.54s
 
-  Tests:    4 incomplete, 1 todo, 18 skipped, 514 passed (1289 assertions)
