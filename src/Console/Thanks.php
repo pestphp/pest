@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Console;
 
+use Pest\Support\View;
 use Symfony\Component\Console\Helper\SymfonyQuestionHelper;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -15,18 +16,14 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 final class Thanks
 {
     /**
-     * The Command messages.
+     * The support options.
      *
-     * @var array<int, string>
+     * @var array<string, string>
      */
     private const FUNDING_MESSAGES = [
-        '',
-        '  - Star or contribute to Pest:',
-        '    <options=bold>https://github.com/pestphp/pest</>',
-        '  - Tweet something about Pest on Twitter:',
-        '    <options=bold>https://twitter.com/pestphp</>',
-        '  - Sponsor the creator:',
-        '    <options=bold>https://github.com/sponsors/nunomaduro</>',
+        'Star the project on GitHub' => 'https://github.com/pestphp/pest',
+        'Tweet about the project' => 'https://twitter.com/pestphp',
+        'Sponsor the project' => 'https://github.com/sponsors/nunomaduro',
     ];
 
     /**
@@ -46,7 +43,7 @@ final class Thanks
             new ArrayInput([]),
             $this->output,
             new ConfirmationQuestion(
-                'Can you quickly <options=bold>star our GitHub repository</>? 🙏🏻',
+                ' <options=bold>Would you like to show your support by starring the project on GitHub?</>',
                 true,
             )
         );
@@ -63,8 +60,15 @@ final class Thanks
             }
         }
 
-        foreach (self::FUNDING_MESSAGES as $message) {
-            $this->output->writeln($message);
+        View::render('components.new-line');
+
+        foreach (self::FUNDING_MESSAGES as $message => $link) {
+            View::render('components.two-column-detail', [
+                'left' => $message,
+                'right' => $link,
+            ]);
         }
+
+        View::render('components.new-line');
     }
 }
