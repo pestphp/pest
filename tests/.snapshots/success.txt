@@ -1,825 +1,703 @@
-
-   PASS  Tests\Features\AfterAll
-  ✓ deletes file after all
-
-   PASS  Tests\Features\AfterEach
-  ✓ it does not get executed before the test
-  ✓ it gets executed after the test
-
-   PASS  Tests\Features\BeforeAll
-  ✓ it gets executed before tests
-  ✓ it do not get executed before each test
-
-   PASS  Tests\Features\BeforeEach
-  ✓ it gets executed before each test
-  ✓ it gets executed before each test once again
-
-   WARN  Tests\Features\Coverage
-  ✓ it has plugin
-  - it adds coverage if --coverage exist → Coverage is not available
-  ✓ it adds coverage if --min exist
-  ✓ it generates coverage based on file input
-
-   PASS  Tests\Features\Covers
-  ✓ it uses the correct PHPUnit attribute for class
-  ✓ it uses the correct PHPUnit attribute for function
-  ✓ it removes duplicated attributes
-  ✓ it guesses if the given argument is a class or function
-  ✓ it appends CoversNothing to method attributes
-  ✓ it does not append CoversNothing to other methods
-  ✓ it throws exception if no class nor method has been found
-
-   PASS  Tests\Features\Datasets
-  ✓ it throws exception if dataset does not exist
-  ✓ it throws exception if dataset already exist
-  ✓ it sets closures
-  ✓ it sets arrays
-  ✓ it gets bound to test case object with ('a')
-  ✓ it gets bound to test case object with ('b')
-  ✓ it truncates the description with ('FoooFoooFoooFoooFoooFoooFoooF...ooFooo')
-  ✓ lazy datasets with (1)
-  ✓ lazy datasets with (2)
-  ✓ lazy datasets did the job right
-  ✓ eager datasets with (1)
-  ✓ eager datasets with (2)
-  ✓ eager datasets did the job right
-  ✓ lazy registered datasets with (1)
-  ✓ lazy registered datasets with (2)
-  ✓ lazy registered datasets did the job right
-  ✓ eager registered datasets with (1)
-  ✓ eager registered datasets with (2)
-  ✓ eager registered datasets did the job right
-  ✓ eager wrapped registered datasets with (1)
-  ✓ eager wrapped registered datasets with (2)
-  ✓ eager registered wrapped datasets did the job right
-  ✓ named datasets with data set "one"
-  ✓ named datasets with data set "two"
-  ✓ named datasets did the job right
-  ✓ lazy named datasets with (Bar Object (...))
-  ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #1
-  ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #2
-  ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), false)
-  ✓ it creates unique test case names with ('Name 2', Pest\Plugin Object (), false)
-  ✓ it creates unique test case names with ('Name 2', Pest\Plugin Object (), true)
-  ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #3
-  ✓ it creates unique test case names - count
-  ✓ lazy multiple datasets with (1) / (3)
-  ✓ lazy multiple datasets with (1) / (4)
-  ✓ lazy multiple datasets with (2) / (3)
-  ✓ lazy multiple datasets with (2) / (4)
-  ✓ lazy multiple datasets did the job right
-  ✓ eager multiple datasets with (1) / (3)
-  ✓ eager multiple datasets with (1) / (4)
-  ✓ eager multiple datasets with (2) / (3)
-  ✓ eager multiple datasets with (2) / (4)
-  ✓ eager multiple datasets did the job right
-  ✓ lazy registered multiple datasets with (1) / (1)
-  ✓ lazy registered multiple datasets with (1) / (2)
-  ✓ lazy registered multiple datasets with (2) / (1)
-  ✓ lazy registered multiple datasets with (2) / (2)
-  ✓ lazy registered multiple datasets did the job right
-  ✓ eager registered multiple datasets with (1) / (1)
-  ✓ eager registered multiple datasets with (1) / (2)
-  ✓ eager registered multiple datasets with (2) / (1)
-  ✓ eager registered multiple datasets with (2) / (2)
-  ✓ eager registered multiple datasets did the job right
-  ✓ eager wrapped registered multiple datasets with (1) / (1)
-  ✓ eager wrapped registered multiple datasets with (1) / (2)
-  ✓ eager wrapped registered multiple datasets with (2) / (1)
-  ✓ eager wrapped registered multiple datasets with (2) / (2)
-  ✓ eager wrapped registered multiple datasets did the job right
-  ✓ named multiple datasets with data set "one" / data set "three"
-  ✓ named multiple datasets with data set "one" / data set "four"
-  ✓ named multiple datasets with data set "two" / data set "three"
-  ✓ named multiple datasets with data set "two" / data set "four"
-  ✓ named multiple datasets did the job right
-  ✓ more than two datasets with (1) / (3) / (5)
-  ✓ more than two datasets with (1) / (3) / (6)
-  ✓ more than two datasets with (1) / (4) / (5)
-  ✓ more than two datasets with (1) / (4) / (6)
-  ✓ more than two datasets with (2) / (3) / (5)
-  ✓ more than two datasets with (2) / (3) / (6)
-  ✓ more than two datasets with (2) / (4) / (5)
-  ✓ more than two datasets with (2) / (4) / (6)
-  ✓ more than two datasets did the job right
-  ✓ it can resolve a dataset after the test case is available with (Closure Object (...)) #1
-  ✓ it can resolve a dataset after the test case is available with (Closure Object (...)) #2
-  ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (...)) #1
-  ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (...)) #2
-  ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (...)) #1
-  ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (...)) #2
-  ✓ it resolves a potential bound dataset logically with ('foo', Closure Object (...))
-  ✓ it resolves a potential bound dataset logically even when the closure comes first with (Closure Object (...), 'bar')
-  ✓ it will not resolve a closure if it is type hinted as a closure with (Closure Object (...)) #1
-  ✓ it will not resolve a closure if it is type hinted as a closure with (Closure Object (...)) #2
-  ✓ it will not resolve a closure if it is type hinted as a callable with (Closure Object (...)) #1
-  ✓ it will not resolve a closure if it is type hinted as a callable with (Closure Object (...)) #2
-  ✓ it can correctly resolve a bound dataset that returns an array with (Closure Object (...))
-  ✓ it can correctly resolve a bound dataset that returns an array but wants to be spread with (Closure Object (...))
-
-   PASS  Tests\Features\Depends
-  ✓ first
-  ✓ second
-  ✓ depends
-  ✓ depends with ...params
-  ✓ depends with defined arguments
-  ✓ depends run test only once
-  ✓ it asserts true is true
-  ✓ depends works with the correct test name
-
-   PASS  Tests\Features\DependsInheritance
-  ✓ it is a test
-  ✓ it uses correct parent class
-
-   PASS  Tests\Features\Exceptions
-  ✓ it gives access the the underlying expectException
-  ✓ it catch exceptions
-  ✓ it catch exceptions and messages
-  ✓ it catch exceptions, messages and code
-  ✓ it can just define the message
-  ✓ it can just define the code
-  ✓ it not catch exceptions if given condition is false
-  ✓ it catch exceptions if given condition is true
-  ✓ it catch exceptions and messages if given condition is true
-  ✓ it catch exceptions, messages and code if given condition is true
-  ✓ it can just define the message if given condition is true
-  ✓ it can just define the code if given condition is true
-  ✓ it can just define the message if given condition is 1
-  ✓ it can just define the code if given condition is 1
-
-   PASS  Tests\Features\Expect\HigherOrder\methods
-  ✓ it can access methods
-  ✓ it can access multiple methods
-  ✓ it works with not
-  ✓ it can accept arguments
-  ✓ it works with each
-  ✓ it works inside of each
-  ✓ it works with sequence
-  ✓ it can compose complex expectations
-  ✓ it can handle nested method calls
-  ✓ it works with higher order tests
-  ✓ it can use the scoped method to lock into the given level for expectations
-  ✓ it works consistently with the json expectation method
-
-   PASS  Tests\Features\Expect\HigherOrder\methodsAndProperties
-  ✓ it can access methods and properties
-  ✓ it can handle nested methods and properties
-  ✓ it works with higher order tests
-  ✓ it can start a new higher order expectation using the and syntax
-  ✓ it can start a new higher order expectation using the and syntax in higher order tests
-  ✓ it can start a new higher order expectation using the and syntax without nesting expectations
-
-   PASS  Tests\Features\Expect\HigherOrder\properties
-  ✓ it allows properties to be accessed from the value
-  ✓ it can access multiple properties from the value
-  ✓ it works with not
-  ✓ it works with each
-  ✓ it works inside of each
-  ✓ it works with sequence
-  ✓ it can compose complex expectations
-  ✓ it works with objects
-  ✓ it works with nested properties
-  ✓ it works with higher order tests
-
-   PASS  Tests\Features\Expect\each
-  ✓ an exception is thrown if the the type is not iterable
-  ✓ it expects on each item
-  ✓ it chains expectations on each item
-  ✓ opposite expectations on each item
-  ✓ chained opposite and non-opposite expectations
-  ✓ it can add expectations via "and"
-  ✓ it accepts callables
-  ✓ it passes the key of the current item to callables
-
-   PASS  Tests\Features\Expect\extend
-  ✓ it macros true is true
-  ✓ it macros false is not true
-  ✓ it macros true is true with argument
-  ✓ it macros false is not true with argument
-
-   PASS  Tests\Features\Expect\json
-  ✓ it properly parses json string
-  ✓ fails with broken json string
-
-   PASS  Tests\Features\Expect\matchExpectation
-  ✓ it pass
-  ✓ it failures
-  ✓ it runs with truthy
-  ✓ it runs with falsy
-  ✓ it runs with truthy closure condition
-  ✓ it runs with falsy closure condition
-  ✓ it can be passed non-callable values
-  ✓ it fails with unhandled match
-  ✓ it can be used in higher order tests
-
-   PASS  Tests\Features\Expect\not
-  ✓ not property calls
-
-   PASS  Tests\Features\Expect\pipes
-  ✓ pipe is applied and can stop pipeline
-  ✓ pipe is run and can let the pipeline keep going
-  ✓ pipe works with negated expectation
-  ✓ interceptor is applied
-  ✓ interceptor stops the pipeline
-  ✓ interceptor is called only when filter is met
-  ✓ interceptor can be filtered with a closure
-  ✓ interceptor can be filter the expected parameter as well
-  ✓ interceptor works with negated expectation
-  ✓ intercept can add new parameters to the expectation
-
-   PASS  Tests\Features\Expect\ray
-  ✓ ray calls do not fail when ray is not installed
-
-   PASS  Tests\Features\Expect\sequence
-  ✓ an exception is thrown if the the type is not iterable
-  ✓ allows for sequences of checks to be run on iterable data
-  ✓ loops back to the start if it runs out of sequence items
-  ✓ fails if the number of iterable items is greater than the number of expectations
-  ✓ it works with associative arrays
-  ✓ it can be passed non-callable values
-  ✓ it can be passed a mixture of value types
-
-   PASS  Tests\Features\Expect\toBe
-  ✓ strict comparisons
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeArray
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeBool
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeCallable
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeDirectory
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeEmpty
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeFalse
-  ✓ strict comparisons
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeFalsy
-  ✓ passes as falsy with (false)
-  ✓ passes as falsy with ('')
-  ✓ passes as falsy with (null)
-  ✓ passes as falsy with (0)
-  ✓ passes as falsy with ('0')
-  ✓ passes as not falsy with (true)
-  ✓ passes as not falsy with (1) #1
-  ✓ passes as not falsy with ('false')
-  ✓ passes as not falsy with (1) #2
-  ✓ passes as not falsy with (-1)
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeFile
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeFloat
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeGreatherThan
-  ✓ passes
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeGreatherThanOrEqual
-  ✓ passes
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeIn
-  ✓ passes
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeInfinite
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeInstanceOf
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeInt
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeIterable
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeJson
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeLessThan
-  ✓ passes
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeLessThanOrEqual
-  ✓ passes
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeNAN
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeNull
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeNumeric
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeObject
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeReadableDirectory
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeReadableFile
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeResource
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeScalar
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeString
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeTrue
-  ✓ strict comparisons
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeTruthy
-  ✓ passes as truthy with (true)
-  ✓ passes as truthy with (1) #1
-  ✓ passes as truthy with ('false')
-  ✓ passes as truthy with (1) #2
-  ✓ passes as truthy with (-1)
-  ✓ passes as not truthy with (false)
-  ✓ passes as not truthy with ('')
-  ✓ passes as not truthy with (null)
-  ✓ passes as not truthy with (0)
-  ✓ passes as not truthy with ('0')
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeWritableDirectory
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toBeWritableFile
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toContain
-  ✓ passes strings
-  ✓ passes strings with multiple needles
-  ✓ passes arrays
-  ✓ passes arrays with multiple needles
-  ✓ passes with array needles
-  ✓ failures
-  ✓ failures with multiple needles (all failing)
-  ✓ failures with multiple needles (some failing)
-  ✓ not failures
-  ✓ not failures with multiple needles (all failing)
-  ✓ not failures with multiple needles (some failing)
-
-   PASS  Tests\Features\Expect\toContainOnlyInstancesOf
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toEndWith
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toEqual
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toEqualCanonicalizing
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toEqualWithDelta
-  ✓ pass
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toHaveCount
-  ✓ pass
-  ✓ failures
-  ✓ failures with message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toHaveKey
-  ✓ pass
-  ✓ pass with nested key
-  ✓ pass with plain key with dots
-  ✓ pass with value check
-  ✓ pass with value check and nested key
-  ✓ pass with value check and plain key with dots
-  ✓ failures
-  ✓ failures with custom message
-  ✓ failures with nested key
-  ✓ failures with nested key and custom message
-  ✓ failures with plain key with dots
-  ✓ fails with wrong value
-  ✓ fails with wrong value and nested key
-  ✓ fails with wrong value and plain key with dots
-  ✓ not failures
-  ✓ not failures with nested key
-  ✓ not failures with plain key with dots
-  ✓ not failures with correct value
-  ✓ not failures with correct value and with nested key
-  ✓ not failures with correct value and with plain key with dots
-
-   PASS  Tests\Features\Expect\toHaveKeys
-  ✓ pass
-  ✓ pass with multi-dimensional arrays
-  ✓ failures
-  ✓ failures with custom message
-  ✓ failures with multi-dimensional arrays
-  ✓ failures with multi-dimensional arrays and custom message
-  ✓ not failures
-  ✓ not failures with multi-dimensional arrays
-
-   PASS  Tests\Features\Expect\toHaveLength
-  ✓ it passes with ('Fortaleza')
-  ✓ it passes with ('Sollefteå')
-  ✓ it passes with ('Ιεράπετρα')
-  ✓ it passes with (stdClass Object (...))
-  ✓ it passes with (Illuminate\Support\Collection Object (...))
-  ✓ it passes with array
-  ✓ it passes with *not*
-  ✓ it properly fails with *not*
-  ✓ it fails
-  ✓ it fails with message
-
-   PASS  Tests\Features\Expect\toHaveProperties
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toHaveProperty
-  ✓ pass
-  ✓ failures
-  ✓ failures with message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toMatch
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toMatchArray
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toMatchConstraint
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toMatchObject
-  ✓ pass
-  ✓ pass with class
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toStartWith
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
-   PASS  Tests\Features\Expect\toThrow
-  ✓ passes
-  ✓ failures 1
-  ✓ failures 2
-  ✓ failures 3
-  ✓ failures 4
-  ✓ failures 5
-  ✓ failures 6
-  ✓ failures 7
-  ✓ failures with custom message
-  ✓ not failures
-  ✓ closure missing parameter
-  ✓ closure missing type-hint
-  ✓ it can handle a non-defined exception
-  ✓ it can handle a class not found Error
-
-   PASS  Tests\Features\Expect\unless
-  ✓ it pass
-  ✓ it failures
-  ✓ it runs with truthy
-  ✓ it skips with falsy
-  ✓ it runs with truthy closure condition
-  ✓ it skips with falsy closure condition
-  ✓ it can be used in higher order tests
-
-   PASS  Tests\Features\Expect\when
-  ✓ it pass
-  ✓ it failures
-  ✓ it runs with truthy
-  ✓ it skips with falsy
-  ✓ it runs with truthy closure condition
-  ✓ it skips with falsy closure condition
-  ✓ it can be used in higher order tests
-
-   PASS  Tests\Features\Helpers
-  ✓ it can set/get properties on $this
-  ✓ it throws error if property do not exist
-  ✓ it allows to call underlying protected/private methods
-  ✓ it throws error if method do not exist
-  ✓ it can forward unexpected calls to any global function
-  ✓ it can use helpers from helpers file
-
-   PASS  Tests\Features\HigherOrderTests
-  ✓ it proxies calls to object
-  ✓ it is capable doing multiple assertions
-  ✓ it resolves expect callables correctly
-  ✓ does not treat method names as callables
-  ✓ it can defer a method until after test setup
-  ✓ it can pass datasets into the expect callables with (1, 2, 3)
-  ✓ it can pass datasets into the defer callable with (1, 2, 3)
-  ✓ it can pass shared datasets into callables with (1)
-  ✓ it can pass shared datasets into callables with (2)
-
-   WARN  Tests\Features\Incompleted
-  … incompleted
-  … it is incompleted
-  … it is incompleted even with method calls like skip
-  … it is incompleted even with method calls like group
-  ✓ it is not incompleted because of expect
-  ✓ it is not incompleted because of assert
-  ✓ it is not incompleted because of test with assertions
-
-   PASS  Tests\Features\It
-  ✓ it is a test
-  ✓ it is a higher order message test
-
-   PASS  Tests\Features\Macro
-  ✓ it can call chained macro method
-  ✓ it will throw exception from call if no macro exists
-
-   PASS  Tests\Features\PendingHigherOrderTests
-  ✓ get 'foo'
-  ✓ get 'foo' → get 'bar' → expect true → toBeTrue
-  ✓ get 'foo' → expect true → toBeTrue
-
-   WARN  Tests\Features\Skip
-  ✓ it do not skips
-  - it skips with truthy → 1
-  - it skips with truthy condition by default
-  - it skips with message → skipped because bar
-  - it skips with truthy closure condition
-  ✓ it do not skips with falsy closure condition
-  - it skips with condition and message → skipped because foo
-  - it skips when skip after assertion
-  - it can use something in the test case as a condition → This test was skipped
-  - it can user higher order callables and skip
-
-   PASS  Tests\Features\Test
-  ✓ a test
-  ✓ higher order message test
-
-   PASS  Tests\Features\ThrowsNoExceptions
-  ✓ it allows access to the underlying expectNotToPerformAssertions method
-  ✓ it allows performing no expectations without being risky
-
-   PASS  Tests\Features\Todo
-  ↓ something todo later
-  ✓ it does something within a file with a todo
-
-   PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest
-  ✓ it example 1
-
-   PASS  Tests\Fixtures\ExampleTest
-  ✓ it example 2
-
-   PASS  Tests\Hooks\AfterAllTest
-  ✓ global afterAll execution order
-  ✓ it only gets called once per file
-
-   PASS  Tests\Hooks\AfterEachTest
-  ✓ global afterEach execution order
-
-   PASS  Tests\Hooks\BeforeAllTest
-  ✓ global beforeAll execution order
-  ✓ it only gets called once per file
-
-   PASS  Tests\Hooks\BeforeEachTest
-  ✓ global beforeEach execution order
-
-   PASS  Tests\PHPUnit\CustomAffixes\InvalidTestName
-  ✓ it runs file names like `@#$%^&()-_=+.php`
-
-   PASS  Tests\PHPUnit\CustomAffixes\ATestWithSpaces
-  ✓ it runs file names like `A Test With Spaces.php`
-
-   PASS  Tests\PHPUnit\CustomAffixes\AdditionalFileExtension
-  ✓ it runs file names like `AdditionalFileExtension.spec.php`
-
-   PASS  Tests\PHPUnit\CustomAffixes\FolderWithAn\ExampleTest
-  ✓ custom traits can be used
-  ✓ trait applied in this file
-
-   PASS  Tests\PHPUnit\CustomAffixes\ManyExtensions
-  ✓ it runs file names like `ManyExtensions.class.test.php`
-
-   PASS  Tests\PHPUnit\CustomAffixes\TestCaseWithQuotes
-  ✓ it runs file names like `Test 'Case' With Quotes.php`
-
-   PASS  Tests\PHPUnit\CustomAffixes\kebabcasespec
-  ✓ it runs file names like `kebab-case-spec.php`
-
-   PASS  Tests\PHPUnit\CustomAffixes\snakecasespec
-  ✓ it runs file names like `snake_case_spec.php`
-
-   PASS  Tests\PHPUnit\CustomTestCase\UsesPerDirectory
-  ✓ closure was bound to CustomTestCase
-
-   PASS  Tests\PHPUnit\CustomTestCaseInSubFolders\SubFolder\SubFolder\UsesPerSubDirectory
-  ✓ closure was bound to CustomTestCase
-
-   PASS  Tests\PHPUnit\CustomTestCaseInSubFolders\SubFolder2\UsesPerFile
-  ✓ custom traits can be used
-  ✓ trait applied in this file
-
-   PASS  Tests\Playground
-  ✓ basic
-
-   PASS  Tests\Plugins\Traits
-  ✓ it allows global uses
-  ✓ it allows multiple global uses registered in the same path
-
-   WARN  Tests\Unit\ConfigLoader
-  ✓ it fallbacks to default path if no phpunit file is found
-  - it fallbacks to default path if phpunit is not a valid XML
-  - it fallbacks to default path if failing to read phpunit content
-  - it fallbacks to default path if there is no test suites directory
-  - it fallbacks to default path if test suite directory has no value
-  - it fallbacks to default path if test suite directory does not exist
-  - it returns the parent folder of first test suite directory
-
-   PASS  Tests\Unit\Console\Help
-  ✓ it outputs the help information when --help is used
-
-   PASS  Tests\Unit\Datasets
-  ✓ it show only the names of named datasets in their description
-  ✓ it show the actual dataset of non-named datasets in their description
-  ✓ it show only the names of multiple named datasets in their description
-  ✓ it show the actual dataset of multiple non-named datasets in their description
-  ✓ it show the correct description for mixed named and not-named datasets
-
-   PASS  Tests\Unit\Plugins\Environment
-  ✓ environment is set to CI when --ci option is used
-  ✓ environment is set to Local when --ci option is not used
-
-   PASS  Tests\Unit\Plugins\Retry
-  ✓ it retries if --retry argument is used
-
-   PASS  Tests\Unit\Support\Backtrace
-  ✓ it gets file name from called file
-
-   PASS  Tests\Unit\Support\Container
-  ✓ it exists
-  ✓ it gets an instance
-  ✓ autowire
-  ✓ it creates an instance and resolves parameters
-  ✓ it creates an instance and resolves also sub parameters
-  ✓ it can resolve builtin value types
-  ✓ it cannot resolve a parameter without type
-
-   PASS  Tests\Unit\Support\Reflection
-  ✓ it gets file name from closure
-  ✓ it gets property values
-
-   PASS  Tests\Unit\TestSuite
-  ✓ it does not allow to add the same test description twice
-  ✓ it alerts users about tests with arguments but no input
-  ✓ it can return an array of all test suite filenames
-  ✓ it can filter the test suite filenames to those with the only method
-  ✓ it does not filter the test suite filenames to those with the only method when working in CI pipeline
-
-   PASS  Tests\Visual\Help
-  ✓ visual snapshot of help command output
-
-   WARN  Tests\Visual\JUnit
-  - it is can successfully call all public methods → Not supported yet.
-
-   PASS  Tests\Visual\SingleTestOrDirectory
-  ✓ allows to run a single test
-  ✓ allows to run a directory
-  ✓ it disable decorating printer when colors is set to never
-
-   WARN  Tests\Visual\Success
-  - visual snapshot of test suite on success
-
-   WARN  Tests\Visual\TeamCity
-  - it is can successfully call all public methods → Not supported yet.
-
-   PASS  Tests\Visual\Version
-  ✓ visual snapshot of help command output
-
-  Tests:    4 incomplete, 1 todo, 18 skipped, 562 passed (1453 assertions)
-  Duration: 1.65s
-
+PASS  Tests\Features\AfterAll
+✓ deletes file after all
+PASS  Tests\Features\AfterEach
+✓ it does not get executed before the test
+✓ it gets executed after the test
+PASS  Tests\Features\BeforeAll
+✓ it gets executed before tests
+✓ it do not get executed before each test
+PASS  Tests\Features\BeforeEach
+✓ it gets executed before each test
+✓ it gets executed before each test once again
+WARN  Tests\Features\Coverage
+✓ it has plugin
+- it adds coverage if --coverage exist → Coverage is not available
+✓ it adds coverage if --min exist
+✓ it generates coverage based on file input
+PASS  Tests\Features\Covers
+✓ it uses the correct PHPUnit attribute for class
+✓ it uses the correct PHPUnit attribute for function
+✓ it removes duplicated attributes
+✓ it guesses if the given argument is a class or function
+✓ it appends CoversNothing to method attributes
+✓ it does not append CoversNothing to other methods
+✓ it throws exception if no class nor method has been found
+PASS  Tests\Features\Datasets
+✓ it throws exception if dataset does not exist
+✓ it throws exception if dataset already exist
+✓ it sets closures
+✓ it sets arrays
+✓ it gets bound to test case object with ('a')
+✓ it gets bound to test case object with ('b')
+✓ it truncates the description with ('FoooFoooFoooFoooFoooFoooFoooF...ooFooo')
+✓ lazy datasets with (1)
+✓ lazy datasets with (2)
+✓ lazy datasets did the job right
+✓ eager datasets with (1)
+✓ eager datasets with (2)
+✓ eager datasets did the job right
+✓ lazy registered datasets with (1)
+✓ lazy registered datasets with (2)
+✓ lazy registered datasets did the job right
+✓ eager registered datasets with (1)
+✓ eager registered datasets with (2)
+✓ eager registered datasets did the job right
+✓ eager wrapped registered datasets with (1)
+✓ eager wrapped registered datasets with (2)
+✓ eager registered wrapped datasets did the job right
+✓ named datasets with data set "one"
+✓ named datasets with data set "two"
+✓ named datasets did the job right
+✓ lazy named datasets with (Bar Object (...))
+✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #1
+✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #2
+✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), false)
+✓ it creates unique test case names with ('Name 2', Pest\Plugin Object (), false)
+✓ it creates unique test case names with ('Name 2', Pest\Plugin Object (), true)
+✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #3
+✓ it creates unique test case names - count
+✓ lazy multiple datasets with (1) / (3)
+✓ lazy multiple datasets with (1) / (4)
+✓ lazy multiple datasets with (2) / (3)
+✓ lazy multiple datasets with (2) / (4)
+✓ lazy multiple datasets did the job right
+✓ eager multiple datasets with (1) / (3)
+✓ eager multiple datasets with (1) / (4)
+✓ eager multiple datasets with (2) / (3)
+✓ eager multiple datasets with (2) / (4)
+✓ eager multiple datasets did the job right
+✓ lazy registered multiple datasets with (1) / (1)
+✓ lazy registered multiple datasets with (1) / (2)
+✓ lazy registered multiple datasets with (2) / (1)
+✓ lazy registered multiple datasets with (2) / (2)
+✓ lazy registered multiple datasets did the job right
+✓ eager registered multiple datasets with (1) / (1)
+✓ eager registered multiple datasets with (1) / (2)
+✓ eager registered multiple datasets with (2) / (1)
+✓ eager registered multiple datasets with (2) / (2)
+✓ eager registered multiple datasets did the job right
+✓ eager wrapped registered multiple datasets with (1) / (1)
+✓ eager wrapped registered multiple datasets with (1) / (2)
+✓ eager wrapped registered multiple datasets with (2) / (1)
+✓ eager wrapped registered multiple datasets with (2) / (2)
+✓ eager wrapped registered multiple datasets did the job right
+✓ named multiple datasets with data set "one" / data set "three"
+✓ named multiple datasets with data set "one" / data set "four"
+✓ named multiple datasets with data set "two" / data set "three"
+✓ named multiple datasets with data set "two" / data set "four"
+✓ named multiple datasets did the job right
+✓ more than two datasets with (1) / (3) / (5)
+✓ more than two datasets with (1) / (3) / (6)
+✓ more than two datasets with (1) / (4) / (5)
+✓ more than two datasets with (1) / (4) / (6)
+✓ more than two datasets with (2) / (3) / (5)
+✓ more than two datasets with (2) / (3) / (6)
+✓ more than two datasets with (2) / (4) / (5)
+✓ more than two datasets with (2) / (4) / (6)
+✓ more than two datasets did the job right
+✓ it can resolve a dataset after the test case is available with (Closure Object (...)) #1
+✓ it can resolve a dataset after the test case is available with (Closure Object (...)) #2
+✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (...)) #1
+✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (...)) #2
+✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (...)) #1
+✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (...)) #2
+✓ it resolves a potential bound dataset logically with ('foo', Closure Object (...))
+✓ it resolves a potential bound dataset logically even when the closure comes first with (Closure Object (...), 'bar')
+✓ it will not resolve a closure if it is type hinted as a closure with (Closure Object (...)) #1
+✓ it will not resolve a closure if it is type hinted as a closure with (Closure Object (...)) #2
+✓ it will not resolve a closure if it is type hinted as a callable with (Closure Object (...)) #1
+✓ it will not resolve a closure if it is type hinted as a callable with (Closure Object (...)) #2
+✓ it can correctly resolve a bound dataset that returns an array with (Closure Object (...))
+✓ it can correctly resolve a bound dataset that returns an array but wants to be spread with (Closure Object (...))
+PASS  Tests\Features\Depends
+✓ first
+✓ second
+✓ depends
+✓ depends with ...params
+✓ depends with defined arguments
+✓ depends run test only once
+✓ it asserts true is true
+✓ depends works with the correct test name
+PASS  Tests\Features\DependsInheritance
+✓ it is a test
+✓ it uses correct parent class
+PASS  Tests\Features\Exceptions
+✓ it gives access the the underlying expectException
+✓ it catch exceptions
+✓ it catch exceptions and messages
+✓ it catch exceptions, messages and code
+✓ it can just define the message
+✓ it can just define the code
+✓ it not catch exceptions if given condition is false
+✓ it catch exceptions if given condition is true
+✓ it catch exceptions and messages if given condition is true
+✓ it catch exceptions, messages and code if given condition is true
+✓ it can just define the message if given condition is true
+✓ it can just define the code if given condition is true
+✓ it can just define the message if given condition is 1
+✓ it can just define the code if given condition is 1
+PASS  Tests\Features\Expect\HigherOrder\methods
+✓ it can access methods
+✓ it can access multiple methods
+✓ it works with not
+✓ it can accept arguments
+✓ it works with each
+✓ it works inside of each
+✓ it works with sequence
+✓ it can compose complex expectations
+✓ it can handle nested method calls
+✓ it works with higher order tests
+✓ it can use the scoped method to lock into the given level for expectations
+✓ it works consistently with the json expectation method
+PASS  Tests\Features\Expect\HigherOrder\methodsAndProperties
+✓ it can access methods and properties
+✓ it can handle nested methods and properties
+✓ it works with higher order tests
+✓ it can start a new higher order expectation using the and syntax
+✓ it can start a new higher order expectation using the and syntax in higher order tests
+✓ it can start a new higher order expectation using the and syntax without nesting expectations
+PASS  Tests\Features\Expect\HigherOrder\properties
+✓ it allows properties to be accessed from the value
+✓ it can access multiple properties from the value
+✓ it works with not
+✓ it works with each
+✓ it works inside of each
+✓ it works with sequence
+✓ it can compose complex expectations
+✓ it works with objects
+✓ it works with nested properties
+✓ it works with higher order tests
+PASS  Tests\Features\Expect\each
+✓ an exception is thrown if the the type is not iterable
+✓ it expects on each item
+✓ it chains expectations on each item
+✓ opposite expectations on each item
+✓ chained opposite and non-opposite expectations
+✓ it can add expectations via "and"
+✓ it accepts callables
+✓ it passes the key of the current item to callables
+PASS  Tests\Features\Expect\extend
+✓ it macros true is true
+✓ it macros false is not true
+✓ it macros true is true with argument
+✓ it macros false is not true with argument
+PASS  Tests\Features\Expect\json
+✓ it properly parses json string
+✓ fails with broken json string
+PASS  Tests\Features\Expect\matchExpectation
+✓ it pass
+✓ it failures
+✓ it runs with truthy
+✓ it runs with falsy
+✓ it runs with truthy closure condition
+✓ it runs with falsy closure condition
+✓ it can be passed non-callable values
+✓ it fails with unhandled match
+✓ it can be used in higher order tests
+PASS  Tests\Features\Expect\not
+✓ not property calls
+PASS  Tests\Features\Expect\pipes
+✓ pipe is applied and can stop pipeline
+✓ pipe is run and can let the pipeline keep going
+✓ pipe works with negated expectation
+✓ interceptor is applied
+✓ interceptor stops the pipeline
+✓ interceptor is called only when filter is met
+✓ interceptor can be filtered with a closure
+✓ interceptor can be filter the expected parameter as well
+✓ interceptor works with negated expectation
+✓ intercept can add new parameters to the expectation
+PASS  Tests\Features\Expect\ray
+✓ ray calls do not fail when ray is not installed
+PASS  Tests\Features\Expect\sequence
+✓ an exception is thrown if the the type is not iterable
+✓ allows for sequences of checks to be run on iterable data
+✓ loops back to the start if it runs out of sequence items
+✓ fails if the number of iterable items is greater than the number of expectations
+✓ it works with associative arrays
+✓ it can be passed non-callable values
+✓ it can be passed a mixture of value types
+PASS  Tests\Features\Expect\toBe
+✓ strict comparisons
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeArray
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeBool
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeCallable
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeDirectory
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeEmpty
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeFalse
+✓ strict comparisons
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeFalsy
+✓ passes as falsy with (false)
+✓ passes as falsy with ('')
+✓ passes as falsy with (null)
+✓ passes as falsy with (0)
+✓ passes as falsy with ('0')
+✓ passes as not falsy with (true)
+✓ passes as not falsy with (1) #1
+✓ passes as not falsy with ('false')
+✓ passes as not falsy with (1) #2
+✓ passes as not falsy with (-1)
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeFile
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeFloat
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeGreatherThan
+✓ passes
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeGreatherThanOrEqual
+✓ passes
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeIn
+✓ passes
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeInfinite
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeInstanceOf
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeInt
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeIterable
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeJson
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeLessThan
+✓ passes
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeLessThanOrEqual
+✓ passes
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeNAN
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeNull
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeNumeric
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeObject
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeReadableDirectory
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeReadableFile
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeResource
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeScalar
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeString
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeTrue
+✓ strict comparisons
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeTruthy
+✓ passes as truthy with (true)
+✓ passes as truthy with (1) #1
+✓ passes as truthy with ('false')
+✓ passes as truthy with (1) #2
+✓ passes as truthy with (-1)
+✓ passes as not truthy with (false)
+✓ passes as not truthy with ('')
+✓ passes as not truthy with (null)
+✓ passes as not truthy with (0)
+✓ passes as not truthy with ('0')
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeWritableDirectory
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toBeWritableFile
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toContain
+✓ passes strings
+✓ passes strings with multiple needles
+✓ passes arrays
+✓ passes arrays with multiple needles
+✓ passes with array needles
+✓ failures
+✓ failures with multiple needles (all failing)
+✓ failures with multiple needles (some failing)
+✓ not failures
+✓ not failures with multiple needles (all failing)
+✓ not failures with multiple needles (some failing)
+PASS  Tests\Features\Expect\toContainOnlyInstancesOf
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toEndWith
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toEqual
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toEqualCanonicalizing
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toEqualWithDelta
+✓ pass
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toHaveCount
+✓ pass
+✓ failures
+✓ failures with message
+✓ not failures
+PASS  Tests\Features\Expect\toHaveKey
+✓ pass
+✓ pass with nested key
+✓ pass with plain key with dots
+✓ pass with value check
+✓ pass with value check and nested key
+✓ pass with value check and plain key with dots
+✓ failures
+✓ failures with custom message
+✓ failures with nested key
+✓ failures with nested key and custom message
+✓ failures with plain key with dots
+✓ fails with wrong value
+✓ fails with wrong value and nested key
+✓ fails with wrong value and plain key with dots
+✓ not failures
+✓ not failures with nested key
+✓ not failures with plain key with dots
+✓ not failures with correct value
+✓ not failures with correct value and with nested key
+✓ not failures with correct value and with plain key with dots
+PASS  Tests\Features\Expect\toHaveKeys
+✓ pass
+✓ pass with multi-dimensional arrays
+✓ failures
+✓ failures with custom message
+✓ failures with multi-dimensional arrays
+✓ failures with multi-dimensional arrays and custom message
+✓ not failures
+✓ not failures with multi-dimensional arrays
+PASS  Tests\Features\Expect\toHaveLength
+✓ it passes with ('Fortaleza')
+✓ it passes with ('Sollefteå')
+✓ it passes with ('Ιεράπετρα')
+✓ it passes with (stdClass Object (...))
+✓ it passes with (Illuminate\Support\Collection Object (...))
+✓ it passes with array
+✓ it passes with *not*
+✓ it properly fails with *not*
+✓ it fails
+✓ it fails with message
+PASS  Tests\Features\Expect\toHaveProperties
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toHaveProperty
+✓ pass
+✓ failures
+✓ failures with message
+✓ not failures
+PASS  Tests\Features\Expect\toMatch
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toMatchArray
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toMatchConstraint
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toMatchObject
+✓ pass
+✓ pass with class
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toStartWith
+✓ pass
+✓ failures
+✓ failures with custom message
+✓ not failures
+PASS  Tests\Features\Expect\toThrow
+✓ passes
+✓ failures 1
+✓ failures 2
+✓ failures 3
+✓ failures 4
+✓ failures 5
+✓ failures 6
+✓ failures 7
+✓ failures with custom message
+✓ not failures
+✓ closure missing parameter
+✓ closure missing type-hint
+✓ it can handle a non-defined exception
+✓ it can handle a class not found Error
+PASS  Tests\Features\Expect\unless
+✓ it pass
+✓ it failures
+✓ it runs with truthy
+✓ it skips with falsy
+✓ it runs with truthy closure condition
+✓ it skips with falsy closure condition
+✓ it can be used in higher order tests
+PASS  Tests\Features\Expect\when
+✓ it pass
+✓ it failures
+✓ it runs with truthy
+✓ it skips with falsy
+✓ it runs with truthy closure condition
+✓ it skips with falsy closure condition
+✓ it can be used in higher order tests
+PASS  Tests\Features\Helpers
+✓ it can set/get properties on $this
+✓ it throws error if property do not exist
+✓ it allows to call underlying protected/private methods
+✓ it throws error if method do not exist
+✓ it can forward unexpected calls to any global function
+✓ it can use helpers from helpers file
+PASS  Tests\Features\HigherOrderTests
+✓ it proxies calls to object
+✓ it is capable doing multiple assertions
+✓ it resolves expect callables correctly
+✓ does not treat method names as callables
+✓ it can defer a method until after test setup
+✓ it can pass datasets into the expect callables with (1, 2, 3)
+✓ it can pass datasets into the defer callable with (1, 2, 3)
+✓ it can pass shared datasets into callables with (1)
+✓ it can pass shared datasets into callables with (2)
+WARN  Tests\Features\Incompleted
+… incompleted
+… it is incompleted
+… it is incompleted even with method calls like skip
+… it is incompleted even with method calls like group
+✓ it is not incompleted because of expect
+✓ it is not incompleted because of assert
+✓ it is not incompleted because of test with assertions
+PASS  Tests\Features\It
+✓ it is a test
+✓ it is a higher order message test
+PASS  Tests\Features\Macro
+✓ it can call chained macro method
+✓ it will throw exception from call if no macro exists
+PASS  Tests\Features\PendingHigherOrderTests
+✓ get 'foo'
+✓ get 'foo' → get 'bar' → expect true → toBeTrue
+✓ get 'foo' → expect true → toBeTrue
+WARN  Tests\Features\Skip
+✓ it do not skips
+- it skips with truthy → 1
+- it skips with truthy condition by default
+- it skips with message → skipped because bar
+- it skips with truthy closure condition
+✓ it do not skips with falsy closure condition
+- it skips with condition and message → skipped because foo
+- it skips when skip after assertion
+- it can use something in the test case as a condition → This test was skipped
+- it can user higher order callables and skip
+PASS  Tests\Features\Test
+✓ a test
+✓ higher order message test
+PASS  Tests\Features\ThrowsNoExceptions
+✓ it allows access to the underlying expectNotToPerformAssertions method
+✓ it allows performing no expectations without being risky
+PASS  Tests\Features\Todo
+↓ something todo later
+✓ it does something within a file with a todo
+PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest
+✓ it example 1
+PASS  Tests\Fixtures\ExampleTest
+✓ it example 2
+PASS  Tests\Hooks\AfterAllTest
+✓ global afterAll execution order
+✓ it only gets called once per file
+PASS  Tests\Hooks\AfterEachTest
+✓ global afterEach execution order
+PASS  Tests\Hooks\BeforeAllTest
+✓ global beforeAll execution order
+✓ it only gets called once per file
+PASS  Tests\Hooks\BeforeEachTest
+✓ global beforeEach execution order
+PASS  Tests\PHPUnit\CustomAffixes\InvalidTestName
+✓ it runs file names like `@#$%^&()-_=+.php`
+PASS  Tests\PHPUnit\CustomAffixes\ATestWithSpaces
+✓ it runs file names like `A Test With Spaces.php`
+PASS  Tests\PHPUnit\CustomAffixes\AdditionalFileExtension
+✓ it runs file names like `AdditionalFileExtension.spec.php`
+PASS  Tests\PHPUnit\CustomAffixes\FolderWithAn\ExampleTest
+✓ custom traits can be used
+✓ trait applied in this file
+PASS  Tests\PHPUnit\CustomAffixes\ManyExtensions
+✓ it runs file names like `ManyExtensions.class.test.php`
+PASS  Tests\PHPUnit\CustomAffixes\TestCaseWithQuotes
+✓ it runs file names like `Test 'Case' With Quotes.php`
+PASS  Tests\PHPUnit\CustomAffixes\kebabcasespec
+✓ it runs file names like `kebab-case-spec.php`
+PASS  Tests\PHPUnit\CustomAffixes\snakecasespec
+✓ it runs file names like `snake_case_spec.php`
+PASS  Tests\PHPUnit\CustomTestCase\UsesPerDirectory
+✓ closure was bound to CustomTestCase
+PASS  Tests\PHPUnit\CustomTestCaseInSubFolders\SubFolder\SubFolder\UsesPerSubDirectory
+✓ closure was bound to CustomTestCase
+PASS  Tests\PHPUnit\CustomTestCaseInSubFolders\SubFolder2\UsesPerFile
+✓ custom traits can be used
+✓ trait applied in this file
+PASS  Tests\Playground
+✓ basic
+PASS  Tests\Plugins\Traits
+✓ it allows global uses
+✓ it allows multiple global uses registered in the same path
+WARN  Tests\Unit\ConfigLoader
+✓ it fallbacks to default path if no phpunit file is found
+- it fallbacks to default path if phpunit is not a valid XML
+- it fallbacks to default path if failing to read phpunit content
+- it fallbacks to default path if there is no test suites directory
+- it fallbacks to default path if test suite directory has no value
+- it fallbacks to default path if test suite directory does not exist
+- it returns the parent folder of first test suite directory
+PASS  Tests\Unit\Console\Help
+✓ it outputs the help information when --help is used
+PASS  Tests\Unit\Datasets
+✓ it show only the names of named datasets in their description
+✓ it show the actual dataset of non-named datasets in their description
+✓ it show only the names of multiple named datasets in their description
+✓ it show the actual dataset of multiple non-named datasets in their description
+✓ it show the correct description for mixed named and not-named datasets
+PASS  Tests\Unit\Plugins\Environment
+✓ environment is set to CI when --ci option is used
+✓ environment is set to Local when --ci option is not used
+PASS  Tests\Unit\Plugins\Retry
+✓ it retries if --retry argument is used
+PASS  Tests\Unit\Support\Backtrace
+✓ it gets file name from called file
+PASS  Tests\Unit\Support\Container
+✓ it exists
+✓ it gets an instance
+✓ autowire
+✓ it creates an instance and resolves parameters
+✓ it creates an instance and resolves also sub parameters
+✓ it can resolve builtin value types
+✓ it cannot resolve a parameter without type
+PASS  Tests\Unit\Support\Reflection
+✓ it gets file name from closure
+✓ it gets property values
+PASS  Tests\Unit\TestSuite
+✓ it does not allow to add the same test description twice
+✓ it alerts users about tests with arguments but no input
+✓ it can return an array of all test suite filenames
+✓ it can filter the test suite filenames to those with the only method
+✓ it does not filter the test suite filenames to those with the only method when working in CI pipeline
+PASS  Tests\Visual\Help
+✓ visual snapshot of help command output
+WARN  Tests\Visual\JUnit
+- it is can successfully call all public methods → Not supported yet.
+PASS  Tests\Visual\SingleTestOrDirectory
+✓ allows to run a single test
+✓ allows to run a directory
+✓ it disable decorating printer when colors is set to never
+WARN  Tests\Visual\Success
+- visual snapshot of test suite on success
+WARN  Tests\Visual\TeamCity
+- it is can successfully call all public methods → Not supported yet.
+PASS  Tests\Visual\Version
+✓ visual snapshot of help command output
