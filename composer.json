@@ -53,12 +53,7 @@
         "illuminate/console": "^9.30.1",
         "illuminate/support": "^9.30.1",
         "laravel/dusk": "^7.0.1",
-        "ergebnis/phpstan-rules": "^1.0.0",
-        "laravel/pint": "^1.2.0",
-        "phpstan/phpstan": "^1.8.5",
-        "phpstan/phpstan-strict-rules": "^1.4.3",
-        "symfony/var-dumper": "^6.2.0",
-        "thecodingmachine/phpstan-strict-rules": "^1.0.0"
+        "pestphp/pest-dev-tools": "^2.0.0"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
