@@ -8,11 +8,12 @@ use Carbon\CarbonInterval;
 use Illuminate\Console\BufferedConsoleOutput;
 use NunoMaduro\Collision\Adapters\Phpunit\Style;
 use Pest\Exceptions\ShouldNotHappen;
-use Pest\Support\ExceptionTrace;
 
 use const PHP_EOL;
 
 use PHPUnit\Framework\AssertionFailedError;
+use PHPUnit\Framework\ExceptionWrapper;
+use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\Test;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\TestResult;
@@ -23,6 +24,8 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
+use Whoops\Exception\Frame;
+use Whoops\Exception\Inspector;
 
 final class TeamCity implements ResultPrinter
 {
@@ -68,8 +71,6 @@ final class TeamCity implements ResultPrinter
     {
         $testCase = $this->testCaseFromTest($test);
 
-        ExceptionTrace::removePestReferences($t);
-
         $message = ServiceMessage::testFailed(
             $testCase->getName(),
             $t->getMessage(),
@@ -80,14 +81,42 @@ final class TeamCity implements ResultPrinter
 
     public function addWarning(Test $test, Warning $e, float $time): void
     {
-        dd($e);
-        // TODO: Implement addWarning() method.
+        $testCase = $this->testCaseFromTest($test);
+
+        $message = ServiceMessage::testFailed(
+            $testCase->getName(),
+            $e->getMessage(),
+            $this->convertStackTrace($e)
+        );
+
+        $this->output($message);
     }
 
     public function addFailure(Test $test, AssertionFailedError $e, float $time): void
     {
-        dd($e);
-        // TODO: Implement addFailure() method.
+        $testCase = $this->testCaseFromTest($test);
+
+        if ($e instanceof ExpectationFailedException && ($comparison = $e->getComparisonFailure()) !== null) {
+            $message = ServiceMessage::comparisonFailure(
+                $testCase->getName(),
+                $e->getMessage(),
+                '', // TODO: add stacktrace with location on where this happened
+                $comparison->getActualAsString(),
+                $comparison->getExpectedAsString(),
+            );
+
+            $this->output($message);
+
+            return;
+        }
+
+        $message = ServiceMessage::testFailed(
+            $testCase->getName(),
+            $e->getMessage(),
+            $this->convertStackTrace($e)
+        );
+
+        $this->output($message);
     }
 
     public function addIncompleteTest(Test $test, Throwable $t, float $time): void
@@ -236,6 +265,32 @@ final class TeamCity implements ResultPrinter
 
     private function convertStackTrace(Throwable $throwable): string
     {
-        return $throwable->getTraceAsString();
+        if ($throwable instanceof ExceptionWrapper) {
+            $throwable = $throwable->getOriginalException();
+        }
+        $inspector = new Inspector($throwable);
+
+        $stacktrace = "{$inspector->getExceptionName()}: {$inspector->getExceptionMessage()}\n";
+        $stacktrace .= $this->convertFrames($inspector);
+
+        while ($inspector = $inspector->getPreviousExceptionInspector()) {
+            $stacktrace .= "Caused by: {$inspector->getExceptionName()}: {$inspector->getExceptionMessage()}\n";
+            $stacktrace .= $this->convertFrames($inspector);
+        }
+
+        return $stacktrace;
+    }
+
+    private function convertFrames(Inspector $inspector): string
+    {
+        $result = '';
+        /** @var Frame $frame */
+        foreach ($inspector->getFrames() as $frame) {
+            $file = str_replace("$this->currentWorkingDirectory/", '', $frame->getFile());
+            $line = $frame->getLine();
+            $result .= "\tat $file:$line\n";
+        }
+
+        return $result;
     }
 }

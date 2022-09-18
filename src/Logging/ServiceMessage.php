@@ -109,6 +109,18 @@ final class ServiceMessage
         ]);
     }
 
+    public static function comparisonFailure(string $name, string $message, string $details, string $actual, string $expected): self
+    {
+        return new self('testFailed', [
+            'name'     => $name,
+            'message'  => $message,
+            'details'  => $details,
+            'type'     => 'comparisonFailure',
+            'actual'   => $actual,
+            'expected' => $expected,
+        ]);
+    }
+
     private static function escapeServiceMessage(string $text): string
     {
         return str_replace(
