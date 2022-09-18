@@ -36,6 +36,13 @@ test('failures', function () {
     ]);
 })->throws(ExpectationFailedException::class);
 
+test('failures with custom message', function () {
+    expect($this->user)->toMatchObject([
+        'name' => 'Not the same name',
+        'email' => 'enunomaduro@gmail.com',
+    ], 'oh no!');
+})->throws(ExpectationFailedException::class, 'oh no!');
+
 test('not failures', function () {
     expect($this->user)->not->toMatchObject([
         'id' => 1,

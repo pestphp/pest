@@ -21,7 +21,7 @@ final class ExpectationPipeline
     /**
      * The list of passables.
      *
-     * @var array<int, mixed>
+     * @var array<array-key, mixed>
      */
     private array $passables;
 
@@ -46,7 +46,7 @@ final class ExpectationPipeline
      */
     public function send(mixed ...$passables): self
     {
-        $this->passables = array_values($passables);
+        $this->passables = $passables;
 
         return $this;
     }
@@ -72,7 +72,7 @@ final class ExpectationPipeline
             array_reverse($this->pipes),
             $this->carry(),
             function (): void {
-                ($this->closure)(...$this->passables);
+                call_user_func_array($this->closure, $this->passables);
             }
         );
 

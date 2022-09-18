@@ -280,7 +280,7 @@ final class Expectation
     {
         if (! self::hasMethod($method)) {
             /* @phpstan-ignore-next-line */
-            return new HigherOrderExpectation($this, $this->value->$method(...$parameters));
+            return new HigherOrderExpectation($this, call_user_func_array($this->value->$method(...), $parameters));
         }
 
         ExpectationPipeline::for($this->getExpectationClosure($method))

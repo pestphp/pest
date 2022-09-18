@@ -19,9 +19,13 @@ it('passes with *not*', function () {
 });
 
 it('properly fails with *not*', function () {
-    expect('pest')->not->toHaveLength(4);
+    expect('pest')->not->toHaveLength(4, 'oh no!');
+})->throws(ExpectationFailedException::class, 'oh no!');
+
+it('fails', function () {
+    expect([1, 1.5, true, null])->toHaveLength(1);
 })->throws(ExpectationFailedException::class);
 
-it('fails', function ($value) {
-    expect($value)->toHaveLength(1);
-})->with([1, 1.5, true, null])->throws(BadMethodCallException::class);
+it('fails with message', function () {
+    expect([1, 1.5, true, null])->toHaveLength(1, 'oh no!');
+})->throws(ExpectationFailedException::class, 'oh no!');

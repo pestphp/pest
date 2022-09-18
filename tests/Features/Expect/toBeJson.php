@@ -12,6 +12,10 @@ test('failures', function () {
     expect(':"world"}')->toBeJson();
 })->throws(ExpectationFailedException::class);
 
+test('failures with custom message', function () {
+    expect(':"world"}')->toBeJson('oh no!');
+})->throws(ExpectationFailedException::class, 'oh no!');
+
 test('not failures', function () {
     expect('{"hello":"world"}')->not->toBeJson();
 })->throws(ExpectationFailedException::class);
