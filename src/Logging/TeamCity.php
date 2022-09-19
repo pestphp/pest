@@ -5,11 +5,7 @@ declare(strict_types=1);
 namespace Pest\Logging;
 
 use Carbon\CarbonInterval;
-use Illuminate\Console\BufferedConsoleOutput;
-use NunoMaduro\Collision\Adapters\Phpunit\Style;
 use Pest\Exceptions\ShouldNotHappen;
-
-use const PHP_EOL;
 
 use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\ExceptionWrapper;
@@ -33,32 +29,33 @@ final class TeamCity implements ResultPrinter
     private $output;
     /** @var string */
     private $currentWorkingDirectory;
-    /** @var Style */
-    private $style;
-
-    /** @var BufferedConsoleOutput */
-    private $styleOutput;
 
     public function __construct()
     {
         $this->output                  = new ConsoleOutput(OutputInterface::VERBOSITY_NORMAL, true);
         $this->currentWorkingDirectory = getcwd() ?: ShouldNotHappen::fromMessage("Couldn't get CWD.");
-        $this->styleOutput             = new class() extends BufferedConsoleOutput {
-            protected function doWrite(string $message, bool $newline): void
-            {
-                $this->buffer .= $message;
-
-                if ($newline) {
-                    $this->buffer .= PHP_EOL;
-                }
-            }
-        };
-        $this->style                   = new Style($this->output);
     }
 
     public function printResult(TestResult $result): void
     {
-        // dd($result);
+        $total = $result->count();
+        $error = $result->errorCount();
+        $skipped = $result->skippedCount();
+        $failure = $result->failureCount();
+        $notImplemented = $result->notImplementedCount();
+        $risky = $result->riskyCount();
+        $warning = $result->warningCount();
+        $passed = $total - $error - $skipped - $failure - $notImplemented - $risky - $warning;
+        $duration = $result->time();
+
+        if ($duration < 1) {
+            $duration = number_format($duration * 100, 2). "ms";
+        } else {
+            $duration = number_format($duration, 2). "s";
+        }
+
+        $this->output->writeln("Passed $passed of $total tests - $duration");
+
         // TODO: Implement printResult() method.
     }
 
@@ -223,7 +220,7 @@ final class TeamCity implements ResultPrinter
      */
     public function output(ServiceMessage $message): void
     {
-        $this->output->write("{$message->toString()}\n");
+        $this->output->writeln("{$message->toString()}");
     }
 
     /**
@@ -266,8 +263,9 @@ final class TeamCity implements ResultPrinter
     private function convertStackTrace(Throwable $throwable): string
     {
         if ($throwable instanceof ExceptionWrapper) {
-            $throwable = $throwable->getOriginalException();
+            $throwable = $throwable->getOriginalException() ?? $throwable;
         }
+
         $inspector = new Inspector($throwable);
 
         $stacktrace = "{$inspector->getExceptionName()}: {$inspector->getExceptionMessage()}\n";
