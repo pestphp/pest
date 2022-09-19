@@ -342,11 +342,7 @@ final class Expectation
     }
 
     /**
-     * Matches any value
-     *
-     * @internal
-     *
-     * @return Any
+     * Matches any value.
      */
     public function any(): Any
     {
