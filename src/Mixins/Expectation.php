@@ -52,9 +52,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBe(mixed $expected, string $message = ''): self
+    public function toBe(mixed $expected, string $failureMessage = ''): self
     {
-        Assert::assertSame($expected, $this->value, $message);
+        Assert::assertSame($expected, $this->value, $failureMessage);
 
         return $this;
     }
@@ -64,9 +64,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeEmpty(string $message = ''): self
+    public function toBeEmpty(string $failureMessage = ''): self
     {
-        Assert::assertEmpty($this->value, $message);
+        Assert::assertEmpty($this->value, $failureMessage);
 
         return $this;
     }
@@ -76,9 +76,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeTrue(string $message = ''): self
+    public function toBeTrue(string $failureMessage = ''): self
     {
-        Assert::assertTrue($this->value, $message);
+        Assert::assertTrue($this->value, $failureMessage);
 
         return $this;
     }
@@ -88,9 +88,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeTruthy(string $message = ''): self
+    public function toBeTruthy(string $failureMessage = ''): self
     {
-        Assert::assertTrue((bool) $this->value, $message);
+        Assert::assertTrue((bool) $this->value, $failureMessage);
 
         return $this;
     }
@@ -100,9 +100,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeFalse(string $message = ''): self
+    public function toBeFalse(string $failureMessage = ''): self
     {
-        Assert::assertFalse($this->value, $message);
+        Assert::assertFalse($this->value, $failureMessage);
 
         return $this;
     }
@@ -112,9 +112,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeFalsy(string $message = ''): self
+    public function toBeFalsy(string $failureMessage = ''): self
     {
-        Assert::assertFalse((bool) $this->value, $message);
+        Assert::assertFalse((bool) $this->value, $failureMessage);
 
         return $this;
     }
@@ -124,9 +124,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeGreaterThan(int|float $expected, string $message = ''): self
+    public function toBeGreaterThan(int|float $expected, string $failureMessage = ''): self
     {
-        Assert::assertGreaterThan($expected, $this->value, $message);
+        Assert::assertGreaterThan($expected, $this->value, $failureMessage);
 
         return $this;
     }
@@ -136,9 +136,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeGreaterThanOrEqual(int|float $expected, string $message = ''): self
+    public function toBeGreaterThanOrEqual(int|float $expected, string $failureMessage = ''): self
     {
-        Assert::assertGreaterThanOrEqual($expected, $this->value, $message);
+        Assert::assertGreaterThanOrEqual($expected, $this->value, $failureMessage);
 
         return $this;
     }
@@ -148,9 +148,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeLessThan(int|float $expected, string $message = ''): self
+    public function toBeLessThan(int|float $expected, string $failureMessage = ''): self
     {
-        Assert::assertLessThan($expected, $this->value, $message);
+        Assert::assertLessThan($expected, $this->value, $failureMessage);
 
         return $this;
     }
@@ -160,9 +160,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeLessThanOrEqual(int|float $expected, string $message = ''): self
+    public function toBeLessThanOrEqual(int|float $expected, string $failureMessage = ''): self
     {
-        Assert::assertLessThanOrEqual($expected, $this->value, $message);
+        Assert::assertLessThanOrEqual($expected, $this->value, $failureMessage);
 
         return $this;
     }
@@ -195,13 +195,13 @@ final class Expectation
      * @param  non-empty-string  $expected
      * @return self<TValue>
      */
-    public function toStartWith(string $expected, string $message = ''): self
+    public function toStartWith(string $expected, string $failureMessage = ''): self
     {
         if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
         }
 
-        Assert::assertStringStartsWith($expected, $this->value, $message);
+        Assert::assertStringStartsWith($expected, $this->value, $failureMessage);
 
         return $this;
     }
@@ -212,13 +212,13 @@ final class Expectation
      * @param  non-empty-string  $expected
      * @return self<TValue>
      */
-    public function toEndWith(string $expected, string $message = ''): self
+    public function toEndWith(string $expected, string $failureMessage = ''): self
     {
         if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
         }
 
-        Assert::assertStringEndsWith($expected, $this->value, $message);
+        Assert::assertStringEndsWith($expected, $this->value, $failureMessage);
 
         return $this;
     }
@@ -228,22 +228,22 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toHaveLength(int $number, string $message = ''): self
+    public function toHaveLength(int $number, string $failureMessage = ''): self
     {
         if (is_string($this->value)) {
-            Assert::assertEquals($number, mb_strlen($this->value), $message);
+            Assert::assertEquals($number, mb_strlen($this->value), $failureMessage);
 
             return $this;
         }
 
         if (is_iterable($this->value)) {
-            return $this->toHaveCount($number, $message);
+            return $this->toHaveCount($number, $failureMessage);
         }
 
         if (is_object($this->value)) {
             $array = method_exists($this->value, 'toArray') ? $this->value->toArray() : (array) $this->value;
 
-            Assert::assertCount($number, $array, $message);
+            Assert::assertCount($number, $array, $failureMessage);
 
             return $this;
         }
@@ -256,13 +256,13 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toHaveCount(int $count, string $message = ''): self
+    public function toHaveCount(int $count, string $failureMessage = ''): self
     {
         if (! is_countable($this->value) && ! is_iterable($this->value)) {
             InvalidExpectationValue::expected('string');
         }
 
-        Assert::assertCount($count, $this->value, $message);
+        Assert::assertCount($count, $this->value, $failureMessage);
 
         return $this;
     }
@@ -272,16 +272,16 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toHaveProperty(string $name, mixed $value = new NullValue(), string $message = ''): self
+    public function toHaveProperty(string $name, mixed $value = new NullValue(), string $failureMessage = ''): self
     {
         $this->toBeObject();
 
         // @phpstan-ignore-next-line
-        Assert::assertTrue(property_exists($this->value, $name), $message);
+        Assert::assertTrue(property_exists($this->value, $name), $failureMessage);
 
         if (! $value instanceof NullValue) {
             /* @phpstan-ignore-next-line */
-            Assert::assertEquals($value, $this->value->{$name}, $message);
+            Assert::assertEquals($value, $this->value->{$name}, $failureMessage);
         }
 
         return $this;
@@ -293,10 +293,10 @@ final class Expectation
      * @param  iterable<array-key, string>  $names
      * @return self<TValue>
      */
-    public function toHaveProperties(iterable $names, string $message = ''): self
+    public function toHaveProperties(iterable $names, string $failureMessage = ''): self
     {
         foreach ($names as $name) {
-            $this->toHaveProperty($name, message: $message);
+            $this->toHaveProperty($name, failureMessage: $failureMessage);
         }
 
         return $this;
@@ -307,9 +307,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toEqual(mixed $expected, string $message = ''): self
+    public function toEqual(mixed $expected, string $failureMessage = ''): self
     {
-        Assert::assertEquals($expected, $this->value, $message);
+        Assert::assertEquals($expected, $this->value, $failureMessage);
 
         return $this;
     }
@@ -325,9 +325,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toEqualCanonicalizing(mixed $expected, string $message = ''): self
+    public function toEqualCanonicalizing(mixed $expected, string $failureMessage = ''): self
     {
-        Assert::assertEqualsCanonicalizing($expected, $this->value, $message);
+        Assert::assertEqualsCanonicalizing($expected, $this->value, $failureMessage);
 
         return $this;
     }
@@ -338,9 +338,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toEqualWithDelta(mixed $expected, float $delta, string $message = ''): self
+    public function toEqualWithDelta(mixed $expected, float $delta, string $failureMessage = ''): self
     {
-        Assert::assertEqualsWithDelta($expected, $this->value, $delta, $message);
+        Assert::assertEqualsWithDelta($expected, $this->value, $delta, $failureMessage);
 
         return $this;
     }
@@ -351,9 +351,9 @@ final class Expectation
      * @param  iterable<int|string, mixed>  $values
      * @return self<TValue>
      */
-    public function toBeIn(iterable $values, string $message = ''): self
+    public function toBeIn(iterable $values, string $failureMessage = ''): self
     {
-        Assert::assertContains($this->value, $values, $message);
+        Assert::assertContains($this->value, $values, $failureMessage);
 
         return $this;
     }
@@ -363,9 +363,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeInfinite(string $message = ''): self
+    public function toBeInfinite(string $failureMessage = ''): self
     {
-        Assert::assertInfinite($this->value, $message);
+        Assert::assertInfinite($this->value, $failureMessage);
 
         return $this;
     }
@@ -376,9 +376,9 @@ final class Expectation
      * @param  class-string  $class
      * @return self<TValue>
      */
-    public function toBeInstanceOf(string $class, string $message = ''): self
+    public function toBeInstanceOf(string $class, string $failureMessage = ''): self
     {
-        Assert::assertInstanceOf($class, $this->value, $message);
+        Assert::assertInstanceOf($class, $this->value, $failureMessage);
 
         return $this;
     }
@@ -388,9 +388,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeArray(string $message = ''): self
+    public function toBeArray(string $failureMessage = ''): self
     {
-        Assert::assertIsArray($this->value, $message);
+        Assert::assertIsArray($this->value, $failureMessage);
 
         return $this;
     }
@@ -400,9 +400,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeBool(string $message = ''): self
+    public function toBeBool(string $failureMessage = ''): self
     {
-        Assert::assertIsBool($this->value, $message);
+        Assert::assertIsBool($this->value, $failureMessage);
 
         return $this;
     }
@@ -412,9 +412,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeCallable(string $message = ''): self
+    public function toBeCallable(string $failureMessage = ''): self
     {
-        Assert::assertIsCallable($this->value, $message);
+        Assert::assertIsCallable($this->value, $failureMessage);
 
         return $this;
     }
@@ -424,9 +424,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeFloat(string $message = ''): self
+    public function toBeFloat(string $failureMessage = ''): self
     {
-        Assert::assertIsFloat($this->value, $message);
+        Assert::assertIsFloat($this->value, $failureMessage);
 
         return $this;
     }
@@ -436,9 +436,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeInt(string $message = ''): self
+    public function toBeInt(string $failureMessage = ''): self
     {
-        Assert::assertIsInt($this->value, $message);
+        Assert::assertIsInt($this->value, $failureMessage);
 
         return $this;
     }
@@ -448,9 +448,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeIterable(string $message = ''): self
+    public function toBeIterable(string $failureMessage = ''): self
     {
-        Assert::assertIsIterable($this->value, $message);
+        Assert::assertIsIterable($this->value, $failureMessage);
 
         return $this;
     }
@@ -460,9 +460,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeNumeric(string $message = ''): self
+    public function toBeNumeric(string $failureMessage = ''): self
     {
-        Assert::assertIsNumeric($this->value, $message);
+        Assert::assertIsNumeric($this->value, $failureMessage);
 
         return $this;
     }
@@ -472,9 +472,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeObject(string $message = ''): self
+    public function toBeObject(string $failureMessage = ''): self
     {
-        Assert::assertIsObject($this->value, $message);
+        Assert::assertIsObject($this->value, $failureMessage);
 
         return $this;
     }
@@ -484,9 +484,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeResource(string $message = ''): self
+    public function toBeResource(string $failureMessage = ''): self
     {
-        Assert::assertIsResource($this->value, $message);
+        Assert::assertIsResource($this->value, $failureMessage);
 
         return $this;
     }
@@ -496,9 +496,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeScalar(string $message = ''): self
+    public function toBeScalar(string $failureMessage = ''): self
     {
-        Assert::assertIsScalar($this->value, $message);
+        Assert::assertIsScalar($this->value, $failureMessage);
 
         return $this;
     }
@@ -508,9 +508,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeString(string $message = ''): self
+    public function toBeString(string $failureMessage = ''): self
     {
-        Assert::assertIsString($this->value, $message);
+        Assert::assertIsString($this->value, $failureMessage);
 
         return $this;
     }
@@ -520,12 +520,12 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeJson(string $message = ''): self
+    public function toBeJson(string $failureMessage = ''): self
     {
-        Assert::assertIsString($this->value, $message);
+        Assert::assertIsString($this->value, $failureMessage);
 
         // @phpstan-ignore-next-line
-        Assert::assertJson($this->value, $message);
+        Assert::assertJson($this->value, $failureMessage);
 
         return $this;
     }
@@ -535,9 +535,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeNan(string $message = ''): self
+    public function toBeNan(string $failureMessage = ''): self
     {
-        Assert::assertNan($this->value, $message);
+        Assert::assertNan($this->value, $failureMessage);
 
         return $this;
     }
@@ -547,9 +547,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeNull(string $message = ''): self
+    public function toBeNull(string $failureMessage = ''): self
     {
-        Assert::assertNull($this->value, $message);
+        Assert::assertNull($this->value, $failureMessage);
 
         return $this;
     }
@@ -559,7 +559,7 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toHaveKey(string|int $key, mixed $value = new NullValue(), string $message = ''): self
+    public function toHaveKey(string|int $key, mixed $value = new NullValue(), string $failureMessage = ''): self
     {
         if (is_object($this->value) && method_exists($this->value, 'toArray')) {
             $array = $this->value->toArray();
@@ -572,15 +572,15 @@ final class Expectation
 
             /* @phpstan-ignore-next-line */
         } catch (ExpectationFailedException $exception) {
-            if ($message === '') {
-                $message = "Failed asserting that an array has the key '$key'";
+            if ($failureMessage === '') {
+                $failureMessage = "Failed asserting that an array has the key '$key'";
             }
 
-            throw new ExpectationFailedException($message, $exception->getComparisonFailure());
+            throw new ExpectationFailedException($failureMessage, $exception->getComparisonFailure());
         }
 
         if (! $value instanceof NullValue) {
-            Assert::assertEquals($value, Arr::get($array, $key), $message);
+            Assert::assertEquals($value, Arr::get($array, $key), $failureMessage);
         }
 
         return $this;
@@ -592,13 +592,13 @@ final class Expectation
      * @param  array<int, int|string|array<array-key, mixed>>  $keys
      * @return self<TValue>
      */
-    public function toHaveKeys(array $keys, string $message = ''): self
+    public function toHaveKeys(array $keys, string $failureMessage = ''): self
     {
         foreach ($keys as $k => $key) {
             if (is_array($key)) {
-                $this->toHaveKeys(array_keys(Arr::dot($key, $k.'.')), $message);
+                $this->toHaveKeys(array_keys(Arr::dot($key, $k.'.')), $failureMessage);
             } else {
-                $this->toHaveKey($key, message: $message);
+                $this->toHaveKey($key, failureMessage: $failureMessage);
             }
         }
 
@@ -610,13 +610,13 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeDirectory(string $message = ''): self
+    public function toBeDirectory(string $failureMessage = ''): self
     {
         if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
         }
 
-        Assert::assertDirectoryExists($this->value, $message);
+        Assert::assertDirectoryExists($this->value, $failureMessage);
 
         return $this;
     }
@@ -626,13 +626,13 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeReadableDirectory(string $message = ''): self
+    public function toBeReadableDirectory(string $failureMessage = ''): self
     {
         if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
         }
 
-        Assert::assertDirectoryIsReadable($this->value, $message);
+        Assert::assertDirectoryIsReadable($this->value, $failureMessage);
 
         return $this;
     }
@@ -642,13 +642,13 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeWritableDirectory(string $message = ''): self
+    public function toBeWritableDirectory(string $failureMessage = ''): self
     {
         if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
         }
 
-        Assert::assertDirectoryIsWritable($this->value, $message);
+        Assert::assertDirectoryIsWritable($this->value, $failureMessage);
 
         return $this;
     }
@@ -658,13 +658,13 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeFile(string $message = ''): self
+    public function toBeFile(string $failureMessage = ''): self
     {
         if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
         }
 
-        Assert::assertFileExists($this->value, $message);
+        Assert::assertFileExists($this->value, $failureMessage);
 
         return $this;
     }
@@ -674,13 +674,13 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeReadableFile(string $message = ''): self
+    public function toBeReadableFile(string $failureMessage = ''): self
     {
         if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
         }
 
-        Assert::assertFileIsReadable($this->value, $message);
+        Assert::assertFileIsReadable($this->value, $failureMessage);
 
         return $this;
     }
@@ -690,12 +690,12 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeWritableFile(string $message = ''): self
+    public function toBeWritableFile(string $failureMessage = ''): self
     {
         if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
         }
-        Assert::assertFileIsWritable($this->value, $message);
+        Assert::assertFileIsWritable($this->value, $failureMessage);
 
         return $this;
     }
@@ -706,7 +706,7 @@ final class Expectation
      * @param  iterable<int|string, mixed>  $array
      * @return self<TValue>
      */
-    public function toMatchArray(iterable $array, string $message = ''): self
+    public function toMatchArray(iterable $array, string $failureMessage = ''): self
     {
         if (is_object($this->value) && method_exists($this->value, 'toArray')) {
             $valueAsArray = $this->value->toArray();
@@ -715,17 +715,17 @@ final class Expectation
         }
 
         foreach ($array as $key => $value) {
-            Assert::assertArrayHasKey($key, $valueAsArray, $message);
+            Assert::assertArrayHasKey($key, $valueAsArray, $failureMessage);
 
-            if ($message === '') {
-                $message = sprintf(
+            if ($failureMessage === '') {
+                $failureMessage = sprintf(
                     'Failed asserting that an array has a key %s with the value %s.',
                     $this->export($key),
                     $this->export($valueAsArray[$key]),
                 );
             }
 
-            Assert::assertEquals($value, $valueAsArray[$key], $message);
+            Assert::assertEquals($value, $valueAsArray[$key], $failureMessage);
         }
 
         return $this;
@@ -738,27 +738,27 @@ final class Expectation
      * @param  iterable<string, mixed>  $object
      * @return self<TValue>
      */
-    public function toMatchObject(iterable $object, string $message = ''): self
+    public function toMatchObject(iterable $object, string $failureMessage = ''): self
     {
         foreach ((array) $object as $property => $value) {
             if (! is_object($this->value) && ! is_string($this->value)) {
                 InvalidExpectationValue::expected('object|string');
             }
 
-            Assert::assertTrue(property_exists($this->value, $property), $message);
+            Assert::assertTrue(property_exists($this->value, $property), $failureMessage);
 
             /* @phpstan-ignore-next-line */
             $propertyValue = $this->value->{$property};
 
-            if ($message === '') {
-                $message = sprintf(
+            if ($failureMessage === '') {
+                $failureMessage = sprintf(
                     'Failed asserting that an object has a property %s with the value %s.',
                     $this->export($property),
                     $this->export($propertyValue),
                 );
             }
 
-            Assert::assertEquals($value, $propertyValue, $message);
+            Assert::assertEquals($value, $propertyValue, $failureMessage);
         }
 
         return $this;
@@ -769,12 +769,12 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toMatch(string $expression, string $message = ''): self
+    public function toMatch(string $expression, string $failureMessage = ''): self
     {
         if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
         }
-        Assert::assertMatchesRegularExpression($expression, $this->value, $message);
+        Assert::assertMatchesRegularExpression($expression, $this->value, $failureMessage);
 
         return $this;
     }
@@ -784,9 +784,9 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toMatchConstraint(Constraint $constraint, string $message = ''): self
+    public function toMatchConstraint(Constraint $constraint, string $failureMessage = ''): self
     {
-        Assert::assertThat($this->value, $constraint, $message);
+        Assert::assertThat($this->value, $constraint, $failureMessage);
 
         return $this;
     }
@@ -795,13 +795,13 @@ final class Expectation
      * @param  class-string  $class
      * @return self<TValue>
      */
-    public function toContainOnlyInstancesOf(string $class, string $message = ''): self
+    public function toContainOnlyInstancesOf(string $class, string $failureMessage = ''): self
     {
         if (! is_iterable($this->value)) {
             InvalidExpectationValue::expected('iterable');
         }
 
-        Assert::assertContainsOnlyInstancesOf($class, $this->value, $message);
+        Assert::assertContainsOnlyInstancesOf($class, $this->value, $failureMessage);
 
         return $this;
     }
@@ -812,7 +812,7 @@ final class Expectation
      * @param (Closure(Throwable): mixed)|string $exception
      * @return self<TValue>
      */
-    public function toThrow(callable|string $exception, string $exceptionMessage = null, string $message = ''): self
+    public function toThrow(callable|string $exception, string $exceptionMessage = null, string $failureMessage = ''): self
     {
         $callback = NullClosure::create();
 
@@ -839,16 +839,16 @@ final class Expectation
                     throw $e;
                 }
 
-                Assert::assertStringContainsString($exception, $e->getMessage(), $message);
+                Assert::assertStringContainsString($exception, $e->getMessage(), $failureMessage);
 
                 return $this;
             }
 
             if ($exceptionMessage !== null) {
-                Assert::assertStringContainsString($exceptionMessage, $e->getMessage(), $message);
+                Assert::assertStringContainsString($exceptionMessage, $e->getMessage(), $failureMessage);
             }
 
-            Assert::assertInstanceOf($exception, $e, $message);
+            Assert::assertInstanceOf($exception, $e, $failureMessage);
             $callback($e);
 
             return $this;
