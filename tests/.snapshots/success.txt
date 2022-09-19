@@ -29,7 +29,7 @@
   ✓ it does not append CoversNothing to other methods
   ✓ it throws exception if no class nor method has been found
 
-   PASS  Tests\Features\Datasets
+   PASS  Tests\Features\DatasetsTests
   ✓ it throws exception if dataset does not exist
   ✓ it throws exception if dataset already exist
   ✓ it sets closures
@@ -116,6 +116,7 @@
   ✓ it will not resolve a closure if it is type hinted as a callable with (Closure Object (...)) #2
   ✓ it can correctly resolve a bound dataset that returns an array with (Closure Object (...))
   ✓ it can correctly resolve a bound dataset that returns an array but wants to be spread with (Closure Object (...))
+  ↓ forbids to define tests in Datasets dirs and Datasets.php files
 
    PASS  Tests\Features\Depends
   ✓ first
@@ -663,6 +664,47 @@
   ✓ get 'foo' → get 'bar' → expect true → toBeTrue
   ✓ get 'foo' → expect true → toBeTrue
 
+   PASS  Tests\Features\ScopedDatasets\Directory\NestedDirectory1\TestFileInNestedDirectoryWithDatasetsFile
+  ✓ uses dataset with (1)
+  ✓ uses dataset with (2)
+  ✓ uses dataset with (3)
+  ✓ uses dataset with (4)
+  ✓ uses dataset with (5)
+  ✓ uses dataset with ('ScopedDatasets/NestedDirector...ts.php')
+  ✓ the right dataset is taken
+
+   PASS  Tests\Features\ScopedDatasets\Directory\NestedDirectory2\TestFileInNestedDirectory
+  ✓ uses dataset with (1)
+  ✓ uses dataset with (2)
+  ✓ uses dataset with (3)
+  ✓ uses dataset with (4)
+  ✓ uses dataset with (5)
+  ✓ uses dataset with ('ScopedDatasets/Datasets/Scoped.php')
+  ✓ the right dataset is taken
+
+   PASS  Tests\Features\ScopedDatasets\Directory\TestFileWithLocallyDefinedDataset
+  ✓ uses dataset with (1)
+  ✓ uses dataset with (2)
+  ✓ uses dataset with (3)
+  ✓ uses dataset with (4)
+  ✓ uses dataset with (5)
+  ✓ uses dataset with ('ScopedDatasets/ScopedDatasets.php')
+  ✓ the right dataset is taken
+
+   PASS  Tests\Features\ScopedDatasets\Directory\TestFileWithScopedDataset
+  ✓ uses dataset with (1)
+  ✓ uses dataset with (2)
+  ✓ uses dataset with (3)
+  ✓ uses dataset with (4)
+  ✓ uses dataset with (5)
+  ✓ uses dataset with ('ScopedDatasets/Datasets/Scoped.php')
+  ✓ the right dataset is taken
+
+   PASS  Tests\Features\ScopedDatasets\TestFileOutOfScope
+  ✓ uses dataset with (1)
+  ✓ uses dataset with (2)
+  ✓ the right dataset is taken
+
    WARN  Tests\Features\Skip
   ✓ it do not skips
   - it skips with truthy → 1
@@ -761,7 +803,7 @@
    PASS  Tests\Unit\Console\Help
   ✓ it outputs the help information when --help is used
 
-   PASS  Tests\Unit\Datasets
+   PASS  Tests\Unit\DatasetsTests
   ✓ it show only the names of named datasets in their description
   ✓ it show the actual dataset of non-named datasets in their description
   ✓ it show only the names of multiple named datasets in their description
@@ -818,4 +860,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    4 incomplete, 1 todo, 18 skipped, 562 passed (1460 assertions)
+  Tests:    4 incomplete, 2 todos, 18 skipped, 593 passed (1503 assertions)

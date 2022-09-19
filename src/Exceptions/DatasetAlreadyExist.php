@@ -17,8 +17,8 @@ final class DatasetAlreadyExist extends InvalidArgumentException implements Exce
     /**
      * Creates a new Exception instance.
      */
-    public function __construct(string $name)
+    public function __construct(string $name, string $scope)
     {
-        parent::__construct(sprintf('A dataset with the name `%s` already exist.', $name));
+        parent::__construct(sprintf('A dataset with the name `%s` already exist in scope [%s].', $name, $scope));
     }
 }

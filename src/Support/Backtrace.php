@@ -43,6 +43,30 @@ final class Backtrace
     }
 
     /**
+     * Returns the current datasets file.
+     */
+    public static function datasetsFile(): string
+    {
+        $current = null;
+
+        foreach (debug_backtrace(self::BACKTRACE_OPTIONS) as $trace) {
+            assert(array_key_exists(self::FILE, $trace));
+
+            if (Str::endsWith($trace['file'], 'Bootstrappers/BootFiles.php') || Str::endsWith($trace[self::FILE], 'overrides/Runner/TestSuiteLoader.php')) {
+                break;
+            }
+
+            $current = $trace;
+        }
+
+        if ($current === null) {
+            throw ShouldNotHappen::fromMessage('Dataset file not found.');
+        }
+
+        return $current[self::FILE];
+    }
+
+    /**
      * Returns the filename that called the current function/method.
      */
     public static function file(): string

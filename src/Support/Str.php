@@ -60,6 +60,24 @@ final class Str
     }
 
     /**
+     * Return the remainder of a string after the last occurrence of a given value.
+     */
+    public static function afterLast(string $subject, string $search): string
+    {
+        if ($search === '') {
+            return $subject;
+        }
+
+        $position = strrpos($subject, $search);
+
+        if ($position === false) {
+            return $subject;
+        }
+
+        return substr($subject, $position + strlen($search));
+    }
+
+    /**
      * Get the portion of a string before the last occurrence of a given value.
      */
     public static function beforeLast(string $subject, string $search): string

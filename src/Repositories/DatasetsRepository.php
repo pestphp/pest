@@ -36,13 +36,15 @@ final class DatasetsRepository
      *
      * @param  Closure|iterable<int|string, mixed>  $data
      */
-    public static function set(string $name, Closure|iterable $data): void
+    public static function set(string $name, Closure|iterable $data, string $scope): void
     {
-        if (array_key_exists($name, self::$datasets)) {
-            throw new DatasetAlreadyExist($name);
+        $datasetKey = "$scope>>>$name";
+
+        if (array_key_exists("$datasetKey", self::$datasets)) {
+            throw new DatasetAlreadyExist($name, $scope);
         }
 
-        self::$datasets[$name] = $data;
+        self::$datasets[$datasetKey] = $data;
     }
 
     /**
@@ -52,7 +54,7 @@ final class DatasetsRepository
      */
     public static function with(string $filename, string $description, array $with): void
     {
-        self::$withs[$filename.'>>>'.$description] = $with;
+        self::$withs["$filename>>>$description"] = $with;
     }
 
     public static function has(string $filename, string $description): bool
@@ -67,9 +69,10 @@ final class DatasetsRepository
      */
     public static function get(string $filename, string $description)
     {
+        // dump("requesting file: " . $filename);
         $dataset = self::$withs[$filename.'>>>'.$description];
 
-        $dataset = self::resolve($description, $dataset);
+        $dataset = self::resolve($dataset, $filename);
 
         if ($dataset === null) {
             throw ShouldNotHappen::fromMessage('Dataset [%s] not resolvable.');
@@ -84,14 +87,14 @@ final class DatasetsRepository
      * @param  array<Closure|iterable<int|string, mixed>|string>  $dataset
      * @return array<string, mixed>|null
      */
-    public static function resolve(string $description, array $dataset): array|null
+    public static function resolve(array $dataset, string $currentTestFile): array|null
     {
         /* @phpstan-ignore-next-line */
         if (empty($dataset)) {
             return null;
         }
 
-        $dataset = self::processDatasets($dataset);
+        $dataset = self::processDatasets($dataset, $currentTestFile);
 
         $datasetCombinations = self::getDatasetsCombinations($dataset);
 
@@ -133,10 +136,44 @@ final class DatasetsRepository
     }
 
     /**
+     * @return Closure|iterable<int|string, mixed>
+     */
+    private static function getScopedDataset(string $name, string $currentTestFile)
+    {
+        $matchingDatasets = array_filter(self::$datasets, function (string $key) use ($name, $currentTestFile) {
+            [$datasetScope, $datasetName] = explode('>>>', $key);
+
+            if ($name !== $datasetName) {
+                return false;
+            }
+
+            if (! str_starts_with($currentTestFile, $datasetScope)) {
+                return false;
+            }
+
+            return true;
+        }, ARRAY_FILTER_USE_KEY);
+
+        $closestScopeDatasetKey = array_reduce(array_keys($matchingDatasets), function ($keyA, $keyB) {
+            if ($keyA === null) {
+                return $keyB;
+            }
+
+            return strlen($keyA) > strlen($keyB) ? $keyA : $keyB;
+        });
+
+        if ($closestScopeDatasetKey === null) {
+            throw new DatasetDoesNotExist($name);
+        }
+
+        return $matchingDatasets[$closestScopeDatasetKey];
+    }
+
+    /**
      * @param  array<Closure|iterable<int|string, mixed>|string>  $datasets
      * @return array<array<mixed>>
      */
-    private static function processDatasets(array $datasets): array
+    private static function processDatasets(array $datasets, string $currentTestFile): array
     {
         $processedDatasets = [];
 
@@ -144,11 +181,7 @@ final class DatasetsRepository
             $processedDataset = [];
 
             if (is_string($data)) {
-                if (! array_key_exists($data, self::$datasets)) {
-                    throw new DatasetDoesNotExist($data);
-                }
-
-                $datasets[$index] = self::$datasets[$data];
+                $datasets[$index] = self::getScopedDataset($data, $currentTestFile);
             }
 
             if (is_callable($datasets[$index])) {

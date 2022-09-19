@@ -9,6 +9,7 @@ use function Pest\testDirectory;
 use Pest\TestSuite;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use SebastianBergmann\FileIterator\Facade as PhpUnitFileIterator;
 
 /**
  * @internal
@@ -21,8 +22,6 @@ final class BootFiles
      * @var array<int, string>
      */
     private const STRUCTURE = [
-        'Datasets',
-        'Datasets.php',
         'Expectations',
         'Expectations.php',
         'Helpers',
@@ -56,6 +55,8 @@ final class BootFiles
                 $this->load($filename);
             }
         }
+
+        $this->bootDatasets($testsPath);
     }
 
     /**
@@ -72,5 +73,27 @@ final class BootFiles
         }
 
         include_once $filename;
+    }
+
+    private function bootDatasets(string $testsPath): void
+    {
+        $files = (new PhpUnitFileIterator)->getFilesAsArray($testsPath, '.php');
+
+        foreach ($files as $fullPath) {
+            $filename = Str::afterLast($fullPath, DIRECTORY_SEPARATOR);
+
+            if ($filename === 'Datasets.php') {
+                $this->load($fullPath);
+
+                continue;
+            }
+
+            $directoryFullPath = Str::beforeLast($fullPath, DIRECTORY_SEPARATOR);
+            $directory = Str::afterLast($directoryFullPath, DIRECTORY_SEPARATOR);
+
+            if ($directory === 'Datasets') {
+                $this->load($fullPath);
+            }
+        }
     }
 }
