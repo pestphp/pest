@@ -11,6 +11,10 @@ test('failures', function () {
     expect(42)->toBeIterable();
 })->throws(ExpectationFailedException::class);
 
+test('failures with custom message', function () {
+    expect(42)->toBeIterable('oh no!');
+})->throws(ExpectationFailedException::class, 'oh no!');
+
 test('not failures', function () {
     function gen(): iterable
     {

@@ -18,6 +18,10 @@ test('failures', function () {
     expect('/random/path/whatever.file')->toBeReadableFile();
 })->throws(ExpectationFailedException::class);
 
+test('failures with custom message', function () {
+    expect('/random/path/whatever.file')->toBeReadableFile('oh no!');
+})->throws(ExpectationFailedException::class, 'oh no!');
+
 test('not failures', function () {
     expect($this->tempFile)->not->toBeReadableFile();
 })->throws(ExpectationFailedException::class);

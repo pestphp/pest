@@ -79,6 +79,12 @@ test('failures 7', function () {
     })->toThrow(RuntimeException::class, 'expected message');
 })->throws(ExpectationFailedException::class);
 
+test('failures with custom message', function () {
+    expect(function () {
+        throw new RuntimeException('actual message');
+    })->toThrow(RuntimeException::class, 'expected message', 'oh no!');
+})->throws(ExpectationFailedException::class, 'oh no!');
+
 test('not failures', function () {
     expect(function () {
         throw new RuntimeException();

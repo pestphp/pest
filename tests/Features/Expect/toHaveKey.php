@@ -24,9 +24,25 @@ test('failures', function () use ($test_array) {
     expect($test_array)->toHaveKey('foo');
 })->throws(ExpectationFailedException::class, "Failed asserting that an array has the key 'foo'");
 
+test('failures with custom message', function () use ($test_array) {
+    expect($test_array)->toHaveKey('foo', message: 'oh no!');
+})->throws(ExpectationFailedException::class, 'oh no!');
+
+test('failures with custom message and Any matcher', function () use ($test_array) {
+    expect($test_array)->toHaveKey('foo', expect()->any(), 'oh no!');
+})->throws(ExpectationFailedException::class, 'oh no!');
+
 test('failures with nested key', function () use ($test_array) {
     expect($test_array)->toHaveKey('d.bar');
 })->throws(ExpectationFailedException::class, "Failed asserting that an array has the key 'd.bar'");
+
+test('failures with nested key and custom message', function () use ($test_array) {
+    expect($test_array)->toHaveKey('d.bar', message: 'oh no!');
+})->throws(ExpectationFailedException::class, 'oh no!');
+
+test('failures with nested key and custom message with Any matcher', function () use ($test_array) {
+    expect($test_array)->toHaveKey('d.bar', expect()->any(), 'oh no!');
+})->throws(ExpectationFailedException::class, 'oh no!');
 
 test('failures with plain key with dots', function () use ($test_array) {
     expect($test_array)->toHaveKey('missing.key.with.dots');

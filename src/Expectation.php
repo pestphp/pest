@@ -14,6 +14,7 @@ use Pest\Exceptions\InvalidExpectationValue;
 use Pest\Expectations\EachExpectation;
 use Pest\Expectations\HigherOrderExpectation;
 use Pest\Expectations\OppositeExpectation;
+use Pest\Matchers\Any;
 use Pest\Support\ExpectationPipeline;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\ExpectationFailedException;
@@ -280,7 +281,7 @@ final class Expectation
     {
         if (! self::hasMethod($method)) {
             /* @phpstan-ignore-next-line */
-            return new HigherOrderExpectation($this, $this->value->$method(...$parameters));
+            return new HigherOrderExpectation($this, call_user_func_array($this->value->$method(...), $parameters));
         }
 
         ExpectationPipeline::for($this->getExpectationClosure($method))
@@ -338,5 +339,13 @@ final class Expectation
         return method_exists(self::class, $name)
             || method_exists(Mixins\Expectation::class, $name)
             || self::hasExtend($name);
+    }
+
+    /**
+     * Matches any value.
+     */
+    public function any(): Any
+    {
+        return new Any();
     }
 }

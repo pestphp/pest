@@ -15,6 +15,10 @@ test('failures', function () {
     expect(1)->toBe(2);
 })->throws(ExpectationFailedException::class);
 
+test('failures with custom message', function () {
+    expect(1)->toBe(2, 'oh no!');
+})->throws(ExpectationFailedException::class, 'oh no!');
+
 test('not failures', function () {
     expect(1)->not->toBe(1);
 })->throws(ExpectationFailedException::class);
