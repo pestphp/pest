@@ -17,7 +17,7 @@ it('adds coverage if --coverage exist', function () {
     $arguments = $plugin->handleArguments(['--coverage']);
     expect($arguments)->toEqual(['--coverage-php', Coverage::getPath()])
         ->and($plugin->coverage)->toBeTrue();
-})->skip(! \Pest\Support\Coverage::isAvailable() || ! in_array('coverage', xdebug_info('mode'), true), 'Coverage is not available');
+})->skip(! \Pest\Support\Coverage::isAvailable() || ! function_exists('xdebug_info') || ! in_array('coverage', xdebug_info('mode'), true), 'Coverage is not available');
 
 it('adds coverage if --min exist', function () {
     $plugin = new CoveragePlugin(new ConsoleOutput());
