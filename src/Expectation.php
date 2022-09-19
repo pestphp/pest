@@ -14,6 +14,7 @@ use Pest\Exceptions\InvalidExpectationValue;
 use Pest\Expectations\EachExpectation;
 use Pest\Expectations\HigherOrderExpectation;
 use Pest\Expectations\OppositeExpectation;
+use Pest\Matchers\Any;
 use Pest\Support\ExpectationPipeline;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\ExpectationFailedException;
@@ -338,5 +339,10 @@ final class Expectation
         return method_exists(self::class, $name)
             || method_exists(Mixins\Expectation::class, $name)
             || self::hasExtend($name);
+    }
+
+    public function any(): Any
+    {
+        return new Any();
     }
 }

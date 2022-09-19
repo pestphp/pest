@@ -512,8 +512,10 @@
   ✓ pass with value check and plain key with dots
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with custom message and Any matcher
   ✓ failures with nested key
   ✓ failures with nested key and custom message
+  ✓ failures with nested key and custom message with Any matcher
   ✓ failures with plain key with dots
   ✓ fails with wrong value
   ✓ fails with wrong value and nested key
@@ -556,6 +558,7 @@
   ✓ pass
   ✓ failures
   ✓ failures with message
+  ✓ failures with message and Any matcher
   ✓ not failures
 
    PASS  Tests\Features\Expect\toMatch
@@ -815,4 +818,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    4 incomplete, 1 todo, 18 skipped, 559 passed (1450 assertions)
+  Tests:    4 incomplete, 1 todo, 18 skipped, 562 passed (1460 assertions)

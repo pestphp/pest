@@ -9,9 +9,9 @@ use Closure;
 use Error;
 use InvalidArgumentException;
 use Pest\Exceptions\InvalidExpectationValue;
+use Pest\Matchers\Any;
 use Pest\Support\Arr;
 use Pest\Support\NullClosure;
-use Pest\Support\NullValue;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Constraint\Constraint;
 use PHPUnit\Framework\ExpectationFailedException;
@@ -272,14 +272,14 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toHaveProperty(string $name, mixed $value = new NullValue(), string $failureMessage = ''): self
+    public function toHaveProperty(string $name, mixed $value = new Any(), string $failureMessage = ''): self
     {
         $this->toBeObject();
 
         // @phpstan-ignore-next-line
         Assert::assertTrue(property_exists($this->value, $name), $failureMessage);
 
-        if (! $value instanceof NullValue) {
+        if (! $value instanceof Any) {
             /* @phpstan-ignore-next-line */
             Assert::assertEquals($value, $this->value->{$name}, $failureMessage);
         }
@@ -559,7 +559,7 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toHaveKey(string|int $key, mixed $value = new NullValue(), string $failureMessage = ''): self
+    public function toHaveKey(string|int $key, mixed $value = new Any(), string $failureMessage = ''): self
     {
         if (is_object($this->value) && method_exists($this->value, 'toArray')) {
             $array = $this->value->toArray();
@@ -579,7 +579,7 @@ final class Expectation
             throw new ExpectationFailedException($failureMessage, $exception->getComparisonFailure());
         }
 
-        if (! $value instanceof NullValue) {
+        if (! $value instanceof Any) {
             Assert::assertEquals($value, Arr::get($array, $key), $failureMessage);
         }
 
