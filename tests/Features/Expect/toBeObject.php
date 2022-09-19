@@ -11,6 +11,10 @@ test('failures', function () {
     expect(null)->toBeObject();
 })->throws(ExpectationFailedException::class);
 
+test('failures with custom message', function () {
+    expect(null)->toBeObject('oh no!');
+})->throws(ExpectationFailedException::class, 'oh no!');
+
 test('not failures', function () {
     expect((object) 'ciao')->not->toBeObject();
 })->throws(ExpectationFailedException::class);
