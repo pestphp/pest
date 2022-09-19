@@ -341,6 +341,13 @@ final class Expectation
             || self::hasExtend($name);
     }
 
+    /**
+     * Matches any value
+     *
+     * @internal
+     *
+     * @return Any
+     */
     public function any(): Any
     {
         return new Any();
