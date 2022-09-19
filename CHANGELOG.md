@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Added
+- Custom failure messages on expectations ([https://github.com/pestphp/pest/pull/583](https://github.com/pestphp/pest/pull/583)) 
+
 ## [v1.20.0 (2021-09-25)](https://github.com/pestphp/pest/compare/v1.19.0...v1.20.0)
 ### Added
 - `throwsIf` test call ([#371](https://github.com/pestphp/pest/pull/371))
