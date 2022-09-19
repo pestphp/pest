@@ -1,5 +1,5 @@
-1. TeamCity
-2. Junit
-3. Check all plugins
-4. Parallel testing.
-5. Finish Collision's todo
+1. TeamCity. (oliver)
+2. Junit. (nuno) 
+3. Check all plugins. (nuno - almost done)
+4. Parallel testing. (luke)
+5. Finish Collision's todo. (nuno)
