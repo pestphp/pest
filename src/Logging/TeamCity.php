@@ -6,7 +6,6 @@ namespace Pest\Logging;
 
 use Carbon\CarbonInterval;
 use Pest\Exceptions\ShouldNotHappen;
-
 use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\ExceptionWrapper;
 use PHPUnit\Framework\ExpectationFailedException;
@@ -38,20 +37,20 @@ final class TeamCity implements ResultPrinter
 
     public function printResult(TestResult $result): void
     {
-        $total = $result->count();
-        $error = $result->errorCount();
-        $skipped = $result->skippedCount();
-        $failure = $result->failureCount();
+        $total          = $result->count();
+        $error          = $result->errorCount();
+        $skipped        = $result->skippedCount();
+        $failure        = $result->failureCount();
         $notImplemented = $result->notImplementedCount();
-        $risky = $result->riskyCount();
-        $warning = $result->warningCount();
-        $passed = $total - $error - $skipped - $failure - $notImplemented - $risky - $warning;
-        $duration = $result->time();
+        $risky          = $result->riskyCount();
+        $warning        = $result->warningCount();
+        $passed         = $total - $error - $skipped - $failure - $notImplemented - $risky - $warning;
+        $duration       = $result->time();
 
         if ($duration < 1) {
-            $duration = number_format($duration * 100, 2). "ms";
+            $duration = number_format($duration * 100, 2) . 'ms';
         } else {
-            $duration = number_format($duration, 2). "s";
+            $duration = number_format($duration, 2) . 's';
         }
 
         $this->output->writeln("Passed $passed of $total tests - $duration");
