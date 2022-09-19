@@ -66,7 +66,7 @@
         "bin/pest"
     ],
     "scripts": {
-        "lint": "pint --test",
+        "lint": "pint",
         "test:lint": "pint --test",
         "test:types": "phpstan analyse --ansi --memory-limit=-1 --debug",
         "test:unit": "php bin/pest --colors=always --exclude-group=integration --compact",
