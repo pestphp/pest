@@ -137,43 +137,6 @@ final class DatasetsRepository
     }
 
     /**
-     * @return Closure|iterable<int|string, mixed>
-     */
-    private static function getScopedDataset(string $name, string $currentTestFile)
-    {
-        $matchingDatasets = array_filter(self::$datasets, function (string $key) use ($name, $currentTestFile) {
-            [$datasetScope, $datasetName] = explode(self::SEPARATOR, $key);
-
-            if ($name !== $datasetName) {
-                return false;
-            }
-
-            if (! str_starts_with($currentTestFile, $datasetScope)) {
-                return false;
-            }
-
-            return true;
-        }, ARRAY_FILTER_USE_KEY);
-
-        $closestScopeDatasetKey = array_reduce(
-            array_keys($matchingDatasets), 
-            fn ($keyA, $keyB) => $keyA !== null && strlen($keyA) > strlen($keyB) ? $keyA : $keyB
-        );
-            if ($keyA === null) {
-                return $keyB;
-            }
-
-            return strlen($keyA) > strlen($keyB) ? $keyA : $keyB;
-        });
-
-        if ($closestScopeDatasetKey === null) {
-            throw new DatasetDoesNotExist($name);
-        }
-
-        return $matchingDatasets[$closestScopeDatasetKey];
-    }
-
-    /**
      * @param  array<Closure|iterable<int|string, mixed>|string>  $datasets
      * @return array<array<mixed>>
      */
@@ -209,6 +172,37 @@ final class DatasetsRepository
         }
 
         return $processedDatasets;
+    }
+
+    /**
+     * @return Closure|iterable<int|string, mixed>
+     */
+    private static function getScopedDataset(string $name, string $currentTestFile)
+    {
+        $matchingDatasets = array_filter(self::$datasets, function (string $key) use ($name, $currentTestFile) {
+            [$datasetScope, $datasetName] = explode(self::SEPARATOR, $key);
+
+            if ($name !== $datasetName) {
+                return false;
+            }
+
+            if (! str_starts_with($currentTestFile, $datasetScope)) {
+                return false;
+            }
+
+            return true;
+        }, ARRAY_FILTER_USE_KEY);
+
+        $closestScopeDatasetKey = array_reduce(
+            array_keys($matchingDatasets),
+            fn ($keyA, $keyB) => $keyA !== null && strlen($keyA) > strlen($keyB) ? $keyA : $keyB
+        );
+
+        if ($closestScopeDatasetKey === null) {
+            throw new DatasetDoesNotExist($name);
+        }
+
+        return $matchingDatasets[$closestScopeDatasetKey];
     }
 
     /**
