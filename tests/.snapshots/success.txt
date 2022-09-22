@@ -829,6 +829,26 @@
   ✓ it can resolve builtin value types
   ✓ it cannot resolve a parameter without type
 
+   PASS  Tests\Unit\Support\DatasetInfo
+  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Datase...rs.php', true)
+  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Datasets.php', false)
+  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur...rs.php', true)
+  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur...rs.php', false)
+  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur...ts.php', false)
+  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Datase...rs.php', false)
+  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Datasets.php', true)
+  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur...rs.php', false) #1
+  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur...rs.php', false) #2
+  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur...ts.php', true)
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Datase...rs.php', '/var/www/project/tests')
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Datasets.php', '/var/www/project/tests')
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur...rs.php', '/var/www/project/tests/Features')
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur...rs.php', '/var/www/project/tests/Featur...rs.php') #1
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur...ts.php', '/var/www/project/tests/Features')
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur...rs.php', '/var/www/project/tests/Featur...ollers')
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur...rs.php', '/var/www/project/tests/Featur...rs.php') #2
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur...ts.php', '/var/www/project/tests/Featur...ollers')
+
    PASS  Tests\Unit\Support\Reflection
   ✓ it gets file name from closure
   ✓ it gets property values
@@ -860,4 +880,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    4 incomplete, 2 todos, 18 skipped, 593 passed (1503 assertions)
+  Tests:    4 incomplete, 2 todos, 18 skipped, 611 passed (1521 assertions)

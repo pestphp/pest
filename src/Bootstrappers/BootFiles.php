@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Bootstrappers;
 
+use Pest\Support\DatasetInfo;
 use Pest\Support\Str;
 use function Pest\testDirectory;
 use Pest\TestSuite;
@@ -79,20 +80,9 @@ final class BootFiles
     {
         $files = (new PhpUnitFileIterator)->getFilesAsArray($testsPath, '.php');
 
-        foreach ($files as $fullPath) {
-            $filename = Str::afterLast($fullPath, DIRECTORY_SEPARATOR);
-
-            if ($filename === 'Datasets.php') {
-                $this->load($fullPath);
-
-                continue;
-            }
-
-            $directoryFullPath = Str::beforeLast($fullPath, DIRECTORY_SEPARATOR);
-            $directory = Str::afterLast($directoryFullPath, DIRECTORY_SEPARATOR);
-
-            if ($directory === 'Datasets') {
-                $this->load($fullPath);
+        foreach ($files as $file) {
+            if (DatasetInfo::isADatasetsFile($file) || DatasetInfo::isInsideADatasetsDirectory($file)) {
+                $this->load($file);
             }
         }
     }
