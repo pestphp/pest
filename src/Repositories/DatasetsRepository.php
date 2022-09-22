@@ -155,7 +155,10 @@ final class DatasetsRepository
             return true;
         }, ARRAY_FILTER_USE_KEY);
 
-        $closestScopeDatasetKey = array_reduce(array_keys($matchingDatasets), function ($keyA, $keyB) {
+        $closestScopeDatasetKey = array_reduce(
+            array_keys($matchingDatasets), 
+            fn ($keyA, $keyB) => $keyA !== null && strlen($keyA) > strlen($keyB) ? $keyA : $keyB
+        );
             if ($keyA === null) {
                 return $keyB;
             }
