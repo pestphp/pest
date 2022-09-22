@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pest\Repositories;
 
 use Closure;
-use Pest\Exceptions\DatasetAlreadyExist;
+use Pest\Exceptions\DatasetAlreadyExists;
 use Pest\Exceptions\DatasetDoesNotExist;
 use Pest\Exceptions\ShouldNotHappen;
 use SebastianBergmann\Exporter\Exporter;
@@ -43,7 +43,7 @@ final class DatasetsRepository
         $datasetKey = "$scope".self::SEPARATOR."$name";
 
         if (array_key_exists("$datasetKey", self::$datasets)) {
-            throw new DatasetAlreadyExist($name, $scope);
+            throw new DatasetAlreadyExists($name, $scope);
         }
 
         self::$datasets[$datasetKey] = $data;

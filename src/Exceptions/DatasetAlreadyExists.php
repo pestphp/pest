@@ -12,7 +12,7 @@ use Symfony\Component\Console\Exception\ExceptionInterface;
 /**
  * @internal
  */
-final class DatasetAlreadyExist extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
+final class DatasetAlreadyExists extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
 {
     /**
      * Creates a new Exception instance.
