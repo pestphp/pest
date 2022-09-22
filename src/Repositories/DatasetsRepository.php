@@ -17,6 +17,8 @@ use Traversable;
  */
 final class DatasetsRepository
 {
+    private const SEPARATOR = '>>';
+
     /**
      * Holds the datasets.
      *
@@ -38,7 +40,7 @@ final class DatasetsRepository
      */
     public static function set(string $name, Closure|iterable $data, string $scope): void
     {
-        $datasetKey = "$scope>>>$name";
+        $datasetKey = "$scope".self::SEPARATOR."$name";
 
         if (array_key_exists("$datasetKey", self::$datasets)) {
             throw new DatasetAlreadyExist($name, $scope);
@@ -54,12 +56,12 @@ final class DatasetsRepository
      */
     public static function with(string $filename, string $description, array $with): void
     {
-        self::$withs["$filename>>>$description"] = $with;
+        self::$withs["$filename".self::SEPARATOR."$description"] = $with;
     }
 
     public static function has(string $filename, string $description): bool
     {
-        return array_key_exists($filename.'>>>'.$description, self::$withs);
+        return array_key_exists($filename.self::SEPARATOR.$description, self::$withs);
     }
 
     /**
@@ -69,7 +71,7 @@ final class DatasetsRepository
      */
     public static function get(string $filename, string $description)
     {
-        $dataset = self::$withs[$filename.'>>>'.$description];
+        $dataset = self::$withs[$filename.self::SEPARATOR.$description];
 
         $dataset = self::resolve($dataset, $filename);
 
@@ -140,7 +142,7 @@ final class DatasetsRepository
     private static function getScopedDataset(string $name, string $currentTestFile)
     {
         $matchingDatasets = array_filter(self::$datasets, function (string $key) use ($name, $currentTestFile) {
-            [$datasetScope, $datasetName] = explode('>>>', $key);
+            [$datasetScope, $datasetName] = explode(self::SEPARATOR, $key);
 
             if ($name !== $datasetName) {
                 return false;
