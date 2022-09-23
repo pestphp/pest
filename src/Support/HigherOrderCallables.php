@@ -25,13 +25,13 @@ final class HigherOrderCallables
      *
      * Create a new expectation. Callable values will be executed prior to returning the new expectation.
      *
-     * @param (Closure():TValue)|TValue $value
+     * @param (Closure():TValue)|TValue|null $value
      * @return Expectation<TValue>
      */
-    public function expect(mixed $value): Expectation
+    public function expect(mixed $value=null): Expectation
     {
         /** @var TValue $value */
-        $value = $value instanceof Closure ? Reflection::bindCallableWithData($value) : $value;
+        $value = ($value instanceof Closure ? Reflection::bindCallableWithData($value) : $value) ?? $this->target;
 
         return new Expectation($value);
     }
