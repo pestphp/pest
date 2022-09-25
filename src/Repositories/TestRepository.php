@@ -84,6 +84,9 @@ final class TestRepository
         }
     }
 
+    /**
+     * Gets the test case factory from the given filename.
+     */
     public function get(string $filename): TestCaseFactory
     {
         return $this->testCases[$filename];
