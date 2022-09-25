@@ -210,8 +210,6 @@ final class TestCaseFactory
 
             eval($classCode);
         } catch (ParseError $caught) {
-
-
             throw new RuntimeException(sprintf(
                 "Unable to create test case for test file at %s. \n %s",
                 $filename,
