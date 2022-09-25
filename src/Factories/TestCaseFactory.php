@@ -122,6 +122,8 @@ final class TestCaseFactory
         $rootPath = TestSuite::getInstance()->rootPath;
         $relativePath = str_replace($rootPath.DIRECTORY_SEPARATOR, '', $filename);
 
+        $relativePath = ltrim($relativePath, DIRECTORY_SEPARATOR);
+
         $basename = basename($relativePath, '.php');
 
         $dotPos = strpos($basename, '.');
@@ -208,7 +210,13 @@ final class TestCaseFactory
 
             eval($classCode);
         } catch (ParseError $caught) {
-            throw new RuntimeException(sprintf('Unable to create test case for test file at %s', $filename), 1, $caught);
+
+
+            throw new RuntimeException(sprintf(
+                "Unable to create test case for test file at %s. \n %s",
+                $filename,
+                $classCode
+            ), 1, $caught);
         }
     }
 
