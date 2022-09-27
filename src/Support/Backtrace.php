@@ -28,7 +28,9 @@ final class Backtrace
         foreach (debug_backtrace(self::BACKTRACE_OPTIONS) as $trace) {
             assert(array_key_exists(self::FILE, $trace));
 
-            if (Str::endsWith($trace[self::FILE], 'overrides/Runner/TestSuiteLoader.php')) {
+            $traceFile = str_replace(DIRECTORY_SEPARATOR, '/', $trace[self::FILE]);
+
+            if (Str::endsWith($traceFile, 'overrides/Runner/TestSuiteLoader.php')) {
                 break;
             }
 
