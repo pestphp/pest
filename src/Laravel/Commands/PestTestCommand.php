@@ -62,11 +62,20 @@ final class PestTestCommand extends Command
             throw new InvalidConsoleArgument(sprintf('%s already exist', $target));
         }
 
-        $contents = File::get(implode(DIRECTORY_SEPARATOR, [
+        $stubPath = implode(DIRECTORY_SEPARATOR, [
             dirname(__DIR__, 3),
             'stubs',
             sprintf('%s.php', $type),
-        ]));
+        ]);
+
+        // pest.stub and pest.unit.stub are compatible with `make:test --pest`
+        $stubOverrideFilename = 'pest' . ($type != 'Feature' ? '.' . strtolower($type) : '') . '.stub';
+        /* @phpstan-ignore-next-line */
+        $stubPath             = file_exists($stubOverridePath = base_path() . '/stubs/' . $stubOverrideFilename)
+            ? $stubOverridePath
+            : $stubPath;
+
+        $contents = File::get($stubPath);
 
         $name = mb_strtolower($name);
         $name = Str::endsWith($name, 'test') ? mb_substr($name, 0, -4) : $name;
