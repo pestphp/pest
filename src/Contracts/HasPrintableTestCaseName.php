@@ -11,5 +11,5 @@ use NunoMaduro\Collision\Contracts\Adapters\Phpunit\HasPrintableTestCaseName as 
  */
 interface HasPrintableTestCaseName extends BaseHasPrintableTestCaseName
 {
-    // ..
+    //
 }
