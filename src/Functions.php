@@ -86,6 +86,7 @@ if (!function_exists('test')) {
      * a closure that contains the test expectations.
      *
      * @return TestCall|TestCase|mixed
+     * @phpstan-return ($description is null ? TestCase|mixed : TestCall)
      */
     function test(string $description = null, Closure $closure = null)
     {
@@ -105,7 +106,7 @@ if (!function_exists('it')) {
      * is the test description; the second argument is
      * a closure that contains the test expectations.
      *
-     * @return TestCall|TestCase|mixed
+     * @return TestCall
      */
     function it(string $description, Closure $closure = null): TestCall
     {

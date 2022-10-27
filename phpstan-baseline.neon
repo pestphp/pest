@@ -181,11 +181,6 @@ parameters:
 			path: src/Factories/TestCaseFactory.php
 
 		-
-			message: "#^Function it\\(\\) should return Pest\\\\PendingObjects\\\\TestCall but returns mixed\\.$#"
-			count: 1
-			path: src/Functions.php
-
-		-
 			message: "#^Parameter \\#2 \\$classAndTraits of class Pest\\\\PendingObjects\\\\UsesCall constructor expects array\\<int, string\\>, array\\<int\\|string, string\\> given\\.$#"
 			count: 1
 			path: src/Functions.php
@@ -247,16 +242,6 @@ parameters:
 
 		-
 			message: "#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\\.$#"
-			count: 1
-			path: src/Support/ExceptionTrace.php
-
-		-
-			message: "#^Cannot access offset 'file' on mixed\\.$#"
-			count: 1
-			path: src/Support/ExceptionTrace.php
-
-		-
-			message: "#^Parameter \\#1 \\$haystack of function mb_strpos expects string, mixed given\\.$#"
 			count: 1
 			path: src/Support/ExceptionTrace.php
 
