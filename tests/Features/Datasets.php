@@ -230,8 +230,8 @@ test('more than two datasets did the job right', function () use ($state) {
     expect($state->text)->toBe('121212121212131423241314232411122122111221221112212213142324135136145146235236245246');
 });
 
-$wrapped_generator_state             = new stdClass();
-$wrapped_generator_state->text       = '';
+$wrapped_generator_state = new stdClass();
+$wrapped_generator_state->text = '';
 $wrapped_generator_function_datasets = [1, 2, 3, 4];
 
 test(
