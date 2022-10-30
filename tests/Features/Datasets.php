@@ -230,6 +230,25 @@ test('more than two datasets did the job right', function () use ($state) {
     expect($state->text)->toBe('121212121212131423241314232411122122111221221112212213142324135136145146235236245246');
 });
 
+$wrapped_generator_state             = new stdClass();
+$wrapped_generator_state->text       = '';
+$wrapped_generator_function_datasets = [1, 2, 3, 4];
+
+test(
+    'eager registered wrapped datasets with Generator functions',
+    function (int $text) use (
+        $wrapped_generator_state,
+        $wrapped_generator_function_datasets
+    ) {
+        $wrapped_generator_state->text .= $text;
+        expect(in_array($text, $wrapped_generator_function_datasets))->toBe(true);
+    }
+)->with('numbers.generators.wrapped');
+
+test('eager registered wrapped datasets with Generator functions did the job right', function () use ($wrapped_generator_state) {
+    expect($wrapped_generator_state->text)->toBe('1234');
+});
+
 it('can resolve a dataset after the test case is available', function ($result) {
     expect($result)->toBe('bar');
 })->with([

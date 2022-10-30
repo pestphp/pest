@@ -102,6 +102,11 @@
   ✓ more than two datasets with (2) / (4) / (5)
   ✓ more than two datasets with (2) / (4) / (6)
   ✓ more than two datasets did the job right
+  ✓ eager registered wrapped datasets with Generator functions with (1)
+  ✓ eager registered wrapped datasets with Generator functions with (2)
+  ✓ eager registered wrapped datasets with Generator functions with (3)
+  ✓ eager registered wrapped datasets with Generator functions with (4)
+  ✓ eager registered wrapped datasets with Generator functions did the job right
   ✓ it can resolve a dataset after the test case is available with (Closure Object (...)) #1
   ✓ it can resolve a dataset after the test case is available with (Closure Object (...)) #2
   ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (...)) #1
@@ -818,4 +823,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    4 incomplete, 1 todo, 18 skipped, 562 passed (1460 assertions)
+  Tests:    4 incomplete, 1 todo, 18 skipped, 566 passed (1465 assertions)
