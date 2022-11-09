@@ -823,4 +823,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    4 incomplete, 1 todo, 18 skipped, 566 passed (1465 assertions)
+  Tests:    4 incomplete, 1 todo, 18 skipped, 567 passed (1465 assertions)
