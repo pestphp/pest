@@ -8,6 +8,7 @@ use ParseError;
 use Pest\Concerns;
 use Pest\Contracts\HasPrintableTestCaseName;
 use Pest\Exceptions\DatasetMissing;
+use Pest\Exceptions\TestDescriptionMissing;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Exceptions\TestAlreadyExist;
 use Pest\Factories\Concerns\HigherOrderable;
@@ -224,7 +225,7 @@ final class TestCaseFactory
     public function addMethod(TestCaseMethodFactory $method): void
     {
         if ($method->description === null) {
-            throw ShouldNotHappen::fromMessage('The test description may not be empty.');
+            throw new TestDescriptionMissing($method->filename);
         }
 
         if (array_key_exists($method->description, $this->methods)) {
