@@ -122,7 +122,7 @@ final class Datasets
             }
 
             if ($datasets[$index] instanceof Traversable) {
-                $datasets[$index] = iterator_to_array($datasets[$index]);
+                $datasets[$index] = iterator_to_array($datasets[$index], false);
             }
 
             foreach ($datasets[$index] as $key => $values) {
