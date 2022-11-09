@@ -60,6 +60,8 @@
   --columns <n> .................... Number of columns to use for progress output  
   --columns max ............ Use maximum number of columns for progress output  
   --stderr ................................. Write to STDERR instead of STDOUT  
+  --no-progress .................... Disable output of test execution progress  
+  --no-results ................................ Disable output of test results  
   --no-output ............................................. Disable all output  
   --display-incomplete .................. Display details for incomplete tests  
   --display-skipped ........................ Display details for skipped tests  
@@ -69,8 +71,7 @@
   --display-warnings ......... Display details for warnings triggered by tests  
   --reverse-list .............................. Print defects in reverse order  
   --teamcity ............... Report test execution progress in TeamCity format  
-  --testdox ................. Report test execution progress in TestDox format  
-  --no-interaction ........................ Disable TestDox progress animation  
+  --testdox ............................ Report test results in TestDox format  
 
   LOGGING OPTIONS:
   --log-junit <file> ................ Log test execution in JUnit XML format to file  
