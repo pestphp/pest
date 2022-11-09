@@ -20,6 +20,11 @@ $rules = [
     ],
     'concat_space'            => ['spacing' => 'one'],
     'not_operator_with_space' => false,
+    'global_namespace_import' => [
+        'import_classes'   => true,
+        'import_functions' => true,
+        'import_constants' => true,
+    ],
 ];
 
 $rules['increment_style'] = ['style' => 'post'];

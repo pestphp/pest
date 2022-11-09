@@ -9,6 +9,9 @@ use Pest\Support\ChainableClosure;
 use Pest\Support\ExceptionTrace;
 use Pest\TestSuite;
 use PHPUnit\Framework\ExecutionOrderDependency;
+
+use function sprintf;
+
 use Throwable;
 
 /**
@@ -257,7 +260,7 @@ trait Testable
      */
     public function toString(): string
     {
-        return \sprintf(
+        return sprintf(
             '%s::%s',
             self::$__filename,
             $this->__description

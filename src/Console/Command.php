@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pest\Console;
 
+use function is_dir;
+
 use Pest\Actions\AddsDefaults;
 use Pest\Actions\AddsTests;
 use Pest\Actions\InteractsWithPlugins;
@@ -81,7 +83,7 @@ final class Command extends BaseCommand
         $testSuite  = $this->arguments['test'];
 
         if (is_string($testSuite)) {
-            if (\is_dir($testSuite)) {
+            if (is_dir($testSuite)) {
                 /** @var string[] $files */
                 $files = (new FileIteratorFacade())->getFilesAsArray(
                     $testSuite,
