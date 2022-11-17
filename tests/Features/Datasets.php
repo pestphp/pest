@@ -250,8 +250,8 @@ test('eager registered wrapped datasets with Generator functions did the job rig
 test('eager registered wrapped datasets with Generator functions display description', function ($wrapped_generator_state_with_description) {
     expect($wrapped_generator_state_with_description)->not->toBeEmpty();
 })->with(function () {
-    yield 'taylor' => 'foo@bar.com';
-    yield 'james' => 'bar@foo.com';
+    yield 'taylor' => 'taylor@laravel.com';
+    yield 'james' => 'james@laravel.com';
 });
 
 it('can resolve a dataset after the test case is available', function ($result) {
