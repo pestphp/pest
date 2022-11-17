@@ -101,6 +101,8 @@
   ✓ eager registered wrapped datasets with Generator functions with (3)
   ✓ eager registered wrapped datasets with Generator functions with (4)
   ✓ eager registered wrapped datasets with Generator functions did the job right
+  ✓ eager registered wrapped datasets with Generator functions display description with data set "taylor"
+  ✓ eager registered wrapped datasets with Generator functions display description with data set "james"
   ✓ it can resolve a dataset after the test case is available with (Closure Object (...))
   ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (...)) #1
   ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (...)) #2
@@ -727,5 +729,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 485 passed
+  Tests:  4 incompleted, 9 skipped, 487 passed
   

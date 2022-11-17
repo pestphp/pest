@@ -247,6 +247,13 @@ test('eager registered wrapped datasets with Generator functions did the job rig
     expect($wrapped_generator_state->text)->toBe('1234');
 });
 
+test('eager registered wrapped datasets with Generator functions display description', function ($wrapped_generator_state_with_description) {
+    expect($wrapped_generator_state_with_description)->not->toBeEmpty();
+})->with(function () {
+    yield 'taylor' => 'foo@bar.com';
+    yield 'james' => 'bar@foo.com';
+});
+
 it('can resolve a dataset after the test case is available', function ($result) {
     expect($result)->toBe('bar');
 })->with([
