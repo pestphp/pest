@@ -6,7 +6,6 @@ namespace Pest\Expectations;
 
 use Pest\Expectation;
 use Pest\Support\Arr;
-use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\ExpectationFailedException;
 use SebastianBergmann\Exporter\Exporter;
 
@@ -65,8 +64,6 @@ final class OppositeExpectation
             /* @phpstan-ignore-next-line */
             $this->original->{$name}(...$arguments);
         } catch (ExpectationFailedException) {
-            Assert::assertTrue(true);
-
             return $this->original;
         }
 
@@ -83,8 +80,6 @@ final class OppositeExpectation
         try {
             $this->original->{$name}; // @phpstan-ignore-line
         } catch (ExpectationFailedException) {  // @phpstan-ignore-line
-            Assert::assertTrue(true);
-
             return $this->original;
         }
 
