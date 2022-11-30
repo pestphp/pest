@@ -9,6 +9,7 @@ use Pest\PendingCalls\TestCall;
 use Pest\PendingCalls\UsesCall;
 use Pest\Repositories\DatasetsRepository;
 use Pest\Support\Backtrace;
+use Pest\Support\DatasetInfo;
 use Pest\Support\HigherOrderTapProxy;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestCase;
@@ -60,7 +61,8 @@ if (! function_exists('dataset')) {
      */
     function dataset(string $name, Closure|iterable $dataset): void
     {
-        DatasetsRepository::set($name, $dataset);
+        $scope = DatasetInfo::scope(Backtrace::datasetsFile());
+        DatasetsRepository::set($name, $dataset, $scope);
     }
 }
 

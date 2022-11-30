@@ -1,6 +1,6 @@
 <?php
 
-use Pest\Exceptions\DatasetAlreadyExist;
+use Pest\Exceptions\DatasetAlreadyExists;
 use Pest\Exceptions\DatasetDoesNotExist;
 use Pest\Plugin;
 use Pest\Repositories\DatasetsRepository;
@@ -13,28 +13,28 @@ it('throws exception if dataset does not exist', function () {
     $this->expectException(DatasetDoesNotExist::class);
     $this->expectExceptionMessage("A dataset with the name `first` does not exist. You can create it using `dataset('first', ['a', 'b']);`.");
 
-    DatasetsRepository::resolve('foo', ['first']);
+    DatasetsRepository::resolve(['first'], __FILE__);
 });
 
 it('throws exception if dataset already exist', function () {
-    DatasetsRepository::set('second', [[]]);
-    $this->expectException(DatasetAlreadyExist::class);
-    $this->expectExceptionMessage('A dataset with the name `second` already exist.');
-    DatasetsRepository::set('second', [[]]);
+    DatasetsRepository::set('second', [[]], __DIR__);
+    $this->expectException(DatasetAlreadyExists::class);
+    $this->expectExceptionMessage('A dataset with the name `second` already exist in scope ['.__DIR__.'].');
+    DatasetsRepository::set('second', [[]], __DIR__);
 });
 
 it('sets closures', function () {
     DatasetsRepository::set('foo', function () {
         yield [1];
-    });
+    }, __DIR__);
 
-    expect(DatasetsRepository::resolve('foo', ['foo']))->toBe(['(1)' => [1]]);
+    expect(DatasetsRepository::resolve(['foo'], __FILE__))->toBe(['(1)' => [1]]);
 });
 
 it('sets arrays', function () {
-    DatasetsRepository::set('bar', [[2]]);
+    DatasetsRepository::set('bar', [[2]], __DIR__);
 
-    expect(DatasetsRepository::resolve('bar', ['bar']))->toBe(['(2)' => [2]]);
+    expect(DatasetsRepository::resolve(['bar'], __FILE__))->toBe(['(2)' => [2]]);
 });
 
 it('gets bound to test case object', function ($value) {
@@ -323,3 +323,5 @@ it('can correctly resolve a bound dataset that returns an array but wants to be 
         return ['foo', 'bar', 'baz'];
     },
 ]);
+
+todo('forbids to define tests in Datasets dirs and Datasets.php files');
