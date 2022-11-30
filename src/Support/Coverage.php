@@ -85,7 +85,7 @@ final class Coverage
 
         $totalWidth = (new Terminal())->getWidth();
 
-        $dottedLineLength = $totalWidth <= 70 ? $totalWidth : 70;
+        $dottedLineLength = $totalWidth - 6;
 
         $totalCoverage = $codeCoverage->getReport()->percentageOfExecutedLines();
 

@@ -22,7 +22,12 @@ trait Testable
     /**
      * Test method description.
      */
-    private static string $__description;
+    private string $__description;
+
+    /**
+     * Test "latest" method description.
+     */
+    private static string $__latestDescription;
 
     /**
      * The Test Case "test" closure.
@@ -69,7 +74,7 @@ trait Testable
 
         if ($test->hasMethod($name)) {
             $method = $test->getMethod($name);
-            self::$__description = $method->description;
+            $this->__description = self::$__latestDescription = $method->description;
             $this->__test = $method->getClosure($this);
         }
     }
@@ -169,7 +174,7 @@ trait Testable
      */
     protected function setUp(): void
     {
-        self::$__description = $this->name();
+        $this->__description = self::$__latestDescription = $this->name();
 
         TestSuite::getInstance()->test = $this;
 
@@ -221,7 +226,7 @@ trait Testable
     {
         $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
 
-        self::$__description = $this->dataName() ? $method->description.' with '.$this->dataName() : $method->description;
+        $this->__description = self::$__latestDescription = $this->dataName() ? $method->description.' with '.$this->dataName() : $method->description;
 
         if (count($arguments) !== 1) {
             return $arguments;
@@ -258,7 +263,7 @@ trait Testable
     }
 
     /**
-     * Gets the Test Case name that should be used by printers.
+     * The printable test case name.
      */
     public static function getPrintableTestCaseName(): string
     {
@@ -266,10 +271,18 @@ trait Testable
     }
 
     /**
-     * Gets the Test Case name that should be used by printers.
+     * The printable test case method name.
      */
-    public static function getPrintableTestCaseMethodName(): string
+    public function getPrintableTestCaseMethodName(): string
     {
-        return self::$__description;
+        return $this->__description;
+    }
+
+    /**
+     * The latest printable test case method name.
+     */
+    public static function getLatestPrintableTestCaseMethodName(): string
+    {
+        return self::$__latestDescription;
     }
 }

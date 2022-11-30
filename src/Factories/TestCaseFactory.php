@@ -10,6 +10,7 @@ use Pest\Contracts\HasPrintableTestCaseName;
 use Pest\Exceptions\DatasetMissing;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Exceptions\TestAlreadyExist;
+use Pest\Exceptions\TestDescriptionMissing;
 use Pest\Factories\Concerns\HigherOrderable;
 use Pest\Plugins\Environment;
 use Pest\Support\Reflection;
@@ -122,6 +123,8 @@ final class TestCaseFactory
         $rootPath = TestSuite::getInstance()->rootPath;
         $relativePath = str_replace($rootPath.DIRECTORY_SEPARATOR, '', $filename);
 
+        $relativePath = ltrim($relativePath, DIRECTORY_SEPARATOR);
+
         $basename = basename($relativePath, '.php');
 
         $dotPos = strpos($basename, '.');
@@ -208,7 +211,11 @@ final class TestCaseFactory
 
             eval($classCode);
         } catch (ParseError $caught) {
-            throw new RuntimeException(sprintf('Unable to create test case for test file at %s', $filename), 1, $caught);
+            throw new RuntimeException(sprintf(
+                "Unable to create test case for test file at %s. \n %s",
+                $filename,
+                $classCode
+            ), 1, $caught);
         }
     }
 
@@ -218,7 +225,7 @@ final class TestCaseFactory
     public function addMethod(TestCaseMethodFactory $method): void
     {
         if ($method->description === null) {
-            throw ShouldNotHappen::fromMessage('The test description may not be empty.');
+            throw new TestDescriptionMissing($method->filename);
         }
 
         if (array_key_exists($method->description, $this->methods)) {

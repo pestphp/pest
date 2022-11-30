@@ -524,7 +524,6 @@ final class Expectation
     {
         Assert::assertIsString($this->value, $message);
 
-        // @phpstan-ignore-next-line
         Assert::assertJson($this->value, $message);
 
         return $this;

@@ -156,7 +156,7 @@ final class DatasetsRepository
             }
 
             if ($datasets[$index] instanceof Traversable) {
-                $datasets[$index] = iterator_to_array($datasets[$index]);
+                $datasets[$index] = iterator_to_array($datasets[$index], false);
             }
 
             // @phpstan-ignore-next-line

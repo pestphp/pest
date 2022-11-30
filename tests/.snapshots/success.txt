@@ -29,7 +29,7 @@
   ✓ it does not append CoversNothing to other methods
   ✓ it throws exception if no class nor method has been found
 
-   PASS  Tests\Features\DatasetsTests
+   PASS  Tests\Features\Datasets
   ✓ it throws exception if dataset does not exist
   ✓ it throws exception if dataset already exist
   ✓ it sets closures
@@ -102,6 +102,11 @@
   ✓ more than two datasets with (2) / (4) / (5)
   ✓ more than two datasets with (2) / (4) / (6)
   ✓ more than two datasets did the job right
+  ✓ eager registered wrapped datasets with Generator functions with (1)
+  ✓ eager registered wrapped datasets with Generator functions with (2)
+  ✓ eager registered wrapped datasets with Generator functions with (3)
+  ✓ eager registered wrapped datasets with Generator functions with (4)
+  ✓ eager registered wrapped datasets with Generator functions did the job right
   ✓ it can resolve a dataset after the test case is available with (Closure Object (...)) #1
   ✓ it can resolve a dataset after the test case is available with (Closure Object (...)) #2
   ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (...)) #1
@@ -116,7 +121,6 @@
   ✓ it will not resolve a closure if it is type hinted as a callable with (Closure Object (...)) #2
   ✓ it can correctly resolve a bound dataset that returns an array with (Closure Object (...))
   ✓ it can correctly resolve a bound dataset that returns an array but wants to be spread with (Closure Object (...))
-  ↓ forbids to define tests in Datasets dirs and Datasets.php files
 
    PASS  Tests\Features\Depends
   ✓ first
@@ -664,47 +668,6 @@
   ✓ get 'foo' → get 'bar' → expect true → toBeTrue
   ✓ get 'foo' → expect true → toBeTrue
 
-   PASS  Tests\Features\ScopedDatasets\Directory\NestedDirectory1\TestFileInNestedDirectoryWithDatasetsFile
-  ✓ uses dataset with (1)
-  ✓ uses dataset with (2)
-  ✓ uses dataset with (3)
-  ✓ uses dataset with (4)
-  ✓ uses dataset with (5)
-  ✓ uses dataset with ('ScopedDatasets/NestedDirector...ts.php')
-  ✓ the right dataset is taken
-
-   PASS  Tests\Features\ScopedDatasets\Directory\NestedDirectory2\TestFileInNestedDirectory
-  ✓ uses dataset with (1)
-  ✓ uses dataset with (2)
-  ✓ uses dataset with (3)
-  ✓ uses dataset with (4)
-  ✓ uses dataset with (5)
-  ✓ uses dataset with ('ScopedDatasets/Datasets/Scoped.php')
-  ✓ the right dataset is taken
-
-   PASS  Tests\Features\ScopedDatasets\Directory\TestFileWithLocallyDefinedDataset
-  ✓ uses dataset with (1)
-  ✓ uses dataset with (2)
-  ✓ uses dataset with (3)
-  ✓ uses dataset with (4)
-  ✓ uses dataset with (5)
-  ✓ uses dataset with ('ScopedDatasets/ScopedDatasets.php')
-  ✓ the right dataset is taken
-
-   PASS  Tests\Features\ScopedDatasets\Directory\TestFileWithScopedDataset
-  ✓ uses dataset with (1)
-  ✓ uses dataset with (2)
-  ✓ uses dataset with (3)
-  ✓ uses dataset with (4)
-  ✓ uses dataset with (5)
-  ✓ uses dataset with ('ScopedDatasets/Datasets/Scoped.php')
-  ✓ the right dataset is taken
-
-   PASS  Tests\Features\ScopedDatasets\TestFileOutOfScope
-  ✓ uses dataset with (1)
-  ✓ uses dataset with (2)
-  ✓ the right dataset is taken
-
    WARN  Tests\Features\Skip
   ✓ it do not skips
   - it skips with truthy → 1
@@ -803,7 +766,7 @@
    PASS  Tests\Unit\Console\Help
   ✓ it outputs the help information when --help is used
 
-   PASS  Tests\Unit\DatasetsTests
+   PASS  Tests\Unit\Datasets
   ✓ it show only the names of named datasets in their description
   ✓ it show the actual dataset of non-named datasets in their description
   ✓ it show only the names of multiple named datasets in their description
@@ -828,26 +791,6 @@
   ✓ it creates an instance and resolves also sub parameters
   ✓ it can resolve builtin value types
   ✓ it cannot resolve a parameter without type
-
-   PASS  Tests\Unit\Support\DatasetInfo
-  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Datase...rs.php', true)
-  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Datasets.php', false)
-  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur...rs.php', true)
-  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur...rs.php', false)
-  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur...ts.php', false)
-  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Datase...rs.php', false)
-  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Datasets.php', true)
-  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur...rs.php', false) #1
-  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur...rs.php', false) #2
-  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur...ts.php', true)
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Datase...rs.php', '/var/www/project/tests')
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Datasets.php', '/var/www/project/tests')
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur...rs.php', '/var/www/project/tests/Features')
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur...rs.php', '/var/www/project/tests/Featur...rs.php') #1
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur...ts.php', '/var/www/project/tests/Features')
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur...rs.php', '/var/www/project/tests/Featur...ollers')
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur...rs.php', '/var/www/project/tests/Featur...rs.php') #2
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur...ts.php', '/var/www/project/tests/Featur...ollers')
 
    PASS  Tests\Unit\Support\Reflection
   ✓ it gets file name from closure
@@ -880,4 +823,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    4 incomplete, 2 todos, 18 skipped, 611 passed (1521 assertions)
+  Tests:    4 incomplete, 1 todo, 18 skipped, 567 passed (1465 assertions)

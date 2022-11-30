@@ -156,7 +156,7 @@ final class NameFilterIterator extends RecursiveFilterIterator
         if ($test instanceof HasPrintableTestCaseName) {
             return [
                 $test::getPrintableTestCaseName(),
-                $test::getPrintableTestCaseMethodName(),
+                $test->getPrintableTestCaseMethodName(),
             ];
         }
 
