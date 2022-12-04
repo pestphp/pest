@@ -858,6 +858,11 @@
   ✓ it gets file name from closure
   ✓ it gets property values
 
+   PASS  Tests\Unit\Support\Str
+  ✓ it evaluates the code with ('version()', 'version__')
+  ✓ it evaluates the code with ('version__ ', 'version___')
+  ✓ it evaluates the code with ('version\', 'version_')
+
    PASS  Tests\Unit\TestSuite
   ✓ it does not allow to add the same test description twice
   ✓ it alerts users about tests with arguments but no input
@@ -885,4 +890,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    4 incomplete, 2 todos, 18 skipped, 616 passed (1526 assertions)
+  Tests:    4 incomplete, 2 todos, 18 skipped, 619 passed (1529 assertions)
