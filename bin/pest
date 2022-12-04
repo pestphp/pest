@@ -11,6 +11,8 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
 (static function () {
+    $_SERVER['__PEST__'] = true;
+
     // Ensures Collision's Printer is registered.
     $_SERVER['COLLISION_PRINTER'] = 'DefaultPrinter';
 
