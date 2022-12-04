@@ -13,6 +13,3 @@ CHANGELOG.md             export-ignore
 CONTRIBUTING.md          export-ignore
 README.md                export-ignore
 
-# Inline
-/src/NotExported         export-ignore
-/phpunit.inline.xml      export-ignore

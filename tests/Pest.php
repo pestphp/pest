@@ -1,11 +1,8 @@
 <?php
 
-use Pest\NotExported\MyTestCase;
 use Tests\CustomTestCaseInSubFolders\SubFolder\SubFolder\CustomTestCaseInSubFolder;
 
 uses(CustomTestCaseInSubFolder::class)->in('PHPUnit/CustomTestCaseInSubFolders/SubFolder/SubFolder');
-
-uses(MyTestCase::class)->in('../src/NotExported');
 
 uses()->group('integration')->in('Visual');
 

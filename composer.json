@@ -51,14 +51,7 @@
     },
     "require-dev": {
         "pestphp/pest-dev-tools": "^2.0.0",
-        "pestphp/pest-plugin-inline": "2.x-dev",
         "symfony/process": "^6.2.0"
-    },
-    "repositories": {
-        "inline": {
-            "type": "path",
-            "url": "../pest-plugin-inline"
-        }
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
