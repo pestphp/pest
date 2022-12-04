@@ -23,6 +23,8 @@ final class BootFiles
      * @var array<int, string>
      */
     private const STRUCTURE = [
+        'Arch',
+        'Arch.php',
         'Expectations',
         'Expectations.php',
         'Helpers',
