@@ -48,7 +48,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
     $testSuite = TestSuite::getInstance(
         $rootPath,
-        $argv->getParameterOption('--test-directory', (new ConfigLoader($rootPath))->getTestsDirectory())
+        $argv->getParameterOption('--test-directory', ConfigLoader::DEFAULT_TESTS_PATH)
     );
 
     $isDecorated = $argv->getParameterOption('--colors', 'always') !== 'never';
