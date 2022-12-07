@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.22.3 (2022-12-07)](https://github.com/pestphp/pest/compare/v1.22.2...v1.22.3)
+### Fixed
+- Fixes ignoring datasets description on lazy datasets ([#612](https://github.com/pestphp/pest/pull/612))
+
 ## [v1.22.2 (2022-11-09)](https://github.com/pestphp/pest/compare/v1.22.1...v1.22.2)
 ### Fixed
 - Fixes storing lazy datasets into internal array ([#602](https://github.com/pestphp/pest/pull/602))
