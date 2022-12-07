@@ -165,8 +165,8 @@ final class TestCaseFactory
             $classFQN .= $className;
         }
 
-        $classAvailableAttributes = array_filter(self::ATTRIBUTES, fn (string $attribute): bool => $attribute::ABOVE_CLASS);
-        $methodAvailableAttributes = array_filter(self::ATTRIBUTES, fn (string $attribute): bool => ! $attribute::ABOVE_CLASS);
+        $classAvailableAttributes = array_filter(self::ATTRIBUTES, fn (string $attribute): bool => $attribute::$above);
+        $methodAvailableAttributes = array_filter(self::ATTRIBUTES, fn (string $attribute): bool => ! $attribute::$above);
 
         $classAttributes = [];
 
