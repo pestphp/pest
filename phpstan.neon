@@ -2,6 +2,9 @@ includes:
     - vendor/phpstan/phpstan-strict-rules/rules.neon
     - vendor/ergebnis/phpstan-rules/rules.neon
     - vendor/thecodingmachine/phpstan-strict-rules/phpstan-strict-rules.neon
+    - vendor/symplify/phpstan-rules/config/services/services.neon
+    - vendor/symplify/phpstan-rules/config/packages/cognitive-complexity/cognitive-complexity-services.neon
+
 
 parameters:
     level: max
@@ -21,3 +24,32 @@ parameters:
         - "#has parameter \\$closure with default value.#"
         - "#has parameter \\$description with default value.#"
         - "#Method Pest\\\\Support\\\\Reflection::getParameterClassName\\(\\) has a nullable return type declaration.#"
+services:
+    -
+        class: Symplify\PHPStanRules\Rules\Explicit\PropertyTypeDeclarationSeaLevelRule
+        tags: [phpstan.rules.rule]
+        arguments:
+            minimalLevel: 0.99
+
+    -
+        class: Symplify\PHPStanRules\Rules\Explicit\ParamTypeDeclarationSeaLevelRule
+        tags: [phpstan.rules.rule]
+        arguments:
+            minimalLevel: 0.96
+
+    -
+        class: Symplify\PHPStanRules\Rules\Explicit\ReturnTypeDeclarationSeaLevelRule
+        tags: [phpstan.rules.rule]
+        arguments:
+            minimalLevel: 0.96
+
+    -
+        class: Symplify\PHPStanRules\Collector\FunctionLike\ParamTypeSeaLevelCollector
+        tags: [phpstan.collector]
+    -
+        class: Symplify\PHPStanRules\Collector\FunctionLike\ReturnTypeSeaLevelCollector
+        tags: [phpstan.collector]
+    -
+        class: Symplify\PHPStanRules\Collector\ClassLike\PropertyTypeSeaLevelCollector
+        tags: [phpstan.collector]
+

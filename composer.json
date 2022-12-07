@@ -52,7 +52,8 @@
     "require-dev": {
         "pestphp/pest-dev-tools": "^2.0.0",
         "rector/rector": "^0.15.0",
-        "symfony/process": "^6.2.0"
+        "symfony/process": "^6.2.0",
+        "symplify/phpstan-rules": "^11.1.17"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
