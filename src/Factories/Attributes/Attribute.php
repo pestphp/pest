@@ -16,7 +16,7 @@ abstract class Attribute
      *
      * @var bool
      */
-    public const ABOVE_CLASS = false;
+    final public const ABOVE_CLASS = false;
 
     /**
      * @param  array<int, string>  $attributes
