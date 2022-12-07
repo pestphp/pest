@@ -209,7 +209,7 @@ final class TestCaseFactory
             }
             PHP;
 
-            eval($classCode);
+            eval($classCode); // @phpstan-ignore-line
         } catch (ParseError $caught) {
             throw new RuntimeException(sprintf(
                 "Unable to create test case for test file at %s. \n %s",
