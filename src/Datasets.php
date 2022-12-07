@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest;
 
 use Closure;
+use Generator;
 use Pest\Exceptions\DatasetAlreadyExist;
 use Pest\Exceptions\DatasetDoesNotExist;
 use SebastianBergmann\Exporter\Exporter;
@@ -122,7 +123,10 @@ final class Datasets
             }
 
             if ($datasets[$index] instanceof Traversable) {
-                $datasets[$index] = iterator_to_array($datasets[$index], false);
+                $preserveKeysForArrayIterator = $datasets[$index] instanceof Generator
+                    && is_string($datasets[$index]->key());
+
+                $datasets[$index] = iterator_to_array($datasets[$index], $preserveKeysForArrayIterator);
             }
 
             foreach ($datasets[$index] as $key => $values) {
