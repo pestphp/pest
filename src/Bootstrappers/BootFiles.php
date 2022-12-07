@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Bootstrappers;
 
+use Pest\Contracts\Bootstrapper;
 use Pest\Support\DatasetInfo;
 use Pest\Support\Str;
 use function Pest\testDirectory;
@@ -15,7 +16,7 @@ use SebastianBergmann\FileIterator\Facade as PhpUnitFileIterator;
 /**
  * @internal
  */
-final class BootFiles
+final class BootFiles implements Bootstrapper
 {
     /**
      * The Pest convention.
@@ -33,7 +34,7 @@ final class BootFiles
     /**
      * Boots the Subscribers.
      */
-    public function __invoke(): void
+    public function boot(): void
     {
         $rootPath = TestSuite::getInstance()->rootPath;
         $testsPath = $rootPath.DIRECTORY_SEPARATOR.testDirectory();

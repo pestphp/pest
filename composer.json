@@ -51,6 +51,7 @@
     },
     "require-dev": {
         "pestphp/pest-dev-tools": "^2.0.0",
+        "rector/rector": "^0.15.0",
         "symfony/process": "^6.2.0"
     },
     "minimum-stability": "dev",
@@ -66,7 +67,9 @@
         "bin/pest"
     ],
     "scripts": {
+        "refacto": "rector",
         "lint": "pint",
+        "test:refactor": "rector --dry-run",
         "test:lint": "pint --test",
         "test:types": "phpstan analyse --ansi --memory-limit=-1 --debug",
         "test:unit": "php bin/pest --colors=always --exclude-group=integration --compact",
@@ -75,6 +78,7 @@
         "test:integration": "php bin/pest --colors=always --group=integration -v",
         "update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --colors=always",
         "test": [
+            "@rest:refacto",
             "@test:lint",
             "@test:types",
             "@test:unit",

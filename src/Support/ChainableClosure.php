@@ -22,8 +22,8 @@ final class ChainableClosure
                 throw ShouldNotHappen::fromMessage('$this not bound to chainable closure.');
             }
 
-            \Pest\Support\Closure::bind($closure, $this, $this::class)(...func_get_args());
-            \Pest\Support\Closure::bind($next, $this, $this::class)(...func_get_args());
+            \Pest\Support\Closure::bind($closure, $this, self::class)(...func_get_args());
+            \Pest\Support\Closure::bind($next, $this, self::class)(...func_get_args());
         };
     }
 

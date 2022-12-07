@@ -90,9 +90,8 @@ final class OppositeExpectation
      * Creates a new expectation failed exception with a nice readable message.
      *
      * @param  array<int, mixed>  $arguments
-     * @return never
      */
-    private function throwExpectationFailedException(string $name, array $arguments = []): void
+    private function throwExpectationFailedException(string $name, array $arguments = []): never
     {
         $exporter = new Exporter();
 

@@ -154,7 +154,7 @@ final class TestCall
 
         $condition = is_callable($condition)
             ? $condition
-            : fn () => $condition;
+            : fn (): bool => $condition;
 
         $message = is_string($conditionOrMessage)
             ? $conditionOrMessage

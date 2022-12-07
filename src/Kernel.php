@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest;
 
+use Pest\Contracts\Bootstrapper;
 use Pest\Plugins\Actions\CallsAddsOutput;
 use Pest\Plugins\Actions\CallsBoot;
 use Pest\Plugins\Actions\CallsShutdown;
@@ -49,7 +50,10 @@ final class Kernel
     public static function boot(): self
     {
         foreach (self::BOOTSTRAPPERS as $bootstrapper) {
-            Container::getInstance()->get($bootstrapper)->__invoke();
+            $bootstrapper = Container::getInstance()->get($bootstrapper);
+            assert($bootstrapper instanceof Bootstrapper);
+
+            $bootstrapper->boot();
         }
 
         (new CallsBoot())->__invoke();

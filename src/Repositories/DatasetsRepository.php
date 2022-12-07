@@ -90,8 +90,7 @@ final class DatasetsRepository
      */
     public static function resolve(array $dataset, string $currentTestFile): array|null
     {
-        /* @phpstan-ignore-next-line */
-        if (empty($dataset)) {
+        if ($dataset === []) {
             return null;
         }
 
@@ -177,25 +176,21 @@ final class DatasetsRepository
     /**
      * @return Closure|iterable<int|string, mixed>
      */
-    private static function getScopedDataset(string $name, string $currentTestFile)
+    private static function getScopedDataset(string $name, string $currentTestFile): Closure|iterable
     {
-        $matchingDatasets = array_filter(self::$datasets, function (string $key) use ($name, $currentTestFile) {
+        $matchingDatasets = array_filter(self::$datasets, function (string $key) use ($name, $currentTestFile): bool {
             [$datasetScope, $datasetName] = explode(self::SEPARATOR, $key);
 
             if ($name !== $datasetName) {
                 return false;
             }
 
-            if (! str_starts_with($currentTestFile, $datasetScope)) {
-                return false;
-            }
-
-            return true;
+            return str_starts_with($currentTestFile, $datasetScope);
         }, ARRAY_FILTER_USE_KEY);
 
         $closestScopeDatasetKey = array_reduce(
             array_keys($matchingDatasets),
-            fn ($keyA, $keyB) => $keyA !== null && strlen($keyA) > strlen($keyB) ? $keyA : $keyB
+            fn ($keyA, $keyB) => $keyA !== null && strlen((string) $keyA) > strlen($keyB) ? $keyA : $keyB
         );
 
         if ($closestScopeDatasetKey === null) {

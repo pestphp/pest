@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Bootstrappers;
 
+use Pest\Contracts\Bootstrapper;
 use Pest\Subscribers;
 use PHPUnit\Event;
 use PHPUnit\Event\Subscriber;
@@ -11,7 +12,7 @@ use PHPUnit\Event\Subscriber;
 /**
  * @internal
  */
-final class BootSubscribers
+final class BootSubscribers implements Bootstrapper
 {
     /**
      * The Kernel subscribers.
@@ -28,7 +29,7 @@ final class BootSubscribers
     /**
      * Boots the Subscribers.
      */
-    public function __invoke(): void
+    public function boot(): void
     {
         foreach (self::SUBSCRIBERS as $subscriber) {
             Event\Facade::registerSubscriber(

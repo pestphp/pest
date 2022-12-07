@@ -85,7 +85,7 @@ final class TestCaseFactory
 
         $methods = array_values(array_filter(
             $this->methods,
-            fn ($method) => $methodsUsingOnly === [] || in_array($method, $methodsUsingOnly, true)
+            fn ($method): bool => $methodsUsingOnly === [] || in_array($method, $methodsUsingOnly, true)
         ));
 
         if ($methods !== []) {
@@ -165,21 +165,21 @@ final class TestCaseFactory
             $classFQN .= $className;
         }
 
-        $classAvailableAttributes = array_filter(self::ATTRIBUTES, fn (string $attribute) => $attribute::ABOVE_CLASS);
-        $methodAvailableAttributes = array_filter(self::ATTRIBUTES, fn (string $attribute) => ! $attribute::ABOVE_CLASS);
+        $classAvailableAttributes = array_filter(self::ATTRIBUTES, fn (string $attribute): bool => $attribute::ABOVE_CLASS);
+        $methodAvailableAttributes = array_filter(self::ATTRIBUTES, fn (string $attribute): bool => ! $attribute::ABOVE_CLASS);
 
         $classAttributes = [];
 
         foreach ($classAvailableAttributes as $attribute) {
             $classAttributes = array_reduce(
                 $methods,
-                fn (array $carry, TestCaseMethodFactory $methodFactory) => (new $attribute())->__invoke($methodFactory, $carry),
+                fn (array $carry, TestCaseMethodFactory $methodFactory): array => (new $attribute())->__invoke($methodFactory, $carry),
                 $classAttributes
             );
         }
 
         $methodsCode = implode('', array_map(
-            fn (TestCaseMethodFactory $methodFactory) => $methodFactory->buildForEvaluation(
+            fn (TestCaseMethodFactory $methodFactory): string => $methodFactory->buildForEvaluation(
                 $classFQN,
                 self::ANNOTATIONS,
                 $methodAvailableAttributes
@@ -188,7 +188,7 @@ final class TestCaseFactory
         ));
 
         $classAttributesCode = implode('', array_map(
-            static fn (string $attribute) => sprintf("\n%s", $attribute),
+            static fn (string $attribute): string => sprintf("\n%s", $attribute),
             array_unique($classAttributes),
         ));
 

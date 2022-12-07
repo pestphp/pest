@@ -42,7 +42,7 @@ final class TestRepository
      */
     public function getFilenames(): array
     {
-        $testCases = array_filter($this->testCases, static fn (TestCaseFactory $testCase) => $testCase->methodsUsingOnly() !== []);
+        $testCases = array_filter($this->testCases, static fn (TestCaseFactory $testCase): bool => $testCase->methodsUsingOnly() !== []);
 
         if ($testCases === []) {
             $testCases = $this->testCases;

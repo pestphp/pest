@@ -42,15 +42,15 @@ final class Coverage
             return false;
         }
 
-        if ($runtime->hasXdebug()) {
-            if (version_compare((string) phpversion('xdebug'), '3.1', '>=')) {
-                if (! in_array('coverage', xdebug_info('mode'), true)) {
-                    return false;
-                }
-            }
+        if (! $runtime->hasXdebug()) {
+            return true;
         }
 
-        return true;
+        if (! version_compare((string) phpversion('xdebug'), '3.1', '>=')) {
+            return true;
+        }
+
+        return in_array('coverage', xdebug_info('mode'), true);
     }
 
     /**

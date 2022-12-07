@@ -70,10 +70,12 @@ final class Expectation
             InvalidExpectationValue::expected('string');
         }
 
-        /** @var array<int|string, mixed>|bool $value */
-        $value = json_decode($this->value, true, 512);
+        $this->toBeJson();
 
-        return $this->toBeJson()->and($value);
+        /** @var array<int|string, mixed>|bool $value */
+        $value = json_decode($this->value, true, 512, JSON_THROW_ON_ERROR);
+
+        return $this->and($value);
     }
 
     /**

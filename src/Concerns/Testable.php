@@ -259,7 +259,7 @@ trait Testable
      */
     private function __callClosure(Closure $closure, array $arguments): mixed
     {
-        return ExceptionTrace::ensure(fn () => call_user_func_array(Closure::bind($closure, $this, $this::class), $arguments));
+        return ExceptionTrace::ensure(fn (): mixed => call_user_func_array(Closure::bind($closure, $this, $this::class), $arguments));
     }
 
     /**

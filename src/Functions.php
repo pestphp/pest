@@ -89,7 +89,7 @@ if (! function_exists('test')) {
      *
      * @return TestCall|TestCase|mixed
      */
-    function test(string $description = null, Closure $closure = null)
+    function test(string $description = null, Closure $closure = null): HigherOrderTapProxy|TestCall
     {
         if ($description === null && TestSuite::getInstance()->test !== null) {
             return new HigherOrderTapProxy(TestSuite::getInstance()->test);

@@ -58,6 +58,6 @@ trait Pipeable
      */
     private function pipes(string $name, object $context, string $scope): array
     {
-        return array_map(fn (Closure $pipe) => $pipe->bindTo($context, $scope), self::$pipes[$name] ?? []);
+        return array_map(fn (Closure $pipe): \Closure => $pipe->bindTo($context, $scope), self::$pipes[$name] ?? []);
     }
 }
