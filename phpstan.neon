@@ -29,7 +29,7 @@ services:
         class: Symplify\PHPStanRules\Rules\Explicit\PropertyTypeDeclarationSeaLevelRule
         tags: [phpstan.rules.rule]
         arguments:
-            minimalLevel: 0.99
+            minimalLevel: 1.00
 
     -
         class: Symplify\PHPStanRules\Rules\Explicit\ParamTypeDeclarationSeaLevelRule
@@ -41,14 +41,16 @@ services:
         class: Symplify\PHPStanRules\Rules\Explicit\ReturnTypeDeclarationSeaLevelRule
         tags: [phpstan.rules.rule]
         arguments:
-            minimalLevel: 0.96
+            minimalLevel: 0.97
 
     -
         class: Symplify\PHPStanRules\Collector\FunctionLike\ParamTypeSeaLevelCollector
         tags: [phpstan.collector]
+
     -
         class: Symplify\PHPStanRules\Collector\FunctionLike\ReturnTypeSeaLevelCollector
         tags: [phpstan.collector]
+
     -
         class: Symplify\PHPStanRules\Collector\ClassLike\PropertyTypeSeaLevelCollector
         tags: [phpstan.collector]
