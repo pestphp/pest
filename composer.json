@@ -77,7 +77,7 @@
         "test:integration": "php bin/pest --colors=always --group=integration -v",
         "update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --colors=always",
         "test": [
-            "@rest:refacto",
+            "@test:refacto",
             "@test:lint",
             "@test:types",
             "@test:unit",
