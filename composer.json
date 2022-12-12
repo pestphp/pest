@@ -20,7 +20,7 @@
         "php": "^7.3 || ^8.0",
         "nunomaduro/collision": "^5.11.0|^6.3.0",
         "pestphp/pest-plugin": "^1.1.0",
-        "phpunit/phpunit": "^9.5.26"
+        "phpunit/phpunit": "^9.5.27"
     },
     "autoload": {
         "psr-4": {
@@ -40,8 +40,8 @@
         ]
     },
     "require-dev": {
-        "illuminate/console": "^8.83.26",
-        "illuminate/support": "^8.83.26",
+        "illuminate/console": "^8.83.27",
+        "illuminate/support": "^8.83.27",
         "laravel/dusk": "^6.25.2",
         "pestphp/pest-dev-tools": "^1.0.0",
         "pestphp/pest-plugin-parallel": "^1.2"
