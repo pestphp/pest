@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Pest\Expectations;
 
+use Pest\Arch\ArchExpectation;
+use Pest\Arch\Expectations\ToDependOn;
+use Pest\Arch\Expectations\ToDependOnNothing;
+use Pest\Arch\Expectations\ToOnlyDependOn;
 use Pest\Expectation;
 use Pest\Support\Arr;
 use PHPUnit\Framework\ExpectationFailedException;
@@ -53,6 +57,44 @@ final class OppositeExpectation
     }
 
     /**
+     * Asserts that the layer does not depend on the given layers.
+     *
+     * @param  array<int, string>|string  $targets
+     * @return ArchExpectation<TValue>
+     */
+    public function toDependOn(array|string $targets): ArchExpectation
+    {
+        return ToDependOn::make($this->original, $targets)->opposite(
+            fn () => $this->throwExpectationFailedException('toDependOn', $targets),
+        );
+    }
+
+    /**
+     * Asserts that the layer does not only depends on the given layers.
+     *
+     * @param  array<int, string>|string  $targets
+     * @return ArchExpectation<TValue>
+     */
+    public function toOnlyDependOn(array|string $targets): ArchExpectation
+    {
+        return ToOnlyDependOn::make($this->original, $targets)->opposite(
+            fn () => $this->throwExpectationFailedException('toOnlyDependOn', $targets),
+        );
+    }
+
+    /**
+     * Asserts that the layer is depends on at least one layer.
+     *
+     * @return ArchExpectation<TValue>
+     */
+    public function toDependOnNothing(): ArchExpectation
+    {
+        return ToDependOnNothing::make($this->original)->opposite(
+            fn () => $this->throwExpectationFailedException('toDependOnNothing'),
+        );
+    }
+
+    /**
      * Handle dynamic method calls into the original expectation.
      *
      * @param  array<int, mixed>  $arguments
@@ -91,7 +133,7 @@ final class OppositeExpectation
      *
      * @param  array<int, mixed>  $arguments
      */
-    private function throwExpectationFailedException(string $name, array $arguments = []): never
+    public function throwExpectationFailedException(string $name, array $arguments = []): never
     {
         $exporter = new Exporter();
 

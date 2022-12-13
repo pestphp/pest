@@ -6,6 +6,10 @@ namespace Pest;
 
 use BadMethodCallException;
 use Closure;
+use Pest\Arch\ArchExpectation;
+use Pest\Arch\Expectations\ToDependOn;
+use Pest\Arch\Expectations\ToDependOnNothing;
+use Pest\Arch\Expectations\ToOnlyDependOn;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\Pipeable;
 use Pest\Concerns\Retrievable;
@@ -24,7 +28,7 @@ use PHPUnit\Framework\ExpectationFailedException;
  *
  * @template TValue
  *
- * @property Expectation     $not  Creates the opposite expectation.
+ * @property OppositeExpectation $not Creates the opposite expectation.
  * @property EachExpectation $each Creates an expectation on each element on the traversable value.
  *
  * @mixin Mixins\Expectation<TValue>
@@ -286,10 +290,14 @@ final class Expectation
             return new HigherOrderExpectation($this, call_user_func_array($this->value->$method(...), $parameters));
         }
 
-        ExpectationPipeline::for($this->getExpectationClosure($method))
+        $result = ExpectationPipeline::for($this->getExpectationClosure($method))
             ->send(...$parameters)
             ->through($this->pipes($method, $this, Expectation::class))
             ->run();
+
+        if ($result !== null) {
+            return $result;
+        }
 
         return $this;
     }
@@ -349,5 +357,38 @@ final class Expectation
     public function any(): Any
     {
         return new Any();
+    }
+
+    /**
+     * Asserts that the layer depends (not exclusively) on the given layers.
+     *
+     * @param  array<int, string>|string  $targets
+     * @return ArchExpectation<TValue>
+     */
+    public function toDependOn(array|string $targets): ArchExpectation
+    {
+        return ToDependOn::make($this, $targets);
+    }
+
+    /**
+     * Asserts that the layer only depends on the given layers.
+     *
+     * @param  array<int, string>|string  $targets
+     * @return ArchExpectation<TValue>
+     */
+    public function toOnlyDependOn(array|string $targets): ArchExpectation
+    {
+        return ToOnlyDependOn::make($this, $targets);
+    }
+
+    /**
+     * Asserts that the layer is not allowed to depend on any other layer.
+     *
+     * @param  array<int, string>|string  $targets
+     * @return ArchExpectation<TValue>
+     */
+    public function toDependOnNothing(): ArchExpectation
+    {
+        return ToDependOnNothing::make($this);
     }
 }
