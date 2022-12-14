@@ -60,7 +60,7 @@ final class OppositeExpectation
      * Asserts that the layer does not depend on the given layers.
      *
      * @param  array<int, string>|string  $targets
-     * @return ArchExpectation<TValue>
+     * @return ArchExpectation<string>
      */
     public function toDependOn(array|string $targets): ArchExpectation
     {
@@ -73,7 +73,7 @@ final class OppositeExpectation
      * Asserts that the layer does not only depends on the given layers.
      *
      * @param  array<int, string>|string  $targets
-     * @return ArchExpectation<TValue>
+     * @return ArchExpectation<string>
      */
     public function toOnlyDependOn(array|string $targets): ArchExpectation
     {
@@ -85,7 +85,7 @@ final class OppositeExpectation
     /**
      * Asserts that the layer is depends on at least one layer.
      *
-     * @return ArchExpectation<TValue>
+     * @return ArchExpectation<string>
      */
     public function toDependOnNothing(): ArchExpectation
     {
@@ -131,10 +131,12 @@ final class OppositeExpectation
     /**
      * Creates a new expectation failed exception with a nice readable message.
      *
-     * @param  array<int, mixed>  $arguments
+     * @param  array<int, mixed>|string  $arguments
      */
-    public function throwExpectationFailedException(string $name, array $arguments = []): never
+    public function throwExpectationFailedException(string $name, array|string $arguments = []): never
     {
+        $arguments = is_array($arguments) ? $arguments : [$arguments];
+
         $exporter = new Exporter();
 
         $toString = fn ($argument): string => $exporter->shortenedExport($argument);

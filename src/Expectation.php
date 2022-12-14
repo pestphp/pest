@@ -290,14 +290,10 @@ final class Expectation
             return new HigherOrderExpectation($this, call_user_func_array($this->value->$method(...), $parameters));
         }
 
-        $result = ExpectationPipeline::for($this->getExpectationClosure($method))
+        ExpectationPipeline::for($this->getExpectationClosure($method))
             ->send(...$parameters)
             ->through($this->pipes($method, $this, Expectation::class))
             ->run();
-
-        if ($result !== null) {
-            return $result;
-        }
 
         return $this;
     }
@@ -363,7 +359,7 @@ final class Expectation
      * Asserts that the layer depends (not exclusively) on the given layers.
      *
      * @param  array<int, string>|string  $targets
-     * @return ArchExpectation<TValue>
+     * @return ArchExpectation<string>
      */
     public function toDependOn(array|string $targets): ArchExpectation
     {
@@ -374,7 +370,7 @@ final class Expectation
      * Asserts that the layer only depends on the given layers.
      *
      * @param  array<int, string>|string  $targets
-     * @return ArchExpectation<TValue>
+     * @return ArchExpectation<string>
      */
     public function toOnlyDependOn(array|string $targets): ArchExpectation
     {
@@ -384,8 +380,7 @@ final class Expectation
     /**
      * Asserts that the layer is not allowed to depend on any other layer.
      *
-     * @param  array<int, string>|string  $targets
-     * @return ArchExpectation<TValue>
+     * @return ArchExpectation<string>
      */
     public function toDependOnNothing(): ArchExpectation
     {
