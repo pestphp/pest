@@ -13,7 +13,6 @@ trait Retrievable
      * @template TRetrievableValue
      *
      * Safely retrieve the value at the given key from an object or array.
-     *
      * @template TRetrievableValue
      *
      * @param  array<string, TRetrievableValue>|object  $value

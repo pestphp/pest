@@ -779,6 +779,9 @@
    PASS  Tests\PHPUnit\CustomAffixes\snakecasespec
   ✓ it runs file names like `snake_case_spec.php`
 
+   PASS  Tests\CustomTestCase\ExecutedTest
+  ✓ that gets executed
+
    PASS  Tests\PHPUnit\CustomTestCase\UsesPerDirectory
   ✓ closure was bound to CustomTestCase
 
@@ -894,4 +897,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    4 incomplete, 2 todos, 18 skipped, 621 passed (1533 assertions)
+  Tests:    4 incomplete, 2 todos, 18 skipped, 622 passed (1509 assertions)

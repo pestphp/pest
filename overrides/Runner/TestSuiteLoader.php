@@ -98,14 +98,14 @@ final class TestSuiteLoader
 
         self::$loadedClasses = array_merge($loadedClasses, self::$loadedClasses);
 
-        if (empty(self::$loadedClasses)) {
+        if (empty($loadedClasses)) {
             return $this->exceptionFor($suiteClassName, $suiteClassFile);
         }
 
         $testCaseFound = false;
 
-        foreach (self::$loadedClasses as $loadedClass) {
-            if (is_subclass_of($loadedClass, HasPrintableTestCaseName::class)) {
+        foreach (array_reverse($loadedClasses) as $loadedClass) {
+            if (is_subclass_of($loadedClass, HasPrintableTestCaseName::class) || is_subclass_of($loadedClass, TestCase::class)) {
                 $suiteClassName = $loadedClass;
 
                 $testCaseFound = true;
@@ -115,13 +115,7 @@ final class TestSuiteLoader
         }
 
         if (! $testCaseFound) {
-            foreach (self::$loadedClasses as $loadedClass) {
-                if (is_subclass_of($loadedClass, TestCase::class)) {
-                    $suiteClassName = $loadedClass;
-
-                    break;
-                }
-            }
+            return $this->exceptionFor($suiteClassName, $suiteClassFile);
         }
 
         if (! class_exists($suiteClassName, false)) {
