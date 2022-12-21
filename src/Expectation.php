@@ -6,7 +6,7 @@ namespace Pest;
 
 use BadMethodCallException;
 use Closure;
-use Pest\Arch\Conctracts\ArchExpectation;
+use Pest\Arch\Contracts\ArchExpectation;
 use Pest\Arch\Expectations\ToDependOn;
 use Pest\Arch\Expectations\ToDependOnNothing;
 use Pest\Arch\Expectations\ToOnlyDependOn;
