@@ -6,7 +6,7 @@ namespace Pest;
 
 use BadMethodCallException;
 use Closure;
-use Pest\Arch\ArchExpectation;
+use Pest\Arch\Conctracts\ArchExpectation;
 use Pest\Arch\Expectations\ToDependOn;
 use Pest\Arch\Expectations\ToDependOnNothing;
 use Pest\Arch\Expectations\ToOnlyDependOn;
@@ -359,7 +359,6 @@ final class Expectation
      * Asserts that the layer depends (not exclusively) on the given layers.
      *
      * @param  array<int, string>|string  $targets
-     * @return ArchExpectation<string>
      */
     public function toDependOn(array|string $targets): ArchExpectation
     {
@@ -370,7 +369,6 @@ final class Expectation
      * Asserts that the layer only depends on the given layers.
      *
      * @param  array<int, string>|string  $targets
-     * @return ArchExpectation<string>
      */
     public function toOnlyDependOn(array|string $targets): ArchExpectation
     {
@@ -379,8 +377,6 @@ final class Expectation
 
     /**
      * Asserts that the layer is not allowed to depend on any other layer.
-     *
-     * @return ArchExpectation<string>
      */
     public function toDependOnNothing(): ArchExpectation
     {

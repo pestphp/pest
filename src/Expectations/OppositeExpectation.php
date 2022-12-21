@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Pest\Expectations;
 
-use Pest\Arch\ArchExpectation;
+use Pest\Arch\Contracts\ArchExpectation;
 use Pest\Arch\Expectations\ToDependOn;
 use Pest\Arch\Expectations\ToDependOnNothing;
 use Pest\Arch\Expectations\ToOnlyDependOn;
+use Pest\Arch\GroupArchExpectation;
+use Pest\Arch\SingleArchExpectation;
+use Pest\Exceptions\InvalidExpectation;
 use Pest\Expectation;
 use Pest\Support\Arr;
 use PHPUnit\Framework\ExpectationFailedException;
@@ -60,38 +63,32 @@ final class OppositeExpectation
      * Asserts that the layer does not depend on the given layers.
      *
      * @param  array<int, string>|string  $targets
-     * @return ArchExpectation<string>
      */
     public function toDependOn(array|string $targets): ArchExpectation
     {
-        return ToDependOn::make($this->original, $targets)->opposite(
-            fn () => $this->throwExpectationFailedException('toDependOn', $targets),
-        );
+        return GroupArchExpectation::fromExpectations(array_map(function (string $target) : SingleArchExpectation {
+            return ToDependOn::make($this->original, $target)->opposite(
+                fn () => $this->throwExpectationFailedException('toDependOn', $target),
+            );
+        }, is_string($targets) ? [$targets] : $targets));
     }
 
     /**
      * Asserts that the layer does not only depends on the given layers.
      *
      * @param  array<int, string>|string  $targets
-     * @return ArchExpectation<string>
      */
-    public function toOnlyDependOn(array|string $targets): ArchExpectation
+    public function toOnlyDependOn(array|string $targets): never
     {
-        return ToOnlyDependOn::make($this->original, $targets)->opposite(
-            fn () => $this->throwExpectationFailedException('toOnlyDependOn', $targets),
-        );
+        throw InvalidExpectation::fromMethods(['not', 'toOnlyDependOn']);
     }
 
     /**
      * Asserts that the layer is depends on at least one layer.
-     *
-     * @return ArchExpectation<string>
      */
-    public function toDependOnNothing(): ArchExpectation
+    public function toDependOnNothing(): never
     {
-        return ToDependOnNothing::make($this->original)->opposite(
-            fn () => $this->throwExpectationFailedException('toDependOnNothing'),
-        );
+        throw InvalidExpectation::fromMethods(['not', 'toDependOnNothing']);
     }
 
     /**
