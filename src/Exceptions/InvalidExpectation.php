@@ -12,10 +12,11 @@ use Symfony\Component\Console\Exception\ExceptionInterface;
 /**
  * @internal
  */
-final class InvalidExpectation extends LogicException  implements ExceptionInterface, RenderlessEditor, RenderlessTrace
+final class InvalidExpectation extends LogicException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
 {
     /**
      * @param  array<int, string>  $methods
+     *
      * @throws self
      */
     public static function fromMethods(array $methods): never

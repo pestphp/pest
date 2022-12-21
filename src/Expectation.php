@@ -9,6 +9,7 @@ use Closure;
 use Pest\Arch\Contracts\ArchExpectation;
 use Pest\Arch\Expectations\ToDependOn;
 use Pest\Arch\Expectations\ToDependOnNothing;
+use Pest\Arch\Expectations\ToOnlyBeUsedOn;
 use Pest\Arch\Expectations\ToOnlyDependOn;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\Pipeable;
@@ -356,30 +357,40 @@ final class Expectation
     }
 
     /**
-     * Asserts that the layer depends (not exclusively) on the given layers.
+     * Asserts that the given expectation target depends on the given dependencies.
      *
-     * @param  array<int, string>|string  $targets
+     * @param  array<int, string>|string  $dependencies
      */
-    public function toDependOn(array|string $targets): ArchExpectation
+    public function toDependOn(array|string $dependencies): ArchExpectation
     {
-        return ToDependOn::make($this, $targets);
+        return ToDependOn::make($this, $dependencies);
     }
 
     /**
-     * Asserts that the layer only depends on the given layers.
+     * Asserts that the given expectation target does not have any dependencies.
+     */
+    public function toDependOnNothing(): ArchExpectation
+    {
+        return ToDependOnNothing::make($this);
+    }
+
+    /**
+     * Asserts that the given expectation dependency is only depended on by the given targets.
+     *
+     * @param  array<int, string>|string  $targets
+     */
+    public function toOnlyBeUsedOn(array|string $targets): ArchExpectation
+    {
+        return ToOnlyBeUsedOn::make($this, $targets);
+    }
+
+    /**
+     * Asserts that the given expectation target does "only" depend on the given dependencies.
      *
      * @param  array<int, string>|string  $targets
      */
     public function toOnlyDependOn(array|string $targets): ArchExpectation
     {
         return ToOnlyDependOn::make($this, $targets);
-    }
-
-    /**
-     * Asserts that the layer is not allowed to depend on any other layer.
-     */
-    public function toDependOnNothing(): ArchExpectation
-    {
-        return ToDependOnNothing::make($this);
     }
 }

@@ -6,8 +6,6 @@ namespace Pest\Expectations;
 
 use Pest\Arch\Contracts\ArchExpectation;
 use Pest\Arch\Expectations\ToDependOn;
-use Pest\Arch\Expectations\ToDependOnNothing;
-use Pest\Arch\Expectations\ToOnlyDependOn;
 use Pest\Arch\GroupArchExpectation;
 use Pest\Arch\SingleArchExpectation;
 use Pest\Exceptions\InvalidExpectation;
@@ -60,31 +58,39 @@ final class OppositeExpectation
     }
 
     /**
-     * Asserts that the layer does not depend on the given layers.
+     * Asserts that the given expectation target depends on the given dependencies.
      *
-     * @param  array<int, string>|string  $targets
+     * @param  array<int, string>|string  $dependencies
      */
-    public function toDependOn(array|string $targets): ArchExpectation
+    public function toDependOn(array|string $dependencies): ArchExpectation
     {
-        return GroupArchExpectation::fromExpectations(array_map(function (string $target) : SingleArchExpectation {
-            return ToDependOn::make($this->original, $target)->opposite(
-                fn () => $this->throwExpectationFailedException('toDependOn', $target),
-            );
-        }, is_string($targets) ? [$targets] : $targets));
+        return GroupArchExpectation::fromExpectations(array_map(fn (string $target): SingleArchExpectation => ToDependOn::make($this->original, $target)->opposite(
+            fn () => $this->throwExpectationFailedException('toDependOn', $target),
+        ), is_string($dependencies) ? [$dependencies] : $dependencies));
     }
 
     /**
-     * Asserts that the layer does not only depends on the given layers.
+     * Asserts that the given expectation dependency is only depended on by the given targets.
      *
      * @param  array<int, string>|string  $targets
      */
-    public function toOnlyDependOn(array|string $targets): never
+    public function toOnlyBeUsedOn(array|string $targets): never
+    {
+        throw InvalidExpectation::fromMethods(['not', 'toOnlyBeUsedOn']);
+    }
+
+    /**
+     * Asserts that the given expectation target does "only" depend on the given dependencies.
+     *
+     * @param  array<int, string>|string  $dependencies
+     */
+    public function toOnlyDependOn(array|string $dependencies): never
     {
         throw InvalidExpectation::fromMethods(['not', 'toOnlyDependOn']);
     }
 
     /**
-     * Asserts that the layer is depends on at least one layer.
+     * Asserts that the given expectation target does not have any dependencies.
      */
     public function toDependOnNothing(): never
     {
