@@ -107,6 +107,8 @@
   ✓ eager registered wrapped datasets with Generator functions with (3)
   ✓ eager registered wrapped datasets with Generator functions with (4)
   ✓ eager registered wrapped datasets with Generator functions did the job right
+  ✓ eager registered wrapped datasets with Generator functions display description with data set "taylor"
+  ✓ eager registered wrapped datasets with Generator functions display description with data set "james"
   ✓ it can resolve a dataset after the test case is available with (Closure Object (...)) #1
   ✓ it can resolve a dataset after the test case is available with (Closure Object (...)) #2
   ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (...)) #1
@@ -897,4 +899,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    4 incomplete, 2 todos, 18 skipped, 622 passed (1509 assertions)
+

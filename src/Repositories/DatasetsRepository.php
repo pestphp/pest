@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Repositories;
 
 use Closure;
+use Generator;
 use Pest\Exceptions\DatasetAlreadyExists;
 use Pest\Exceptions\DatasetDoesNotExist;
 use Pest\Exceptions\ShouldNotHappen;
@@ -155,7 +156,10 @@ final class DatasetsRepository
             }
 
             if ($datasets[$index] instanceof Traversable) {
-                $datasets[$index] = iterator_to_array($datasets[$index], false);
+                $preserveKeysForArrayIterator = $datasets[$index] instanceof Generator
+                    && is_string($datasets[$index]->key());
+
+                $datasets[$index] = iterator_to_array($datasets[$index], $preserveKeysForArrayIterator);
             }
 
             foreach ($datasets[$index] as $key => $values) {
