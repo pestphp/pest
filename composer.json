@@ -19,7 +19,7 @@
     "require": {
         "php": "^8.1.0",
         "nunomaduro/collision": "^7.0.0",
-        "nunomaduro/termwind": "^1.14.2",
+        "nunomaduro/termwind": "^1.15",
         "pestphp/pest-plugin": "^2.0.0",
         "phpunit/phpunit": "10.0.x-dev"
     },
@@ -51,6 +51,7 @@
     },
     "require-dev": {
         "pestphp/pest-dev-tools": "^2.1.0",
+        "pestphp/pest-plugin-arch": "^2.0.0",
         "symfony/process": "^6.2.0"
     },
     "minimum-stability": "dev",
@@ -77,7 +78,7 @@
         "test:integration": "php bin/pest --colors=always --group=integration -v",
         "update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --colors=always",
         "test": [
-            "@rest:refacto",
+            "@test:refacto",
             "@test:lint",
             "@test:types",
             "@test:unit",

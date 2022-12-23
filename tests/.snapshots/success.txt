@@ -781,6 +781,9 @@
    PASS  Tests\PHPUnit\CustomAffixes\snakecasespec
   ✓ it runs file names like `snake_case_spec.php`
 
+   PASS  Tests\CustomTestCase\ExecutedTest
+  ✓ that gets executed
+
    PASS  Tests\PHPUnit\CustomTestCase\UsesPerDirectory
   ✓ closure was bound to CustomTestCase
 
@@ -816,6 +819,10 @@
   ✓ it show only the names of multiple named datasets in their description
   ✓ it show the actual dataset of multiple non-named datasets in their description
   ✓ it show the correct description for mixed named and not-named datasets
+
+   PASS  Tests\Unit\Expectations\OppositeExpectation
+  ✓ it throw expectation failed exception with string argument
+  ✓ it throw expectation failed exception with array argument
 
    PASS  Tests\Unit\Plugins\Environment
   ✓ environment is set to CI when --ci option is used
@@ -892,4 +899,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    4 incomplete, 2 todos, 18 skipped, 621 passed (1531 assertions)
+

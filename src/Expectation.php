@@ -6,6 +6,11 @@ namespace Pest;
 
 use BadMethodCallException;
 use Closure;
+use Pest\Arch\Contracts\ArchExpectation;
+use Pest\Arch\Expectations\ToDependOn;
+use Pest\Arch\Expectations\ToDependOnNothing;
+use Pest\Arch\Expectations\ToOnlyBeUsedOn;
+use Pest\Arch\Expectations\ToOnlyDependOn;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\Pipeable;
 use Pest\Concerns\Retrievable;
@@ -24,7 +29,7 @@ use PHPUnit\Framework\ExpectationFailedException;
  *
  * @template TValue
  *
- * @property Expectation     $not  Creates the opposite expectation.
+ * @property OppositeExpectation $not Creates the opposite expectation.
  * @property EachExpectation $each Creates an expectation on each element on the traversable value.
  *
  * @mixin Mixins\Expectation<TValue>
@@ -349,5 +354,43 @@ final class Expectation
     public function any(): Any
     {
         return new Any();
+    }
+
+    /**
+     * Asserts that the given expectation target depends on the given dependencies.
+     *
+     * @param  array<int, string>|string  $dependencies
+     */
+    public function toDependOn(array|string $dependencies): ArchExpectation
+    {
+        return ToDependOn::make($this, $dependencies);
+    }
+
+    /**
+     * Asserts that the given expectation target does not have any dependencies.
+     */
+    public function toDependOnNothing(): ArchExpectation
+    {
+        return ToDependOnNothing::make($this);
+    }
+
+    /**
+     * Asserts that the given expectation dependency is only depended on by the given targets.
+     *
+     * @param  array<int, string>|string  $targets
+     */
+    public function toOnlyBeUsedOn(array|string $targets): ArchExpectation
+    {
+        return ToOnlyBeUsedOn::make($this, $targets);
+    }
+
+    /**
+     * Asserts that the given expectation target does "only" depend on the given dependencies.
+     *
+     * @param  array<int, string>|string  $targets
+     */
+    public function toOnlyDependOn(array|string $targets): ArchExpectation
+    {
+        return ToOnlyDependOn::make($this, $targets);
     }
 }
