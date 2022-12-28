@@ -7,6 +7,7 @@ namespace Pest;
 use BadMethodCallException;
 use Closure;
 use Pest\Arch\Contracts\ArchExpectation;
+use Pest\Arch\Expectations\ToBeUsedOn;
 use Pest\Arch\Expectations\ToDependOn;
 use Pest\Arch\Expectations\ToDependOnNothing;
 use Pest\Arch\Expectations\ToOnlyBeUsedOn;
@@ -359,11 +360,21 @@ final class Expectation
     /**
      * Asserts that the given expectation target depends on the given dependencies.
      *
-     * @param  array<int, string>|string  $dependencies
+     * @param  array<int, string>|string  $targets
      */
-    public function toDependOn(array|string $dependencies): ArchExpectation
+    public function toDependOn(array|string $targets): ArchExpectation
     {
-        return ToDependOn::make($this, $dependencies);
+        return ToDependOn::make($this, $targets);
+    }
+
+    /**
+     * Asserts that the given expectation target "only" depends on the given dependencies.
+     *
+     * @param  array<int, string>|string  $targets
+     */
+    public function toOnlyDependOn(array|string $targets): ArchExpectation
+    {
+        return ToOnlyDependOn::make($this, $targets);
     }
 
     /**
@@ -375,22 +386,22 @@ final class Expectation
     }
 
     /**
-     * Asserts that the given expectation dependency is only depended on by the given targets.
+     * Asserts that the given expectation dependency is used by the given targets.
+     *
+     * @param  array<int, string>|string  $targets
+     */
+    public function toBeUsedOn(array|string $targets): ArchExpectation
+    {
+        return ToBeUsedOn::make($this, $targets);
+    }
+
+    /**
+     * Asserts that the given expectation dependency is "only" used by the given targets.
      *
      * @param  array<int, string>|string  $targets
      */
     public function toOnlyBeUsedOn(array|string $targets): ArchExpectation
     {
         return ToOnlyBeUsedOn::make($this, $targets);
-    }
-
-    /**
-     * Asserts that the given expectation target does "only" depend on the given dependencies.
-     *
-     * @param  array<int, string>|string  $targets
-     */
-    public function toOnlyDependOn(array|string $targets): ArchExpectation
-    {
-        return ToOnlyDependOn::make($this, $targets);
     }
 }
