@@ -95,7 +95,7 @@ final class TestSuite
             return self::$instance;
         }
 
-        if (self::$instance === null) {
+        if (! self::$instance instanceof self) {
             throw new InvalidPestCommand();
         }
 

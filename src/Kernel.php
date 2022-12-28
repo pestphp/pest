@@ -23,6 +23,7 @@ final class Kernel
      * @var array<int, class-string>
      */
     private const BOOTSTRAPPERS = [
+        Bootstrappers\BootOverrides::class,
         Bootstrappers\BootExceptionHandler::class,
         Bootstrappers\BootSubscribers::class,
         Bootstrappers\BootFiles::class,

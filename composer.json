@@ -27,15 +27,7 @@
         "psr-4": {
             "Pest\\": "src/"
         },
-        "exclude-from-classmap": [
-            "../phpunit/phpunit/src/Runner/Filter/NameFilterIterator.php",
-            "vendor/phpunit/phpunit/src/Runner/Filter/NameFilterIterator.php",
-            "../phpunit/src/Runner/TestSuiteLoader.php",
-            "vendor/phpunit/phpunit/src/Runner/TestSuiteLoader.php"
-        ],
         "files": [
-            "overrides/Runner/Filter/NameFilterIterator.php",
-            "overrides/Runner/TestSuiteLoader.php",
             "src/Functions.php",
             "src/Pest.php"
         ]

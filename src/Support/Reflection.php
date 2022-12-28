@@ -12,6 +12,7 @@ use ReflectionException;
 use ReflectionFunction;
 use ReflectionNamedType;
 use ReflectionParameter;
+use ReflectionProperty;
 use ReflectionUnionType;
 
 /**
@@ -95,7 +96,7 @@ final class Reflection
 
         $reflectionProperty = null;
 
-        while ($reflectionProperty === null) {
+        while (! $reflectionProperty instanceof ReflectionProperty) {
             try {
                 /* @var ReflectionProperty $reflectionProperty */
                 $reflectionProperty = $reflectionClass->getProperty($property);
@@ -127,7 +128,7 @@ final class Reflection
 
         $reflectionProperty = null;
 
-        while ($reflectionProperty === null) {
+        while (! $reflectionProperty instanceof ReflectionProperty) {
             try {
                 /* @var ReflectionProperty $reflectionProperty */
                 $reflectionProperty = $reflectionClass->getProperty($property);
