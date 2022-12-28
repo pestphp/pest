@@ -27,7 +27,7 @@ final class Backtrace
 
         foreach (debug_backtrace(self::BACKTRACE_OPTIONS) as $trace) {
             assert(array_key_exists(self::FILE, $trace));
-            if (Str::endsWith($trace[self::FILE], (string) realpath('vendor/phpunit/phpunit/src/Util/FileLoader.php'))) {
+            if (Str::endsWith($trace[self::FILE], (string) realpath(__DIR__.'/../../../../phpunit/phpunit/src/Util/FileLoader.php'))) {
                 break;
             }
 
