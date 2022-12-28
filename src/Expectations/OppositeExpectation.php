@@ -6,6 +6,7 @@ namespace Pest\Expectations;
 
 use Pest\Arch\Contracts\ArchExpectation;
 use Pest\Arch\Expectations\ToBeUsedOn;
+use Pest\Arch\Expectations\ToBeUsedOnNothing;
 use Pest\Arch\Expectations\ToDependOn;
 use Pest\Arch\GroupArchExpectation;
 use Pest\Arch\SingleArchExpectation;
@@ -84,6 +85,14 @@ final class OppositeExpectation
     }
 
     /**
+     * Asserts that the given expectation dependency is not used.
+     */
+    public function toBeUsed(): ArchExpectation
+    {
+        return ToBeUsedOnNothing::make($this->original);
+    }
+
+    /**
      * Asserts that the given expectation dependency is not used by any of the given targets.
      *
      * @param  array<int, string>|string  $targets
@@ -98,6 +107,14 @@ final class OppositeExpectation
     public function toOnlyBeUsedOn(): never
     {
         throw InvalidExpectation::fromMethods(['not', 'toOnlyBeUsedOn']);
+    }
+
+    /**
+     * Asserts that the given expectation dependency is not used.
+     */
+    public function toBeUsedOnNothing(): ArchExpectation
+    {
+        throw InvalidExpectation::fromMethods(['not', 'toBeUsedOnNothing']);
     }
 
     /**
