@@ -38,6 +38,14 @@ final class TempRepository
     }
 
     /**
+     * Checks if there is any element.
+     */
+    public function isEmpty(): bool
+    {
+        return $this->all() === [];
+    }
+
+    /**
      * Checks if the given element exists.
      */
     public function exists(string $element): bool
