@@ -116,7 +116,6 @@ final class Coverage
                     <span class="text-{$color}">{$percentage}%</span>
                 </div>
             HTML);
-
         }
 
         $totalCoverageAsString = $totalCoverage->asFloat() === 0.0
