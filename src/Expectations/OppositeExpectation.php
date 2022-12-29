@@ -7,7 +7,7 @@ namespace Pest\Expectations;
 use Pest\Arch\Contracts\ArchExpectation;
 use Pest\Arch\Expectations\ToBeUsedOn;
 use Pest\Arch\Expectations\ToBeUsedOnNothing;
-use Pest\Arch\Expectations\ToDependOn;
+use Pest\Arch\Expectations\ToUse;
 use Pest\Arch\GroupArchExpectation;
 use Pest\Arch\SingleArchExpectation;
 use Pest\Exceptions\InvalidExpectation;
@@ -60,28 +60,28 @@ final class OppositeExpectation
     }
 
     /**
-     * Asserts that the given expectation target does not depend on any of the given dependencies.
+     * Asserts that the given expectation target does not use any of the given dependencies.
      *
      * @param  array<int, string>|string  $targets
      */
-    public function toDependOn(array|string $targets): ArchExpectation
+    public function toUse(array|string $targets): ArchExpectation
     {
-        return GroupArchExpectation::fromExpectations($this->original, array_map(fn (string $target): SingleArchExpectation => ToDependOn::make($this->original, $target)->opposite(
-            fn () => $this->throwExpectationFailedException('toDependOn', $target),
+        return GroupArchExpectation::fromExpectations($this->original, array_map(fn (string $target): SingleArchExpectation => ToUse::make($this->original, $target)->opposite(
+            fn () => $this->throwExpectationFailedException('toUse', $target),
         ), is_string($targets) ? [$targets] : $targets));
     }
 
     /**
      * @param  array<int, string>|string  $targets
      */
-    public function toOnlyDependOn(array|string $targets): never
+    public function toOnlyUse(array|string $targets): never
     {
-        throw InvalidExpectation::fromMethods(['not', 'toOnlyDependOn']);
+        throw InvalidExpectation::fromMethods(['not', 'toOnlyUse']);
     }
 
-    public function toDependOnNothing(): never
+    public function toUseNothing(): never
     {
-        throw InvalidExpectation::fromMethods(['not', 'toDependOnNothing']);
+        throw InvalidExpectation::fromMethods(['not', 'toUseNothing']);
     }
 
     /**

@@ -9,10 +9,10 @@ use Closure;
 use Pest\Arch\Contracts\ArchExpectation;
 use Pest\Arch\Expectations\ToBeUsedOn;
 use Pest\Arch\Expectations\ToBeUsedOnNothing;
-use Pest\Arch\Expectations\ToDependOn;
-use Pest\Arch\Expectations\ToDependOnNothing;
+use Pest\Arch\Expectations\ToUse;
+use Pest\Arch\Expectations\ToUseNothing;
 use Pest\Arch\Expectations\ToOnlyBeUsedOn;
-use Pest\Arch\Expectations\ToOnlyDependOn;
+use Pest\Arch\Expectations\ToOnlyUse;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\Pipeable;
 use Pest\Concerns\Retrievable;
@@ -360,31 +360,31 @@ final class Expectation
     }
 
     /**
-     * Asserts that the given expectation target depends on the given dependencies.
+     * Asserts that the given expectation target use the given dependencies.
      *
      * @param  array<int, string>|string  $targets
      */
-    public function toDependOn(array|string $targets): ArchExpectation
+    public function toUse(array|string $targets): ArchExpectation
     {
-        return ToDependOn::make($this, $targets);
+        return ToUse::make($this, $targets);
     }
 
     /**
-     * Asserts that the given expectation target "only" depends on the given dependencies.
+     * Asserts that the given expectation target "only" use on the given dependencies.
      *
      * @param  array<int, string>|string  $targets
      */
-    public function toOnlyDependOn(array|string $targets): ArchExpectation
+    public function toOnlyUse(array|string $targets): ArchExpectation
     {
-        return ToOnlyDependOn::make($this, $targets);
+        return ToOnlyUse::make($this, $targets);
     }
 
     /**
-     * Asserts that the given expectation target does not have any dependencies.
+     * Asserts that the given expectation target does not use any dependencies.
      */
-    public function toDependOnNothing(): ArchExpectation
+    public function toUseNothing(): ArchExpectation
     {
-        return ToDependOnNothing::make($this);
+        return ToUseNothing::make($this);
     }
 
     public function toBeUsed(): never
