@@ -60,7 +60,9 @@ final class TempRepository
      */
     private function all(): array
     {
-        $contents = file_get_contents(self::FOLDER.'/'.$this->filename.'.json');
+        $path = self::FOLDER.'/'.$this->filename.'.json';
+
+        $contents = file_exists($path) ? file_get_contents($path) : '{}';
 
         assert(is_string($contents));
 
