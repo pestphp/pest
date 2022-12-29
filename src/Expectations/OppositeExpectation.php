@@ -112,7 +112,7 @@ final class OppositeExpectation
     /**
      * Asserts that the given expectation dependency is not used.
      */
-    public function toBeUsedOnNothing(): ArchExpectation
+    public function toBeUsedOnNothing(): never
     {
         throw InvalidExpectation::fromMethods(['not', 'toBeUsedOnNothing']);
     }
