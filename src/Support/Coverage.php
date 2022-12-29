@@ -10,9 +10,9 @@ use SebastianBergmann\CodeCoverage\Node\Directory;
 use SebastianBergmann\CodeCoverage\Node\File;
 use SebastianBergmann\Environment\Runtime;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Terminal;
 use function Termwind\render;
 use function Termwind\renderUsing;
+use function Termwind\terminal;
 
 /**
  * @internal
@@ -83,10 +83,6 @@ final class Coverage
         $codeCoverage = require $reportPath;
         unlink($reportPath);
 
-        $totalWidth = (new Terminal())->getWidth();
-
-        $dottedLineLength = $totalWidth - 6;
-
         $totalCoverage = $codeCoverage->getReport()->percentageOfExecutedLines();
 
         /** @var Directory<File|Directory> $report */
@@ -103,36 +99,24 @@ final class Coverage
                 $dirname,
                 $basename,
             ]);
-            $rawName = $dirname === '.' ? $basename : implode(DIRECTORY_SEPARATOR, [
-                $dirname,
-                $basename,
-            ]);
-
-            $linesExecutedTakenSize = 0;
-
-            if ($file->percentageOfExecutedLines()->asString() != '0.00%') {
-                $linesExecutedTakenSize = strlen($uncoveredLines = trim(implode(', ', self::getMissingCoverage($file)))) + 1;
-                $name .= sprintf(' <fg=red>%s</>', $uncoveredLines);
-            }
 
             $percentage = $file->numberOfExecutableLines() === 0
                 ? '100.0'
                 : number_format($file->percentageOfExecutedLines()->asFloat(), 1, '.', '');
 
-            $takenSize = strlen($rawName.$percentage) + 2 + $linesExecutedTakenSize; // adding 3 space and percent sign
+            $color = $percentage === '100.0' ? 'green' : ($percentage === '0.0' ? 'red' : 'yellow');
 
-            $percentage = sprintf(
-                '<fg=%s>%s</>',
-                $percentage === '100.0' ? 'green' : ($percentage === '0.0' ? 'red' : 'yellow'),
-                $percentage
-            );
+            $truncateAt = max(1, terminal()->width() - 12);
 
-            $output->writeln(sprintf(
-                '  %s <fg=gray>%s</> %s <fg=gray>%%</>',
-                $name,
-                str_repeat('.', max($dottedLineLength - $takenSize, 1)),
-                $percentage
-            ));
+            renderUsing($output);
+            render(<<<HTML
+                <div class="flex mx-2">
+                    <span class="truncate-{$truncateAt}">{$name}</span>
+                    <span class="flex-1 content-repeat-[.] text-gray mx-1"></span>
+                    <span class="text-{$color}">{$percentage}%</span>
+                </div>
+            HTML);
+
         }
 
         $totalCoverageAsString = $totalCoverage->asFloat() === 0.0
