@@ -56,11 +56,6 @@ parameters:
 			path: src/Console/Command.php
 
 		-
-			message: "#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\\.$#"
-			count: 1
-			path: src/Datasets.php
-
-		-
 			message: "#^Method Pest\\\\Datasets\\:\\:getDataSetsCombinations\\(\\) has parameter \\$combinations with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: src/Datasets.php
@@ -72,11 +67,6 @@ parameters:
 
 		-
 			message: "#^Method Pest\\\\Datasets\\:\\:processDatasets\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: src/Datasets.php
-
-		-
-			message: "#^Parameter \\#1 \\$key of static method Pest\\\\Datasets\\:\\:getDataSetDescription\\(\\) expects int\\|string, mixed given\\.$#"
 			count: 1
 			path: src/Datasets.php
 

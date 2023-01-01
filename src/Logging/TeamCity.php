@@ -194,7 +194,7 @@ final class TeamCity extends DefaultResultPrinter
         }
 
         $this->printEvent(self::TEST_STARTED, [
-            self::NAME => $test->getName(),
+            self::NAME          => $test->getName(),
             // @phpstan-ignore-next-line
             self::LOCATION_HINT => self::PROTOCOL . $test->toString(),
         ]);

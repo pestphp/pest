@@ -8,11 +8,11 @@ $finder = PhpCsFixer\Finder::create()
     ->append(['.php-cs-fixer.dist.php']);
 
 $rules = [
-    '@Symfony'               => true,
-    'phpdoc_no_empty_return' => false,
-    'array_syntax'           => ['syntax' => 'short'],
-    'yoda_style'             => false,
-    'binary_operator_spaces' => [
+    '@Symfony'                => true,
+    'phpdoc_no_empty_return'  => false,
+    'array_syntax'            => ['syntax' => 'short'],
+    'yoda_style'              => false,
+    'binary_operator_spaces'  => [
         'operators' => [
             '=>' => 'align',
             '='  => 'align',

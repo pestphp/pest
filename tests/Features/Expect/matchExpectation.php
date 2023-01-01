@@ -47,7 +47,7 @@ it('runs with truthy', function () {
 
                     return $value->toEqual('bar');
                 },
-                true => function ($value) {
+                true  => function ($value) {
                     $this->matched = 'foo';
 
                     return $value->toEqual('foo');
@@ -88,7 +88,7 @@ it('runs with truthy closure condition', function () {
 
                     return $value->toEqual('bar');
                 },
-                true => function ($value) {
+                true  => function ($value) {
                     $this->matched = 'foo';
 
                     return $value->toEqual('foo');
@@ -141,7 +141,7 @@ it('can be used in higher order tests')
             false => function ($value) {
                 return $value->toBeFalse();
             },
-            true => function ($value) {
+            true  => function ($value) {
                 return $value->toBeTrue();
             },
         ]
