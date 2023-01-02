@@ -11,13 +11,13 @@ use PHPUnit\Event\Test\FailedSubscriber;
 /**
  * @internal
  */
-final class EnsureFailedTestsAreStoredForRetry implements FailedSubscriber
+final class EnsureFailedTestsAreRetryable implements FailedSubscriber
 {
     /**
      * Runs the subscriber.
      */
     public function notify(Failed $event): void
     {
-        TestSuite::getInstance()->retryTempRepository->add($event->test()->id());
+        TestSuite::getInstance()->retryRepository->add($event->test()->id());
     }
 }

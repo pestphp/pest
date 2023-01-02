@@ -7,9 +7,15 @@ namespace Pest\Repositories;
 /**
  * @internal
  */
-final class TempRepository
+final class RetryRepository
 {
-    private const FOLDER = __DIR__.'/../../.temp';
+    private const TEMPORARY_FOLDER = __DIR__
+        .DIRECTORY_SEPARATOR
+        .'..'
+        .DIRECTORY_SEPARATOR
+        .'..'
+        .DIRECTORY_SEPARATOR
+        .'.temp';
 
     /**
      * Creates a new Temp Repository instance.
@@ -32,7 +38,7 @@ final class TempRepository
      */
     public function boot(): void
     {
-        @unlink(self::FOLDER.'/'.$this->filename.'.json'); // @phpstan-ignore-line
+        @unlink(self::TEMPORARY_FOLDER.'/'.$this->filename.'.json'); // @phpstan-ignore-line
 
         $this->save([]);
     }
@@ -60,7 +66,7 @@ final class TempRepository
      */
     private function all(): array
     {
-        $path = self::FOLDER.'/'.$this->filename.'.json';
+        $path = self::TEMPORARY_FOLDER.'/'.$this->filename.'.json';
 
         $contents = file_exists($path) ? file_get_contents($path) : '{}';
 
@@ -80,6 +86,6 @@ final class TempRepository
     {
         $contents = json_encode($elements, JSON_THROW_ON_ERROR);
 
-        file_put_contents(self::FOLDER.'/'.$this->filename.'.json', $contents);
+        file_put_contents(self::TEMPORARY_FOLDER.'/'.$this->filename.'.json', $contents);
     }
 }

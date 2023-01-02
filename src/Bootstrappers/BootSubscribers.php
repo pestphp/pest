@@ -23,7 +23,8 @@ final class BootSubscribers implements Bootstrapper
         Subscribers\EnsureConfigurationIsValid::class,
         Subscribers\EnsureConfigurationDefaults::class,
         Subscribers\EnsureRetryRepositoryExists::class,
-        Subscribers\EnsureFailedTestsAreStoredForRetry::class,
+        Subscribers\EnsureErroredTestsAreRetryable::class,
+        Subscribers\EnsureFailedTestsAreRetryable::class,
     ];
 
     /**

@@ -123,7 +123,7 @@ final class TestCaseMethodFactory
 
         $methodName = Str::evaluable($this->description);
 
-        $retryRepository = TestSuite::getInstance()->retryTempRepository;
+        $retryRepository = TestSuite::getInstance()->retryRepository;
 
         if (Retry::$retrying && ! $retryRepository->isEmpty() && ! $retryRepository->exists(sprintf('%s::%s', $classFQN, $methodName))) {
             return '';
