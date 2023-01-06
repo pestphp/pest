@@ -757,29 +757,29 @@
   ✓ global beforeEach execution order
 
    PASS  Tests\PHPUnit\CustomAffixes\InvalidTestName
-  ✓ it runs file names like `@#$%^&()-_=+.php`
+  ✓ it runs file names like @#$%^&()-_=+.php
 
    PASS  Tests\PHPUnit\CustomAffixes\ATestWithSpaces
-  ✓ it runs file names like `A Test With Spaces.php`
+  ✓ it runs file names like A Test With Spaces.php
 
    PASS  Tests\PHPUnit\CustomAffixes\AdditionalFileExtension
-  ✓ it runs file names like `AdditionalFileExtension.spec.php`
+  ✓ it runs file names like AdditionalFileExtension.spec.php
 
    PASS  Tests\PHPUnit\CustomAffixes\FolderWithAn\ExampleTest
   ✓ custom traits can be used
   ✓ trait applied in this file
 
    PASS  Tests\PHPUnit\CustomAffixes\ManyExtensions
-  ✓ it runs file names like `ManyExtensions.class.test.php`
+  ✓ it runs file names like ManyExtensions.class.test.php
 
    PASS  Tests\PHPUnit\CustomAffixes\TestCaseWithQuotes
-  ✓ it runs file names like `Test 'Case' With Quotes.php`
+  ✓ it runs file names like Test 'Case' With Quotes.php
 
    PASS  Tests\PHPUnit\CustomAffixes\kebabcasespec
-  ✓ it runs file names like `kebab-case-spec.php`
+  ✓ it runs file names like kebab-case-spec.php
 
    PASS  Tests\PHPUnit\CustomAffixes\snakecasespec
-  ✓ it runs file names like `snake_case_spec.php`
+  ✓ it runs file names like snake_case_spec.php
 
    PASS  Tests\CustomTestCase\ExecutedTest
   ✓ that gets executed
