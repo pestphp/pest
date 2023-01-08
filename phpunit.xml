@@ -24,6 +24,8 @@
   <testsuites>
     <testsuite name="default">
       <directory suffix=".php">./tests</directory>
+      <exclude>./tests/.snapshots</exclude>
+      <exclude>./tests/.tests</exclude>
     </testsuite>
   </testsuites>
   <coverage>

@@ -29,7 +29,7 @@ final class TestRepository
     private array $uses = [];
 
     /**
-     * @var array<int, TestCaseFilter>
+     * @var  array<int, TestCaseFilter>
      */
     private array $filters = [];
 

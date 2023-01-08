@@ -23,6 +23,7 @@
         "pestphp/pest-plugin": "^2.0.0",
         "phpunit/phpunit": "10.0.x-dev"
     },
+    "version": "2.x-dev",
     "autoload": {
         "psr-4": {
             "Pest\\": "src/"

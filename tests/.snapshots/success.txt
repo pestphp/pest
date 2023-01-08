@@ -893,9 +893,10 @@
   - visual snapshot of test suite on success
 
    WARN  Tests\Visual\TeamCity
-  - it is can successfully call all public methods → Not supported yet.
+  - visual snapshot of team city with ('Failure.php')
+  - visual snapshot of team city with ('SuccessOnly.php')
 
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    4 incomplete, 4 todos, 17 skipped, 624 passed (1511 assertions)
+  Tests:    4 incomplete, 4 todos, 18 skipped, 624 passed (1511 assertions)

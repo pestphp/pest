@@ -6,6 +6,7 @@ namespace Pest\Bootstrappers;
 
 use Pest\Contracts\Bootstrapper;
 use Pest\Subscribers;
+use Pest\Support\Container;
 use PHPUnit\Event;
 use PHPUnit\Event\Subscriber;
 
@@ -25,7 +26,13 @@ final class BootSubscribers implements Bootstrapper
         Subscribers\EnsureRetryRepositoryExists::class,
         Subscribers\EnsureErroredTestsAreRetryable::class,
         Subscribers\EnsureFailedTestsAreRetryable::class,
+        Subscribers\EnsureTeamCityEnabled::class,
     ];
+
+    public function __construct(
+        private readonly Container $container,
+    ) {
+    }
 
     /**
      * Boots the Subscribers.
@@ -33,8 +40,10 @@ final class BootSubscribers implements Bootstrapper
     public function boot(): void
     {
         foreach (self::SUBSCRIBERS as $subscriber) {
+            /** @var Subscriber $instance */
+            $instance = $this->container->get($subscriber);
             Event\Facade::registerSubscriber(
-                new $subscriber()
+                $instance
             );
         }
     }

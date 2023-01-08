@@ -11,6 +11,7 @@ use Pest\Exceptions\DatasetMissing;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Exceptions\TestAlreadyExist;
 use Pest\Exceptions\TestDescriptionMissing;
+use Pest\Factories\Annotations\AddsAnnotation;
 use Pest\Factories\Concerns\HigherOrderable;
 use Pest\Plugins\Environment;
 use Pest\Support\Reflection;
@@ -29,12 +30,13 @@ final class TestCaseFactory
     /**
      * The list of annotations.
      *
-     * @var array<int, class-string>
+     * @var array<int, class-string<AddsAnnotation>>
      */
     private const ANNOTATIONS = [
         Annotations\Depends::class,
         Annotations\Groups::class,
         Annotations\CoversNothing::class,
+        Annotations\TestDox::class,
     ];
 
     /**
@@ -198,6 +200,10 @@ final class TestCaseFactory
 
             use Pest\Repositories\DatasetsRepository as __PestDatasets;
             use Pest\TestSuite as __PestTestSuite;
+
+            /**
+             * @testdox $filename
+             */
             $classAttributesCode
             #[\AllowDynamicProperties]
             final class $className extends $baseClass implements $hasPrintableTestCaseClassFQN {

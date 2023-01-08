@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pest\Support;
 
 use Closure;
-use ReflectionProperty;
 use Throwable;
 
 /**
@@ -36,33 +35,5 @@ final class ExceptionTrace
 
             throw $throwable;
         }
-    }
-
-    /**
-     * Removes any item from the stack trace referencing Pest so as not to
-     * crowd the error log for the end user.
-     */
-    public static function removePestReferences(Throwable $t): void
-    {
-        if (! property_exists($t, 'serializableTrace')) {
-            return;
-        }
-
-        $property = new ReflectionProperty($t, 'serializableTrace');
-        $property->setAccessible(true);
-
-        /** @var array<int, array<string, string>> $trace */
-        $trace = $property->getValue($t);
-
-        $cleanedTrace = [];
-        foreach ($trace as $item) {
-            if (array_key_exists('file', $item) && mb_strpos($item['file'], 'vendor/pestphp/pest/') > 0) {
-                continue;
-            }
-
-            $cleanedTrace[] = $item;
-        }
-
-        $property->setValue($t, $cleanedTrace);
     }
 }

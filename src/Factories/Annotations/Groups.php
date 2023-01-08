@@ -9,7 +9,7 @@ use Pest\Factories\TestCaseMethodFactory;
 /**
  * @internal
  */
-final class Groups
+final class Groups implements AddsAnnotation
 {
     /**
      * Adds annotations regarding the "groups" feature.
