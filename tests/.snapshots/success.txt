@@ -882,9 +882,6 @@
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
 
-   WARN  Tests\Visual\JUnit
-  - it is can successfully call all public methods → Not supported yet.
-
    PASS  Tests\Visual\SingleTestOrDirectory
   ✓ allows to run a single test
   ✓ allows to run a directory
@@ -899,4 +896,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    4 incomplete, 2 todos, 18 skipped, 624 passed (1511 assertions)
+  Tests:    4 incomplete, 2 todos, 17 skipped, 624 passed (1511 assertions)
