@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Console;
 
+use Pest\Bootstrappers\BootView;
 use Pest\Support\View;
 use Symfony\Component\Console\Helper\SymfonyQuestionHelper;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -39,6 +40,9 @@ final class Thanks
      */
     public function __invoke(): void
     {
+        $bootstrapper = new BootView($this->output);
+        $bootstrapper->boot();
+
         $wantsToSupport = (new SymfonyQuestionHelper())->ask(
             new ArrayInput([]),
             $this->output,
