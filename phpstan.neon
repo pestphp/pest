@@ -16,7 +16,6 @@ parameters:
         - "#with a nullable type declaration#"
         - "#type mixed is not subtype of native#"
         - "#is not allowed to extend#"
-        - "#Language construct eval#"
         - "# with null as default value#"
         - "#has parameter \\$closure with default value.#"
         - "#has parameter \\$description with default value.#"

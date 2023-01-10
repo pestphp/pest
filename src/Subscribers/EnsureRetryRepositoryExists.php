@@ -18,6 +18,6 @@ final class EnsureRetryRepositoryExists implements StartedSubscriber
      */
     public function notify(Started $event): void
     {
-        TestSuite::getInstance()->retryTempRepository->boot();
+        TestSuite::getInstance()->retryRepository->boot();
     }
 }

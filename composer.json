@@ -19,7 +19,7 @@
     "require": {
         "php": "^8.1.0",
         "nunomaduro/collision": "^7.0.0",
-        "nunomaduro/termwind": "^1.14.2",
+        "nunomaduro/termwind": "^1.15",
         "pestphp/pest-plugin": "^2.0.0",
         "phpunit/phpunit": "10.0.x-dev"
     },
@@ -27,15 +27,7 @@
         "psr-4": {
             "Pest\\": "src/"
         },
-        "exclude-from-classmap": [
-            "../phpunit/phpunit/src/Runner/Filter/NameFilterIterator.php",
-            "vendor/phpunit/phpunit/src/Runner/Filter/NameFilterIterator.php",
-            "../phpunit/src/Runner/TestSuiteLoader.php",
-            "vendor/phpunit/phpunit/src/Runner/TestSuiteLoader.php"
-        ],
         "files": [
-            "overrides/Runner/Filter/NameFilterIterator.php",
-            "overrides/Runner/TestSuiteLoader.php",
             "src/Functions.php",
             "src/Pest.php"
         ]
@@ -50,7 +42,8 @@
         ]
     },
     "require-dev": {
-        "pestphp/pest-dev-tools": "^2.0.0",
+        "pestphp/pest-dev-tools": "^2.1.0",
+        "pestphp/pest-plugin-arch": "^2.0.0",
         "symfony/process": "^6.2.0"
     },
     "minimum-stability": "dev",
@@ -66,14 +59,18 @@
         "bin/pest"
     ],
     "scripts": {
+        "refacto": "rector",
         "lint": "pint",
+        "test:refacto": "rector --dry-run",
         "test:lint": "pint --test",
         "test:types": "phpstan analyse --ansi --memory-limit=-1 --debug",
         "test:unit": "php bin/pest --colors=always --exclude-group=integration --compact",
+        "test:inline": "php bin/pest --colors=always --configuration=phpunit.inline.xml",
         "test:parallel": "exit 1",
         "test:integration": "php bin/pest --colors=always --group=integration -v",
         "update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --colors=always",
         "test": [
+            "@test:refacto",
             "@test:lint",
             "@test:types",
             "@test:unit",

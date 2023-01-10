@@ -12,11 +12,9 @@ use InvalidArgumentException;
 final class InvalidExpectationValue extends InvalidArgumentException
 {
     /**
-     * @return never
-     *
      * @throws self
      */
-    public static function expected(string $type): void
+    public static function expected(string $type): never
     {
         throw new self(sprintf('Invalid expectation value type. Expected [%s].', $type));
     }

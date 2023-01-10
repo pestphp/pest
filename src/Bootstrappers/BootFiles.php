@@ -4,16 +4,19 @@ declare(strict_types=1);
 
 namespace Pest\Bootstrappers;
 
+use Pest\Contracts\Bootstrapper;
+use Pest\Support\DatasetInfo;
 use Pest\Support\Str;
 use function Pest\testDirectory;
 use Pest\TestSuite;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use SebastianBergmann\FileIterator\Facade as PhpUnitFileIterator;
 
 /**
  * @internal
  */
-final class BootFiles
+final class BootFiles implements Bootstrapper
 {
     /**
      * The Pest convention.
@@ -21,8 +24,6 @@ final class BootFiles
      * @var array<int, string>
      */
     private const STRUCTURE = [
-        'Datasets',
-        'Datasets.php',
         'Expectations',
         'Expectations.php',
         'Helpers',
@@ -33,7 +34,7 @@ final class BootFiles
     /**
      * Boots the Subscribers.
      */
-    public function __invoke(): void
+    public function boot(): void
     {
         $rootPath = TestSuite::getInstance()->rootPath;
         $testsPath = $rootPath.DIRECTORY_SEPARATOR.testDirectory();
@@ -56,6 +57,8 @@ final class BootFiles
                 $this->load($filename);
             }
         }
+
+        $this->bootDatasets($testsPath);
     }
 
     /**
@@ -72,5 +75,16 @@ final class BootFiles
         }
 
         include_once $filename;
+    }
+
+    private function bootDatasets(string $testsPath): void
+    {
+        $files = (new PhpUnitFileIterator)->getFilesAsArray($testsPath, '.php');
+
+        foreach ($files as $file) {
+            if (DatasetInfo::isADatasetsFile($file) || DatasetInfo::isInsideADatasetsDirectory($file)) {
+                $this->load($file);
+            }
+        }
     }
 }

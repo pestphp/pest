@@ -9,6 +9,7 @@ use Pest\PendingCalls\TestCall;
 use Pest\PendingCalls\UsesCall;
 use Pest\Repositories\DatasetsRepository;
 use Pest\Support\Backtrace;
+use Pest\Support\DatasetInfo;
 use Pest\Support\HigherOrderTapProxy;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestCase;
@@ -60,7 +61,8 @@ if (! function_exists('dataset')) {
      */
     function dataset(string $name, Closure|iterable $dataset): void
     {
-        DatasetsRepository::set($name, $dataset);
+        $scope = DatasetInfo::scope(Backtrace::datasetsFile());
+        DatasetsRepository::set($name, $dataset, $scope);
     }
 }
 
@@ -85,9 +87,9 @@ if (! function_exists('test')) {
      * is the test description; the second argument is
      * a closure that contains the test expectations.
      *
-     * @return TestCall|TestCase|mixed
+     * @return HigherOrderTapProxy<TestCall|TestCase>|TestCall
      */
-    function test(string $description = null, Closure $closure = null)
+    function test(string $description = null, Closure $closure = null): HigherOrderTapProxy|TestCall
     {
         if ($description === null && TestSuite::getInstance()->test !== null) {
             return new HigherOrderTapProxy(TestSuite::getInstance()->test);
@@ -128,10 +130,11 @@ if (! function_exists('todo')) {
      */
     function todo(string $description): TestCall
     {
-        /* @phpstan-ignore-next-line */
-        return test($description, fn () => self::markTestSkipped(
-            '__TODO__',
-        ));
+        $test = test($description);
+
+        assert($test instanceof TestCall);
+
+        return $test->skip('__TODO__');
     }
 }
 

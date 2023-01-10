@@ -56,7 +56,7 @@ final class Str
     {
         $code = str_replace(' ', '_', $code);
 
-        return (string) preg_replace('/[^A-Z_a-z0-9\\\\]/', '', $code);
+        return (string) preg_replace('/[^A-Z_a-z0-9]/', '_', $code);
     }
 
     /**

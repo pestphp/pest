@@ -154,7 +154,7 @@ final class TestCall
 
         $condition = is_callable($condition)
             ? $condition
-            : fn () => $condition;
+            : fn (): bool => $condition;
 
         $message = is_string($conditionOrMessage)
             ? $conditionOrMessage
@@ -166,6 +166,16 @@ final class TestCall
         $this->testCaseMethod
             ->chains
             ->addWhen($condition, Backtrace::file(), Backtrace::line(), 'markTestSkipped', [$message]);
+
+        return $this;
+    }
+
+    /**
+     * Sets the test as "todo".
+     */
+    public function todo(): self
+    {
+        $this->skip('__TODO__');
 
         return $this;
     }

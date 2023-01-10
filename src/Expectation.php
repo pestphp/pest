@@ -6,10 +6,18 @@ namespace Pest;
 
 use BadMethodCallException;
 use Closure;
+use Pest\Arch\Contracts\ArchExpectation;
+use Pest\Arch\Expectations\ToBeUsedOn;
+use Pest\Arch\Expectations\ToBeUsedOnNothing;
+use Pest\Arch\Expectations\ToOnlyBeUsedOn;
+use Pest\Arch\Expectations\ToOnlyUse;
+use Pest\Arch\Expectations\ToUse;
+use Pest\Arch\Expectations\ToUseNothing;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\Pipeable;
 use Pest\Concerns\Retrievable;
 use Pest\Exceptions\ExpectationNotFound;
+use Pest\Exceptions\InvalidExpectation;
 use Pest\Exceptions\InvalidExpectationValue;
 use Pest\Expectations\EachExpectation;
 use Pest\Expectations\HigherOrderExpectation;
@@ -24,7 +32,7 @@ use PHPUnit\Framework\ExpectationFailedException;
  *
  * @template TValue
  *
- * @property Expectation     $not  Creates the opposite expectation.
+ * @property OppositeExpectation $not Creates the opposite expectation.
  * @property EachExpectation $each Creates an expectation on each element on the traversable value.
  *
  * @mixin Mixins\Expectation<TValue>
@@ -70,10 +78,12 @@ final class Expectation
             InvalidExpectationValue::expected('string');
         }
 
-        /** @var array<int|string, mixed>|bool $value */
-        $value = json_decode($this->value, true, 512);
+        $this->toBeJson();
 
-        return $this->toBeJson()->and($value);
+        /** @var array<int|string, mixed>|bool $value */
+        $value = json_decode($this->value, true, 512, JSON_THROW_ON_ERROR);
+
+        return $this->and($value);
     }
 
     /**
@@ -347,5 +357,66 @@ final class Expectation
     public function any(): Any
     {
         return new Any();
+    }
+
+    /**
+     * Asserts that the given expectation target use the given dependencies.
+     *
+     * @param  array<int, string>|string  $targets
+     */
+    public function toUse(array|string $targets): ArchExpectation
+    {
+        return ToUse::make($this, $targets);
+    }
+
+    /**
+     * Asserts that the given expectation target "only" use on the given dependencies.
+     *
+     * @param  array<int, string>|string  $targets
+     */
+    public function toOnlyUse(array|string $targets): ArchExpectation
+    {
+        return ToOnlyUse::make($this, $targets);
+    }
+
+    /**
+     * Asserts that the given expectation target does not use any dependencies.
+     */
+    public function toUseNothing(): ArchExpectation
+    {
+        return ToUseNothing::make($this);
+    }
+
+    public function toBeUsed(): never
+    {
+        throw InvalidExpectation::fromMethods(['toBeUsed']);
+    }
+
+    /**
+     * Asserts that the given expectation dependency is used by the given targets.
+     *
+     * @param  array<int, string>|string  $targets
+     */
+    public function toBeUsedOn(array|string $targets): ArchExpectation
+    {
+        return ToBeUsedOn::make($this, $targets);
+    }
+
+    /**
+     * Asserts that the given expectation dependency is "only" used by the given targets.
+     *
+     * @param  array<int, string>|string  $targets
+     */
+    public function toOnlyBeUsedOn(array|string $targets): ArchExpectation
+    {
+        return ToOnlyBeUsedOn::make($this, $targets);
+    }
+
+    /**
+     * Asserts that the given expectation dependency is not used.
+     */
+    public function toBeUsedOnNothing(): ArchExpectation
+    {
+        return ToBeUsedOnNothing::make($this);
     }
 }

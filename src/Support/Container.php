@@ -16,7 +16,7 @@ final class Container
     private static ?Container $instance = null;
 
     /**
-     * @var array<string, mixed>
+     * @var array<string, object|string>
      */
     private array $instances = [];
 
@@ -25,37 +25,30 @@ final class Container
      */
     public static function getInstance(): self
     {
-        if (static::$instance === null) {
-            static::$instance = new self();
+        if (self::$instance === null) {
+            self::$instance = new self();
         }
 
-        return static::$instance;
+        return self::$instance;
     }
 
     /**
      * Gets a dependency from the container.
-     *
-     * @template TObject of object
-     *
-     * @param  class-string<TObject>  $id
-     * @return TObject
      */
-    public function get(string $id): mixed
+    public function get(string $id): object|string
     {
         if (! array_key_exists($id, $this->instances)) {
+            /** @var class-string $id */
             $this->instances[$id] = $this->build($id);
         }
 
-        /** @var TObject $concrete */
-        $concrete = $this->instances[$id];
-
-        return $concrete;
+        return $this->instances[$id];
     }
 
     /**
      * Adds the given instance to the container.
      */
-    public function add(string $id, mixed $instance): void
+    public function add(string $id, object|string $instance): void
     {
         $this->instances[$id] = $instance;
     }
@@ -68,7 +61,7 @@ final class Container
      * @param  class-string<TObject>  $id
      * @return TObject
      */
-    private function build(string $id): mixed
+    private function build(string $id): object
     {
         $reflectionClass = new ReflectionClass($id);
 
@@ -77,7 +70,7 @@ final class Container
 
             if ($constructor !== null) {
                 $params = array_map(
-                    function (ReflectionParameter $param) use ($id) {
+                    function (ReflectionParameter $param) use ($id): object|string {
                         $candidate = Reflection::getParameterClassName($param);
 
                         if ($candidate === null) {
@@ -90,7 +83,6 @@ final class Container
                             }
                         }
 
-                        // @phpstan-ignore-next-line
                         return $this->get($candidate);
                     },
                     $constructor->getParameters()

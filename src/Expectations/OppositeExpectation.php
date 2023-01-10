@@ -4,6 +4,13 @@ declare(strict_types=1);
 
 namespace Pest\Expectations;
 
+use Pest\Arch\Contracts\ArchExpectation;
+use Pest\Arch\Expectations\ToBeUsedOn;
+use Pest\Arch\Expectations\ToBeUsedOnNothing;
+use Pest\Arch\Expectations\ToUse;
+use Pest\Arch\GroupArchExpectation;
+use Pest\Arch\SingleArchExpectation;
+use Pest\Exceptions\InvalidExpectation;
 use Pest\Expectation;
 use Pest\Support\Arr;
 use PHPUnit\Framework\ExpectationFailedException;
@@ -53,6 +60,64 @@ final class OppositeExpectation
     }
 
     /**
+     * Asserts that the given expectation target does not use any of the given dependencies.
+     *
+     * @param  array<int, string>|string  $targets
+     */
+    public function toUse(array|string $targets): ArchExpectation
+    {
+        return GroupArchExpectation::fromExpectations($this->original, array_map(fn (string $target): SingleArchExpectation => ToUse::make($this->original, $target)->opposite(
+            fn () => $this->throwExpectationFailedException('toUse', $target),
+        ), is_string($targets) ? [$targets] : $targets));
+    }
+
+    /**
+     * @param  array<int, string>|string  $targets
+     */
+    public function toOnlyUse(array|string $targets): never
+    {
+        throw InvalidExpectation::fromMethods(['not', 'toOnlyUse']);
+    }
+
+    public function toUseNothing(): never
+    {
+        throw InvalidExpectation::fromMethods(['not', 'toUseNothing']);
+    }
+
+    /**
+     * Asserts that the given expectation dependency is not used.
+     */
+    public function toBeUsed(): ArchExpectation
+    {
+        return ToBeUsedOnNothing::make($this->original);
+    }
+
+    /**
+     * Asserts that the given expectation dependency is not used by any of the given targets.
+     *
+     * @param  array<int, string>|string  $targets
+     */
+    public function toBeUsedOn(array|string $targets): ArchExpectation
+    {
+        return GroupArchExpectation::fromExpectations($this->original, array_map(fn (string $target): GroupArchExpectation => ToBeUsedOn::make($this->original, $target)->opposite(
+            fn () => $this->throwExpectationFailedException('toBeUsedOn', $target),
+        ), is_string($targets) ? [$targets] : $targets));
+    }
+
+    public function toOnlyBeUsedOn(): never
+    {
+        throw InvalidExpectation::fromMethods(['not', 'toOnlyBeUsedOn']);
+    }
+
+    /**
+     * Asserts that the given expectation dependency is not used.
+     */
+    public function toBeUsedOnNothing(): never
+    {
+        throw InvalidExpectation::fromMethods(['not', 'toBeUsedOnNothing']);
+    }
+
+    /**
      * Handle dynamic method calls into the original expectation.
      *
      * @param  array<int, mixed>  $arguments
@@ -89,11 +154,12 @@ final class OppositeExpectation
     /**
      * Creates a new expectation failed exception with a nice readable message.
      *
-     * @param  array<int, mixed>  $arguments
-     * @return never
+     * @param  array<int, mixed>|string  $arguments
      */
-    private function throwExpectationFailedException(string $name, array $arguments = []): void
+    public function throwExpectationFailedException(string $name, array|string $arguments = []): never
     {
+        $arguments = is_array($arguments) ? $arguments : [$arguments];
+
         $exporter = new Exporter();
 
         $toString = fn ($argument): string => $exporter->shortenedExport($argument);

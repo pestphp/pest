@@ -7,7 +7,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest] # (macos-latest, windows-latest) 2.x-dev is under development
+        os: [ubuntu-latest, macos-latest] # "windows-latest" is waiting for https://github.com/pestphp/pest/issues/638
         php: ['8.1', '8.2']
         dependency-version: [prefer-lowest, prefer-stable]
         parallel: ['', '--parallel']
@@ -38,7 +38,7 @@ jobs:
 
     - name: Unit Tests
       run: test:parallel
-      if: ${{ false }}  # 2.x-dev is under development
+      if: ${{ false }}  # Parallel's not yet supported.
 
     - name: Integration Tests
       run: composer test:integration

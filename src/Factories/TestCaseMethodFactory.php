@@ -97,7 +97,7 @@ final class TestCaseMethodFactory
             $testCase->chains->chain($this);
             $method->chains->chain($this);
 
-            return \Pest\Support\Closure::bind($closure, $this, $this::class)(...func_get_args());
+            return \Pest\Support\Closure::bind($closure, $this, self::class)(...func_get_args());
         };
     }
 
@@ -123,7 +123,9 @@ final class TestCaseMethodFactory
 
         $methodName = Str::evaluable($this->description);
 
-        if (Retry::$retrying && ! TestSuite::getInstance()->retryTempRepository->exists(sprintf('%s::%s', $classFQN, $methodName))) {
+        $retryRepository = TestSuite::getInstance()->retryRepository;
+
+        if (Retry::$retrying && ! $retryRepository->isEmpty() && ! $retryRepository->exists(sprintf('%s::%s', $classFQN, $methodName))) {
             return '';
         }
 
@@ -147,11 +149,11 @@ final class TestCaseMethodFactory
         }
 
         $annotations = implode('', array_map(
-            static fn ($annotation) => sprintf("\n     * %s", $annotation), $annotations,
+            static fn ($annotation): string => sprintf("\n     * %s", $annotation), $annotations,
         ));
 
         $attributes = implode('', array_map(
-            static fn ($attribute) => sprintf("\n        %s", $attribute), $attributes,
+            static fn ($attribute): string => sprintf("\n        %s", $attribute), $attributes,
         ));
 
         return <<<PHP
