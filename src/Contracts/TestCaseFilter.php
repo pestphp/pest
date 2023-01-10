@@ -6,5 +6,8 @@ namespace Pest\Contracts;
 
 interface TestCaseFilter
 {
-    public function canLoad(string $suiteClassFile): bool;
+    /**
+     * Whether the test case is accepted.
+     */
+    public function accept(string $testCaseFilename): bool;
 }

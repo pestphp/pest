@@ -24,6 +24,11 @@ final class TestSuite
     public ?TestCase $test = null;
 
     /**
+     * Holds the tests repository.
+     */
+    public TestRepository $tests;
+
+    /**
      * Holds the before each repository.
      */
     public BeforeEachRepository $beforeEach;
@@ -64,11 +69,10 @@ final class TestSuite
     public function __construct(
         string $rootPath,
         public string $testPath,
-        public TestRepository $tests = new TestRepository(),
-    )
-    {
+    ) {
         $this->beforeAll = new BeforeAllRepository();
         $this->beforeEach = new BeforeEachRepository();
+        $this->tests = new TestRepository();
         $this->afterEach = new AfterEachRepository();
         $this->afterAll = new AfterAllRepository();
         $this->retryRepository = new RetryRepository('retry');
@@ -82,11 +86,9 @@ final class TestSuite
     public static function getInstance(
         string $rootPath = null,
         string $testPath = null,
-        TestRepository $tests = null,
-    ): TestSuite
-    {
+    ): TestSuite {
         if (is_string($rootPath) && is_string($testPath)) {
-            self::$instance = new TestSuite($rootPath, $testPath, $tests);
+            self::$instance = new TestSuite($rootPath, $testPath);
 
             foreach (Plugin::$callables as $callable) {
                 $callable();
