@@ -3,8 +3,10 @@
 
 use Pest\Actions\ValidatesEnvironment;
 use Pest\ConfigLoader;
+use Pest\Repositories\TestRepository;
 use Pest\Support\Container;
 use Pest\Kernel;
+use Pest\Support\DirtyTestCaseFilter;
 use Pest\TestSuite;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -44,9 +46,18 @@ use Symfony\Component\Console\Output\OutputInterface;
     $rootPath = dirname($autoloadPath, 2);
     $argv = new ArgvInput();
 
+    $filters = [];
+
+    foreach ($args as $key => $value) {
+        if (str_contains($value, '--dirty')) {
+            $filters[] = new DirtyTestCaseFilter($rootPath);
+        }
+    }
+
     $testSuite = TestSuite::getInstance(
         $rootPath,
-        $argv->getParameterOption('--test-directory', (new ConfigLoader($rootPath))->getTestsDirectory())
+        $argv->getParameterOption('--test-directory', (new ConfigLoader($rootPath))->getTestsDirectory()),
+        new TestRepository($filters),
     );
 
     $isDecorated = $argv->getParameterOption('--colors', 'always') !== 'never';
@@ -57,16 +68,10 @@ use Symfony\Component\Console\Output\OutputInterface;
     $container->add(TestSuite::class, $testSuite);
     $container->add(OutputInterface::class, $output);
 
+    $argsToUnset = ['--test-directory', '--compact', '--profile', '--dirty'];
+
     foreach ($args as $key => $value) {
-        if (str_contains($value, '--test-directory')) {
-            unset($args[$key]);
-        }
-
-        if (str_contains($value, '--compact')) {
-            unset($args[$key]);
-        }
-
-        if (str_contains($value, '--profile')) {
+        if (in_array($value, $argsToUnset)) {
             unset($args[$key]);
         }
     }
