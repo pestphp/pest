@@ -171,6 +171,16 @@ final class TestCall
     }
 
     /**
+     * Sets the test as "todo".
+     */
+    public function todo(): self
+    {
+        $this->skip('__TODO__');
+
+        return $this;
+    }
+
+    /**
      * Sets the covered classes or methods.
      */
     public function covers(string ...$classesOrFunctions): self

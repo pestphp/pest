@@ -734,6 +734,8 @@
 
    PASS  Tests\Features\Todo
   ↓ something todo later
+  ↓ something todo later chained
+  ↓ something todo later chained and with function body
   ✓ it does something within a file with a todo
 
    PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest
@@ -896,4 +898,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    4 incomplete, 2 todos, 17 skipped, 624 passed (1511 assertions)
+  Tests:    4 incomplete, 4 todos, 17 skipped, 624 passed (1511 assertions)

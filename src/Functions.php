@@ -87,7 +87,7 @@ if (! function_exists('test')) {
      * is the test description; the second argument is
      * a closure that contains the test expectations.
      *
-     * @return TestCall|TestCase|mixed
+     * @return HigherOrderTapProxy<TestCall|TestCase>|TestCall
      */
     function test(string $description = null, Closure $closure = null): HigherOrderTapProxy|TestCall
     {
@@ -130,10 +130,11 @@ if (! function_exists('todo')) {
      */
     function todo(string $description): TestCall
     {
-        /* @phpstan-ignore-next-line */
-        return test($description, fn () => self::markTestSkipped(
-            '__TODO__',
-        ));
+        $test = test($description);
+
+        assert($test instanceof TestCall);
+
+        return $test->skip('__TODO__');
     }
 }
 
