@@ -16,6 +16,7 @@ use Symfony\Component\Console\Output\OutputInterface;
     $_SERVER['COLLISION_PRINTER'] = 'DefaultPrinter';
 
     $args = $_SERVER['argv'];
+    $dirty = false;
 
     foreach ($args as $key => $value) {
         if (str_contains($value, '--compact')) {
@@ -33,6 +34,7 @@ use Symfony\Component\Console\Output\OutputInterface;
         }
 
         if (str_contains($value, '--dirty')) {
+            $dirty = true;
             unset($args[$key]);
         }
 
@@ -66,10 +68,8 @@ use Symfony\Component\Console\Output\OutputInterface;
         $argv->getParameterOption('--test-directory', (new ConfigLoader($rootPath))->getTestsDirectory()),
     );
 
-    foreach ($args as $key => $value) {
-        if (str_contains($value, '--dirty')) {
-            $testSuite->tests->filter(new GitDirtyTestCaseFilter($rootPath));
-        }
+    if ($dirty) {
+        $testSuite->tests->filter(new GitDirtyTestCaseFilter($rootPath));
     }
 
     $isDecorated = $argv->getParameterOption('--colors', 'always') !== 'never';
