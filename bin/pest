@@ -1,13 +1,13 @@
 #!/usr/bin/env php
 <?php declare(strict_types=1);
 
-use Pest\Actions\ValidatesEnvironment;
 use Pest\ConfigLoader;
 use Pest\Kernel;
 use Pest\Support\Container;
 use Pest\TestCaseFilters\GitDirtyTestCaseFilter;
 use Pest\TestSuite;
 use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -20,10 +20,26 @@ use Symfony\Component\Console\Output\OutputInterface;
     foreach ($args as $key => $value) {
         if (str_contains($value, '--compact')) {
             $_SERVER['COLLISION_PRINTER_COMPACT'] = 'true';
+            unset($args[$key]);
         }
 
         if (str_contains($value, '--profile')) {
             $_SERVER['COLLISION_PRINTER_PROFILE'] = 'true';
+            unset($args[$key]);
+        }
+
+        if (str_contains($value, '--test-directory')) {
+            unset($args[$key]);
+        }
+
+        if (str_contains($value, '--dirty')) {
+            unset($args[$key]);
+        }
+
+        if (str_contains($value, '--teamcity')) {
+            unset($args[$key]);
+            $args[] = '--no-output';
+            unset($_SERVER['COLLISION_PRINTER']);
         }
     }
 
@@ -63,14 +79,8 @@ use Symfony\Component\Console\Output\OutputInterface;
     $container = Container::getInstance();
     $container->add(TestSuite::class, $testSuite);
     $container->add(OutputInterface::class, $output);
-
-    $argsToUnset = ['--test-directory', '--compact', '--profile', '--dirty'];
-
-    foreach ($args as $key => $value) {
-        if (in_array($value, $argsToUnset)) {
-            unset($args[$key]);
-        }
-    }
+    $container->add(InputInterface::class, $argv);
+    $container->add(Container::class, $container);
 
     $kernel = Kernel::boot();
 

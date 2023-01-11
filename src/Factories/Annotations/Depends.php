@@ -10,7 +10,7 @@ use Pest\Support\Str;
 /**
  * @internal
  */
-final class Depends
+final class Depends implements AddsAnnotation
 {
     /**
      * Adds annotations regarding the "depends" feature.

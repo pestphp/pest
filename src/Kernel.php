@@ -73,9 +73,7 @@ final class Kernel
     {
         $argv = (new Plugins\Actions\CallsHandleArguments())->__invoke($argv);
 
-        $this->application->run(
-            $argv, false,
-        );
+        $this->application->run($argv, false);
 
         return (new CallsAddsOutput())->__invoke(
             Result::exitCode(),

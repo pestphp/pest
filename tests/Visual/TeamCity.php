@@ -1,32 +1,42 @@
 <?php
 
-use Pest\Logging\TeamCity;
-use PHPUnit\Framework\AssertionFailedError;
-use PHPUnit\Framework\TestResult;
-use PHPUnit\Framework\TestSuite;
-use PHPUnit\Framework\Warning;
-use PHPUnit\TextUI\DefaultResultPrinter;
+test('visual snapshot of team city', function (string $testFile) {
+    $testsPath = dirname(__DIR__)."/.tests/$testFile";
 
-beforeEach(function () {
-    file_put_contents(__DIR__.'/output.txt', '');
-});
+    $snapshot = implode(DIRECTORY_SEPARATOR, [
+        dirname(__DIR__),
+        '.snapshots',
+        "$testFile.inc",
+    ]);
 
-it('is can successfully call all public methods', function () {
-    $teamCity = new TeamCity(__DIR__.'/output.txt', false, DefaultResultPrinter::COLOR_ALWAYS);
-    expect($teamCity::isPestTest($this))->toBeTrue();
-    $teamCity->startTestSuite(new TestSuite());
-    $teamCity->startTest($this);
-    $teamCity->addError($this, new Exception('Don\'t worry about this error. Its purposeful.'), 0);
-    $teamCity->addFailure($this, new AssertionFailedError('Don\'t worry about this error. Its purposeful.'), 0);
-    $teamCity->addWarning($this, new Warning(), 0);
-    $teamCity->addIncompleteTest($this, new Exception(), 0);
-    $teamCity->addRiskyTest($this, new Exception(), 0);
-    $teamCity->addSkippedTest($this, new Exception(), 0);
-    $teamCity->endTest($this, 0);
-    $teamCity->printResult(new TestResult());
-    $teamCity->endTestSuite(new TestSuite());
-})->skip('Not supported yet.');
+    $output = function () use ($testsPath) {
+        $process = (new Symfony\Component\Process\Process(
+            ['php', 'bin/pest', '--teamcity', $testsPath],
+            dirname(__DIR__, levels: 2),
+            [
+                'EXCLUDE' => 'integration',
+                'REBUILD_SNAPSHOTS' => false,
+                'PARATEST' => 0,
+                'COLLISION_IGNORE_DURATION' => 'true',
+                'FLOW_ID' => '1234',
+            ],
+        ));
 
-afterEach(function () {
-    unlink(__DIR__.'/output.txt');
-});
+        $process->run();
+
+        return $process->getOutput();
+    };
+
+    if (getenv('REBUILD_SNAPSHOTS')) {
+        $outputContent = explode("\n", $output());
+
+        file_put_contents($snapshot, implode("\n", $outputContent));
+    } elseif (! getenv('EXCLUDE')) {
+        $output = explode("\n", $output());
+
+        expect(implode("\n", $output))->toEqual(file_get_contents($snapshot));
+    }
+})->with([
+    'Failure.php',
+    'SuccessOnly.php',
+])->skip(! getenv('REBUILD_SNAPSHOTS') && getenv('EXCLUDE'));
