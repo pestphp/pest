@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Pest\Factories;
 
 use Closure;
+use Pest\Contracts\AddsAnnotations;
 use Pest\Exceptions\ShouldNotHappen;
-use Pest\Factories\Annotations\AddsAnnotation;
 use Pest\Factories\Concerns\HigherOrderable;
 use Pest\Plugins\Retry;
 use Pest\Repositories\DatasetsRepository;
@@ -113,7 +113,7 @@ final class TestCaseMethodFactory
     /**
      * Creates a PHPUnit method as a string ready for evaluation.
      *
-     * @param  array<int, class-string<AddsAnnotation>>  $annotationsToUse
+     * @param  array<int, class-string<AddsAnnotations>>  $annotationsToUse
      * @param  array<int, class-string<\Pest\Factories\Attributes\Attribute>>  $attributesToUse
      */
     public function buildForEvaluation(string $classFQN, array $annotationsToUse, array $attributesToUse): string

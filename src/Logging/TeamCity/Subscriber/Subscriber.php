@@ -11,10 +11,16 @@ use Pest\Logging\TeamCity\TeamCityLogger;
  */
 abstract class Subscriber
 {
+    /**
+     * Creates a new Subscriber instance.
+     */
     public function __construct(private readonly TeamCityLogger $logger)
     {
     }
 
+    /**
+     * Creates a new TeamCityLogger instance.
+     */
     final protected function logger(): TeamCityLogger
     {
         return $this->logger;

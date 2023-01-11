@@ -77,6 +77,9 @@ final class Str
         return substr($subject, 0, $pos);
     }
 
+    /**
+     * Returns the content after the given "search".
+     */
     public static function after(string $subject, string $search): string
     {
         return $search === '' ? $subject : array_reverse(explode($search, $subject, 2))[0];

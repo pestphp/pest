@@ -17,6 +17,9 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class EnsureTeamCityEnabled implements ConfiguredSubscriber
 {
+    /**
+     * Creates a new Configured Subscriber instance.
+     */
     public function __construct(
         private readonly OutputInterface $output,
         private readonly InputInterface $input,

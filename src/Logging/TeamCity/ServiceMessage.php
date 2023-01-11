@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Pest\Logging\TeamCity;
 
+/**
+ * @internal
+ */
 final class ServiceMessage
 {
     private static int|null $flowId = null;

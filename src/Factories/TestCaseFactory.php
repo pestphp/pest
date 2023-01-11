@@ -6,12 +6,12 @@ namespace Pest\Factories;
 
 use ParseError;
 use Pest\Concerns;
+use Pest\Contracts\AddsAnnotations;
 use Pest\Contracts\HasPrintableTestCaseName;
 use Pest\Exceptions\DatasetMissing;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Exceptions\TestAlreadyExist;
 use Pest\Exceptions\TestDescriptionMissing;
-use Pest\Factories\Annotations\AddsAnnotation;
 use Pest\Factories\Concerns\HigherOrderable;
 use Pest\Plugins\Environment;
 use Pest\Support\Reflection;
@@ -30,7 +30,7 @@ final class TestCaseFactory
     /**
      * The list of annotations.
      *
-     * @var array<int, class-string<AddsAnnotation>>
+     * @var array<int, class-string<AddsAnnotations>>
      */
     private const ANNOTATIONS = [
         Annotations\Depends::class,

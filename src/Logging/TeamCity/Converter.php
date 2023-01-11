@@ -26,16 +26,19 @@ use PHPUnit\TestRunner\TestResult\TestResult as PhpUnitTestResult;
  */
 final class Converter
 {
-    /**
-     * @var string
-     */
     private const PREFIX = 'P\\';
 
+    /**
+     * Creates a new instance of the Converter.
+     */
     public function __construct(
         private readonly string $rootPath,
     ) {
     }
 
+    /**
+     * Gets the test case method name.
+     */
     public function getTestCaseMethodName(Test $test): string
     {
         if (! $test instanceof TestMethod) {
@@ -45,21 +48,27 @@ final class Converter
         return $test->testDox()->prettifiedMethodName();
     }
 
+    /**
+     * Gets the test case location.
+     */
     public function getTestCaseLocation(Test $test): string
     {
         if (! $test instanceof TestMethod) {
             throw ShouldNotHappen::fromMessage('Not an instance of TestMethod');
         }
 
-        $fileName = $test->testDox()->prettifiedClassName();
-        $fileName = $this->cleanPath($fileName);
+        $path = $test->testDox()->prettifiedClassName();
+        $relativePath = $this->toRelativePath($path);
 
         // TODO: Get the description without the dataset.
         $description = $test->testDox()->prettifiedMethodName();
 
-        return "$fileName::$description";
+        return "$relativePath::$description";
     }
 
+    /**
+     * Gets the exception messsage.
+     */
     public function getExceptionMessage(Throwable $throwable): string
     {
         if (is_a($throwable->className(), FrameworkException::class, true)) {
@@ -76,6 +85,9 @@ final class Converter
         return $buffer;
     }
 
+    /**
+     * Gets the exception details.
+     */
     public function getExceptionDetails(Throwable $throwable): string
     {
         $buffer = $this->getStackTrace($throwable);
@@ -93,6 +105,9 @@ final class Converter
         return $buffer;
     }
 
+    /**
+     * Gets the stack trace.
+     */
     public function getStackTrace(Throwable $throwable): string
     {
         $stackTrace = $throwable->stackTrace();
@@ -105,7 +120,7 @@ final class Converter
 
         // clean the paths of each frame.
         $frames = array_map(
-            fn (string $frame): string => $this->cleanPath($frame),
+            fn (string $frame): string => $this->toRelativePath($frame),
             $frames
         );
 
@@ -118,6 +133,9 @@ final class Converter
         return implode("\n", $frames);
     }
 
+    /**
+     * Gets the test suite name.
+     */
     public function getTestSuiteName(TestSuite $testSuite): string
     {
         $name = $testSuite->name();
@@ -129,6 +147,9 @@ final class Converter
         return Str::after($name, self::PREFIX);
     }
 
+    /**
+     * Gets the test suite location.
+     */
     public function getTestSuiteLocation(TestSuite $testSuite): string|null
     {
         $tests = $testSuite->tests()->asArray();
@@ -145,15 +166,21 @@ final class Converter
 
         $path = $firstTest->testDox()->prettifiedClassName();
 
-        return $this->cleanPath($path);
+        return $this->toRelativePath($path);
     }
 
-    private function cleanPath(string $path): string
+    /**
+     * Transforms the given path in relative path.
+     */
+    private function toRelativePath(string $path): string
     {
         // Remove cwd from the path.
         return str_replace("$this->rootPath/", '', $path);
     }
 
+    /**
+     * Get the test result.
+     */
     public function getStateFromResult(PhpUnitTestResult $result): State
     {
         $state = new State();

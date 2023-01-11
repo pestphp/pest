@@ -29,6 +29,9 @@ final class BootSubscribers implements Bootstrapper
         Subscribers\EnsureTeamCityEnabled::class,
     ];
 
+    /**
+     * Creates a new Subscriber instance.
+     */
     public function __construct(
         private readonly Container $container,
     ) {
@@ -40,8 +43,10 @@ final class BootSubscribers implements Bootstrapper
     public function boot(): void
     {
         foreach (self::SUBSCRIBERS as $subscriber) {
-            /** @var Subscriber $instance */
             $instance = $this->container->get($subscriber);
+
+            assert($instance instanceof Subscriber);
+
             Event\Facade::registerSubscriber(
                 $instance
             );

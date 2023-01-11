@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Pest\Factories\Annotations;
+namespace Pest\Contracts;
 
 use Pest\Factories\TestCaseMethodFactory;
 
 /**
  * @interal
  */
-interface AddsAnnotation
+interface AddsAnnotations
 {
     /**
-     * Adds annotations to method
+     * Adds annotations to the given test case method.
      *
      * @param  array<int, string>  $annotations
      * @return array<int, string>

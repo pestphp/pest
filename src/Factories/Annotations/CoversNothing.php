@@ -4,19 +4,17 @@ declare(strict_types=1);
 
 namespace Pest\Factories\Annotations;
 
+use Pest\Contracts\AddsAnnotations;
 use Pest\Factories\Covers\CoversNothing as CoversNothingFactory;
 use Pest\Factories\TestCaseMethodFactory;
 
 /**
  * @internal
  */
-final class CoversNothing implements AddsAnnotation
+final class CoversNothing implements AddsAnnotations
 {
     /**
-     * Adds annotations regarding the "depends" feature.
-     *
-     * @param  array<int, string>  $annotations
-     * @return array<int, string>
+     * {@inheritdoc}
      */
     public function __invoke(TestCaseMethodFactory $method, array $annotations): array
     {
