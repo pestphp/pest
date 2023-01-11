@@ -6,22 +6,30 @@ namespace Pest\TestCaseFilters;
 
 use Pest\Contracts\TestCaseFilter;
 use Pest\Exceptions\MissingDependency;
+use Pest\Exceptions\NoTestsFound;
+use Pest\TestSuite;
 use Symfony\Component\Process\Process;
 
 final class GitDirtyTestCaseFilter implements TestCaseFilter
 {
     /**
-     * @var array<string>
+     * @var string[]|null
      */
-    private array $changedFiles = [];
+    private array|null $changedFiles = null;
 
     public function __construct(private readonly string $projectRoot)
     {
-        $this->loadDiff();
+        // ...
     }
 
     public function accept(string $testCaseFilename): bool
     {
+        if ($this->changedFiles === null) {
+            $this->loadChangedFiles();
+        }
+
+        assert(is_array($this->changedFiles));
+
         $relativePath = str_replace($this->projectRoot, '', $testCaseFilename);
 
         if (str_starts_with($relativePath, '/')) {
@@ -31,7 +39,7 @@ final class GitDirtyTestCaseFilter implements TestCaseFilter
         return in_array($relativePath, $this->changedFiles, true);
     }
 
-    private function loadDiff(): void
+    private function loadChangedFiles(): void
     {
         $process = new Process(['git', 'status', '--short', '--', '*.php']);
         $process->run();
@@ -53,6 +61,14 @@ final class GitDirtyTestCaseFilter implements TestCaseFilter
 
         $dirtyFiles = array_map(fn ($file, $status): string => in_array($status, ['R', 'RM'], true) ? explode(' -> ', $file)[1] : $file, array_keys($dirtyFiles), $dirtyFiles);
 
-        $this->changedFiles = $dirtyFiles = array_values($dirtyFiles);
+        $dirtyFiles = array_filter($dirtyFiles, fn ($file): bool => str_starts_with('.'.DIRECTORY_SEPARATOR.$file, TestSuite::getInstance()->testPath));
+
+        $dirtyFiles = array_values($dirtyFiles);
+
+        if ($dirtyFiles === []) {
+            throw new NoTestsFound();
+        }
+
+        $this->changedFiles = $dirtyFiles;
     }
 }

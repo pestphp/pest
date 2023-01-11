@@ -84,7 +84,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
     $kernel = Kernel::boot();
 
-    $result = $kernel->handle($args);
+    $result = $kernel->handle($output, $args);
 
     $kernel->shutdown();
 

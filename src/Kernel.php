@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Pest;
 
 use Pest\Contracts\Bootstrapper;
+use Pest\Exceptions\NoTestsFound;
 use Pest\Plugins\Actions\CallsAddsOutput;
 use Pest\Plugins\Actions\CallsBoot;
 use Pest\Plugins\Actions\CallsShutdown;
 use Pest\Support\Container;
 use PHPUnit\TextUI\Application;
 use PHPUnit\TextUI\Exception;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @internal
@@ -69,11 +71,19 @@ final class Kernel
      *
      * @throws Exception
      */
-    public function handle(array $argv): int
+    public function handle(OutputInterface $output, array $argv): int
     {
         $argv = (new Plugins\Actions\CallsHandleArguments())->__invoke($argv);
 
-        $this->application->run($argv, false);
+        try {
+            $this->application->run($argv, false);
+        } catch (NoTestsFound) { // @phpstan-ignore-line
+            $output->writeln([
+                '',
+                '  <fg=white;options=bold;bg=blue> INFO </> No tests found.',
+                '',
+            ]);
+        }
 
         return (new CallsAddsOutput())->__invoke(
             Result::exitCode(),
