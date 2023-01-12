@@ -77,7 +77,7 @@ final class Kernel
 
         try {
             $this->application->run($argv, false);
-        } catch (NoTestsFound) { // @phpstan-ignore-line
+        } catch (NoTestsFound) {
             $output->writeln([
                 '',
                 '  <fg=white;options=bold;bg=blue> INFO </> No tests found.',
