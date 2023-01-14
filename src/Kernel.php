@@ -76,7 +76,7 @@ final class Kernel
         $argv = (new Plugins\Actions\CallsHandleArguments())->__invoke($argv);
 
         try {
-            $this->application->run($argv, false);
+            $this->application->run($argv);
         } catch (NoTestsFound) {
             $output->writeln([
                 '',
