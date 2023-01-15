@@ -6,6 +6,7 @@ namespace Pest\Repositories;
 
 use Closure;
 use Pest\Contracts\TestCaseFilter;
+use Pest\Contracts\TestCaseMethodFilter;
 use Pest\Exceptions\TestCaseAlreadyInUse;
 use Pest\Exceptions\TestCaseClassOrTraitNotFound;
 use Pest\Factories\TestCaseFactory;
@@ -31,7 +32,12 @@ final class TestRepository
     /**
      * @var  array<int, TestCaseFilter>
      */
-    private array $filters = [];
+    private array $testCaseFilters = [];
+
+    /**
+     * @var  array<int, TestCaseMethodFilter>
+     */
+    private array $testCaseMethodFilters = [];
 
     /**
      * Counts the number of test cases.
@@ -93,9 +99,17 @@ final class TestRepository
     /**
      * Filters the test cases using the given filter.
      */
-    public function filter(TestCaseFilter $filter): void
+    public function addTestCaseFilter(TestCaseFilter $filter): void
     {
-        $this->filters[] = $filter;
+        $this->testCaseFilters[] = $filter;
+    }
+
+    /**
+     * Filters the test cases using the given filter.
+     */
+    public function addTestCaseMethodFilter(TestCaseMethodFilter $filter): void
+    {
+        $this->testCaseMethodFilters[] = $filter;
     }
 
     /**
@@ -111,6 +125,12 @@ final class TestRepository
      */
     public function set(TestCaseMethodFactory $method): void
     {
+        foreach ($this->testCaseMethodFilters as $filter) {
+            if (! $filter->accept($method)) {
+                return;
+            }
+        }
+
         if (! array_key_exists($method->filename, $this->testCases)) {
             $this->testCases[$method->filename] = new TestCaseFactory($method->filename);
         }
@@ -128,7 +148,7 @@ final class TestRepository
         }
 
         $accepted = array_reduce(
-            $this->filters,
+            $this->testCaseFilters,
             fn (bool $carry, TestCaseFilter $filter): bool => $carry && $filter->accept($filename),
             true,
         );

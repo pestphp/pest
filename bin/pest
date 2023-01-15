@@ -5,6 +5,7 @@ use Pest\ConfigLoader;
 use Pest\Kernel;
 use Pest\Support\Container;
 use Pest\TestCaseFilters\GitDirtyTestCaseFilter;
+use Pest\TestCaseMethodFilters\TodoTestCaseFilter;
 use Pest\TestSuite;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
@@ -17,6 +18,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
     $args = $_SERVER['argv'];
     $dirty = false;
+    $todo = false;
 
     foreach ($args as $key => $value) {
         if (str_contains($value, '--compact')) {
@@ -35,6 +37,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 
         if (str_contains($value, '--dirty')) {
             $dirty = true;
+            unset($args[$key]);
+        }
+
+        if (str_contains($value, '--todo')) {
+            $todo = true;
             unset($args[$key]);
         }
 
@@ -69,7 +76,11 @@ use Symfony\Component\Console\Output\OutputInterface;
     );
 
     if ($dirty) {
-        $testSuite->tests->filter(new GitDirtyTestCaseFilter($rootPath));
+        $testSuite->tests->addTestCaseFilter(new GitDirtyTestCaseFilter($rootPath));
+    }
+
+    if ($todo) {
+        $testSuite->tests->addTestCaseMethodFilter(new TodoTestCaseFilter());
     }
 
     $isDecorated = $argv->getParameterOption('--colors', 'always') !== 'never';

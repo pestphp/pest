@@ -177,6 +177,8 @@ final class TestCall
     {
         $this->skip('__TODO__');
 
+        $this->testCaseMethod->todo = true;
+
         return $this;
     }
 

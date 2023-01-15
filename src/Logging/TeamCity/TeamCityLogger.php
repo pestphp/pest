@@ -208,7 +208,6 @@ final class TeamCityLogger
                 $telemetry->memoryUsageSinceStart(),
                 $telemetry->durationSincePrevious(),
                 $telemetry->memoryUsageSincePrevious(),
-                $telemetry->emitter(),
             );
         }
 

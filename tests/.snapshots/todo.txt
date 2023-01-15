@@ -1,0 +1,12 @@
+   PASS  Tests\Features\DatasetsTests
+  ↓ forbids to define tests in Datasets dirs and Datasets.php files
+
+   PASS  Tests\Features\Todo
+  ↓ something todo later
+  ↓ something todo later chained
+  ↓ something todo later chained and with function body
+
+   PASS  Tests\CustomTestCase\ExecutedTest
+  ✓ that gets executed
+
+  Tests:    4 todos, 1 passed (1 assertions)

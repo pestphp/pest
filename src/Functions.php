@@ -134,7 +134,7 @@ if (! function_exists('todo')) {
 
         assert($test instanceof TestCall);
 
-        return $test->skip('__TODO__');
+        return $test->todo();
     }
 }
 
