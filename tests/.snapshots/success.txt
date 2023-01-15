@@ -528,6 +528,7 @@
   ✓ fails with wrong value
   ✓ fails with wrong value and nested key
   ✓ fails with wrong value and plain key with dots
+  ✓ fails with a non-iterable value
   ✓ not failures
   ✓ not failures with nested key
   ✓ not failures with plain key with dots
@@ -899,4 +900,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    4 incomplete, 4 todos, 18 skipped, 624 passed (1511 assertions)
+  Tests:    4 incomplete, 4 todos, 18 skipped, 625 passed (1513 assertions)

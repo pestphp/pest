@@ -1,5 +1,6 @@
 <?php
 
+use Pest\Exceptions\InvalidExpectationValue;
 use PHPUnit\Framework\ExpectationFailedException;
 
 $test_array = [
@@ -59,6 +60,10 @@ test('fails with wrong value and nested key', function () use ($test_array) {
 test('fails with wrong value and plain key with dots', function () use ($test_array) {
     expect($test_array)->toHaveKey('key.with.dots', true);
 })->throws(ExpectationFailedException::class);
+
+test('fails with a non-iterable value', function () {
+    expect('this is a string')->toHaveKey('a');
+})->throws(InvalidExpectationValue::class, 'Invalid expectation value type. Expected [iterable].');
 
 test('not failures', function () use ($test_array) {
     expect($test_array)->not->toHaveKey('c');
