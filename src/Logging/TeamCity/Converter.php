@@ -175,7 +175,7 @@ final class Converter
     private function toRelativePath(string $path): string
     {
         // Remove cwd from the path.
-        return str_replace("$this->rootPath/", '', $path);
+        return str_replace("$this->rootPath".DIRECTORY_SEPARATOR, '', $path);
     }
 
     /**

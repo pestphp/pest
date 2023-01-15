@@ -1,5 +1,12 @@
 <?php
 
+function normalize_windows_os_output(string $text): string
+{
+    $text = str_replace('\r', '', $text);
+
+    return str_replace('\\', '/', $text);
+}
+
 test('visual snapshot of team city', function (string $testFile) {
     $testsPath = dirname(__DIR__)."/.tests/$testFile";
 
@@ -28,13 +35,9 @@ test('visual snapshot of team city', function (string $testFile) {
     };
 
     if (getenv('REBUILD_SNAPSHOTS')) {
-        $outputContent = explode("\n", $output());
-
-        file_put_contents($snapshot, implode("\n", $outputContent));
+        file_put_contents($snapshot, normalize_windows_os_output($output()));
     } elseif (! getenv('EXCLUDE')) {
-        $output = explode("\n", $output());
-
-        expect(implode("\n", $output))->toEqual(file_get_contents($snapshot));
+        expect(normalize_windows_os_output($output()))->toEqual(file_get_contents($snapshot));
     }
 })->with([
     'Failure.php',
