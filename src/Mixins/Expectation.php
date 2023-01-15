@@ -560,6 +560,10 @@ final class Expectation
      */
     public function toHaveKey(string|int $key, mixed $value = new Any(), string $message = ''): self
     {
+        if (! is_iterable($this->value)) {
+            InvalidExpectationValue::expected('iterable');
+        }
+
         if (is_object($this->value) && method_exists($this->value, 'toArray')) {
             $array = $this->value->toArray();
         } else {
