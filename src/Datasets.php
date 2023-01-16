@@ -8,7 +8,7 @@ use Closure;
 use Generator;
 use Pest\Exceptions\DatasetAlreadyExist;
 use Pest\Exceptions\DatasetDoesNotExist;
-use SebastianBergmann\Exporter\Exporter;
+use Pest\Exporters\Exporter;
 use Traversable;
 
 /**

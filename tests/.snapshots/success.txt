@@ -30,7 +30,7 @@
   ✓ it sets arrays
   ✓ it gets bound to test case object with ('a')
   ✓ it gets bound to test case object with ('b')
-  ✓ it truncates the description with ('FoooFoooFoooFoooFoooFoooFoooF...ooFooo')
+  ✓ it truncates the description with ('FoooFoooFoooFoooFoooFoooFoooF…ooFooo')
   ✓ lazy datasets with (1)
   ✓ lazy datasets with (2)
   ✓ lazy datasets did the job right
@@ -49,7 +49,7 @@
   ✓ named datasets with data set "one"
   ✓ named datasets with data set "two"
   ✓ named datasets did the job right
-  ✓ lazy named datasets with (Bar Object (...))
+  ✓ lazy named datasets with (Bar Object (…))
   ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #1
   ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #2
   ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), false)
@@ -103,11 +103,11 @@
   ✓ eager registered wrapped datasets with Generator functions did the job right
   ✓ eager registered wrapped datasets with Generator functions display description with data set "taylor"
   ✓ eager registered wrapped datasets with Generator functions display description with data set "james"
-  ✓ it can resolve a dataset after the test case is available with (Closure Object (...))
-  ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (...)) #1
-  ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (...)) #2
-  ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (...)) #1
-  ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (...)) #2
+  ✓ it can resolve a dataset after the test case is available with (Closure Object (…))
+  ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (…)) #1
+  ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (…)) #2
+  ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (…)) #1
+  ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (…)) #2
 
    PASS  Tests\Features\Exceptions
   ✓ it gives access the the underlying expectException
@@ -446,8 +446,8 @@
   ✓ it passes with ('Fortaleza')
   ✓ it passes with ('Sollefteå')
   ✓ it passes with ('Ιεράπετρα')
-  ✓ it passes with (stdClass Object (...))
-  ✓ it passes with (Illuminate\Support\Collection Object (...))
+  ✓ it passes with (stdClass Object (…))
+  ✓ it passes with (Illuminate\Support\Collection Object (…))
   ✓ it passes with array
   ✓ it passes with *not*
   ✓ it properly fails with *not*
@@ -665,6 +665,7 @@
   ✓ it show only the names of multiple named datasets in their description
   ✓ it show the actual dataset of multiple non-named datasets in their description
   ✓ it show the correct description for mixed named and not-named datasets
+  ✓ it shows the correct description for long texts with newlines
 
    PASS  Tests\Unit\Plugins\Environment
   ✓ environment is set to CI when --ci option is used
@@ -729,5 +730,5 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-  Tests:  4 incompleted, 9 skipped, 487 passed
+  Tests:  4 incompleted, 9 skipped, 488 passed
   
