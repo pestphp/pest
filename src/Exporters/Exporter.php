@@ -40,8 +40,10 @@ final class Exporter extends BaseExporter
 
     /**
      * Exports a value into a single-line string.
+     *
+     * @phpstan-ignore-next-line
      */
-    public function shortenedExport(mixed $value): string
+    public function shortenedExport($value)
     {
         return (string) preg_replace(['#\.{3}#', '#\\\n\s*#'], ['…'], parent::shortenedExport($value));
     }
