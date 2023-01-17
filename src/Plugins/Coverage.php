@@ -76,8 +76,12 @@ final class Coverage implements AddsOutput, HandlesArguments
         $input = new ArgvInput($arguments, new InputDefinition($inputs));
         if ((bool) $input->getOption(self::COVERAGE_OPTION)) {
             $this->coverage      = true;
-            $originals[]         = '--coverage-php';
-            $originals[]         = \Pest\Support\Coverage::getPath();
+
+            // If --coverage-php exists, we don't need to add it.
+            if (! in_array('--coverage-php', $originals, true)) {
+                $originals[] = '--coverage-php';
+                $originals[]         = \Pest\Support\Coverage::getPath();
+            }
         }
 
         if ($input->getOption(self::MIN_OPTION) !== null) {
