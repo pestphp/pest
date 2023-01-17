@@ -36,7 +36,7 @@
   ✓ it sets arrays
   ✓ it gets bound to test case object with ('a')
   ✓ it gets bound to test case object with ('b')
-  ✓ it truncates the description with ('FoooFoooFoooFoooFoooFoooFoooF...ooFooo')
+  ✓ it truncates the description with ('FoooFoooFoooFoooFoooFoooFoooF…ooFooo')
   ✓ lazy datasets with (1)
   ✓ lazy datasets with (2)
   ✓ lazy datasets did the job right
@@ -55,7 +55,7 @@
   ✓ named datasets with data set "one"
   ✓ named datasets with data set "two"
   ✓ named datasets did the job right
-  ✓ lazy named datasets with (Bar Object (...))
+  ✓ lazy named datasets with (Bar Object (…))
   ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #1
   ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #2
   ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), false)
@@ -109,20 +109,20 @@
   ✓ eager registered wrapped datasets with Generator functions did the job right
   ✓ eager registered wrapped datasets with Generator functions display description with data set "taylor"
   ✓ eager registered wrapped datasets with Generator functions display description with data set "james"
-  ✓ it can resolve a dataset after the test case is available with (Closure Object (...)) #1
-  ✓ it can resolve a dataset after the test case is available with (Closure Object (...)) #2
-  ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (...)) #1
-  ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (...)) #2
-  ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (...)) #1
-  ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (...)) #2
-  ✓ it resolves a potential bound dataset logically with ('foo', Closure Object (...))
-  ✓ it resolves a potential bound dataset logically even when the closure comes first with (Closure Object (...), 'bar')
-  ✓ it will not resolve a closure if it is type hinted as a closure with (Closure Object (...)) #1
-  ✓ it will not resolve a closure if it is type hinted as a closure with (Closure Object (...)) #2
-  ✓ it will not resolve a closure if it is type hinted as a callable with (Closure Object (...)) #1
-  ✓ it will not resolve a closure if it is type hinted as a callable with (Closure Object (...)) #2
-  ✓ it can correctly resolve a bound dataset that returns an array with (Closure Object (...))
-  ✓ it can correctly resolve a bound dataset that returns an array but wants to be spread with (Closure Object (...))
+  ✓ it can resolve a dataset after the test case is available with (Closure Object (…)) #1
+  ✓ it can resolve a dataset after the test case is available with (Closure Object (…)) #2
+  ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (…)) #1
+  ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (…)) #2
+  ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (…)) #1
+  ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (…)) #2
+  ✓ it resolves a potential bound dataset logically with ('foo', Closure Object (…))
+  ✓ it resolves a potential bound dataset logically even when the closure comes first with (Closure Object (…), 'bar')
+  ✓ it will not resolve a closure if it is type hinted as a closure with (Closure Object (…)) #1
+  ✓ it will not resolve a closure if it is type hinted as a closure with (Closure Object (…)) #2
+  ✓ it will not resolve a closure if it is type hinted as a callable with (Closure Object (…)) #1
+  ✓ it will not resolve a closure if it is type hinted as a callable with (Closure Object (…)) #2
+  ✓ it can correctly resolve a bound dataset that returns an array with (Closure Object (…))
+  ✓ it can correctly resolve a bound dataset that returns an array but wants to be spread with (Closure Object (…))
   ↓ forbids to define tests in Datasets dirs and Datasets.php files
 
    PASS  Tests\Features\Depends
@@ -549,7 +549,7 @@
   ✓ it passes with ('Fortaleza')
   ✓ it passes with ('Sollefteå')
   ✓ it passes with ('Ιεράπετρα')
-  ✓ it passes with (stdClass Object (...))
+  ✓ it passes with (stdClass Object (…))
   ✓ it passes with array
   ✓ it passes with *not*
   ✓ it properly fails with *not*
@@ -677,7 +677,7 @@
   ✓ uses dataset with (3)
   ✓ uses dataset with (4)
   ✓ uses dataset with (5)
-  ✓ uses dataset with ('ScopedDatasets/NestedDirector...ts.php')
+  ✓ uses dataset with ('ScopedDatasets/NestedDirector…ts.php')
   ✓ the right dataset is taken
 
    PASS  Tests\Features\ScopedDatasets\Directory\NestedDirectory2\TestFileInNestedDirectory
@@ -821,6 +821,8 @@
   ✓ it show only the names of multiple named datasets in their description
   ✓ it show the actual dataset of multiple non-named datasets in their description
   ✓ it show the correct description for mixed named and not-named datasets
+  ✓ it shows the correct description for long texts with newlines
+  ✓ it shows the correct description for arrays with many elements
 
    PASS  Tests\Unit\Expectations\OppositeExpectation
   ✓ it throw expectation failed exception with string argument
@@ -846,24 +848,24 @@
   ✓ it cannot resolve a parameter without type
 
    PASS  Tests\Unit\Support\DatasetInfo
-  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Datase...rs.php', true)
+  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Datase…rs.php', true)
   ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Datasets.php', false)
-  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur...rs.php', true)
-  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur...rs.php', false)
-  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur...ts.php', false)
-  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Datase...rs.php', false)
+  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur…rs.php', true)
+  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur…rs.php', false)
+  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur…ts.php', false)
+  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Datase…rs.php', false)
   ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Datasets.php', true)
-  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur...rs.php', false) #1
-  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur...rs.php', false) #2
-  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur...ts.php', true)
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Datase...rs.php', '/var/www/project/tests')
+  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur…rs.php', false) #1
+  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur…rs.php', false) #2
+  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur…ts.php', true)
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Datase…rs.php', '/var/www/project/tests')
   ✓ it computes the dataset scope with ('/var/www/project/tests/Datasets.php', '/var/www/project/tests')
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur...rs.php', '/var/www/project/tests/Features')
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur...rs.php', '/var/www/project/tests/Featur...rs.php') #1
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur...ts.php', '/var/www/project/tests/Features')
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur...rs.php', '/var/www/project/tests/Featur...ollers')
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur...rs.php', '/var/www/project/tests/Featur...rs.php') #2
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur...ts.php', '/var/www/project/tests/Featur...ollers')
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Features')
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Featur…rs.php') #1
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…ts.php', '/var/www/project/tests/Features')
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Featur…ollers')
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Featur…rs.php') #2
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…ts.php', '/var/www/project/tests/Featur…ollers')
 
    PASS  Tests\Unit\Support\Reflection
   ✓ it gets file name from closure
@@ -902,4 +904,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    4 incomplete, 4 todos, 18 skipped, 625 passed (1512 assertions)
+  Tests:    4 incomplete, 4 todos, 18 skipped, 627 passed (1514 assertions)
