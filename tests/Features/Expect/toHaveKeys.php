@@ -2,6 +2,13 @@
 
 use PHPUnit\Framework\ExpectationFailedException;
 
+class ExampleClassKeys
+{
+    public $foo = 'foo';
+
+    public $bar = 'bar';
+}
+
 test('pass', function () {
     expect(['a' => 1, 'b', 'c' => 'world', 'foo' => ['bar' => 'baz']])->toHaveKeys(['a', 'c', 'foo.bar']);
 });
@@ -33,3 +40,7 @@ test('not failures', function () {
 test('not failures with multi-dimensional arrays', function () {
     expect(['a' => 1, 'b', 'c' => 'world', 'foo' => ['bar' => ['bir' => 'biz']]])->not->toHaveKeys(['foo' => ['bar' => 'bir'], 'c', 'z']);
 })->throws(ExpectationFailedException::class);
+
+test('pass with a class')->expect((new ExampleClassKeys()))->toHaveKeys(['foo', 'bar']);
+
+test('pass with a class (opposite)')->expect((new ExampleClassKeys()))->not()->toHaveKeys(['foo1234', 'bar5678']);

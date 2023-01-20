@@ -535,6 +535,8 @@
   ✓ not failures with correct value
   ✓ not failures with correct value and with nested key
   ✓ not failures with correct value and with plain key with dots
+  ✓ pass with a class
+  ✓ pass with a class (opposite)
 
    PASS  Tests\Features\Expect\toHaveKeys
   ✓ pass
@@ -545,6 +547,8 @@
   ✓ failures with multi-dimensional arrays and custom message
   ✓ not failures
   ✓ not failures with multi-dimensional arrays
+  ✓ pass with a class
+  ✓ pass with a class (opposite)
 
    PASS  Tests\Features\Expect\toHaveLength
   ✓ it passes with ('Fortaleza')
@@ -900,4 +904,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    4 incomplete, 4 todos, 18 skipped, 625 passed (1513 assertions)
+  Tests:    4 incomplete, 4 todos, 18 skipped, 629 passed (1519 assertions)

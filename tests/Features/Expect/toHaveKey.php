@@ -13,6 +13,11 @@ $test_array = [
     'key.with.dots' => false,
 ];
 
+class ExampleClassKey
+{
+    public $foo = 'foo';
+}
+
 test('pass')->expect($test_array)->toHaveKey('c');
 test('pass with nested key')->expect($test_array)->toHaveKey('d.e');
 test('pass with plain key with dots')->expect($test_array)->toHaveKey('key.with.dots');
@@ -88,3 +93,7 @@ test('not failures with correct value and  with nested key', function () use ($t
 test('not failures with correct value and  with plain key with dots', function () use ($test_array) {
     expect($test_array)->not->toHaveKey('key.with.dots', false);
 })->throws(ExpectationFailedException::class);
+
+test('pass with a class')->expect((new ExampleClassKey()))->toHaveKey('foo');
+
+test('pass with a class (opposite)')->expect((new ExampleClassKey()))->not()->toHaveKey('foo1234');
