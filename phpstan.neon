@@ -12,7 +12,6 @@ parameters:
     reportUnmatchedIgnoredErrors: true
 
     ignoreErrors:
-        - '#Cannot instantiate interface PHPUnit\\Util\\Exception#'
         - "#with a nullable type declaration#"
         - "#type mixed is not subtype of native#"
         - "#is not allowed to extend#"
