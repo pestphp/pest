@@ -303,6 +303,36 @@ final class Expectation
     }
 
     /**
+     * Asserts that the value has the method $name.
+     *
+     * @return self<TValue>
+     */
+    public function toHaveMethod(string $name, string $message = ''): self
+    {
+        $this->toBeObject();
+
+        // @phpstan-ignore-next-line
+        Assert::assertTrue(method_exists($this->value, $name), $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value has the provided methods $names.
+     *
+     * @param  iterable<array-key, string>  $names
+     * @return self<TValue>
+     */
+    public function toHaveMethods(iterable $names, string $message = ''): self
+    {
+        foreach ($names as $name) {
+            $this->toHaveMethod($name, message: $message);
+        }
+
+        return $this;
+    }
+
+    /**
      * Asserts that two variables have the same value.
      *
      * @return self<TValue>
