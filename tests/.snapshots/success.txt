@@ -556,6 +556,18 @@
   ✓ it fails
   ✓ it fails with message
 
+   PASS  Tests\Features\Expect\toHaveMethod
+  ✓ pass
+  ✓ failures
+  ✓ failures with message
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toHaveMethods
+  ✓ pass
+  ✓ failures
+  ✓ failures with custom message
+  ✓ not failures
+
    PASS  Tests\Features\Expect\toHaveProperties
   ✓ pass
   ✓ failures
@@ -902,4 +914,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    4 incomplete, 4 todos, 18 skipped, 625 passed (1512 assertions)
+  Tests:    4 incomplete, 4 todos, 18 skipped, 633 passed (1552 assertions)
