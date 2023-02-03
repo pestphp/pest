@@ -9,10 +9,9 @@ use Pest\Support\ChainableClosure;
 use Pest\Support\ExceptionTrace;
 use Pest\TestSuite;
 use PHPUnit\Framework\ExecutionOrderDependency;
+use Throwable;
 
 use function sprintf;
-
-use Throwable;
 
 /**
  * To avoid inheritance conflicts, all the fields related

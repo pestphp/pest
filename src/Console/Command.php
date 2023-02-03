@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Pest\Console;
 
-use function is_dir;
-
 use Pest\Actions\AddsDefaults;
 use Pest\Actions\AddsTests;
 use Pest\Actions\InteractsWithPlugins;
@@ -19,6 +17,8 @@ use PHPUnit\TextUI\Command as BaseCommand;
 use PHPUnit\TextUI\TestRunner;
 use SebastianBergmann\FileIterator\Facade as FileIteratorFacade;
 use Symfony\Component\Console\Output\OutputInterface;
+
+use function is_dir;
 
 /**
  * @internal

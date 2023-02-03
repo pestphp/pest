@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace Pest\Support;
 
 use Closure;
-
-use const PHP_MAJOR_VERSION;
-
 use ReflectionClass;
 use Throwable;
+
+use const PHP_MAJOR_VERSION;
 
 /**
  * @internal

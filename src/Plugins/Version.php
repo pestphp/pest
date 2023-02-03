@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace Pest\Plugins;
 
 use Pest\Contracts\Plugins\HandlesArguments;
+use Symfony\Component\Console\Output\OutputInterface;
 
 use function Pest\version;
-
-use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @internal
