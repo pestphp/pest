@@ -44,7 +44,7 @@
         "illuminate/support": "^8.83.27",
         "laravel/dusk": "^6.25.2",
         "pestphp/pest-dev-tools": "^1.0.0",
-        "pestphp/pest-plugin-parallel": "^1.2"
+        "pestphp/pest-plugin-parallel": "^1.2.1"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
