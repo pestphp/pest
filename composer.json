@@ -21,7 +21,7 @@
         "nunomaduro/collision": "^7.0.0",
         "nunomaduro/termwind": "^1.15.0",
         "pestphp/pest-plugin": "^2.0.0",
-        "phpunit/phpunit": "^10.0.0"
+        "phpunit/phpunit": "^10.0.2"
     },
     "version": "2.x-dev",
     "autoload": {
@@ -43,7 +43,7 @@
         ]
     },
     "require-dev": {
-        "pestphp/pest-dev-tools": "^2.2.0",
+        "pestphp/pest-dev-tools": "^2.3.0",
         "pestphp/pest-plugin-arch": "^2.0.0",
         "symfony/process": "^6.2.5"
     },
