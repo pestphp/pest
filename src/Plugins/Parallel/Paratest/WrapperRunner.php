@@ -96,8 +96,6 @@ final class WrapperRunner implements RunnerInterface
 
     public function run(): int
     {
-        $this->timer->start();
-
         ExcludeList::addDirectory(dirname(__DIR__));
         TestResultFacade::init();
         EventFacade::seal();
@@ -108,6 +106,9 @@ final class WrapperRunner implements RunnerInterface
 
         $this->printer->setTestCount($suiteLoader->testCount);
         $this->printer->start();
+
+        $this->timer->start();
+
         $this->startWorkers();
         $this->assignAllPendingTests();
         $this->waitForAllToFinish();
