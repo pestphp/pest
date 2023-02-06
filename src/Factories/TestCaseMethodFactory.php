@@ -188,7 +188,7 @@ final class TestCaseMethodFactory
 
         return <<<EOF
 
-                public function $dataProviderName()
+                public static function $dataProviderName()
                 {
                     return __PestDatasets::get(self::\$__filename, "$methodName");
                 }
