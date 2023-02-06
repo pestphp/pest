@@ -18,6 +18,7 @@ use PHPUnit\TestRunner\TestResult\Facade as TestResultFacade;
 use PHPUnit\TestRunner\TestResult\TestResult;
 use PHPUnit\TextUI\ShellExitCodeCalculator;
 use PHPUnit\Util\ExcludeList;
+use SebastianBergmann\Timer\Timer;
 use SplFileInfo;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
@@ -42,6 +43,7 @@ final class WrapperRunner implements RunnerInterface
 {
     private const CYCLE_SLEEP = 10000;
     private readonly ResultPrinter $printer;
+    private Timer $timer;
 
     /** @var non-empty-string[] */
     private array $pending = [];
@@ -70,6 +72,7 @@ final class WrapperRunner implements RunnerInterface
         private readonly OutputInterface $output
     ) {
         $this->printer = new ResultPrinter($output, $options);
+        $this->timer = new Timer();
 
         $wrapper = realpath(
             dirname(__DIR__, 4) . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . 'pest-wrapper.php',
@@ -93,6 +96,8 @@ final class WrapperRunner implements RunnerInterface
 
     public function run(): int
     {
+        $this->timer->start();
+
         ExcludeList::addDirectory(dirname(__DIR__));
         TestResultFacade::init();
         EventFacade::seal();
@@ -277,6 +282,7 @@ final class WrapperRunner implements RunnerInterface
             $testResultSum,
             $this->teamcityFiles,
             $this->testdoxFiles,
+            $this->timer->stop(),
         );
         $this->generateCodeCoverageReports();
         $this->generateLogs();

@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Parallel\Handlers;
 
+use Illuminate\Testing\ParallelRunner;
+use ParaTest\Options;
+use ParaTest\RunnerInterface;
 use Pest\Plugins\Concerns\HandleArguments;
+use Pest\Plugins\Parallel\Paratest\WrapperRunner;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @internal
@@ -19,6 +24,8 @@ final class Laravel
             return $args;
         }
 
+        $this->setLaravelParallelRunner();
+
         foreach ($args as $value) {
             if (str_starts_with($value, '--runner')) {
                 $args = $this->popArgument($value, $args);
@@ -26,6 +33,17 @@ final class Laravel
         }
 
         return $this->pushArgument('--runner=\Illuminate\Testing\ParallelRunner', $args);
+    }
+
+    private function setLaravelParallelRunner(): void
+    {
+        if (!method_exists(ParallelRunner::class, 'resolveRunnerUsing')) {
+            exit('Using parallel with Pest requires Laravel v8.55.0 or higher.');
+        }
+
+        ParallelRunner::resolveRunnerUsing(function (Options $options, OutputInterface $output): RunnerInterface {
+            return new WrapperRunner($options, $output);
+        });
     }
 
     private static function isALaravelApplication(): bool

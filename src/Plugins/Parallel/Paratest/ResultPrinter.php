@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Parallel\Paratest;
 
+use NunoMaduro\Collision\Adapters\Phpunit\TestResult as CollisionTestResult;
+use NunoMaduro\Collision\Exceptions\TestException;
 use ParaTest\Options;
+use Pest\Plugins\Parallel\Support\CompactPrinter;
 use PHPUnit\Runner\TestSuiteSorter;
 use PHPUnit\TestRunner\TestResult\TestResult;
 use PHPUnit\TextUI\Output\Default\ResultPrinter as DefaultResultPrinter;
@@ -13,11 +16,13 @@ use PHPUnit\TextUI\Output\SummaryPrinter;
 use PHPUnit\Util\Color;
 use SebastianBergmann\CodeCoverage\Driver\Selector;
 use SebastianBergmann\CodeCoverage\Filter;
+use SebastianBergmann\Timer\Duration;
 use SebastianBergmann\Timer\ResourceUsageFormatter;
 use SplFileInfo;
 use Symfony\Component\Console\Formatter\OutputFormatter;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Termwind\Terminal;
 use function assert;
 use function fclose;
 use function feof;
@@ -32,6 +37,7 @@ use function sprintf;
 use function str_repeat;
 use function strlen;
 
+use function Termwind\terminal;
 use const DIRECTORY_SEPARATOR;
 use const PHP_EOL;
 use const PHP_VERSION;
@@ -40,6 +46,7 @@ use const PHP_VERSION;
 final class ResultPrinter
 {
     public readonly Printer $printer;
+    private readonly CompactPrinter $compactPrinter;
 
     private int $numTestsWidth   = 0;
     private int $maxColumn       = 0;
@@ -72,6 +79,8 @@ final class ResultPrinter
             }
         };
 
+        $this->compactPrinter = new CompactPrinter();
+
         if (! $this->options->configuration->hasLogfileTeamcity()) {
             return;
         }
@@ -88,19 +97,13 @@ final class ResultPrinter
 
     public function start(): void
     {
-        $this->numTestsWidth = strlen((string) $this->totalCases);
-        $this->maxColumn     = $this->numberOfColumns
-            + (DIRECTORY_SEPARATOR === '\\' ? -1 : 0) // fix windows blank lines
-            - strlen($this->getProgress());
-
-        // @see \PHPUnit\TextUI\TestRunner::writeMessage()
-        $output = $this->output;
-        $write  = static function (string $type, string $message) use ($output): void {
-            $output->write(sprintf("%-15s%s\n", $type . ':', $message));
-        };
-
-        // @see \PHPUnit\TextUI\Application::writeRuntimeInformation()
-        $write('Processes', (string) $this->options->processes);
+        $this->compactPrinter->line(sprintf(
+            'Running %d test file%s using %d process%s',
+            $this->totalCases,
+            $this->totalCases === 1 ? '' : 's',
+            $this->options->processes,
+            $this->options->processes === 1 ? '' : 'es')
+        );
     }
 
     /** @param list<SplFileInfo> $teamcityFiles */
@@ -142,7 +145,7 @@ final class ResultPrinter
      * @param list<SplFileInfo> $teamcityFiles
      * @param list<SplFileInfo> $testdoxFiles
      */
-    public function printResults(TestResult $testResult, array $teamcityFiles, array $testdoxFiles): void
+    public function printResults(TestResult $testResult, array $teamcityFiles, array $testdoxFiles, Duration $duration): void
     {
         if ($this->options->needsTeamcity) {
             $teamcityProgress = $this->tailMultiple($teamcityFiles);
@@ -168,78 +171,21 @@ final class ResultPrinter
             return;
         }
 
-        $resultPrinter  = new DefaultResultPrinter(
-            $this->printer,
-            $this->options->configuration->displayDetailsOnIncompleteTests(),
-            $this->options->configuration->displayDetailsOnSkippedTests(),
-            $this->options->configuration->displayDetailsOnTestsThatTriggerDeprecations(),
-            $this->options->configuration->displayDetailsOnTestsThatTriggerErrors(),
-            $this->options->configuration->displayDetailsOnTestsThatTriggerNotices(),
-            $this->options->configuration->displayDetailsOnTestsThatTriggerWarnings(),
-            false,
-        );
-        $summaryPrinter = new SummaryPrinter(
-            $this->printer,
-            $this->options->configuration->colors(),
-        );
+        $this->compactPrinter->newLine();
 
-        $this->printer->print(PHP_EOL . (new ResourceUsageFormatter())->resourceUsageSinceStartOfRequest() . PHP_EOL . PHP_EOL);
+        $issues = array_map(fn($event) => CollisionTestResult::fromTestCase(
+            $event->test(),
+            CollisionTestResult::FAIL,
+            $event->throwable(),
+        ), [...$testResult->testFailedEvents(), ...$testResult->testErroredEvents()]);
 
-        $resultPrinter->print($testResult);
-        $summaryPrinter->print($testResult);
+        $this->compactPrinter->errors($issues);
+        $this->compactPrinter->recap($testResult, $duration);
     }
 
     private function printFeedbackItem(string $item): void
     {
-        $this->printFeedbackItemColor($item);
-        ++$this->column;
-        ++$this->casesProcessed;
-        if ($this->column !== $this->maxColumn && $this->casesProcessed < $this->totalCases) {
-            return;
-        }
-
-        if (
-            $this->casesProcessed > 0
-            && $this->casesProcessed === $this->totalCases
-            && ($pad = $this->maxColumn - $this->column) > 0
-        ) {
-            $this->output->write(str_repeat(' ', $pad));
-        }
-
-        $this->output->write($this->getProgress() . "\n");
-        $this->column = 0;
-    }
-
-    private function printFeedbackItemColor(string $item): void
-    {
-        $buffer = match ($item) {
-            'E' => $this->colorizeTextBox('fg-red, bold', $item),
-            'F' => $this->colorizeTextBox('bg-red, fg-white', $item),
-            'I', 'N', 'D', 'R', 'W' => $this->colorizeTextBox('fg-yellow, bold', $item),
-            'S' => $this->colorizeTextBox('fg-cyan, bold', $item),
-            default => $item,
-        };
-
-        $this->output->write($buffer);
-    }
-
-    private function getProgress(): string
-    {
-        return sprintf(
-            ' %' . $this->numTestsWidth . 'd / %' . $this->numTestsWidth . 'd (%3s%%)',
-            $this->casesProcessed,
-            $this->totalCases,
-            floor(($this->totalCases > 0 ? $this->casesProcessed / $this->totalCases : 0) * 100),
-        );
-    }
-
-    private function colorizeTextBox(string $color, string $buffer): string
-    {
-        if (! $this->options->configuration->colors()) {
-            return $buffer;
-        }
-
-        return Color::colorizeTextBox($color, $buffer);
+        $this->compactPrinter->descriptionItem($item);
     }
 
     /** @param list<SplFileInfo> $files */
