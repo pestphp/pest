@@ -9,7 +9,6 @@ use ParaTest\JUnit\LogMerger;
 use ParaTest\JUnit\Writer;
 use ParaTest\Options;
 use ParaTest\RunnerInterface;
-use ParaTest\WrapperRunner\ResultPrinter;
 use ParaTest\WrapperRunner\SuiteLoader;
 use ParaTest\WrapperRunner\WrapperWorker;
 use Pest\TestSuite;
@@ -75,6 +74,7 @@ final class WrapperRunner implements RunnerInterface
         $wrapper = realpath(
             dirname(__DIR__, 4) . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . 'pest-wrapper.php',
         );
+
         assert($wrapper !== false);
         $phpFinder = new PhpExecutableFinder();
         $phpBin    = $phpFinder->find(false);
