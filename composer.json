@@ -43,6 +43,7 @@
         ]
     },
     "require-dev": {
+        "brianium/paratest": "^7.0",
         "pestphp/pest-dev-tools": "^2.4.0",
         "pestphp/pest-plugin-arch": "^2.0.0",
         "symfony/process": "^6.2.5"
@@ -89,7 +90,8 @@
                 "Pest\\Plugins\\Memory",
                 "Pest\\Plugins\\Printer",
                 "Pest\\Plugins\\Retry",
-                "Pest\\Plugins\\Version"
+                "Pest\\Plugins\\Version",
+                "Pest\\Plugins\\Parallel"
             ]
         }
     }
