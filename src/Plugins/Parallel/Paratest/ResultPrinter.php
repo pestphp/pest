@@ -4,18 +4,6 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Parallel\Paratest;
 
-use NunoMaduro\Collision\Adapters\Phpunit\TestResult as CollisionTestResult;
-use ParaTest\Options;
-use Pest\Plugins\Parallel\Support\CompactPrinter;
-use Pest\Support\StateGenerator;
-use PHPUnit\Event\Test\Errored;
-use PHPUnit\TestRunner\TestResult\TestResult;
-use PHPUnit\TextUI\Output\Printer;
-use SebastianBergmann\Timer\Duration;
-use SplFileInfo;
-use Symfony\Component\Console\Formatter\OutputFormatter;
-use Symfony\Component\Console\Output\OutputInterface;
-
 use function assert;
 use function fclose;
 use function feof;
@@ -24,28 +12,40 @@ use function fread;
 use function fseek;
 use function ftell;
 use function fwrite;
+use ParaTest\Options;
+use Pest\Plugins\Parallel\Support\CompactPrinter;
+use Pest\Support\StateGenerator;
+use PHPUnit\TestRunner\TestResult\TestResult;
+use PHPUnit\TextUI\Output\Printer;
 use function preg_replace;
+use SebastianBergmann\Timer\Duration;
+use SplFileInfo;
 use function sprintf;
 use function strlen;
+use Symfony\Component\Console\Formatter\OutputFormatter;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /** @internal */
 final class ResultPrinter
 {
     public readonly Printer $printer;
+
     private readonly CompactPrinter $compactPrinter;
 
-    private int $totalCases      = 0;
+    private int $totalCases = 0;
 
     /** @var resource|null */
     private $teamcityLogFileHandle;
-    /** @var array<non-empty-string, int> */
+
+    /** @var array<string, int> */
     private array $tailPositions;
 
     public function __construct(
         private readonly OutputInterface $output,
         private readonly Options $options
     ) {
-        $this->printer = new class ($this->output) implements Printer {
+        $this->printer = new class($this->output) implements Printer
+        {
             public function __construct(
                 private readonly OutputInterface $output,
             ) {
@@ -88,7 +88,7 @@ final class ResultPrinter
         );
     }
 
-    /** @param list<SplFileInfo> $teamcityFiles */
+    /** @param  array<int, SplFileInfo>  $teamcityFiles */
     public function printFeedback(SplFileInfo $progressFile, array $teamcityFiles): void
     {
         if ($this->options->needsTeamcity) {
@@ -115,17 +115,17 @@ final class ResultPrinter
             return;
         }
 
-        $feedbackItems = preg_replace('/ +\\d+ \\/ \\d+ \\( ?\\d+%\\)\\s*/', '', $feedbackItems);
+        $feedbackItems = (string) preg_replace('/ +\\d+ \\/ \\d+ \\( ?\\d+%\\)\\s*/', '', $feedbackItems);
 
         $actualTestCount = strlen($feedbackItems);
-        for ($index = 0; $index < $actualTestCount; ++$index) {
+        for ($index = 0; $index < $actualTestCount; $index++) {
             $this->printFeedbackItem($feedbackItems[$index]);
         }
     }
 
     /**
-     * @param list<SplFileInfo> $teamcityFiles
-     * @param list<SplFileInfo> $testdoxFiles
+     * @param  array<int, SplFileInfo>  $teamcityFiles
+     * @param  array<int, SplFileInfo>  $testdoxFiles
      */
     public function printResults(TestResult $testResult, array $teamcityFiles, array $testdoxFiles, Duration $duration): void
     {
@@ -134,7 +134,7 @@ final class ResultPrinter
 
             if ($this->teamcityLogFileHandle !== null) {
                 fwrite($this->teamcityLogFileHandle, $teamcityProgress);
-                $resource                    = $this->teamcityLogFileHandle;
+                $resource = $this->teamcityLogFileHandle;
                 $this->teamcityLogFileHandle = null;
                 fclose($resource);
             }
@@ -166,7 +166,7 @@ final class ResultPrinter
         $this->compactPrinter->descriptionItem($item);
     }
 
-    /** @param list<SplFileInfo> $files */
+    /** @param  array<int, SplFileInfo>  $files */
     private function tailMultiple(array $files): string
     {
         $content = '';
@@ -183,7 +183,7 @@ final class ResultPrinter
 
     private function tail(SplFileInfo $file): string
     {
-        $path   = $file->getPathname();
+        $path = $file->getPathname();
         $handle = fopen($path, 'r');
         assert($handle !== false);
         $fseek = fseek($handle, $this->tailPositions[$path] ?? 0);
