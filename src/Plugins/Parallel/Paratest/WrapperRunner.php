@@ -44,7 +44,7 @@ final class WrapperRunner implements RunnerInterface
 {
     private const CYCLE_SLEEP = 10000;
     private readonly ResultPrinter $printer;
-    private Timer $timer;
+    private readonly Timer $timer;
 
     /** @var non-empty-string[] */
     private array $pending = [];
@@ -131,7 +131,7 @@ final class WrapperRunner implements RunnerInterface
     {
         $batchSize = $this->options->maxBatchSize;
 
-        while (count($this->pending) > 0 && count($this->workers) > 0) {
+        while ($this->pending !== [] && $this->workers !== []) {
             foreach ($this->workers as $token => $worker) {
                 if (! $worker->isRunning()) {
                     throw $worker->getWorkerCrashedException();
@@ -178,7 +178,7 @@ final class WrapperRunner implements RunnerInterface
     private function waitForAllToFinish(): void
     {
         $stopped = [];
-        while (count($this->workers) > 0) {
+        while ($this->workers !== []) {
             foreach ($this->workers as $index => $worker) {
                 if ($worker->isRunning()) {
                     if (! isset($stopped[$index]) && $worker->isFree()) {
@@ -307,7 +307,7 @@ final class WrapperRunner implements RunnerInterface
         return $exitcode;
     }
 
-    protected function generateCodeCoverageReports(): void
+    private function generateCodeCoverageReports(): void
     {
         if ($this->coverageFiles === []) {
             return;
@@ -361,7 +361,7 @@ final class WrapperRunner implements RunnerInterface
 
         $tests = array_filter(
             $suiteLoader->files,
-            fn(string $filename) => ! str_ends_with($filename, "eval()'d code")
+            fn(string $filename): bool => ! str_ends_with($filename, "eval()'d code")
         );
 
         return [...$tests, ...TestSuite::getInstance()->tests->getFilenames()];

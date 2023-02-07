@@ -17,7 +17,7 @@ final class Parallel implements HandlesArguments
 {
     use HandleArguments;
 
-    private array $handlers = [
+    private const HANDLERS = [
         \Pest\Plugins\Parallel\Handlers\Parallel::class,
         \Pest\Plugins\Parallel\Handlers\Laravel::class,
     ];
@@ -36,8 +36,10 @@ final class Parallel implements HandlesArguments
 
     private function argumentsContainParallelFlags(array $arguments): bool
     {
-        return $this->hasArgument('--parallel', $arguments)
-            || $this->hasArgument('-p', $arguments);
+        if ($this->hasArgument('--parallel', $arguments)) {
+            return true;
+        }
+        return $this->hasArgument('-p', $arguments);
     }
 
     private function runTestSuiteInParallel(array $arguments): int
@@ -49,7 +51,7 @@ final class Parallel implements HandlesArguments
         }
 
         $filteredArguments = array_reduce(
-            $this->handlers,
+            self::HANDLERS,
             fn($arguments, $handler) => (new $handler())->handle($arguments),
             $arguments
         );

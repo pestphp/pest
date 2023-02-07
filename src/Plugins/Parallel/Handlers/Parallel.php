@@ -14,16 +14,18 @@ use Symfony\Component\Console\Input\ArgvInput;
 final class Parallel
 {
     use HandleArguments;
+    /**
+     * @var string[]
+     */
+    private const ARGS_TO_REMOVE = [
+        '--parallel',
+        '-p',
+        '--no-output',
+    ];
 
     public function handle(array $args): array
     {
-        $argsToRemove = [
-            '--parallel',
-            '-p',
-            '--no-output',
-        ];
-
-        $args = array_reduce($argsToRemove, fn ($args, $arg) => $this->popArgument($arg, $args), $args);
+        $args = array_reduce(self::ARGS_TO_REMOVE, fn ($args, $arg): array => $this->popArgument($arg, $args), $args);
 
         return $this->pushArgument('--runner=' . WrapperRunner::class, $args);
     }

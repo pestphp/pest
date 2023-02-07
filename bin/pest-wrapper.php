@@ -45,13 +45,13 @@ $bootPest = (static function (): void {
         'phpunit-argv:',
     ]);
 
-    require_once __DIR__ . '/../overrides/Runner/TestSuiteLoader.php';
-    require_once __DIR__ . '/../overrides/Runner/Filter/NameFilterIterator.php';
+    require_once __DIR__.'/../overrides/Runner/TestSuiteLoader.php';
+    require_once __DIR__.'/../overrides/Runner/Filter/NameFilterIterator.php';
 
     $composerAutoloadFiles = [
-        dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'autoload.php',
-        dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php',
-        dirname(__DIR__) . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php',
+        dirname(__DIR__, 3).DIRECTORY_SEPARATOR.'autoload.php',
+        dirname(__DIR__, 2).DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'autoload.php',
+        dirname(__DIR__).DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'autoload.php',
     ];
 
     foreach ($composerAutoloadFiles as $file) {
@@ -69,8 +69,8 @@ $bootPest = (static function (): void {
 
     assert(isset($getopt['progress-file']) && is_string($getopt['progress-file']));
     assert(isset($getopt['testresult-file']) && is_string($getopt['testresult-file']));
-    assert(!isset($getopt['teamcity-file']) || is_string($getopt['teamcity-file']));
-    assert(!isset($getopt['testdox-file']) || is_string($getopt['testdox-file']));
+    assert(! isset($getopt['teamcity-file']) || is_string($getopt['teamcity-file']));
+    assert(! isset($getopt['testdox-file']) || is_string($getopt['testdox-file']));
 
     assert(isset($getopt['phpunit-argv']) && is_string($getopt['phpunit-argv']));
     $phpunitArgv = unserialize($getopt['phpunit-argv'], ['allowed_classes' => false]);

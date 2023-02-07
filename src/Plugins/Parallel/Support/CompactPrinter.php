@@ -25,6 +25,8 @@ final class CompactPrinter
 {
     private readonly Terminal $terminal;
 
+    private readonly ConsoleOutputInterface $output;
+
     private readonly Style $style;
 
     private int $compactProcessed = 0;

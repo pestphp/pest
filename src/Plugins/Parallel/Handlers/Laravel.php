@@ -27,7 +27,7 @@ final class Laravel
         $this->setLaravelParallelRunner();
 
         foreach ($args as $value) {
-            if (str_starts_with($value, '--runner')) {
+            if (str_starts_with((string) $value, '--runner')) {
                 $args = $this->popArgument($value, $args);
             }
         }
@@ -41,9 +41,7 @@ final class Laravel
             exit('Using parallel with Pest requires Laravel v8.55.0 or higher.');
         }
 
-        ParallelRunner::resolveRunnerUsing(function (Options $options, OutputInterface $output): RunnerInterface {
-            return new WrapperRunner($options, $output);
-        });
+        ParallelRunner::resolveRunnerUsing(fn(Options $options, OutputInterface $output): RunnerInterface => new WrapperRunner($options, $output));
     }
 
     private static function isALaravelApplication(): bool
