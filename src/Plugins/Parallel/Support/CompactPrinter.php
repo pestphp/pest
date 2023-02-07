@@ -58,7 +58,7 @@ final class CompactPrinter
 
     public function line(string $message): void
     {
-        render("<span class='mx-2 py-1 text-gray-700'>{$message}</span>");
+        render("<span class='mx-2 py-1 text-gray'>{$message}</span>");
     }
 
     public function descriptionItem(string $item): void
