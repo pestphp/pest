@@ -6,9 +6,12 @@ use ParaTest\ParaTestCommand;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Plugins\Actions\CallsAddsOutput;
 use Pest\Plugins\Concerns\HandleArguments;
+use Pest\Plugins\Parallel\Handlers\Laravel;
 use Pest\Support\Arr;
 use Pest\Support\Container;
 use Pest\TestSuite;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\OutputInterface;
 use function Pest\version;
@@ -18,15 +21,14 @@ final class Parallel implements HandlesArguments
     use HandleArguments;
 
     private const HANDLERS = [
-        \Pest\Plugins\Parallel\Handlers\Parallel::class,
-        \Pest\Plugins\Parallel\Handlers\Laravel::class,
+        Parallel\Handlers\Parallel::class,
+        Laravel::class,
     ];
 
     public function handleArguments(array $arguments): array
     {
         if ($this->argumentsContainParallelFlags($arguments)) {
-            $exitCode = $this->runTestSuiteInParallel($arguments);
-            exit($exitCode);
+            exit($this->runTestSuiteInParallel($arguments));
         }
 
         $this->markTestSuiteAsParallelSubProcessIfRequired();
@@ -47,7 +49,7 @@ final class Parallel implements HandlesArguments
         if (! class_exists(ParaTestCommand::class)) {
             $this->askUserToInstallParatest();
 
-            return 1;
+            return Command::FAILURE;
         }
 
         $filteredArguments = array_reduce(
@@ -56,16 +58,9 @@ final class Parallel implements HandlesArguments
             $arguments
         );
 
-        $testSuite = TestSuite::getInstance();
+        $exitCode = $this->paratestCommand()->run(new ArgvInput($filteredArguments));
 
-        $command = ParaTestCommand::applicationFactory($testSuite->rootPath);
-        $command->setAutoExit(false);
-        $command->setName('Pest');
-        $command->setVersion(version());
-        $exitCode = $command->run(new ArgvInput($filteredArguments));
-
-        $exitCode = (new CallsAddsOutput())($exitCode);
-        exit($exitCode);
+        return (new CallsAddsOutput())($exitCode);
     }
 
     private function markTestSuiteAsParallelSubProcessIfRequired(): void
@@ -81,5 +76,15 @@ final class Parallel implements HandlesArguments
             '<fg=red>Parallel support requires ParaTest, which is not installed.</>',
             'Please run <fg=yellow>composer require --dev brianium/paratest</> to install ParaTest.',
         ]);
+    }
+
+    private function paratestCommand(): Application
+    {
+        $command = ParaTestCommand::applicationFactory(TestSuite::getInstance()->rootPath);
+        $command->setAutoExit(false);
+        $command->setName('Pest');
+        $command->setVersion(version());
+
+        return $command;
     }
 }
