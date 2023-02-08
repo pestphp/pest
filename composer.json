@@ -23,6 +23,9 @@
         "pestphp/pest-plugin": "^2.0.0",
         "phpunit/phpunit": "^10.0.7"
     },
+    "conflict": {
+        "brianium/paratest": "<7.0.4"
+    },
     "version": "2.x-dev",
     "autoload": {
         "psr-4": {
