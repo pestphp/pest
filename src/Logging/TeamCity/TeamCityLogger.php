@@ -211,7 +211,7 @@ final class TeamCityLogger
             );
         }
 
-        $style->writeRecap($state, $telemetry);
+        $style->writeRecap($state, $telemetry, $result);
     }
 
     public function output(ServiceMessage $message): void
