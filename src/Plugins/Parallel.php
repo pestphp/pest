@@ -8,6 +8,7 @@ use ParaTest\ParaTestCommand;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Plugins\Actions\CallsAddsOutput;
 use Pest\Plugins\Concerns\HandleArguments;
+use Pest\Plugins\Parallel\Paratest\CleanConsoleOutput;
 use Pest\Support\Arr;
 use Pest\Support\Container;
 use Pest\TestSuite;
@@ -60,7 +61,7 @@ final class Parallel implements HandlesArguments
             $arguments
         );
 
-        $exitCode = $this->paratestCommand()->run(new ArgvInput($filteredArguments));
+        $exitCode = $this->paratestCommand()->run(new ArgvInput($filteredArguments), new CleanConsoleOutput());
 
         return (new CallsAddsOutput())($exitCode);
     }
