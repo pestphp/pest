@@ -73,8 +73,8 @@ final class Parallel implements HandlesArguments
     private function askUserToInstallParatest(): void
     {
         Container::getInstance()->get(OutputInterface::class)->writeln([
-            '<fg=red>Parallel support requires ParaTest, which is not installed.</>',
-            'Please run <fg=yellow>composer require --dev brianium/paratest</> to install ParaTest.',
+            '<fg=red>Pest Parallel requires ParaTest to run.</>',
+            'Please run <fg=yellow>composer require --dev brianium/paratest</>.',
         ]);
     }
 
