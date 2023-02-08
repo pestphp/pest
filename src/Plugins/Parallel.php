@@ -1,20 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pest\Plugins;
 
 use ParaTest\ParaTestCommand;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Plugins\Actions\CallsAddsOutput;
 use Pest\Plugins\Concerns\HandleArguments;
-use Pest\Plugins\Parallel\Handlers\Laravel;
 use Pest\Support\Arr;
 use Pest\Support\Container;
 use Pest\TestSuite;
+use function Pest\version;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\OutputInterface;
-use function Pest\version;
 
 final class Parallel implements HandlesArguments
 {
@@ -22,7 +23,7 @@ final class Parallel implements HandlesArguments
 
     private const HANDLERS = [
         Parallel\Handlers\Parallel::class,
-        Laravel::class,
+        Parallel\Handlers\Laravel::class,
     ];
 
     public function handleArguments(array $arguments): array
@@ -41,6 +42,7 @@ final class Parallel implements HandlesArguments
         if ($this->hasArgument('--parallel', $arguments)) {
             return true;
         }
+
         return $this->hasArgument('-p', $arguments);
     }
 
@@ -54,7 +56,7 @@ final class Parallel implements HandlesArguments
 
         $filteredArguments = array_reduce(
             self::HANDLERS,
-            fn($arguments, $handler) => (new $handler())->handle($arguments),
+            fn ($arguments, $handler) => (new $handler())->handle($arguments),
             $arguments
         );
 

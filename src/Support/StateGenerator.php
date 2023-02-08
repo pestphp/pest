@@ -82,7 +82,7 @@ final class StateGenerator
             $state->add(TestResult::fromTestCase(
 
                 new TestMethod(
-                /** @phpstan-ignore-next-line */
+                    /** @phpstan-ignore-next-line */
                     "$i",
                     /** @phpstan-ignore-next-line */
                     '',

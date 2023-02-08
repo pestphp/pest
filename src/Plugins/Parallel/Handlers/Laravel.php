@@ -37,17 +37,17 @@ final class Laravel
 
     private function setLaravelParallelRunner(): void
     {
-        if (!method_exists(ParallelRunner::class, 'resolveRunnerUsing')) {
+        if (! method_exists(ParallelRunner::class, 'resolveRunnerUsing')) {
             exit('Using parallel with Pest requires Laravel v8.55.0 or higher.');
         }
 
-        ParallelRunner::resolveRunnerUsing(fn(Options $options, OutputInterface $output): RunnerInterface => new WrapperRunner($options, $output));
+        ParallelRunner::resolveRunnerUsing(fn (Options $options, OutputInterface $output): RunnerInterface => new WrapperRunner($options, $output));
     }
 
     private static function isALaravelApplication(): bool
     {
         return class_exists(\Illuminate\Foundation\Application::class)
             && class_exists(\Illuminate\Testing\ParallelRunner::class)
-            && !class_exists(\Orchestra\Testbench\TestCase::class);
+            && ! class_exists(\Orchestra\Testbench\TestCase::class);
     }
 }

@@ -6,7 +6,6 @@ use ParaTest\WrapperRunner\ApplicationForWrapperWorker;
 use ParaTest\WrapperRunner\WrapperWorker;
 use Pest\ConfigLoader;
 use Pest\Kernel;
-use Pest\Plugins\Actions\CallsAddsOutput;
 use Pest\Plugins\Actions\CallsHandleArguments;
 use Pest\Support\Container;
 use Pest\TestSuite;

@@ -4,6 +4,15 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Parallel\Paratest;
 
+use function array_merge;
+use function array_merge_recursive;
+use function array_shift;
+use function assert;
+use function count;
+use const DIRECTORY_SEPARATOR;
+use function dirname;
+use function file_get_contents;
+use function max;
 use ParaTest\Coverage\CoverageMerger;
 use ParaTest\JUnit\LogMerger;
 use ParaTest\JUnit\Writer;
@@ -19,49 +28,47 @@ use PHPUnit\TestRunner\TestResult\TestResult;
 use PHPUnit\TextUI\Configuration\CodeCoverageFilterRegistry;
 use PHPUnit\TextUI\ShellExitCodeCalculator;
 use PHPUnit\Util\ExcludeList;
+use function realpath;
 use SebastianBergmann\Timer\Timer;
 use SplFileInfo;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
-
-use function array_merge;
-use function array_merge_recursive;
-use function array_shift;
-use function assert;
-use function count;
-use function dirname;
-use function file_get_contents;
-use function max;
-use function realpath;
 use function unlink;
 use function unserialize;
 use function usleep;
-
-use const DIRECTORY_SEPARATOR;
 
 /** @internal */
 final class WrapperRunner implements RunnerInterface
 {
     private const CYCLE_SLEEP = 10000;
+
     private readonly ResultPrinter $printer;
+
     private readonly Timer $timer;
 
     /** @var non-empty-string[] */
     private array $pending = [];
-    private int $exitcode  = -1;
+
+    private int $exitcode = -1;
+
     /** @var array<positive-int,WrapperWorker> */
     private array $workers = [];
+
     /** @var array<int,int> */
     private array $batches = [];
 
     /** @var list<SplFileInfo> */
     private array $testresultFiles = [];
+
     /** @var list<SplFileInfo> */
     private array $coverageFiles = [];
+
     /** @var list<SplFileInfo> */
     private array $junitFiles = [];
+
     /** @var list<SplFileInfo> */
     private array $teamcityFiles = [];
+
     /** @var list<SplFileInfo> */
     private array $testdoxFiles = [];
 
@@ -78,12 +85,12 @@ final class WrapperRunner implements RunnerInterface
         $this->timer = new Timer();
 
         $wrapper = realpath(
-            dirname(__DIR__, 4) . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . 'pest-wrapper.php',
+            dirname(__DIR__, 4).DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'pest-wrapper.php',
         );
 
         assert($wrapper !== false);
         $phpFinder = new PhpExecutableFinder();
-        $phpBin    = $phpFinder->find(false);
+        $phpBin = $phpFinder->find(false);
         assert($phpBin !== false);
         $parameters = [$phpBin];
         $parameters = array_merge($parameters, $phpFinder->findArguments());
@@ -100,13 +107,16 @@ final class WrapperRunner implements RunnerInterface
 
     public function run(): int
     {
-        ExcludeList::addDirectory(dirname(__DIR__));
+        $directory = dirname(__DIR__);
+        assert(strlen($directory) > 0);
+        ExcludeList::addDirectory($directory);
+
         TestResultFacade::init();
         EventFacade::seal();
-        $suiteLoader = new SuiteLoader($this->options, $this->output, $this->codeCoverageFilterRegistry,);
+        $suiteLoader = new SuiteLoader($this->options, $this->output, $this->codeCoverageFilterRegistry);
         $this->pending = $this->getTestFiles($suiteLoader);
 
-        $result      = TestResultFacade::result();
+        $result = TestResultFacade::result();
 
         $this->printer->setTestCount($suiteLoader->testCount);
         $this->printer->start();
@@ -122,7 +132,7 @@ final class WrapperRunner implements RunnerInterface
 
     private function startWorkers(): void
     {
-        for ($token = 1; $token <= $this->options->processes; ++$token) {
+        for ($token = 1; $token <= $this->options->processes; $token++) {
             $this->startWorker($token);
         }
     }
@@ -143,7 +153,7 @@ final class WrapperRunner implements RunnerInterface
 
                 $this->flushWorker($worker);
 
-                if ($batchSize !== null && $batchSize !== 0 && $this->batches[$token] === $batchSize) {
+                if ($batchSize !== 0 && $this->batches[$token] === $batchSize) {
                     $this->destroyWorker($token);
                     $worker = $this->startWorker($token);
                 }
@@ -339,7 +349,7 @@ final class WrapperRunner implements RunnerInterface
         );
     }
 
-    /** @param list<SplFileInfo> $files */
+    /** @param  list<SplFileInfo>  $files */
     private function clearFiles(array $files): void
     {
         foreach ($files as $file) {
@@ -357,11 +367,11 @@ final class WrapperRunner implements RunnerInterface
      */
     private function getTestFiles(SuiteLoader $suiteLoader): array
     {
-        $this->debug(sprintf("Found %d test file%s", count($suiteLoader->files), count($suiteLoader->files) === 1 ? '' : 's'));
+        $this->debug(sprintf('Found %d test file%s', count($suiteLoader->files), count($suiteLoader->files) === 1 ? '' : 's'));
 
         $tests = array_filter(
             $suiteLoader->files,
-            fn(string $filename): bool => ! str_ends_with($filename, "eval()'d code")
+            fn (string $filename): bool => ! str_ends_with($filename, "eval()'d code")
         );
 
         return [...$tests, ...TestSuite::getInstance()->tests->getFilenames()];

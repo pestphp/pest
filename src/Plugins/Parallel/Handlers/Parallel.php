@@ -6,7 +6,6 @@ namespace Pest\Plugins\Parallel\Handlers;
 
 use Pest\Plugins\Concerns\HandleArguments;
 use Pest\Plugins\Parallel\Paratest\WrapperRunner;
-use Symfony\Component\Console\Input\ArgvInput;
 
 /**
  * @internal
@@ -14,6 +13,7 @@ use Symfony\Component\Console\Input\ArgvInput;
 final class Parallel
 {
     use HandleArguments;
+
     /**
      * @var string[]
      */
@@ -27,6 +27,6 @@ final class Parallel
     {
         $args = array_reduce(self::ARGS_TO_REMOVE, fn ($args, $arg): array => $this->popArgument($arg, $args), $args);
 
-        return $this->pushArgument('--runner=' . WrapperRunner::class, $args);
+        return $this->pushArgument('--runner='.WrapperRunner::class, $args);
     }
 }

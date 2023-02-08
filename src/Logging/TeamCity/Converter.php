@@ -5,21 +5,14 @@ declare(strict_types=1);
 namespace Pest\Logging\TeamCity;
 
 use NunoMaduro\Collision\Adapters\Phpunit\State;
-use NunoMaduro\Collision\Adapters\Phpunit\TestResult;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Support\StateGenerator;
 use Pest\Support\Str;
 use PHPUnit\Event\Code\Test;
-use PHPUnit\Event\Code\TestDox;
 use PHPUnit\Event\Code\TestMethod;
 use PHPUnit\Event\Code\Throwable;
-use PHPUnit\Event\Test\Errored;
-use PHPUnit\Event\TestData\TestDataCollection;
 use PHPUnit\Event\TestSuite\TestSuite;
 use PHPUnit\Framework\Exception as FrameworkException;
-use PHPUnit\Framework\IncompleteTestError;
-use PHPUnit\Framework\SkippedWithMessageException;
-use PHPUnit\Metadata\MetadataCollection;
 use PHPUnit\TestRunner\TestResult\TestResult as PhpUnitTestResult;
 
 /**
