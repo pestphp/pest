@@ -4,12 +4,14 @@ namespace Pest\Plugins;
 
 use ParaTest\ParaTestCommand;
 use Pest\Contracts\Plugins\HandlesArguments;
+use Pest\Plugins\Actions\CallsAddsOutput;
 use Pest\Plugins\Concerns\HandleArguments;
 use Pest\Support\Arr;
 use Pest\Support\Container;
 use Pest\TestSuite;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\OutputInterface;
+use function Pest\version;
 
 final class Parallel implements HandlesArguments
 {
@@ -54,7 +56,14 @@ final class Parallel implements HandlesArguments
 
         $testSuite = TestSuite::getInstance();
 
-        return ParaTestCommand::applicationFactory($testSuite->rootPath)->run(new ArgvInput($filteredArguments));
+        $command = ParaTestCommand::applicationFactory($testSuite->rootPath);
+        $command->setAutoExit(false);
+        $command->setName('Pest');
+        $command->setVersion(version());
+        $exitCode = $command->run(new ArgvInput($filteredArguments));
+
+        $exitCode = (new CallsAddsOutput())($exitCode);
+        exit($exitCode);
     }
 
     private function markTestSuiteAsParallelSubProcessIfRequired(): void

@@ -5,10 +5,36 @@ declare(strict_types=1);
 use ParaTest\WrapperRunner\ApplicationForWrapperWorker;
 use ParaTest\WrapperRunner\WrapperWorker;
 use Pest\ConfigLoader;
+use Pest\Kernel;
+use Pest\Plugins\Actions\CallsAddsOutput;
+use Pest\Plugins\Actions\CallsHandleArguments;
+use Pest\Support\Container;
 use Pest\TestSuite;
 use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Console\Output\OutputInterface;
 
-(static function (): void {
+$bootPest = (static function (): void {
+    $argv = new ArgvInput();
+    $rootPath = dirname(PHPUNIT_COMPOSER_INSTALL, 2);
+    $testSuite = TestSuite::getInstance(
+        $rootPath,
+        $argv->getParameterOption('--test-directory', (new ConfigLoader($rootPath))->getTestsDirectory()),
+    );
+
+    $output = new ConsoleOutput(OutputInterface::VERBOSITY_NORMAL, true);
+
+    $container = Container::getInstance();
+    $container->add(TestSuite::class, $testSuite);
+    $container->add(OutputInterface::class, $output);
+    $container->add(InputInterface::class, $argv);
+    $container->add(Container::class, $container);
+
+    Kernel::boot();
+});
+
+(static function () use ($bootPest): void {
     $getopt = getopt('', [
         'status-file:',
         'progress-file:',
@@ -50,16 +76,9 @@ use Symfony\Component\Console\Input\ArgvInput;
     $phpunitArgv = unserialize($getopt['phpunit-argv'], ['allowed_classes' => false]);
     assert(is_array($phpunitArgv));
 
-    /**
-     * We need to instantiate the Pest Test suite instance
-     * so that Pest is able to execute correctly.
-     */
-    $argv = new ArgvInput();
-    $rootPath = dirname(PHPUNIT_COMPOSER_INSTALL, 2);
-    TestSuite::getInstance(
-        $rootPath,
-        $argv->getParameterOption('--test-directory', (new ConfigLoader($rootPath))->getTestsDirectory()),
-    );
+    $bootPest();
+
+    (new CallsHandleArguments())($phpunitArgv);
 
     $application = new ApplicationForWrapperWorker(
         $phpunitArgv,

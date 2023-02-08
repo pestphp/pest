@@ -7,6 +7,7 @@ namespace Pest\Logging\TeamCity;
 use NunoMaduro\Collision\Adapters\Phpunit\State;
 use NunoMaduro\Collision\Adapters\Phpunit\TestResult;
 use Pest\Exceptions\ShouldNotHappen;
+use Pest\Support\StateGenerator;
 use Pest\Support\Str;
 use PHPUnit\Event\Code\Test;
 use PHPUnit\Event\Code\TestDox;
@@ -28,12 +29,15 @@ final class Converter
 {
     private const PREFIX = 'P\\';
 
+    private readonly StateGenerator $stateGenerator;
+
     /**
      * Creates a new instance of the Converter.
      */
     public function __construct(
         private readonly string $rootPath,
     ) {
+        $this->stateGenerator = new StateGenerator();
     }
 
     /**
@@ -183,83 +187,6 @@ final class Converter
      */
     public function getStateFromResult(PhpUnitTestResult $result): State
     {
-        $state = new State();
-
-        foreach ($result->testErroredEvents() as $resultEvent) {
-            assert($resultEvent instanceof Errored);
-            $state->add(TestResult::fromTestCase(
-                $resultEvent->test(),
-                TestResult::FAIL,
-                $resultEvent->throwable()
-            ));
-        }
-
-        foreach ($result->testFailedEvents() as $resultEvent) {
-            $state->add(TestResult::fromTestCase(
-                $resultEvent->test(),
-                TestResult::FAIL,
-                $resultEvent->throwable()
-            ));
-        }
-
-        foreach ($result->testMarkedIncompleteEvents() as $resultEvent) {
-            $state->add(TestResult::fromTestCase(
-                $resultEvent->test(),
-                TestResult::INCOMPLETE,
-                $resultEvent->throwable()
-            ));
-        }
-
-        foreach ($result->testConsideredRiskyEvents() as $riskyEvents) {
-            foreach ($riskyEvents as $riskyEvent) {
-                $state->add(TestResult::fromTestCase(
-                    $riskyEvent->test(),
-                    TestResult::RISKY,
-                    Throwable::from(new IncompleteTestError($riskyEvent->message()))
-                ));
-            }
-        }
-
-        foreach ($result->testSkippedEvents() as $resultEvent) {
-            if ($resultEvent->message() === '__TODO__') {
-                $state->add(TestResult::fromTestCase($resultEvent->test(), TestResult::TODO));
-
-                continue;
-            }
-
-            $state->add(TestResult::fromTestCase(
-                $resultEvent->test(),
-                TestResult::SKIPPED,
-                Throwable::from(new SkippedWithMessageException($resultEvent->message()))
-            ));
-        }
-
-        $numberOfPassedTests = $result->numberOfTests()
-            - $result->numberOfTestErroredEvents()
-            - $result->numberOfTestFailedEvents()
-            - $result->numberOfTestSkippedEvents()
-            - $result->numberOfTestsWithTestConsideredRiskyEvents()
-            - $result->numberOfTestMarkedIncompleteEvents();
-
-        for ($i = 0; $i < $numberOfPassedTests; $i++) {
-            $state->add(TestResult::fromTestCase(
-
-                new TestMethod(
-                    /** @phpstan-ignore-next-line */
-                    "$i",
-                    /** @phpstan-ignore-next-line */
-                    '',
-                    '',
-                    1,
-                    /** @phpstan-ignore-next-line */
-                    TestDox::fromClassNameAndMethodName('', ''),
-                    MetadataCollection::fromArray([]),
-                    TestDataCollection::fromArray([])
-                ),
-                TestResult::PASS
-            ));
-        }
-
-        return $state;
+        return $this->stateGenerator->fromPhpUnitTestResult($result);
     }
 }

@@ -4,12 +4,26 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Parallel\Support;
 
+use NunoMaduro\Collision\Adapters\Phpunit\Printers\DefaultPrinter;
 use NunoMaduro\Collision\Adapters\Phpunit\State;
 use NunoMaduro\Collision\Adapters\Phpunit\Style;
 use NunoMaduro\Collision\Adapters\Phpunit\TestResult;
 use NunoMaduro\Collision\Exceptions\ShouldNotHappen;
+use Pest\Logging\TeamCity\Converter;
+use Pest\Support\StateGenerator;
+use PHPUnit\Event\Code\TestDox;
+use PHPUnit\Event\Code\TestMethod;
+use PHPUnit\Event\Event;
+use PHPUnit\Event\Telemetry\HRTime;
+use PHPUnit\Event\Telemetry\Info;
+use PHPUnit\Event\Telemetry\MemoryUsage;
+use PHPUnit\Event\Telemetry\Snapshot;
+use PHPUnit\Event\Test\Passed;
+use PHPUnit\Event\TestData\TestDataCollection;
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\IncompleteTestError;
+use PHPUnit\Metadata\MetadataCollection;
+use PHPUnit\TestRunner\TestResult\TestResult as PHPUnitTestResult;
 use ReflectionClass;
 use SebastianBergmann\Timer\Duration;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -49,22 +63,20 @@ final class CompactPrinter
 
     public function descriptionItem(string $item): void
     {
-        // TODO: Support todos
+        // TODO: Support TODOs
 
-        $icon = match (strtolower($item)) {
-            'f', 'e' => '⨯', // FAILED
-            's' => 's', // SKIPPED
-            'w', 'r' => '!', // WARN, RISKY
-            'i' => '…', // INCOMPLETE
-            '.' => '.', // PASSED
-            default => $item,
-        };
+        $lookupTable = [
+            '.' => ['gray', '.'],
+            'S' => ['yellow', 's'],
+            'I' => ['yellow', 'i'],
+            'N' => ['yellow', 'i'],
+            'R' => ['yellow', '!'],
+            'W' => ['yellow', '!'],
+            'E' => ['red', '⨯'],
+            'F' => ['red', '⨯'],
+        ];
 
-        $color = match (strtolower($item)) {
-            'f', 'e' => 'red',
-            'd', 's', 'i', 'r', 'w' => 'yellow',
-            default => 'gray',
-        };
+        [$color, $icon] = $lookupTable[$item] ?? $lookupTable['.'];
 
         $symbolsOnCurrentLine = $this->compactProcessed % $this->compactSymbolsPerLine;
 
@@ -80,102 +92,34 @@ final class CompactPrinter
         $this->output->write(sprintf('<fg=%s;options=bold>%s</>', $color, $icon));
 
         $this->compactProcessed++;
-
-        //switch ($item) {
-        //    case self::TODO:
-        //        return '↓';
-        //    case self::RUNS:
-        //        return '•';
-        //    default:
-        //        return '✓';
-        //}
     }
 
-    public function errors(array $errors): void
+    public function errors(State $state): void
     {
-        array_map(function (TestResult $testResult): void {
-            if (! $testResult->throwable instanceof \PHPUnit\Event\Code\Throwable) {
-                throw new ShouldNotHappen();
-            }
-
-            renderUsing($this->output);
-            render(<<<'HTML'
-                <div class="mx-2 text-red">
-                    <hr/>
-                </div>
-            HTML);
-
-            $testCaseName = $testResult->testCaseName;
-            $description = $testResult->description;
-
-            /** @var class-string $throwableClassName */
-            $throwableClassName = $testResult->throwable->className();
-
-            $throwableClassName = ! in_array($throwableClassName, [
-                ExpectationFailedException::class,
-                IncompleteTestError::class,
-            ], true) ? sprintf('<span class="px-1 bg-red font-bold">%s</span>', (new ReflectionClass($throwableClassName))->getShortName())
-                : '';
-
-            $truncateClasses = $this->output->isVerbose() ? '' : 'flex-1 truncate';
-
-            renderUsing($this->output);
-            render(sprintf(<<<'HTML'
-                <div class="flex justify-between mx-2">
-                    <span class="%s">
-                        <span class="px-1 bg-%s font-bold uppercase">%s</span> <span class="font-bold">%s</span><span class="text-gray mx-1">></span><span>%s</span>
-                    </span>
-                    <span class="ml-1">
-                        %s
-                    </span>
-                </div>
-            HTML, $truncateClasses, $testResult->color, $testResult->type, $testCaseName, $description, $throwableClassName));
-
-            $this->style->writeError($testResult->throwable);
-        }, $errors);
+        $this->style->writeErrorsSummary($state, false);
     }
 
-    public function recap(\PHPUnit\TestRunner\TestResult\TestResult $testResult, Duration $duration): void
+    public function recap(State $state, PHPUnitTestResult $testResult, Duration $duration): void
     {
-        $testCounts = [
-            'passed' => ['green', $testResult->numberOfTestsRun()],
-            'failed' => ['red', $testResult->numberOfTestFailedEvents()],
-            'errored' => ['red', $testResult->numberOfTestErroredEvents()],
-            'skipped' => ['yellow', $testResult->numberOfTestSkippedEvents()],
-            'incomplete' => ['yellow', $testResult->numberOfTestMarkedIncompleteEvents()],
-            'risky' => ['yellow', $testResult->numberOfTestsWithTestConsideredRiskyEvents()],
-            'warnings' => ['yellow', $testResult->numberOfTestsWithTestTriggeredWarningEvents()],
-        ];
+        assert($this->output instanceof ConsoleOutput);
+        $style = new Style($this->output);
 
-        $tests = [];
+        $nanoseconds = $duration->asNanoseconds() % 1000000000;
+        $snapshotDuration = HRTime::fromSecondsAndNanoseconds((int)$duration->asSeconds(), $nanoseconds);
+        $telemetryDuration = \PHPUnit\Event\Telemetry\Duration::fromSecondsAndNanoseconds((int)$duration->asSeconds(), $nanoseconds);
 
-        foreach ($testCounts as $type => [$color, $count]) {
-            if ($count === 0) {
-                continue;
-            }
-
-            $tests[] = "<fg={$color};options=bold>$count $type</>";
-        }
-
-        $this->output->writeln(['']);
-
-        if (! empty($tests)) {
-            $this->output->writeln([
-                sprintf(
-                    '  <fg=gray>Tests:</>    <fg=default>%s</><fg=gray> (%s assertions)</>',
-                    implode('<fg=gray>,</> ', $tests),
-                    $testResult->numberOfAssertions()
-                ),
-            ]);
-        }
-
-        $this->output->writeln([
-            sprintf(
-                '  <fg=gray>Duration:</> <fg=default>%ss</>',
-                number_format($duration->asSeconds(), 2, '.', '')
+        $telemetry = new Info(
+            new Snapshot(
+                $snapshotDuration,
+                MemoryUsage::fromBytes(0),
+                MemoryUsage::fromBytes(0),
             ),
-        ]);
+            $telemetryDuration,
+            MemoryUsage::fromBytes(0),
+            \PHPUnit\Event\Telemetry\Duration::fromSecondsAndNanoseconds(0, 0),
+            MemoryUsage::fromBytes(0),
+        );
 
-        $this->output->writeln('');
+        $style->writeRecap($state, $telemetry, $testResult);
     }
 }

@@ -12,6 +12,10 @@ RUN docker-php-ext-configure intl
 RUN docker-php-ext-install intl
 RUN docker-php-ext-enable intl
 
+RUN apk add --no-cache $PHPIZE_DEPS linux-headers
+RUN pecl install xdebug
+RUN docker-php-ext-enable xdebug
+
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html

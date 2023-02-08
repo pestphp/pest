@@ -5,28 +5,20 @@ declare(strict_types=1);
 namespace Pest\Plugins\Parallel\Paratest;
 
 use NunoMaduro\Collision\Adapters\Phpunit\TestResult as CollisionTestResult;
-use NunoMaduro\Collision\Exceptions\TestException;
 use ParaTest\Options;
 use Pest\Plugins\Parallel\Support\CompactPrinter;
-use PHPUnit\Runner\TestSuiteSorter;
+use Pest\Support\StateGenerator;
+use PHPUnit\Event\Test\Errored;
 use PHPUnit\TestRunner\TestResult\TestResult;
-use PHPUnit\TextUI\Output\Default\ResultPrinter as DefaultResultPrinter;
 use PHPUnit\TextUI\Output\Printer;
-use PHPUnit\TextUI\Output\SummaryPrinter;
-use PHPUnit\Util\Color;
-use SebastianBergmann\CodeCoverage\Driver\Selector;
-use SebastianBergmann\CodeCoverage\Filter;
 use SebastianBergmann\Timer\Duration;
-use SebastianBergmann\Timer\ResourceUsageFormatter;
 use SplFileInfo;
 use Symfony\Component\Console\Formatter\OutputFormatter;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use Termwind\Terminal;
 use function assert;
 use function fclose;
 use function feof;
-use function floor;
 use function fopen;
 use function fread;
 use function fseek;
@@ -34,13 +26,7 @@ use function ftell;
 use function fwrite;
 use function preg_replace;
 use function sprintf;
-use function str_repeat;
 use function strlen;
-
-use function Termwind\terminal;
-use const DIRECTORY_SEPARATOR;
-use const PHP_EOL;
-use const PHP_VERSION;
 
 /** @internal */
 final class ResultPrinter
@@ -48,12 +34,8 @@ final class ResultPrinter
     public readonly Printer $printer;
     private readonly CompactPrinter $compactPrinter;
 
-    private int $numTestsWidth   = 0;
-    private int $maxColumn       = 0;
     private int $totalCases      = 0;
-    private int $column          = 0;
-    private int $casesProcessed  = 0;
-    private int $numberOfColumns = 80;
+
     /** @var resource|null */
     private $teamcityLogFileHandle;
     /** @var array<non-empty-string, int> */
@@ -98,7 +80,7 @@ final class ResultPrinter
     public function start(): void
     {
         $this->compactPrinter->line(sprintf(
-            'Running %d test file%s using %d process%s',
+            'Running %d test%s using %d process%s',
             $this->totalCases,
             $this->totalCases === 1 ? '' : 's',
             $this->options->processes,
@@ -173,14 +155,10 @@ final class ResultPrinter
 
         $this->compactPrinter->newLine();
 
-        $issues = array_map(fn($event) => CollisionTestResult::fromTestCase(
-            $event->test(),
-            CollisionTestResult::FAIL,
-            $event->throwable(),
-        ), [...$testResult->testFailedEvents(), ...$testResult->testErroredEvents()]);
+        $state = (new StateGenerator())->fromPhpUnitTestResult($testResult);
 
-        $this->compactPrinter->errors($issues);
-        $this->compactPrinter->recap($testResult, $duration);
+        $this->compactPrinter->errors($state);
+        $this->compactPrinter->recap($state, $testResult, $duration);
     }
 
     private function printFeedbackItem(string $item): void

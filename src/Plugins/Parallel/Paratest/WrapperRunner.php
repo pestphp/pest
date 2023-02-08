@@ -16,6 +16,7 @@ use PHPUnit\Event\Facade as EventFacade;
 use PHPUnit\Runner\CodeCoverage;
 use PHPUnit\TestRunner\TestResult\Facade as TestResultFacade;
 use PHPUnit\TestRunner\TestResult\TestResult;
+use PHPUnit\TextUI\Configuration\CodeCoverageFilterRegistry;
 use PHPUnit\TextUI\ShellExitCodeCalculator;
 use PHPUnit\Util\ExcludeList;
 use SebastianBergmann\Timer\Timer;
@@ -67,6 +68,8 @@ final class WrapperRunner implements RunnerInterface
     /** @var non-empty-string[] */
     private readonly array $parameters;
 
+    private CodeCoverageFilterRegistry $codeCoverageFilterRegistry;
+
     public function __construct(
         private readonly Options $options,
         private readonly OutputInterface $output
@@ -92,6 +95,7 @@ final class WrapperRunner implements RunnerInterface
         $parameters[] = $wrapper;
 
         $this->parameters = $parameters;
+        $this->codeCoverageFilterRegistry = new CodeCoverageFilterRegistry();
     }
 
     public function run(): int
@@ -99,7 +103,7 @@ final class WrapperRunner implements RunnerInterface
         ExcludeList::addDirectory(dirname(__DIR__));
         TestResultFacade::init();
         EventFacade::seal();
-        $suiteLoader = new SuiteLoader($this->options, $this->output);
+        $suiteLoader = new SuiteLoader($this->options, $this->output, $this->codeCoverageFilterRegistry,);
         $this->pending = $this->getTestFiles($suiteLoader);
 
         $result      = TestResultFacade::result();
@@ -114,11 +118,6 @@ final class WrapperRunner implements RunnerInterface
         $this->waitForAllToFinish();
 
         return $this->complete($result);
-    }
-
-    public function getExitCode(): int
-    {
-        return $this->exitcode;
     }
 
     private function startWorkers(): void
@@ -155,6 +154,8 @@ final class WrapperRunner implements RunnerInterface
                 ) {
                     $this->pending = [];
                 } elseif (($pending = array_shift($this->pending)) !== null) {
+                    $this->debug(sprintf('Assigning %s to worker %d', $pending, $token));
+
                     $worker->assign($pending);
                     $this->batches[$token]++;
                 }
@@ -312,13 +313,14 @@ final class WrapperRunner implements RunnerInterface
             return;
         }
 
-        CodeCoverage::init($this->options->configuration);
-        $coverageMerger = new CoverageMerger(CodeCoverage::instance());
+        $coverageManager = new CodeCoverage();
+        $coverageManager->init($this->options->configuration, $this->codeCoverageFilterRegistry);
+        $coverageMerger = new CoverageMerger($coverageManager->codeCoverage());
         foreach ($this->coverageFiles as $coverageFile) {
             $coverageMerger->addCoverageFromFile($coverageFile);
         }
 
-        CodeCoverage::generateReports(
+        $coverageManager->generateReports(
             $this->printer->printer,
             $this->options->configuration,
         );
@@ -349,14 +351,13 @@ final class WrapperRunner implements RunnerInterface
         }
     }
 
+    /**
+     * We are doing this because the SuiteLoader returns filenames incorrectly
+     * for Pest tests. Ideally we should find a cleaner solution.
+     */
     private function getTestFiles(SuiteLoader $suiteLoader): array
     {
-        /**
-         * TODO: Clean this up
-         *
-         * We are doing this because the SuiteLoader returns filenames incorrectly
-         * for Pest tests. We need to find a better way to do this.
-         */
+        $this->debug(sprintf("Found %d test file%s", count($suiteLoader->files), count($suiteLoader->files) === 1 ? '' : 's'));
 
         $tests = array_filter(
             $suiteLoader->files,
@@ -364,5 +365,12 @@ final class WrapperRunner implements RunnerInterface
         );
 
         return [...$tests, ...TestSuite::getInstance()->tests->getFilenames()];
+    }
+
+    private function debug(string $message): void
+    {
+        if ($this->options->verbose) {
+            $this->output->writeln("  <fg=blue>{$message}</>  ");
+        }
     }
 }
