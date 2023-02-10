@@ -17,7 +17,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 $bootPest = (static function (): void {
     $argv = new ArgvInput();
-    $originalArgv = new ArgvInput(json_decode($_SERVER['PEST_PARALLEL_ARGV']));
+    $parentProcessArgv = new ArgvInput(json_decode($_SERVER['PEST_PARALLEL_ARGV']));
 
     $rootPath = dirname(PHPUNIT_COMPOSER_INSTALL, 2);
     $testSuite = TestSuite::getInstance(
@@ -25,7 +25,7 @@ $bootPest = (static function (): void {
         $argv->getParameterOption('--test-directory', (new ConfigLoader($rootPath))->getTestsDirectory()),
     );
 
-    if ($originalArgv->hasParameterOption('--todo')) {
+    if ($parentProcessArgv->hasParameterOption('--todo')) {
         $testSuite->tests->addTestCaseMethodFilter(new TodoTestCaseFilter());
     }
 
