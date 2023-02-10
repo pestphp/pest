@@ -8,6 +8,7 @@ use Pest\ConfigLoader;
 use Pest\Kernel;
 use Pest\Plugins\Actions\CallsHandleArguments;
 use Pest\Support\Container;
+use Pest\TestCaseMethodFilters\TodoTestCaseFilter;
 use Pest\TestSuite;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
@@ -16,11 +17,17 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 $bootPest = (static function (): void {
     $argv = new ArgvInput();
+    $originalArgv = new ArgvInput(json_decode($_SERVER['PEST_PARALLEL_ARGV']));
+
     $rootPath = dirname(PHPUNIT_COMPOSER_INSTALL, 2);
     $testSuite = TestSuite::getInstance(
         $rootPath,
         $argv->getParameterOption('--test-directory', (new ConfigLoader($rootPath))->getTestsDirectory()),
     );
+
+    if ($originalArgv->hasParameterOption('--todo')) {
+        $testSuite->tests->addTestCaseMethodFilter(new TodoTestCaseFilter());
+    }
 
     $output = new ConsoleOutput(OutputInterface::VERBOSITY_NORMAL, true);
 

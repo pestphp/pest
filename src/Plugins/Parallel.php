@@ -64,6 +64,8 @@ final class Parallel implements HandlesArguments
             return Command::FAILURE;
         }
 
+        $_ENV['PEST_PARALLEL_ARGV'] = json_encode($_SERVER['argv']);
+
         $handlers = array_filter(
             array_map(fn ($handler) => Container::getInstance()->get($handler), self::HANDLERS),
             fn ($handler) => $handler instanceof HandlesArguments,
