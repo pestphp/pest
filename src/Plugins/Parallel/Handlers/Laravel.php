@@ -13,6 +13,7 @@ use ParaTest\RunnerInterface;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Plugins\Concerns\HandleArguments;
 use Pest\Plugins\Parallel\Paratest\WrapperRunner;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\PhpProcess;
@@ -47,7 +48,8 @@ final class Laravel implements HandlesArguments
     private function setLaravelParallelRunner(): void
     {
         if (! method_exists(ParallelRunner::class, 'resolveRunnerUsing')) {
-            $this->output->writeln('  <fg:red>Using parallel with Pest requires Laravel v8.55.0 or higher.</>');
+            $this->output->writeln('  <fg=red>Using parallel with Pest requires Laravel v8.55.0 or higher.</>');
+            exit(Command::FAILURE);
         }
 
         ParallelRunner::resolveRunnerUsing(fn (Options $options, OutputInterface $output): RunnerInterface => new WrapperRunner($options, $output));
