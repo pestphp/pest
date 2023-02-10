@@ -77,7 +77,7 @@ $bootPest = (static function (): void {
 
     $bootPest();
 
-    (new CallsHandleArguments())($phpunitArgv);
+    $phpunitArgv = (new CallsHandleArguments())($phpunitArgv);
 
     $application = new ApplicationForWrapperWorker(
         $phpunitArgv,

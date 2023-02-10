@@ -29,13 +29,18 @@ final class Parallel implements HandlesArguments
         Parallel\Handlers\Laravel::class,
     ];
 
+    public static function isInParallelProcess(): bool
+    {
+        return (int) Arr::get($_SERVER, 'PARATEST') === 1;
+    }
+
     public function handleArguments(array $arguments): array
     {
         if ($this->argumentsContainParallelFlags($arguments)) {
             exit($this->runTestSuiteInParallel($arguments));
         }
 
-        if ((int) Arr::get($_SERVER, 'PARATEST') === 1) {
+        if (self::isInParallelProcess()) {
             return $this->runSubprocessHandlers($arguments);
         }
 
