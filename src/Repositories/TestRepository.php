@@ -113,20 +113,6 @@ final class TestRepository
     }
 
     /**
-     * @param class-string<TestCaseMethodFilter> $filter
-     */
-    public function hasTestCaseMethodFilter(string $filter): bool
-    {
-        foreach ($this->testCaseMethodFilters as $testCaseMethodFilter) {
-            if ($testCaseMethodFilter instanceof $filter) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * Gets the test case factory from the given filename.
      */
     public function get(string $filename): TestCaseFactory

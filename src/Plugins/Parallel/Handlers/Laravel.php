@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Pest\Plugins\Parallel\Handlers;
 
 use Composer\InstalledVersions;
-use Illuminate\Support\Facades\App;
 use Illuminate\Testing\ParallelRunner;
-use NunoMaduro\Collision\Adapters\Laravel\Commands\TestCommand;
 use ParaTest\Options;
 use ParaTest\RunnerInterface;
 use Pest\Contracts\Plugins\HandlesArguments;
@@ -16,7 +14,6 @@ use Pest\Plugins\Parallel\Paratest\WrapperRunner;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Process\PhpProcess;
 
 /**
  * @internal
