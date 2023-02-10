@@ -8,6 +8,7 @@ use ParaTest\ParaTestCommand;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Plugins\Actions\CallsAddsOutput;
 use Pest\Plugins\Concerns\HandleArguments;
+use Pest\Plugins\Parallel\Contracts\HandlesSubprocessArguments;
 use Pest\Plugins\Parallel\Paratest\CleanConsoleOutput;
 use Pest\Support\Arr;
 use Pest\Support\Container;
@@ -24,6 +25,7 @@ final class Parallel implements HandlesArguments
 
     private const HANDLERS = [
         Parallel\Handlers\Parallel::class,
+        Parallel\Handlers\Pest::class,
         Parallel\Handlers\Laravel::class,
     ];
 
@@ -33,7 +35,9 @@ final class Parallel implements HandlesArguments
             exit($this->runTestSuiteInParallel($arguments));
         }
 
-        $this->markTestSuiteAsParallelSubProcessIfRequired();
+        if ((int) Arr::get($_SERVER, 'PARATEST') === 1) {
+            return $this->runSubprocessHandlers($arguments);
+        }
 
         return $arguments;
     }
@@ -55,9 +59,14 @@ final class Parallel implements HandlesArguments
             return Command::FAILURE;
         }
 
+        $handlers = array_filter(
+            array_map(fn ($handler) => Container::getInstance()->get($handler), self::HANDLERS),
+            fn ($handler) => $handler instanceof HandlesArguments,
+        );
+
         $filteredArguments = array_reduce(
-            self::HANDLERS,
-            fn ($arguments, $handler) => (new $handler())->handle($arguments),
+            $handlers,
+            fn ($arguments, HandlesArguments $handler) => $handler->handleArguments($arguments),
             $arguments
         );
 
@@ -66,11 +75,18 @@ final class Parallel implements HandlesArguments
         return (new CallsAddsOutput())($exitCode);
     }
 
-    private function markTestSuiteAsParallelSubProcessIfRequired(): void
+    private function runSubprocessHandlers(array $arguments): array
     {
-        if ((int) Arr::get($_SERVER, 'PARATEST') === 1) {
-            $_SERVER['PEST_PARALLEL'] = 1;
-        }
+        $handlers = array_filter(
+            array_map(fn ($handler) => Container::getInstance()->get($handler), self::HANDLERS),
+            fn ($handler) => $handler instanceof HandlesSubprocessArguments,
+        );
+
+        return array_reduce(
+            $handlers,
+            fn ($arguments, HandlesSubprocessArguments $handler) => $handler->handleSubprocessArguments($arguments),
+            $arguments
+        );
     }
 
     private function askUserToInstallParatest(): void

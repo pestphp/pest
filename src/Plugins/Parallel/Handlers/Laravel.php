@@ -4,35 +4,38 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Parallel\Handlers;
 
+use Composer\InstalledVersions;
 use Illuminate\Testing\ParallelRunner;
 use ParaTest\Options;
 use ParaTest\RunnerInterface;
+use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Plugins\Concerns\HandleArguments;
+use Pest\Plugins\Parallel\Contracts\HandlesSubprocessArguments;
 use Pest\Plugins\Parallel\Paratest\WrapperRunner;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @internal
  */
-final class Laravel
+final class Laravel implements HandlesArguments, HandlesSubprocessArguments
 {
     use HandleArguments;
 
-    public function handle(array $args): array
+    public function handleArguments(array $arguments): array
     {
         if (! self::isALaravelApplication()) {
-            return $args;
+            return $arguments;
         }
 
         $this->setLaravelParallelRunner();
 
-        foreach ($args as $value) {
+        foreach ($arguments as $value) {
             if (str_starts_with((string) $value, '--runner')) {
-                $args = $this->popArgument($value, $args);
+                $arguments = $this->popArgument($value, $arguments);
             }
         }
 
-        return $this->pushArgument('--runner=\Illuminate\Testing\ParallelRunner', $args);
+        return $this->pushArgument('--runner=\Illuminate\Testing\ParallelRunner', $arguments);
     }
 
     private function setLaravelParallelRunner(): void
@@ -46,8 +49,14 @@ final class Laravel
 
     private static function isALaravelApplication(): bool
     {
-        return class_exists(\Illuminate\Foundation\Application::class)
-            && class_exists(\Illuminate\Testing\ParallelRunner::class)
+        return InstalledVersions::isInstalled('laravel/framework', false)
             && ! class_exists(\Orchestra\Testbench\TestCase::class);
+    }
+
+    public function handleSubprocessArguments(array $arguments): array
+    {
+        putenv('LARAVEL_PARALLEL_TESTING=1');
+
+        return $arguments;
     }
 }
