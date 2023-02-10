@@ -369,12 +369,14 @@ final class WrapperRunner implements RunnerInterface
     {
         $this->debug(sprintf('Found %d test file%s', count($suiteLoader->files), count($suiteLoader->files) === 1 ? '' : 's'));
 
-        $tests = array_filter(
+        $phpunitTests = array_filter(
             $suiteLoader->files,
             fn (string $filename): bool => ! str_ends_with($filename, "eval()'d code")
         );
 
-        return [...$tests, ...TestSuite::getInstance()->tests->getFilenames()];
+        $pestTests = TestSuite::getInstance()->tests->getFilenames();
+
+        return [...$phpunitTests, ...$pestTests];
     }
 
     private function debug(string $message): void
