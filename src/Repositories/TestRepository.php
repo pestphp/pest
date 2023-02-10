@@ -54,22 +54,22 @@ final class TestRepository
      */
     public function getFilenames(): array
     {
-        $testCases = array_filter($this->testCases, static fn (TestCaseFactory $testCase): bool => $testCase->methodsUsingOnly() !== []);
+        $testCases = array_filter($this->testCases, static fn(TestCaseFactory $testCase): bool => $testCase->methodsUsingOnly() !== []);
 
         if ($testCases === []) {
             $testCases = $this->testCases;
         }
 
-        return array_values(array_map(static fn (TestCaseFactory $factory): string => $factory->filename, $testCases));
+        return array_values(array_map(static fn(TestCaseFactory $factory): string => $factory->filename, $testCases));
     }
 
     /**
      * Uses the given `$testCaseClass` on the given `$paths`.
      *
-     * @param  array<int, string>  $classOrTraits
-     * @param  array<int, string>  $groups
-     * @param  array<int, string>  $paths
-     * @param  array<int, Closure>  $hooks
+     * @param array<int, string> $classOrTraits
+     * @param array<int, string> $groups
+     * @param array<int, string> $paths
+     * @param array<int, Closure> $hooks
      */
     public function use(array $classOrTraits, array $groups, array $paths, array $hooks): void
     {
@@ -125,13 +125,19 @@ final class TestRepository
      */
     public function set(TestCaseMethodFactory $method): void
     {
-        foreach ($this->testCaseMethodFilters as $filter) {
-            if (! $filter->accept($method)) {
+        foreach ($this->testCaseFilters as $filter) {
+            if (!$filter->accept($method->filename)) {
                 return;
             }
         }
 
-        if (! array_key_exists($method->filename, $this->testCases)) {
+        foreach ($this->testCaseMethodFilters as $filter) {
+            if (!$filter->accept($method)) {
+                return;
+            }
+        }
+
+        if (!array_key_exists($method->filename, $this->testCases)) {
             $this->testCases[$method->filename] = new TestCaseFactory($method->filename);
         }
 
@@ -143,19 +149,17 @@ final class TestRepository
      */
     public function makeIfNeeded(string $filename): void
     {
-        if (! array_key_exists($filename, $this->testCases)) {
+        if (!array_key_exists($filename, $this->testCases)) {
             return;
         }
 
-        $accepted = array_reduce(
-            $this->testCaseFilters,
-            fn (bool $carry, TestCaseFilter $filter): bool => $carry && $filter->accept($filename),
-            true,
-        );
-
-        if ($accepted) {
-            $this->make($this->testCases[$filename]);
+        foreach ($this->testCaseFilters as $filter) {
+            if (!$filter->accept($filename)) {
+                return;
+            }
         }
+
+        $this->make($this->testCases[$filename]);
     }
 
     /**
@@ -163,12 +167,12 @@ final class TestRepository
      */
     private function make(TestCaseFactory $testCase): void
     {
-        $startsWith = static fn (string $target, string $directory): bool => Str::startsWith($target, $directory.DIRECTORY_SEPARATOR);
+        $startsWith = static fn(string $target, string $directory): bool => Str::startsWith($target, $directory . DIRECTORY_SEPARATOR);
 
         foreach ($this->uses as $path => $uses) {
             [$classOrTraits, $groups, $hooks] = $uses;
 
-            if ((! is_dir($path) && $testCase->filename === $path) || (is_dir($path) && $startsWith($testCase->filename, $path))) {
+            if ((!is_dir($path) && $testCase->filename === $path) || (is_dir($path) && $startsWith($testCase->filename, $path))) {
                 foreach ($classOrTraits as $class) {
                     /** @var string $class */
                     if (class_exists($class)) {
