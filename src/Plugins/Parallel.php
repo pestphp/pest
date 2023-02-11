@@ -30,7 +30,25 @@ final class Parallel implements HandlesArguments
         Parallel\Handlers\Laravel::class,
     ];
 
-    public static function isInParallelProcess(): bool
+    /**
+     * If the
+     */
+    public static function isCommand(): bool
+    {
+        // get binary name
+        Arr::get($_SERVER, 'argv.0');
+
+        $argvValue = Arr::get($_ENV, 'PARATEST');
+
+        assert(is_string($argvValue) || is_int($argvValue) || is_null($argvValue));
+
+        return ((int) $argvValue) === 1;
+    }
+
+    /**
+     * If the
+     */
+    public static function isWorker(): bool
     {
         $argvValue = Arr::get($_SERVER, 'PARATEST');
 
@@ -45,7 +63,7 @@ final class Parallel implements HandlesArguments
             exit($this->runTestSuiteInParallel($arguments));
         }
 
-        if (self::isInParallelProcess()) {
+        if (self::isWorker()) {
             return $this->runWorkersHandlers($arguments);
         }
 

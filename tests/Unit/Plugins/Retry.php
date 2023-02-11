@@ -9,6 +9,6 @@ it('orders by defects and stop on defects if when --retry is used ', function ()
 
     expect($arguments)->toBe([
         '--order-by=defects',
-        ' --stop-on-defect',
+        '--stop-on-failure',
     ]);
 });

@@ -55,6 +55,7 @@ final class Coverage implements AddsOutput, HandlesArguments
                 if ($original === sprintf('--%s', $option)) {
                     return true;
                 }
+
                 if (Str::startsWith($original, sprintf('--%s=', $option))) {
                     return true;
                 }

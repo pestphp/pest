@@ -11,3 +11,4 @@ coverage.xml
 *.swp
 *.swo
 .vscode/
+./temp/

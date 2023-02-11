@@ -12,7 +12,7 @@ use Symfony\Component\Console\Exception\ExceptionInterface;
 /**
  * @internal
  */
-final class InvalidConsoleArgument extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
+final class InvalidOption extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
 {
     /**
      * Creates a new Exception instance.
