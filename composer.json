@@ -43,7 +43,7 @@
         ]
     },
     "require-dev": {
-        "pestphp/pest-dev-tools": "^2.3.0",
+        "pestphp/pest-dev-tools": "^2.4.0",
         "pestphp/pest-plugin-arch": "^2.0.0",
         "symfony/process": "^6.2.5"
     },
