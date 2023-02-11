@@ -1,7 +1,7 @@
-   PASS  Tests\Features\DatasetsTests
+   TODO  Tests\Features\DatasetsTests - 1 todo
   ↓ forbids to define tests in Datasets dirs and Datasets.php files
 
-   PASS  Tests\Features\Todo
+   TODO  Tests\Features\Todo - 3 todos
   ↓ something todo later
   ↓ something todo later chained
   ↓ something todo later chained and with function body

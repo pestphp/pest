@@ -29,7 +29,7 @@
   ✓ it does not append CoversNothing to other methods
   ✓ it throws exception if no class nor method has been found
 
-   PASS  Tests\Features\DatasetsTests
+   PASS  Tests\Features\DatasetsTests - 1 todo
   ✓ it throws exception if dataset does not exist
   ✓ it throws exception if dataset already exist
   ✓ it sets closures
@@ -744,7 +744,7 @@
   ✓ it allows access to the underlying expectNotToPerformAssertions method
   ✓ it allows performing no expectations without being risky
 
-   PASS  Tests\Features\Todo
+   PASS  Tests\Features\Todo - 3 todos
   ↓ something todo later
   ↓ something todo later chained
   ↓ something todo later chained and with function body
