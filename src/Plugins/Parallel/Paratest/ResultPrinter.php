@@ -1,0 +1,206 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Pest\Plugins\Parallel\Paratest;
+
+use function assert;
+use function fclose;
+use function feof;
+use function fopen;
+use function fread;
+use function fseek;
+use function ftell;
+use function fwrite;
+use ParaTest\Options;
+use Pest\Plugins\Parallel\Support\CompactPrinter;
+use Pest\Support\StateGenerator;
+use PHPUnit\TestRunner\TestResult\TestResult;
+use PHPUnit\TextUI\Output\Printer;
+use function preg_replace;
+use SebastianBergmann\Timer\Duration;
+use SplFileInfo;
+use function sprintf;
+use function strlen;
+use Symfony\Component\Console\Formatter\OutputFormatter;
+use Symfony\Component\Console\Output\OutputInterface;
+
+/** @internal */
+final class ResultPrinter
+{
+    public readonly Printer $printer;
+
+    private readonly CompactPrinter $compactPrinter;
+
+    private int $totalCases = 0;
+
+    /** @var resource|null */
+    private $teamcityLogFileHandle;
+
+    /** @var array<string, int> */
+    private array $tailPositions;
+
+    public function __construct(
+        private readonly OutputInterface $output,
+        private readonly Options $options
+    ) {
+        $this->printer = new class($this->output) implements Printer
+        {
+            public function __construct(
+                private readonly OutputInterface $output,
+            ) {
+            }
+
+            public function print(string $buffer): void
+            {
+                $this->output->write(OutputFormatter::escape($buffer));
+            }
+
+            public function flush(): void
+            {
+            }
+        };
+
+        $this->compactPrinter = new CompactPrinter();
+
+        if (! $this->options->configuration->hasLogfileTeamcity()) {
+            return;
+        }
+
+        $teamcityLogFileHandle = fopen($this->options->configuration->logfileTeamcity(), 'ab+');
+        assert($teamcityLogFileHandle !== false);
+        $this->teamcityLogFileHandle = $teamcityLogFileHandle;
+    }
+
+    public function setTestCount(int $testCount): void
+    {
+        $this->totalCases = $testCount;
+    }
+
+    public function start(): void
+    {
+        $this->compactPrinter->line(sprintf(
+            'Running %d test%s using %d process%s',
+            $this->totalCases,
+            $this->totalCases === 1 ? '' : 's',
+            $this->options->processes,
+            $this->options->processes === 1 ? '' : 'es')
+        );
+    }
+
+    /** @param  array<int, SplFileInfo>  $teamcityFiles */
+    public function printFeedback(SplFileInfo $progressFile, array $teamcityFiles): void
+    {
+        if ($this->options->needsTeamcity) {
+            $teamcityProgress = $this->tailMultiple($teamcityFiles);
+
+            if ($this->teamcityLogFileHandle !== null) {
+                fwrite($this->teamcityLogFileHandle, $teamcityProgress);
+            }
+        }
+
+        if ($this->options->configuration->outputIsTeamCity()) {
+            assert(isset($teamcityProgress));
+            $this->output->write($teamcityProgress);
+
+            return;
+        }
+
+        if ($this->options->configuration->noProgress()) {
+            return;
+        }
+
+        $feedbackItems = $this->tail($progressFile);
+        if ($feedbackItems === '') {
+            return;
+        }
+
+        $feedbackItems = (string) preg_replace('/ +\\d+ \\/ \\d+ \\( ?\\d+%\\)\\s*/', '', $feedbackItems);
+
+        $actualTestCount = strlen($feedbackItems);
+        for ($index = 0; $index < $actualTestCount; $index++) {
+            $this->printFeedbackItem($feedbackItems[$index]);
+        }
+    }
+
+    /**
+     * @param  array<int, SplFileInfo>  $teamcityFiles
+     * @param  array<int, SplFileInfo>  $testdoxFiles
+     */
+    public function printResults(TestResult $testResult, array $teamcityFiles, array $testdoxFiles, Duration $duration): void
+    {
+        if ($this->options->needsTeamcity) {
+            $teamcityProgress = $this->tailMultiple($teamcityFiles);
+
+            if ($this->teamcityLogFileHandle !== null) {
+                fwrite($this->teamcityLogFileHandle, $teamcityProgress);
+                $resource = $this->teamcityLogFileHandle;
+                $this->teamcityLogFileHandle = null;
+                fclose($resource);
+            }
+        }
+
+        if ($this->options->configuration->outputIsTeamCity()) {
+            assert(isset($teamcityProgress));
+            $this->output->write($teamcityProgress);
+
+            return;
+        }
+
+        if ($this->options->configuration->outputIsTestDox()) {
+            $this->output->write($this->tailMultiple($testdoxFiles));
+
+            return;
+        }
+
+        $this->compactPrinter->newLine();
+
+        $state = (new StateGenerator())->fromPhpUnitTestResult($testResult);
+
+        $this->compactPrinter->errors($state);
+        $this->compactPrinter->recap($state, $testResult, $duration);
+    }
+
+    private function printFeedbackItem(string $item): void
+    {
+        $this->compactPrinter->descriptionItem($item);
+    }
+
+    /** @param  array<int, SplFileInfo>  $files */
+    private function tailMultiple(array $files): string
+    {
+        $content = '';
+        foreach ($files as $file) {
+            if (! $file->isFile()) {
+                continue;
+            }
+
+            $content .= $this->tail($file);
+        }
+
+        return $content;
+    }
+
+    private function tail(SplFileInfo $file): string
+    {
+        $path = $file->getPathname();
+        $handle = fopen($path, 'r');
+        assert($handle !== false);
+        $fseek = fseek($handle, $this->tailPositions[$path] ?? 0);
+        assert($fseek === 0);
+
+        $contents = '';
+        while (! feof($handle)) {
+            $fread = fread($handle, 8192);
+            assert($fread !== false);
+            $contents .= $fread;
+        }
+
+        $ftell = ftell($handle);
+        assert($ftell !== false);
+        $this->tailPositions[$path] = $ftell;
+        fclose($handle);
+
+        return $contents;
+    }
+}

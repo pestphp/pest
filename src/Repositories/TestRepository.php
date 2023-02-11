@@ -125,6 +125,12 @@ final class TestRepository
      */
     public function set(TestCaseMethodFactory $method): void
     {
+        foreach ($this->testCaseFilters as $filter) {
+            if (! $filter->accept($method->filename)) {
+                return;
+            }
+        }
+
         foreach ($this->testCaseMethodFilters as $filter) {
             if (! $filter->accept($method)) {
                 return;
@@ -147,15 +153,13 @@ final class TestRepository
             return;
         }
 
-        $accepted = array_reduce(
-            $this->testCaseFilters,
-            fn (bool $carry, TestCaseFilter $filter): bool => $carry && $filter->accept($filename),
-            true,
-        );
-
-        if ($accepted) {
-            $this->make($this->testCases[$filename]);
+        foreach ($this->testCaseFilters as $filter) {
+            if (! $filter->accept($filename)) {
+                return;
+            }
         }
+
+        $this->make($this->testCases[$filename]);
     }
 
     /**

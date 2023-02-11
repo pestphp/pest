@@ -896,6 +896,9 @@
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
 
+   PASS  Tests\Visual\Parallel
+  ✓ parallel
+
    PASS  Tests\Visual\SingleTestOrDirectory
   ✓ allows to run a single test
   ✓ allows to run a directory
@@ -914,4 +917,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    4 incomplete, 4 todos, 18 skipped, 633 passed (1552 assertions)
+  Tests:    4 incomplete, 4 todos, 18 skipped, 634 passed (1554 assertions)

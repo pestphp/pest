@@ -47,10 +47,14 @@ final class Container
 
     /**
      * Adds the given instance to the container.
+     *
+     * @return $this
      */
-    public function add(string $id, object|string $instance): void
+    public function add(string $id, object|string $instance): self
     {
         $this->instances[$id] = $instance;
+
+        return $this;
     }
 
     /**

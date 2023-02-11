@@ -11,7 +11,7 @@ use Pest\Plugins\Actions\CallsBoot;
 use Pest\Plugins\Actions\CallsShutdown;
 use Pest\Support\Container;
 use PHPUnit\TextUI\Application;
-use PHPUnit\TextUI\Exception;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -36,7 +36,8 @@ final class Kernel
      * Creates a new Kernel instance.
      */
     public function __construct(
-        private readonly Application $application
+        private readonly Application $application,
+        private readonly OutputInterface $output,
     ) {
         register_shutdown_function(function (): void {
             if (error_get_last() !== null) {
@@ -50,8 +51,16 @@ final class Kernel
     /**
      * Boots the Kernel.
      */
-    public static function boot(): self
+    public static function boot(TestSuite $testSuite, InputInterface $input, OutputInterface $output): self
     {
+        $container = Container::getInstance();
+
+        $container
+            ->add(TestSuite::class, $testSuite)
+            ->add(InputInterface::class, $input)
+            ->add(OutputInterface::class, $output)
+            ->add(Container::class, $container);
+
         foreach (self::BOOTSTRAPPERS as $bootstrapper) {
             $bootstrapper = Container::getInstance()->get($bootstrapper);
             assert($bootstrapper instanceof Bootstrapper);
@@ -61,24 +70,25 @@ final class Kernel
 
         (new CallsBoot())->__invoke();
 
-        return new self(new Application());
+        return new self(
+            new Application(),
+            $output,
+        );
     }
 
     /**
-     * Handles the given argv.
+     * Runs the application, and returns the exit code.
      *
-     * @param  array<int, string>  $argv
-     *
-     * @throws Exception
+     * @param  array<int, string>  $args
      */
-    public function handle(OutputInterface $output, array $argv): int
+    public function handle(array $args): int
     {
-        $argv = (new Plugins\Actions\CallsHandleArguments())->__invoke($argv);
+        $args = (new Plugins\Actions\CallsHandleArguments())->__invoke($args);
 
         try {
-            $this->application->run($argv);
+            $this->application->run($args);
         } catch (NoTestsFound) {
-            $output->writeln([
+            $this->output->writeln([
                 '',
                 '  <fg=white;options=bold;bg=blue> INFO </> No tests found.',
                 '',
