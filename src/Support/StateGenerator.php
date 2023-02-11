@@ -23,12 +23,15 @@ final class StateGenerator
         $state = new State();
 
         foreach ($testResult->testErroredEvents() as $testResultEvent) {
-            assert($testResultEvent instanceof Errored);
-            $state->add(\NunoMaduro\Collision\Adapters\Phpunit\TestResult::fromTestCase(
-                $testResultEvent->test(),
-                TestResult::FAIL,
-                $testResultEvent->throwable()
-            ));
+            if ($testResultEvent instanceof Errored) {
+                $state->add(TestResult::fromTestCase(
+                    $testResultEvent->test(),
+                    TestResult::FAIL,
+                    $testResultEvent->throwable()
+                ));
+            } else {
+                $state->add(TestResult::fromBeforeFirstTestMethodErrored($testResultEvent));
+            }
         }
 
         foreach ($testResult->testFailedEvents() as $testResultEvent) {

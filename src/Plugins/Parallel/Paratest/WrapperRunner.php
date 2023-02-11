@@ -37,7 +37,9 @@ use function unlink;
 use function unserialize;
 use function usleep;
 
-/** @internal */
+/**
+ * @internal
+ */
 final class WrapperRunner implements RunnerInterface
 {
     private const CYCLE_SLEEP = 10000;
@@ -46,36 +48,36 @@ final class WrapperRunner implements RunnerInterface
 
     private readonly Timer $timer;
 
-    /** @var non-empty-string[] */
+    /** @var array<int, string> */
     private array $pending = [];
 
-    private int $exitcode = -1;
+    private int $exitCode = -1;
 
-    /** @var array<positive-int,WrapperWorker> */
+    /** @var array<int,WrapperWorker> */
     private array $workers = [];
 
     /** @var array<int,int> */
     private array $batches = [];
 
-    /** @var list<SplFileInfo> */
+    /** @var array<int, SplFileInfo> */
     private array $testresultFiles = [];
 
-    /** @var list<SplFileInfo> */
+    /** @var array<int, SplFileInfo> */
     private array $coverageFiles = [];
 
-    /** @var list<SplFileInfo> */
+    /** @var array<int, SplFileInfo> */
     private array $junitFiles = [];
 
-    /** @var list<SplFileInfo> */
+    /** @var array<int, SplFileInfo> */
     private array $teamcityFiles = [];
 
-    /** @var list<SplFileInfo> */
+    /** @var array<int, SplFileInfo> */
     private array $testdoxFiles = [];
 
-    /** @var non-empty-string[] */
+    /** @var array<int, string> */
     private readonly array $parameters;
 
-    private CodeCoverageFilterRegistry $codeCoverageFilterRegistry;
+    private readonly CodeCoverageFilterRegistry $codeCoverageFilterRegistry;
 
     public function __construct(
         private readonly Options $options,
@@ -84,11 +86,11 @@ final class WrapperRunner implements RunnerInterface
         $this->printer = new ResultPrinter($output, $options);
         $this->timer = new Timer();
 
-        $wrapper = realpath(
-            dirname(__DIR__, 4).DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'pest-wrapper.php',
+        $worker = realpath(
+            dirname(__DIR__, 4).DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'worker.php',
         );
 
-        assert($wrapper !== false);
+        assert($worker !== false);
         $phpFinder = new PhpExecutableFinder();
         $phpBin = $phpFinder->find(false);
         assert($phpBin !== false);
@@ -99,7 +101,7 @@ final class WrapperRunner implements RunnerInterface
             $parameters = array_merge($parameters, $options->passthruPhp);
         }
 
-        $parameters[] = $wrapper;
+        $parameters[] = $worker;
 
         $this->parameters = $parameters;
         $this->codeCoverageFilterRegistry = new CodeCoverageFilterRegistry();
@@ -113,6 +115,7 @@ final class WrapperRunner implements RunnerInterface
 
         TestResultFacade::init();
         EventFacade::seal();
+
         $suiteLoader = new SuiteLoader($this->options, $this->output, $this->codeCoverageFilterRegistry);
         $this->pending = $this->getTestFiles($suiteLoader);
 
@@ -159,7 +162,7 @@ final class WrapperRunner implements RunnerInterface
                 }
 
                 if (
-                    $this->exitcode > 0
+                    $this->exitCode > 0
                     && $this->options->configuration->stopOnFailure()
                 ) {
                     $this->pending = [];
@@ -177,7 +180,7 @@ final class WrapperRunner implements RunnerInterface
 
     private function flushWorker(WrapperWorker $worker): void
     {
-        $this->exitcode = max($this->exitcode, $worker->getExitCode());
+        $this->exitCode = max($this->exitCode, $worker->getExitCode());
         $this->printer->printFeedback(
             $worker->progressFile,
             $this->teamcityFiles,
@@ -191,7 +194,7 @@ final class WrapperRunner implements RunnerInterface
         while ($this->workers !== []) {
             foreach ($this->workers as $index => $worker) {
                 if ($worker->isRunning()) {
-                    if (! isset($stopped[$index]) && $worker->isFree()) {
+                    if (! array_key_exists($index, $stopped) && $worker->isFree()) {
                         $worker->stop();
                         $stopped[$index] = true;
                     }
@@ -213,16 +216,22 @@ final class WrapperRunner implements RunnerInterface
 
     private function startWorker(int $token): WrapperWorker
     {
+        /** @var array<non-empty-string> $parameters */
+        $parameters = $this->parameters;
+
         $worker = new WrapperWorker(
             $this->output,
             $this->options,
-            $this->parameters,
+            $parameters,
             $token,
         );
+
         $worker->start();
+
         $this->batches[$token] = 0;
 
         $this->testresultFiles[] = $worker->testresultFile;
+
         if (isset($worker->junitFile)) {
             $this->junitFiles[] = $worker->junitFile;
         }
@@ -349,7 +358,7 @@ final class WrapperRunner implements RunnerInterface
         );
     }
 
-    /** @param  list<SplFileInfo>  $files */
+    /** @param  array<int, SplFileInfo>  $files */
     private function clearFiles(array $files): void
     {
         foreach ($files as $file) {
@@ -362,23 +371,29 @@ final class WrapperRunner implements RunnerInterface
     }
 
     /**
-     * We are doing this because the SuiteLoader returns filenames incorrectly
-     * for Pest tests. Ideally we should find a cleaner solution.
+     * Returns the test files to be executed.
+     *
+     * @return array<int, string>
      */
     private function getTestFiles(SuiteLoader $suiteLoader): array
     {
         $this->debug(sprintf('Found %d test file%s', count($suiteLoader->files), count($suiteLoader->files) === 1 ? '' : 's'));
 
-        $phpunitTests = array_filter(
-            $suiteLoader->files,
-            fn (string $filename): bool => ! str_ends_with($filename, "eval()'d code")
-        );
+        /** @var array<string, string> $files */
+        $files = $suiteLoader->files;
 
-        $pestTests = TestSuite::getInstance()->tests->getFilenames();
-
-        return [...$phpunitTests, ...$pestTests];
+        return [
+            ...array_values(array_filter(
+                $files,
+                fn (string $filename): bool => ! str_ends_with($filename, "eval()'d code")
+            )),
+            ...TestSuite::getInstance()->tests->getFilenames(),
+        ];
     }
 
+    /**
+     * Prints a debug message.
+     */
     private function debug(string $message): void
     {
         if ($this->options->verbose) {

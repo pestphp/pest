@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Pest\Plugins;
 
+use JsonException;
 use ParaTest\ParaTestCommand;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Plugins\Actions\CallsAddsOutput;
 use Pest\Plugins\Concerns\HandleArguments;
-use Pest\Plugins\Parallel\Contracts\HandlesSubprocessArguments;
+use Pest\Plugins\Parallel\Contracts\HandlersWorkerArguments;
 use Pest\Plugins\Parallel\Paratest\CleanConsoleOutput;
 use Pest\Support\Arr;
 use Pest\Support\Container;
@@ -31,7 +32,11 @@ final class Parallel implements HandlesArguments
 
     public static function isInParallelProcess(): bool
     {
-        return (int) Arr::get($_SERVER, 'PARATEST') === 1;
+        $argvValue = Arr::get($_SERVER, 'PARATEST');
+
+        assert(is_string($argvValue) || is_int($argvValue) || is_null($argvValue));
+
+        return ((int) $argvValue) === 1;
     }
 
     public function handleArguments(array $arguments): array
@@ -41,12 +46,15 @@ final class Parallel implements HandlesArguments
         }
 
         if (self::isInParallelProcess()) {
-            return $this->runSubprocessHandlers($arguments);
+            return $this->runWorkersHandlers($arguments);
         }
 
         return $arguments;
     }
 
+    /**
+     * @param  array<int, string>  $arguments
+     */
     private function argumentsContainParallelFlags(array $arguments): bool
     {
         if ($this->hasArgument('--parallel', $arguments)) {
@@ -56,6 +64,11 @@ final class Parallel implements HandlesArguments
         return $this->hasArgument('-p', $arguments);
     }
 
+    /**
+     * @param  array<int, string>  $arguments
+     *
+     * @throws JsonException
+     */
     private function runTestSuiteInParallel(array $arguments): int
     {
         if (! class_exists(ParaTestCommand::class)) {
@@ -64,16 +77,16 @@ final class Parallel implements HandlesArguments
             return Command::FAILURE;
         }
 
-        $_ENV['PEST_PARALLEL_ARGV'] = json_encode($_SERVER['argv']);
+        $_ENV['PEST_PARALLEL_ARGV'] = json_encode($_SERVER['argv'], JSON_THROW_ON_ERROR);
 
         $handlers = array_filter(
-            array_map(fn ($handler) => Container::getInstance()->get($handler), self::HANDLERS),
-            fn ($handler) => $handler instanceof HandlesArguments,
+            array_map(fn ($handler): object|string => Container::getInstance()->get($handler), self::HANDLERS),
+            fn ($handler): bool => $handler instanceof HandlesArguments,
         );
 
         $filteredArguments = array_reduce(
             $handlers,
-            fn ($arguments, HandlesArguments $handler) => $handler->handleArguments($arguments),
+            fn ($arguments, HandlesArguments $handler): array => $handler->handleArguments($arguments),
             $arguments
         );
 
@@ -82,23 +95,30 @@ final class Parallel implements HandlesArguments
         return (new CallsAddsOutput())($exitCode);
     }
 
-    private function runSubprocessHandlers(array $arguments): array
+    /**
+     * @param  array<int, string>  $arguments
+     * @return array<int, string>
+     */
+    private function runWorkersHandlers(array $arguments): array
     {
         $handlers = array_filter(
-            array_map(fn ($handler) => Container::getInstance()->get($handler), self::HANDLERS),
-            fn ($handler) => $handler instanceof HandlesSubprocessArguments,
+            array_map(fn ($handler): object|string => Container::getInstance()->get($handler), self::HANDLERS),
+            fn ($handler): bool => $handler instanceof HandlersWorkerArguments,
         );
 
         return array_reduce(
             $handlers,
-            fn ($arguments, HandlesSubprocessArguments $handler) => $handler->handleSubprocessArguments($arguments),
+            fn ($arguments, HandlersWorkerArguments $handler): array => $handler->handleWorkerArguments($arguments),
             $arguments
         );
     }
 
     private function askUserToInstallParatest(): void
     {
-        Container::getInstance()->get(OutputInterface::class)->writeln([
+        /** @var OutputInterface $output */
+        $output = Container::getInstance()->get(OutputInterface::class);
+
+        $output->writeln([
             '<fg=red>Pest Parallel requires ParaTest to run.</>',
             'Please run <fg=yellow>composer require --dev brianium/paratest</>.',
         ]);
@@ -106,7 +126,10 @@ final class Parallel implements HandlesArguments
 
     private function paratestCommand(): Application
     {
-        $command = ParaTestCommand::applicationFactory(TestSuite::getInstance()->rootPath);
+        /** @var non-empty-string $rootPath */
+        $rootPath = TestSuite::getInstance()->rootPath;
+
+        $command = ParaTestCommand::applicationFactory($rootPath);
         $command->setAutoExit(false);
         $command->setName('Pest');
         $command->setVersion(version());

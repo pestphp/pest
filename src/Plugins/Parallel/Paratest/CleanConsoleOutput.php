@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pest\Plugins\Parallel\Paratest;
 
 use Symfony\Component\Console\Output\ConsoleOutput;
 
-class CleanConsoleOutput extends ConsoleOutput
+final class CleanConsoleOutput extends ConsoleOutput
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     protected function doWrite(string $message, bool $newline): void
     {

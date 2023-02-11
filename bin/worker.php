@@ -7,37 +7,31 @@ use ParaTest\WrapperRunner\WrapperWorker;
 use Pest\ConfigLoader;
 use Pest\Kernel;
 use Pest\Plugins\Actions\CallsHandleArguments;
-use Pest\Support\Container;
 use Pest\TestCaseMethodFilters\TodoTestCaseFilter;
 use Pest\TestSuite;
 use Symfony\Component\Console\Input\ArgvInput;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
 $bootPest = (static function (): void {
-    $argv = new ArgvInput();
-    $parentProcessArgv = new ArgvInput(json_decode($_SERVER['PEST_PARALLEL_ARGV']));
+    $workerArgv = new ArgvInput();
+    $masterArgv = new ArgvInput(json_decode($_SERVER['PEST_PARALLEL_ARGV']));
 
     $rootPath = dirname(PHPUNIT_COMPOSER_INSTALL, 2);
-    $testSuite = TestSuite::getInstance(
-        $rootPath,
-        $argv->getParameterOption('--test-directory', (new ConfigLoader($rootPath))->getTestsDirectory()),
-    );
+    $testSuite = TestSuite::getInstance($rootPath, $workerArgv->getParameterOption(
+        '--test-directory',
+        (new ConfigLoader($rootPath))->getTestsDirectory()
+    ));
 
-    if ($parentProcessArgv->hasParameterOption('--todo')) {
+    if ($masterArgv->hasParameterOption('--todo')) {
         $testSuite->tests->addTestCaseMethodFilter(new TodoTestCaseFilter());
     }
 
+    $input = new ArgvInput();
+
     $output = new ConsoleOutput(OutputInterface::VERBOSITY_NORMAL, true);
 
-    $container = Container::getInstance();
-    $container->add(TestSuite::class, $testSuite);
-    $container->add(OutputInterface::class, $output);
-    $container->add(InputInterface::class, $argv);
-    $container->add(Container::class, $container);
-
-    Kernel::boot();
+    Kernel::boot($testSuite, $input, $output);
 });
 
 (static function () use ($bootPest): void {
@@ -104,10 +98,10 @@ $bootPest = (static function (): void {
         $testPath = fgets(STDIN);
         if ($testPath === false || $testPath === WrapperWorker::COMMAND_EXIT) {
             $application->end();
+
             exit;
         }
 
-        // It must be a 1 byte string to ensure filesize() is equal to the number of tests executed
         $exitCode = $application->runTest(trim($testPath));
 
         fwrite($statusFile, (string) $exitCode);

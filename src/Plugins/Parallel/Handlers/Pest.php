@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pest\Plugins\Parallel\Handlers;
 
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Plugins\Concerns\HandleArguments;
-use Pest\Plugins\Parallel\Contracts\HandlesSubprocessArguments;
+use Pest\Plugins\Parallel\Contracts\HandlersWorkerArguments;
 use Pest\Plugins\Retry;
 
-final class Pest implements HandlesArguments, HandlesSubprocessArguments
+final class Pest implements HandlesArguments, HandlersWorkerArguments
 {
     use HandleArguments;
 
@@ -20,7 +22,7 @@ final class Pest implements HandlesArguments, HandlesSubprocessArguments
         return $arguments;
     }
 
-    public function handleSubprocessArguments(array $arguments): array
+    public function handleWorkerArguments(array $arguments): array
     {
         $_SERVER['PEST_PARALLEL'] = '1';
 
