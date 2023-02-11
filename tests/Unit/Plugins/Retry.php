@@ -2,14 +2,13 @@
 
 use Pest\Plugins\Retry;
 
-beforeEach(fn () => Retry::$retrying = false);
-
-afterEach(fn () => Retry::$retrying = false);
-
-it('retries if --retry argument is used', function () {
+it('orders by defects and stop on defects if when --retry is used ', function () {
     $retry = new Retry();
 
-    $retry->handleArguments(['--retry']);
+    $arguments = $retry->handleArguments(['--retry']);
 
-    expect(Retry::$retrying)->toBeTrue();
+    expect($arguments)->toBe([
+        '--order-by=defects',
+        ' --stop-on-defect',
+    ]);
 });

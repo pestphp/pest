@@ -22,10 +22,7 @@ final class BootSubscribers implements Bootstrapper
      */
     private const SUBSCRIBERS = [
         Subscribers\EnsureConfigurationIsValid::class,
-        Subscribers\EnsureConfigurationDefaults::class,
-        Subscribers\EnsureRetryRepositoryExists::class,
-        Subscribers\EnsureErroredTestsAreRetryable::class,
-        Subscribers\EnsureFailedTestsAreRetryable::class,
+        Subscribers\EnsureConfigurationIsAvailable::class,
         Subscribers\EnsureTeamCityEnabled::class,
     ];
 

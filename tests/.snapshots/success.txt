@@ -843,7 +843,7 @@
   ✓ environment is set to Local when --ci option is not used
 
    PASS  Tests\Unit\Plugins\Retry
-  ✓ it retries if --retry argument is used
+  ✓ it orders by defects and stop on defects if when --retry is used
 
    PASS  Tests\Unit\Support\Backtrace
   ✓ it gets file name from called file
