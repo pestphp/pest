@@ -23,7 +23,7 @@ final class BootOverrides implements Bootstrapper
     ];
 
     /**
-     * Boots the Subscribers.
+     * Boots the list of files to be overridden.
      */
     public function boot(): void
     {

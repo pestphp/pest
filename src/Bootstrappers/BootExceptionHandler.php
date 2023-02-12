@@ -13,7 +13,7 @@ use Pest\Contracts\Bootstrapper;
 final class BootExceptionHandler implements Bootstrapper
 {
     /**
-     * Boots the Exception Handler.
+     * Boots the "Collision" exception handler.
      */
     public function boot(): void
     {

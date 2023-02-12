@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Parallel\Handlers;
 
+use Closure;
 use Composer\InstalledVersions;
 use Illuminate\Testing\ParallelRunner;
 use ParaTest\Options;
@@ -22,38 +23,53 @@ final class Laravel implements HandlesArguments
 
     public function handleArguments(array $arguments): array
     {
-        if (! self::isALaravelApplication()) {
-            return $arguments;
-        }
+        return self::whenUsingLaravel($arguments, function (array $arguments): array {
+            $this->ensureRunnerIsResolvable();
 
-        $this->setLaravelParallelRunner();
+            $arguments = $this->ensureEnvironmentVariables($arguments);
 
-        $arguments = $this->setEnvironmentVariables($arguments);
-
-        return $this->useLaravelRunner($arguments);
+            return $this->ensureRunner($arguments);
+        });
     }
 
-    private function setLaravelParallelRunner(): void
+    /**
+     * Executes the given closure when running Laravel.
+     *
+     * @param  array<int, string>  $arguments
+     * @param  CLosure(array<int, string>): array<int, string>  $closure
+     * @return array<int, string>
+     */
+    private static function whenUsingLaravel(array $arguments, Closure $closure): array
+    {
+        $isLaravelApplication = InstalledVersions::isInstalled('laravel/framework', false);
+        $isLaravelPackage = class_exists(\Orchestra\Testbench\TestCase::class);
+        if ($isLaravelApplication) {
+            return $closure($arguments);
+        }
+        if ($isLaravelPackage) {
+            return $closure($arguments);
+        }
+
+        return $arguments;
+    }
+
+    /**
+     * Ensures the runner is resolvable.
+     */
+    private function ensureRunnerIsResolvable(): void
     {
         ParallelRunner::resolveRunnerUsing( // @phpstan-ignore-line
             fn (Options $options, OutputInterface $output): RunnerInterface => new WrapperRunner($options, $output)
         );
     }
 
-    private static function isALaravelApplication(): bool
-    {
-        if (! InstalledVersions::isInstalled('laravel/framework', false)) {
-            return false;
-        }
-
-        return ! class_exists(\Orchestra\Testbench\TestCase::class);
-    }
-
     /**
+     * Ensures the environment variables are set.
+     *
      * @param  array<int, string>  $arguments
      * @return array<int, string>
      */
-    private function setEnvironmentVariables(array $arguments): array
+    private function ensureEnvironmentVariables(array $arguments): array
     {
         $_ENV['LARAVEL_PARALLEL_TESTING'] = 1;
 
@@ -71,10 +87,12 @@ final class Laravel implements HandlesArguments
     }
 
     /**
+     * Ensure the runner is set.
+     *
      * @param  array<int, string>  $arguments
      * @return array<int, string>
      */
-    private function useLaravelRunner(array $arguments): array
+    private function ensureRunner(array $arguments): array
     {
         foreach ($arguments as $value) {
             if (str_starts_with($value, '--runner')) {

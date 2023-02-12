@@ -19,7 +19,7 @@ use SebastianBergmann\FileIterator\Facade as PhpUnitFileIterator;
 final class BootFiles implements Bootstrapper
 {
     /**
-     * The Pest convention.
+     * The structure of the tests directory.
      *
      * @var array<int, string>
      */
@@ -32,7 +32,7 @@ final class BootFiles implements Bootstrapper
     ];
 
     /**
-     * Boots the Subscribers.
+     * Boots the structure of the tests directory.
      */
     public function boot(): void
     {

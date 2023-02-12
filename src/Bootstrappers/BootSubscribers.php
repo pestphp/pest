@@ -16,7 +16,7 @@ use PHPUnit\Event\Subscriber;
 final class BootSubscribers implements Bootstrapper
 {
     /**
-     * The Kernel subscribers.
+     * The list of Subscribers.
      *
      * @var array<int, class-string<Subscriber>>
      */
@@ -27,7 +27,7 @@ final class BootSubscribers implements Bootstrapper
     ];
 
     /**
-     * Creates a new Subscriber instance.
+     * Creates a new instance of the Boot Subscribers.
      */
     public function __construct(
         private readonly Container $container,
@@ -35,7 +35,7 @@ final class BootSubscribers implements Bootstrapper
     }
 
     /**
-     * Boots the Subscribers.
+     * Boots the list of Subscribers.
      */
     public function boot(): void
     {
