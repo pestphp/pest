@@ -1,5 +1,6 @@
 .idea/*
 .idea/codeStyleSettings.xml
+.temp/*
 composer.lock
 /vendor/
 coverage.xml
@@ -11,4 +12,3 @@ coverage.xml
 *.swp
 *.swo
 .vscode/
-/.temp/
