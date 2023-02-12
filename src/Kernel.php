@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pest;
 
 use Pest\Contracts\Bootstrapper;
-use Pest\Exceptions\NoTestsFound;
+use Pest\Exceptions\NoDirtyTestsFound;
 use Pest\Plugins\Actions\CallsAddsOutput;
 use Pest\Plugins\Actions\CallsBoot;
 use Pest\Plugins\Actions\CallsShutdown;
@@ -87,7 +87,7 @@ final class Kernel
 
         try {
             $this->application->run($args);
-        } catch (NoTestsFound) {
+        } catch (NoDirtyTestsFound) {
             $this->output->writeln([
                 '',
                 '  <fg=white;options=bold;bg=blue> INFO </> No tests found.',

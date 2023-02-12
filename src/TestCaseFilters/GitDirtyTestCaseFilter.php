@@ -6,7 +6,8 @@ namespace Pest\TestCaseFilters;
 
 use Pest\Contracts\TestCaseFilter;
 use Pest\Exceptions\MissingDependency;
-use Pest\Exceptions\NoTestsFound;
+use Pest\Exceptions\NoDirtyTestsFound;
+use Pest\Panic;
 use Pest\TestSuite;
 use Symfony\Component\Process\Process;
 
@@ -66,7 +67,7 @@ final class GitDirtyTestCaseFilter implements TestCaseFilter
         $dirtyFiles = array_values($dirtyFiles);
 
         if ($dirtyFiles === []) {
-            throw new NoTestsFound();
+            Panic::with(new NoDirtyTestsFound());
         }
 
         $this->changedFiles = $dirtyFiles;
