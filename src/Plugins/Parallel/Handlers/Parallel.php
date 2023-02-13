@@ -22,10 +22,11 @@ final class Parallel implements HandlesArguments
         '--parallel',
         '-p',
         '--no-output',
+        '--cache-result',
     ];
 
     /**
-     * Handles the arguments, removing the ones that are not needed, and adding the "runner" argument.
+     * Handles the arguments, removing the ones that are not needed, and adds the "runner" argument.
      */
     public function handleArguments(array $arguments): array
     {

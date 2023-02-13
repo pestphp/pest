@@ -152,8 +152,6 @@ final class ResultPrinter
             return;
         }
 
-        $this->compactPrinter->newLine();
-
         $state = (new StateGenerator())->fromPhpUnitTestResult($testResult);
 
         $this->compactPrinter->errors($state);

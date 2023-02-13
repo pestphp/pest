@@ -21,6 +21,9 @@ final class Laravel implements HandlesArguments
 {
     use HandleArguments;
 
+    /**
+     * {@inheritdoc}
+     */
     public function handleArguments(array $arguments): array
     {
         return self::whenUsingLaravel($arguments, function (array $arguments): array {
@@ -43,10 +46,8 @@ final class Laravel implements HandlesArguments
     {
         $isLaravelApplication = InstalledVersions::isInstalled('laravel/framework', false);
         $isLaravelPackage = class_exists(\Orchestra\Testbench\TestCase::class);
-        if ($isLaravelApplication) {
-            return $closure($arguments);
-        }
-        if ($isLaravelPackage) {
+
+        if ($isLaravelApplication && ! $isLaravelPackage) {
             return $closure($arguments);
         }
 

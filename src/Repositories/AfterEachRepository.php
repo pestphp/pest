@@ -33,7 +33,7 @@ final class AfterEachRepository
     }
 
     /**
-     * Gets a after each closure by the given filename.
+     * Gets an after each closure by the given filename.
      */
     public function get(string $filename): Closure
     {

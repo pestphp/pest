@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pest\Plugins;
 
-use JsonException;
 use ParaTest\ParaTestCommand;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Plugins\Actions\CallsAddsOutput;
@@ -29,24 +28,25 @@ final class Parallel implements HandlesArguments
         Parallel\Handlers\Pest::class,
         Parallel\Handlers\Laravel::class,
     ];
+    /**
+     * @var string[]
+     */
+    private const UNSUPPORTED_ARGUMENTS = ['--todo', '--retry'];
 
     /**
-     * If the
+     * Whether the given command line arguments indicate that the test suite should be run in parallel.
      */
-    public static function isCommand(): bool
+    public static function isEnabled(): bool
     {
-        // get binary name
-        Arr::get($_SERVER, 'argv.0');
-
-        $argvValue = Arr::get($_ENV, 'PARATEST');
-
-        assert(is_string($argvValue) || is_int($argvValue) || is_null($argvValue));
-
-        return ((int) $argvValue) === 1;
+        $argv = new ArgvInput();
+        if ($argv->hasParameterOption('--parallel')) {
+            return true;
+        }
+        return $argv->hasParameterOption('-p');
     }
 
     /**
-     * If the
+     * If this code is running in a worker process rather than the main process.
      */
     public static function isWorker(): bool
     {
@@ -57,35 +57,30 @@ final class Parallel implements HandlesArguments
         return ((int) $argvValue) === 1;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function handleArguments(array $arguments): array
     {
-        if ($this->argumentsContainParallelFlags($arguments)) {
+        if ($this->hasArgumentsThatWouldBeFasterWithoutParallel()) {
+            return $this->runTestSuiteInSeries($arguments);
+        }
+
+        if (self::isEnabled()) {
             exit($this->runTestSuiteInParallel($arguments));
         }
 
         if (self::isWorker()) {
-            return $this->runWorkersHandlers($arguments);
+            return $this->runWorkerHandlers($arguments);
         }
 
         return $arguments;
     }
 
     /**
-     * @param  array<int, string>  $arguments
-     */
-    private function argumentsContainParallelFlags(array $arguments): bool
-    {
-        if ($this->hasArgument('--parallel', $arguments)) {
-            return true;
-        }
-
-        return $this->hasArgument('-p', $arguments);
-    }
-
-    /**
-     * @param  array<int, string>  $arguments
+     * Runs the test suite in parallel. This method will exit the process upon completion.
      *
-     * @throws JsonException
+     * @param  array<int, string>  $arguments
      */
     private function runTestSuiteInParallel(array $arguments): int
     {
@@ -94,8 +89,6 @@ final class Parallel implements HandlesArguments
 
             return Command::FAILURE;
         }
-
-        $_ENV['PEST_PARALLEL_ARGV'] = json_encode($_SERVER['argv'], JSON_THROW_ON_ERROR);
 
         $handlers = array_filter(
             array_map(fn ($handler): object|string => Container::getInstance()->get($handler), self::HANDLERS),
@@ -114,10 +107,12 @@ final class Parallel implements HandlesArguments
     }
 
     /**
+     * Runs any handlers that have been registered to handle worker arguments, and returns the modified arguments.
+     *
      * @param  array<int, string>  $arguments
      * @return array<int, string>
      */
-    private function runWorkersHandlers(array $arguments): array
+    private function runWorkerHandlers(array $arguments): array
     {
         $handlers = array_filter(
             array_map(fn ($handler): object|string => Container::getInstance()->get($handler), self::HANDLERS),
@@ -131,6 +126,9 @@ final class Parallel implements HandlesArguments
         );
     }
 
+    /**
+     * Outputs a message to the user asking them to install ParaTest as a dev dependency.
+     */
     private function askUserToInstallParatest(): void
     {
         /** @var OutputInterface $output */
@@ -142,6 +140,9 @@ final class Parallel implements HandlesArguments
         ]);
     }
 
+    /**
+     * Builds an instance of the Paratest command.
+     */
     private function paratestCommand(): Application
     {
         /** @var non-empty-string $rootPath */
@@ -153,5 +154,35 @@ final class Parallel implements HandlesArguments
         $command->setVersion(version());
 
         return $command;
+    }
+
+    /**
+     * Whether the command line arguments contain any arguments that are
+     * not supported or are suboptimal when running in parallel.
+     */
+    private function hasArgumentsThatWouldBeFasterWithoutParallel(): bool
+    {
+        $arguments = new ArgvInput();
+
+        foreach (self::UNSUPPORTED_ARGUMENTS as $unsupportedArgument) {
+            if ($arguments->hasParameterOption($unsupportedArgument)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Removes any parallel arguments.
+     *
+     * @param  array<int, string>  $arguments
+     * @return array<int, string>
+     */
+    private function runTestSuiteInSeries(array $arguments): array
+    {
+        $arguments = $this->popArgument('--parallel', $arguments);
+
+        return $this->popArgument('-p', $arguments);
     }
 }
