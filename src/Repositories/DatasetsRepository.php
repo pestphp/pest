@@ -9,7 +9,7 @@ use Generator;
 use Pest\Exceptions\DatasetAlreadyExists;
 use Pest\Exceptions\DatasetDoesNotExist;
 use Pest\Exceptions\ShouldNotHappen;
-use SebastianBergmann\Exporter\Exporter;
+use Pest\Exporters\Exporter;
 use function sprintf;
 use Traversable;
 
