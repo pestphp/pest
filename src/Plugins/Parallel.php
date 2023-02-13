@@ -28,6 +28,7 @@ final class Parallel implements HandlesArguments
         Parallel\Handlers\Pest::class,
         Parallel\Handlers\Laravel::class,
     ];
+
     /**
      * @var string[]
      */
@@ -42,6 +43,7 @@ final class Parallel implements HandlesArguments
         if ($argv->hasParameterOption('--parallel')) {
             return true;
         }
+
         return $argv->hasParameterOption('-p');
     }
 
