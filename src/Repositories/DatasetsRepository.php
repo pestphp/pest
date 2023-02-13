@@ -9,7 +9,7 @@ use Generator;
 use Pest\Exceptions\DatasetAlreadyExists;
 use Pest\Exceptions\DatasetDoesNotExist;
 use Pest\Exceptions\ShouldNotHappen;
-use Pest\Exporters\Exporter;
+use Pest\Support\Exporter;
 use function sprintf;
 use Traversable;
 
@@ -229,7 +229,7 @@ final class DatasetsRepository
      */
     private static function getDatasetDescription(int|string $key, array $data): string
     {
-        $exporter = new Exporter();
+        $exporter = Exporter::default();
 
         if (is_int($key)) {
             return sprintf('(%s)', $exporter->shortenedRecursiveExport($data));

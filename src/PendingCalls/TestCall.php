@@ -11,10 +11,10 @@ use Pest\Factories\Covers\CoversFunction;
 use Pest\Factories\Covers\CoversNothing;
 use Pest\Factories\TestCaseMethodFactory;
 use Pest\Support\Backtrace;
+use Pest\Support\Exporter;
 use Pest\Support\HigherOrderCallables;
 use Pest\Support\NullClosure;
 use Pest\TestSuite;
-use SebastianBergmann\Exporter\Exporter;
 
 /**
  * @internal
@@ -276,12 +276,13 @@ final class TestCall
      */
     private function addChain(string $file, int $line, string $name, array $arguments = null): self
     {
+        $exporter = Exporter::default();
         $this->testCaseMethod
             ->chains
             ->add($file, $line, $name, $arguments);
 
         if ($this->descriptionLess) {
-            $exporter = new Exporter();
+            Exporter::default();
             if ($this->testCaseMethod->description !== null) {
                 $this->testCaseMethod->description .= ' → ';
             }

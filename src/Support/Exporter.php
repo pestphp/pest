@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pest\Exporters;
+namespace Pest\Support;
 
 use SebastianBergmann\Exporter\Exporter as BaseExporter;
 use SebastianBergmann\RecursionContext\Context;
@@ -18,16 +18,22 @@ final class Exporter
     private const MAX_ARRAY_ITEMS = 3;
 
     /**
-     * The PHPUnit exporter.
+     * Creates a new Exporter instance.
      */
-    private readonly BaseExporter $exporter;
+    public function __construct(
+        private readonly BaseExporter $exporter,
+    ) {
+        // ...
+    }
 
     /**
-     * Instantiate the class.
+     * Creates a new Exporter instance.
      */
-    public function __construct()
+    public static function default(): self
     {
-        $this->exporter = new BaseExporter();
+        return new self(
+            new BaseExporter()
+        );
     }
 
     /**
@@ -40,7 +46,7 @@ final class Exporter
         $result = [];
         $array = $data;
         $itemsCount = 0;
-        $exporter = new self();
+        $exporter = self::default();
         $context ??= new Context();
 
         $context->add($data);

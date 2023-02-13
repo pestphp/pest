@@ -13,6 +13,6 @@ $run = function () {
 };
 
 test('parallel', function () use ($run) {
-    expect($run())->toContain('Running 650 tests using 3 processes')
-        ->toContain('Tests:    4 incomplete, 4 todos, 15 skipped, 627 passed (1546 assertions)');
+    expect($run())->toContain('Running 652 tests using 3 processes')
+        ->toContain('Tests:    4 incomplete, 4 todos, 15 skipped, 629 passed (1548 assertions)');
 });

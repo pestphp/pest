@@ -13,8 +13,8 @@ use Pest\Arch\SingleArchExpectation;
 use Pest\Exceptions\InvalidExpectation;
 use Pest\Expectation;
 use Pest\Support\Arr;
+use Pest\Support\Exporter;
 use PHPUnit\Framework\ExpectationFailedException;
-use SebastianBergmann\Exporter\Exporter;
 
 /**
  * @internal
@@ -160,7 +160,7 @@ final class OppositeExpectation
     {
         $arguments = is_array($arguments) ? $arguments : [$arguments];
 
-        $exporter = new Exporter();
+        $exporter = Exporter::default();
 
         $toString = fn ($argument): string => $exporter->shortenedExport($argument);
 

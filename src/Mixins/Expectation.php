@@ -11,13 +11,13 @@ use InvalidArgumentException;
 use Pest\Exceptions\InvalidExpectationValue;
 use Pest\Matchers\Any;
 use Pest\Support\Arr;
+use Pest\Support\Exporter;
 use Pest\Support\NullClosure;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Constraint\Constraint;
 use PHPUnit\Framework\ExpectationFailedException;
 use ReflectionFunction;
 use ReflectionNamedType;
-use SebastianBergmann\Exporter\Exporter;
 use Throwable;
 
 /**
@@ -896,9 +896,9 @@ final class Expectation
     private function export(mixed $value): string
     {
         if ($this->exporter === null) {
-            $this->exporter = new Exporter();
+            $this->exporter = Exporter::default();
         }
 
-        return $this->exporter->export($value);
+        return $this->exporter->shortenedExport($value);
     }
 }
