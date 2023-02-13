@@ -22,6 +22,7 @@ final class Parallel implements HandlesArguments
         '--parallel',
         '-p',
         '--no-output',
+        '--cache-result',
     ];
 
     /**
