@@ -295,7 +295,6 @@ it('resolves a potential bound dataset logically even when the closure comes fir
 
 it('will not resolve a closure if it is type hinted as a closure', function (Closure $data) {
     expect($data())->toBeString();
-    expect(true)->toBeFalse();
 })->with([
     function () {
         return 'foo';
