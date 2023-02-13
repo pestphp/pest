@@ -14,6 +14,9 @@ final class Cache implements HandlesArguments
 {
     use HandleArguments;
 
+    /**
+     * The temporary folder.
+     */
     private const TEMPORARY_FOLDER = __DIR__
         .DIRECTORY_SEPARATOR
         .'..'
@@ -23,7 +26,7 @@ final class Cache implements HandlesArguments
         .'.temp';
 
     /**
-     * {@inheritdoc}
+     * Handles the arguments, adding the cache directory and the cache result arguments.
      */
     public function handleArguments(array $arguments): array
     {

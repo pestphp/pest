@@ -13,7 +13,7 @@ use PHPUnit\Event\Telemetry\Snapshot;
 use PHPUnit\TestRunner\TestResult\TestResult as PHPUnitTestResult;
 use SebastianBergmann\Timer\Duration;
 use Symfony\Component\Console\Output\ConsoleOutput;
-use Symfony\Component\Console\Output\ConsoleOutputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use function Termwind\render;
 use Termwind\Terminal;
 use function Termwind\terminal;
@@ -23,15 +23,10 @@ use function Termwind\terminal;
  */
 final class CompactPrinter
 {
-    private readonly Terminal $terminal;
-
-    private readonly ConsoleOutputInterface $output;
-
-    private readonly Style $style;
-
-    private int $compactProcessed = 0;
-
-    private readonly int $compactSymbolsPerLine;
+    /**
+     * The number of processed tests.
+     */
+    private int $processed = 0;
 
     /**
      * @var array<string, array<int, string>>
@@ -47,13 +42,29 @@ final class CompactPrinter
         'F' => ['red', '⨯'],
     ];
 
-    public function __construct()
-    {
-        $this->terminal = terminal();
-        $this->output = new ConsoleOutput(decorated: true);
-        $this->style = new Style($this->output);
+    /**
+     * Creates a new instance of the Compact Printer.
+     */
+    public function __construct(
+        private readonly Terminal $terminal,
+        private readonly OutputInterface $output,
+        private readonly Style $style,
+        private readonly int $compactSymbolsPerLine,
+    ) {
+        // ..
+    }
 
-        $this->compactSymbolsPerLine = $this->terminal->width() - 4;
+    /**
+     * Creates a new instance of the Compact Printer.
+     */
+    public static function default(): self
+    {
+        return new self(
+            terminal(),
+            new ConsoleOutput(decorated: true),
+            new Style(new ConsoleOutput(decorated: true)),
+            terminal()->width() - 4,
+        );
     }
 
     /**
@@ -79,7 +90,7 @@ final class CompactPrinter
     {
         [$color, $icon] = self::LOOKUP_TABLE[$item] ?? self::LOOKUP_TABLE['.'];
 
-        $symbolsOnCurrentLine = $this->compactProcessed % $this->compactSymbolsPerLine;
+        $symbolsOnCurrentLine = $this->processed % $this->compactSymbolsPerLine;
 
         if ($symbolsOnCurrentLine >= $this->terminal->width() - 4) {
             $symbolsOnCurrentLine = 0;
@@ -92,7 +103,7 @@ final class CompactPrinter
 
         $this->output->write(sprintf('<fg=%s;options=bold>%s</>', $color, $icon));
 
-        $this->compactProcessed++;
+        $this->processed++;
     }
 
     /**

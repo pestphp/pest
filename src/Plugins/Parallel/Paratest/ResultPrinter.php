@@ -28,11 +28,15 @@ use Symfony\Component\Console\Output\OutputInterface;
 /** @internal */
 final class ResultPrinter
 {
+    /**
+     * The "native" printer.
+     */
     public readonly Printer $printer;
 
+    /**
+     * The "compact" printer.
+     */
     private readonly CompactPrinter $compactPrinter;
-
-    private int $totalCases = 0;
 
     /** @var resource|null */
     private $teamcityLogFileHandle;
@@ -61,7 +65,7 @@ final class ResultPrinter
             }
         };
 
-        $this->compactPrinter = new CompactPrinter();
+        $this->compactPrinter = CompactPrinter::default();
 
         if (! $this->options->configuration->hasLogfileTeamcity()) {
             return;
@@ -72,17 +76,12 @@ final class ResultPrinter
         $this->teamcityLogFileHandle = $teamcityLogFileHandle;
     }
 
-    public function setTestCount(int $testCount): void
-    {
-        $this->totalCases = $testCount;
-    }
-
-    public function start(): void
+    public function start(int $numberOfTests): void
     {
         $this->compactPrinter->line(sprintf(
             'Running %d test%s using %d process%s',
-            $this->totalCases,
-            $this->totalCases === 1 ? '' : 's',
+            $numberOfTests,
+            $numberOfTests === 1 ? '' : 's',
             $this->options->processes,
             $this->options->processes === 1 ? '' : 'es')
         );

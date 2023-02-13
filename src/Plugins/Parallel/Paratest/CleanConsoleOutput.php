@@ -21,8 +21,7 @@ final class CleanConsoleOutput extends ConsoleOutput
     }
 
     /**
-     * Determines if the given message is the descriptive message
-     * that Paratest outputs when it starts.
+     * Removes the opening headline, witch is not needed.
      */
     private function isOpeningHeadline(string $message): bool
     {

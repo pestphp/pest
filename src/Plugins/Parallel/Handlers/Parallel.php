@@ -16,7 +16,7 @@ final class Parallel implements HandlesArguments
     use HandleArguments;
 
     /**
-     * @var string[]
+     * The list of arguments to remove.
      */
     private const ARGS_TO_REMOVE = [
         '--parallel',
@@ -24,6 +24,9 @@ final class Parallel implements HandlesArguments
         '--no-output',
     ];
 
+    /**
+     * Handles the arguments, removing the ones that are not needed, and adding the "runner" argument.
+     */
     public function handleArguments(array $arguments): array
     {
         $args = array_reduce(self::ARGS_TO_REMOVE, fn ($args, $arg): array => $this->popArgument($arg, $args), $arguments);
