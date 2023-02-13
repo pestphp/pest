@@ -54,15 +54,6 @@ $bootPest = (static function (): void {
         }
     }
 
-    require_once __DIR__.'/../overrides/Runner/TestSuiteLoader.php';
-    require_once __DIR__.'/../overrides/Runner/Filter/NameFilterIterator.php';
-
-    /**
-     * PHPUnit has no understanding of "todo" tests, so the ProgressPrinter will not show
-     * TODO items by default. We use our own implementation here to add support for TODO.
-     */
-    require_once __DIR__.'/../overrides/TextUI/Output/Default/ProgressPrinter/TestSkippedSubscriber.php';
-
     assert(isset($getopt['status-file']) && is_string($getopt['status-file']));
     $statusFile = fopen($getopt['status-file'], 'wb');
     assert(is_resource($statusFile));

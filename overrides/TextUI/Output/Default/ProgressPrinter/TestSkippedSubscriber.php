@@ -19,7 +19,7 @@ use ReflectionClass;
 /**
  * @internal This class is not covered by the backward compatibility promise for PHPUnit
  *
- * This file is only overridden when using Pest Parallel. See /bin/worker.php for more information.
+ * This file is overridden to allow Pest Parallel to show todo items in the progress output.
  */
 final class TestSkippedSubscriber extends Subscriber implements SkippedSubscriber
 {

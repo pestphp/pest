@@ -6,6 +6,7 @@ namespace Pest\Bootstrappers;
 
 use Pest\Contracts\Bootstrapper;
 use Pest\Exceptions\ShouldNotHappen;
+use Pest\Plugins\Parallel;
 
 /**
  * @internal
@@ -20,6 +21,7 @@ final class BootOverrides implements Bootstrapper
     private const FILES = [
         'Runner/Filter/NameFilterIterator.php',
         'Runner/TestSuiteLoader.php',
+        'TextUI/Output/Default/ProgressPrinter/TestSkippedSubscriber.php',
     ];
 
     /**
