@@ -34,7 +34,7 @@ final class CompactPrinter
     private const LOOKUP_TABLE = [
         '.' => ['gray', '.'],
         'S' => ['yellow', 's'],
-        'T' => ['blue', 't'],
+        'T' => ['cyan', 't'],
         'I' => ['yellow', 'i'],
         'N' => ['yellow', 'i'],
         'R' => ['yellow', '!'],
