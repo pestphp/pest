@@ -25,7 +25,7 @@ final class Parallel implements HandlesArguments
     ];
 
     /**
-     * Handles the arguments, removing the ones that are not needed, and adding the "runner" argument.
+     * Handles the arguments, removing the ones that are not needed, and adds the "runner" argument.
      */
     public function handleArguments(array $arguments): array
     {
