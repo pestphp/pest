@@ -29,7 +29,7 @@
   ✓ it does not append CoversNothing to other methods
   ✓ it throws exception if no class nor method has been found
 
-   PASS  Tests\Features\DatasetsTests
+   PASS  Tests\Features\DatasetsTests - 1 todo
   ✓ it throws exception if dataset does not exist
   ✓ it throws exception if dataset already exist
   ✓ it sets closures
@@ -556,6 +556,18 @@
   ✓ it fails
   ✓ it fails with message
 
+   PASS  Tests\Features\Expect\toHaveMethod
+  ✓ pass
+  ✓ failures
+  ✓ failures with message
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toHaveMethods
+  ✓ pass
+  ✓ failures
+  ✓ failures with custom message
+  ✓ not failures
+
    PASS  Tests\Features\Expect\toHaveProperties
   ✓ pass
   ✓ failures
@@ -732,7 +744,7 @@
   ✓ it allows access to the underlying expectNotToPerformAssertions method
   ✓ it allows performing no expectations without being risky
 
-   PASS  Tests\Features\Todo
+   PASS  Tests\Features\Todo - 3 todos
   ↓ something todo later
   ↓ something todo later chained
   ↓ something todo later chained and with function body
@@ -833,7 +845,7 @@
   ✓ environment is set to Local when --ci option is not used
 
    PASS  Tests\Unit\Plugins\Retry
-  ✓ it retries if --retry argument is used
+  ✓ it orders by defects and stop on defects if when --retry is used
 
    PASS  Tests\Unit\Support\Backtrace
   ✓ it gets file name from called file
@@ -886,6 +898,9 @@
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
 
+   PASS  Tests\Visual\Parallel
+  ✓ parallel
+
    PASS  Tests\Visual\SingleTestOrDirectory
   ✓ allows to run a single test
   ✓ allows to run a directory
@@ -905,3 +920,4 @@
   ✓ visual snapshot of help command output
 
   Tests:    4 incomplete, 4 todos, 18 skipped, 627 passed (1514 assertions)
+

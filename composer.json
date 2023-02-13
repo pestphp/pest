@@ -18,10 +18,13 @@
     ],
     "require": {
         "php": "^8.1.0",
-        "nunomaduro/collision": "^7.0.0",
-        "nunomaduro/termwind": "^1.15",
+        "nunomaduro/collision": "^7.0.2",
+        "nunomaduro/termwind": "^1.15.1",
         "pestphp/pest-plugin": "^2.0.0",
-        "phpunit/phpunit": "10.0.x-dev"
+        "phpunit/phpunit": "^10.0.7"
+    },
+    "conflict": {
+        "brianium/paratest": "<7.0.4"
     },
     "version": "2.x-dev",
     "autoload": {
@@ -43,9 +46,10 @@
         ]
     },
     "require-dev": {
-        "pestphp/pest-dev-tools": "^2.2",
+        "brianium/paratest": "^7.0.6",
+        "pestphp/pest-dev-tools": "^2.4.0",
         "pestphp/pest-plugin-arch": "^2.0.0",
-        "symfony/process": "^6.2.0"
+        "symfony/process": "^6.2.5"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -81,6 +85,7 @@
     "extra": {
         "pest": {
             "plugins": [
+                "Pest\\Plugins\\Cache",
                 "Pest\\Plugins\\Coverage",
                 "Pest\\Plugins\\Init",
                 "Pest\\Plugins\\Environment",
@@ -88,7 +93,8 @@
                 "Pest\\Plugins\\Memory",
                 "Pest\\Plugins\\Printer",
                 "Pest\\Plugins\\Retry",
-                "Pest\\Plugins\\Version"
+                "Pest\\Plugins\\Version",
+                "Pest\\Plugins\\Parallel"
             ]
         }
     }

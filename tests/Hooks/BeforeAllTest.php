@@ -1,11 +1,12 @@
 <?php
 
+use Pest\Plugins\Parallel;
 use Pest\Support\Str;
 
 // HACK: we have to determine our $_SERVER['globalHook-]>calls baseline. This is because
 // two other tests are executed before this one due to filename ordering.
 $args = $_SERVER['argv'] ?? [];
-$single = (isset($args[1]) && Str::endsWith(__FILE__, $args[1])) || ($_SERVER['PEST_PARALLEL'] ?? false);
+$single = (isset($args[1]) && Str::endsWith(__FILE__, $args[1])) || Parallel::isWorker();
 $offset = $single ? 0 : 2;
 
 uses()->beforeAll(function () use ($offset) {

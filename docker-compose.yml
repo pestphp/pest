@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  php:
+    build:
+      context: ./docker
+    volumes:
+      - .:/var/www/html
+  composer:
+    build:
+      context: ./docker
+    volumes:
+      - .:/var/www/html
+    entrypoint: ["composer"]

@@ -8,7 +8,6 @@ use Closure;
 use Pest\Contracts\AddsAnnotations;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Factories\Concerns\HigherOrderable;
-use Pest\Plugins\Retry;
 use Pest\Repositories\DatasetsRepository;
 use Pest\Support\Str;
 use Pest\TestSuite;
@@ -129,12 +128,6 @@ final class TestCaseMethodFactory
 
         $methodName = Str::evaluable($this->description);
 
-        $retryRepository = TestSuite::getInstance()->retryRepository;
-
-        if (Retry::$retrying && ! $retryRepository->isEmpty() && ! $retryRepository->exists(sprintf('%s::%s', $classFQN, $methodName))) {
-            return '';
-        }
-
         $datasetsCode = '';
         $annotations = ['@test'];
         $attributes = [];
@@ -188,7 +181,7 @@ final class TestCaseMethodFactory
 
         return <<<EOF
 
-                public function $dataProviderName()
+                public static function $dataProviderName()
                 {
                     return __PestDatasets::get(self::\$__filename, "$methodName");
                 }

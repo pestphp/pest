@@ -12,15 +12,13 @@ use Symfony\Component\Console\Exception\ExceptionInterface;
 /**
  * @internal
  */
-final class NoTestsFound extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
+final class InvalidOption extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
 {
     /**
      * Creates a new Exception instance.
      */
-    public function __construct()
+    public function __construct(string $message)
     {
-        parent::__construct('No tests found.');
-
-        // ...
+        parent::__construct($message, 1);
     }
 }

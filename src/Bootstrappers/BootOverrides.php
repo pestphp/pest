@@ -20,10 +20,11 @@ final class BootOverrides implements Bootstrapper
     private const FILES = [
         'Runner/Filter/NameFilterIterator.php',
         'Runner/TestSuiteLoader.php',
+        'TextUI/Output/Default/ProgressPrinter/TestSkippedSubscriber.php',
     ];
 
     /**
-     * Boots the Subscribers.
+     * Boots the list of files to be overridden.
      */
     public function boot(): void
     {

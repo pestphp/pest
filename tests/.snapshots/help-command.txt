@@ -49,7 +49,6 @@
   --fail-on-risky .............................. Treat risky tests as failures  
   --fail-on-skipped .......................... Treat skipped tests as failures  
   --fail-on-warning .................... Treat tests with warnings as failures  
-  --repeat <times> ...................................... Runs the test(s) repeatedly  
   --cache-result ............................ Write test results to cache file  
   --do-not-cache-result .............. Do not write test results to cache file  
   --order-by <order>  Run tests in order: default|defects|duration|no-depends|random|reverse|size  
@@ -78,7 +77,6 @@
   --log-teamcity <file> .............. Log test execution in TeamCity format to file  
   --testdox-html <file> ................. Write documentation in HTML format to file  
   --testdox-text <file> ................. Write documentation in Text format to file  
-  --testdox-xml <file> ................... Write documentation in XML format to file  
   --log-events-text <file> ..................... Stream events as plain text to file  
   --log-events-verbose-text <file>  Stream events as plain text to file (with telemetry information)  
   --no-logging .................................. Ignore logging configuration  
