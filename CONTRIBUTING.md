@@ -61,15 +61,15 @@ If you have Docker installed, you can quickly get all dependencies for Pest in p
 our Docker files. Assuming you have the repository cloned, you may run the following
 commands:
 
-1. `docker compose build` to build the Docker image
-2. `docker compose run --rm composer install` to install Composer dependencies
-3. `docker compose run --rm composer test` to run the project tests and analysis tools
+1. `make build` to build the Docker image
+2. `make install` to install Composer dependencies
+3. `make test` to run the project tests and analysis tools
 
 If you want to check things work against a specific version of PHP, you may include
 the `PHP` build argument when building the image:
 
 ```bash
-docker compose build --build-arg PHP=8.2
+make build ARGS="--build-arg PHP=8.2"
 ```
 
 The default PHP version will always be the lowest version of PHP supported by Pest.
