@@ -6,7 +6,6 @@ namespace Pest\Bootstrappers;
 
 use Pest\Contracts\Bootstrapper;
 use Pest\Exceptions\ShouldNotHappen;
-use Pest\Plugins\Parallel;
 
 /**
  * @internal
