@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pest\Plugins;
 
 use Pest\Contracts\Plugins\HandlesArguments;
-use Pest\Exceptions\InvalidOption;
 
 /**
  * @internal
@@ -19,17 +18,15 @@ final class Retry implements HandlesArguments
      */
     public function handleArguments(array $arguments): array
     {
-        if ($this->hasArgument('--retry', $arguments)) {
-            if ($this->hasArgument('--parallel', $arguments)) {
-                throw new InvalidOption('The --retry option is not supported when running in parallel.');
-            }
-
-            $arguments = $this->popArgument('--retry', $arguments);
-
-            $arguments = $this->pushArgument('--order-by=defects', $arguments);
-
-            $arguments = $this->pushArgument('--stop-on-failure', $arguments);
+        if (! $this->hasArgument('--retry', $arguments)) {
+            return $arguments;
         }
+
+        $arguments = $this->popArgument('--retry', $arguments);
+
+        $arguments = $this->pushArgument('--order-by=defects', $arguments);
+
+        $arguments = $this->pushArgument('--stop-on-failure', $arguments);
 
         return $arguments;
     }

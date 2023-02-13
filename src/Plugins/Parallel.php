@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pest\Plugins;
 
-use JsonException;
 use ParaTest\ParaTestCommand;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Plugins\Actions\CallsAddsOutput;
@@ -31,6 +30,16 @@ final class Parallel implements HandlesArguments
     ];
 
     /**
+     * Whether the given command line arguments indicate that the test suite should be run in parallel.
+     */
+    public static function isEnabled(): bool
+    {
+        $argv = new ArgvInput();
+
+        return $argv->hasParameterOption('--parallel') || $argv->hasParameterOption('-p');
+    }
+
+    /**
      * If this code is running in a worker process rather than the main process.
      */
     public static function isWorker(): bool
@@ -47,7 +56,11 @@ final class Parallel implements HandlesArguments
      */
     public function handleArguments(array $arguments): array
     {
-        if ($this->argumentsContainParallelOptions($arguments)) {
+        if ($this->hasArgumentsThatWouldBeFasterWithoutParallel()) {
+            return $this->runTestSuiteInSeries($arguments);
+        }
+
+        if (self::isEnabled()) {
             exit($this->runTestSuiteInParallel($arguments));
         }
 
@@ -59,25 +72,9 @@ final class Parallel implements HandlesArguments
     }
 
     /**
-     * Whether the given command line arguments indicate that the test suite should be run in parallel.
-     *
-     * @param  array<int, string>  $arguments
-     */
-    private function argumentsContainParallelOptions(array $arguments): bool
-    {
-        if ($this->hasArgument('--parallel', $arguments)) {
-            return true;
-        }
-
-        return $this->hasArgument('-p', $arguments);
-    }
-
-    /**
      * Runs the test suite in parallel. This method will exit the process upon completion.
      *
      * @param  array<int, string>  $arguments
-     *
-     * @throws JsonException
      */
     private function runTestSuiteInParallel(array $arguments): int
     {
@@ -86,8 +83,6 @@ final class Parallel implements HandlesArguments
 
             return Command::FAILURE;
         }
-
-        $_ENV['PEST_PARALLEL_ARGV'] = json_encode($_SERVER['argv'], JSON_THROW_ON_ERROR);
 
         $handlers = array_filter(
             array_map(fn ($handler): object|string => Container::getInstance()->get($handler), self::HANDLERS),
@@ -153,5 +148,36 @@ final class Parallel implements HandlesArguments
         $command->setVersion(version());
 
         return $command;
+    }
+
+    /**
+     * Whether the command line arguments contain any arguments that are
+     * not supported or are suboptimal when running in parallel.
+     */
+    private function hasArgumentsThatWouldBeFasterWithoutParallel(): bool
+    {
+        $unsupportedArguments = ['--todo', '--retry'];
+        $arguments = new ArgvInput();
+
+        foreach ($unsupportedArguments as $unsupportedArgument) {
+            if ($arguments->hasParameterOption($unsupportedArgument)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Removes any parallel arguments.
+     *
+     * @param  array<int, string>  $arguments
+     * @return array<int, string>
+     */
+    private function runTestSuiteInSeries(array $arguments): array
+    {
+        $arguments = $this->popArgument('--parallel', $arguments);
+
+        return $this->popArgument('-p', $arguments);
     }
 }

@@ -7,7 +7,6 @@ use ParaTest\WrapperRunner\WrapperWorker;
 use Pest\ConfigLoader;
 use Pest\Kernel;
 use Pest\Plugins\Actions\CallsHandleArguments;
-use Pest\TestCaseMethodFilters\TodoTestCaseFilter;
 use Pest\TestSuite;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -15,17 +14,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 $bootPest = (static function (): void {
     $workerArgv = new ArgvInput();
-    $masterArgv = new ArgvInput(json_decode($_SERVER['PEST_PARALLEL_ARGV']));
 
     $rootPath = dirname(PHPUNIT_COMPOSER_INSTALL, 2);
     $testSuite = TestSuite::getInstance($rootPath, $workerArgv->getParameterOption(
         '--test-directory',
         (new ConfigLoader($rootPath))->getTestsDirectory()
     ));
-
-    if ($masterArgv->hasParameterOption('--todo')) {
-        $testSuite->tests->addTestCaseMethodFilter(new TodoTestCaseFilter());
-    }
 
     $input = new ArgvInput();
 
