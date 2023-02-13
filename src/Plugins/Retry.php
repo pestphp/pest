@@ -26,8 +26,6 @@ final class Retry implements HandlesArguments
 
         $arguments = $this->pushArgument('--order-by=defects', $arguments);
 
-        $arguments = $this->pushArgument('--stop-on-failure', $arguments);
-
-        return $arguments;
+        return $this->pushArgument('--stop-on-failure', $arguments);
     }
 }

@@ -28,6 +28,10 @@ final class Parallel implements HandlesArguments
         Parallel\Handlers\Pest::class,
         Parallel\Handlers\Laravel::class,
     ];
+    /**
+     * @var string[]
+     */
+    private const UNSUPPORTED_ARGUMENTS = ['--todo', '--retry'];
 
     /**
      * Whether the given command line arguments indicate that the test suite should be run in parallel.
@@ -35,8 +39,10 @@ final class Parallel implements HandlesArguments
     public static function isEnabled(): bool
     {
         $argv = new ArgvInput();
-
-        return $argv->hasParameterOption('--parallel') || $argv->hasParameterOption('-p');
+        if ($argv->hasParameterOption('--parallel')) {
+            return true;
+        }
+        return $argv->hasParameterOption('-p');
     }
 
     /**
@@ -156,10 +162,9 @@ final class Parallel implements HandlesArguments
      */
     private function hasArgumentsThatWouldBeFasterWithoutParallel(): bool
     {
-        $unsupportedArguments = ['--todo', '--retry'];
         $arguments = new ArgvInput();
 
-        foreach ($unsupportedArguments as $unsupportedArgument) {
+        foreach (self::UNSUPPORTED_ARGUMENTS as $unsupportedArgument) {
             if ($arguments->hasParameterOption($unsupportedArgument)) {
                 return true;
             }
