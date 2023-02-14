@@ -20,12 +20,11 @@ final class ShouldNotHappen extends RuntimeException
         $message = $exception->getMessage();
 
         parent::__construct(sprintf(<<<'EOF'
-
 This should not happen - please create an new issue here: https://github.com/pestphp/pest.
 
-- Issue: %s
-- PHP version: %s
-- Operating system: %s
+  Issue: %s
+  PHP version: %s
+  Operating system: %s
 EOF
             , $message, phpversion(), PHP_OS), 1, $exception);
     }
