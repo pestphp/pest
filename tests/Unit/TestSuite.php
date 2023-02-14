@@ -3,7 +3,6 @@
 use Pest\Exceptions\DatasetMissing;
 use Pest\Exceptions\TestAlreadyExist;
 use Pest\Factories\TestCaseMethodFactory;
-use Pest\Plugins\Environment;
 use Pest\TestSuite;
 
 it('does not allow to add the same test description twice', function () {
@@ -39,40 +38,4 @@ it('can return an array of all test suite filenames', function () {
         'a',
         'c',
     ]);
-});
-
-it('can filter the test suite filenames to those with the only method', function () {
-    $testSuite = new TestSuite(getcwd(), 'tests');
-
-    $testWithOnly = new TestCaseMethodFactory('a', 'b', null);
-    $testWithOnly->only = true;
-    $testSuite->tests->set($testWithOnly);
-
-    $testSuite->tests->set(new TestCaseMethodFactory('c', 'd', null));
-
-    expect($testSuite->tests->getFilenames())->toEqual([
-        'a',
-    ]);
-});
-
-it('does not filter the test suite filenames to those with the only method when working in CI pipeline', function () {
-    $previousEnvironment = Environment::name();
-    Environment::name(Environment::CI);
-    $testSuite = new TestSuite(getcwd(), 'tests');
-
-    $test = function () {
-    };
-
-    $testWithOnly = new TestCaseMethodFactory('a', 'b', null);
-    $testWithOnly->only = true;
-    $testSuite->tests->set($testWithOnly);
-
-    $testSuite->tests->set(new TestCaseMethodFactory('c', 'd', null));
-
-    expect($testSuite->tests->getFilenames())->toEqual([
-        'a',
-        'c',
-    ]);
-
-    Environment::name($previousEnvironment);
 });

@@ -892,8 +892,6 @@
   ✓ it does not allow to add the same test description twice
   ✓ it alerts users about tests with arguments but no input
   ✓ it can return an array of all test suite filenames
-  ✓ it can filter the test suite filenames to those with the only method
-  ✓ it does not filter the test suite filenames to those with the only method when working in CI pipeline
 
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
@@ -919,4 +917,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    4 incomplete, 4 todos, 18 skipped, 636 passed (1556 assertions)
+  Tests:    4 incomplete, 4 todos, 18 skipped, 634 passed (1554 assertions)

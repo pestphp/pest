@@ -13,7 +13,6 @@ use Pest\Exceptions\ShouldNotHappen;
 use Pest\Exceptions\TestAlreadyExist;
 use Pest\Exceptions\TestDescriptionMissing;
 use Pest\Factories\Concerns\HigherOrderable;
-use Pest\Plugins\Environment;
 use Pest\Support\Reflection;
 use Pest\Support\Str;
 use Pest\TestSuite;
@@ -83,12 +82,7 @@ final class TestCaseFactory
 
     public function make(): void
     {
-        $methodsUsingOnly = $this->methodsUsingOnly();
-
-        $methods = array_values(array_filter(
-            $this->methods,
-            fn ($method): bool => $methodsUsingOnly === [] || in_array($method, $methodsUsingOnly, true)
-        ));
+        $methods = $this->methods;
 
         if ($methods !== []) {
             $this->evaluate($this->filename, $methods);
@@ -96,23 +90,9 @@ final class TestCaseFactory
     }
 
     /**
-     * Returns all the "only" methods.
-     *
-     * @return array<int, TestCaseMethodFactory>
-     */
-    public function methodsUsingOnly(): array
-    {
-        if (Environment::name() === Environment::CI) {
-            return [];
-        }
-
-        return array_values(array_filter($this->methods, static fn ($method): bool => $method->only));
-    }
-
-    /**
      * Creates a Test Case class using a runtime evaluate.
      *
-     * @param  array<int, TestCaseMethodFactory>  $methods
+     * @param  array<string, TestCaseMethodFactory>  $methods
      */
     public function evaluate(string $filename, array $methods): void
     {

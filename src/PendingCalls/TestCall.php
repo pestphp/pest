@@ -122,16 +122,6 @@ final class TestCall
     }
 
     /**
-     * Makes the test suite only this test case.
-     */
-    public function only(): self
-    {
-        $this->testCaseMethod->only = true;
-
-        return $this;
-    }
-
-    /**
      * Sets the test group(s).
      */
     public function group(string ...$groups): self

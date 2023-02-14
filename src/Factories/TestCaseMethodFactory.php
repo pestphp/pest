@@ -22,11 +22,6 @@ final class TestCaseMethodFactory
     use HigherOrderable;
 
     /**
-     * Determines if the Test Case Method will be the "only" being run.
-     */
-    public bool $only = false;
-
-    /**
      * Determines if the Test Case Method is a "todo".
      */
     public bool $todo = false;
