@@ -43,7 +43,7 @@ if (! function_exists('beforeEach')) {
     /**
      * Runs the given closure before each test in the current file.
      *
-     * @return BeforeEachCall|TestCase|mixed
+     * @return HigherOrderTapProxy<TestCall|TestCase>|TestCall|mixed
      */
     function beforeEach(Closure $closure = null): BeforeEachCall
     {
@@ -62,6 +62,7 @@ if (! function_exists('dataset')) {
     function dataset(string $name, Closure|iterable $dataset): void
     {
         $scope = DatasetInfo::scope(Backtrace::datasetsFile());
+
         DatasetsRepository::set($name, $dataset, $scope);
     }
 }
@@ -87,7 +88,7 @@ if (! function_exists('test')) {
      * is the test description; the second argument is
      * a closure that contains the test expectations.
      *
-     * @return HigherOrderTapProxy<TestCall|TestCase>|TestCall
+     * @return HigherOrderTapProxy<TestCall|TestCase>|TestCall|mixed
      */
     function test(string $description = null, Closure $closure = null): HigherOrderTapProxy|TestCall
     {
@@ -107,7 +108,7 @@ if (! function_exists('it')) {
      * is the test description; the second argument is
      * a closure that contains the test expectations.
      *
-     * @return TestCall|TestCase|mixed
+     * @return HigherOrderTapProxy<TestCall|TestCase>|TestCall|mixed
      */
     function it(string $description, Closure $closure = null): TestCall
     {
@@ -126,7 +127,7 @@ if (! function_exists('todo')) {
      * is marked as incomplete. Yet, Collision, Pest's
      * printer, will display it as a "todo" test.
      *
-     * @return TestCall|TestCase|mixed
+     * @return HigherOrderTapProxy<TestCall|TestCase>|TestCall|mixed
      */
     function todo(string $description): TestCall
     {
@@ -142,7 +143,7 @@ if (! function_exists('afterEach')) {
     /**
      * Runs the given closure after each test in the current file.
      *
-     * @return AfterEachCall|TestCase|mixed
+     * @return HigherOrderTapProxy<TestCall|TestCase>|TestCall|mixed
      */
     function afterEach(Closure $closure = null): AfterEachCall
     {
