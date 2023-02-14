@@ -16,6 +16,11 @@ final class Str
     private const POOL = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
     /**
+     * @var string
+     */
+    private const PREFIX = '__pest_evaluable_';
+
+    /**
      * Create a (unsecure & non-cryptographically safe) random alpha-numeric
      * string value.
      *
@@ -54,7 +59,7 @@ final class Str
      */
     public static function evaluable(string $code): string
     {
-        $code = str_replace(' ', '_', $code);
+        $code = self::PREFIX.str_replace(' ', '_', $code);
 
         return (string) preg_replace('/[^A-Z_a-z0-9]/', '_', $code);
     }
