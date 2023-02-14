@@ -7,7 +7,7 @@ it('evaluates the code', function ($evaluatable, $expected) {
 
     expect($code)->toBe($expected);
 })->with([
-    ['version()', 'version__'],
-    ['version__ ', 'version___'],
-    ['version\\', 'version_'],
+    ['version()', '__pest_evaluable_version__'],
+    ['version__ ', '__pest_evaluable_version___'],
+    ['version\\', '__pest_evaluable_version_'],
 ]);
