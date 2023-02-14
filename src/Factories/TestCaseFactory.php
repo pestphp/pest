@@ -162,7 +162,6 @@ final class TestCaseFactory
 
         $methodsCode = implode('', array_map(
             fn (TestCaseMethodFactory $methodFactory): string => $methodFactory->buildForEvaluation(
-                $classFQN,
                 self::ANNOTATIONS,
                 $methodAvailableAttributes
             ),

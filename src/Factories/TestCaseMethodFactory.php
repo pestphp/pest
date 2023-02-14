@@ -115,7 +115,7 @@ final class TestCaseMethodFactory
      * @param  array<int, class-string<AddsAnnotations>>  $annotationsToUse
      * @param  array<int, class-string<\Pest\Factories\Attributes\Attribute>>  $attributesToUse
      */
-    public function buildForEvaluation(string $classFQN, array $annotationsToUse, array $attributesToUse): string
+    public function buildForEvaluation(array $annotationsToUse, array $attributesToUse): string
     {
         if ($this->description === null) {
             throw ShouldNotHappen::fromMessage('The test description may not be empty.');
