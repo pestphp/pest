@@ -90,7 +90,6 @@ final class Help implements HandlesArguments
      */
     private function getContent(): array
     {
-        // Access the PHPUnit help class's private const HELP
         $helpReflection = new \ReflectionClass(PHPUnitHelp::class);
 
         /** @var array<string, array<int, array{arg: string, desc: string}>> $content */
@@ -100,6 +99,17 @@ final class Help implements HandlesArguments
             'arg' => '--init',
             'desc' => 'Initialise a standard Pest configuration',
         ]] + $content['Configuration'];
+
+        $content['Selection'] = [
+                [
+                    'arg' => '--todos',
+                    'desc' => 'Output to standard output the list of todos',
+                ],
+                [
+                    'arg' => '--retry',
+                    'desc' => 'Run non-passing tests first and stop execution upon first error or failure',
+                ],
+            ] + $content['Selection'];
 
         $content['Code Coverage'] = [
             [
@@ -111,6 +121,15 @@ final class Help implements HandlesArguments
                 'desc' => 'Set the minimum required coverage percentage, and fail if not met',
             ],
         ] + $content['Code Coverage'];
+
+        $content['Profiling'] = [
+                [
+                    'arg' => '--profile ',
+                    'desc' => 'Output to standard output the top ten slowest tests',
+                ],
+            ];
+
+        unset($content['Miscellaneous']);
 
         return $content;
     }
