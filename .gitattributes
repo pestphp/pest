@@ -1,18 +1,18 @@
-/art                     export-ignore
 /docker                  export-ignore
 /docs                    export-ignore
 /tests                   export-ignore
 /scripts                 export-ignore
 /.github                 export-ignore
-/.php-cs-fixer.dist.php  export-ignore
 .editorconfig            export-ignore
 .gitattributes           export-ignore
 .gitignore               export-ignore
-phpstan.neon             export-ignore
+/phpstan.neon            export-ignore
 /phpunit.xml             export-ignore
-CHANGELOG.md             export-ignore
-CONTRIBUTING.md          export-ignore
-docker-compose.yml       export-ignore
-Makefile                 export-ignore
-README.md                export-ignore
+/CHANGELOG.md            export-ignore
+/CONTRIBUTING.md         export-ignore
+/docker-compose.yml      export-ignore
+/Makefile                export-ignore
+/rector.php              export-ignore
+/README.md               export-ignore
+/RELEASE.md              export-ignore
 
