@@ -8,7 +8,7 @@ trait MyCustomTrait
     }
 }
 
-class MyCustomClass extends PHPUnit\Framework\TestCase
+abstract class MyCustomClass extends PHPUnit\Framework\TestCase
 {
     public function assertTrueIsTrue()
     {

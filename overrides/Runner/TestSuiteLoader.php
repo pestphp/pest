@@ -41,6 +41,7 @@ use function array_values;
 use function basename;
 use function class_exists;
 use function get_declared_classes;
+use Exception;
 use Pest\Contracts\HasPrintableTestCaseName;
 use Pest\TestCases\IgnorableTestCase;
 use Pest\TestSuite;
@@ -101,11 +102,27 @@ final class TestSuiteLoader
         }
 
         $testCaseFound = false;
+        $class = false;
 
         foreach (array_reverse($loadedClasses) as $loadedClass) {
-            if (is_subclass_of($loadedClass, HasPrintableTestCaseName::class) || is_subclass_of($loadedClass, TestCase::class)) {
-                $suiteClassName = $loadedClass;
+            if (
+                is_subclass_of($loadedClass, HasPrintableTestCaseName::class)
+                || is_subclass_of($loadedClass, TestCase::class)) {
 
+                try {
+                    $class = new ReflectionClass($loadedClass);
+                    // @codeCoverageIgnoreStart
+                } catch (ReflectionException) {
+                    continue;
+                }
+
+                if ($class->isAbstract() || ($class->getFileName() !== $suiteClassFile)) {
+                    if (! str_contains($class->getFileName(), 'TestCaseFactory.php')) {
+                        continue;
+                    }
+                }
+
+                $suiteClassName = $loadedClass;
                 $testCaseFound = true;
 
                 break;
@@ -120,12 +137,6 @@ final class TestSuiteLoader
             return $this->exceptionFor($suiteClassName, $suiteClassFile);
         }
 
-        try {
-            $class = new ReflectionClass($suiteClassName);
-            // @codeCoverageIgnoreStart
-        } catch (ReflectionException $e) {
-            throw new Exception($e->getMessage(), (int) $e->getCode(), $e);
-        }
         // @codeCoverageIgnoreEnd
 
         if ($class->isSubclassOf(TestCase::class) && ! $class->isAbstract()) {
