@@ -15,9 +15,9 @@ final class CallsBoot
     /**
      * Executes the Plugin action.
      *
-     * Provides an opportunity for any plugins to boot..
+     * Provides an opportunity for any plugins to boot.
      */
-    public function __invoke(): void
+    public static function execute(): void
     {
         $plugins = Loader::getPlugins(Plugins\Bootable::class);
 

@@ -20,7 +20,7 @@ final class CallsHandleArguments
      * @param  array<int, string>  $argv
      * @return array<int, string>
      */
-    public function __invoke(array $argv): array
+    public static function execute(array $argv): array
     {
         $plugins = Loader::getPlugins(Plugins\HandlesArguments::class);
 

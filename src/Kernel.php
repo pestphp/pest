@@ -8,6 +8,7 @@ use Pest\Contracts\Bootstrapper;
 use Pest\Exceptions\NoDirtyTestsFound;
 use Pest\Plugins\Actions\CallsAddsOutput;
 use Pest\Plugins\Actions\CallsBoot;
+use Pest\Plugins\Actions\CallsHandleArguments;
 use Pest\Plugins\Actions\CallsShutdown;
 use Pest\Support\Container;
 use PHPUnit\TextUI\Application;
@@ -68,7 +69,7 @@ final class Kernel
             $bootstrapper->boot();
         }
 
-        (new CallsBoot())->__invoke();
+        CallsBoot::execute();
 
         return new self(
             new Application(),
@@ -83,7 +84,7 @@ final class Kernel
      */
     public function handle(array $args): int
     {
-        $args = (new Plugins\Actions\CallsHandleArguments())->__invoke($args);
+        $args = CallsHandleArguments::execute($args);
 
         try {
             $this->application->run($args);
@@ -95,7 +96,7 @@ final class Kernel
             ]);
         }
 
-        return (new CallsAddsOutput())->__invoke(
+        return CallsAddsOutput::execute(
             Result::exitCode(),
         );
     }
@@ -105,6 +106,6 @@ final class Kernel
      */
     public function shutdown(): void
     {
-        (new CallsShutdown())->__invoke();
+        CallsShutdown::execute();
     }
 }

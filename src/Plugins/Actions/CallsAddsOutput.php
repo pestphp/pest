@@ -17,7 +17,7 @@ final class CallsAddsOutput
      *
      * Provides an opportunity for any plugins that want to provide additional output after test execution.
      */
-    public function __invoke(int $exitCode): int
+    public static function execute(int $exitCode): int
     {
         $plugins = Loader::getPlugins(Plugins\AddsOutput::class);
 

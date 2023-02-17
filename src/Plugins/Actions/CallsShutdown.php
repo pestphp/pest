@@ -17,7 +17,7 @@ final class CallsShutdown
      *
      * Provides an opportunity for any plugins to shutdown.
      */
-    public function __invoke(): void
+    public static function execute(): void
     {
         $plugins = Loader::getPlugins(Plugins\Shutdownable::class);
 

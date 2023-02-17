@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Plugins;
 
 use ParaTest\ParaTestCommand;
+use Pest\Contracts\Plugins\AddsOutput;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Plugins\Actions\CallsAddsOutput;
 use Pest\Plugins\Concerns\HandleArguments;
@@ -105,7 +106,7 @@ final class Parallel implements HandlesArguments
 
         $exitCode = $this->paratestCommand()->run(new ArgvInput($filteredArguments), new CleanConsoleOutput());
 
-        return (new CallsAddsOutput())($exitCode);
+        return CallsAddsOutput::execute($exitCode);
     }
 
     /**
