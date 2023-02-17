@@ -40,8 +40,8 @@ use function array_diff;
 use function array_values;
 use function basename;
 use function class_exists;
-use function get_declared_classes;
 use Exception;
+use function get_declared_classes;
 use Pest\Contracts\HasPrintableTestCaseName;
 use Pest\TestCases\IgnorableTestCase;
 use Pest\TestSuite;
@@ -108,7 +108,6 @@ final class TestSuiteLoader
             if (
                 is_subclass_of($loadedClass, HasPrintableTestCaseName::class)
                 || is_subclass_of($loadedClass, TestCase::class)) {
-
                 try {
                     $class = new ReflectionClass($loadedClass);
                     // @codeCoverageIgnoreStart

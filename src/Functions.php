@@ -88,7 +88,7 @@ if (! function_exists('test')) {
      * is the test description; the second argument is
      * a closure that contains the test expectations.
      *
-     * @return HigherOrderTapProxy<TestCall|TestCase>|TestCall|mixed
+     * @return TestCall|TestCase|mixed
      */
     function test(string $description = null, Closure $closure = null): HigherOrderTapProxy|TestCall
     {
@@ -108,7 +108,7 @@ if (! function_exists('it')) {
      * is the test description; the second argument is
      * a closure that contains the test expectations.
      *
-     * @return HigherOrderTapProxy<TestCall|TestCase>|TestCall|mixed
+     * @return TestCall|TestCase|mixed
      */
     function it(string $description, Closure $closure = null): TestCall
     {
@@ -127,7 +127,7 @@ if (! function_exists('todo')) {
      * is marked as incomplete. Yet, Collision, Pest's
      * printer, will display it as a "todo" test.
      *
-     * @return HigherOrderTapProxy<TestCall|TestCase>|TestCall|mixed
+     * @return TestCall|TestCase|mixed
      */
     function todo(string $description): TestCall
     {

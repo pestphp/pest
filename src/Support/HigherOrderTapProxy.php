@@ -10,10 +10,6 @@ use Throwable;
 
 /**
  * @internal
- *
- * @template TProxy
- *
- * @mixin TProxy
  */
 final class HigherOrderTapProxy
 {

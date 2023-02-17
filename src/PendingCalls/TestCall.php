@@ -15,11 +15,12 @@ use Pest\Support\Exporter;
 use Pest\Support\HigherOrderCallables;
 use Pest\Support\NullClosure;
 use Pest\TestSuite;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
  *
- * @mixin HigherOrderCallables
+ * @mixin HigherOrderCallables|TestCase
  */
 final class TestCall
 {
