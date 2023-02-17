@@ -82,7 +82,7 @@ final class TestRepository
                 $this->uses[$path] = [
                     [...$this->uses[$path][0], ...$classOrTraits],
                     [...$this->uses[$path][1], ...$groups],
-                    $this->uses[$path][2] + $hooks, // NOTE: array_merge will destroy numeric indices
+                    $this->uses[$path][2] + $hooks,
                 ];
             } else {
                 $this->uses[$path] = [$classOrTraits, $groups, $hooks];
