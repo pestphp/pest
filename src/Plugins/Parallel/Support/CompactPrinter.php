@@ -78,14 +78,6 @@ final class CompactPrinter
     }
 
     /**
-     * Write the given message to the console, adding vertical and horizontal padding.
-     */
-    public function line(string $message): void
-    {
-        render("<span class='mx-2 py-1 text-gray-700'>{$message}</span>");
-    }
-
-    /**
      * Outputs the given description item from the ProgressPrinter as a gorgeous, colored symbol.
      */
     public function descriptionItem(string $item): void
@@ -119,7 +111,7 @@ final class CompactPrinter
     /**
      * Outputs a clean recap of the test run, including the number of tests, assertions, and failures.
      */
-    public function recap(State $state, PHPUnitTestResult $testResult, Duration $duration): void
+    public function recap(State $state, PHPUnitTestResult $testResult, Duration $duration, Options $options): void
     {
         assert($this->output instanceof ConsoleOutput);
 
@@ -140,5 +132,17 @@ final class CompactPrinter
         );
 
         $this->style->writeRecap($state, $telemetry, $testResult);
+
+        $this->output->write("\033[1A");
+
+        $this->output->write([
+            sprintf(
+                '  <fg=gray>Parallel:</> <fg=default>%s process%s</>',
+                $options->processes,
+                $options->processes > 1 ? 'es' : '',
+            ),
+            "\n",
+            "\n",
+        ]);
     }
 }
