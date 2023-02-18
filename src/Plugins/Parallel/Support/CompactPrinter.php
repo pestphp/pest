@@ -6,6 +6,7 @@ namespace Pest\Plugins\Parallel\Support;
 
 use NunoMaduro\Collision\Adapters\Phpunit\State;
 use NunoMaduro\Collision\Adapters\Phpunit\Style;
+use ParaTest\Options;
 use PHPUnit\Event\Telemetry\HRTime;
 use PHPUnit\Event\Telemetry\Info;
 use PHPUnit\Event\Telemetry\MemoryUsage;

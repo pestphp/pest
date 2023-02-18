@@ -20,7 +20,6 @@ use PHPUnit\TextUI\Output\Printer;
 use function preg_replace;
 use SebastianBergmann\Timer\Duration;
 use SplFileInfo;
-use function sprintf;
 use function strlen;
 use Symfony\Component\Console\Formatter\OutputFormatter;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -74,17 +73,6 @@ final class ResultPrinter
         $teamcityLogFileHandle = fopen($this->options->configuration->logfileTeamcity(), 'ab+');
         assert($teamcityLogFileHandle !== false);
         $this->teamcityLogFileHandle = $teamcityLogFileHandle;
-    }
-
-    public function start(int $numberOfTests): void
-    {
-        $this->compactPrinter->line(sprintf(
-            'Running %d test%s using %d process%s',
-            $numberOfTests,
-            $numberOfTests === 1 ? '' : 's',
-            $this->options->processes,
-            $this->options->processes === 1 ? '' : 'es')
-        );
     }
 
     /** @param  array<int, SplFileInfo>  $teamcityFiles */
@@ -155,7 +143,7 @@ final class ResultPrinter
         $state = (new StateGenerator())->fromPhpUnitTestResult($testResult);
 
         $this->compactPrinter->errors($state);
-        $this->compactPrinter->recap($state, $testResult, $duration);
+        $this->compactPrinter->recap($state, $testResult, $duration, $this->options);
     }
 
     private function printFeedbackItem(string $item): void

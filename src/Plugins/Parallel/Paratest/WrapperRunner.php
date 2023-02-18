@@ -121,8 +121,6 @@ final class WrapperRunner implements RunnerInterface
 
         $result = TestResultFacade::result();
 
-        $this->printer->start($suiteLoader->testCount);
-
         $this->timer->start();
 
         $this->startWorkers();
