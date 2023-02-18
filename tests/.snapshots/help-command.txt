@@ -21,8 +21,8 @@
   --list-groups ................................... List available test groups  
   --group <name> ........................ Only run tests from the specified group(s)  
   --exclude-group <name> ................. Exclude tests from the specified group(s)  
-  --covers <name> ......................... Only run tests annotated with "@covers <name>"  
-  --uses <name> ............................. Only run tests annotated with "@uses <name>"  
+  --covers <name> ............................. Only run tests that intend to cover <name>  
+  --uses <name> ................................. Only run tests that intend to use <name>  
   --list-tests .......................................... List available tests  
   --list-tests-xml <file> ....................... List available tests in XML format  
   --filter <pattern> ........................................ Filter which tests to run  
@@ -32,7 +32,7 @@
   --process-isolation ................ Run each test in a separate PHP process  
   --globals-backup ................. Backup and restore $GLOBALS for each test  
   --static-backup ......... Backup and restore static properties for each test  
-  --strict-coverage . Be strict about code coverage attributes and annotations  
+  --strict-coverage ................... Be strict about code coverage metadata  
   --strict-global-state .............. Be strict about changes to global state  
   --disallow-test-output ................. Be strict about output during tests  
   --enforce-time-limit ................. Enforce time limit based on test size  
@@ -51,8 +51,8 @@
   --fail-on-warning .................... Treat tests with warnings as failures  
   --cache-result ............................ Write test results to cache file  
   --do-not-cache-result .............. Do not write test results to cache file  
-  --order-by <order>  Run tests in order: default|defects|duration|no-depends|random|reverse|size  
-  --random-order-seed <N> .......... Use a specific random seed <N> for random order  
+  --order-by <order>  Run tests in order: default|defects|depends|duration|no-depends|random|reverse|size  
+  --random-order-seed <N>  Use the specified random seed when running tests in random order  
 
   REPORTING OPTIONS:
   --colors <flag> ............... Use colors in output ("never", "auto" or "always")  
@@ -69,31 +69,31 @@
   --display-notices ........... Display details for notices triggered by tests  
   --display-warnings ......... Display details for warnings triggered by tests  
   --reverse-list .............................. Print defects in reverse order  
-  --teamcity ............... Report test execution progress in TeamCity format  
-  --testdox ............................ Report test results in TestDox format  
+  --teamcity . Replace default progress and result output with TeamCity format  
+  --testdox ................ Replace default result output with TestDox format  
 
   LOGGING OPTIONS:
-  --log-junit <file> ................ Log test execution in JUnit XML format to file  
-  --log-teamcity <file> .............. Log test execution in TeamCity format to file  
-  --testdox-html <file> ................. Write documentation in HTML format to file  
-  --testdox-text <file> ................. Write documentation in Text format to file  
+  --log-junit <file> ................ Write test results in JUnit XML format to file  
+  --log-teamcity <file> .............. Write test results in TeamCity format to file  
+  --testdox-html <file> ........ Write test results in TestDox format (HTML) to file  
+  --testdox-text <file> .. Write test results in TestDox format (plain text) to file  
   --log-events-text <file> ..................... Stream events as plain text to file  
-  --log-events-verbose-text <file>  Stream events as plain text to file (with telemetry information)  
-  --no-logging .................................. Ignore logging configuration  
+  --log-events-verbose-text <file>  Stream events as plain text (with telemetry information) to file  
+  --no-logging ....... Ignore logging configured in the XML configuration file  
 
   CODE COVERAGE OPTIONS:
   --coverage ..... Generate code coverage report and output to standard output  
   --coverage --min  Set the minimum required coverage percentage, and fail if not met  
-  --coverage-crap4j <file> ...... Generate code coverage report in Crap4J XML format  
-  --coverage-html <dir> .............. Generate code coverage report in HTML format  
-  --coverage-php <file> ..................... Export PHP_CodeCoverage object to file  
-  --coverage-text=<file>  Generate code coverage report in text format [default: standard output]  
-  --coverage-xml <dir> ........ Generate code coverage report in PHPUnit XML format  
+  --coverage-crap4j <file> . Write code coverage report in Crap4J XML format to file  
+  --coverage-html <dir> .... Write code coverage report in HTML format to directory  
+  --coverage-php <file> ................ Write serialized code coverage data to file  
+  --coverage-text=<file>  Write code coverage report in text format to file [default: standard output]  
+  --coverage-xml <dir> ...... Write code coverage report in XML format to directory  
   --warm-coverage-cache ........................... Warm static analysis cache  
-  --coverage-filter <dir> ...................... Include <dir> in code coverage analysis  
-  --path-coverage ............................. Perform path coverage analysis  
-  --disable-coverage-ignore  Disable attributes and annotations for ignoring code coverage  
-  --no-coverage ........................... Ignore code coverage configuration  
+  --coverage-filter <dir> ..................... Include <dir> in code coverage reporting  
+  --path-coverage .......... Report path coverage in addition to line coverage  
+  --disable-coverage-ignore ...... Disable metadata for ignoring code coverage  
+  --no-coverage  Ignore code coverage reporting configured in the XML configuration file  
 
   PROFILING OPTIONS:
   --profile .............. Output to standard output the top ten slowest tests  
