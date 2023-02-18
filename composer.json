@@ -24,7 +24,7 @@
         "phpunit/phpunit": "^10.0.7"
     },
     "conflict": {
-        "brianium/paratest": "<7.0.4"
+        "brianium/paratest": "<7.0.6"
     },
     "version": "2.x-dev",
     "autoload": {
