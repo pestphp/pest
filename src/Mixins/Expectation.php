@@ -865,6 +865,8 @@ final class Expectation
         } catch (Throwable $e) {
             if (! class_exists($exception)) {
                 if ($e instanceof Error && $e->getMessage() === "Class \"$exception\" not found") {
+                    Assert::assertTrue(true);
+
                     throw $e;
                 }
 
@@ -882,6 +884,8 @@ final class Expectation
 
             return $this;
         }
+
+        Assert::assertTrue(true);
 
         if (! class_exists($exception)) {
             throw new ExpectationFailedException("Exception with message \"$exception\" not thrown.");
