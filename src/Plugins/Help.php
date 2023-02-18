@@ -101,15 +101,15 @@ final class Help implements HandlesArguments
         ]] + $content['Configuration'];
 
         $content['Selection'] = [
-                [
-                    'arg' => '--todos',
-                    'desc' => 'Output to standard output the list of todos',
-                ],
-                [
-                    'arg' => '--retry',
-                    'desc' => 'Run non-passing tests first and stop execution upon first error or failure',
-                ],
-            ] + $content['Selection'];
+            [
+                'arg' => '--todos',
+                'desc' => 'Output to standard output the list of todos',
+            ],
+            [
+                'arg' => '--retry',
+                'desc' => 'Run non-passing tests first and stop execution upon first error or failure',
+            ],
+        ] + $content['Selection'];
 
         $content['Code Coverage'] = [
             [
@@ -123,11 +123,11 @@ final class Help implements HandlesArguments
         ] + $content['Code Coverage'];
 
         $content['Profiling'] = [
-                [
-                    'arg' => '--profile ',
-                    'desc' => 'Output to standard output the top ten slowest tests',
-                ],
-            ];
+            [
+                'arg' => '--profile ',
+                'desc' => 'Output to standard output the top ten slowest tests',
+            ],
+        ];
 
         unset($content['Miscellaneous']);
 

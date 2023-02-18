@@ -24,6 +24,7 @@ final class BootSubscribers implements Bootstrapper
         Subscribers\EnsureConfigurationIsValid::class,
         Subscribers\EnsureConfigurationIsAvailable::class,
         Subscribers\EnsureTeamCityEnabled::class,
+        Subscribers\EnsureKernelDumpIsFlushed::class,
     ];
 
     /**

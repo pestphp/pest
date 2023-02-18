@@ -31,6 +31,7 @@ final class Kernel
         Bootstrappers\BootSubscribers::class,
         Bootstrappers\BootFiles::class,
         Bootstrappers\BootView::class,
+        Bootstrappers\BootKernelDump::class,
     ];
 
     /**
@@ -106,6 +107,12 @@ final class Kernel
      */
     public function shutdown(): void
     {
+        $preBufferOutput = Container::getInstance()->get(KernelDump::class);
+
+        assert($preBufferOutput instanceof KernelDump);
+
+        $preBufferOutput->shutdown();
+
         CallsShutdown::execute();
     }
 }

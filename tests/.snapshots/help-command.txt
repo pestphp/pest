@@ -15,8 +15,8 @@
   --migrate-configuration ....... Migrate configuration file to current format  
 
   SELECTION OPTIONS:
-  --list-suites ................................... List available test suites  
-  --testsuite <name> ............... Only run tests from the specified test suite(s)  
+  --todos ........................ Output to standard output the list of todos  
+  --retry  Run non-passing tests first and stop execution upon first error or failure  
   --exclude-testsuite <name> ........ Exclude tests from the specified test suite(s)  
   --list-groups ................................... List available test groups  
   --group <name> ........................ Only run tests from the specified group(s)  
@@ -95,9 +95,6 @@
   --disable-coverage-ignore  Disable attributes and annotations for ignoring code coverage  
   --no-coverage ........................... Ignore code coverage configuration  
 
-  MISCELLANEOUS OPTIONS:
-  -h|--help .................................... Prints this usage information  
-  --version ..................................... Prints the version and exits  
-  --atleast-version <min> ....... Checks that version is greater than min and exits  
-  --check-version ................ Check whether PHPUnit is the latest version  
+  PROFILING OPTIONS:
+  --profile .............. Output to standard output the top ten slowest tests  
 
