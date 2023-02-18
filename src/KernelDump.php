@@ -70,6 +70,10 @@ final class KernelDump
             $this->buffer = implode(PHP_EOL, array_slice(explode(PHP_EOL, $this->buffer), 2));
         }
 
+        if ($this->isInternalError($this->buffer)) {
+            $this->buffer = str_replace('An error occurred inside PHPUnit.', '', $this->buffer);
+        }
+
         $this->buffer = trim($this->buffer);
         $this->buffer = rtrim($this->buffer, '.').'.';
 
@@ -87,5 +91,13 @@ final class KernelDump
     private function isOpeningHeadline(string $output): bool
     {
         return str_contains($output, 'by Sebastian Bergmann and contributors.');
+    }
+
+    /**
+     * Checks if the given output contains an opening headline.
+     */
+    private function isInternalError(string $output): bool
+    {
+        return str_contains($output, 'An error occurred inside PHPUnit.');
     }
 }
