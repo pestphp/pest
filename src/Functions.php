@@ -88,7 +88,7 @@ if (! function_exists('test')) {
      * is the test description; the second argument is
      * a closure that contains the test expectations.
      *
-     * @return HigherOrderTapProxy<TestCall|TestCase>|TestCall|mixed
+     * @return HigherOrderTapProxy<TestCall|TestCase>|TestCall
      */
     function test(string $description = null, Closure $closure = null): HigherOrderTapProxy|TestCall
     {

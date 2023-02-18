@@ -8,6 +8,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
+ *
+ * @phpstan-ignore-next-line
  */
 final class IgnorableTestCase extends TestCase
 {
