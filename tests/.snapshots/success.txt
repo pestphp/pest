@@ -884,9 +884,9 @@
   ✓ it gets property values
 
    PASS  Tests\Unit\Support\Str
-  ✓ it evaluates the code with ('version()', 'version__')
-  ✓ it evaluates the code with ('version__ ', 'version___')
-  ✓ it evaluates the code with ('version\', 'version_')
+  ✓ it evaluates the code with ('version()', '__pest_evaluable_version__')
+  ✓ it evaluates the code with ('version__ ', '__pest_evaluable_version___')
+  ✓ it evaluates the code with ('version\', '__pest_evaluable_version_')
 
    PASS  Tests\Unit\TestSuite
   ✓ it does not allow to add the same test description twice
