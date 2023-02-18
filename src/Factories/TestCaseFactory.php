@@ -144,7 +144,6 @@ final class TestCaseFactory
 
         if ('' === trim($className)) {
             $className = 'InvalidTestName'.Str::random();
-            $classFQN .= $className;
         }
 
         $classAvailableAttributes = array_filter(self::ATTRIBUTES, fn (string $attribute): bool => $attribute::$above);
