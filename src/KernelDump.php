@@ -40,7 +40,7 @@ final class KernelDump
      */
     public function disable(): void
     {
-        ob_clean();
+        @ob_clean();
 
         if ($this->buffer !== '') {
             $this->flush('INFO');
@@ -52,7 +52,7 @@ final class KernelDump
      */
     public function shutdown(): void
     {
-        ob_clean();
+        @ob_clean();
 
         if ($this->buffer !== '') {
             $this->flush('ERROR');
