@@ -20,6 +20,13 @@ trait Pipeable
     private static array $pipes = [];
 
     /**
+     * The list of interceptors.
+     *
+     * @var array<string, array<Closure(Closure, mixed ...$arguments): void>>
+     */
+    private static array $interceptors = [];
+
+    /**
      * Register a pipe to be applied before an expectation is checked.
      */
     public function pipe(string $name, Closure $pipe): void
@@ -37,6 +44,8 @@ trait Pipeable
         if (is_string($filter)) {
             $filter = fn ($value): bool => $value instanceof $filter;
         }
+
+        self::$interceptors[$name][] = $handler;
 
         $this->pipe($name, function ($next, ...$arguments) use ($handler, $filter): void {
             /* @phpstan-ignore-next-line */
