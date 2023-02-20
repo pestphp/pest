@@ -127,7 +127,7 @@ final class Init implements HandlesArguments
         $command = [
             'php', 'artisan',
             'pest:install',
-            '--no-interaction',
+            '--ansi', '--no-interaction',
         ];
 
         return (new Process($command, $this->testSuite->rootPath, ['COMPOSER_MEMORY_LIMIT' => '-1']))
