@@ -6,6 +6,7 @@ namespace Pest;
 
 use NunoMaduro\Collision\Writer;
 use Pest\Support\Container;
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 use Whoops\Exception\Inspector;
@@ -39,7 +40,11 @@ final class Panic
     private function handle(): void
     {
         /** @var OutputInterface $output */
-        $output = Container::getInstance()->get(OutputInterface::class);
+        try {
+            $output = Container::getInstance()->get(OutputInterface::class);
+        } catch (Throwable) {
+            $output = new ConsoleOutput();
+        }
 
         if ($this->throwable instanceof Contracts\Panicable) {
             $this->throwable->render($output);
@@ -51,7 +56,6 @@ final class Panic
 
         $inspector = new Inspector($this->throwable);
 
-        $output->writeln('');
         $writer->write($inspector);
         $output->writeln('');
 

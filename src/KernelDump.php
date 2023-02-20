@@ -43,7 +43,7 @@ final class KernelDump
         @ob_clean(); // @phpstan-ignore-line
 
         if ($this->buffer !== '') {
-            $this->flush('INFO');
+            $this->flush();
         }
     }
 
@@ -52,35 +52,41 @@ final class KernelDump
      */
     public function shutdown(): void
     {
-        @ob_clean(); // @phpstan-ignore-line
-
-        if ($this->buffer !== '') {
-            $this->flush('ERROR');
-        }
+        $this->disable();
     }
 
     /**
      * Flushes the buffer.
      */
-    private function flush(string $type): void
+    private function flush(): void
     {
         View::renderUsing($this->output);
-
         if ($this->isOpeningHeadline($this->buffer)) {
             $this->buffer = implode(PHP_EOL, array_slice(explode(PHP_EOL, $this->buffer), 2));
         }
 
+        $type = 'INFO';
+
         if ($this->isInternalError($this->buffer)) {
+            $type = 'ERROR';
             $this->buffer = str_replace('An error occurred inside PHPUnit.', '', $this->buffer);
         }
 
         $this->buffer = trim($this->buffer);
         $this->buffer = rtrim($this->buffer, '.').'.';
 
+        $lines = explode(PHP_EOL, $this->buffer);
+
+        $lines = array_reverse($lines);
+        $firstLine = array_pop($lines);
+        $lines = array_reverse($lines);
+
         View::render('components.badge', [
             'type' => $type,
-            'content' => $this->buffer,
+            'content' => $firstLine,
         ]);
+
+        $this->output->writeln($lines);
 
         $this->buffer = '';
     }
