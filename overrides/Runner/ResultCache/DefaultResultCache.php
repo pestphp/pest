@@ -47,6 +47,7 @@ namespace PHPUnit\Runner\ResultCache;
 
 use function array_keys;
 use function assert;
+use function Pest\version;
 use const DIRECTORY_SEPARATOR;
 use function dirname;
 use function file_get_contents;
@@ -66,11 +67,6 @@ use PHPUnit\Util\Filesystem;
  */
 final class DefaultResultCache implements ResultCache
 {
-    /**
-     * @var int
-     */
-    private const VERSION = 1;
-
     /**
      * @var string
      */
@@ -138,7 +134,7 @@ final class DefaultResultCache implements ResultCache
             return;
         }
 
-        if ($data['version'] !== self::VERSION) {
+        if ($data['version'] !== $this->cacheVersion()) {
             return;
         }
 
@@ -163,7 +159,7 @@ final class DefaultResultCache implements ResultCache
         }
 
         $data = [
-            'version' => self::VERSION,
+            'version' => $this->cacheVersion(),
             'defects' => [],
             'times' => $this->times,
         ];
@@ -177,5 +173,13 @@ final class DefaultResultCache implements ResultCache
             json_encode($data),
             LOCK_EX
         );
+    }
+
+    /**
+     * Returns the cache version.
+     */
+    private function cacheVersion(): string
+    {
+        return 'pest_' . version();
     }
 }
