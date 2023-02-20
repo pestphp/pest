@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace Pest\Plugins;
 
-use App\Console\Kernel;
 use Composer\InstalledVersions;
-use Illuminate\Support\Facades\Process;
 use Pest\Console\Thanks;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Support\View;
 use Pest\TestSuite;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
 
 /**
  * @internal
@@ -109,63 +108,38 @@ final class Init implements HandlesArguments
 
     private function initLaravel(): int
     {
-        View::render('components.badge', [
-            'type' => 'INFO',
-            'content' => 'Laravel installation detected, pest-plugin-laravel will be installed.',
-        ]);
+        $command = [
+            'composer', 'require',
+            'pestphp/pest-plugin-laravel 2.x-dev',
+            '--dev',
+        ];
 
-        exec('composer require pestphp/pest-plugin-laravel 2.x-dev', result_code: $result);
+        $result = (new Process($command, $this->testSuite->rootPath, ['COMPOSER_MEMORY_LIMIT' => '-1']))
+            ->setTimeout(null)
+            ->run(function ($type, $output): void {
+                $this->output->write($output);
+            });
 
-        /** @var int $result */
         if ($result > 0) {
-            View::render('components.badge', [
-                'type' => 'ERROR',
-                'content' => 'Something went wrong while installing pest-plugin-laravel package. Please refer the above output for more info.',
-            ]);
-
             return $result;
         }
 
-        View::render('components.badge', [
-            'type' => 'INFO',
-            'content' => 'Running artisan command to install Pest.',
-        ]);
+        $command = [
+            'php', 'artisan',
+            'pest:install',
+            '--no-interaction',
+        ];
 
-        $app = require $this->testSuite->rootPath.'/bootstrap/app.php';
-        /** @phpstan-ignore-next-line */
-        $app->make(Kernel::class)->bootstrap();
-
-        /** @phpstan-ignore-next-line */
-        $result = Process::run('php artisan pest:install --no-interaction');
-
-        if ($result->failed()) {
-            $this->output->writeln($result->errorOutput());
-
-            View::render('components.badge', [
-                'type' => 'ERROR',
-                'content' => 'Something went wrong while installing Pest in laravel. Please refer the above output for more info.',
-            ]);
-
-            return $result->exitCode();
-        }
-
-        $this->output->writeln($result->output());
-
-        View::render('components.two-column-detail', [
-            'left' => 'pest-plugin-laravel',
-            'right' => 'Installed',
-        ]);
-
-        View::render('components.two-column-detail', [
-            'left' => 'Pest',
-            'right' => 'Installed in Laravel',
-        ]);
-
-        View::render('components.new-line');
-
-        return 0;
+        return (new Process($command, $this->testSuite->rootPath, ['COMPOSER_MEMORY_LIMIT' => '-1']))
+            ->setTimeout(null)
+            ->run(function ($type, $output): void {
+                $this->output->write($output);
+            });
     }
 
+    /**
+     * Checks if laravel is installed through Composer
+     */
     private function isLaravelInstalled(): bool
     {
         return InstalledVersions::isInstalled('laravel/laravel');
