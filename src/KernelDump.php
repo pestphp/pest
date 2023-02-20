@@ -61,6 +61,7 @@ final class KernelDump
     private function flush(): void
     {
         View::renderUsing($this->output);
+
         if ($this->isOpeningHeadline($this->buffer)) {
             $this->buffer = implode(PHP_EOL, array_slice(explode(PHP_EOL, $this->buffer), 2));
         }
@@ -69,7 +70,9 @@ final class KernelDump
 
         if ($this->isInternalError($this->buffer)) {
             $type = 'ERROR';
-            $this->buffer = str_replace('An error occurred inside PHPUnit.', '', $this->buffer);
+            $this->buffer = str_replace(
+                sprintf('An error occurred inside PHPUnit.%s%sMessage:  ', PHP_EOL, PHP_EOL), '', $this->buffer,
+            );
         }
 
         $this->buffer = trim($this->buffer);
