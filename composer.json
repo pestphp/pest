@@ -21,7 +21,7 @@
         "nunomaduro/collision": "^7.0.5",
         "nunomaduro/termwind": "^1.15.1",
         "pestphp/pest-plugin": "^2.0.0",
-        "phpunit/phpunit": "^10.0.9"
+        "phpunit/phpunit": "^10.0.11"
     },
     "conflict": {
         "brianium/paratest": "<7.0.6"
