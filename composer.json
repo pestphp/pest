@@ -79,6 +79,7 @@
             "@test:lint",
             "@test:types",
             "@test:unit",
+            "@test:parallel",
             "@test:integration"
         ]
     },

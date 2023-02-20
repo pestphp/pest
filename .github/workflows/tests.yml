@@ -41,7 +41,7 @@ jobs:
       run: composer test:unit
 
     - name: Unit Tests in Parallel
-      run: test:parallel
+      run: composer test:parallel
 
     - name: Integration Tests
       run: composer test:integration
