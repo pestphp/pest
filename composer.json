@@ -71,7 +71,7 @@
         "test:types": "phpstan analyse --ansi --memory-limit=-1 --debug",
         "test:unit": "php bin/pest --colors=always --exclude-group=integration --compact",
         "test:inline": "php bin/pest --colors=always --configuration=phpunit.inline.xml",
-        "test:parallel": "exit 1",
+        "test:parallel": "php bin/pest --colors=always --exclude-group=integration --parallel",
         "test:integration": "php bin/pest --colors=always --group=integration -v",
         "update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --colors=always",
         "test": [
