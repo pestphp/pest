@@ -47,7 +47,6 @@ namespace PHPUnit\Runner\ResultCache;
 
 use function array_keys;
 use function assert;
-use function Pest\version;
 use const DIRECTORY_SEPARATOR;
 use function dirname;
 use function file_get_contents;
@@ -57,6 +56,7 @@ use function is_dir;
 use function is_file;
 use function json_decode;
 use function json_encode;
+use function Pest\version;
 use PHPUnit\Framework\TestStatus\TestStatus;
 use PHPUnit\Runner\DirectoryCannotBeCreatedException;
 use PHPUnit\Runner\Exception;
@@ -180,6 +180,6 @@ final class DefaultResultCache implements ResultCache
      */
     private function cacheVersion(): string
     {
-        return 'pest_' . version();
+        return 'pest_'.version();
     }
 }
