@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Pest\Plugins;
 
+use Composer\InstalledVersions;
 use Pest\Console\Thanks;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Support\View;
 use Pest\TestSuite;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
 
 /**
  * @internal
@@ -26,7 +28,9 @@ final class Init implements HandlesArguments
     private const STUBS = [
         'phpunit.xml' => 'phpunit.xml',
         'Pest.php' => 'tests/Pest.php',
-        'ExampleTest.php' => 'tests/ExampleTest.php',
+        'TestCase.php' => 'tests/TestCase.php',
+        'Unit/ExampleTest.php' => 'tests/Unit/ExampleTest.php',
+        'Feature/ExampleTest.php' => 'tests/Feature/ExampleTest.php',
     ];
 
     /**
@@ -59,16 +63,19 @@ final class Init implements HandlesArguments
 
     private function init(): void
     {
+        if ($this->isLaravelInstalled()) {
+            exit($this->initLaravel());
+        }
+
         $testsBaseDir = "{$this->testSuite->rootPath}/tests";
 
         if (! is_dir($testsBaseDir)) {
             mkdir($testsBaseDir);
         }
 
-        $this->output->writeln([
-            '',
-            '  <fg=white;bg=blue;options=bold> INFO </> Preparing tests directory.</>',
-            '',
+        View::render('components.badge', [
+            'type' => 'INFO',
+            'content' => 'Preparing tests directory.',
         ]);
 
         foreach (self::STUBS as $from => $to) {
@@ -97,5 +104,44 @@ final class Init implements HandlesArguments
         (new Thanks($this->output))();
 
         exit(0);
+    }
+
+    private function initLaravel(): int
+    {
+        $command = [
+            'composer', 'require',
+            'pestphp/pest-plugin-laravel 2.x-dev',
+            '--dev',
+        ];
+
+        $result = (new Process($command, $this->testSuite->rootPath, ['COMPOSER_MEMORY_LIMIT' => '-1']))
+            ->setTimeout(null)
+            ->run(function ($type, $output): void {
+                $this->output->write($output);
+            });
+
+        if ($result > 0) {
+            return $result;
+        }
+
+        $command = [
+            'php', 'artisan',
+            'pest:install',
+            '--ansi', '--no-interaction',
+        ];
+
+        return (new Process($command, $this->testSuite->rootPath, ['COMPOSER_MEMORY_LIMIT' => '-1']))
+            ->setTimeout(null)
+            ->run(function ($type, $output): void {
+                $this->output->write($output);
+            });
+    }
+
+    /**
+     * Checks if laravel is installed through Composer
+     */
+    private function isLaravelInstalled(): bool
+    {
+        return InstalledVersions::isInstalled('laravel/laravel');
     }
 }
