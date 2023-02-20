@@ -39,12 +39,13 @@ final class Panic
      */
     private function handle(): void
     {
-        /** @var OutputInterface $output */
         try {
             $output = Container::getInstance()->get(OutputInterface::class);
-        } catch (Throwable) {
+        } catch (Throwable) { // @phpstan-ignore-line
             $output = new ConsoleOutput();
         }
+
+        assert($output instanceof OutputInterface);
 
         if ($this->throwable instanceof Contracts\Panicable) {
             $this->throwable->render($output);
