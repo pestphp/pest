@@ -9,6 +9,8 @@ $run = function () {
 
     $process->run();
 
+    expect($process->getExitCode())->toBe(0);
+
     return preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $process->getOutput());
 };
 

@@ -317,9 +317,7 @@ final class WrapperRunner implements RunnerInterface
             $testResultSum->testTriggeredPhpunitErrorEvents(),
             $testResultSum->testTriggeredPhpunitWarningEvents(),
             $testResultSum->testRunnerTriggeredDeprecationEvents(),
-            array_values(array_filter($testResultSum->testRunnerTriggeredWarningEvents(), function ($event) {
-                return ! str_contains($event->message(), 'No tests found');
-            })),
+            array_values(array_filter($testResultSum->testRunnerTriggeredWarningEvents(), fn ($event): bool => ! str_contains($event->message(), 'No tests found'))),
         );
 
         $this->printer->printResults(
