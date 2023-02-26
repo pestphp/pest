@@ -296,6 +296,30 @@ final class WrapperRunner implements RunnerInterface
             );
         }
 
+        $testResultSum = new TestResult(
+            $testResultSum->numberOfTests(),
+            $testResultSum->numberOfTestsRun(),
+            $testResultSum->numberOfAssertions(),
+            $testResultSum->testErroredEvents(),
+            $testResultSum->testFailedEvents(),
+            $testResultSum->testConsideredRiskyEvents(),
+            $testResultSum->testSuiteSkippedEvents(),
+            $testResultSum->testSkippedEvents(),
+            $testResultSum->testMarkedIncompleteEvents(),
+            $testResultSum->testTriggeredDeprecationEvents(),
+            $testResultSum->testTriggeredPhpDeprecationEvents(),
+            $testResultSum->testTriggeredPhpunitDeprecationEvents(),
+            $testResultSum->testTriggeredErrorEvents(),
+            $testResultSum->testTriggeredNoticeEvents(),
+            $testResultSum->testTriggeredPhpNoticeEvents(),
+            $testResultSum->testTriggeredWarningEvents(),
+            $testResultSum->testTriggeredPhpWarningEvents(),
+            $testResultSum->testTriggeredPhpunitErrorEvents(),
+            $testResultSum->testTriggeredPhpunitWarningEvents(),
+            $testResultSum->testRunnerTriggeredDeprecationEvents(),
+            array_values(array_filter($testResultSum->testRunnerTriggeredWarningEvents(), fn ($event): bool => ! str_contains($event->message(), 'No tests found'))),
+        );
+
         $this->printer->printResults(
             $testResultSum,
             $this->teamcityFiles,
@@ -305,7 +329,7 @@ final class WrapperRunner implements RunnerInterface
         $this->generateCodeCoverageReports();
         $this->generateLogs();
 
-        $exitcode = (new ShellExitCodeCalculator())->calculate(
+        $exitCode = (new ShellExitCodeCalculator())->calculate(
             $this->options->configuration->failOnEmptyTestSuite(),
             $this->options->configuration->failOnRisky(),
             $this->options->configuration->failOnWarning(),
@@ -320,7 +344,7 @@ final class WrapperRunner implements RunnerInterface
         $this->clearFiles($this->teamcityFiles);
         $this->clearFiles($this->testdoxFiles);
 
-        return $exitcode;
+        return $exitCode;
     }
 
     private function generateCodeCoverageReports(): void

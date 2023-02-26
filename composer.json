@@ -21,7 +21,7 @@
         "nunomaduro/collision": "^7.0.5",
         "nunomaduro/termwind": "^1.15.1",
         "pestphp/pest-plugin": "^2.0.0",
-        "phpunit/phpunit": "^10.0.11"
+        "phpunit/phpunit": "^10.0.12"
     },
     "conflict": {
         "brianium/paratest": "<7.0.6"
@@ -71,7 +71,7 @@
         "test:types": "phpstan analyse --ansi --memory-limit=-1 --debug",
         "test:unit": "php bin/pest --colors=always --exclude-group=integration --compact",
         "test:inline": "php bin/pest --colors=always --configuration=phpunit.inline.xml",
-        "test:parallel": "php bin/pest --colors=always --exclude-group=integration --parallel",
+        "test:parallel": "php bin/pest --colors=always --exclude-group=integration --parallel --processes=10",
         "test:integration": "php bin/pest --colors=always --group=integration -v",
         "update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --colors=always",
         "test": [
