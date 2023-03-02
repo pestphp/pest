@@ -42,9 +42,9 @@ declare(strict_types=1);
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace PHPUnit\TextUI\Command;
 
-use function printf;
 use PHPUnit\TextUI\Configuration\CodeCoverageFilterRegistry;
 use PHPUnit\TextUI\Configuration\Configuration;
 use PHPUnit\TextUI\Configuration\NoCoverageCacheDirectoryException;
@@ -58,11 +58,12 @@ use SebastianBergmann\Timer\Timer;
 final class WarmCodeCoverageCacheCommand implements Command
 {
     private readonly Configuration $configuration;
+
     private readonly CodeCoverageFilterRegistry $codeCoverageFilterRegistry;
 
     public function __construct(Configuration $configuration, CodeCoverageFilterRegistry $codeCoverageFilterRegistry)
     {
-        $this->configuration              = $configuration;
+        $this->configuration = $configuration;
         $this->codeCoverageFilterRegistry = $codeCoverageFilterRegistry;
     }
 
@@ -72,18 +73,18 @@ final class WarmCodeCoverageCacheCommand implements Command
      */
     public function execute(): Result
     {
-        if (!$this->configuration->hasCoverageCacheDirectory()) {
+        if (! $this->configuration->hasCoverageCacheDirectory()) {
             return Result::from(
-                'Cache for static analysis has not been configured' . PHP_EOL,
+                'Cache for static analysis has not been configured'.PHP_EOL,
                 Result::FAILURE
             );
         }
 
         $this->codeCoverageFilterRegistry->init($this->configuration);
 
-        if (!$this->codeCoverageFilterRegistry->configured()) {
+        if (! $this->codeCoverageFilterRegistry->configured()) {
             return Result::from(
-                'Filter for code coverage has not been configured' . PHP_EOL,
+                'Filter for code coverage has not been configured'.PHP_EOL,
                 Result::FAILURE
             );
         }
@@ -93,7 +94,7 @@ final class WarmCodeCoverageCacheCommand implements Command
 
         (new CacheWarmer)->warmCache(
             $this->configuration->coverageCacheDirectory(),
-            !$this->configuration->disableCodeCoverageIgnore(),
+            ! $this->configuration->disableCodeCoverageIgnore(),
             $this->configuration->ignoreDeprecatedCodeUnitsFromCodeCoverage(),
             $this->codeCoverageFilterRegistry->get()
         );
