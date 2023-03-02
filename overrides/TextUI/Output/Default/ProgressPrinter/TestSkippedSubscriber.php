@@ -61,9 +61,11 @@ final class TestSkippedSubscriber extends Subscriber implements SkippedSubscribe
      */
     public function notify(Skipped $event): void
     {
-        str_contains($event->message(), '__TODO__')
-            ? $this->printTodoItem()
-            : $this->printer()->testSkipped();
+        if (str_contains($event->message(), '__TODO__')) {
+            $this->printTodoItem();
+        }
+
+        $this->printer()->testSkipped();
     }
 
     /**

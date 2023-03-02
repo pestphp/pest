@@ -11,6 +11,7 @@ use PHPUnit\Event\Code\TestMethod;
 use PHPUnit\Event\Code\Throwable;
 use PHPUnit\Event\Test\Errored;
 use PHPUnit\Event\TestData\TestDataCollection;
+use PHPUnit\Framework\Exception;
 use PHPUnit\Framework\IncompleteTestError;
 use PHPUnit\Framework\SkippedWithMessageException;
 use PHPUnit\Metadata\MetadataCollection;
@@ -18,7 +19,7 @@ use PHPUnit\TestRunner\TestResult\TestResult as PHPUnitTestResult;
 
 final class StateGenerator
 {
-    public function fromPhpUnitTestResult(PHPUnitTestResult $testResult): State
+    public function fromPhpUnitTestResult(int $passedTests, PHPUnitTestResult $testResult): State
     {
         $state = new State();
 
@@ -74,16 +75,69 @@ final class StateGenerator
             ));
         }
 
-        $numberOfPassedTests = $testResult->numberOfTestsRun()
-            - $testResult->numberOfTestErroredEvents()
-            - $testResult->numberOfTestFailedEvents()
-            - $testResult->numberOfTestSkippedEvents()
-            - $testResult->numberOfTestsWithTestConsideredRiskyEvents()
-            - $testResult->numberOfTestMarkedIncompleteEvents();
+        foreach ($testResult->testTriggeredDeprecationEvents() as $testResultEvent) {
+            $testResultEvent = $testResultEvent[0];
 
-        for ($i = 0; $i < $numberOfPassedTests; $i++) {
             $state->add(TestResult::fromTestCase(
+                $testResultEvent->test(),
+                TestResult::DEPRECATED,
+                Throwable::from(new Exception($testResultEvent->message()))
+            ));
+        }
 
+        foreach ($testResult->testTriggeredPhpDeprecationEvents() as $testResultEvent) {
+            $testResultEvent = $testResultEvent[0];
+
+            $state->add(TestResult::fromTestCase(
+                $testResultEvent->test(),
+                TestResult::DEPRECATED,
+                Throwable::from(new Exception($testResultEvent->message()))
+            ));
+        }
+
+        foreach ($testResult->testTriggeredNoticeEvents() as $testResultEvent) {
+            $testResultEvent = $testResultEvent[0];
+
+            $state->add(TestResult::fromTestCase(
+                $testResultEvent->test(),
+                TestResult::NOTICE,
+                Throwable::from(new Exception($testResultEvent->message()))
+            ));
+        }
+
+        foreach ($testResult->testTriggeredPhpNoticeEvents() as $testResultEvent) {
+            $testResultEvent = $testResultEvent[0];
+
+            $state->add(TestResult::fromTestCase(
+                $testResultEvent->test(),
+                TestResult::NOTICE,
+                Throwable::from(new Exception($testResultEvent->message()))
+            ));
+        }
+
+        foreach ($testResult->testTriggeredWarningEvents() as $testResultEvent) {
+            $testResultEvent = $testResultEvent[0];
+
+            $state->add(TestResult::fromTestCase(
+                $testResultEvent->test(),
+                TestResult::WARN,
+                Throwable::from(new Exception($testResultEvent->message()))
+            ));
+        }
+
+        foreach ($testResult->testTriggeredPhpWarningEvents() as $testResultEvent) {
+            $testResultEvent = $testResultEvent[0];
+
+            $state->add(TestResult::fromTestCase(
+                $testResultEvent->test(),
+                TestResult::WARN,
+                Throwable::from(new Exception($testResultEvent->message()))
+            ));
+        }
+
+        // for each test that passed, we need to add it to the state
+        for ($i = 0; $i < $passedTests; $i++) {
+            $state->add(TestResult::fromTestCase(
                 new TestMethod(
                     /** @phpstan-ignore-next-line */
                     "$i",

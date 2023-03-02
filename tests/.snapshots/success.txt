@@ -139,6 +139,10 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
+   DEPR  Tests\Features\Deprecated
+  ! deprecated → str_contains(): Passing null to parameter #2 ($needle) of type string is deprecated
+  ! user deprecated → Since foo 1.0: This is a deprecation description
+
    PASS  Tests\Features\Exceptions
   ✓ it gives access the the underlying expectException
   ✓ it catch exceptions
@@ -646,9 +650,9 @@
   ✓ it skips with falsy closure condition
   ✓ it can be used in higher order tests
 
-   PASS  Tests\Features\Helpers
+   WARN  Tests\Features\Helpers
   ✓ it can set/get properties on $this
-  ✓ it throws error if property do not exist
+  ! it gets null if property do not exist → Undefined property Tests\Features\Helpers::$wqdwqdqw
   ✓ it allows to call underlying protected/private methods
   ✓ it throws error if method do not exist
   ✓ it can forward unexpected calls to any global function
@@ -677,6 +681,9 @@
    PASS  Tests\Features\It
   ✓ it is a test
   ✓ it is a higher order message test
+
+   NOTI  Tests\Features\Notices
+  ! notice → This is a notice description
 
    PASS  Tests\Features\PendingHigherOrderTests
   ✓ get 'foo'
@@ -749,6 +756,10 @@
   ↓ something todo later chained
   ↓ something todo later chained and with function body
   ✓ it does something within a file with a todo
+
+   WARN  Tests\Features\Warnings
+  ! warning → Undefined property: P\Tests\Features\Warnings::$fooqwdfwqdfqw
+  ! user warning → This is a warning description
 
    PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest
   ✓ it example 1
@@ -917,4 +928,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    4 incomplete, 4 todos, 18 skipped, 634 passed (1560 assertions)
+  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 18 skipped, 633 passed (1564 assertions)

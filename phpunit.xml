@@ -12,12 +12,6 @@
          stopOnError="false"
          stopOnFailure="false"
          backupStaticProperties="false"
-         displayDetailsOnIncompleteTests="true"
-         displayDetailsOnSkippedTests="true"
-         displayDetailsOnTestsThatTriggerDeprecations="true"
-         displayDetailsOnTestsThatTriggerErrors="true"
-         displayDetailsOnTestsThatTriggerNotices="true"
-         displayDetailsOnTestsThatTriggerWarnings="true"
 >
   <testsuites>
     <testsuite name="default">

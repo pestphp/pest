@@ -6,15 +6,12 @@ namespace Pest\Support;
 
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
-use Throwable;
 
 /**
  * @internal
  */
 final class HigherOrderTapProxy
 {
-    private const UNDEFINED_PROPERTY = 'Undefined property: P\\';  // @phpstan-ignore-line
-
     /**
      * Create a new tap proxy instance.
      */
@@ -40,16 +37,18 @@ final class HigherOrderTapProxy
     public function __get(string $property)
     {
         if (property_exists($this->target, $property)) {
-            return $this->target->{$property};
+            return $this->target->{$property}; // @phpstan-ignore-line
         }
 
         $className = (new ReflectionClass($this->target))->getName();
 
-        if (str_starts_with($className, "P\\")) {
+        if (str_starts_with($className, 'P\\')) {
             $className = substr($className, 2);
         }
 
         trigger_error(sprintf('Undefined property %s::$%s', $className, $property), E_USER_WARNING);
+
+        return null;
     }
 
     /**
