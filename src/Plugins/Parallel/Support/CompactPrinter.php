@@ -38,6 +38,7 @@ final class CompactPrinter
         'T' => ['cyan', 't'],
         'I' => ['yellow', 'i'],
         'N' => ['yellow', 'i'],
+        'D' => ['yellow', '!'],
         'R' => ['yellow', '!'],
         'W' => ['yellow', '!'],
         'E' => ['red', '⨯'],
