@@ -91,7 +91,6 @@ final class TeamCityLogger
 
     public function testMarkedIncomplete(MarkedIncomplete $event): never
     {
-        // TODO: when does this trigger?
         throw ShouldNotHappen::fromMessage('testMarkedIncomplete not implemented.');
     }
 

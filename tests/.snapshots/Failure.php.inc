@@ -18,3 +18,7 @@
 ##teamcity[testIgnored name='build this one.' message='This test was ignored.' details='' flowId='1234']
 ##teamcity[testFinished name='build this one.' duration='100000' flowId='1234']
 ##teamcity[testSuiteFinished name='Tests/tests/Failure' flowId='1234']
+
+  [90mTests:[39m    [31;1m2 failed[39;22m[90m,[39m[39m [39m[33;1m1 risky[39;22m[90m,[39m[39m [39m[36;1m2 todos[39;22m[90m,[39m[39m [39m[33;1m1 skipped[39;22m[90m (2 assertions)[39m
+  [90mDuration:[39m [39m1.00s[39m
+
