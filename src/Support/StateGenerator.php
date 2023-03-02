@@ -6,13 +6,12 @@ namespace Pest\Support;
 
 use NunoMaduro\Collision\Adapters\Phpunit\State;
 use NunoMaduro\Collision\Adapters\Phpunit\TestResult;
+use NunoMaduro\Collision\Exceptions\TestOutcome;
 use PHPUnit\Event\Code\TestDox;
 use PHPUnit\Event\Code\TestMethod;
 use PHPUnit\Event\Code\Throwable;
 use PHPUnit\Event\Test\Errored;
 use PHPUnit\Event\TestData\TestDataCollection;
-use PHPUnit\Framework\Exception;
-use PHPUnit\Framework\IncompleteTestError;
 use PHPUnit\Framework\SkippedWithMessageException;
 use PHPUnit\Metadata\MetadataCollection;
 use PHPUnit\TestRunner\TestResult\TestResult as PHPUnitTestResult;
@@ -56,7 +55,7 @@ final class StateGenerator
                 $state->add(TestResult::fromTestCase(
                     $riskyEvent->test(),
                     TestResult::RISKY,
-                    Throwable::from(new IncompleteTestError($riskyEvent->message()))
+                    Throwable::from(new TestOutcome($riskyEvent->message()))
                 ));
             }
         }
@@ -81,7 +80,7 @@ final class StateGenerator
             $state->add(TestResult::fromTestCase(
                 $testResultEvent->test(),
                 TestResult::DEPRECATED,
-                Throwable::from(new Exception($testResultEvent->message()))
+                Throwable::from(new TestOutcome($testResultEvent->message()))
             ));
         }
 
@@ -91,7 +90,7 @@ final class StateGenerator
             $state->add(TestResult::fromTestCase(
                 $testResultEvent->test(),
                 TestResult::DEPRECATED,
-                Throwable::from(new Exception($testResultEvent->message()))
+                Throwable::from(new TestOutcome($testResultEvent->message()))
             ));
         }
 
@@ -101,7 +100,7 @@ final class StateGenerator
             $state->add(TestResult::fromTestCase(
                 $testResultEvent->test(),
                 TestResult::NOTICE,
-                Throwable::from(new Exception($testResultEvent->message()))
+                Throwable::from(new TestOutcome($testResultEvent->message()))
             ));
         }
 
@@ -111,7 +110,7 @@ final class StateGenerator
             $state->add(TestResult::fromTestCase(
                 $testResultEvent->test(),
                 TestResult::NOTICE,
-                Throwable::from(new Exception($testResultEvent->message()))
+                Throwable::from(new TestOutcome($testResultEvent->message()))
             ));
         }
 
@@ -121,7 +120,7 @@ final class StateGenerator
             $state->add(TestResult::fromTestCase(
                 $testResultEvent->test(),
                 TestResult::WARN,
-                Throwable::from(new Exception($testResultEvent->message()))
+                Throwable::from(new TestOutcome($testResultEvent->message()))
             ));
         }
 
@@ -131,7 +130,7 @@ final class StateGenerator
             $state->add(TestResult::fromTestCase(
                 $testResultEvent->test(),
                 TestResult::WARN,
-                Throwable::from(new Exception($testResultEvent->message()))
+                Throwable::from(new TestOutcome($testResultEvent->message()))
             ));
         }
 
