@@ -66,11 +66,7 @@ final class BootFiles implements Bootstrapper
      */
     private function load(string $filename): void
     {
-        if (! Str::endsWith($filename, '.php')) {
-            return;
-        }
-
-        if (! file_exists($filename)) {
+        if (! Str::endsWith($filename, '.php') || ! file_exists($filename)) {
             return;
         }
 
