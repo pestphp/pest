@@ -68,11 +68,13 @@ final class ResultPrinter
             public function print(string $buffer): void
             {
                 $buffer = OutputFormatter::escape($buffer);
-
-                if (! str_starts_with($buffer, "\nGenerating code coverage report")
-                    && ! str_starts_with($buffer, 'done [')) {
-                    $this->output->write(OutputFormatter::escape($buffer));
+                if (str_starts_with($buffer, "\nGenerating code coverage report")) {
+                    return;
                 }
+                if (str_starts_with($buffer, 'done [')) {
+                    return;
+                }
+                $this->output->write(OutputFormatter::escape($buffer));
             }
 
             public function flush(): void

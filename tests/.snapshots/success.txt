@@ -924,8 +924,9 @@
 
    PASS  Tests\Visual\Todo
   ✓ todo
+  ✓ todo in parallel
 
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 18 skipped, 633 passed (1564 assertions)
+  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 18 skipped, 634 passed (1567 assertions)
