@@ -36,6 +36,5 @@ We would like to extend our thanks to the following sponsors for funding Pest de
 - [Hyvor](https://hyvor.com/)
 - [Fathom Analytics](https://usefathom.com/)
 - [Meema](https://meema.io)
-- [Scout APM](https://scoutapm.com)
 
 Pest is an open-sourced software licensed under the **[MIT license](https://opensource.org/licenses/MIT)**.
