@@ -1,5 +1,7 @@
 <?php
 
+error_reporting(E_ALL);
+
 test('deprecated', function () {
     str_contains(null, null);
 
