@@ -43,38 +43,62 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace PHPUnit\TextUI\Output\Default\ProgressPrinter;
+namespace PHPUnit\TextUI\Command;
 
-use PHPUnit\Event\Test\Skipped;
-use PHPUnit\Event\Test\SkippedSubscriber;
-use ReflectionClass;
+use PHPUnit\TextUI\Configuration\CodeCoverageFilterRegistry;
+use PHPUnit\TextUI\Configuration\Configuration;
+use PHPUnit\TextUI\Configuration\NoCoverageCacheDirectoryException;
+use SebastianBergmann\CodeCoverage\StaticAnalysis\CacheWarmer;
+use SebastianBergmann\Timer\NoActiveTimerException;
+use SebastianBergmann\Timer\Timer;
 
 /**
  * @internal This class is not covered by the backward compatibility promise for PHPUnit
- *
- * This file is overridden to allow Pest Parallel to show todo items in the progress output.
  */
-final class TestSkippedSubscriber extends Subscriber implements SkippedSubscriber
+final class WarmCodeCoverageCacheCommand implements Command
 {
-    /**
-     * Notifies the printer that a test was skipped.
-     */
-    public function notify(Skipped $event): void
-    {
-        if (str_contains($event->message(), '__TODO__')) {
-            $this->printTodoItem();
-        }
+    private readonly Configuration $configuration;
 
-        $this->printer()->testSkipped();
+    private readonly CodeCoverageFilterRegistry $codeCoverageFilterRegistry;
+
+    public function __construct(Configuration $configuration, CodeCoverageFilterRegistry $codeCoverageFilterRegistry)
+    {
+        $this->configuration = $configuration;
+        $this->codeCoverageFilterRegistry = $codeCoverageFilterRegistry;
     }
 
     /**
-     * Prints a "T" to the standard PHPUnit output to indicate a todo item.
+     * @throws NoActiveTimerException
+     * @throws NoCoverageCacheDirectoryException
      */
-    private function printTodoItem(): void
+    public function execute(): Result
     {
-        $mirror = new ReflectionClass($this->printer());
-        $printerMirror = $mirror->getMethod('printProgress');
-        $printerMirror->invoke($this->printer(), 'T');
+        if (! $this->configuration->hasCoverageCacheDirectory()) {
+            return Result::from(
+                'Cache for static analysis has not been configured'.PHP_EOL,
+                Result::FAILURE
+            );
+        }
+
+        $this->codeCoverageFilterRegistry->init($this->configuration);
+
+        if (! $this->codeCoverageFilterRegistry->configured()) {
+            return Result::from(
+                'Filter for code coverage has not been configured'.PHP_EOL,
+                Result::FAILURE
+            );
+        }
+
+        $timer = new Timer;
+        $timer->start();
+
+        (new CacheWarmer)->warmCache(
+            $this->configuration->coverageCacheDirectory(),
+            ! $this->configuration->disableCodeCoverageIgnore(),
+            $this->configuration->ignoreDeprecatedCodeUnitsFromCodeCoverage(),
+            $this->codeCoverageFilterRegistry->get()
+        );
+
+        return Result::from();
     }
 }

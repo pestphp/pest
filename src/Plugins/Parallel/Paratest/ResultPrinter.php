@@ -12,6 +12,7 @@ use function fread;
 use function fseek;
 use function ftell;
 use function fwrite;
+use NunoMaduro\Collision\Adapters\Phpunit\State;
 use ParaTest\Options;
 use Pest\Plugins\Parallel\Support\CompactPrinter;
 use Pest\Support\StateGenerator;
@@ -28,9 +29,19 @@ use Symfony\Component\Console\Output\OutputInterface;
 final class ResultPrinter
 {
     /**
+     * If the test should be marked as todo.
+     */
+    public bool $lastWasTodo = false;
+
+    /**
      * The "native" printer.
      */
     public readonly Printer $printer;
+
+    /**
+     * The state.
+     */
+    public int $passedTests = 0;
 
     /**
      * The "compact" printer.
@@ -56,6 +67,13 @@ final class ResultPrinter
 
             public function print(string $buffer): void
             {
+                $buffer = OutputFormatter::escape($buffer);
+                if (str_starts_with($buffer, "\nGenerating code coverage report")) {
+                    return;
+                }
+                if (str_starts_with($buffer, 'done [')) {
+                    return;
+                }
                 $this->output->write(OutputFormatter::escape($buffer));
             }
 
@@ -140,7 +158,7 @@ final class ResultPrinter
             return;
         }
 
-        $state = (new StateGenerator())->fromPhpUnitTestResult($testResult);
+        $state = (new StateGenerator())->fromPhpUnitTestResult($this->passedTests, $testResult);
 
         $this->compactPrinter->errors($state);
         $this->compactPrinter->recap($state, $testResult, $duration, $this->options);
@@ -148,6 +166,20 @@ final class ResultPrinter
 
     private function printFeedbackItem(string $item): void
     {
+        if ($this->lastWasTodo) {
+            $this->lastWasTodo = false;
+
+            return;
+        }
+
+        if ($item === 'T') {
+            $this->lastWasTodo = true;
+        }
+
+        if ($item === '.') {
+            $this->passedTests++;
+        }
+
         $this->compactPrinter->descriptionItem($item);
     }
 

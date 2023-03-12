@@ -180,6 +180,13 @@ final class Converter
      */
     public function getStateFromResult(PhpUnitTestResult $result): State
     {
-        return $this->stateGenerator->fromPhpUnitTestResult($result);
+        $numberOfPassedTests = $result->numberOfTestsRun()
+            - $result->numberOfTestErroredEvents()
+            - $result->numberOfTestFailedEvents()
+            - $result->numberOfTestSkippedEvents()
+            - $result->numberOfTestsWithTestConsideredRiskyEvents()
+            - $result->numberOfTestMarkedIncompleteEvents();
+
+        return $this->stateGenerator->fromPhpUnitTestResult($numberOfPassedTests, $result);
     }
 }

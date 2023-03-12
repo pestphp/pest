@@ -6,19 +6,19 @@ namespace Pest\Support;
 
 use NunoMaduro\Collision\Adapters\Phpunit\State;
 use NunoMaduro\Collision\Adapters\Phpunit\TestResult;
+use NunoMaduro\Collision\Exceptions\TestOutcome;
 use PHPUnit\Event\Code\TestDox;
 use PHPUnit\Event\Code\TestMethod;
 use PHPUnit\Event\Code\Throwable;
 use PHPUnit\Event\Test\Errored;
 use PHPUnit\Event\TestData\TestDataCollection;
-use PHPUnit\Framework\IncompleteTestError;
 use PHPUnit\Framework\SkippedWithMessageException;
 use PHPUnit\Metadata\MetadataCollection;
 use PHPUnit\TestRunner\TestResult\TestResult as PHPUnitTestResult;
 
 final class StateGenerator
 {
-    public function fromPhpUnitTestResult(PHPUnitTestResult $testResult): State
+    public function fromPhpUnitTestResult(int $passedTests, PHPUnitTestResult $testResult): State
     {
         $state = new State();
 
@@ -55,7 +55,7 @@ final class StateGenerator
                 $state->add(TestResult::fromTestCase(
                     $riskyEvent->test(),
                     TestResult::RISKY,
-                    Throwable::from(new IncompleteTestError($riskyEvent->message()))
+                    Throwable::from(new TestOutcome($riskyEvent->message()))
                 ));
             }
         }
@@ -74,16 +74,69 @@ final class StateGenerator
             ));
         }
 
-        $numberOfPassedTests = $testResult->numberOfTestsRun()
-            - $testResult->numberOfTestErroredEvents()
-            - $testResult->numberOfTestFailedEvents()
-            - $testResult->numberOfTestSkippedEvents()
-            - $testResult->numberOfTestsWithTestConsideredRiskyEvents()
-            - $testResult->numberOfTestMarkedIncompleteEvents();
+        foreach ($testResult->testTriggeredDeprecationEvents() as $testResultEvent) {
+            $testResultEvent = $testResultEvent[0];
 
-        for ($i = 0; $i < $numberOfPassedTests; $i++) {
             $state->add(TestResult::fromTestCase(
+                $testResultEvent->test(),
+                TestResult::DEPRECATED,
+                Throwable::from(new TestOutcome($testResultEvent->message()))
+            ));
+        }
 
+        foreach ($testResult->testTriggeredPhpDeprecationEvents() as $testResultEvent) {
+            $testResultEvent = $testResultEvent[0];
+
+            $state->add(TestResult::fromTestCase(
+                $testResultEvent->test(),
+                TestResult::DEPRECATED,
+                Throwable::from(new TestOutcome($testResultEvent->message()))
+            ));
+        }
+
+        foreach ($testResult->testTriggeredNoticeEvents() as $testResultEvent) {
+            $testResultEvent = $testResultEvent[0];
+
+            $state->add(TestResult::fromTestCase(
+                $testResultEvent->test(),
+                TestResult::NOTICE,
+                Throwable::from(new TestOutcome($testResultEvent->message()))
+            ));
+        }
+
+        foreach ($testResult->testTriggeredPhpNoticeEvents() as $testResultEvent) {
+            $testResultEvent = $testResultEvent[0];
+
+            $state->add(TestResult::fromTestCase(
+                $testResultEvent->test(),
+                TestResult::NOTICE,
+                Throwable::from(new TestOutcome($testResultEvent->message()))
+            ));
+        }
+
+        foreach ($testResult->testTriggeredWarningEvents() as $testResultEvent) {
+            $testResultEvent = $testResultEvent[0];
+
+            $state->add(TestResult::fromTestCase(
+                $testResultEvent->test(),
+                TestResult::WARN,
+                Throwable::from(new TestOutcome($testResultEvent->message()))
+            ));
+        }
+
+        foreach ($testResult->testTriggeredPhpWarningEvents() as $testResultEvent) {
+            $testResultEvent = $testResultEvent[0];
+
+            $state->add(TestResult::fromTestCase(
+                $testResultEvent->test(),
+                TestResult::WARN,
+                Throwable::from(new TestOutcome($testResultEvent->message()))
+            ));
+        }
+
+        // for each test that passed, we need to add it to the state
+        for ($i = 0; $i < $passedTests; $i++) {
+            $state->add(TestResult::fromTestCase(
                 new TestMethod(
                     /** @phpstan-ignore-next-line */
                     "$i",

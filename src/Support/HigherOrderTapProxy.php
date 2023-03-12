@@ -6,15 +6,12 @@ namespace Pest\Support;
 
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
-use Throwable;
 
 /**
  * @internal
  */
 final class HigherOrderTapProxy
 {
-    private const UNDEFINED_PROPERTY = 'Undefined property: P\\';  // @phpstan-ignore-line
-
     /**
      * Create a new tap proxy instance.
      */
@@ -39,20 +36,19 @@ final class HigherOrderTapProxy
      */
     public function __get(string $property)
     {
-        try {
+        if (property_exists($this->target, $property)) {
             return $this->target->{$property}; // @phpstan-ignore-line
-        } catch (Throwable $throwable) {  // @phpstan-ignore-line
-            Reflection::setPropertyValue($throwable, 'file', Backtrace::file());
-            Reflection::setPropertyValue($throwable, 'line', Backtrace::line());
-
-            if (Str::startsWith($message = $throwable->getMessage(), self::UNDEFINED_PROPERTY)) {
-                /** @var ReflectionClass $reflection */
-                $reflection = (new ReflectionClass($this->target))->getParentClass();
-                Reflection::setPropertyValue($throwable, 'message', sprintf('Undefined property %s::$%s', $reflection->getName(), $property));
-            }
-
-            throw $throwable;
         }
+
+        $className = (new ReflectionClass($this->target))->getName();
+
+        if (str_starts_with($className, 'P\\')) {
+            $className = substr($className, 2);
+        }
+
+        trigger_error(sprintf('Undefined property %s::$%s', $className, $property), E_USER_WARNING);
+
+        return null;
     }
 
     /**

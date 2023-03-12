@@ -22,12 +22,12 @@ use Symfony\Component\Console\Output\OutputInterface;
     $todo = false;
 
     foreach ($args as $key => $value) {
-        if (str_contains($value, '--compact')) {
+        if ($value === '--compact') {
             $_SERVER['COLLISION_PRINTER_COMPACT'] = 'true';
             unset($args[$key]);
         }
 
-        if (str_contains($value, '--profile')) {
+        if ($value === '--profile') {
             $_SERVER['COLLISION_PRINTER_PROFILE'] = 'true';
             unset($args[$key]);
         }
@@ -36,12 +36,12 @@ use Symfony\Component\Console\Output\OutputInterface;
             unset($args[$key]);
         }
 
-        if (str_contains($value, '--dirty')) {
+        if ($value === '--dirty') {
             $dirty = true;
             unset($args[$key]);
         }
 
-        if (str_contains($value, '--todo')) {
+        if ($value === '--todo') {
             $todo = true;
             unset($args[$key]);
         }

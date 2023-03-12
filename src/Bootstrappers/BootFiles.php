@@ -69,11 +69,9 @@ final class BootFiles implements Bootstrapper
         if (! Str::endsWith($filename, '.php')) {
             return;
         }
-
         if (! file_exists($filename)) {
             return;
         }
-
         include_once $filename;
     }
 

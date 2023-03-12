@@ -2,14 +2,16 @@
 
 use Symfony\Component\Process\Process;
 
-$run = function (string $target, $decorated = false) {
-    $process = new Process(['php', 'bin/pest', $target, '--colors=always'], dirname(__DIR__, 2),
+$run = function (string $target, bool $parallel) {
+    $process = new Process(['php', 'bin/pest', $target, $parallel ? '--parallel' : '', '--colors=always'], dirname(__DIR__, 2),
         ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true'],
     );
 
     $process->run();
 
-    return $decorated ? $process->getOutput() : preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $process->getOutput());
+    expect($process->getExitCode())->toBe(0);
+
+    return preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $process->getOutput());
 };
 
 $snapshot = function ($name) {
@@ -23,5 +25,9 @@ $snapshot = function ($name) {
 };
 
 test('todo', function () use ($run, $snapshot) {
-    expect($run('--todo'))->toContain($snapshot('todo'));
+    expect($run('--todo', false))->toContain($snapshot('todo'));
+})->skip(PHP_OS_FAMILY === 'Windows');
+
+test('todo in parallel', function () use ($run, $snapshot) {
+    expect($run('--todo', true))->toContain($snapshot('todo'));
 })->skip(PHP_OS_FAMILY === 'Windows');

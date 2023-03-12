@@ -129,6 +129,27 @@ final class TestSuiteLoader
         }
 
         if (! $testCaseFound) {
+            foreach (array_reverse($loadedClasses) as $loadedClass) {
+                $offset = 0 - strlen($suiteClassName);
+
+                if (stripos(substr($loadedClass, $offset - 1), '\\'.$suiteClassName) === 0 ||
+                    stripos(substr($loadedClass, $offset - 1), '_'.$suiteClassName) === 0) {
+                    try {
+                        $class = new ReflectionClass($loadedClass);
+                        // @codeCoverageIgnoreStart
+                    } catch (ReflectionException) {
+                        continue;
+                    }
+
+                    $suiteClassName = $loadedClass;
+                    $testCaseFound = true;
+
+                    break;
+                }
+            }
+        }
+
+        if (! $testCaseFound) {
             return $this->exceptionFor($suiteClassName, $suiteClassFile);
         }
 

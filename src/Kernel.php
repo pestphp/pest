@@ -27,7 +27,6 @@ final class Kernel
      */
     private const BOOTSTRAPPERS = [
         Bootstrappers\BootOverrides::class,
-        Bootstrappers\BootExceptionHandler::class,
         Bootstrappers\BootSubscribers::class,
         Bootstrappers\BootFiles::class,
         Bootstrappers\BootView::class,

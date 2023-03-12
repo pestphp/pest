@@ -36,8 +36,9 @@ final class CompactPrinter
         '.' => ['gray', '.'],
         'S' => ['yellow', 's'],
         'T' => ['cyan', 't'],
-        'I' => ['yellow', 'i'],
-        'N' => ['yellow', 'i'],
+        'I' => ['yellow', '!'],
+        'N' => ['yellow', '!'],
+        'D' => ['yellow', '!'],
         'R' => ['yellow', '!'],
         'W' => ['yellow', '!'],
         'E' => ['red', '⨯'],
@@ -105,7 +106,9 @@ final class CompactPrinter
      */
     public function errors(State $state): void
     {
-        $this->style->writeErrorsSummary($state, false);
+        $this->output->writeln('');
+
+        $this->style->writeErrorsSummary($state);
     }
 
     /**

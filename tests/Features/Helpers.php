@@ -10,9 +10,9 @@ it('can set/get properties on $this', function () {
     expect($this->user)->toBe('nuno');
 });
 
-it('throws error if property do not exist', function () {
-    test()->user;
-})->throws(\Whoops\Exception\ErrorException::class, 'Undefined property PHPUnit\Framework\TestCase::$user');
+it('gets null if property do not exist', function () {
+    expect(test()->wqdwqdqw)->toBe(null);
+});
 
 class User
 {
