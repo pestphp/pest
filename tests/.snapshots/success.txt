@@ -111,6 +111,10 @@
   ✓ eager registered wrapped datasets with Generator functions display description with data set "james"
   ✓ it can resolve a dataset after the test case is available with (Closure Object (…)) #1
   ✓ it can resolve a dataset after the test case is available with (Closure Object (…)) #2
+  ✓ it can resolve a dataset after the test case is available with multiple datasets with (Closure Object (…)) / (Closure Object (…)) #1
+  ✓ it can resolve a dataset after the test case is available with multiple datasets with (Closure Object (…)) / (Closure Object (…)) #2
+  ✓ it can resolve a dataset after the test case is available with multiple datasets with (Closure Object (…)) / (Closure Object (…)) #3
+  ✓ it can resolve a dataset after the test case is available with multiple datasets with (Closure Object (…)) / (Closure Object (…)) #4
   ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (…)) #1
   ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object (…)) #2
   ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object (…)) #1
@@ -929,4 +933,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 18 skipped, 634 passed (1567 assertions)
+  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 18 skipped, 638 passed (1571 assertions)
