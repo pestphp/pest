@@ -23,7 +23,7 @@
         "nunomaduro/termwind": "^1.15.1",
         "pestphp/pest-plugin": "^2.0.0",
         "pestphp/pest-plugin-arch": "^2.0.0",
-        "phpunit/phpunit": "^10.0.15"
+        "phpunit/phpunit": "^10.0.16"
     },
     "conflict": {
         "brianium/paratest": "<7.0.6"

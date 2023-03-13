@@ -84,8 +84,7 @@ final class StateGenerator
             $state->add(TestResult::fromTestCase(
                 $testResultEvent->test(),
                 TestResult::DEPRECATED,
-                /** @phpstan-ignore-next-line */
-                method_exists(Throwable::class, 'from') ? Throwable::from(new TestOutcome($testResultEvent->message())) : ThrowableBuilder::from(new TestOutcome($testResultEvent->message()))
+                ThrowableBuilder::from(new TestOutcome($testResultEvent->message()))
             ));
         }
 
@@ -95,8 +94,7 @@ final class StateGenerator
             $state->add(TestResult::fromTestCase(
                 $testResultEvent->test(),
                 TestResult::DEPRECATED,
-                /** @phpstan-ignore-next-line */
-                method_exists(Throwable::class, 'from') ? Throwable::from(new TestOutcome($testResultEvent->message())) : ThrowableBuilder::from(new TestOutcome($testResultEvent->message()))
+                ThrowableBuilder::from(new TestOutcome($testResultEvent->message()))
             ));
         }
 
@@ -106,8 +104,7 @@ final class StateGenerator
             $state->add(TestResult::fromTestCase(
                 $testResultEvent->test(),
                 TestResult::NOTICE,
-                /** @phpstan-ignore-next-line */
-                method_exists(Throwable::class, 'from') ? Throwable::from(new TestOutcome($testResultEvent->message())) : ThrowableBuilder::from(new TestOutcome($testResultEvent->message()))
+                ThrowableBuilder::from(new TestOutcome($testResultEvent->message()))
             ));
         }
 
@@ -117,8 +114,7 @@ final class StateGenerator
             $state->add(TestResult::fromTestCase(
                 $testResultEvent->test(),
                 TestResult::NOTICE,
-                /** @phpstan-ignore-next-line */
-                method_exists(Throwable::class, 'from') ? Throwable::from(new TestOutcome($testResultEvent->message())) : ThrowableBuilder::from(new TestOutcome($testResultEvent->message()))
+                ThrowableBuilder::from(new TestOutcome($testResultEvent->message()))
             ));
         }
 
@@ -128,8 +124,7 @@ final class StateGenerator
             $state->add(TestResult::fromTestCase(
                 $testResultEvent->test(),
                 TestResult::WARN,
-                /** @phpstan-ignore-next-line */
-                method_exists(Throwable::class, 'from') ? Throwable::from(new TestOutcome($testResultEvent->message())) : ThrowableBuilder::from(new TestOutcome($testResultEvent->message()))
+                ThrowableBuilder::from(new TestOutcome($testResultEvent->message()))
             ));
         }
 
@@ -139,8 +134,7 @@ final class StateGenerator
             $state->add(TestResult::fromTestCase(
                 $testResultEvent->test(),
                 TestResult::WARN,
-                /** @phpstan-ignore-next-line */
-                method_exists(Throwable::class, 'from') ? Throwable::from(new TestOutcome($testResultEvent->message())) : ThrowableBuilder::from(new TestOutcome($testResultEvent->message()))
+                ThrowableBuilder::from(new TestOutcome($testResultEvent->message()))
             ));
         }
 
@@ -154,8 +148,7 @@ final class StateGenerator
                     '',
                     '',
                     1,
-                    /** @phpstan-ignore-next-line */
-                    method_exists(TestDox::class, 'fromClassNameAndMethodName') ? TestDox::fromClassNameAndMethodName('', '') : TestDoxBuilder::fromClassNameAndMethodName('', ''),
+                  TestDoxBuilder::fromClassNameAndMethodName('', ''),
                     MetadataCollection::fromArray([]),
                     TestDataCollection::fromArray([])
                 ),
