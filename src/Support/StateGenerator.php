@@ -7,10 +7,8 @@ namespace Pest\Support;
 use NunoMaduro\Collision\Adapters\Phpunit\State;
 use NunoMaduro\Collision\Adapters\Phpunit\TestResult;
 use NunoMaduro\Collision\Exceptions\TestOutcome;
-use PHPUnit\Event\Code\TestDox;
 use PHPUnit\Event\Code\TestDoxBuilder;
 use PHPUnit\Event\Code\TestMethod;
-use PHPUnit\Event\Code\Throwable;
 use PHPUnit\Event\Code\ThrowableBuilder;
 use PHPUnit\Event\Test\Errored;
 use PHPUnit\Event\TestData\TestDataCollection;
@@ -58,7 +56,7 @@ final class StateGenerator
                     $riskyEvent->test(),
                     TestResult::RISKY,
                     /** @phpstan-ignore-next-line */
-                    method_exists(Throwable::class, 'from') ? Throwable::from(new TestOutcome($riskyEvent->message())) : ThrowableBuilder::from(new TestOutcome($riskyEvent->message()))
+                    ThrowableBuilder::from(new TestOutcome($riskyEvent->message()))
                 ));
             }
         }
@@ -74,7 +72,7 @@ final class StateGenerator
                 $testResultEvent->test(),
                 TestResult::SKIPPED,
                 /** @phpstan-ignore-next-line */
-                method_exists(Throwable::class, 'from') ? Throwable::from(new SkippedWithMessageException($testResultEvent->message())) : ThrowableBuilder::from(new SkippedWithMessageException($testResultEvent->message()))
+                ThrowableBuilder::from(new SkippedWithMessageException($testResultEvent->message()))
             ));
         }
 
@@ -148,7 +146,7 @@ final class StateGenerator
                     '',
                     '',
                     1,
-                  TestDoxBuilder::fromClassNameAndMethodName('', ''),
+                    TestDoxBuilder::fromClassNameAndMethodName('', ''),
                     MetadataCollection::fromArray([]),
                     TestDataCollection::fromArray([])
                 ),
