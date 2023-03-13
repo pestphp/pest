@@ -228,17 +228,16 @@ trait Testable
 
         $this->__description = self::$__latestDescription = $this->dataName() ? $method->description.' with '.$this->dataName() : $method->description;
 
-
         $underlyingTest = Reflection::getFunctionVariable($this->__test, 'closure');
         $testParameterTypes = array_values(Reflection::getFunctionArguments($underlyingTest));
 
         if (count($arguments) !== 1) {
             foreach ($arguments as $argumentIndex => $argumentValue) {
-                if (!$argumentValue instanceof Closure) {
+                if (! $argumentValue instanceof Closure) {
                     continue;
                 }
 
-                if (in_array($testParameterTypes[$argumentIndex], [\Closure::class, 'callable'])) {
+                if (in_array($testParameterTypes[$argumentIndex], [\Closure::class, 'callable', 'mixed'])) {
                     continue;
                 }
 
@@ -248,7 +247,7 @@ trait Testable
             return $arguments;
         }
 
-        if (!$arguments[0] instanceof Closure) {
+        if (! $arguments[0] instanceof Closure) {
             return $arguments;
         }
 
@@ -260,7 +259,7 @@ trait Testable
         if (count($testParameterTypes) === 1) {
             return [$boundDatasetResult];
         }
-        if (!is_array($boundDatasetResult)) {
+        if (! is_array($boundDatasetResult)) {
             return [$boundDatasetResult];
         }
 
