@@ -269,8 +269,7 @@ it('can resolve a dataset after the test case is available', function ($result) 
     ],
 ]);
 
-
-it('can resolve a dataset after the test case is available with multiple datasets', function ($result, $result2) {
+it('can resolve a dataset after the test case is available with multiple datasets', function (string $result, string $result2) {
     expect($result)->toBe('bar');
 })->with([
     function () {
