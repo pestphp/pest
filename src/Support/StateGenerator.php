@@ -55,7 +55,6 @@ final class StateGenerator
                 $state->add(TestResult::fromTestCase(
                     $riskyEvent->test(),
                     TestResult::RISKY,
-                    /** @phpstan-ignore-next-line */
                     ThrowableBuilder::from(new TestOutcome($riskyEvent->message()))
                 ));
             }
@@ -71,7 +70,6 @@ final class StateGenerator
             $state->add(TestResult::fromTestCase(
                 $testResultEvent->test(),
                 TestResult::SKIPPED,
-                /** @phpstan-ignore-next-line */
                 ThrowableBuilder::from(new SkippedWithMessageException($testResultEvent->message()))
             ));
         }
@@ -140,13 +138,11 @@ final class StateGenerator
         for ($i = 0; $i < $passedTests; $i++) {
             $state->add(TestResult::fromTestCase(
                 new TestMethod(
-                    /** @phpstan-ignore-next-line */
-                    "$i",
-                    /** @phpstan-ignore-next-line */
-                    '',
+                    "$i", // @phpstan-ignore-line
+                    '', // @phpstan-ignore-line
                     '',
                     1,
-                    TestDoxBuilder::fromClassNameAndMethodName('', ''),
+                    TestDoxBuilder::fromClassNameAndMethodName('', ''), // @phpstan-ignore-line
                     MetadataCollection::fromArray([]),
                     TestDataCollection::fromArray([])
                 ),
