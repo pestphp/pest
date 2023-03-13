@@ -107,6 +107,7 @@ final class KernelDump
      */
     private function isInternalError(string $output): bool
     {
-        return str_contains($output, 'An error occurred inside PHPUnit.');
+        return str_contains($output, 'An error occurred inside PHPUnit.')
+            || str_contains($output, 'Fatal error');
     }
 }

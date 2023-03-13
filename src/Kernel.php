@@ -40,13 +40,7 @@ final class Kernel
         private readonly Application $application,
         private readonly OutputInterface $output,
     ) {
-        register_shutdown_function(function (): void {
-            if (error_get_last() !== null) {
-                return;
-            }
-
-            $this->shutdown();
-        });
+        register_shutdown_function(fn () => $this->shutdown());
     }
 
     /**
