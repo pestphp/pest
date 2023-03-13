@@ -262,9 +262,33 @@ it('can resolve a dataset after the test case is available', function ($result) 
     function () {
         return $this->foo;
     },
-    [function () {
+    [
+        function () {
+            return $this->foo;
+        },
+    ],
+]);
+
+it('can resolve a dataset after the test case is available with multiple datasets', function (string $result, string $result2) {
+    expect($result)->toBe('bar');
+})->with([
+    function () {
         return $this->foo;
-    }],
+    },
+    [
+        function () {
+            return $this->foo;
+        },
+    ],
+], [
+    function () {
+        return $this->foo;
+    },
+    [
+        function () {
+            return $this->foo;
+        },
+    ],
 ]);
 
 it('can resolve a dataset after the test case is available with shared yield sets', function ($result) {
@@ -279,18 +303,23 @@ it('resolves a potential bound dataset logically', function ($foo, $bar) {
     expect($foo)->toBe('foo');
     expect($bar())->toBe('bar');
 })->with([
-    ['foo', function () {
-        return 'bar';
-    }], // This should be passed as a closure because we've passed multiple arguments
+    [
+        'foo',
+        function () {
+            return 'bar';
+        },
+    ], // This should be passed as a closure because we've passed multiple arguments
 ]);
 
 it('resolves a potential bound dataset logically even when the closure comes first', function ($foo, $bar) {
     expect($foo())->toBe('foo');
     expect($bar)->toBe('bar');
 })->with([
-    [function () {
-        return 'foo';
-    }, 'bar'], // This should be passed as a closure because we've passed multiple arguments
+    [
+        function () {
+            return 'foo';
+        }, 'bar',
+    ], // This should be passed as a closure because we've passed multiple arguments
 ]);
 
 it('will not resolve a closure if it is type hinted as a closure', function (Closure $data) {
