@@ -174,8 +174,6 @@ trait Testable
      */
     protected function setUp(): void
     {
-        $this->__description = self::$__latestDescription = $this->name();
-
         TestSuite::getInstance()->test = $this;
 
         parent::setUp();
