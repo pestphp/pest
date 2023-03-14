@@ -15,6 +15,6 @@ $run = function () {
 };
 
 test('parallel', function () use ($run) {
-    expect($run())->toContain('Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 15 skipped, 630 passed (1559 assertions)')
+    expect($run())->toContain('Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 15 skipped, 632 passed (1568 assertions)')
         ->toContain('Parallel: 3 processes');
 });

@@ -31,6 +31,14 @@ it('can defer a method until after test setup')
     ->toBe('foo')
     ->and('hello world')->toBeString();
 
+it('can tap a method until after test setup')
+    ->expect('foo')->toBeString()
+    ->tap(function () {
+        expect($this)->toBeInstanceOf(TestCase::class);
+    })
+    ->toBe('foo')
+    ->and('hello world')->toBeString();
+
 it('can pass datasets into the expect callables')
     ->with([[1, 2, 3]])
     ->expect(function (...$numbers) {
@@ -43,6 +51,12 @@ it('can pass datasets into the expect callables')
 it('can pass datasets into the defer callable')
     ->with([[1, 2, 3]])
     ->defer(function (...$numbers) {
+        expect($numbers)->toBe([1, 2, 3]);
+    });
+
+it('can pass datasets into the tap callable')
+    ->with([[1, 2, 3]])
+    ->tap(function (...$numbers) {
         expect($numbers)->toBe([1, 2, 3]);
     });
 
