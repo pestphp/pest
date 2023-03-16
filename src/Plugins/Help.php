@@ -58,6 +58,8 @@ final class Help implements HandlesArguments
                         'desc' => $description,
                     ] = $option;
 
+                    assert(is_string($argument));
+
                     View::render('components.two-column-detail', [
                         'left' => $this->colorizeOptions($argument),
                         'right' => preg_replace(['/</', '/>/'], ['[', ']'], $description),
@@ -78,7 +80,7 @@ final class Help implements HandlesArguments
      */
     private function colorizeOptions(string $argument): string
     {
-        return preg_replace(
+        return (string) preg_replace(
             ['/</', '/>/', '/(-+[\w-]+)/'],
             ['[', ']', '<fg=blue;options=bold>$1</>'],
             $argument
@@ -95,12 +97,12 @@ final class Help implements HandlesArguments
         /** @var array<string, array<int, array{arg: string, desc: string}>> $content */
         $content = $helpReflection->getConstant('HELP_TEXT');
 
-        $content['Configuration'] = [[
+        $content['Configuration'] = [...[[
             'arg' => '--init',
             'desc' => 'Initialise a standard Pest configuration',
-        ], $content['Configuration']];
+        ]], ...$content['Configuration']];
 
-        $content['Selection'] = [
+        $content['Selection'] = array_merge([
             [
                 'arg' => '--todos',
                 'desc' => 'Output to standard output the list of todos',
@@ -109,7 +111,7 @@ final class Help implements HandlesArguments
                 'arg' => '--retry',
                 'desc' => 'Run non-passing tests first and stop execution upon first error or failure',
             ],
-        ] + $content['Selection'];
+        ], $content['Selection']);
 
         $content['Reporting'] = [...$content['Reporting'], ...[
             [
