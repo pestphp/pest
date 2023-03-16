@@ -86,7 +86,7 @@ final class Help implements HandlesArguments
     }
 
     /**
-     * @return array<string, array<int, array{arg?: string, desc: string}>>
+     * @return array<string, array<int, array<'arg'|'desc'|int, array{arg: string, desc: string}|string>>>
      */
     private function getContent(): array
     {
@@ -98,7 +98,7 @@ final class Help implements HandlesArguments
         $content['Configuration'] = [[
             'arg' => '--init',
             'desc' => 'Initialise a standard Pest configuration',
-        ]] + $content['Configuration'];
+        ], $content['Configuration']];
 
         $content['Selection'] = [
             [
@@ -111,7 +111,14 @@ final class Help implements HandlesArguments
             ],
         ] + $content['Selection'];
 
-        $content['Code Coverage'] = [
+        $content['Reporting'] = [...$content['Reporting'], ...[
+            [
+                'arg' => '--compact',
+                'desc' => 'Replace default result output with Compact format',
+            ],
+        ]];
+
+        $content['Code Coverage'] = array_merge([
             [
                 'arg' => '--coverage ',
                 'desc' => 'Generate code coverage report and output to standard output',
@@ -120,7 +127,7 @@ final class Help implements HandlesArguments
                 'arg' => '--coverage --min',
                 'desc' => 'Set the minimum required coverage percentage, and fail if not met',
             ],
-        ] + $content['Code Coverage'];
+        ], $content['Code Coverage']);
 
         $content['Profiling'] = [
             [
