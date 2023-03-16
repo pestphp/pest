@@ -58,11 +58,9 @@ final class Help implements HandlesArguments
                         'desc' => $description,
                     ] = $option;
 
-                    $argument = $this->colorizeOptions($argument);
-
                     View::render('components.two-column-detail', [
-                        'left' => $argument,
-                        'right' => $description,
+                        'left' => $this->colorizeOptions($argument),
+                        'right' => preg_replace(['/</', '/>/'], ['[', ']'], $description),
                     ]);
                 }
             }
@@ -80,9 +78,11 @@ final class Help implements HandlesArguments
      */
     private function colorizeOptions(string $argument): string
     {
-        $argument = (string) preg_replace('/(--\w+)/', '<fg=blue;options=bold>$1</>', $argument);
-
-        return (string) preg_replace('/(-\w+)/', '<fg=blue;options=bold>$1</>', $argument);
+        return preg_replace(
+            ['/</', '/>/', '/(-+[\w-]+)/'],
+            ['[', ']', '<fg=blue;options=bold>$1</>'],
+            $argument
+        );
     }
 
     /**
