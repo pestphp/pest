@@ -16,6 +16,7 @@
   --migrate-configuration ....... Migrate configuration file to current format  
 
   SELECTION OPTIONS:
+  --bail ........................... Stop execution upon first not-passed test  
   --todos ........................ Output to standard output the list of todos  
   --retry  Run non-passing tests first and stop execution upon first error or failure  
   --list-suites ................................... List available test suites  

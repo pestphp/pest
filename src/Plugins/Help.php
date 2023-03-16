@@ -104,6 +104,10 @@ final class Help implements HandlesArguments
 
         $content['Selection'] = array_merge([
             [
+                'arg' => '--bail',
+                'desc' => 'Stop execution upon first not-passed test',
+            ],
+            [
                 'arg' => '--todos',
                 'desc' => 'Output to standard output the list of todos',
             ],
