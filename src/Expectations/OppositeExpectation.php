@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Pest\Expectations;
 
 use Pest\Arch\Contracts\ArchExpectation;
-use Pest\Arch\Expectations\ToBeUsedOn;
-use Pest\Arch\Expectations\ToBeUsedOnNothing;
+use Pest\Arch\Expectations\ToBeUsedIn;
+use Pest\Arch\Expectations\ToBeUsedInNothing;
 use Pest\Arch\Expectations\ToUse;
 use Pest\Arch\GroupArchExpectation;
 use Pest\Arch\SingleArchExpectation;
@@ -89,7 +89,7 @@ final class OppositeExpectation
      */
     public function toBeUsed(): ArchExpectation
     {
-        return ToBeUsedOnNothing::make($this->original);
+        return ToBeUsedInNothing::make($this->original);
     }
 
     /**
@@ -97,24 +97,24 @@ final class OppositeExpectation
      *
      * @param  array<int, string>|string  $targets
      */
-    public function toBeUsedOn(array|string $targets): ArchExpectation
+    public function toBeUsedIn(array|string $targets): ArchExpectation
     {
-        return GroupArchExpectation::fromExpectations($this->original, array_map(fn (string $target): GroupArchExpectation => ToBeUsedOn::make($this->original, $target)->opposite(
-            fn () => $this->throwExpectationFailedException('toBeUsedOn', $target),
+        return GroupArchExpectation::fromExpectations($this->original, array_map(fn (string $target): GroupArchExpectation => ToBeUsedIn::make($this->original, $target)->opposite(
+            fn () => $this->throwExpectationFailedException('toBeUsedIn', $target),
         ), is_string($targets) ? [$targets] : $targets));
     }
 
-    public function toOnlyBeUsedOn(): never
+    public function toOnlyBeUsedIn(): never
     {
-        throw InvalidExpectation::fromMethods(['not', 'toOnlyBeUsedOn']);
+        throw InvalidExpectation::fromMethods(['not', 'toOnlyBeUsedIn']);
     }
 
     /**
      * Asserts that the given expectation dependency is not used.
      */
-    public function toBeUsedOnNothing(): never
+    public function toBeUsedInNothing(): never
     {
-        throw InvalidExpectation::fromMethods(['not', 'toBeUsedOnNothing']);
+        throw InvalidExpectation::fromMethods(['not', 'toBeUsedInNothing']);
     }
 
     /**

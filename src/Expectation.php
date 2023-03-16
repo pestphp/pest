@@ -7,9 +7,9 @@ namespace Pest;
 use BadMethodCallException;
 use Closure;
 use Pest\Arch\Contracts\ArchExpectation;
-use Pest\Arch\Expectations\ToBeUsedOn;
-use Pest\Arch\Expectations\ToBeUsedOnNothing;
-use Pest\Arch\Expectations\ToOnlyBeUsedOn;
+use Pest\Arch\Expectations\ToBeUsedIn;
+use Pest\Arch\Expectations\ToBeUsedInNothing;
+use Pest\Arch\Expectations\ToOnlyBeUsedIn;
 use Pest\Arch\Expectations\ToOnlyUse;
 use Pest\Arch\Expectations\ToUse;
 use Pest\Arch\Expectations\ToUseNothing;
@@ -397,9 +397,9 @@ final class Expectation
      *
      * @param  array<int, string>|string  $targets
      */
-    public function toBeUsedOn(array|string $targets): ArchExpectation
+    public function toBeUsedIn(array|string $targets): ArchExpectation
     {
-        return ToBeUsedOn::make($this, $targets);
+        return ToBeUsedIn::make($this, $targets);
     }
 
     /**
@@ -407,16 +407,16 @@ final class Expectation
      *
      * @param  array<int, string>|string  $targets
      */
-    public function toOnlyBeUsedOn(array|string $targets): ArchExpectation
+    public function toOnlyBeUsedIn(array|string $targets): ArchExpectation
     {
-        return ToOnlyBeUsedOn::make($this, $targets);
+        return ToOnlyBeUsedIn::make($this, $targets);
     }
 
     /**
      * Asserts that the given expectation dependency is not used.
      */
-    public function toBeUsedOnNothing(): ArchExpectation
+    public function toBeUsedInNothing(): ArchExpectation
     {
-        return ToBeUsedOnNothing::make($this);
+        return ToBeUsedInNothing::make($this);
     }
 }
