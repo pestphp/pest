@@ -21,20 +21,20 @@ We would like to extend our thanks to the following sponsors for funding Pest de
 
 ### Platinum Sponsors
 
-- **[Advent](https://advent.dev)**
 - **[Forge](https://forge.laravel.com)**
+- **[LoadForge](https://loadforge.com)**
 - **[Spatie](https://spatie.be)**
 - **[Worksome](https://www.worksome.com/)**
 
 ### Premium Sponsors
 
 - [Akaunting](https://akaunting.com)
-- [Auth0](https://auth0.com)
 - [Codecourse](https://codecourse.com/)
 - [Laracasts](https://laracasts.com/)
 - [Localazy](https://localazy.com)
 - [Hyvor](https://hyvor.com/)
 - [Fathom Analytics](https://usefathom.com/)
 - [Meema](https://meema.io)
+- [Zapiet](https://www.zapiet.com)
 
 Pest is an open-sourced software licensed under the **[MIT license](https://opensource.org/licenses/MIT)**.
