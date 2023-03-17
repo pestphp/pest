@@ -1,4 +1,8 @@
 
+   PASS  Tests\Arch
+  ✓ globals
+  ✓ contracts
+
    PASS  Tests\Features\AfterAll
   ✓ deletes file after all
 
@@ -938,4 +942,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 18 skipped, 641 passed (1581 assertions)
+  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 18 skipped, 643 passed (1585 assertions)
