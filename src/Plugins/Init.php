@@ -63,10 +63,6 @@ final class Init implements HandlesArguments
 
     private function init(): void
     {
-        if ($this->isLaravelInstalled()) {
-            exit($this->initLaravel());
-        }
-
         $testsBaseDir = "{$this->testSuite->rootPath}/tests";
 
         if (! is_dir($testsBaseDir)) {
@@ -79,7 +75,12 @@ final class Init implements HandlesArguments
         ]);
 
         foreach (self::STUBS as $from => $to) {
-            $fromPath = __DIR__."/../../stubs/init/{$from}";
+            if ($this->isLaravelInstalled()) {
+                $fromPath = __DIR__."/../../stubs/init-laravel/{$from}";
+            } else {
+                $fromPath = __DIR__."/../../stubs/init/{$from}";
+            }
+
             $toPath = "{$this->testSuite->rootPath}/{$to}";
 
             if (file_exists($toPath)) {
@@ -104,37 +105,6 @@ final class Init implements HandlesArguments
         (new Thanks($this->output))();
 
         exit(0);
-    }
-
-    private function initLaravel(): int
-    {
-        $command = [
-            'composer', 'require',
-            'pestphp/pest-plugin-laravel 2.x-dev',
-            '--dev',
-        ];
-
-        $result = (new Process($command, $this->testSuite->rootPath, ['COMPOSER_MEMORY_LIMIT' => '-1']))
-            ->setTimeout(null)
-            ->run(function ($type, $output): void {
-                $this->output->write($output);
-            });
-
-        if ($result > 0) {
-            return $result;
-        }
-
-        $command = [
-            'php', 'artisan',
-            'pest:install',
-            '--ansi', '--no-interaction',
-        ];
-
-        return (new Process($command, $this->testSuite->rootPath, ['COMPOSER_MEMORY_LIMIT' => '-1']))
-            ->setTimeout(null)
-            ->run(function ($type, $output): void {
-                $this->output->write($output);
-            });
     }
 
     /**
