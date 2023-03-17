@@ -46,14 +46,20 @@ final class Thanks
         $bootstrapper = new BootView($this->output);
         $bootstrapper->boot();
 
-        $wantsToSupport = getenv('PEST_NO_SUPPORT') !== 'true' && $this->input->isInteractive() && (new SymfonyQuestionHelper())->ask(
-            new ArrayInput([]),
-            $this->output,
-            new ConfirmationQuestion(
-                ' <options=bold>Wanna show Pest some love by starring it on GitHub?</>',
-                false,
-            )
-        );
+        $wantsToSupport = false;
+
+        if (getenv('PEST_NO_SUPPORT') !== 'true' && $this->input->isInteractive()) {
+            $wantsToSupport = (new SymfonyQuestionHelper())->ask(
+                new ArrayInput([]),
+                $this->output,
+                new ConfirmationQuestion(
+                    ' <options=bold>Wanna show Pest some love by starring it on GitHub?</>',
+                    false,
+                )
+            );
+
+            View::render('components.new-line');
+        }
 
         if ($wantsToSupport === true) {
             if (PHP_OS_FAMILY == 'Darwin') {

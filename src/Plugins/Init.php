@@ -66,7 +66,7 @@ final class Init implements HandlesArguments
     /**
      * Initializes the tests directory.
      */
-    private function init(): never
+    private function init(): void
     {
         $testsBaseDir = "{$this->testSuite->rootPath}/tests";
 
@@ -97,7 +97,9 @@ final class Init implements HandlesArguments
                 continue;
             }
 
-            @mkdir(dirname($toPath));
+            if (! is_dir(dirname($toPath))) {
+                mkdir(dirname($toPath));
+            }
 
             copy($fromPath, $toPath);
 
