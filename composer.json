@@ -18,7 +18,7 @@
     ],
     "require": {
         "php": "^7.3 || ^8.0",
-        "nunomaduro/collision": "^5.11.0|^6.3.0",
+        "nunomaduro/collision": "^5.11.0|^6.4.0",
         "pestphp/pest-plugin": "^1.1.0",
         "phpunit/phpunit": "^9.6.5"
     },
@@ -46,7 +46,7 @@
         "pestphp/pest-dev-tools": "^1.0.0",
         "pestphp/pest-plugin-parallel": "^1.2.1"
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true,
     "config": {
         "sort-packages": true,
