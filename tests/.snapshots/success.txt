@@ -149,8 +149,8 @@
   ✓ it uses correct parent class
 
    DEPR  Tests\Features\Deprecated
-  ! deprecated → str_contains(): Passing null to parameter #2 ($needle) of type string is deprecated
-  ! user deprecated → Since foo 1.0: This is a deprecation description
+  ! deprecated → str_contains(): Passing null to parameter #2 ($needle) of type string is deprecated // tests/Features/Deprecated.php:6
+  ! user deprecated → Since foo 1.0: This is a deprecation description // vendor/symfony/deprecation-contracts/function.php:25
 
    PASS  Tests\Features\Exceptions
   ✓ it gives access the the underlying expectException
@@ -694,7 +694,7 @@
   ✓ it is a higher order message test
 
    NOTI  Tests\Features\Notices
-  ! notice → This is a notice description
+  ! notice → This is a notice description // tests/Features/Notices.php:4
 
    PASS  Tests\Features\PendingHigherOrderTests
   ✓ get 'foo'
