@@ -46,7 +46,7 @@ final class Thanks
         $bootstrapper = new BootView($this->output);
         $bootstrapper->boot();
 
-        $wantsToSupport = ! isset($_ENV['PEST_NO_SUPPORT']) && $this->input->isInteractive() && (new SymfonyQuestionHelper())->ask(
+        $wantsToSupport = getenv('PEST_NO_SUPPORT') !== 'true' && $this->input->isInteractive() && (new SymfonyQuestionHelper())->ask(
             new ArrayInput([]),
             $this->output,
             new ConfirmationQuestion(
