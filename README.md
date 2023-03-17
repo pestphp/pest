@@ -13,7 +13,7 @@
 
 - Explore our docs at **[pestphp.com »](https://pestphp.com)**
 - Follow us on Twitter at **[@pestphp »](https://twitter.com/pestphp)**
-- Join our community at **[https://discord.gg/kaHY6p54JH »](https://discord.gg/kaHY6p54JH)** or **[t.me/+kYH5G4d5MV83ODk0](https://t.me/+kYH5G4d5MV83ODk0)**
+- Join us at **[https://discord.gg/kaHY6p54JH »](https://discord.gg/kaHY6p54JH)** or **[t.me/+kYH5G4d5MV83ODk0 »](https://t.me/+kYH5G4d5MV83ODk0)**
 
 ## Sponsors
 
