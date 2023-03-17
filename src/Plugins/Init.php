@@ -9,6 +9,7 @@ use Pest\Console\Thanks;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Support\View;
 use Pest\TestSuite;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 
@@ -38,6 +39,7 @@ final class Init implements HandlesArguments
      */
     public function __construct(
         private readonly TestSuite $testSuite,
+        private readonly InputInterface $input,
         private readonly OutputInterface $output
     ) {
         // ..
@@ -54,6 +56,7 @@ final class Init implements HandlesArguments
         if ($arguments[1] !== self::INIT_OPTION) {
             return $arguments;
         }
+
         unset($arguments[1]);
 
         $this->init();
@@ -61,7 +64,10 @@ final class Init implements HandlesArguments
         return array_values($arguments);
     }
 
-    private function init(): void
+    /**
+     * Initializes the tests directory.
+     */
+    private function init(): never
     {
         $testsBaseDir = "{$this->testSuite->rootPath}/tests";
 
@@ -92,6 +98,8 @@ final class Init implements HandlesArguments
                 continue;
             }
 
+            @mkdir(dirname($toPath));
+
             copy($fromPath, $toPath);
 
             View::render('components.two-column-detail', [
@@ -102,7 +110,7 @@ final class Init implements HandlesArguments
 
         View::render('components.new-line');
 
-        (new Thanks($this->output))();
+        (new Thanks($this->input, $this->output))();
 
         exit(0);
     }

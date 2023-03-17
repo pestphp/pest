@@ -8,6 +8,7 @@ use Pest\Bootstrappers\BootView;
 use Pest\Support\View;
 use Symfony\Component\Console\Helper\SymfonyQuestionHelper;
 use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
@@ -30,8 +31,10 @@ final class Thanks
     /**
      * Creates a new Console Command instance.
      */
-    public function __construct(private readonly OutputInterface $output)
-    {
+    public function __construct(
+        private readonly InputInterface $input,
+        private readonly OutputInterface $output
+    ) {
         // ..
     }
 
@@ -43,11 +46,11 @@ final class Thanks
         $bootstrapper = new BootView($this->output);
         $bootstrapper->boot();
 
-        $wantsToSupport = (new SymfonyQuestionHelper())->ask(
+        $wantsToSupport = $this->input->isInteractive() && (new SymfonyQuestionHelper())->ask(
             new ArrayInput([]),
             $this->output,
             new ConfirmationQuestion(
-                ' <options=bold>Would you like to show your support by starring the project on GitHub?</>',
+                ' <options=bold>Wanna show Pest some love by starring it on GitHub?</>',
                 true,
             )
         );
