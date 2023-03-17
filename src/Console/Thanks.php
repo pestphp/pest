@@ -46,12 +46,12 @@ final class Thanks
         $bootstrapper = new BootView($this->output);
         $bootstrapper->boot();
 
-        $wantsToSupport = $this->input->isInteractive() && (new SymfonyQuestionHelper())->ask(
+        $wantsToSupport = ! isset($_ENV['PEST_NO_SUPPORT']) && $this->input->isInteractive() && (new SymfonyQuestionHelper())->ask(
             new ArrayInput([]),
             $this->output,
             new ConfirmationQuestion(
                 ' <options=bold>Wanna show Pest some love by starring it on GitHub?</>',
-                true,
+                false,
             )
         );
 
