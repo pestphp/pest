@@ -59,6 +59,15 @@ final class Thanks
             );
 
             View::render('components.new-line');
+
+            foreach (self::FUNDING_MESSAGES as $message => $link) {
+                View::render('components.two-column-detail', [
+                    'left' => $message,
+                    'right' => $link,
+                ]);
+            }
+
+            View::render('components.new-line');
         }
 
         if ($wantsToSupport === true) {
@@ -72,16 +81,5 @@ final class Thanks
                 exec('xdg-open https://github.com/pestphp/pest');
             }
         }
-
-        View::render('components.new-line');
-
-        foreach (self::FUNDING_MESSAGES as $message => $link) {
-            View::render('components.two-column-detail', [
-                'left' => $message,
-                'right' => $link,
-            ]);
-        }
-
-        View::render('components.new-line');
     }
 }
