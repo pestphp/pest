@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.22.6 (2023-03-17)](https://github.com/pestphp/pest/compare/v1.22.5...v1.22.6)
+### Changed
+- Bumps dependencies
+
 ## [v1.22.5 (2023-03-03)](https://github.com/pestphp/pest/compare/v1.22.4...v1.22.5)
 ### Changed
 - Bumps dependencies
