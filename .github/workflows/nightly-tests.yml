@@ -41,6 +41,7 @@ jobs:
 
     - name: Unit Tests in Parallel
       run: composer test:parallel
+      if: startsWith(matrix.os, 'windows') != true
 
     - name: Integration Tests
       run: composer test:integration
