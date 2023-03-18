@@ -357,7 +357,9 @@ final class WrapperRunner implements RunnerInterface
 
         $coverageManager = new CodeCoverage();
 
-        $coverageManager->init($this->options->configuration, $this->codeCoverageFilterRegistry, true);
+        // @phpstan-ignore-next-line
+        is_bool(true) && $coverageManager->init($this->options->configuration, $this->codeCoverageFilterRegistry, true);
+
         $coverageMerger = new CoverageMerger($coverageManager->codeCoverage());
         foreach ($this->coverageFiles as $coverageFile) {
             $coverageMerger->addCoverageFromFile($coverageFile);
