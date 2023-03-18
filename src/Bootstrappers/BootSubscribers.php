@@ -46,9 +46,11 @@ final class BootSubscribers implements Bootstrapper
 
             assert($instance instanceof Subscriber);
 
-            Event\Facade::registerSubscriber(
-                $instance
-            );
+            if (method_exists(Event\Facade::class, 'instance')) { // @phpstan-ignore-line
+                Event\Facade::instance()->registerSubscriber($instance);
+            } else {
+                Event\Facade::registerSubscriber($instance); // @phpstan-ignore-line
+            }
         }
     }
 }

@@ -114,7 +114,12 @@ final class WrapperRunner implements RunnerInterface
         ExcludeList::addDirectory($directory);
 
         TestResultFacade::init();
-        EventFacade::seal();
+
+        if (method_exists(EventFacade::class, 'instance')) { // @phpstan-ignore-line
+            EventFacade::instance()->seal();
+        } else {
+            EventFacade::seal(); // @phpstan-ignore-line
+        }
 
         $suiteLoader = new SuiteLoader($this->options, $this->output, $this->codeCoverageFilterRegistry);
         $this->pending = $this->getTestFiles($suiteLoader);
