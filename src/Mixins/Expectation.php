@@ -894,6 +894,13 @@ final class Expectation
         throw new ExpectationFailedException("Exception \"$exception\" not thrown.");
     }
 
+    public function toWritable(string $filename, string $message = ''): self
+    {
+        Assert::assertIsWritable($filename, $message);
+
+        return $this;
+    }
+
     /**
      * Exports the given value.
      */
