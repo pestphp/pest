@@ -115,11 +115,8 @@ final class WrapperRunner implements RunnerInterface
 
         TestResultFacade::init();
 
-        if (method_exists(EventFacade::class, 'instance')) { // @phpstan-ignore-line
-            EventFacade::instance()->seal();
-        } else {
-            EventFacade::seal(); // @phpstan-ignore-line
-        }
+        // @phpstan-ignore-next-line
+        method_exists(EventFacade::class, 'instance') ? EventFacade::instance()->seal() : EventFacade::seal();
 
         $suiteLoader = new SuiteLoader($this->options, $this->output, $this->codeCoverageFilterRegistry);
         $this->pending = $this->getTestFiles($suiteLoader);
@@ -359,7 +356,8 @@ final class WrapperRunner implements RunnerInterface
         }
 
         $coverageManager = new CodeCoverage();
-        $coverageManager->init($this->options->configuration, $this->codeCoverageFilterRegistry);
+
+        $coverageManager->init($this->options->configuration, $this->codeCoverageFilterRegistry, true);
         $coverageMerger = new CoverageMerger($coverageManager->codeCoverage());
         foreach ($this->coverageFiles as $coverageFile) {
             $coverageMerger->addCoverageFromFile($coverageFile);
