@@ -31,7 +31,7 @@ final class Result
      */
     public static function ok(): bool
     {
-        return self::exitCode() === 0;
+        return self::exitCode() === self::SUCCESS_EXIT;
     }
 
     /**
