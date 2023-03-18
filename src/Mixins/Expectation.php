@@ -899,7 +899,7 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toEqualObjects(object $expected, string $method = 'equals', string $message = ''): self
+    public function toEqualObject(object $expected, string $method = 'equals', string $message = ''): self
     {
         Assert::assertObjectEquals($expected, $this->value, $method, $message);
 
