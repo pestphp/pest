@@ -899,7 +899,7 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toWritable(string $message = ''): self
+    public function toBeWritable(string $message = ''): self
     {
         Assert::assertIsWritable($this->value, $message);
 
