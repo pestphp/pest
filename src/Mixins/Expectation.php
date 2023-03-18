@@ -894,6 +894,11 @@ final class Expectation
         throw new ExpectationFailedException("Exception \"$exception\" not thrown.");
     }
 
+    /**
+     * Asserts that the value is equals with $expected.
+     *
+     * @return self<TValue>
+     */
     public function toEqualObjects(object $expected, string $method = 'equals', string $message = ''): self
     {
         Assert::assertObjectEquals($expected, $this->value, $method, $message);
