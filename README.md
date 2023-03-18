@@ -9,7 +9,7 @@
 </p>
 
 ------
-**Pest** is an elegant PHP Testing Framework with a focus on simplicity. It was carefully crafted to bring the joy of testing to PHP.
+**Pest** is an elegant PHP testing Framework with a focus on simplicity, meticulously designed to bring back the joy of testing in PHP.
 
 - Explore our docs at **[pestphp.com »](https://pestphp.com)**
 - Follow us on Twitter at **[@pestphp »](https://twitter.com/pestphp)**
