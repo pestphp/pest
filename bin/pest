@@ -3,14 +3,11 @@
 
 use Pest\ConfigLoader;
 use Pest\Kernel;
-use Pest\Support\Container;
 use Pest\TestCaseFilters\GitDirtyTestCaseFilter;
 use Pest\TestCaseMethodFilters\TodoTestCaseFilter;
 use Pest\TestSuite;
 use Symfony\Component\Console\Input\ArgvInput;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
-use Symfony\Component\Console\Output\OutputInterface;
 
 (static function () {
     // Ensures Collision's Printer is registered.
