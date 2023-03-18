@@ -285,12 +285,13 @@ trait Testable
         $underlyingTest = Reflection::getFunctionVariable($this->__test, 'closure');
         $testReflection = new ReflectionFunction($underlyingTest);
         $requiredParametersCount = $testReflection->getNumberOfRequiredParameters();
+        $suppliedParametersCount = count($arguments);
 
-        if (count($arguments) >= $requiredParametersCount) {
+        if ($suppliedParametersCount >= $requiredParametersCount) {
             return;
         }
 
-        throw new DatasetArgsCountMismatch($this->dataName());
+        throw new DatasetArgsCountMismatch($this->dataName(), $requiredParametersCount, $suppliedParametersCount);
     }
 
     /**
