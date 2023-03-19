@@ -82,7 +82,7 @@ it('runs with falsy', function () {
 test('strict rules', function ($subject, $key1, $key2) {
     expect('PEST')
         ->match($subject, [
-            $key1 =>function ($value) {
+            $key1 => function ($value) {
                 $this->matched = 'PEST';
 
                 return $value->toBe('PEST');
