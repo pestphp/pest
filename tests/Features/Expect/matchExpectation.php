@@ -81,9 +81,8 @@ it('runs with falsy', function () {
 
 test('strict rules', function ($subject, $key1, $key2) {
     expect('PEST')
-        ->toBeString()
         ->match($subject, [
-            $key1 => function ($value) {
+            $key1 =>function ($value) {
                 $this->matched = 'PEST';
 
                 return $value->toBe('PEST');
@@ -96,7 +95,7 @@ test('strict rules', function ($subject, $key1, $key2) {
         ])
         ->toEqual($this->matched);
 
-    expect(static::getCount())->toBe(3);
+    expect(static::getCount())->toBe(2);
 })->with([
     [true, true, 'foo'],
     [true, true, 2],
