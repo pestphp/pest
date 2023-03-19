@@ -3,6 +3,7 @@
 
 use Pest\ConfigLoader;
 use Pest\Kernel;
+use Pest\Panic;
 use Pest\TestCaseFilters\GitDirtyTestCaseFilter;
 use Pest\TestCaseMethodFilters\TodoTestCaseFilter;
 use Pest\TestSuite;
@@ -85,11 +86,15 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
     $output = new ConsoleOutput(ConsoleOutput::VERBOSITY_NORMAL, $isDecorated);
 
-    $kernel = Kernel::boot($testSuite, $input, $output);
+    try {
+        $kernel = Kernel::boot($testSuite, $input, $output);
 
-    $result = $kernel->handle($args);
+        $result = $kernel->handle($args);
 
-    $kernel->shutdown();
+        $kernel->shutdown();
+    } catch (Throwable|Error $e) {
+        Panic::with($e);
+    }
 
     exit($result);
 })();

@@ -25,9 +25,9 @@ $snapshot = function ($name) {
 };
 
 test('todo', function () use ($run, $snapshot) {
-    expect($run('--todo', false))->toContain($snapshot('todo'));
+    expect($run('--todos', false))->toContain($snapshot('todo'));
 })->skip(PHP_OS_FAMILY === 'Windows');
 
 test('todo in parallel', function () use ($run, $snapshot) {
-    expect($run('--todo', true))->toContain($snapshot('todo'));
+    expect($run('--todos', true))->toContain($snapshot('todo'));
 })->skip(PHP_OS_FAMILY === 'Windows');
