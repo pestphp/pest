@@ -220,6 +220,10 @@ final class Expectation
 
         $matched = false;
 
+        if (in_array($subject, ['0', '1', false, true], true)) {
+            $subject = (int) $subject;
+        }
+
         foreach ($expressions as $key => $callback) {
             if ($subject != $key) {
                 continue;
