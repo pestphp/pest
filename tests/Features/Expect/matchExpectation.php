@@ -79,6 +79,30 @@ it('runs with falsy', function () {
     expect(static::getCount())->toBe(2);
 });
 
+test('strict rules', function ($subject, $key1, $key2) {
+    expect('PEST')
+        ->toBeString()
+        ->match($subject, [
+            $key1 => function ($value) {
+                $this->matched = 'PEST';
+
+                return $value->toBe('PEST');
+            },
+            $key2 => function ($value) use ($key2) {
+                $this->matched = $key2;
+
+                return $value->toBe('should not match');
+            },
+        ])
+        ->toEqual($this->matched);
+
+    expect(static::getCount())->toBe(3);
+})->with([
+    [true, true, 'foo'],
+    [true, true, 2],
+    [false, false, ''],
+]);
+
 it('runs with truthy closure condition', function () {
     expect('foo')
         ->match(
