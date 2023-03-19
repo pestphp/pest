@@ -277,7 +277,7 @@ trait Testable
      */
     public static function getPrintableTestCaseName(): string
     {
-        return ltrim(self::class, 'P\\');
+        return preg_replace('/P\\\/', '', self::class, 1);
     }
 
     /**
