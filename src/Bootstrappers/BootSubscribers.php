@@ -21,7 +21,6 @@ final class BootSubscribers implements Bootstrapper
      * @var array<int, class-string<Subscriber>>
      */
     private const SUBSCRIBERS = [
-        Subscribers\EnsureConfigurationIsValid::class,
         Subscribers\EnsureConfigurationIsAvailable::class,
         Subscribers\EnsureIgnorableTestCasesAreIgnored::class,
         Subscribers\EnsureKernelDumpIsFlushed::class,
