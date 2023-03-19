@@ -254,11 +254,7 @@ final class Expectation
      */
     public function unless(callable|bool $condition, callable $callback): Expectation
     {
-        $condition = is_callable($condition)
-            ? $condition
-            : static fn (): bool => $condition;
-
-        return $this->when(! $condition(), $callback);
+        return $this->when(! (is_bool($condition) ? $condition : $condition()), $callback);
     }
 
     /**
