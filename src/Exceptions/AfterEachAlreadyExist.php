@@ -19,6 +19,6 @@ final class AfterEachAlreadyExist extends InvalidArgumentException implements Ex
      */
     public function __construct(string $filename)
     {
-        parent::__construct(sprintf('The afterEach already exist in the filename `%s`.', $filename));
+        parent::__construct(sprintf('The afterEach already exists in the filename `%s`.', $filename));
     }
 }

@@ -19,7 +19,7 @@ it('throws exception if dataset does not exist', function () {
 it('throws exception if dataset already exist', function () {
     DatasetsRepository::set('second', [[]], __DIR__);
     $this->expectException(DatasetAlreadyExists::class);
-    $this->expectExceptionMessage('A dataset with the name `second` already exist in scope ['.__DIR__.'].');
+    $this->expectExceptionMessage('A dataset with the name `second` already exists in scope ['.__DIR__.'].');
     DatasetsRepository::set('second', [[]], __DIR__);
 });
 
