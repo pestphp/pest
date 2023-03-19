@@ -22,7 +22,8 @@ final class Bail implements HandlesArguments
         if ($this->hasArgument('--bail', $arguments)) {
             $arguments = $this->popArgument('--bail', $arguments);
 
-            $arguments = $this->pushArgument('--stop-on-defect', $arguments);
+            $arguments = $this->pushArgument('--stop-on-failure', $arguments);
+            $arguments = $this->pushArgument('--stop-on-error', $arguments);
         }
 
         return $arguments;
