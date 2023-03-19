@@ -95,6 +95,7 @@
                 "Pest\\Plugins\\Memory",
                 "Pest\\Plugins\\Printer",
                 "Pest\\Plugins\\ProcessIsolation",
+                "Pest\\Plugins\\Profile",
                 "Pest\\Plugins\\Retry",
                 "Pest\\Plugins\\Version",
                 "Pest\\Plugins\\Parallel"

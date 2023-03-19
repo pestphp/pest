@@ -23,7 +23,6 @@ final class Retry implements HandlesArguments
             return $arguments;
         }
 
-        // If running in parallel, we need to disable the retry plugin
         if ($this->hasArgument('--parallel', $arguments)) {
             throw new InvalidOption('The [--retry] option is not supported when running in parallel.');
         }
