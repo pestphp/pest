@@ -26,7 +26,8 @@
         "phpunit/phpunit": "^10.0.16"
     },
     "conflict": {
-        "webmozart/assert": "<1.11.0"
+        "webmozart/assert": "<1.11.0",
+        "phpunit/phpunit": ">10.0.16"
     },
     "version": "2.x-dev",
     "autoload": {
