@@ -840,15 +840,6 @@
   ✓ it allows global uses
   ✓ it allows multiple global uses registered in the same path
 
-   WARN  Tests\Unit\ConfigLoader
-  ✓ it fallbacks to default path if no phpunit file is found
-  - it fallbacks to default path if phpunit is not a valid XML
-  - it fallbacks to default path if failing to read phpunit content
-  - it fallbacks to default path if there is no test suites directory
-  - it fallbacks to default path if test suite directory has no value
-  - it fallbacks to default path if test suite directory does not exist
-  - it returns the parent folder of first test suite directory
-
    PASS  Tests\Unit\Console\Help
   ✓ it outputs the help information when --help is used
 
@@ -953,4 +944,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 18 skipped, 650 passed (1592 assertions)
+  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 12 skipped, 649 passed (1589 assertions)
