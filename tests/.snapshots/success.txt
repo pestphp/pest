@@ -4,6 +4,9 @@
   ✓ dependencies
   ✓ contracts
 
+   PASS  Tests\Environments\Windows
+  ✓ global functions are loaded
+
    PASS  Tests\Features\AfterAll
   ✓ deletes file after all
 
@@ -950,4 +953,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 18 skipped, 649 passed (1591 assertions)
+  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 18 skipped, 650 passed (1592 assertions)
