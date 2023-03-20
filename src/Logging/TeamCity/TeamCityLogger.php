@@ -237,8 +237,7 @@ final class TeamCityLogger
             new TestExecutionFinishedSubscriber($this),
         ];
 
-        // @phpstan-ignore-next-line
-        method_exists(Facade::class, 'instance') ? Facade::instance()->registerSubscribers(...$subscribers) : Facade::registerSubscribers(...$subscribers);
+        Facade::instance()->registerSubscribers(...$subscribers);
     }
 
     private function setFlowId(): void

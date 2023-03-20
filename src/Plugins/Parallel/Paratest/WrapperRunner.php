@@ -115,8 +115,7 @@ final class WrapperRunner implements RunnerInterface
 
         TestResultFacade::init();
 
-        // @phpstan-ignore-next-line
-        method_exists(EventFacade::class, 'instance') ? EventFacade::instance()->seal() : EventFacade::seal();
+        EventFacade::instance()->seal();
 
         $suiteLoader = new SuiteLoader($this->options, $this->output, $this->codeCoverageFilterRegistry);
         $this->pending = $this->getTestFiles($suiteLoader);
