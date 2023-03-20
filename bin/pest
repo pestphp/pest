@@ -1,7 +1,6 @@
 #!/usr/bin/env php
 <?php declare(strict_types=1);
 
-use Pest\ConfigLoader;
 use Pest\Kernel;
 use Pest\Panic;
 use Pest\TestCaseFilters\GitDirtyTestCaseFilter;
@@ -71,7 +70,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
     $testSuite = TestSuite::getInstance(
         $rootPath,
-        $input->getParameterOption('--test-directory', (new ConfigLoader($rootPath))->getTestsDirectory()),
+        $input->getParameterOption('--test-directory', 'tests'),
     );
 
     if ($dirty) {

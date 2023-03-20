@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use ParaTest\WrapperRunner\ApplicationForWrapperWorker;
 use ParaTest\WrapperRunner\WrapperWorker;
-use Pest\ConfigLoader;
 use Pest\Kernel;
 use Pest\Plugins\Actions\CallsHandleArguments;
 use Pest\TestSuite;
@@ -18,7 +17,7 @@ $bootPest = (static function (): void {
     $rootPath = dirname(PHPUNIT_COMPOSER_INSTALL, 2);
     $testSuite = TestSuite::getInstance($rootPath, $workerArgv->getParameterOption(
         '--test-directory',
-        (new ConfigLoader($rootPath))->getTestsDirectory()
+        'tests'
     ));
 
     $input = new ArgvInput();
