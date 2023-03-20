@@ -52,8 +52,7 @@
         "pestphp/pest-dev-tools": "^2.5.0",
         "symfony/process": "^6.2.7"
     },
-    "minimum-stability": "dev",
-    "prefer-stable": true,
+    "minimum-stability": "stable",
     "config": {
         "sort-packages": true,
         "preferred-install": "dist",
