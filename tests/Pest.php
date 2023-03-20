@@ -25,3 +25,7 @@ uses()
         $_SERVER['globalHook']->calls->afterAll++;
     })
     ->in('Hooks');
+
+function helper_returns_string() {
+    return 'string';
+}
