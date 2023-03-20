@@ -97,12 +97,14 @@ final class Help implements HandlesArguments
         /** @var array<string, array<int, array{arg: string, desc: string}>> $content */
         $content = $helpReflection->getConstant('HELP_TEXT');
 
-        $content['Configuration'] = [...[[
-            'arg' => '--init',
-            'desc' => 'Initialise a standard Pest configuration',
-        ]], ...$content['Configuration']];
+        $content['Configuration'] = [...[
+            [
+                'arg' => '--init',
+                'desc' => 'Initialise a standard Pest configuration',
+            ]
+        ], ...$content['Configuration']];
 
-        $content['Selection'] = array_merge([
+        $content['Selection'] = [...[
             [
                 'arg' => '--bail',
                 'desc' => 'Stop execution upon first not-passed test',
@@ -115,16 +117,16 @@ final class Help implements HandlesArguments
                 'arg' => '--retry',
                 'desc' => 'Run non-passing tests first and stop execution upon first error or failure',
             ],
-        ], $content['Selection']);
+        ], ...$content['Selection']];
 
-        $content['Reporting'] = [...$content['Reporting'], ...[
+        $content['Reporting'] = [...[
             [
                 'arg' => '--compact',
                 'desc' => 'Replace default result output with Compact format',
             ],
-        ]];
+        ], ...$content['Reporting']];
 
-        $content['Code Coverage'] = array_merge([
+        $content['Code Coverage'] = [...[
             [
                 'arg' => '--coverage ',
                 'desc' => 'Generate code coverage report and output to standard output',
@@ -133,7 +135,7 @@ final class Help implements HandlesArguments
                 'arg' => '--coverage --min',
                 'desc' => 'Set the minimum required coverage percentage, and fail if not met',
             ],
-        ], $content['Code Coverage']);
+        ], ...$content['Code Coverage']];
 
         $content['Profiling'] = [
             [
