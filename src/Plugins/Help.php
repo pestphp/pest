@@ -101,7 +101,7 @@ final class Help implements HandlesArguments
             [
                 'arg' => '--init',
                 'desc' => 'Initialise a standard Pest configuration',
-            ]
+            ],
         ], ...$content['Configuration']];
 
         $content['Selection'] = [...[
@@ -118,6 +118,13 @@ final class Help implements HandlesArguments
                 'desc' => 'Run non-passing tests first and stop execution upon first error or failure',
             ],
         ], ...$content['Selection']];
+
+        $content['Execution'] = [...[
+            [
+                'arg' => '--parallel',
+                'desc' => 'Run tests in parallel',
+            ],
+        ], ...$content['Execution']];
 
         $content['Reporting'] = [...[
             [

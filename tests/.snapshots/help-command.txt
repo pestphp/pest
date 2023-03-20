@@ -33,6 +33,7 @@
   --test-suffix [suffixes]  Only search for test in files with specified suffix(es). Default: Test.php,.phpt  
 
   EXECUTION OPTIONS:
+  --parallel ........................................... Run tests in parallel  
   --process-isolation ................ Run each test in a separate PHP process  
   --globals-backup ................. Backup and restore $GLOBALS for each test  
   --static-backup ......... Backup and restore static properties for each test  
@@ -59,6 +60,7 @@
   --random-order-seed [N]  Use the specified random seed when running tests in random order  
 
   REPORTING OPTIONS:
+  --compact ................ Replace default result output with Compact format  
   --colors [flag] ......... Use colors in output ("never", "auto" or "always")  
   --columns [n] ................. Number of columns to use for progress output  
   --columns max ............ Use maximum number of columns for progress output  
@@ -75,7 +77,6 @@
   --reverse-list .............................. Print defects in reverse order  
   --teamcity . Replace default progress and result output with TeamCity format  
   --testdox ................ Replace default result output with TestDox format  
-  --compact ................ Replace default result output with Compact format  
 
   LOGGING OPTIONS:
   --log-junit [file] .......... Write test results in JUnit XML format to file  
