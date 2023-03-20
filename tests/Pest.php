@@ -26,6 +26,7 @@ uses()
     })
     ->in('Hooks');
 
-function helper_returns_string() {
+function helper_returns_string()
+{
     return 'string';
 }
