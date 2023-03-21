@@ -1,7 +1,11 @@
+   WARN  Tests\Fixtures\CollisionTest
+  - error
+  - success
+
    PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest
   ✓ it example 1
 
    PASS  Tests\Fixtures\ExampleTest
   ✓ it example 2
 
-  Tests:    2 passed (2 assertions)
+  Tests:    2 skipped, 2 passed (2 assertions)

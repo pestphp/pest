@@ -1,0 +1,23 @@
+
+  ⨯.
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Fixtures\CollisionTest > success                   Exception   
+  error
+
+  at tests/Fixtures/CollisionTest.php:4
+      1▕ <?php
+      2▕ 
+      3▕ test('error', function () {
+  ➜   4▕     throw new Exception('error');
+      5▕ })->skip(! isset($_SERVER['COLLISION_TEST']));
+      6▕ 
+      7▕ test('success', function () {
+      8▕     expect(true)->toBeTrue();
+      9▕ })->skip(! isset($_SERVER['COLLISION_TEST']));
+
+  1   tests/Fixtures/CollisionTest.php:4
+  2   src/Factories/TestCaseMethodFactory.php:100
+
+
+  Tests:    1 failed, 1 passed (1 assertions)
+  Duration: 0.16s

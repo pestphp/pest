@@ -779,6 +779,10 @@
   ! warning → Undefined property: P\Tests\Features\Warnings::$fooqwdfwqdfqw
   ! user warning → This is a warning description
 
+   WARN  Tests\Fixtures\CollisionTest
+  - error
+  - success
+
    PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest
   ✓ it example 1
 
@@ -969,6 +973,10 @@
    PASS  Tests\Visual\BeforeEachTestName
   ✓ latest description
 
+   PASS  Tests\Visual\Collision
+  ✓ collision with ([''])
+  ✓ collision with (['--parallel'])
+
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
 
@@ -994,4 +1002,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 12 skipped, 699 passed (1696 assertions)
+  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 14 skipped, 701 passed (1698 assertions)
