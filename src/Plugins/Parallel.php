@@ -32,7 +32,7 @@ final class Parallel implements HandlesArguments
     /**
      * @var string[]
      */
-    private const UNSUPPORTED_ARGUMENTS = ['--todo', '--retry'];
+    private const UNSUPPORTED_ARGUMENTS = ['--todos', '--retry'];
 
     /**
      * Whether the given command line arguments indicate that the test suite should be run in parallel.

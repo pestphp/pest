@@ -124,7 +124,7 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeGreaterThan(int|float $expected, string $message = ''): self
+    public function toBeGreaterThan(int|float|\DateTime|\DateTimeImmutable $expected, string $message = ''): self
     {
         Assert::assertGreaterThan($expected, $this->value, $message);
 
@@ -136,7 +136,7 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeGreaterThanOrEqual(int|float $expected, string $message = ''): self
+    public function toBeGreaterThanOrEqual(int|float|\DateTime|\DateTimeImmutable $expected, string $message = ''): self
     {
         Assert::assertGreaterThanOrEqual($expected, $this->value, $message);
 
@@ -148,7 +148,7 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeLessThan(int|float $expected, string $message = ''): self
+    public function toBeLessThan(int|float|\DateTime|\DateTimeImmutable $expected, string $message = ''): self
     {
         Assert::assertLessThan($expected, $this->value, $message);
 
@@ -160,7 +160,7 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeLessThanOrEqual(int|float $expected, string $message = ''): self
+    public function toBeLessThanOrEqual(int|float|\DateTime|\DateTimeImmutable $expected, string $message = ''): self
     {
         Assert::assertLessThanOrEqual($expected, $this->value, $message);
 

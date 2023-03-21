@@ -102,6 +102,13 @@ final class Help implements HandlesArguments
             'desc' => 'Initialise a standard Pest configuration',
         ]], ...$content['Configuration']];
 
+        $content['Execution'] = [...[
+            [
+                'arg' => '--parallel',
+                'desc' => 'Run tests in parallel',
+            ],
+        ], ...$content['Execution']];
+
         $content['Selection'] = array_merge([
             [
                 'arg' => '--bail',

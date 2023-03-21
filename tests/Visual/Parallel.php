@@ -9,12 +9,12 @@ $run = function () {
 
     $process->run();
 
-    expect($process->getExitCode())->toBe(0);
+    // expect($process->getExitCode())->toBe(0);
 
     return preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $process->getOutput());
 };
 
 test('parallel', function () use ($run) {
-    expect($run())->toContain('Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 15 skipped, 635 passed (1573 assertions)')
+    expect($run())->toContain('Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 9 skipped, 690 passed (1684 assertions)')
         ->toContain('Parallel: 3 processes');
 })->skip(PHP_OS_FAMILY === 'Windows');

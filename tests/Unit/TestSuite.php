@@ -13,7 +13,7 @@ it('does not allow to add the same test description twice', function () {
     $testSuite->tests->set($method);
 })->throws(
     TestAlreadyExist::class,
-    sprintf('A test with the description `%s` already exist in the filename `%s`.', 'bar', 'foo'),
+    sprintf('A test with the description `%s` already exists in the filename `%s`.', 'bar', 'foo'),
 );
 
 it('alerts users about tests with arguments but no input', function () {

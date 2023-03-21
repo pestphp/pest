@@ -10,6 +10,7 @@ use Pest\Factories\Covers\CoversClass;
 use Pest\Factories\Covers\CoversFunction;
 use Pest\Factories\Covers\CoversNothing;
 use Pest\Factories\TestCaseMethodFactory;
+use Pest\Plugins\Only;
 use Pest\Support\Backtrace;
 use Pest\Support\Exporter;
 use Pest\Support\HigherOrderCallables;
@@ -130,6 +131,16 @@ final class TestCall
         foreach ($groups as $group) {
             $this->testCaseMethod->groups[] = $group;
         }
+
+        return $this;
+    }
+
+    /**
+     * Filters the test suite by "only" tests.
+     */
+    public function only(): self
+    {
+        Only::enable($this);
 
         return $this;
     }

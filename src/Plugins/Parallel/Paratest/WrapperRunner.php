@@ -20,13 +20,13 @@ use ParaTest\Options;
 use ParaTest\RunnerInterface;
 use ParaTest\WrapperRunner\SuiteLoader;
 use ParaTest\WrapperRunner\WrapperWorker;
+use Pest\Result;
 use Pest\TestSuite;
 use PHPUnit\Event\Facade as EventFacade;
 use PHPUnit\Runner\CodeCoverage;
 use PHPUnit\TestRunner\TestResult\Facade as TestResultFacade;
 use PHPUnit\TestRunner\TestResult\TestResult;
 use PHPUnit\TextUI\Configuration\CodeCoverageFilterRegistry;
-use PHPUnit\TextUI\ShellExitCodeCalculator;
 use PHPUnit\Util\ExcludeList;
 use function realpath;
 use SebastianBergmann\Timer\Timer;
@@ -114,7 +114,8 @@ final class WrapperRunner implements RunnerInterface
         ExcludeList::addDirectory($directory);
 
         TestResultFacade::init();
-        EventFacade::seal();
+
+        EventFacade::instance()->seal();
 
         $suiteLoader = new SuiteLoader($this->options, $this->output, $this->codeCoverageFilterRegistry);
         $this->pending = $this->getTestFiles($suiteLoader);
@@ -329,14 +330,7 @@ final class WrapperRunner implements RunnerInterface
         $this->generateCodeCoverageReports();
         $this->generateLogs();
 
-        $exitCode = (new ShellExitCodeCalculator())->calculate(
-            $this->options->configuration->failOnEmptyTestSuite(),
-            $this->options->configuration->failOnRisky(),
-            $this->options->configuration->failOnWarning(),
-            $this->options->configuration->failOnIncomplete(),
-            $this->options->configuration->failOnSkipped(),
-            $testResultSum,
-        );
+        $exitCode = Result::exitCode($this->options->configuration, $testResultSum);
 
         $this->clearFiles($this->testresultFiles);
         $this->clearFiles($this->coverageFiles);
@@ -354,7 +348,10 @@ final class WrapperRunner implements RunnerInterface
         }
 
         $coverageManager = new CodeCoverage();
-        $coverageManager->init($this->options->configuration, $this->codeCoverageFilterRegistry);
+
+        // @phpstan-ignore-next-line
+        is_bool(true) && $coverageManager->init($this->options->configuration, $this->codeCoverageFilterRegistry, true);
+
         $coverageMerger = new CoverageMerger($coverageManager->codeCoverage());
         foreach ($this->coverageFiles as $coverageFile) {
             $coverageMerger->addCoverageFromFile($coverageFile);

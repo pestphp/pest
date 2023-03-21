@@ -10,7 +10,7 @@ use Pest\Exceptions\InvalidOption;
 /**
  * @internal
  */
-final class Retry implements HandlesArguments
+final class Profile implements HandlesArguments
 {
     use Concerns\HandleArguments;
 
@@ -19,18 +19,14 @@ final class Retry implements HandlesArguments
      */
     public function handleArguments(array $arguments): array
     {
-        if (! $this->hasArgument('--retry', $arguments)) {
+        if (! $this->hasArgument('--profile', $arguments)) {
             return $arguments;
         }
 
         if ($this->hasArgument('--parallel', $arguments)) {
-            throw new InvalidOption('The [--retry] option is not supported when running in parallel.');
+            throw new InvalidOption('The [--profile] option is not supported when running in parallel.');
         }
 
-        $arguments = $this->popArgument('--retry', $arguments);
-
-        $arguments = $this->pushArgument('--order-by=defects', $arguments);
-
-        return $this->pushArgument('--stop-on-failure', $arguments);
+        return $arguments;
     }
 }

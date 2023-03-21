@@ -4,6 +4,9 @@
   ✓ dependencies
   ✓ contracts
 
+   PASS  Tests\Environments\Windows
+  ✓ global functions are loaded
+
    PASS  Tests\Features\AfterAll
   ✓ deletes file after all
 
@@ -331,12 +334,14 @@
 
    PASS  Tests\Features\Expect\toBeGreatherThan
   ✓ passes
+  ✓ passes with DateTime and DateTimeImmutable
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeGreatherThanOrEqual
   ✓ passes
+  ✓ passes with DateTime and DateTimeImmutable
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
@@ -379,12 +384,14 @@
 
    PASS  Tests\Features\Expect\toBeLessThan
   ✓ passes
+  ✓ passes with DateTime and DateTimeImmutable
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeLessThanOrEqual
   ✓ passes
+  ✓ passes with DateTime and DateTimeImmutable
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
@@ -837,15 +844,6 @@
   ✓ it allows global uses
   ✓ it allows multiple global uses registered in the same path
 
-   WARN  Tests\Unit\ConfigLoader
-  ✓ it fallbacks to default path if no phpunit file is found
-  - it fallbacks to default path if phpunit is not a valid XML
-  - it fallbacks to default path if failing to read phpunit content
-  - it fallbacks to default path if there is no test suites directory
-  - it fallbacks to default path if test suite directory has no value
-  - it fallbacks to default path if test suite directory does not exist
-  - it returns the parent folder of first test suite directory
-
    PASS  Tests\Unit\Console\Help
   ✓ it outputs the help information when --help is used
 
@@ -910,6 +908,59 @@
   ✓ it evaluates the code with ('version__ ', '__pest_evaluable_version___')
   ✓ it evaluates the code with ('version\', '__pest_evaluable_version_')
 
+   PASS  Tests\Unit\TestName
+  ✓ it may start with P with ('P\Tests\BarTest', 'Tests\BarTest')
+  ✓ it may start with P with ('P\Packages\Foo', 'Packages\Foo')
+  ✓ it may start with P with ('P\PPPackages\Foo', 'PPPackages\Foo')
+  ✓ it may start with P with ('PPPackages\Foo', 'PPPackages\Foo') #1
+  ✓ it may start with P with ('PPPackages\Foo', 'PPPackages\Foo') #2
+  ✓ ふ+が+
+  ✓ ほげ
+  ✓ 卜竹弓一十山
+  ✓ アゴデヸ
+  ✓ !p8VrB
+  ✓ &xe6VeKWF#n4
+  ✓ %%HurHUnw7zM!
+  ✓ rundeliekend
+  ✓ g%%c!Jt9$fy#Kf
+  ✓ NRs*Gz2@hmB$W$BPD%%b2U%3P%z%apnwSX
+  ✓ ÀÄ¤{¼÷
+  ✓ ìèéàòç
+  ✓ زهراء المعادي
+  ✓ الجبيهه
+  ✓ الظهران
+  ✓ Каролин
+  ✓ অ্যান্টার্কটিকা
+  ✓ Frýdek-Místek"
+  ✓ Allingåbro&
+  ✓ Κεντροαφρικανική Δημοκρατία
+  ✓ آذربایجان غربی
+  ✓ זימבבואה
+  ✓ Belišće
+  ✓ Գվատեմալա
+  ✓ パプアニューギニア
+  ✓ 富山県
+  ✓ Қарағанды
+  ✓ Қостанай
+  ✓ 안양시 동안구
+  ✓ Itālija
+  ✓ Honningsvåg
+  ✓ Águeda
+  ✓ Râșcani
+  ✓ Năsăud
+  ✓ Орехово-Зуево
+  ✓ Čereňany
+  ✓ Moravče
+  ✓ Šentjernej
+  ✓ Врање
+  ✓ Крушевац
+  ✓ Åkersberga
+  ✓ บอสเนียและเฮอร์เซโกวีนา
+  ✓ Birleşik Arap Emirlikleri
+  ✓ Німеччина
+  ✓ Nam Định
+  ✓ 呼和浩特
+
    PASS  Tests\Unit\TestSuite
   ✓ it does not allow to add the same test description twice
   ✓ it alerts users about tests with arguments but no input
@@ -943,4 +994,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 18 skipped, 644 passed (1586 assertions)
+  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 12 skipped, 699 passed (1696 assertions)

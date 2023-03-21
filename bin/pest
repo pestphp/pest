@@ -1,8 +1,8 @@
 #!/usr/bin/env php
 <?php declare(strict_types=1);
 
-use Pest\ConfigLoader;
 use Pest\Kernel;
+use Pest\Panic;
 use Pest\TestCaseFilters\GitDirtyTestCaseFilter;
 use Pest\TestCaseMethodFilters\TodoTestCaseFilter;
 use Pest\TestSuite;
@@ -38,7 +38,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
             unset($args[$key]);
         }
 
-        if ($value === '--todo') {
+        if ($value === '--todos') {
             $todo = true;
             unset($args[$key]);
         }
@@ -70,7 +70,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
     $testSuite = TestSuite::getInstance(
         $rootPath,
-        $input->getParameterOption('--test-directory', (new ConfigLoader($rootPath))->getTestsDirectory()),
+        $input->getParameterOption('--test-directory', 'tests'),
     );
 
     if ($dirty) {
@@ -85,11 +85,15 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
     $output = new ConsoleOutput(ConsoleOutput::VERBOSITY_NORMAL, $isDecorated);
 
-    $kernel = Kernel::boot($testSuite, $input, $output);
+    try {
+        $kernel = Kernel::boot($testSuite, $input, $output);
 
-    $result = $kernel->handle($args);
+        $result = $kernel->handle($args);
 
-    $kernel->shutdown();
+        $kernel->shutdown();
+    } catch (Throwable|Error $e) {
+        Panic::with($e);
+    }
 
     exit($result);
 })();

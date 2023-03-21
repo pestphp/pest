@@ -42,7 +42,7 @@ final class Reflection
             }
 
             if (is_callable($method)) {
-                return static::bindCallable($method, $args);
+                return self::bindCallable($method, $args);
             }
 
             throw $exception;
@@ -72,7 +72,7 @@ final class Reflection
 
         return $test instanceof \PHPUnit\Framework\TestCase
             ? Closure::fromCallable($callable)->bindTo($test)(...$test->providedData())
-            : static::bindCallable($callable);
+            : self::bindCallable($callable);
     }
 
     /**

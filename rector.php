@@ -16,6 +16,10 @@ return static function (RectorConfig $rectorConfig): void {
         InlineConstructorDefaultToPropertyRector::class,
     ]);
 
+    $rectorConfig->skip([
+        __DIR__.'/src/Plugins/Parallel/Paratest/WrapperRunner.php',
+    ]);
+
     $rectorConfig->sets([
         LevelSetList::UP_TO_PHP_81,
         SetList::CODE_QUALITY,
