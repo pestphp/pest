@@ -64,7 +64,7 @@ final class Expectation
      */
     public function and(mixed $value): Expectation
     {
-        return $value instanceof static ? $value : new self($value);
+        return $value instanceof self ? $value : new self($value);
     }
 
     /**
