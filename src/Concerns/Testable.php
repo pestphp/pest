@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace Pest\Concerns;
 
 use Closure;
+use Pest\Exceptions\DatasetArgsCountMismatch;
 use Pest\Support\ChainableClosure;
 use Pest\Support\ExceptionTrace;
 use Pest\Support\Reflection;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestCase;
+use ReflectionException;
+use ReflectionFunction;
 use Throwable;
 
 /**
@@ -212,7 +215,10 @@ trait Testable
      */
     private function __runTest(Closure $closure, ...$args): mixed
     {
-        return $this->__callClosure($closure, $this->__resolveTestArguments($args));
+        $arguments = $this->__resolveTestArguments($args);
+        $this->__ensureDatasetArgumentNumberMatches($arguments);
+
+        return $this->__callClosure($closure, $arguments);
     }
 
     /**
@@ -262,6 +268,30 @@ trait Testable
         }
 
         return array_values($boundDatasetResult);
+    }
+
+    /**
+     * Ensures dataset items count matches underlying test case required parameters
+     *
+     * @throws ReflectionException
+     * @throws DatasetArgsCountMismatch
+     */
+    private function __ensureDatasetArgumentNumberMatches(array $arguments): void
+    {
+        if ($arguments === []) {
+            return;
+        }
+
+        $underlyingTest = Reflection::getFunctionVariable($this->__test, 'closure');
+        $testReflection = new ReflectionFunction($underlyingTest);
+        $requiredParametersCount = $testReflection->getNumberOfRequiredParameters();
+        $suppliedParametersCount = count($arguments);
+
+        if ($suppliedParametersCount >= $requiredParametersCount) {
+            return;
+        }
+
+        throw new DatasetArgsCountMismatch($this->dataName(), $requiredParametersCount, $suppliedParametersCount);
     }
 
     /**
