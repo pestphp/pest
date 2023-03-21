@@ -61,7 +61,7 @@ final class Str
     {
         $code = self::PREFIX.str_replace(' ', '_', $code);
 
-        return (string) preg_replace('/[^A-Z_a-z0-9]/', '_', $code);
+        return (string) preg_replace('/[^\p{L}_0-9]/', '_', $code);
     }
 
     /**
