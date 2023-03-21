@@ -7,6 +7,15 @@ test('passes', function () {
     expect(4)->toBeLessThan(5);
 });
 
+test('passes with DateTime and DateTimeImmutable', function () {
+    $now = new DateTime();
+    $past = (new DateTimeImmutable())->modify('-1 day');
+
+    expect($past)->toBeLessThan($now);
+
+    expect($now)->not->toBeLessThan($now);
+});
+
 test('failures', function () {
     expect(4)->toBeLessThan(4);
 })->throws(ExpectationFailedException::class);

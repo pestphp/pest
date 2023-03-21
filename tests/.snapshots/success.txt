@@ -334,12 +334,14 @@
 
    PASS  Tests\Features\Expect\toBeGreatherThan
   ✓ passes
+  ✓ passes with DateTime and DateTimeImmutable
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeGreatherThanOrEqual
   ✓ passes
+  ✓ passes with DateTime and DateTimeImmutable
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
@@ -382,12 +384,14 @@
 
    PASS  Tests\Features\Expect\toBeLessThan
   ✓ passes
+  ✓ passes with DateTime and DateTimeImmutable
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeLessThanOrEqual
   ✓ passes
+  ✓ passes with DateTime and DateTimeImmutable
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
@@ -944,4 +948,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 12 skipped, 649 passed (1588 assertions)
+  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 12 skipped, 653 passed (1604 assertions)
