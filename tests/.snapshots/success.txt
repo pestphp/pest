@@ -334,12 +334,14 @@
 
    PASS  Tests\Features\Expect\toBeGreatherThan
   ✓ passes
+  ✓ passes with DateTime and DateTimeImmutable
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeGreatherThanOrEqual
   ✓ passes
+  ✓ passes with DateTime and DateTimeImmutable
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
@@ -382,12 +384,14 @@
 
    PASS  Tests\Features\Expect\toBeLessThan
   ✓ passes
+  ✓ passes with DateTime and DateTimeImmutable
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeLessThanOrEqual
   ✓ passes
+  ✓ passes with DateTime and DateTimeImmutable
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
