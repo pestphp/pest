@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Pest;
 
-use PHPUnit\TestRunner\TestResult\Facade;
-use PHPUnit\TextUI\Configuration\Registry;
+use PHPUnit\TestRunner\TestResult\TestResult;
+use PHPUnit\TextUI\Configuration\Configuration;
 
 /**
  * @internal
@@ -21,34 +21,30 @@ final class Result
     /**
      * If the exit code is different from 0.
      */
-    public static function failed(): bool
+    public static function failed(Configuration $configuration, TestResult $result): bool
     {
-        return ! self::ok();
+        return ! self::ok($configuration, $result);
     }
 
     /**
      * If the exit code is exactly 0.
      */
-    public static function ok(): bool
+    public static function ok(Configuration $configuration, TestResult $result): bool
     {
-        return self::exitCode() === self::SUCCESS_EXIT;
+        return self::exitCode($configuration, $result) === self::SUCCESS_EXIT;
     }
 
     /**
      * Get the test execution's exit code.
      */
-    public static function exitCode(): int
+    public static function exitCode(Configuration $configuration, TestResult $result): int
     {
-        $result = Facade::result();
-
         $returnCode = self::FAILURE_EXIT;
 
         if ($result->wasSuccessfulIgnoringPhpunitWarnings()
             && ! $result->hasTestTriggeredPhpunitWarningEvents()) {
             $returnCode = self::SUCCESS_EXIT;
         }
-
-        $configuration = Registry::get();
 
         if ($configuration->failOnEmptyTestSuite() && $result->numberOfTests() === 0) {
             $returnCode = self::FAILURE_EXIT;

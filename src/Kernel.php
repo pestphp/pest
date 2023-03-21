@@ -11,7 +11,9 @@ use Pest\Plugins\Actions\CallsBoot;
 use Pest\Plugins\Actions\CallsHandleArguments;
 use Pest\Plugins\Actions\CallsShutdown;
 use Pest\Support\Container;
+use PHPUnit\TestRunner\TestResult\Facade;
 use PHPUnit\TextUI\Application;
+use PHPUnit\TextUI\Configuration\Registry;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -90,8 +92,11 @@ final class Kernel
             ]);
         }
 
+        $configuration = Registry::get();
+        $result = Facade::result();
+
         return CallsAddsOutput::execute(
-            Result::exitCode(),
+            Result::exitCode($configuration, $result),
         );
     }
 
