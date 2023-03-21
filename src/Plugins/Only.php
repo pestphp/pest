@@ -29,7 +29,7 @@ final class Only implements Shutdownable
     public function shutdown(): void
     {
         $lockFile = self::TEMPORARY_FOLDER.DIRECTORY_SEPARATOR.'only.lock';
-        
+
         if (file_exists($lockFile)) {
             unlink($lockFile);
         }

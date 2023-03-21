@@ -910,6 +910,52 @@
   ✓ it may start with P with ('P\PPPackages\Foo', 'PPPackages\Foo')
   ✓ it may start with P with ('PPPackages\Foo', 'PPPackages\Foo') #1
   ✓ it may start with P with ('PPPackages\Foo', 'PPPackages\Foo') #2
+  ✓ ふ+が+
+  ✓ ほげ
+  ✓ 卜竹弓一十山
+  ✓ アゴデヸ
+  ✓ !p8VrB
+  ✓ &xe6VeKWF#n4
+  ✓ %%HurHUnw7zM!
+  ✓ rundeliekend
+  ✓ g%%c!Jt9$fy#Kf
+  ✓ NRs*Gz2@hmB$W$BPD%%b2U%3P%z%apnwSX
+  ✓ ÀÄ¤{¼÷
+  ✓ ìèéàòç
+  ✓ زهراء المعادي
+  ✓ الجبيهه
+  ✓ الظهران
+  ✓ Каролин
+  ✓ অ্যান্টার্কটিকা
+  ✓ Frýdek-Místek"
+  ✓ Allingåbro&
+  ✓ Κεντροαφρικανική Δημοκρατία
+  ✓ آذربایجان غربی
+  ✓ זימבבואה
+  ✓ Belišće
+  ✓ Գվատեմալա
+  ✓ パプアニューギニア
+  ✓ 富山県
+  ✓ Қарағанды
+  ✓ Қостанай
+  ✓ 안양시 동안구
+  ✓ Itālija
+  ✓ Honningsvåg
+  ✓ Águeda
+  ✓ Râșcani
+  ✓ Năsăud
+  ✓ Орехово-Зуево
+  ✓ Čereňany
+  ✓ Moravče
+  ✓ Šentjernej
+  ✓ Врање
+  ✓ Крушевац
+  ✓ Åkersberga
+  ✓ บอสเนียและเฮอร์เซโกวีนา
+  ✓ Birleşik Arap Emirlikleri
+  ✓ Німеччина
+  ✓ Nam Định
+  ✓ 呼和浩特
 
    PASS  Tests\Unit\TestSuite
   ✓ it does not allow to add the same test description twice
@@ -944,4 +990,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 12 skipped, 649 passed (1588 assertions)
+  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 12 skipped, 695 passed (1680 assertions)
