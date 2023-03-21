@@ -33,6 +33,7 @@
   --test-suffix [suffixes]  Only search for test in files with specified suffix(es). Default: Test.php,.phpt  
 
   EXECUTION OPTIONS:
+  --parallel ........................................... Run tests in parallel  
   --process-isolation ................ Run each test in a separate PHP process  
   --globals-backup ................. Backup and restore $GLOBALS for each test  
   --static-backup ......... Backup and restore static properties for each test  
