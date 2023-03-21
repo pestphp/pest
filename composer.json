@@ -92,6 +92,7 @@
                 "Pest\\Plugins\\Environment",
                 "Pest\\Plugins\\Help",
                 "Pest\\Plugins\\Memory",
+                "Pest\\Plugins\\Only",
                 "Pest\\Plugins\\Printer",
                 "Pest\\Plugins\\ProcessIsolation",
                 "Pest\\Plugins\\Profile",
