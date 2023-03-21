@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## [v2.1.0 (2023-03-21)](https://github.com/pestphp/pest/compare/v2.0.2...v2.1.0)
+
+### Added
+- `only` test case method ([bcd1503](https://github.com/pestphp/pest/commit/bcd1503cade938853a55c1283b02b6b820ea0b69))
+
+### Fixed
+- Issues with different characters on test names ([715](https://github.com/pestphp/pest/pull/715))
+
 ## [v2.0.2 (2023-03-20)](https://github.com/pestphp/pest/compare/v2.0.1...v2.0.2)
 
 ### Fixed
