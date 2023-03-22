@@ -79,6 +79,7 @@ final class Parallel implements HandlesArguments
 
         foreach ($placesToCheck as $location) {
             if (array_key_exists(self::GLOBAL_PREFIX.$key, $location)) {
+                // @phpstan-ignore-next-line
                 return json_decode($location[self::GLOBAL_PREFIX.$key], true)['value'] ?? null;
             }
         }
