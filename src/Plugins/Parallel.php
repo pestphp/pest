@@ -64,7 +64,7 @@ final class Parallel implements HandlesArguments
     {
         $data = ['value' => $value instanceof Stringable ? $value->__toString() : $value];
 
-        $_SERVER[self::GLOBAL_PREFIX.$key] = json_encode($data);
+        $_ENV[self::GLOBAL_PREFIX.$key] = json_encode($data);
     }
 
     public static function getGlobal(string $key): string|int|bool|null
