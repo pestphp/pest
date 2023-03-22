@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## [v2.2.1 (2023-03-22)](https://github.com/pestphp/pest/compare/v2.2.0...v2.2.1)
+
+### Fixed
+- Collision between tests names with underscores ([#724](https://github.com/pestphp/pest/pull/724))
+
+### Chore
+- Bumps PHPUnit to `^10.0.18` ([1408cff](https://github.com/pestphp/pest/commit/1408cffc028690057e44f00038f9390f776e6bfb))
+
 ## [v2.2.0 (2023-03-22)](https://github.com/pestphp/pest/compare/v2.1.0...v2.2.0)
 
 ### Added
