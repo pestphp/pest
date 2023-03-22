@@ -14,12 +14,15 @@ use Pest\Support\Arr;
 use Pest\Support\Container;
 use Pest\TestSuite;
 use function Pest\version;
+use Stringable;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArgvInput;
 
 final class Parallel implements HandlesArguments
 {
     use HandleArguments;
+
+    private const GLOBAL_PREFIX = 'PEST_PARALLEL_GLOBAL_';
 
     private const HANDLERS = [
         Parallel\Handlers\Parallel::class,
@@ -55,6 +58,26 @@ final class Parallel implements HandlesArguments
         assert(is_string($argvValue) || is_int($argvValue) || is_null($argvValue));
 
         return ((int) $argvValue) === 1;
+    }
+
+    public static function setGlobal(string $key, string|int|bool|Stringable $value): void
+    {
+        $data = ['value' => $value instanceof Stringable ? $value->__toString() : $value];
+
+        $_SERVER[self::GLOBAL_PREFIX.$key] = json_encode($data);
+    }
+
+    public static function getGlobal(string $key): string|int|bool|null
+    {
+        $placesToCheck = [$_SERVER, $_ENV];
+
+        foreach ($placesToCheck as $location) {
+            if (array_key_exists(self::GLOBAL_PREFIX.$key, $location)) {
+                return json_decode($location[self::GLOBAL_PREFIX.$key])['value'] ?? null;
+            }
+        }
+
+        return null;
     }
 
     /**
