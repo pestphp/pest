@@ -1,8 +1,7 @@
-name: Tests
+name: Integration Tests
 
 on:
   push:
-  pull_request:
   schedule:
     - cron: '0 0 * * *'
 
@@ -37,9 +36,6 @@ jobs:
     - name: Install PHP dependencies
       run: composer update --${{ matrix.dependency-version }} --no-interaction --no-progress --ansi
 
-    - name: Unit Tests
-      run: composer test:unit
+    - name: Integration Tests
+      run: composer test:integration
 
-    - name: Unit Tests in Parallel
-      run: composer test:parallel
-      if: startsWith(matrix.os, 'windows') != true
