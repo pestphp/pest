@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## [v2.2.0 (2023-03-22)](https://github.com/pestphp/pest/compare/v2.1.0...v2.2.0)
+
+### Added
+- Improved error messages on dataset arguments mismatch ([#698](https://github.com/pestphp/pest/pull/698))
+- Allows the usage of `DateTimeInterface` on multiple expectations ([#716](https://github.com/pestphp/pest/pull/716))
+
+### Fixed
+- `--dirty` option on Windows environments ([#721](https://github.com/pestphp/pest/pull/721))
+- Parallel exit code when `phpunit.xml` is outdated ([14dd5cb](https://github.com/pestphp/pest/commit/14dd5cb57b9432300ac4e8095f069941cb43bdb5))
+
 ## [v2.1.0 (2023-03-21)](https://github.com/pestphp/pest/compare/v2.0.2...v2.1.0)
 
 ### Added
