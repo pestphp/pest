@@ -32,6 +32,7 @@ final class GitDirtyTestCaseFilter implements TestCaseFilter
         assert(is_array($this->changedFiles));
 
         $relativePath = str_replace($this->projectRoot, '', $testCaseFilename);
+        $relativePath = str_replace(DIRECTORY_SEPARATOR, '/', $relativePath);
 
         if (str_starts_with($relativePath, '/')) {
             $relativePath = substr($relativePath, 1);
