@@ -59,6 +59,8 @@ final class Str
      */
     public static function evaluable(string $code): string
     {
+        $code = str_replace('_', '__', $code);
+
         $code = self::PREFIX.str_replace(' ', '_', $code);
 
         // sticks to PHP8.2 function naming rules https://www.php.net/manual/en/functions.user-defined.php
