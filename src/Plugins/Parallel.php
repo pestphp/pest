@@ -60,6 +60,9 @@ final class Parallel implements HandlesArguments
         return ((int) $argvValue) === 1;
     }
 
+    /**
+     * Sets a global value that can be accessed by the parent process and all workers.
+     */
     public static function setGlobal(string $key, string|int|bool|Stringable $value): void
     {
         $data = ['value' => $value instanceof Stringable ? $value->__toString() : $value];
@@ -67,6 +70,9 @@ final class Parallel implements HandlesArguments
         $_ENV[self::GLOBAL_PREFIX.$key] = json_encode($data);
     }
 
+    /**
+     * Returns the given global value if one has been set.
+     */
     public static function getGlobal(string $key): string|int|bool|null
     {
         $placesToCheck = [$_SERVER, $_ENV];
