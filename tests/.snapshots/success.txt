@@ -909,7 +909,7 @@
 
    PASS  Tests\Unit\Support\Str
   ✓ it evaluates the code with ('version()', '__pest_evaluable_version__')
-  ✓ it evaluates the code with ('version__ ', '__pest_evaluable_version___')
+  ✓ it evaluates the code with ('version__ ', '__pest_evaluable_version_____')
   ✓ it evaluates the code with ('version\', '__pest_evaluable_version_')
 
    PASS  Tests\Unit\TestName
@@ -918,6 +918,8 @@
   ✓ it may start with P with ('P\PPPackages\Foo', 'PPPackages\Foo')
   ✓ it may start with P with ('PPPackages\Foo', 'PPPackages\Foo') #1
   ✓ it may start with P with ('PPPackages\Foo', 'PPPackages\Foo') #2
+  ✓ test description
+  ✓ test_description
   ✓ ふ+が+
   ✓ ほげ
   ✓ 卜竹弓一十山
@@ -1002,4 +1004,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 14 skipped, 701 passed (1698 assertions)
+  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 14 skipped, 703 passed (1702 assertions)
