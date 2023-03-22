@@ -2,7 +2,7 @@ ARG PHP=8.1
 FROM php:${PHP}-cli-alpine
 
 RUN apk update \
-    && apk add zip libzip-dev icu-dev
+    && apk add zip libzip-dev icu-dev git
 
 RUN docker-php-ext-configure zip
 RUN docker-php-ext-install zip

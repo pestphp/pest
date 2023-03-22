@@ -15,9 +15,7 @@ use Pest\Support\Container;
 use Pest\TestSuite;
 use function Pest\version;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArgvInput;
-use Symfony\Component\Console\Output\OutputInterface;
 
 final class Parallel implements HandlesArguments
 {
@@ -86,12 +84,6 @@ final class Parallel implements HandlesArguments
      */
     private function runTestSuiteInParallel(array $arguments): int
     {
-        if (! class_exists(ParaTestCommand::class)) {
-            $this->askUserToInstallParatest();
-
-            return Command::FAILURE;
-        }
-
         $handlers = array_filter(
             array_map(fn ($handler): object|string => Container::getInstance()->get($handler), self::HANDLERS),
             fn ($handler): bool => $handler instanceof HandlesArguments,
@@ -126,20 +118,6 @@ final class Parallel implements HandlesArguments
             fn ($arguments, HandlersWorkerArguments $handler): array => $handler->handleWorkerArguments($arguments),
             $arguments
         );
-    }
-
-    /**
-     * Outputs a message to the user asking them to install ParaTest as a dev dependency.
-     */
-    private function askUserToInstallParatest(): void
-    {
-        /** @var OutputInterface $output */
-        $output = Container::getInstance()->get(OutputInterface::class);
-
-        $output->writeln([
-            '<fg=red>Pest Parallel requires ParaTest to run.</>',
-            'Please run <fg=yellow>composer require --dev brianium/paratest</>.',
-        ]);
     }
 
     /**
