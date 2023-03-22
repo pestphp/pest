@@ -6,6 +6,7 @@ namespace Pest\Mixins;
 
 use BadMethodCallException;
 use Closure;
+use DateTimeInterface;
 use Error;
 use InvalidArgumentException;
 use Pest\Exceptions\InvalidExpectationValue;
@@ -124,7 +125,7 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeGreaterThan(int|float|\DateTime|\DateTimeImmutable $expected, string $message = ''): self
+    public function toBeGreaterThan(int|float|DateTimeInterface $expected, string $message = ''): self
     {
         Assert::assertGreaterThan($expected, $this->value, $message);
 
@@ -136,7 +137,7 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeGreaterThanOrEqual(int|float|\DateTime|\DateTimeImmutable $expected, string $message = ''): self
+    public function toBeGreaterThanOrEqual(int|float|DateTimeInterface $expected, string $message = ''): self
     {
         Assert::assertGreaterThanOrEqual($expected, $this->value, $message);
 
@@ -148,7 +149,7 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeLessThan(int|float|\DateTime|\DateTimeImmutable $expected, string $message = ''): self
+    public function toBeLessThan(int|float|DateTimeInterface $expected, string $message = ''): self
     {
         Assert::assertLessThan($expected, $this->value, $message);
 
@@ -160,7 +161,7 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeLessThanOrEqual(int|float|\DateTime|\DateTimeImmutable $expected, string $message = ''): self
+    public function toBeLessThanOrEqual(int|float|DateTimeInterface $expected, string $message = ''): self
     {
         Assert::assertLessThanOrEqual($expected, $this->value, $message);
 
