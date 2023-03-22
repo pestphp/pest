@@ -24,7 +24,11 @@ test('collision', function (array $arguments) {
         array_pop($outputContent);
         array_pop($outputContent);
         array_pop($outputContent);
-        array_pop($outputContent);
+
+        if (in_array('--parallel', $arguments)) {
+            array_pop($outputContent);
+            array_pop($outputContent);
+        }
 
         file_put_contents($snapshot, implode("\n", $outputContent));
 

@@ -20,4 +20,3 @@
 
 
   Tests:    1 failed, 1 passed (1 assertions)
-  Duration: 0.16s

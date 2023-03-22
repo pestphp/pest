@@ -20,3 +20,5 @@
   1   tests/Fixtures/CollisionTest.php:4
   2   src/Factories/TestCaseMethodFactory.php:100
 
+
+  Tests:    1 failed, 1 passed (1 assertions)
