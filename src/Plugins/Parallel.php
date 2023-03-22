@@ -67,7 +67,7 @@ final class Parallel implements HandlesArguments
     {
         $data = ['value' => $value instanceof Stringable ? $value->__toString() : $value];
 
-        $_ENV[self::GLOBAL_PREFIX.$key] = json_encode($data);
+        $_ENV[self::GLOBAL_PREFIX.$key] = json_encode($data, JSON_THROW_ON_ERROR);
     }
 
     /**
@@ -80,7 +80,7 @@ final class Parallel implements HandlesArguments
         foreach ($placesToCheck as $location) {
             if (array_key_exists(self::GLOBAL_PREFIX.$key, $location)) {
                 // @phpstan-ignore-next-line
-                return json_decode($location[self::GLOBAL_PREFIX.$key], true)['value'] ?? null;
+                return json_decode((string) $location[self::GLOBAL_PREFIX.$key], true, 512, JSON_THROW_ON_ERROR)['value'] ?? null;
             }
         }
 
