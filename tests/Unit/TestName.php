@@ -13,6 +13,8 @@ it('may start with P', function (string $real, string $toBePrinted) {
 ]);
 
 $names = [
+    'test description' => '__pest_evaluable_test_description',
+    'test_description' => '__pest_evaluable_test__description',
     'ふ+が+' => '__pest_evaluable_ふ_が_',
     'ほげ' => '__pest_evaluable_ほげ',
     '卜竹弓一十山' => '__pest_evaluable_卜竹弓一十山',
