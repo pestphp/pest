@@ -837,6 +837,20 @@ final class Expectation
     }
 
     /**
+     * @return self<TValue>
+     */
+    public function toContainOnly(string $class, bool $isNativeType = null, string $message = ''): self
+    {
+        if (! is_iterable($this->value)) {
+            InvalidExpectationValue::expected('iterable');
+        }
+
+        Assert::assertContainsOnly($class, $this->value, $isNativeType, $message);
+
+        return $this;
+    }
+
+    /**
      * Asserts that executing value throws an exception.
      *
      * @param (Closure(Throwable): mixed)|string $exception
