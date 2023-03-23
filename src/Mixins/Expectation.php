@@ -837,6 +837,8 @@ final class Expectation
     }
 
     /**
+     * Asserts that contain only.
+     *
      * @return self<TValue>
      */
     public function toContainOnly(string $class, bool $isNativeType = null, string $message = ''): self
