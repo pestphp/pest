@@ -1,7 +1,7 @@
 
   ⨯.
   ────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Fixtures\CollisionTest > success                   Exception   
+   FAILED  Tests\Fixtures\CollisionTest > error                     Exception   
   error
 
   at tests/Fixtures/CollisionTest.php:4

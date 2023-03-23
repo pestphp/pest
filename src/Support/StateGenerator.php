@@ -24,7 +24,7 @@ final class StateGenerator
 
         foreach ($testResult->testErroredEvents() as $testResultEvent) {
             if ($testResultEvent instanceof Errored) {
-                $state->add(TestResult::fromTestCase(
+                $state->add(TestResult::fromPestParallelTestCase(
                     $testResultEvent->test(),
                     TestResult::FAIL,
                     $testResultEvent->throwable()
@@ -35,7 +35,7 @@ final class StateGenerator
         }
 
         foreach ($testResult->testFailedEvents() as $testResultEvent) {
-            $state->add(TestResult::fromTestCase(
+            $state->add(TestResult::fromPestParallelTestCase(
                 $testResultEvent->test(),
                 TestResult::FAIL,
                 $testResultEvent->throwable()
@@ -43,7 +43,7 @@ final class StateGenerator
         }
 
         foreach ($testResult->testMarkedIncompleteEvents() as $testResultEvent) {
-            $state->add(TestResult::fromTestCase(
+            $state->add(TestResult::fromPestParallelTestCase(
                 $testResultEvent->test(),
                 TestResult::INCOMPLETE,
                 $testResultEvent->throwable()
@@ -52,7 +52,7 @@ final class StateGenerator
 
         foreach ($testResult->testConsideredRiskyEvents() as $riskyEvents) {
             foreach ($riskyEvents as $riskyEvent) {
-                $state->add(TestResult::fromTestCase(
+                $state->add(TestResult::fromPestParallelTestCase(
                     $riskyEvent->test(),
                     TestResult::RISKY,
                     ThrowableBuilder::from(new TestOutcome($riskyEvent->message()))
@@ -62,12 +62,12 @@ final class StateGenerator
 
         foreach ($testResult->testSkippedEvents() as $testResultEvent) {
             if ($testResultEvent->message() === '__TODO__') {
-                $state->add(TestResult::fromTestCase($testResultEvent->test(), TestResult::TODO));
+                $state->add(TestResult::fromPestParallelTestCase($testResultEvent->test(), TestResult::TODO));
 
                 continue;
             }
 
-            $state->add(TestResult::fromTestCase(
+            $state->add(TestResult::fromPestParallelTestCase(
                 $testResultEvent->test(),
                 TestResult::SKIPPED,
                 ThrowableBuilder::from(new SkippedWithMessageException($testResultEvent->message()))
@@ -77,7 +77,7 @@ final class StateGenerator
         foreach ($testResult->testTriggeredDeprecationEvents() as $testResultEvent) {
             $testResultEvent = $testResultEvent[0];
 
-            $state->add(TestResult::fromTestCase(
+            $state->add(TestResult::fromPestParallelTestCase(
                 $testResultEvent->test(),
                 TestResult::DEPRECATED,
                 ThrowableBuilder::from(new TestOutcome($testResultEvent->message()))
@@ -87,7 +87,7 @@ final class StateGenerator
         foreach ($testResult->testTriggeredPhpDeprecationEvents() as $testResultEvent) {
             $testResultEvent = $testResultEvent[0];
 
-            $state->add(TestResult::fromTestCase(
+            $state->add(TestResult::fromPestParallelTestCase(
                 $testResultEvent->test(),
                 TestResult::DEPRECATED,
                 ThrowableBuilder::from(new TestOutcome($testResultEvent->message()))
@@ -97,7 +97,7 @@ final class StateGenerator
         foreach ($testResult->testTriggeredNoticeEvents() as $testResultEvent) {
             $testResultEvent = $testResultEvent[0];
 
-            $state->add(TestResult::fromTestCase(
+            $state->add(TestResult::fromPestParallelTestCase(
                 $testResultEvent->test(),
                 TestResult::NOTICE,
                 ThrowableBuilder::from(new TestOutcome($testResultEvent->message()))
@@ -107,7 +107,7 @@ final class StateGenerator
         foreach ($testResult->testTriggeredPhpNoticeEvents() as $testResultEvent) {
             $testResultEvent = $testResultEvent[0];
 
-            $state->add(TestResult::fromTestCase(
+            $state->add(TestResult::fromPestParallelTestCase(
                 $testResultEvent->test(),
                 TestResult::NOTICE,
                 ThrowableBuilder::from(new TestOutcome($testResultEvent->message()))
@@ -117,7 +117,7 @@ final class StateGenerator
         foreach ($testResult->testTriggeredWarningEvents() as $testResultEvent) {
             $testResultEvent = $testResultEvent[0];
 
-            $state->add(TestResult::fromTestCase(
+            $state->add(TestResult::fromPestParallelTestCase(
                 $testResultEvent->test(),
                 TestResult::WARN,
                 ThrowableBuilder::from(new TestOutcome($testResultEvent->message()))
@@ -127,7 +127,7 @@ final class StateGenerator
         foreach ($testResult->testTriggeredPhpWarningEvents() as $testResultEvent) {
             $testResultEvent = $testResultEvent[0];
 
-            $state->add(TestResult::fromTestCase(
+            $state->add(TestResult::fromPestParallelTestCase(
                 $testResultEvent->test(),
                 TestResult::WARN,
                 ThrowableBuilder::from(new TestOutcome($testResultEvent->message()))
@@ -136,7 +136,7 @@ final class StateGenerator
 
         // for each test that passed, we need to add it to the state
         for ($i = 0; $i < $passedTests; $i++) {
-            $state->add(TestResult::fromTestCase(
+            $state->add(TestResult::fromPestParallelTestCase(
                 new TestMethod(
                     "$i", // @phpstan-ignore-line
                     '', // @phpstan-ignore-line
