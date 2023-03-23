@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## [v2.2.2 (2023-03-23)](https://github.com/pestphp/pest/compare/v2.2.1...v2.2.2)
+
+### Fixed
+- Edge case in parallel executation test description ([3ce6408](https://github.com/pestphp/pest/commit/3ce640819541ca6022b250e000f336d87c3e7889))
+
 ## [v2.2.1 (2023-03-22)](https://github.com/pestphp/pest/compare/v2.2.0...v2.2.1)
 
 ### Fixed
