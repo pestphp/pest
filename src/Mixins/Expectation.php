@@ -841,13 +841,13 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toContainOnly(string $class, bool $isNativeType = null, string $message = ''): self
+    public function toContainOnly(string $type, bool $isNativeType = null, string $message = ''): self
     {
         if (! is_iterable($this->value)) {
             InvalidExpectationValue::expected('iterable');
         }
 
-        Assert::assertContainsOnly($class, $this->value, $isNativeType, $message);
+        Assert::assertContainsOnly($type, $this->value, $isNativeType, $message);
 
         return $this;
     }
