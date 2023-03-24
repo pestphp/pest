@@ -100,7 +100,7 @@ final class TestCall
      * Runs the current test multiple times with
      * each item of the given `iterable`.
      *
-     * @param  array<\Closure|iterable<int|string, mixed>|string>  $data
+     * @param  iterable<\Closure|iterable<int|string, mixed>|string>  $data
      */
     public function with(Closure|iterable|string ...$data): self
     {
