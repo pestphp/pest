@@ -10,7 +10,7 @@ namespace Pest\Contracts\Plugins;
 interface HandlesArguments
 {
     /**
-     * Adds arguments before of the Test Suite execution.
+     * Adds arguments before the Test Suite execution.
      *
      * @param  array<int, string>  $arguments
      * @return array<int, string>

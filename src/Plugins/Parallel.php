@@ -14,14 +14,15 @@ use Pest\Support\Arr;
 use Pest\Support\Container;
 use Pest\TestSuite;
 use function Pest\version;
+use Stringable;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArgvInput;
-use Symfony\Component\Console\Output\OutputInterface;
 
 final class Parallel implements HandlesArguments
 {
     use HandleArguments;
+
+    private const GLOBAL_PREFIX = 'PEST_PARALLEL_GLOBAL_';
 
     private const HANDLERS = [
         Parallel\Handlers\Parallel::class,
@@ -60,6 +61,33 @@ final class Parallel implements HandlesArguments
     }
 
     /**
+     * Sets a global value that can be accessed by the parent process and all workers.
+     */
+    public static function setGlobal(string $key, string|int|bool|Stringable $value): void
+    {
+        $data = ['value' => $value instanceof Stringable ? $value->__toString() : $value];
+
+        $_ENV[self::GLOBAL_PREFIX.$key] = json_encode($data, JSON_THROW_ON_ERROR);
+    }
+
+    /**
+     * Returns the given global value if one has been set.
+     */
+    public static function getGlobal(string $key): string|int|bool|null
+    {
+        $placesToCheck = [$_SERVER, $_ENV];
+
+        foreach ($placesToCheck as $location) {
+            if (array_key_exists(self::GLOBAL_PREFIX.$key, $location)) {
+                // @phpstan-ignore-next-line
+                return json_decode((string) $location[self::GLOBAL_PREFIX.$key], true, 512, JSON_THROW_ON_ERROR)['value'] ?? null;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function handleArguments(array $arguments): array
@@ -86,12 +114,6 @@ final class Parallel implements HandlesArguments
      */
     private function runTestSuiteInParallel(array $arguments): int
     {
-        if (! class_exists(ParaTestCommand::class)) {
-            $this->askUserToInstallParatest();
-
-            return Command::FAILURE;
-        }
-
         $handlers = array_filter(
             array_map(fn ($handler): object|string => Container::getInstance()->get($handler), self::HANDLERS),
             fn ($handler): bool => $handler instanceof HandlesArguments,
@@ -126,20 +148,6 @@ final class Parallel implements HandlesArguments
             fn ($arguments, HandlersWorkerArguments $handler): array => $handler->handleWorkerArguments($arguments),
             $arguments
         );
-    }
-
-    /**
-     * Outputs a message to the user asking them to install ParaTest as a dev dependency.
-     */
-    private function askUserToInstallParatest(): void
-    {
-        /** @var OutputInterface $output */
-        $output = Container::getInstance()->get(OutputInterface::class);
-
-        $output->writeln([
-            '<fg=red>Pest Parallel requires ParaTest to run.</>',
-            'Please run <fg=yellow>composer require --dev brianium/paratest</>.',
-        ]);
     }
 
     /**
