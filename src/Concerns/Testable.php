@@ -241,7 +241,7 @@ trait Testable
                     continue;
                 }
 
-                if (in_array($testParameterTypes[$argumentIndex], [\Closure::class, 'callable', 'mixed'])) {
+                if (in_array($testParameterTypes[$argumentIndex], [Closure::class, 'callable', 'mixed'])) {
                     continue;
                 }
 
@@ -255,7 +255,7 @@ trait Testable
             return $arguments;
         }
 
-        if (in_array($testParameterTypes[0], [\Closure::class, 'callable'])) {
+        if (in_array($testParameterTypes[0], [Closure::class, 'callable'])) {
             return $arguments;
         }
 
@@ -291,7 +291,7 @@ trait Testable
             return;
         }
 
-        throw new DatasetArgsCountMismatch($this->dataName(), $requiredParametersCount, $suppliedParametersCount);
+        throw new DatasetArgsCountMismatch($requiredParametersCount, $suppliedParametersCount);
     }
 
     /**
