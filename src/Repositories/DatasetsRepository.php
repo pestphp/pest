@@ -235,6 +235,6 @@ final class DatasetsRepository
             return sprintf('(%s)', $exporter->shortenedRecursiveExport($data));
         }
 
-        return sprintf('data set "%s"', $key);
+        return sprintf('dataset "%s"', $key);
     }
 }
