@@ -8,8 +8,8 @@ use Exception;
 
 final class DatasetArgsCountMismatch extends Exception
 {
-    public function __construct(string $dataName, int $requiredCount, int $suppliedCount)
+    public function __construct(int $requiredCount, int $suppliedCount)
     {
-        parent::__construct(sprintf('Test expects %d arguments but dataset [%s] only provides %d', $requiredCount, $dataName, $suppliedCount));
+        parent::__construct(sprintf('Test expects %d arguments but dataset only provides %d', $requiredCount, $suppliedCount));
     }
 }
