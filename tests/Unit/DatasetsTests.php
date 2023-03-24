@@ -10,8 +10,8 @@ it('show only the names of named datasets in their description', function () {
         ],
     ], __FILE__));
 
-    expect($descriptions[0])->toBe('data set "one"')
-        ->and($descriptions[1])->toBe('data set "two"');
+    expect($descriptions[0])->toBe('dataset "one"')
+        ->and($descriptions[1])->toBe('dataset "two"');
 });
 
 it('show the actual dataset of non-named datasets in their description', function () {
@@ -38,10 +38,10 @@ it('show only the names of multiple named datasets in their description', functi
         ],
     ], __FILE__));
 
-    expect($descriptions[0])->toBe('data set "one" / data set "three"');
-    expect($descriptions[1])->toBe('data set "one" / data set "four"');
-    expect($descriptions[2])->toBe('data set "two" / data set "three"');
-    expect($descriptions[3])->toBe('data set "two" / data set "four"');
+    expect($descriptions[0])->toBe('dataset "one" / dataset "three"');
+    expect($descriptions[1])->toBe('dataset "one" / dataset "four"');
+    expect($descriptions[2])->toBe('dataset "two" / dataset "three"');
+    expect($descriptions[3])->toBe('dataset "two" / dataset "four"');
 });
 
 it('show the actual dataset of multiple non-named datasets in their description', function () {
@@ -74,10 +74,10 @@ it('show the correct description for mixed named and not-named datasets', functi
         ],
     ], __FILE__));
 
-    expect($descriptions[0])->toBe('data set "one" / (3)');
-    expect($descriptions[1])->toBe('data set "one" / data set "four"');
+    expect($descriptions[0])->toBe('dataset "one" / (3)');
+    expect($descriptions[1])->toBe('dataset "one" / dataset "four"');
     expect($descriptions[2])->toBe('([2]) / (3)');
-    expect($descriptions[3])->toBe('([2]) / data set "four"');
+    expect($descriptions[3])->toBe('([2]) / dataset "four"');
 });
 
 it('shows the correct description for long texts with newlines', function () {
