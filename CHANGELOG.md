@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## [v2.2.3 (2023-03-24)](https://github.com/pestphp/pest/compare/v2.2.2...v2.2.3)
+
+### Fixed
+- Unnecessary dataset on dataset arguments missmatch ([#736](https://github.com/pestphp/pest/pull/736))
+- Parallel arguments on plugins order ([#703](https://github.com/pestphp/pest/pull/703))
+- Arch plugin runtime exceptions on bad phpdocs ([2f2b51c](https://github.com/pestphp/pest/commit/2f2b51ce3d1b000be9d6add0e785fd0044931b3b))
+
 ## [v2.2.2 (2023-03-23)](https://github.com/pestphp/pest/compare/v2.2.1...v2.2.2)
 
 ### Fixed
