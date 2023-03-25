@@ -8,6 +8,7 @@ on:
 
 jobs:
   ci:
+    if: github.event_name != 'schedule' || github.repository == 'pestphp/pest'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
