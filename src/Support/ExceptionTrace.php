@@ -33,7 +33,7 @@ final class ExceptionTrace
                 $message = str_replace(self::UNDEFINED_METHOD, 'Call to undefined method ', $message);
 
                 if (class_exists($class) && count(class_parents($class)) > 0 && array_values(class_parents($class))[0] === TestCase::class) {
-                    $message .= '. Did you forget to use the [uses()] function? https://pestphp.com/docs/configuring-tests';
+                    $message .= '. Did you forget to use the [uses()] function? Read more at: https://pestphp.com/docs/configuring-tests';
                 }
 
                 Reflection::setPropertyValue($throwable, 'message', $message);
