@@ -17,5 +17,5 @@ it('ensures the given closures reports the correct class name and suggests the [
     $this->get();
 })->throws(
     Error::class,
-    'Call to undefined method Tests\Unit\Support\ExceptionTrace::get(). Did you forget to use the [uses()] function? https://pestphp.com/docs/configuring-tests',
+    'Call to undefined method Tests\Unit\Support\ExceptionTrace::get(). Did you forget to use the [uses()] function? Read more at: https://pestphp.com/docs/configuring-tests',
 );
