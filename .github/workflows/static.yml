@@ -8,6 +8,7 @@ on:
 
 jobs:
   static:
+    if: github.event_name != 'schedule' || github.repository == 'pestphp/pest'
     name: Static Tests
 
     runs-on: ubuntu-latest
