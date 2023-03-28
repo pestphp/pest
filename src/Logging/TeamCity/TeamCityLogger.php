@@ -44,6 +44,8 @@ final class TeamCityLogger
 {
     private ?HRTime $time = null;
 
+    private bool $isSummaryTestCountPrinted = false;
+
     /**
      * @throws EventFacadeIsSealedException
      * @throws UnknownSubscriberTypeException
@@ -66,6 +68,15 @@ final class TeamCityLogger
         );
 
         $this->output($message);
+
+        if (! $this->isSummaryTestCountPrinted) {
+            $this->isSummaryTestCountPrinted = true;
+            $message = ServiceMessage::testSuiteCount(
+                $this->converter->getTestSuiteSize($event->testSuite())
+            );
+
+            $this->output($message);
+        }
     }
 
     public function testSuiteFinished(TestSuiteFinished $event): void

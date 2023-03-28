@@ -1,4 +1,5 @@
 ##teamcity[testSuiteStarted name='Tests/tests/Failure' locationHint='file://tests/.tests/Failure.php' flowId='1234']
+##teamcity[testCount count='6' flowId='1234']
 ##teamcity[testStarted name='it can fail with comparison' locationHint='pest_qn://tests/.tests/Failure.php::it can fail with comparison' flowId='1234']
 ##teamcity[testFailed name='it can fail with comparison' message='Failed asserting that true matches expected false.' details='at src/Mixins/Expectation.php:343|nat src/Support/ExpectationPipeline.php:75|nat src/Support/ExpectationPipeline.php:79|nat src/Expectation.php:300|nat tests/.tests/Failure.php:6|nat src/Factories/TestCaseMethodFactory.php:100|nat src/Concerns/Testable.php:302|nat src/Support/ExceptionTrace.php:28|nat src/Concerns/Testable.php:302|nat src/Concerns/Testable.php:221|nat src/Kernel.php:86' type='comparisonFailure' actual='true' expected='false' flowId='1234']
 ##teamcity[testFinished name='it can fail with comparison' duration='100000' flowId='1234']
