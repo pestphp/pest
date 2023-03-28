@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## [v2.3.0 (2023-03-28)](https://github.com/pestphp/pest/compare/v2.2.3...v2.3.0)
+
+### Added
+- Better error handler about missing uses ([#743](https://github.com/pestphp/pest/pull/743))
+
+### Fixed
+- Inconsistent spelling of `dataset` ([#739](https://github.com/pestphp/pest/pull/739))
+
+### Chore
+- Bumps PHPUnit to `^10.0.19` ([3d7e621](https://github.com/pestphp/pest/commit/3d7e621b7dfc03f0b2d9dcf6eb06c26bc383f502))
+
 ## [v2.2.3 (2023-03-24)](https://github.com/pestphp/pest/compare/v2.2.2...v2.2.3)
 
 ### Fixed
