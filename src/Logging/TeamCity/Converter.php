@@ -167,6 +167,14 @@ final class Converter
     }
 
     /**
+     * Gets the test suite size.
+     */
+    public function getTestSuiteSize(TestSuite $testSuite): int
+    {
+        return $testSuite->count();
+    }
+
+    /**
      * Transforms the given path in relative path.
      */
     private function toRelativePath(string $path): string

@@ -40,6 +40,13 @@ final class ServiceMessage
         ]);
     }
 
+    public static function testSuiteCount(int $count): self
+    {
+        return new self('testCount', [
+            'count' => $count,
+        ]);
+    }
+
     public static function testSuiteFinished(string $name): self
     {
         return new self('testSuiteFinished', [
