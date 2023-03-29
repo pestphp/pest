@@ -8,4 +8,10 @@
    PASS  Tests\Fixtures\ExampleTest
   ✓ it example 2
 
-  Tests:    2 skipped, 2 passed (2 assertions)
+   WARN  Tests\Fixtures\Inheritance\Base\ExampleTest
+  - example
+
+   PASS  Tests\Fixtures\Inheritance\ExampleTest
+  ✓ example
+
+  Tests:    3 skipped, 3 passed (3 assertions)

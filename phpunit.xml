@@ -18,6 +18,7 @@
       <directory suffix=".php">./tests</directory>
       <exclude>./tests/.snapshots</exclude>
       <exclude>./tests/.tests</exclude>
+      <exclude>./tests/Fixtures/Inheritance</exclude>
     </testsuite>
   </testsuites>
   <coverage>

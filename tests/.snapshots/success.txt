@@ -988,6 +988,7 @@
 
    PASS  Tests\Visual\Parallel
   ✓ parallel
+  ✓ a parallel test can extend another test with same name
 
    PASS  Tests\Visual\SingleTestOrDirectory
   ✓ allows to run a single test
@@ -1008,4 +1009,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 14 skipped, 705 passed (1706 assertions)
+  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 14 skipped, 706 passed (1707 assertions)
