@@ -41,6 +41,7 @@
     "autoload-dev": {
         "psr-4": {
             "Tests\\Fixtures\\Covers\\": "tests/Fixtures/Covers",
+            "Tests\\Fixtures\\Inheritance\\": "tests/Fixtures/Inheritance",
             "Tests\\": "tests/PHPUnit/"
         },
         "files": [

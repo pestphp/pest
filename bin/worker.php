@@ -92,7 +92,7 @@ $bootPest = (static function (): void {
             exit;
         }
 
-        $exitCode = $application->runTest(trim($testPath));
+        $exitCode = $application->runTest(realpath(trim($testPath)));
 
         fwrite($statusFile, (string) $exitCode);
         fflush($statusFile);
