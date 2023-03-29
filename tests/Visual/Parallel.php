@@ -23,6 +23,5 @@ test('parallel', function () use ($run) {
 })->skip(PHP_OS_FAMILY === 'Windows');
 
 test('a parallel test can extend another test with same name', function () use ($run) {
-    expect($run('--configuration=tests/Fixtures/phpunit-parallel-inheritance.xml'))
-        ->toContain('1 passed');
+    expect($run('tests/Fixtures/Inheritance'))->toContain('Tests:    1 skipped, 1 passed (1 assertions)');
 });
