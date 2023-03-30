@@ -673,6 +673,7 @@
   ✓ it throws error if method do not exist
   ✓ it can forward unexpected calls to any global function
   ✓ it can use helpers from helpers file
+  ✓ it can use helpers from helpers directory
 
    PASS  Tests\Features\HigherOrderTests
   ✓ it proxies calls to object
@@ -788,6 +789,9 @@
 
    PASS  Tests\Fixtures\ExampleTest
   ✓ it example 2
+
+   PASS  Tests\Helpers\TestInHelpers
+  ✓ it executes tests in the Helpers directory
 
    PASS  Tests\Hooks\AfterAllTest
   ✓ global afterAll execution order
@@ -1009,4 +1013,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 14 skipped, 706 passed (1707 assertions)
+  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 14 skipped, 708 passed (1709 assertions)

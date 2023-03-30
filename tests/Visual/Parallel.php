@@ -18,10 +18,10 @@ $run = function () {
 
 test('parallel', function () use ($run) {
     expect($run('--exclude-group=integration'))
-        ->toContain('Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 11 skipped, 694 passed (1692 assertions)')
+        ->toContain('Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 11 skipped, 696 passed (1694 assertions)')
         ->toContain('Parallel: 3 processes');
 })->skip(PHP_OS_FAMILY === 'Windows');
 
 test('a parallel test can extend another test with same name', function () use ($run) {
-    expect($run('tests/Fixtures/Inheritance'))->toContain('Tests:    1 skipped, 1 passed (1 assertions)');
+    expect($run('tests/Fixtures/Inheritance'))->toContain('Tests:    1 skipped, 2 passed (2 assertions)');
 });

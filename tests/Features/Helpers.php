@@ -44,3 +44,5 @@ it('throws error if method do not exist', function () {
 it('can forward unexpected calls to any global function')->_assertThat();
 
 it('can use helpers from helpers file')->myAssertTrue(true);
+
+it('can use helpers from helpers directory')->myDirectoryAssertTrue(true);

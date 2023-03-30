@@ -1,5 +1,5 @@
 
-  ⨯.
+  .⨯.
   ────────────────────────────────────────────────────────────────────────────  
    FAILED  Tests\Fixtures\CollisionTest > error                     Exception   
   error
@@ -19,4 +19,4 @@
   2   src/Factories/TestCaseMethodFactory.php:100
 
 
-  Tests:    1 failed, 1 passed (1 assertions)
+  Tests:    1 failed, 2 passed (2 assertions)
