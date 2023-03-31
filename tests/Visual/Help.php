@@ -18,4 +18,4 @@ test('visual snapshot of help command output', function () {
     }
 
     expect($output())->toContain(file_get_contents($snapshot));
-})->skip(PHP_OS_FAMILY === 'Windows');
+})->skipOnWindows();

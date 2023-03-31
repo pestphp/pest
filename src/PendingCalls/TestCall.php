@@ -173,6 +173,17 @@ final class TestCall
     }
 
     /**
+     * Skips the current test if the given test is running on Windows.
+     */
+    public function skipOnWindows(): self
+    {
+        return $this->skip(
+            PHP_OS_FAMILY === 'Windows',
+            'This test is skipped on Windows.',
+        );
+    }
+
+    /**
      * Sets the test as "todo".
      */
     public function todo(): self

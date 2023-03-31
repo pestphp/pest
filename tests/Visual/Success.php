@@ -41,4 +41,4 @@ test('visual snapshot of test suite on success', function () {
         expect(implode("\n", $output))->toContain(file_get_contents($snapshot));
     }
 })->skip(! getenv('REBUILD_SNAPSHOTS') && getenv('EXCLUDE'))
-    ->skip(PHP_OS_FAMILY === 'Windows');
+    ->skipOnWindows();
