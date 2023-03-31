@@ -184,6 +184,8 @@ final class TestCall
                 );
             }
         }
+
+        return $this;
     }
 
     /**
