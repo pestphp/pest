@@ -868,6 +868,9 @@
   ✓ it throw expectation failed exception with string argument
   ✓ it throw expectation failed exception with array argument
 
+   PASS  Tests\Unit\Overrides\ThrowableBuilder
+  ✓ collision editor can be added to the stack trace
+
    PASS  Tests\Unit\Plugins\Environment
   ✓ environment is set to CI when --ci option is used
   ✓ environment is set to Local when --ci option is not used
@@ -1013,4 +1016,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 14 skipped, 708 passed (1709 assertions)
+  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 14 skipped, 709 passed (1711 assertions)

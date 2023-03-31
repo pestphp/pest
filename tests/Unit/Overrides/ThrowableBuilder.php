@@ -21,8 +21,8 @@ test('collision editor can be added to the stack trace', function () {
         }
     };
 
-    expect(ThrowableBuilder::from($exception))
-        ->stackTrace()->toStartWith('/data/projects/open-source/pest/tests/Unit/Overrides/../../Pest.php:5')
-        ->and(ThrowableBuilder::from(new Exception('test')))
-        ->stackTrace()->toStartWith('/data/projects/open-source/pest/tests/Unit/Overrides/ThrowableBuilder.php:26');
+    expect(ThrowableBuilder::from($exception)->stackTrace())
+        ->toContain('tests/Unit/Overrides/../../Pest.php:5')
+        ->and(ThrowableBuilder::from(new Exception('test'))->stackTrace())
+        ->toContain('tests/Unit/Overrides/ThrowableBuilder.php:26');
 });
