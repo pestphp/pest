@@ -173,14 +173,22 @@ final class TestCall
     }
 
     /**
+     * Skips the current test if the given test is running on given os family.
+     */
+    public function skipOsFamily(string $osFamily): self
+    {
+        return $this->skip(
+            PHP_OS_FAMILY === $osFamily,
+            "This test is skipped on $osFamily.",
+        );
+    }
+
+    /**
      * Skips the current test if the given test is running on Windows.
      */
     public function skipOnWindows(): self
     {
-        return $this->skip(
-            PHP_OS_FAMILY === 'Windows',
-            'This test is skipped on Windows.',
-        );
+        return $this->skipOsFamily('Windows');
     }
 
     /**
