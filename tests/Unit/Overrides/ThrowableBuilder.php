@@ -21,8 +21,8 @@ test('collision editor can be added to the stack trace', function () {
         }
     };
 
-    expect(ThrowableBuilder::from($exception)->stackTrace())
+    expect(str_replace(DIRECTORY_SEPARATOR, '/', ThrowableBuilder::from($exception)->stackTrace()))
         ->toContain('tests/Unit/Overrides/../../Pest.php:5')
-        ->and(ThrowableBuilder::from(new Exception('test'))->stackTrace())
+        ->and(str_replace(DIRECTORY_SEPARATOR, '/', ThrowableBuilder::from(new Exception('test'))->stackTrace()))
         ->toContain('tests/Unit/Overrides/ThrowableBuilder.php:26');
 });
