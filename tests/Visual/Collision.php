@@ -39,4 +39,4 @@ test('collision', function (array $arguments) {
 })->with([
     [['']],
     [['--parallel']],
-])->skip(PHP_OS_FAMILY === 'Windows');
+])->skipOnWindows();

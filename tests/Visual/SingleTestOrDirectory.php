@@ -24,11 +24,11 @@ $snapshot = function ($name) {
 
 test('allows to run a single test', function () use ($run, $snapshot) {
     expect($run('tests/Fixtures/DirectoryWithTests/ExampleTest.php'))->toContain($snapshot('allows-to-run-a-single-test'));
-})->skip(PHP_OS_FAMILY === 'Windows');
+})->skipOnWindows();
 
 test('allows to run a directory', function () use ($run, $snapshot) {
     expect($run('tests/Fixtures'))->toContain($snapshot('allows-to-run-a-directory'));
-})->skip(PHP_OS_FAMILY === 'Windows');
+})->skipOnWindows();
 
 it('disable decorating printer when colors is set to never', function () use ($snapshot) {
     $process = new Process([
@@ -40,4 +40,4 @@ it('disable decorating printer when colors is set to never', function () use ($s
     $process->run();
     $output = $process->getOutput();
     expect($output)->toContain($snapshot('disable-decorating-printer'));
-})->skip(PHP_OS_FAMILY === 'Windows');
+})->skipOnWindows();
