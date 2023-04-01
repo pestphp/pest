@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Added
+- `skipOnWindows()`, `skipOnMac()`, and `skipOnLinux()` ([#757](https://github.com/pestphp/pest/pull/757))
+
+### Fixed
+- Tests on `tests/Helpers` directory not being executed ([#753](https://github.com/pestphp/pest/pull/753))
+- Teamcity count ([#747](https://github.com/pestphp/pest/pull/747))
+- Parallel executation when class extends class with same name ([#748](https://github.com/pestphp/pest/pull/748))
+- Wording on `uses()` hint ([#745](https://github.com/pestphp/pest/pull/745/files))
+
 ## [v2.3.0 (2023-03-28)](https://github.com/pestphp/pest/compare/v2.2.3...v2.3.0)
 
 ### Added
