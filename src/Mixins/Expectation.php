@@ -296,8 +296,8 @@ final class Expectation
      */
     public function toHaveProperties(iterable $names, string $message = ''): self
     {
-        foreach ($names as $name) {
-            $this->toHaveProperty($name, message: $message);
+        foreach ($names as $name => $value) {
+            is_int($name) ? $this->toHaveProperty($value, message: $message) : $this->toHaveProperty($name, $value, $message);
         }
 
         return $this;
