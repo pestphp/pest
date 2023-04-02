@@ -4,6 +4,7 @@
 
 ### Added
 - `skipOnWindows()`, `skipOnMac()`, and `skipOnLinux()` ([#757](https://github.com/pestphp/pest/pull/757))
+- source architecture testing violation ([#1](https://github.com/pestphp/pest-plugin-arch/pull/1))((8e66263)[https://github.com/pestphp/pest-plugin-arch/commit/8e66263104304e99e3d6ceda25c7ed679b27fb03])
 
 ### Fixed
 - Tests on `tests/Helpers` directory not being executed ([#753](https://github.com/pestphp/pest/pull/753))
