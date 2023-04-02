@@ -1016,4 +1016,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 14 skipped, 709 passed (1711 assertions)
+  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 14 skipped, 709 passed (1717 assertions)
