@@ -22,7 +22,7 @@
         "nunomaduro/collision": "^7.4.0",
         "nunomaduro/termwind": "^1.15.1",
         "pestphp/pest-plugin": "^2.0.1",
-        "pestphp/pest-plugin-arch": "^2.1.0",
+        "pestphp/pest-plugin-arch": "^2.1.1",
         "phpunit/phpunit": "^10.0.19"
     },
     "conflict": {
