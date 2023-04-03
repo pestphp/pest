@@ -64,7 +64,7 @@ final class Converter
     }
 
     /**
-     * Gets the exception messsage.
+     * Gets the exception message.
      */
     public function getExceptionMessage(Throwable $throwable): string
     {
