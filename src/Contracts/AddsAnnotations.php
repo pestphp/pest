@@ -7,7 +7,7 @@ namespace Pest\Contracts;
 use Pest\Factories\TestCaseMethodFactory;
 
 /**
- * @interal
+ * @internal
  */
 interface AddsAnnotations
 {

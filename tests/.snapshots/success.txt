@@ -332,14 +332,14 @@
   ✓ failures with custom message
   ✓ not failures
 
-   PASS  Tests\Features\Expect\toBeGreatherThan
+   PASS  Tests\Features\Expect\toBeGreaterThan
   ✓ passes
   ✓ passes with DateTime and DateTimeImmutable
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
 
-   PASS  Tests\Features\Expect\toBeGreatherThanOrEqual
+   PASS  Tests\Features\Expect\toBeGreaterThanOrEqual
   ✓ passes
   ✓ passes with DateTime and DateTimeImmutable
   ✓ failures

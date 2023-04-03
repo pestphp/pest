@@ -12,7 +12,7 @@
 ### Fixed
 - Tests on `tests/Helpers` directory not being executed ([#753](https://github.com/pestphp/pest/pull/753))
 - Teamcity count ([#747](https://github.com/pestphp/pest/pull/747))
-- Parallel executation when class extends class with same name ([#748](https://github.com/pestphp/pest/pull/748))
+- Parallel execution when class extends class with same name ([#748](https://github.com/pestphp/pest/pull/748))
 - Wording on `uses()` hint ([#745](https://github.com/pestphp/pest/pull/745/files))
 
 ## [v2.3.0 (2023-03-28)](https://github.com/pestphp/pest/compare/v2.2.3...v2.3.0)
@@ -29,14 +29,14 @@
 ## [v2.2.3 (2023-03-24)](https://github.com/pestphp/pest/compare/v2.2.2...v2.2.3)
 
 ### Fixed
-- Unnecessary dataset on dataset arguments missmatch ([#736](https://github.com/pestphp/pest/pull/736))
+- Unnecessary dataset on dataset arguments mismatch ([#736](https://github.com/pestphp/pest/pull/736))
 - Parallel arguments on plugins order ([#703](https://github.com/pestphp/pest/pull/703))
 - Arch plugin runtime exceptions on bad phpdocs ([2f2b51c](https://github.com/pestphp/pest/commit/2f2b51ce3d1b000be9d6add0e785fd0044931b3b))
 
 ## [v2.2.2 (2023-03-23)](https://github.com/pestphp/pest/compare/v2.2.1...v2.2.2)
 
 ### Fixed
-- Edge case in parallel executation test description ([3ce6408](https://github.com/pestphp/pest/commit/3ce640819541ca6022b250e000f336d87c3e7889))
+- Edge case in parallel execution test description ([3ce6408](https://github.com/pestphp/pest/commit/3ce640819541ca6022b250e000f336d87c3e7889))
 
 ## [v2.2.1 (2023-03-22)](https://github.com/pestphp/pest/compare/v2.2.0...v2.2.1)
 

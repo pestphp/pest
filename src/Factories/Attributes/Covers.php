@@ -14,7 +14,7 @@ use Pest\Factories\TestCaseMethodFactory;
 final class Covers extends Attribute
 {
     /**
-     * Determine if the attribute should be placed above the classe instead of above the method.
+     * Determine if the attribute should be placed above the class instead of above the method.
      */
     public static bool $above = true;
 
