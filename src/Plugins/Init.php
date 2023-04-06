@@ -26,11 +26,11 @@ final class Init implements HandlesArguments
      * The files that will be created.
      */
     private const STUBS = [
-        'phpunit.xml' => 'phpunit.xml',
-        'Pest.php' => 'tests/Pest.php',
-        'TestCase.php' => 'tests/TestCase.php',
-        'Unit/ExampleTest.php' => 'tests/Unit/ExampleTest.php',
-        'Feature/ExampleTest.php' => 'tests/Feature/ExampleTest.php',
+        'phpunit.xml.stub' => 'phpunit.xml',
+        'Pest.php.stub' => 'tests/Pest.php',
+        'TestCase.php.stub' => 'tests/TestCase.php',
+        'Unit/ExampleTest.php.stub' => 'tests/Unit/ExampleTest.php',
+        'Feature/ExampleTest.php.stub' => 'tests/Feature/ExampleTest.php',
     ];
 
     /**
