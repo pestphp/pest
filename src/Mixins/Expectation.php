@@ -900,7 +900,7 @@ final class Expectation
      */
     private function export(mixed $value): string
     {
-        if ($this->exporter === null) {
+        if (! $this->exporter instanceof \Pest\Support\Exporter) {
             $this->exporter = Exporter::default();
         }
 

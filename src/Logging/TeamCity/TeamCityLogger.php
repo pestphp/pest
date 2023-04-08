@@ -180,7 +180,7 @@ final class TeamCityLogger
 
     public function testFinished(Finished $event): void
     {
-        if ($this->time === null) {
+        if (! $this->time instanceof \PHPUnit\Event\Telemetry\HRTime) {
             throw ShouldNotHappen::fromMessage('Start time has not been set.');
         }
 
