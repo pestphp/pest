@@ -46,6 +46,10 @@ final class Coverage
             return true;
         }
 
+        if ($runtime->hasPHPDBGCodeCoverage()) {
+            return true;
+        }
+
         if (! $runtime->hasXdebug()) {
             return true;
         }
