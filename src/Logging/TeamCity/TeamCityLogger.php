@@ -34,6 +34,7 @@ use PHPUnit\Event\TestSuite\Finished as TestSuiteFinished;
 use PHPUnit\Event\TestSuite\Started as TestSuiteStarted;
 use PHPUnit\Event\UnknownSubscriberTypeException;
 use PHPUnit\TestRunner\TestResult\Facade as TestResultFacade;
+use ReflectionClass;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -207,13 +208,16 @@ final class TeamCityLogger
         $style = new Style($this->output);
 
         $telemetry = $event->telemetryInfo();
+
         if ($this->withoutDuration) {
+            $reflector = new ReflectionClass($telemetry);
+            $property = $reflector->getProperty('snapshot');
+            $property->setAccessible(true);
+            $snapshot = $property->getValue($telemetry);
+            assert($snapshot instanceof Snapshot);
+
             $telemetry = new Info(
-                new Snapshot(
-                    $telemetry->time(),
-                    $telemetry->memoryUsage(),
-                    $telemetry->peakMemoryUsage(),
-                ),
+                $snapshot,
                 Duration::fromSecondsAndNanoseconds(1, 0),
                 $telemetry->memoryUsageSinceStart(),
                 $telemetry->durationSincePrevious(),

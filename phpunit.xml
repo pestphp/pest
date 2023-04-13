@@ -21,9 +21,9 @@
       <exclude>./tests/Fixtures/Inheritance</exclude>
     </testsuite>
   </testsuites>
-  <coverage>
+  <source>
     <include>
       <directory suffix=".php">./src</directory>
     </include>
-  </coverage>
+  </source>
 </phpunit>
