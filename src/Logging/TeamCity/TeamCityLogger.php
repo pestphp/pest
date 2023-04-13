@@ -211,7 +211,8 @@ final class TeamCityLogger
 
         if ($this->withoutDuration) {
             $reflector = new ReflectionClass($telemetry);
-            $property = $reflector->getProperty('snapshot');
+
+            $property = $reflector->getProperty('current');
             $property->setAccessible(true);
             $snapshot = $property->getValue($telemetry);
             assert($snapshot instanceof Snapshot);

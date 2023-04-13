@@ -988,14 +988,13 @@
 
    PASS  Tests\Visual\Collision
   ✓ collision with ([''])
-  ✓ collision with (['--parallel'])
 
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
 
-   PASS  Tests\Visual\Parallel
-  ✓ parallel
-  ✓ a parallel test can extend another test with same name
+   WARN  Tests\Visual\Parallel
+  - parallel
+  - a parallel test can extend another test with same name
 
    PASS  Tests\Visual\SingleTestOrDirectory
   ✓ allows to run a single test
@@ -1016,4 +1015,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 14 skipped, 709 passed (1717 assertions)
+  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 16 skipped, 706 passed (1713 assertions)

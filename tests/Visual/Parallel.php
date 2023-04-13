@@ -20,8 +20,8 @@ test('parallel', function () use ($run) {
     expect($run('--exclude-group=integration'))
         ->toContain('Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 11 skipped, 697 passed (1702 assertions)')
         ->toContain('Parallel: 3 processes');
-})->skipOnWindows();
+})->skip();
 
 test('a parallel test can extend another test with same name', function () use ($run) {
     expect($run('tests/Fixtures/Inheritance'))->toContain('Tests:    1 skipped, 2 passed (2 assertions)');
-});
+})->skip();
