@@ -27,7 +27,7 @@
     },
     "conflict": {
         "webmozart/assert": "<1.11.0",
-        "phpunit/phpunit": "<10.1.0"
+        "phpunit/phpunit": ">10.1.0"
     },
     "autoload": {
         "psr-4": {
