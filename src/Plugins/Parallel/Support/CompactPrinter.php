@@ -7,6 +7,7 @@ namespace Pest\Plugins\Parallel\Support;
 use NunoMaduro\Collision\Adapters\Phpunit\State;
 use NunoMaduro\Collision\Adapters\Phpunit\Style;
 use ParaTest\Options;
+use PHPUnit\Event\Telemetry\GarbageCollectorStatus;
 use PHPUnit\Event\Telemetry\HRTime;
 use PHPUnit\Event\Telemetry\Info;
 use PHPUnit\Event\Telemetry\MemoryUsage;
@@ -122,11 +123,25 @@ final class CompactPrinter
         $snapshotDuration = HRTime::fromSecondsAndNanoseconds((int) $duration->asSeconds(), $nanoseconds);
         $telemetryDuration = \PHPUnit\Event\Telemetry\Duration::fromSecondsAndNanoseconds((int) $duration->asSeconds(), $nanoseconds);
 
+        $status = gc_status();
+
+        $garbageCollectorStatus = new GarbageCollectorStatus(
+            $status['runs'],
+            $status['collected'],
+            $status['threshold'],
+            $status['roots'],
+            null,
+            null,
+            null,
+            null,
+        );
+
         $telemetry = new Info(
             new Snapshot(
                 $snapshotDuration,
                 MemoryUsage::fromBytes(0),
                 MemoryUsage::fromBytes(0),
+                $garbageCollectorStatus,
             ),
             $telemetryDuration,
             MemoryUsage::fromBytes(0),

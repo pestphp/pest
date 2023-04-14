@@ -153,7 +153,7 @@
 
    DEPR  Tests\Features\Deprecated
   ! deprecated → str_contains(): Passing null to parameter #2 ($needle) of type string is deprecated // tests/Features/Deprecated.php:6
-  ! user deprecated → Since foo 1.0: This is a deprecation description // vendor/symfony/deprecation-contracts/function.php:25
+  ✓ user deprecated
 
    PASS  Tests\Features\Exceptions
   ✓ it gives access the the underlying expectException
@@ -1016,4 +1016,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 14 skipped, 709 passed (1717 assertions)
+  Tests:    1 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 14 skipped, 710 passed (1717 assertions)
