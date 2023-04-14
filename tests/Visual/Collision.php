@@ -38,4 +38,5 @@ test('collision', function (array $arguments) {
     expect($output())->toContain(file_get_contents($snapshot));
 })->with([
     [['']],
+    [['--parallel']],
 ])->skipOnWindows();

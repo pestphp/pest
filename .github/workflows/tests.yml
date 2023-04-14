@@ -43,6 +43,4 @@ jobs:
 
     - name: Unit Tests in Parallel
       run: composer test:parallel
-      # Waiting for Paratest support...
-      if: false
 
