@@ -2,7 +2,12 @@
 
 ## Unreleased
 
-## [v2.3.0 (2023-04-03)](https://github.com/pestphp/pest/compare/v2.3.0...v2.4.0)
+## [v2.5.0 (2023-04-14)](https://github.com/pestphp/pest/compare/v2.4.0...v2.5.0)
+
+### Chore
+- Bumps PHPUnit to `^10.1.0` ([#780](https://github.com/pestphp/pest/pull/780))
+
+## [v2.4.0 (2023-04-03)](https://github.com/pestphp/pest/compare/v2.3.0...v2.4.0)
 
 ### Added
 - `skipOnWindows()`, `skipOnMac()`, and `skipOnLinux()` ([#757](https://github.com/pestphp/pest/pull/757))
