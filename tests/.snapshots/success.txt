@@ -977,6 +977,7 @@
   ✓ Німеччина
   ✓ Nam Định
   ✓ 呼和浩特
+  ✓ test /** with comment */ should do
 
    PASS  Tests\Unit\TestSuite
   ✓ it does not allow to add the same test description twice
@@ -1016,4 +1017,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    1 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 14 skipped, 710 passed (1717 assertions)
+  Tests:    1 deprecated, 3 warnings, 4 incomplete, 1 notice, 4 todos, 14 skipped, 711 passed (1719 assertions)
