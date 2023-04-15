@@ -61,6 +61,7 @@ $names = [
     'Німеччина' => '__pest_evaluable_Німеччина',
     'Nam Định' => '__pest_evaluable_Nam_Định',
     '呼和浩特' => '__pest_evaluable_呼和浩特',
+    'test /** with comment */ should do' => '__pest_evaluable_test_____with_comment____should_do',
 ];
 
 foreach ($names as $name => $methodName) {
