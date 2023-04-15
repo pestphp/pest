@@ -69,6 +69,5 @@ foreach ($names as $name => $methodName) {
         ->expect(fn () => static::getLatestPrintableTestCaseMethodName())
         ->toBe($name)
         ->and(fn () => $this->name())
-        ->toBe($methodName)
-        ->only();
+        ->toBe($methodName);
 }
