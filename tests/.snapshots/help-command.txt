@@ -1,5 +1,5 @@
 
-  Pest Testing Framework 2.4.0.  
+  Pest Testing Framework 2.5.1.  
 
   USAGE: pest <file> [options]  
 

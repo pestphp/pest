@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## [v2.5.1 (2023-04-18)](https://github.com/pestphp/pest/compare/v2.5.0...v2.5.1)
+
+### Chore
+- Bumps PHPUnit to `^10.1.1` ([ec6a817](https://github.com/pestphp/pest/commit/ec6a81735af19f5463d24545df97535d77697ec6))
+
 ## [v2.5.0 (2023-04-14)](https://github.com/pestphp/pest/compare/v2.4.0...v2.5.0)
 
 ### Chore
