@@ -387,7 +387,10 @@ final class Expectation
         return ToUseNothing::make($this);
     }
 
-    public function toBeUsed(): never
+    /**
+     * @return never
+     */
+    public function toBeUsed(): void
     {
         throw InvalidExpectation::fromMethods(['toBeUsed']);
     }
