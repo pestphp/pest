@@ -85,16 +85,16 @@ it('works with higher order tests')
 it('can use the scoped method to lock into the given level for expectations', function () {
     expect(new HasMethods())
         ->attributes()->scoped(fn ($attributes) => $attributes
-            ->name->toBe('Has Methods')
-            ->quantity->toBe(20)
+        ->name->toBe('Has Methods')
+        ->quantity->toBe(20)
         )
         ->name()->toBeString()->toBe('Has Methods')
         ->newInstance()->newInstance()->scoped(fn ($instance) => $instance
-            ->name()->toBe('Has Methods')
-            ->quantity()->toBe(20)
-            ->attributes()->scoped(fn ($attributes) => $attributes
-                ->name->toBe('Has Methods')
-                ->quantity->toBe(20)
+        ->name()->toBe('Has Methods')
+        ->quantity()->toBe(20)
+        ->attributes()->scoped(fn ($attributes) => $attributes
+        ->name->toBe('Has Methods')
+        ->quantity->toBe(20)
             )
         );
 });

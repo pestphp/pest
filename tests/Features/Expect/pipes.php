@@ -171,19 +171,19 @@ test('pipe works with negated expectation', function () use ($state) {
     $state->reset();
 
     expect($char)->not->toBe(new Char('B'))
-       ->and($state)
-       ->runCount->toMatchArray([
-           'char' => 1,
-           'number' => 0,
-           'wildcard' => 0,
-           'symbol' => 0,
-       ])
-       ->appliedCount->toMatchArray([
-           'char' => 1,
-           'number' => 0,
-           'wildcard' => 0,
-           'symbol' => 0,
-       ]);
+        ->and($state)
+        ->runCount->toMatchArray([
+            'char' => 1,
+            'number' => 0,
+            'wildcard' => 0,
+            'symbol' => 0,
+        ])
+        ->appliedCount->toMatchArray([
+            'char' => 1,
+            'number' => 0,
+            'wildcard' => 0,
+            'symbol' => 0,
+        ]);
 });
 
 test('interceptor is applied', function () use ($state) {
