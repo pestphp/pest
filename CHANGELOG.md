@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## [v2.5.2 (2023-04-19)](https://github.com/pestphp/pest/compare/v2.5.1...v2.5.2)
+
+### Chore
+- Removes `myclabs/php-enuma` dependency ([1a05df1](https://github.com/pestphp/pest/commit/1a05df14d0ce7d12583df26ff716807db6f81f13))
+
 ## [v2.5.1 (2023-04-18)](https://github.com/pestphp/pest/compare/v2.5.0...v2.5.1)
 
 ### Chore
