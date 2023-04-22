@@ -152,7 +152,7 @@
   ✓ it uses correct parent class
 
    DEPR  Tests\Features\Deprecated
-  ! deprecated → str_contains(): Passing null to parameter #2 ($needle) of type string is deprecated // tests/Features/Deprecated.php:6
+  ! deprecated → str_contains(): Passing null to parameter #1 ($haystack) of type string is deprecated // tests/Features/Deprecated.php:6
   ✓ user deprecated
 
    PASS  Tests\Features\Exceptions

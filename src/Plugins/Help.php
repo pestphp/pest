@@ -109,20 +109,16 @@ final class Help implements HandlesArguments
             ],
         ], ...$content['Execution']];
 
-        $content['Selection'] = array_merge([
-            [
-                'arg' => '--bail',
-                'desc' => 'Stop execution upon first not-passed test',
-            ],
-            [
-                'arg' => '--todos',
-                'desc' => 'Output to standard output the list of todos',
-            ],
-            [
-                'arg' => '--retry',
-                'desc' => 'Run non-passing tests first and stop execution upon first error or failure',
-            ],
-        ], $content['Selection']);
+        $content['Selection'] = [[
+            'arg' => '--bail',
+            'desc' => 'Stop execution upon first not-passed test',
+        ], [
+            'arg' => '--todos',
+            'desc' => 'Output to standard output the list of todos',
+        ], [
+            'arg' => '--retry',
+            'desc' => 'Run non-passing tests first and stop execution upon first error or failure',
+        ], ...$content['Selection']];
 
         $content['Reporting'] = [...$content['Reporting'], ...[
             [
@@ -131,16 +127,13 @@ final class Help implements HandlesArguments
             ],
         ]];
 
-        $content['Code Coverage'] = array_merge([
-            [
-                'arg' => '--coverage ',
-                'desc' => 'Generate code coverage report and output to standard output',
-            ],
-            [
-                'arg' => '--coverage --min',
-                'desc' => 'Set the minimum required coverage percentage, and fail if not met',
-            ],
-        ], $content['Code Coverage']);
+        $content['Code Coverage'] = [[
+            'arg' => '--coverage ',
+            'desc' => 'Generate code coverage report and output to standard output',
+        ], [
+            'arg' => '--coverage --min',
+            'desc' => 'Set the minimum required coverage percentage, and fail if not met',
+        ], ...$content['Code Coverage']];
 
         $content['Profiling'] = [
             [
