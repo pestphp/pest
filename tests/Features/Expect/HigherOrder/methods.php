@@ -95,7 +95,7 @@ it('can use the scoped method to lock into the given level for expectations', fu
         ->attributes()->scoped(fn ($attributes) => $attributes
         ->name->toBe('Has Methods')
         ->quantity->toBe(20)
-            )
+        )
         );
 });
 
