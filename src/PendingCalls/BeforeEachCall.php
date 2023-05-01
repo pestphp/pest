@@ -19,12 +19,17 @@ final class BeforeEachCall
     /**
      * Holds the before each closure.
      */
-    private readonly \Closure $closure;
+    private readonly Closure $closure;
 
     /**
-     * The calls that should be proxied.
+     * The test call proxies.
      */
-    private readonly HigherOrderMessageCollection $proxies;
+    private readonly HigherOrderMessageCollection $testCallProxies;
+
+    /**
+     * The test case proxies.
+     */
+    private readonly HigherOrderMessageCollection $testCaseProxies;
 
     /**
      * Creates a new Pending Call.
@@ -36,7 +41,8 @@ final class BeforeEachCall
     ) {
         $this->closure = $closure instanceof Closure ? $closure : NullClosure::create();
 
-        $this->proxies = new HigherOrderMessageCollection();
+        $this->testCallProxies = new HigherOrderMessageCollection();
+        $this->testCaseProxies = new HigherOrderMessageCollection();
     }
 
     /**
@@ -44,13 +50,16 @@ final class BeforeEachCall
      */
     public function __destruct()
     {
-        $proxies = $this->proxies;
+        $testCaseProxies = $this->testCaseProxies;
 
         $this->testSuite->beforeEach->set(
             $this->filename,
-            ChainableClosure::from(function () use ($proxies): void {
-                $proxies->chain($this);
-            }, $this->closure)
+            function (TestCall $testCall): void {
+                $this->testCallProxies->chain($testCall);
+            },
+            ChainableClosure::from(function () use ($testCaseProxies): void {
+                $testCaseProxies->chain($this);
+            }, $this->closure),
         );
     }
 
@@ -61,7 +70,13 @@ final class BeforeEachCall
      */
     public function __call(string $name, array $arguments): self
     {
-        $this->proxies
+        if (method_exists(TestCall::class, $name)) {
+            $this->testCallProxies->add(Backtrace::file(), Backtrace::line(), $name, $arguments);
+
+            return $this;
+        }
+
+        $this->testCaseProxies
             ->add(Backtrace::file(), Backtrace::line(), $name, $arguments);
 
         return $this;

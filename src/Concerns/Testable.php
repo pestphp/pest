@@ -181,7 +181,7 @@ trait Testable
 
         parent::setUp();
 
-        $beforeEach = TestSuite::getInstance()->beforeEach->get(self::$__filename);
+        $beforeEach = TestSuite::getInstance()->beforeEach->get(self::$__filename)[1];
 
         if ($this->__beforeEach instanceof Closure) {
             $beforeEach = ChainableClosure::from($this->__beforeEach, $beforeEach);

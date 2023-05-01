@@ -43,7 +43,7 @@ if (! function_exists('beforeEach')) {
     /**
      * Runs the given closure before each test in the current file.
      *
-     * @return HigherOrderTapProxy<TestCall|TestCase>|TestCall|mixed
+     * @return HigherOrderTapProxy<TestCall|TestCase>|TestCall|TestCase|mixed
      */
     function beforeEach(Closure $closure = null): BeforeEachCall
     {

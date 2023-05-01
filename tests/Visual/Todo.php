@@ -11,7 +11,9 @@ $run = function (string $target, bool $parallel) {
 
     expect($process->getExitCode())->toBe(0);
 
-    return preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $process->getOutput());
+    $outputContent = preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $process->getOutput());
+
+    return $outputContent;
 };
 
 $snapshot = function ($name) {

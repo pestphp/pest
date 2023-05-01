@@ -1,3 +1,9 @@
+   TODO  Tests\Features\BeforeEachProxiesToTestCallWithTodo - 4 todos
+  ↓ is marked as todo 1
+  ↓ is marked as todo 2
+  ↓ is marked as todo 3
+  ↓ shouldBeMarkedAsTodo
+
    TODO  Tests\Features\DatasetsTests - 1 todo
   ↓ forbids to define tests in Datasets dirs and Datasets.php files
 
@@ -9,4 +15,4 @@
    PASS  Tests\CustomTestCase\ExecutedTest
   ✓ that gets executed
 
-  Tests:    4 todos, 1 passed (1 assertions)
+  Tests:    8 todos, 1 passed (1 assertions)

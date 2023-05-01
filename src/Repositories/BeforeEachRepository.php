@@ -14,27 +14,34 @@ use Pest\Support\NullClosure;
 final class BeforeEachRepository
 {
     /**
-     * @var array<string, Closure>
+     * @var array<string, array{0: Closure, 1: Closure}>
      */
     private array $state = [];
 
     /**
      * Sets a before each closure.
      */
-    public function set(string $filename, Closure $closure): void
+    public function set(string $filename, Closure $beforeEachTestCall, Closure $beforeEachTestCase): void
     {
         if (array_key_exists($filename, $this->state)) {
             throw new BeforeEachAlreadyExist($filename);
         }
 
-        $this->state[$filename] = $closure;
+        $this->state[$filename] = [$beforeEachTestCall, $beforeEachTestCase];
     }
 
     /**
      * Gets a before each closure by the given filename.
+     *
+     * @return array{0: Closure, 1: Closure}
      */
-    public function get(string $filename): Closure
+    public function get(string $filename): array
     {
-        return $this->state[$filename] ?? NullClosure::create();
+        $closures = $this->state[$filename] ?? [];
+
+        return [
+            $closures[0] ?? NullClosure::create(),
+            $closures[1] ?? NullClosure::create(),
+        ];
     }
 }

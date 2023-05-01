@@ -50,7 +50,7 @@
     },
     "require-dev": {
         "pestphp/pest-dev-tools": "^2.7.0",
-        "symfony/process": "^6.2.8"
+        "symfony/process": "^6.2.10"
     },
     "minimum-stability": "stable",
     "config": {

@@ -104,8 +104,6 @@ final class Backtrace
     {
         $trace = debug_backtrace(self::BACKTRACE_OPTIONS)[1];
 
-        assert(array_key_exists('line', $trace));
-
-        return $trace['line'];
+        return $trace['line'] ?? 0;
     }
 }
