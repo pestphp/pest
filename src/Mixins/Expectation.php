@@ -842,7 +842,7 @@ final class Expectation
      * @param (Closure(Throwable): mixed)|string $exception
      * @return self<TValue>
      */
-    public function toThrow(callable|string $exception, string $exceptionMessage = null, string $message = ''): self
+    public function toThrow(callable|string|Throwable $exception, string $exceptionMessage = null, string $message = ''): self
     {
         $callback = NullClosure::create();
 
@@ -864,6 +864,15 @@ final class Expectation
         try {
             ($this->value)();
         } catch (Throwable $e) {
+
+            if ($exception instanceof Throwable) {
+                expect($e)
+                    ->toBeInstanceOf($exception::class, $message)
+                    ->and($e->getMessage())->toBe($exceptionMessage ?? $exception->getMessage(), $message);
+
+                return $this;
+            }
+
             if (! class_exists($exception)) {
                 if ($e instanceof Error && $e->getMessage() === "Class \"$exception\" not found") {
                     Assert::assertTrue(true);
@@ -888,7 +897,7 @@ final class Expectation
 
         Assert::assertTrue(true);
 
-        if (! class_exists($exception)) {
+        if (! $exception instanceof Throwable && ! class_exists($exception)) {
             throw new ExpectationFailedException("Exception with message \"$exception\" not thrown.");
         }
 
