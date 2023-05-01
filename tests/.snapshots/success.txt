@@ -657,6 +657,7 @@
   ✓ failures 5
   ✓ failures 6
   ✓ failures 7
+  ✓ failures 8
   ✓ failures with custom message
   ✓ not failures
   ✓ closure missing parameter
@@ -1033,4 +1034,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    1 deprecated, 3 warnings, 4 incomplete, 1 notice, 8 todos, 17 skipped, 714 passed (1722 assertions)
+  Tests:    1 deprecated, 3 warnings, 4 incomplete, 1 notice, 8 todos, 17 skipped, 715 passed (1727 assertions)
