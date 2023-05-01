@@ -2,6 +2,10 @@
 
 use PHPUnit\Framework\ExpectationFailedException;
 
+class CustomException extends Exception
+{
+}
+
 test('passes', function () {
     expect(function () {
         throw new RuntimeException();
@@ -33,6 +37,9 @@ test('passes', function () {
         throw new RuntimeException('actual message');
     })->toThrow(function (RuntimeException $e) {
     }, 'actual message');
+    expect(function () {
+        throw new CustomException('foo');
+    })->toThrow(new CustomException('foo'));
 });
 
 test('failures 1', function () {
@@ -77,6 +84,12 @@ test('failures 7', function () {
     expect(function () {
         throw new RuntimeException('actual message');
     })->toThrow(RuntimeException::class, 'expected message');
+})->throws(ExpectationFailedException::class);
+
+test('failures 8', function () {
+    expect(function () {
+        throw new CustomException('actual message');
+    })->toThrow(new CustomException('expected message'));
 })->throws(ExpectationFailedException::class);
 
 test('failures with custom message', function () {
