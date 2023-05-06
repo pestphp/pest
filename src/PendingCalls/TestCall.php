@@ -9,6 +9,7 @@ use InvalidArgumentException;
 use Pest\Factories\Covers\CoversClass;
 use Pest\Factories\Covers\CoversFunction;
 use Pest\Factories\Covers\CoversNothing;
+use Pest\Factories\Testbench\Environment;
 use Pest\Factories\TestCaseMethodFactory;
 use Pest\Plugins\Only;
 use Pest\Support\Backtrace;
@@ -286,6 +287,16 @@ final class TestCall
     public function throwsNoExceptions(): self
     {
         $this->testCaseMethod->proxies->add(Backtrace::file(), Backtrace::line(), 'expectNotToPerformAssertions', []);
+
+        return $this;
+    }
+
+    /**
+     * Sets an environment when using Orchestra Testbench
+     */
+    public function environment(string $name): self
+    {
+        $this->testCaseMethod->environment = [new Environment($name)];
 
         return $this;
     }

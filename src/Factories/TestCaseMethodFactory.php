@@ -8,6 +8,7 @@ use Closure;
 use Pest\Contracts\AddsAnnotations;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Factories\Concerns\HigherOrderable;
+use Pest\Factories\Testbench\Environment;
 use Pest\Repositories\DatasetsRepository;
 use Pest\Support\Str;
 use Pest\TestSuite;
@@ -53,6 +54,11 @@ final class TestCaseMethodFactory
      * @var array<int, \Pest\Factories\Covers\CoversClass|\Pest\Factories\Covers\CoversFunction|\Pest\Factories\Covers\CoversNothing>
      */
     public array $covers = [];
+
+    /**
+     * The defined environment used with Testbench
+     */
+    public array $environment = [];
 
     /**
      * Creates a new Factory instance.
