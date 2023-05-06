@@ -6,6 +6,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\Fixtures\Covers\CoversClass1;
 use Tests\Fixtures\Covers\CoversClass2;
 use Tests\Fixtures\Covers\CoversClass3;
+use Tests\Fixtures\Covers\CoversTrait;
 
 $runCounter = 0;
 
@@ -42,6 +43,13 @@ it('guesses if the given argument is a class or function', function () {
     expect($attributes[3]->getName())->toBe(CoversClass::class);
     expect($attributes[3]->getArguments()[0])->toBe(CoversClass3::class);
 })->covers(CoversClass3::class, 'testCoversFunction');
+
+it('uses the correct PHPUnit attribute for trait', function () {
+    $attributes = (new ReflectionClass($this))->getAttributes();
+
+    expect($attributes[4]->getName())->toBe('PHPUnit\Framework\Attributes\CoversClass');
+    expect($attributes[4]->getArguments()[0])->toBe('Tests\Fixtures\Covers\CoversTrait');
+})->coversClass(CoversTrait::class);
 
 it('appends CoversNothing to method attributes', function () {
     $phpDoc = (new ReflectionClass($this))->getMethod($this->name());
