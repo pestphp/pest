@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pest\Factories\Annotations;
 
 use Pest\Contracts\AddsAnnotations;

@@ -57,6 +57,8 @@ final class TestCaseMethodFactory
 
     /**
      * The defined environment used with Testbench
+     *
+     * @var array<\Pest\Factories\Testbench\Environment>
      */
     public array $environment = [];
 

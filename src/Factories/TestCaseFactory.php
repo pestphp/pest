@@ -36,7 +36,7 @@ final class TestCaseFactory
         Annotations\Groups::class,
         Annotations\CoversNothing::class,
         Annotations\TestDox::class,
-        Annotations\Environment::class
+        Annotations\Environment::class,
     ];
 
     /**
