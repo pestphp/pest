@@ -227,7 +227,7 @@ final class TestCall
     public function covers(string ...$classesOrFunctions): self
     {
         foreach ($classesOrFunctions as $classOrFunction) {
-            $isClass = class_exists($classOrFunction);
+            $isClass = class_exists($classOrFunction) || trait_exists($classOrFunction);
             $isMethod = function_exists($classOrFunction);
 
             if (! $isClass && ! $isMethod) {
