@@ -157,6 +157,11 @@ final class TestCaseMethodFactory
             static fn ($attribute): string => sprintf("\n        %s", $attribute), $attributes,
         ));
 
+        $define_env_method = '';
+        if ($this->environment !== []) {
+            $define_env_method = $this->buildDefineEnvForEvaluation($this->environment[0]->name, $methodName);
+        }
+
         return <<<PHP
 
                 /**$annotations
@@ -172,6 +177,7 @@ final class TestCaseMethodFactory
                     );
                 }
                 $datasetsCode
+                $define_env_method
             PHP;
     }
 
@@ -187,6 +193,23 @@ final class TestCaseMethodFactory
                 public static function $dataProviderName()
                 {
                     return __PestDatasets::get(self::\$__filename, "$methodName");
+                }
+
+        EOF;
+    }
+
+    /**
+     * Creates a DefineEnv method
+     */
+    private function buildDefineEnvForEvaluation(string $environmentMethodName, string $methodName): string
+    {
+        $m = $environmentMethodName.'_'.$methodName;
+
+        return <<<EOF
+
+                public function define_env_$m(\$app)
+                {
+                    $methodName(\$app);
                 }
 
         EOF;
