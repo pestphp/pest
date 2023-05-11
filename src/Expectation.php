@@ -395,6 +395,24 @@ final class Expectation
     }
 
     /**
+     * Asserts that $needle is an element of the value ignoring case.
+     *
+     * @param mixed $needles
+     */
+    public function toContainIgnoringCase(...$needles): Expectation
+    {
+        foreach ($needles as $needle) {
+            if (is_string($this->value)) {
+                Assert::assertStringContainsStringIgnoringCase($needle, $this->value);
+            } else {
+                Assert::assertContains($needle, $this->value);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * Asserts that the value starts with $expected.
      */
     public function toStartWith(string $expected): Expectation
