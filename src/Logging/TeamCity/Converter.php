@@ -11,6 +11,12 @@ use Pest\Support\Str;
 use PHPUnit\Event\Code\Test;
 use PHPUnit\Event\Code\TestMethod;
 use PHPUnit\Event\Code\Throwable;
+use PHPUnit\Event\Test\BeforeFirstTestMethodErrored;
+use PHPUnit\Event\Test\ConsideredRisky;
+use PHPUnit\Event\Test\Errored;
+use PHPUnit\Event\Test\Failed;
+use PHPUnit\Event\Test\MarkedIncomplete;
+use PHPUnit\Event\Test\Skipped;
 use PHPUnit\Event\TestSuite\TestSuite;
 use PHPUnit\Framework\Exception as FrameworkException;
 use PHPUnit\TestRunner\TestResult\TestResult as PhpUnitTestResult;
@@ -188,12 +194,30 @@ final class Converter
      */
     public function getStateFromResult(PhpUnitTestResult $result): State
     {
-        $numberOfPassedTests = $result->numberOfTestsRun()
-            - $result->numberOfTestErroredEvents()
-            - $result->numberOfTestFailedEvents()
-            - $result->numberOfTestSkippedEvents()
-            - $result->numberOfTestsWithTestConsideredRiskyEvents()
-            - $result->numberOfTestMarkedIncompleteEvents();
+        $events = [
+            ...$result->testErroredEvents(),
+            ...$result->testFailedEvents(),
+            ...$result->testSkippedEvents(),
+            ...array_merge(...array_values($result->testConsideredRiskyEvents())),
+            ...$result->testMarkedIncompleteEvents(),
+        ];
+
+        $numberOfNotPassedTests = count(
+            array_unique(
+                array_map(
+                    function (BeforeFirstTestMethodErrored|Errored|Failed|Skipped|ConsideredRisky|MarkedIncomplete $event): string {
+                        if ($event instanceof BeforeFirstTestMethodErrored) {
+                            return $event->testClassName();
+                        }
+
+                        return $this->getTestCaseLocation($event->test());
+                    },
+                    $events
+                )
+            )
+        );
+
+        $numberOfPassedTests = $result->numberOfTestsRun() - $numberOfNotPassedTests;
 
         return $this->stateGenerator->fromPhpUnitTestResult($numberOfPassedTests, $result);
     }

@@ -18,9 +18,17 @@ it('can fail', function () {
     $this->fail("oh noo");
 });
 
+it('throws exception', function () {
+    throw new Exception('test error');
+});
+
 it('is not done yet', function () {
 
 })->todo();
 
 todo("build this one.");
+
+it('is passing', function () {
+    expect(true)->toEqual(true);
+});
 
