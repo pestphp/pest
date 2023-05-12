@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## [v2.6.1 (2023-04-12)](https://github.com/pestphp/pest/compare/v2.6.0...v2.6.1)
+
+### Fixes
+- PHPStorm issue output problem for tests throwing an exception before the first assertion ([#809](https://github.com/pestphp/pest/pull/809))
+
+### Chore
+- Bumps PHPUnit to `^10.1.3` ([c993252](https://github.com/pestphp/pest/commit/c99325275acf1fd3759b487b93ec50473f706709))
+
+## [v2.6.0 (2023-04-05)](https://github.com/pestphp/pest/compare/v2.5.2...v2.6.0)
+
+### Adds
+- Allows `toThrow` to be used against an exception instance ([#797](https://github.com/pestphp/pest/pull/797))
+
 ## [v2.5.2 (2023-04-19)](https://github.com/pestphp/pest/compare/v2.5.1...v2.5.2)
 
 ### Chore
