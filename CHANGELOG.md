@@ -6,6 +6,7 @@
 
 ### Fixes
 - PHPStorm issue output problem for tests throwing an exception before the first assertion ([#809](https://github.com/pestphp/pest/pull/809))
+- Allow traits to be covered ([#804](https://github.com/pestphp/pest/pull/804))
 
 ### Chore
 - Bumps PHPUnit to `^10.1.3` ([c993252](https://github.com/pestphp/pest/commit/c99325275acf1fd3759b487b93ec50473f706709))
