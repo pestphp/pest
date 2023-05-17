@@ -119,7 +119,11 @@ final class Command extends BaseCommand
         $result = parent::run($argv, false);
         $result = InteractsWithPlugins::addOutput($result);
 
-        exit($result);
+        if ($exit) {
+            exit($result);
+        }
+
+        return $result;
     }
 
     protected function showHelp(): void
