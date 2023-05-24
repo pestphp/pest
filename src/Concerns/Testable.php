@@ -23,14 +23,19 @@ use Throwable;
 trait Testable
 {
     /**
-     * Test method description.
+     * Test method's test description.
      */
-    private string $__description;
+    private string $__testDescription;
+
+    /**
+     * Test method's describe description, if any.
+     */
+    public ?string $__describeDescription = null;
 
     /**
      * Test "latest" method description.
      */
-    private static string $__latestDescription;
+    private static string $__latestTestDescription;
 
     /**
      * The Test Case "test" closure.
@@ -77,7 +82,7 @@ trait Testable
 
         if ($test->hasMethod($name)) {
             $method = $test->getMethod($name);
-            $this->__description = self::$__latestDescription = $method->description;
+            $this->__testDescription = self::$__latestTestDescription = $method->description;
             $this->__test = $method->getClosure($this);
         }
     }
@@ -230,7 +235,7 @@ trait Testable
     {
         $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
 
-        $this->__description = self::$__latestDescription = $this->dataName() ? $method->description.' with '.$this->dataName() : $method->description;
+        $this->__testDescription = self::$__latestTestDescription = $this->dataName() ? $method->description.' with '.$this->dataName() : $method->description;
 
         $underlyingTest = Reflection::getFunctionVariable($this->__test, 'closure');
         $testParameterTypes = array_values(Reflection::getFunctionArguments($underlyingTest));
@@ -315,7 +320,7 @@ trait Testable
      */
     public function getPrintableTestCaseMethodName(): string
     {
-        return $this->__description;
+        return $this->__testDescription;
     }
 
     /**
@@ -323,6 +328,6 @@ trait Testable
      */
     public static function getLatestPrintableTestCaseMethodName(): string
     {
-        return self::$__latestDescription;
+        return self::$__latestTestDescription;
     }
 }

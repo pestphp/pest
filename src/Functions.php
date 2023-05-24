@@ -2,9 +2,13 @@
 
 declare(strict_types=1);
 
+use Pest\Exceptions\AfterAllWithinDescribe;
+use Pest\Exceptions\BeforeAllWithinDescribe;
 use Pest\Expectation;
+use Pest\PendingCalls;
 use Pest\PendingCalls\AfterEachCall;
 use Pest\PendingCalls\BeforeEachCall;
+use Pest\PendingCalls\DescribeCall;
 use Pest\PendingCalls\TestCall;
 use Pest\PendingCalls\UsesCall;
 use Pest\Repositories\DatasetsRepository;
@@ -35,6 +39,12 @@ if (! function_exists('beforeAll')) {
      */
     function beforeAll(Closure $closure): void
     {
+        if (! is_null(PendingCalls::$describing)) {
+            $filename = Backtrace::file();
+
+            throw new BeforeAllWithinDescribe($filename);
+        }
+
         TestSuite::getInstance()->beforeAll->set($closure);
     }
 }
@@ -64,6 +74,26 @@ if (! function_exists('dataset')) {
         $scope = DatasetInfo::scope(Backtrace::datasetsFile());
 
         DatasetsRepository::set($name, $dataset, $scope);
+    }
+}
+
+if (! function_exists('describe')) {
+    /**
+     * Adds the given closure as a group of tests. The first argument
+     * is the group description; the second argument is a closure
+     * that contains the group tests.
+     *
+     * @return HigherOrderTapProxy<TestCall|TestCase>|TestCall|TestCase|mixed
+     */
+    function describe(string $description, Closure $tests): DescribeCall
+    {
+        $filename = Backtrace::testFile();
+
+        PendingCalls::startDescribe(
+            $describeCall = new DescribeCall(TestSuite::getInstance(), $filename, $description, $tests),
+        );
+
+        return $describeCall;
     }
 }
 
@@ -159,6 +189,12 @@ if (! function_exists('afterAll')) {
      */
     function afterAll(Closure $closure): void
     {
+        if (! is_null(PendingCalls::$describing)) {
+            $filename = Backtrace::file();
+
+            throw new AfterAllWithinDescribe($filename);
+        }
+
         TestSuite::getInstance()->afterAll->set($closure);
     }
 }

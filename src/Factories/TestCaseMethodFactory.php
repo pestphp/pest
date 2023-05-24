@@ -22,6 +22,11 @@ final class TestCaseMethodFactory
     use HigherOrderable;
 
     /**
+     * D=fghjkl
+     */
+    public ?string $describing = null;
+
+    /**
      * Determines if the Test Case Method is a "todo".
      */
     public bool $todo = false;
@@ -84,6 +89,7 @@ final class TestCaseMethodFactory
 
         $testCase = TestSuite::getInstance()->tests->get($this->filename);
 
+        $concrete->__describeDescription = $this->describing; // @phpstan-ignore-line
         $testCase->factoryProxies->proxy($concrete);
         $this->factoryProxies->proxy($concrete);
 

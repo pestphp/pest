@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Pest\PendingCalls;
 
 use Closure;
+use Pest\PendingCalls;
+use Pest\PendingCalls\Concerns\Describable;
 use Pest\Support\Backtrace;
 use Pest\Support\ChainableClosure;
 use Pest\Support\HigherOrderMessageCollection;
@@ -16,6 +18,8 @@ use Pest\TestSuite;
  */
 final class AfterEachCall
 {
+    use Describable;
+
     /**
      * The "afterEach" closure.
      */
@@ -44,14 +48,23 @@ final class AfterEachCall
      */
     public function __destruct()
     {
-        $proxies = $this->proxies;
+        PendingCalls::afterEach($this, function (string $describing = null) {
+            $proxies = $this->proxies;
 
-        $this->testSuite->afterEach->set(
-            $this->filename,
-            ChainableClosure::from(function () use ($proxies): void {
-                $proxies->chain($this);
-            }, $this->closure)
-        );
+            $afterEachTestCase = ChainableClosure::when(
+                fn () => is_null($describing) || $this->__describeDescription === $describing, // @phpstan-ignore-line
+                ChainableClosure::from(fn () => $proxies->chain($this), $this->closure)->bindTo($this, self::class), // @phpstan-ignore-line
+            )->bindTo($this, self::class);
+
+            assert($afterEachTestCase instanceof Closure);
+
+            $this->testSuite->afterEach->set(
+                $this->filename,
+                $this,
+                $afterEachTestCase,
+            );
+        });
+
     }
 
     /**
