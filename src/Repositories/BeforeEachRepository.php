@@ -27,8 +27,8 @@ final class BeforeEachRepository
         if (array_key_exists($filename, $this->state)) {
             [$fromBeforeEachTestCall, $fromBeforeEachTestCase] = $this->state[$filename];
 
-            $beforeEachTestCall = ChainableClosure::fromDifferentObjects($fromBeforeEachTestCall, $beforeEachTestCall);
-            $beforeEachTestCase = ChainableClosure::fromSameObject($fromBeforeEachTestCase, $beforeEachTestCase)->bindTo($beforeEachCall, $beforeEachCall::class);
+            $beforeEachTestCall = ChainableClosure::unbound($fromBeforeEachTestCall, $beforeEachTestCall);
+            $beforeEachTestCase = ChainableClosure::bound($fromBeforeEachTestCase, $beforeEachTestCase)->bindTo($beforeEachCall, $beforeEachCall::class);
         }
 
         assert($beforeEachTestCall instanceof Closure);

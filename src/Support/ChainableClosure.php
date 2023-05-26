@@ -29,9 +29,9 @@ final class ChainableClosure
     }
 
     /**
-     * Calls the given `$closure` and chains the `$next` closure.
+     * Calls the given `$closure` and chains the `$next` closure, "bound" to the same object.
      */
-    public static function fromSameObject(Closure $closure, Closure $next): Closure
+    public static function bound(Closure $closure, Closure $next): Closure
     {
         return function () use ($closure, $next): void {
             if (! is_object($this)) { // @phpstan-ignore-line
@@ -44,9 +44,9 @@ final class ChainableClosure
     }
 
     /**
-     * Calls the given `$closure` and chains the `$next` closure.
+     * Calls the given `$closure` and chains the `$next` closure, "unbound" of any object.
      */
-    public static function fromDifferentObjects(Closure $closure, Closure $next): Closure
+    public static function unbound(Closure $closure, Closure $next): Closure
     {
         return function () use ($closure, $next): void {
             $closure(...func_get_args());

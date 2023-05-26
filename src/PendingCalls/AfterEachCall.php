@@ -55,7 +55,7 @@ final class AfterEachCall
 
         $afterEachTestCase = ChainableClosure::when(
             fn (): bool => is_null($describing) || $this->__describing === $describing, // @phpstan-ignore-line
-            ChainableClosure::fromSameObject(fn () => $proxies->chain($this), $this->closure)->bindTo($this, self::class), // @phpstan-ignore-line
+            ChainableClosure::bound(fn () => $proxies->chain($this), $this->closure)->bindTo($this, self::class), // @phpstan-ignore-line
         )->bindTo($this, self::class);
 
         assert($afterEachTestCase instanceof Closure);
