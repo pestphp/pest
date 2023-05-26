@@ -29,10 +29,8 @@ final class BeforeEachRepository
 
             $beforeEachTestCall = ChainableClosure::unbound($fromBeforeEachTestCall, $beforeEachTestCall);
             $beforeEachTestCase = ChainableClosure::bound($fromBeforeEachTestCase, $beforeEachTestCase)->bindTo($beforeEachCall, $beforeEachCall::class);
+            assert($beforeEachTestCase instanceof Closure);
         }
-
-        assert($beforeEachTestCall instanceof Closure);
-        assert($beforeEachTestCase instanceof Closure);
 
         $this->state[$filename] = [$beforeEachTestCall, $beforeEachTestCase];
     }

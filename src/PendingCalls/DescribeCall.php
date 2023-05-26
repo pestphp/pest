@@ -65,6 +65,6 @@ final class DescribeCall
 
         $beforeEachCall->describing = $this->description;
 
-        return $beforeEachCall->{$name}(...$arguments);
+        return $beforeEachCall->{$name}(...$arguments); // @phpstan-ignore-line
     }
 }

@@ -345,9 +345,9 @@ final class TestCall
      */
     public function __destruct()
     {
-        if ($this->describing) {
-            $this->testCaseMethod->description = '`'.$this->describing.'` '.$this->testCaseMethod->description;
+        if (! is_null($this->describing)) {
             $this->testCaseMethod->describing = $this->describing;
+            $this->testCaseMethod->description = sprintf('`%s` > %s', $this->describing, $this->testCaseMethod->description);
         }
 
         $this->testSuite->tests->set($this->testCaseMethod);
