@@ -68,7 +68,7 @@ final class BeforeEachCall
             $this->testCallProxies->chain($testCall);
         };
 
-        $beforeEachTestCase = ChainableClosure::when(
+        $beforeEachTestCase = ChainableClosure::boundWhen(
             fn (): bool => is_null($describing) || $this->__describing === $describing,  // @phpstan-ignore-line
             ChainableClosure::bound(fn () => $testCaseProxies->chain($this), $this->closure)->bindTo($this, self::class), // @phpstan-ignore-line
         )->bindTo($this, self::class);

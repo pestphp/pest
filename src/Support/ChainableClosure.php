@@ -13,9 +13,9 @@ use Pest\Exceptions\ShouldNotHappen;
 final class ChainableClosure
 {
     /**
-     * Calls the given `$closure` when the given condition is true.
+     * Calls the given `$closure` when the given condition is true, "bound" to the same object.
      */
-    public static function when(Closure $condition, Closure $next): Closure
+    public static function boundWhen(Closure $condition, Closure $next): Closure
     {
         return function () use ($condition, $next): void {
             if (! is_object($this)) { // @phpstan-ignore-line
@@ -55,9 +55,9 @@ final class ChainableClosure
     }
 
     /**
-     * Call the given static `$closure` and chains the `$next` closure.
+     * Call the given static `$closure` and chains the `$next` closure, "bound" to the same object statically.
      */
-    public static function fromStatic(Closure $closure, Closure $next): Closure
+    public static function boundStatically(Closure $closure, Closure $next): Closure
     {
         return static function () use ($closure, $next): void {
             \Pest\Support\Closure::bind($closure, null, self::class)(...func_get_args());

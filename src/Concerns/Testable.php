@@ -98,7 +98,7 @@ trait Testable
         }
 
         self::$__beforeAll = (self::$__beforeAll instanceof Closure)
-            ? ChainableClosure::fromStatic(self::$__beforeAll, $hook)
+            ? ChainableClosure::boundStatically(self::$__beforeAll, $hook)
             : $hook;
     }
 
@@ -112,7 +112,7 @@ trait Testable
         }
 
         self::$__afterAll = (self::$__afterAll instanceof Closure)
-            ? ChainableClosure::fromStatic(self::$__afterAll, $hook)
+            ? ChainableClosure::boundStatically(self::$__afterAll, $hook)
             : $hook;
     }
 
@@ -156,7 +156,7 @@ trait Testable
         $beforeAll = TestSuite::getInstance()->beforeAll->get(self::$__filename);
 
         if (self::$__beforeAll instanceof Closure) {
-            $beforeAll = ChainableClosure::fromStatic(self::$__beforeAll, $beforeAll);
+            $beforeAll = ChainableClosure::boundStatically(self::$__beforeAll, $beforeAll);
         }
 
         call_user_func(Closure::bind($beforeAll, null, self::class));
@@ -170,7 +170,7 @@ trait Testable
         $afterAll = TestSuite::getInstance()->afterAll->get(self::$__filename);
 
         if (self::$__afterAll instanceof Closure) {
-            $afterAll = ChainableClosure::fromStatic(self::$__afterAll, $afterAll);
+            $afterAll = ChainableClosure::boundStatically(self::$__afterAll, $afterAll);
         }
 
         call_user_func(Closure::bind($afterAll, null, self::class));
