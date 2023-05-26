@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pest\PendingCalls;
 
 use Closure;
-use Pest\PendingCalls;
 use Pest\PendingCalls\Concerns\Describable;
 use Pest\Support\Backtrace;
 use Pest\Support\ChainableClosure;
@@ -47,6 +46,8 @@ final class BeforeEachCall
 
         $this->testCallProxies = new HigherOrderMessageCollection();
         $this->testCaseProxies = new HigherOrderMessageCollection();
+
+        $this->describing = DescribeCall::describing();
     }
 
     /**
@@ -54,29 +55,28 @@ final class BeforeEachCall
      */
     public function __destruct()
     {
-        PendingCalls::beforeEach($this, function (string $describing = null) {
-            $testCaseProxies = $this->testCaseProxies;
+        $describing = $this->describing;
+        $testCaseProxies = $this->testCaseProxies;
 
-            $beforeEachTestCall = function (TestCall $testCall) use ($describing): void {
-                if (is_null($describing) || ($this->describing === $testCall->describing && $testCall->describing === $describing)) {
-                    $this->testCallProxies->chain($testCall);
-                }
-            };
+        $beforeEachTestCall = function (TestCall $testCall) use ($describing): void {
+            if ($describing === $this->describing && $describing === $testCall->describing) {
+                $this->testCallProxies->chain($testCall);
+            }
+        };
 
-            $beforeEachTestCase = ChainableClosure::when(
-                fn () => is_null($describing) || $this->__describeDescription === $describing,  // @phpstan-ignore-line
-                ChainableClosure::from(fn () => $testCaseProxies->chain($this), $this->closure)->bindTo($this, self::class), // @phpstan-ignore-line
-            )->bindTo($this, self::class);
+        $beforeEachTestCase = ChainableClosure::when(
+            fn () => is_null($describing) || $this->__describeDescription === $describing,  // @phpstan-ignore-line
+            ChainableClosure::fromSameObject(fn () => $testCaseProxies->chain($this), $this->closure)->bindTo($this, self::class), // @phpstan-ignore-line
+        )->bindTo($this, self::class);
 
-            assert($beforeEachTestCase instanceof Closure);
+        assert($beforeEachTestCase instanceof Closure);
 
-            $this->testSuite->beforeEach->set(
-                $this->filename,
-                $this,
-                $beforeEachTestCall,
-                $beforeEachTestCase,
-            );
-        });
+        $this->testSuite->beforeEach->set(
+            $this->filename,
+            $this,
+            $beforeEachTestCall,
+            $beforeEachTestCase,
+        );
     }
 
     /**
@@ -86,7 +86,6 @@ final class BeforeEachCall
      */
     public function __call(string $name, array $arguments): self
     {
-
         if (method_exists(TestCall::class, $name)) {
             $this->testCallProxies->add(Backtrace::file(), Backtrace::line(), $name, $arguments);
 

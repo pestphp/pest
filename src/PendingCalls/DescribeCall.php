@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pest\PendingCalls;
 
 use Closure;
-use Pest\PendingCalls;
+use Pest\Support\Backtrace;
 use Pest\TestSuite;
 
 /**
@@ -13,6 +13,11 @@ use Pest\TestSuite;
  */
 final class DescribeCall
 {
+    /**
+     * The current describe call.
+     */
+    private static ?string $describing = null;
+
     /**
      * Creates a new Pending Call.
      */
@@ -25,9 +30,26 @@ final class DescribeCall
         //
     }
 
+    /**
+     * What is the current describing.
+     */
+    public static function describing(): ?string
+    {
+        return self::$describing;
+    }
+
+    /**
+     * Creates the Call.
+     */
     public function __destruct()
     {
-        PendingCalls::endDescribe($this);
+        self::$describing = $this->description;
+
+        try {
+            ($this->tests)();
+        } finally {
+            self::$describing = null;
+        }
     }
 
     /**
@@ -35,12 +57,14 @@ final class DescribeCall
      *
      * @param  array<int, mixed>  $arguments
      */
-    public function __call(string $name, array $arguments): self
+    public function __call(string $name, array $arguments): BeforeEachCall
     {
-        foreach (PendingCalls::$testCalls as [$testCall]) {
-            $testCall->{$name}(...$arguments); // @phpstan-ignore-line
-        }
+        $filename = Backtrace::file();
 
-        return $this;
+        $beforeEachCall = new BeforeEachCall(TestSuite::getInstance(), $filename);
+
+        $beforeEachCall->describing = $this->description;
+
+        return $beforeEachCall->{$name}(...$arguments);
     }
 }

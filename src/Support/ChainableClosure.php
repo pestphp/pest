@@ -31,7 +31,7 @@ final class ChainableClosure
     /**
      * Calls the given `$closure` and chains the `$next` closure.
      */
-    public static function from(Closure $closure, Closure $next): Closure
+    public static function fromSameObject(Closure $closure, Closure $next): Closure
     {
         return function () use ($closure, $next): void {
             if (! is_object($this)) { // @phpstan-ignore-line
@@ -40,6 +40,17 @@ final class ChainableClosure
 
             \Pest\Support\Closure::bind($closure, $this, self::class)(...func_get_args());
             \Pest\Support\Closure::bind($next, $this, self::class)(...func_get_args());
+        };
+    }
+
+    /**
+     * Calls the given `$closure` and chains the `$next` closure.
+     */
+    public static function fromDifferentObjects(Closure $closure, Closure $next): Closure
+    {
+        return function () use ($closure, $next): void {
+            $closure(...func_get_args());
+            $next(...func_get_args());
         };
     }
 

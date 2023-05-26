@@ -5,7 +5,6 @@ declare(strict_types=1);
 use Pest\Exceptions\AfterAllWithinDescribe;
 use Pest\Exceptions\BeforeAllWithinDescribe;
 use Pest\Expectation;
-use Pest\PendingCalls;
 use Pest\PendingCalls\AfterEachCall;
 use Pest\PendingCalls\BeforeEachCall;
 use Pest\PendingCalls\DescribeCall;
@@ -39,7 +38,7 @@ if (! function_exists('beforeAll')) {
      */
     function beforeAll(Closure $closure): void
     {
-        if (! is_null(PendingCalls::$describing)) {
+        if (! is_null(DescribeCall::describing())) {
             $filename = Backtrace::file();
 
             throw new BeforeAllWithinDescribe($filename);
@@ -89,11 +88,7 @@ if (! function_exists('describe')) {
     {
         $filename = Backtrace::testFile();
 
-        PendingCalls::startDescribe(
-            $describeCall = new DescribeCall(TestSuite::getInstance(), $filename, $description, $tests),
-        );
-
-        return $describeCall;
+        return new DescribeCall(TestSuite::getInstance(), $filename, $description, $tests);
     }
 }
 
@@ -189,7 +184,7 @@ if (! function_exists('afterAll')) {
      */
     function afterAll(Closure $closure): void
     {
-        if (! is_null(PendingCalls::$describing)) {
+        if (! is_null(DescribeCall::describing())) {
             $filename = Backtrace::file();
 
             throw new AfterAllWithinDescribe($filename);

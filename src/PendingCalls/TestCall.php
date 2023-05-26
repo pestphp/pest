@@ -10,7 +10,6 @@ use Pest\Factories\Covers\CoversClass;
 use Pest\Factories\Covers\CoversFunction;
 use Pest\Factories\Covers\CoversNothing;
 use Pest\Factories\TestCaseMethodFactory;
-use Pest\PendingCalls;
 use Pest\PendingCalls\Concerns\Describable;
 use Pest\Plugins\Only;
 use Pest\Support\Backtrace;
@@ -51,6 +50,8 @@ final class TestCall
         $this->testCaseMethod = new TestCaseMethodFactory($filename, $description, $closure);
 
         $this->descriptionLess = $description === null;
+
+        $this->describing = DescribeCall::describing();
 
         $this->testSuite->beforeEach->get($this->filename)[0]($this);
     }
@@ -344,10 +345,11 @@ final class TestCall
      */
     public function __destruct()
     {
-        PendingCalls::test($this, function () {
+        if ($this->describing) {
+            $this->testCaseMethod->description = '`'.$this->describing.'` '.$this->testCaseMethod->description;
             $this->testCaseMethod->describing = $this->describing;
+        }
 
-            $this->testSuite->tests->set($this->testCaseMethod);
-        });
+        $this->testSuite->tests->set($this->testCaseMethod);
     }
 }

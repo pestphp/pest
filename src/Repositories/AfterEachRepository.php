@@ -28,7 +28,7 @@ final class AfterEachRepository
         if (array_key_exists($filename, $this->state)) {
             $fromAfterEachTestCase = $this->state[$filename];
 
-            $afterEachTestCase = ChainableClosure::from($fromAfterEachTestCase, $afterEachTestCase)
+            $afterEachTestCase = ChainableClosure::fromSameObject($fromAfterEachTestCase, $afterEachTestCase)
                 ->bindTo($afterEachCall, $afterEachCall::class);
         }
 
@@ -44,7 +44,7 @@ final class AfterEachRepository
     {
         $afterEach = $this->state[$filename] ?? NullClosure::create();
 
-        return ChainableClosure::from(function (): void {
+        return ChainableClosure::fromSameObject(function (): void {
             if (class_exists(Mockery::class)) {
                 if ($container = Mockery::getContainer()) {
                     /* @phpstan-ignore-next-line */

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pest\PendingCalls;
 
 use Closure;
-use Pest\PendingCalls;
 use Pest\PendingCalls\Concerns\Describable;
 use Pest\Support\Backtrace;
 use Pest\Support\ChainableClosure;
@@ -41,6 +40,8 @@ final class AfterEachCall
         $this->closure = $closure instanceof Closure ? $closure : NullClosure::create();
 
         $this->proxies = new HigherOrderMessageCollection();
+
+        $this->describing = DescribeCall::describing();
     }
 
     /**
@@ -48,22 +49,22 @@ final class AfterEachCall
      */
     public function __destruct()
     {
-        PendingCalls::afterEach($this, function (string $describing = null) {
-            $proxies = $this->proxies;
+        $describing = $this->describing;
 
-            $afterEachTestCase = ChainableClosure::when(
-                fn () => is_null($describing) || $this->__describeDescription === $describing, // @phpstan-ignore-line
-                ChainableClosure::from(fn () => $proxies->chain($this), $this->closure)->bindTo($this, self::class), // @phpstan-ignore-line
-            )->bindTo($this, self::class);
+        $proxies = $this->proxies;
 
-            assert($afterEachTestCase instanceof Closure);
+        $afterEachTestCase = ChainableClosure::when(
+            fn () => is_null($describing) || $this->__describeDescription === $describing, // @phpstan-ignore-line
+            ChainableClosure::fromSameObject(fn () => $proxies->chain($this), $this->closure)->bindTo($this, self::class), // @phpstan-ignore-line
+        )->bindTo($this, self::class);
 
-            $this->testSuite->afterEach->set(
-                $this->filename,
-                $this,
-                $afterEachTestCase,
-            );
-        });
+        assert($afterEachTestCase instanceof Closure);
+
+        $this->testSuite->afterEach->set(
+            $this->filename,
+            $this,
+            $afterEachTestCase,
+        );
 
     }
 

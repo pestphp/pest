@@ -141,7 +141,7 @@ trait Testable
         }
 
         $this->{$property} = ($this->{$property} instanceof Closure)
-            ? ChainableClosure::from($this->{$property}, $hook)
+            ? ChainableClosure::fromSameObject($this->{$property}, $hook)
             : $hook;
     }
 
@@ -189,7 +189,7 @@ trait Testable
         $beforeEach = TestSuite::getInstance()->beforeEach->get(self::$__filename)[1];
 
         if ($this->__beforeEach instanceof Closure) {
-            $beforeEach = ChainableClosure::from($this->__beforeEach, $beforeEach);
+            $beforeEach = ChainableClosure::fromSameObject($this->__beforeEach, $beforeEach);
         }
 
         $this->__callClosure($beforeEach, func_get_args());
@@ -203,7 +203,7 @@ trait Testable
         $afterEach = TestSuite::getInstance()->afterEach->get(self::$__filename);
 
         if ($this->__afterEach instanceof Closure) {
-            $afterEach = ChainableClosure::from($this->__afterEach, $afterEach);
+            $afterEach = ChainableClosure::fromSameObject($this->__afterEach, $afterEach);
         }
 
         $this->__callClosure($afterEach, func_get_args());
