@@ -58,14 +58,18 @@ final class BeforeEachCall
         $describing = $this->describing;
         $testCaseProxies = $this->testCaseProxies;
 
-        $beforeEachTestCall = function (TestCall $testCall) use ($describing): void {
-            if ($describing === $this->describing && $describing === $testCall->describing) {
-                $this->testCallProxies->chain($testCall);
+        $beforeEachTestCall = function (TestCall $testCall) use ($describing) : void {
+            if ($describing !== $this->describing) {
+                return;
             }
+            if ($describing !== $testCall->describing) {
+                return;
+            }
+            $this->testCallProxies->chain($testCall);
         };
 
         $beforeEachTestCase = ChainableClosure::when(
-            fn () => is_null($describing) || $this->__describeDescription === $describing,  // @phpstan-ignore-line
+            fn (): bool => is_null($describing) || $this->__describing === $describing,  // @phpstan-ignore-line
             ChainableClosure::fromSameObject(fn () => $testCaseProxies->chain($this), $this->closure)->bindTo($this, self::class), // @phpstan-ignore-line
         )->bindTo($this, self::class);
 
