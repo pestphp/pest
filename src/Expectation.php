@@ -13,6 +13,7 @@ use Pest\Arch\Expectations\ToOnlyBeUsedIn;
 use Pest\Arch\Expectations\ToOnlyUse;
 use Pest\Arch\Expectations\ToUse;
 use Pest\Arch\Expectations\ToUseNothing;
+use Pest\Arch\Expectations\ToUseStrictTypes;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\Pipeable;
 use Pest\Concerns\Retrievable;
@@ -367,6 +368,16 @@ final class Expectation
     public function toUse(array|string $targets): ArchExpectation
     {
         return ToUse::make($this, $targets);
+    }
+
+    /**
+     * Asserts that the given expectation target use the "declare(strict_types=1)" declaration.
+     *
+     * @param  array<int, string>|string  $targets
+     */
+    public function toUseStrictTypes(): ArchExpectation
+    {
+        return ToUseStrictTypes::make($this);
     }
 
     /**

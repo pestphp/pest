@@ -5,15 +5,19 @@ declare(strict_types=1);
 namespace Pest\Expectations;
 
 use Pest\Arch\Contracts\ArchExpectation;
+use Pest\Arch\Exceptions\ArchExpectationFailedException;
+use Pest\Arch\Expectations\NotToUseStrictTypes;
 use Pest\Arch\Expectations\ToBeUsedIn;
 use Pest\Arch\Expectations\ToBeUsedInNothing;
 use Pest\Arch\Expectations\ToUse;
+use Pest\Arch\Expectations\ToUseStrictTypes;
 use Pest\Arch\GroupArchExpectation;
 use Pest\Arch\SingleArchExpectation;
 use Pest\Exceptions\InvalidExpectation;
 use Pest\Expectation;
 use Pest\Support\Arr;
 use Pest\Support\Exporter;
+use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\ExpectationFailedException;
 
 /**
@@ -69,6 +73,14 @@ final class OppositeExpectation
         return GroupArchExpectation::fromExpectations($this->original, array_map(fn (string $target): SingleArchExpectation => ToUse::make($this->original, $target)->opposite(
             fn () => $this->throwExpectationFailedException('toUse', $target),
         ), is_string($targets) ? [$targets] : $targets));
+    }
+
+    /**
+     * Asserts that the given expectation target does not use the "declare(strict_types=1)" declaration.
+     */
+    public function toUseStrictTypes(): ArchExpectation
+    {
+        return ToUseStrictTypes::make($this->original, false);
     }
 
     /**
@@ -128,7 +140,7 @@ final class OppositeExpectation
         try {
             /* @phpstan-ignore-next-line */
             $this->original->{$name}(...$arguments);
-        } catch (ExpectationFailedException) {
+        } catch (ExpectationFailedException|AssertionFailedError) {
             return $this->original;
         }
 
