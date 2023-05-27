@@ -347,7 +347,7 @@ final class TestCall
     {
         if (! is_null($this->describing)) {
             $this->testCaseMethod->describing = $this->describing;
-            $this->testCaseMethod->description = sprintf('`%s` > %s', $this->describing, $this->testCaseMethod->description);
+            $this->testCaseMethod->description = sprintf('`%s` → %s', $this->describing, $this->testCaseMethod->description);
         }
 
         $this->testSuite->tests->set($this->testCaseMethod);

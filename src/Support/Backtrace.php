@@ -78,9 +78,7 @@ final class Backtrace
      */
     public static function file(): string
     {
-        $trace = debug_backtrace(self::BACKTRACE_OPTIONS)[1];
-
-        assert(array_key_exists(self::FILE, $trace));
+        $trace = self::backtrace();
 
         return $trace[self::FILE];
     }
@@ -90,9 +88,7 @@ final class Backtrace
      */
     public static function dirname(): string
     {
-        $trace = debug_backtrace(self::BACKTRACE_OPTIONS)[1];
-
-        assert(array_key_exists(self::FILE, $trace));
+        $trace = self::backtrace();
 
         return dirname($trace[self::FILE]);
     }
@@ -102,8 +98,30 @@ final class Backtrace
      */
     public static function line(): int
     {
-        $trace = debug_backtrace(self::BACKTRACE_OPTIONS)[1];
+        $trace = self::backtrace();
 
         return $trace['line'] ?? 0;
+    }
+
+    /**
+     * @return array{function: string, line?: int, file: string, class?: class-string, type?: string, args?: mixed[], object?: object}
+     */
+    private static function backtrace(): array
+    {
+        $backtrace = debug_backtrace(self::BACKTRACE_OPTIONS);
+
+        foreach ($backtrace as $trace) {
+            if (! isset($trace['file'])) {
+                continue;
+            }
+
+            if (str_contains($trace['file'], 'pest/src')) {
+                continue;
+            }
+
+            return $trace;
+        }
+
+        throw ShouldNotHappen::fromMessage('Backtrace not found.');
     }
 }

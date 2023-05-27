@@ -9,10 +9,10 @@
 
    TODO  Tests\Features\Describe - 5 todos
   ↓ todo
-  ↓ todo on hook > should not fail
-  ↓ todo on hook > should run
-  ↓ todo on describe > should not fail
-  ↓ todo on describe > should run
+  ↓ todo on hook → should not fail
+  ↓ todo on hook → should run
+  ↓ todo on describe → should not fail
+  ↓ todo on describe → should run
 
    TODO  Tests\Features\Todo - 3 todos
   ↓ something todo later
