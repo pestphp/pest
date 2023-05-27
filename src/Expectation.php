@@ -7,6 +7,7 @@ namespace Pest;
 use BadMethodCallException;
 use Closure;
 use Pest\Arch\Contracts\ArchExpectation;
+use Pest\Arch\Expectations\ToBeFinal;
 use Pest\Arch\Expectations\ToBeUsedIn;
 use Pest\Arch\Expectations\ToBeUsedInNothing;
 use Pest\Arch\Expectations\ToOnlyBeUsedIn;
@@ -372,12 +373,18 @@ final class Expectation
 
     /**
      * Asserts that the given expectation target use the "declare(strict_types=1)" declaration.
-     *
-     * @param  array<int, string>|string  $targets
      */
     public function toUseStrictTypes(): ArchExpectation
     {
         return ToUseStrictTypes::make($this);
+    }
+
+    /**
+     * Asserts that the given expectation target is final.
+     */
+    public function toBeFinal(): ArchExpectation
+    {
+        return ToBeFinal::make($this);
     }
 
     /**

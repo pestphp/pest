@@ -7,6 +7,7 @@ namespace Pest\Expectations;
 use Pest\Arch\Contracts\ArchExpectation;
 use Pest\Arch\Exceptions\ArchExpectationFailedException;
 use Pest\Arch\Expectations\NotToUseStrictTypes;
+use Pest\Arch\Expectations\ToBeFinal;
 use Pest\Arch\Expectations\ToBeUsedIn;
 use Pest\Arch\Expectations\ToBeUsedInNothing;
 use Pest\Arch\Expectations\ToUse;
@@ -81,6 +82,14 @@ final class OppositeExpectation
     public function toUseStrictTypes(): ArchExpectation
     {
         return ToUseStrictTypes::make($this->original, false);
+    }
+
+    /**
+     * Asserts that the given expectation target is final.
+     */
+    public function toBeFinal(): ArchExpectation
+    {
+        return ToBeFinal::make($this->original, false);
     }
 
     /**
