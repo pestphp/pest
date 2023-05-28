@@ -11,7 +11,6 @@ use Pest\Factories\Concerns\HigherOrderable;
 use Pest\Repositories\DatasetsRepository;
 use Pest\Support\Str;
 use Pest\TestSuite;
-use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -62,9 +61,7 @@ final class TestCaseMethodFactory
         public ?string $description,
         public ?Closure $closure,
     ) {
-        $this->closure ??= function (): void {
-            Assert::getCount() > 0 ?: self::markTestIncomplete(); // @phpstan-ignore-line
-        };
+        $this->closure ??= function (): void {};
 
         $this->bootHigherOrderable();
     }

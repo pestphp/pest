@@ -10,6 +10,7 @@ use Pest\Support\ChainableClosure;
 use Pest\Support\ExceptionTrace;
 use Pest\Support\Reflection;
 use Pest\TestSuite;
+use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use ReflectionFunction;
@@ -204,6 +205,10 @@ trait Testable
         $this->__callClosure($afterEach, func_get_args());
 
         parent::tearDown();
+
+        if (Assert::getCount() === 0) {
+            Assert::markTestIncomplete();
+        }
 
         TestSuite::getInstance()->test = null;
     }
