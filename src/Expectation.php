@@ -7,14 +7,13 @@ namespace Pest;
 use BadMethodCallException;
 use Closure;
 use Pest\Arch\Contracts\ArchExpectation;
-use Pest\Arch\Expectations\ToBeFinal;
+use Pest\Arch\Expectations\ToBe;
 use Pest\Arch\Expectations\ToBeUsedIn;
 use Pest\Arch\Expectations\ToBeUsedInNothing;
 use Pest\Arch\Expectations\ToOnlyBeUsedIn;
 use Pest\Arch\Expectations\ToOnlyUse;
 use Pest\Arch\Expectations\ToUse;
 use Pest\Arch\Expectations\ToUseNothing;
-use Pest\Arch\Expectations\ToUseStrictTypes;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\Pipeable;
 use Pest\Concerns\Retrievable;
@@ -26,6 +25,7 @@ use Pest\Expectations\HigherOrderExpectation;
 use Pest\Expectations\OppositeExpectation;
 use Pest\Matchers\Any;
 use Pest\Support\ExpectationPipeline;
+use PHPUnit\Architecture\Elements\ObjectDescription;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\ExpectationFailedException;
 
@@ -376,7 +376,11 @@ final class Expectation
      */
     public function toUseStrictTypes(): ArchExpectation
     {
-        return ToUseStrictTypes::make($this);
+        return ToBe::make(
+            $this,
+            fn (ObjectDescription $object): bool => str_contains((string) file_get_contents($object->path), 'declare(strict_types=1);'),
+            'to use strict types',
+        );
     }
 
     /**
@@ -384,7 +388,119 @@ final class Expectation
      */
     public function toBeFinal(): ArchExpectation
     {
-        return ToBeFinal::make($this);
+        return ToBe::make(
+            $this,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->isFinal(),
+            'to be final',
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target is readonly.
+     */
+    public function toBeReadonly(): ArchExpectation
+    {
+        return ToBe::make(
+            $this,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->isReadOnly(),
+            'to be readonly',
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target is trait.
+     */
+    public function toBeTrait(): ArchExpectation
+    {
+        return ToBe::make(
+            $this,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->isTrait(),
+            'to be trait',
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target is abstract.
+     */
+    public function toBeAbstract(): ArchExpectation
+    {
+        return ToBe::make(
+            $this,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->isAbstract(),
+            'to be abstract',
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target is enum.
+     */
+    public function toBeEnum(): ArchExpectation
+    {
+        return ToBe::make(
+            $this,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->isEnum(),
+            'to be enum',
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target is interface.
+     */
+    public function toBeInterface(): ArchExpectation
+    {
+        return ToBe::make(
+            $this,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->isInterface(),
+            'to be interface',
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target to be subclass of the given class.
+     *
+     * @param  class-string  $class
+     */
+    public function toExtend(string $class): ArchExpectation
+    {
+        return ToBe::make(
+            $this,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->isSubclassOf($class),
+            sprintf("to extend '%s'", $class),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target to be have a parent class.
+     */
+    public function toExtendNothing(): ArchExpectation
+    {
+        return ToBe::make(
+            $this,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->getParentClass() === false,
+            "to extend nothing",
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target to implement the given interfaces.
+     */
+    public function toImplement(array|string $interfaces): ArchExpectation
+    {
+        $interfaces = is_array($interfaces) ? $interfaces : [$interfaces];
+
+        return ToBe::make(
+            $this,
+            function (ObjectDescription $object) use ($interfaces) : bool {
+                foreach ($interfaces as $interface) {
+                    if (! $object->reflectionClass->implementsInterface($interface)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            },
+            "to implement '".implode("', '", (array) $interfaces)."'",
+        );
     }
 
     /**
