@@ -7,6 +7,7 @@ namespace Pest;
 use BadMethodCallException;
 use Closure;
 use Pest\Arch\Contracts\ArchExpectation;
+use Pest\Arch\Expectations\Targeted;
 use Pest\Arch\Expectations\ToBe;
 use Pest\Arch\Expectations\ToBeUsedIn;
 use Pest\Arch\Expectations\ToBeUsedInNothing;
@@ -14,6 +15,7 @@ use Pest\Arch\Expectations\ToOnlyBeUsedIn;
 use Pest\Arch\Expectations\ToOnlyUse;
 use Pest\Arch\Expectations\ToUse;
 use Pest\Arch\Expectations\ToUseNothing;
+use Pest\Arch\Support\FileLineFinder;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\Pipeable;
 use Pest\Concerns\Retrievable;
@@ -376,10 +378,13 @@ final class Expectation
      */
     public function toUseStrictTypes(): ArchExpectation
     {
-        return ToBe::make(
+        return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => str_contains((string) file_get_contents($object->path), 'declare(strict_types=1);'),
             'to use strict types',
+            FileLineFinder::where(function (string $line): bool {
+                return str_contains($line, '<?php');
+            }),
         );
     }
 
@@ -388,10 +393,13 @@ final class Expectation
      */
     public function toBeFinal(): ArchExpectation
     {
-        return ToBe::make(
+        return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => $object->reflectionClass->isFinal(),
             'to be final',
+            FileLineFinder::where(function (string $line): bool {
+                return str_contains($line, 'class');
+            }),
         );
     }
 
@@ -400,10 +408,13 @@ final class Expectation
      */
     public function toBeReadonly(): ArchExpectation
     {
-        return ToBe::make(
+        return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => $object->reflectionClass->isReadOnly(),
             'to be readonly',
+            FileLineFinder::where(function (string $line): bool {
+                return str_contains($line, 'class');
+            }),
         );
     }
 
@@ -412,10 +423,13 @@ final class Expectation
      */
     public function toBeTrait(): ArchExpectation
     {
-        return ToBe::make(
+        return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => $object->reflectionClass->isTrait(),
             'to be trait',
+            FileLineFinder::where(function (string $line): bool {
+                return str_contains($line, 'class');
+            }),
         );
     }
 
@@ -424,10 +438,13 @@ final class Expectation
      */
     public function toBeAbstract(): ArchExpectation
     {
-        return ToBe::make(
+        return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => $object->reflectionClass->isAbstract(),
             'to be abstract',
+            FileLineFinder::where(function (string $line): bool {
+                return str_contains($line, 'class');
+            }),
         );
     }
 
@@ -436,10 +453,13 @@ final class Expectation
      */
     public function toBeEnum(): ArchExpectation
     {
-        return ToBe::make(
+        return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => $object->reflectionClass->isEnum(),
             'to be enum',
+            FileLineFinder::where(function (string $line): bool {
+                return str_contains($line, 'class');
+            }),
         );
     }
 
@@ -448,10 +468,13 @@ final class Expectation
      */
     public function toBeInterface(): ArchExpectation
     {
-        return ToBe::make(
+        return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => $object->reflectionClass->isInterface(),
             'to be interface',
+            FileLineFinder::where(function (string $line): bool {
+                return str_contains($line, 'class');
+            }),
         );
     }
 
@@ -462,10 +485,13 @@ final class Expectation
      */
     public function toExtend(string $class): ArchExpectation
     {
-        return ToBe::make(
+        return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => $object->reflectionClass->isSubclassOf($class),
             sprintf("to extend '%s'", $class),
+            FileLineFinder::where(function (string $line): bool {
+                return str_contains($line, 'class');
+            }),
         );
     }
 
@@ -474,10 +500,76 @@ final class Expectation
      */
     public function toExtendNothing(): ArchExpectation
     {
-        return ToBe::make(
+        return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => $object->reflectionClass->getParentClass() === false,
             "to extend nothing",
+            FileLineFinder::where(function (string $line): bool {
+                return str_contains($line, 'class');
+            }),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target to not implement any interfaces.
+     */
+    public function toImplementNothing(): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->getInterfaceNames() === [],
+            "to implement nothing",
+            FileLineFinder::where(function (string $line): bool {
+                return str_contains($line, 'class');
+            }),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target to only implement the given interfaces.
+     */
+    public function toOnlyImplement(array|string $interfaces): ArchExpectation
+    {
+        $interfaces = is_array($interfaces) ? $interfaces : [$interfaces];
+
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => count($interfaces) === count($object->reflectionClass->getInterfaceNames())
+                && array_diff($interfaces, $object->reflectionClass->getInterfaceNames()) === [],
+            "to only implement '".implode("', '", (array) $interfaces)."'",
+            FileLineFinder::where(function (string $line): bool {
+                return str_contains($line, 'class');
+            }),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target to have the given suffix.
+     */
+    public function toHaveSuffix(string $suffix): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => str_ends_with($object->reflectionClass->getName(), $suffix),
+            "to have suffix '{$suffix}'",
+            FileLineFinder::where(function (string $line): bool {
+                return str_contains($line, 'class');
+            }),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target to have the given suffix.
+     */
+    public function toHavePrefix(string $suffix): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => str_starts_with($object->reflectionClass->getName(), $suffix),
+            "to have prefix '{$suffix}'",
+            FileLineFinder::where(function (string $line): bool {
+                return str_contains($line, 'class');
+            }),
         );
     }
 
@@ -488,7 +580,7 @@ final class Expectation
     {
         $interfaces = is_array($interfaces) ? $interfaces : [$interfaces];
 
-        return ToBe::make(
+        return Targeted::make(
             $this,
             function (ObjectDescription $object) use ($interfaces) : bool {
                 foreach ($interfaces as $interface) {
@@ -500,6 +592,9 @@ final class Expectation
                 return true;
             },
             "to implement '".implode("', '", (array) $interfaces)."'",
+            FileLineFinder::where(function (string $line): bool {
+                return str_contains($line, 'class');
+            }),
         );
     }
 
