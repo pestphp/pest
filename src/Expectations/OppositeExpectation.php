@@ -257,9 +257,6 @@ final class OppositeExpectation
         );
     }
 
-    /**
-     * Asserts that the given expectation target to not only implement the given interfaces.
-     */
     public function toOnlyImplement(array|string $interfaces): ArchExpectation
     {
         throw InvalidExpectation::fromMethods(['not', 'toOnlyImplement']);
@@ -282,7 +279,6 @@ final class OppositeExpectation
     {
         throw InvalidExpectation::fromMethods(['not', 'toOnlyUse']);
     }
-
 
     public function toUseNothing(): never
     {
