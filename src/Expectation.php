@@ -8,7 +8,6 @@ use BadMethodCallException;
 use Closure;
 use Pest\Arch\Contracts\ArchExpectation;
 use Pest\Arch\Expectations\Targeted;
-use Pest\Arch\Expectations\ToBe;
 use Pest\Arch\Expectations\ToBeUsedIn;
 use Pest\Arch\Expectations\ToBeUsedInNothing;
 use Pest\Arch\Expectations\ToOnlyBeUsedIn;
@@ -503,7 +502,7 @@ final class Expectation
         return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => $object->reflectionClass->getParentClass() === false,
-            "to extend nothing",
+            'to extend nothing',
             FileLineFinder::where(function (string $line): bool {
                 return str_contains($line, 'class');
             }),
@@ -518,7 +517,7 @@ final class Expectation
         return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => $object->reflectionClass->getInterfaceNames() === [],
-            "to implement nothing",
+            'to implement nothing',
             FileLineFinder::where(function (string $line): bool {
                 return str_contains($line, 'class');
             }),
@@ -582,7 +581,7 @@ final class Expectation
 
         return Targeted::make(
             $this,
-            function (ObjectDescription $object) use ($interfaces) : bool {
+            function (ObjectDescription $object) use ($interfaces): bool {
                 foreach ($interfaces as $interface) {
                     if (! $object->reflectionClass->implementsInterface($interface)) {
                         return false;

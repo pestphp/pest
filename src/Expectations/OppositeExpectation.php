@@ -5,15 +5,10 @@ declare(strict_types=1);
 namespace Pest\Expectations;
 
 use Pest\Arch\Contracts\ArchExpectation;
-use Pest\Arch\Exceptions\ArchExpectationFailedException;
-use Pest\Arch\Expectations\NotToUseStrictTypes;
 use Pest\Arch\Expectations\Targeted;
-use Pest\Arch\Expectations\ToBe;
-use Pest\Arch\Expectations\ToBeFinal;
 use Pest\Arch\Expectations\ToBeUsedIn;
 use Pest\Arch\Expectations\ToBeUsedInNothing;
 use Pest\Arch\Expectations\ToUse;
-use Pest\Arch\Expectations\ToUseStrictTypes;
 use Pest\Arch\GroupArchExpectation;
 use Pest\Arch\SingleArchExpectation;
 use Pest\Arch\Support\FileLineFinder;
@@ -210,7 +205,7 @@ final class OppositeExpectation
         return Targeted::make(
             $this->original,
             fn (ObjectDescription $object): bool => $object->reflectionClass->getParentClass() !== false,
-            "to extend a class",
+            'to extend a class',
             FileLineFinder::where(function (string $line): bool {
                 return str_contains($line, 'class');
             }),
@@ -226,7 +221,7 @@ final class OppositeExpectation
 
         return Targeted::make(
             $this->original,
-            function (ObjectDescription $object) use ($interfaces) : bool {
+            function (ObjectDescription $object) use ($interfaces): bool {
                 foreach ($interfaces as $interface) {
                     if ($object->reflectionClass->implementsInterface($interface)) {
                         return false;
@@ -250,7 +245,7 @@ final class OppositeExpectation
         return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => $object->reflectionClass->getInterfaceNames() !== [],
-            "to implement an interface",
+            'to implement an interface',
             FileLineFinder::where(function (string $line): bool {
                 return str_contains($line, 'class');
             }),
