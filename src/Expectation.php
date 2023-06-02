@@ -433,6 +433,14 @@ final class Expectation
     }
 
     /**
+     * Asserts that the given expectation targets are traits.
+     */
+    public function toBeTraits(): ArchExpectation
+    {
+        return $this->toBeTrait();
+    }
+
+    /**
      * Asserts that the given expectation target is abstract.
      */
     public function toBeAbstract(): ArchExpectation
@@ -463,6 +471,14 @@ final class Expectation
     }
 
     /**
+     * Asserts that the given expectation targets are enums.
+     */
+    public function toBeEnums(): ArchExpectation
+    {
+        return $this->toBeEnum();
+    }
+
+    /**
      * Asserts that the given expectation target is interface.
      */
     public function toBeInterface(): ArchExpectation
@@ -475,6 +491,14 @@ final class Expectation
                 return str_contains($line, 'class');
             }),
         );
+    }
+
+    /**
+     * Asserts that the given expectation targets are interfaces.
+     */
+    public function toBeInterfaces(): ArchExpectation
+    {
+        return $this->toBeInterface();
     }
 
     /**
@@ -526,6 +550,8 @@ final class Expectation
 
     /**
      * Asserts that the given expectation target to only implement the given interfaces.
+     *
+     * @param  array<int, class-string>|class-string  $interfaces
      */
     public function toOnlyImplement(array|string $interfaces): ArchExpectation
     {
@@ -535,7 +561,7 @@ final class Expectation
             $this,
             fn (ObjectDescription $object): bool => count($interfaces) === count($object->reflectionClass->getInterfaceNames())
                 && array_diff($interfaces, $object->reflectionClass->getInterfaceNames()) === [],
-            "to only implement '".implode("', '", (array) $interfaces)."'",
+            "to only implement '".implode("', '", $interfaces)."'",
             FileLineFinder::where(function (string $line): bool {
                 return str_contains($line, 'class');
             }),
@@ -574,6 +600,8 @@ final class Expectation
 
     /**
      * Asserts that the given expectation target to implement the given interfaces.
+     *
+     * @param  array<int, class-string>|class-string  $interfaces
      */
     public function toImplement(array|string $interfaces): ArchExpectation
     {
@@ -590,7 +618,7 @@ final class Expectation
 
                 return true;
             },
-            "to implement '".implode("', '", (array) $interfaces)."'",
+            "to implement '".implode("', '", $interfaces)."'",
             FileLineFinder::where(function (string $line): bool {
                 return str_contains($line, 'class');
             }),
