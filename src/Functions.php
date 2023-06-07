@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Pest\Concerns\Expectable;
 use Pest\Exceptions\AfterAllWithinDescribe;
 use Pest\Exceptions\BeforeAllWithinDescribe;
 use Pest\Expectation;
@@ -52,7 +53,7 @@ if (! function_exists('beforeEach')) {
     /**
      * Runs the given closure before each test in the current file.
      *
-     * @return HigherOrderTapProxy<TestCall|TestCase>|TestCall|TestCase|mixed
+     * @return HigherOrderTapProxy<Expectable|TestCall|TestCase>|Expectable|TestCall|TestCase|mixed
      */
     function beforeEach(Closure $closure = null): BeforeEachCall
     {
@@ -82,7 +83,7 @@ if (! function_exists('describe')) {
      * is the group description; the second argument is a closure
      * that contains the group tests.
      *
-     * @return HigherOrderTapProxy<TestCall|TestCase>|TestCall|TestCase|mixed
+     * @return HigherOrderTapProxy<Expectable|TestCall|TestCase>|Expectable|TestCall|TestCase|mixed
      */
     function describe(string $description, Closure $tests): DescribeCall
     {
@@ -113,7 +114,7 @@ if (! function_exists('test')) {
      * is the test description; the second argument is
      * a closure that contains the test expectations.
      *
-     * @return TestCall|TestCase|mixed
+     * @return Expectable|TestCall|TestCase|mixed
      */
     function test(string $description = null, Closure $closure = null): HigherOrderTapProxy|TestCall
     {
@@ -133,7 +134,7 @@ if (! function_exists('it')) {
      * is the test description; the second argument is
      * a closure that contains the test expectations.
      *
-     * @return TestCall|TestCase|mixed
+     * @return Expectable|TestCall|TestCase|mixed
      */
     function it(string $description, Closure $closure = null): TestCall
     {
@@ -152,7 +153,7 @@ if (! function_exists('todo')) {
      * is marked as incomplete. Yet, Collision, Pest's
      * printer, will display it as a "todo" test.
      *
-     * @return TestCall|TestCase|mixed
+     * @return Expectable|TestCall|TestCase|mixed
      */
     function todo(string $description): TestCall
     {
@@ -168,7 +169,7 @@ if (! function_exists('afterEach')) {
     /**
      * Runs the given closure after each test in the current file.
      *
-     * @return HigherOrderTapProxy<TestCall|TestCase>|TestCall|mixed
+     * @return Expectable|HigherOrderTapProxy<Expectable|TestCall|TestCase>|TestCall|mixed
      */
     function afterEach(Closure $closure = null): AfterEachCall
     {
