@@ -84,7 +84,7 @@ final class UsesCall
         }, $targets);
 
         $this->targets = array_reduce($targets, function (array $accumulator, string $target): array {
-            if ($matches = glob($target)) {
+            if (($matches = glob($target)) != false) {
                 foreach ($matches as $file) {
                     $accumulator[] = (string) realpath($file);
                 }

@@ -1,8 +1,13 @@
 <?php
 
+use Tests\CustomTestCase\CustomTestCase;
 use Tests\CustomTestCaseInSubFolders\SubFolder\SubFolder\CustomTestCaseInSubFolder;
 
 uses(CustomTestCaseInSubFolder::class)->in('PHPUnit/CustomTestCaseInSubFolders/SubFolder/SubFolder');
+
+uses(CustomTestCase::class)->in('PHPUnit/CustomTestCase/SubFolder/*/');
+
+uses(CustomTestCase::class)->in('PHPUnit/CustomTestCase/SubFolder2/*AsPattern.php');
 
 uses()->group('integration')->in('Visual');
 
