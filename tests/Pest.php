@@ -5,9 +5,11 @@ use Tests\CustomTestCaseInSubFolders\SubFolder\SubFolder\CustomTestCaseInSubFold
 
 uses(CustomTestCaseInSubFolder::class)->in('PHPUnit/CustomTestCaseInSubFolders/SubFolder/SubFolder');
 
-uses(CustomTestCase::class)->in('PHPUnit/CustomTestCase/SubFolder/*/');
+// test case for all the directories inside PHPUnit/GlobPatternTests/SubFolder/
+uses(CustomTestCase::class)->in('PHPUnit/GlobPatternTests/SubFolder/*/');
 
-uses(CustomTestCase::class)->in('PHPUnit/CustomTestCase/SubFolder2/*AsPattern.php');
+// test case for all the files that end with AsPattern.php inside PHPUnit/GlobPatternTests/SubFolder2/
+uses(CustomTestCase::class)->in('PHPUnit/GlobPatternTests/SubFolder2/*AsPattern.php');
 
 uses()->group('integration')->in('Visual');
 
