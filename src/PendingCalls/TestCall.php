@@ -84,7 +84,7 @@ final class TestCall
     /**
      * Asserts that the test throws the given `$exceptionClass` when called if the given condition is true.
      *
-     * @param (callable(): bool)|bool $condition
+     * @param  (callable(): bool)|bool  $condition
      */
     public function throwsIf(callable|bool $condition, string|int $exception, string $exceptionMessage = null, int $exceptionCode = null): self
     {

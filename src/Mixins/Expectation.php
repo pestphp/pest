@@ -839,7 +839,7 @@ final class Expectation
     /**
      * Asserts that executing value throws an exception.
      *
-     * @param (Closure(Throwable): mixed)|string $exception
+     * @param  (Closure(Throwable): mixed)|string  $exception
      * @return self<TValue>
      */
     public function toThrow(callable|string|Throwable $exception, string $exceptionMessage = null, string $message = ''): self

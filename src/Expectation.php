@@ -167,7 +167,7 @@ final class Expectation
      *
      * @template TSequenceValue
      *
-     * @param (callable(self<TValue>, self<string|int>): void)|TSequenceValue ...$callbacks
+     * @param  (callable(self<TValue>, self<string|int>): void)|TSequenceValue  ...$callbacks
      * @return self<TValue>
      */
     public function sequence(mixed ...$callbacks): self
@@ -210,8 +210,8 @@ final class Expectation
      *
      * @template TMatchSubject of array-key
      *
-     * @param (callable(): TMatchSubject)|TMatchSubject $subject
-     * @param array<TMatchSubject, (callable(self<TValue>): mixed)|TValue> $expressions
+     * @param  (callable(): TMatchSubject)|TMatchSubject  $subject
+     * @param  array<TMatchSubject, (callable(self<TValue>): mixed)|TValue>  $expressions
      * @return self<TValue>
      */
     public function match(mixed $subject, array $expressions): self
@@ -248,7 +248,7 @@ final class Expectation
     /**
      * Apply the callback if the given "condition" is falsy.
      *
-     * @param (callable(): bool)|bool $condition
+     * @param  (callable(): bool)|bool  $condition
      * @param  callable(Expectation<TValue>): mixed  $callback
      * @return self<TValue>
      */
@@ -264,7 +264,7 @@ final class Expectation
     /**
      * Apply the callback if the given "condition" is truthy.
      *
-     * @param (callable(): bool)|bool $condition
+     * @param  (callable(): bool)|bool  $condition
      * @param  callable(self<TValue>): mixed  $callback
      * @return self<TValue>
      */
