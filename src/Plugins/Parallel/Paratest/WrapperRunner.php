@@ -48,36 +48,39 @@ final class WrapperRunner implements RunnerInterface
 
     private readonly Timer $timer;
 
-    /** @var array<int, string> */
+    /** @var list<non-empty-string> */
     private array $pending = [];
 
-    private int $exitCode = -1;
+    private int $exitcode = -1;
 
-    /** @var array<int,WrapperWorker> */
+    /** @var array<positive-int,WrapperWorker> */
     private array $workers = [];
 
     /** @var array<int,int> */
     private array $batches = [];
 
-    /** @var array<int, SplFileInfo> */
+    /** @var list<SplFileInfo> */
+    private array $unexpectedOutputFiles = [];
+
+    /** @var list<SplFileInfo> */
     private array $testresultFiles = [];
 
-    /** @var array<int, SplFileInfo> */
+    /** @var list<SplFileInfo> */
     private array $coverageFiles = [];
 
-    /** @var array<int, SplFileInfo> */
+    /** @var list<SplFileInfo> */
     private array $junitFiles = [];
 
-    /** @var array<int, SplFileInfo> */
+    /** @var list<SplFileInfo> */
     private array $teamcityFiles = [];
 
-    /** @var array<int, SplFileInfo> */
+    /** @var list<SplFileInfo> */
     private array $testdoxFiles = [];
 
-    /** @var array<int, string> */
+    /** @var non-empty-string[] */
     private readonly array $parameters;
 
-    private readonly CodeCoverageFilterRegistry $codeCoverageFilterRegistry;
+    private CodeCoverageFilterRegistry $codeCoverageFilterRegistry;
 
     public function __construct(
         private readonly Options $options,
@@ -86,11 +89,10 @@ final class WrapperRunner implements RunnerInterface
         $this->printer = new ResultPrinter($output, $options);
         $this->timer = new Timer();
 
-        $worker = realpath(
+        $wrapper = realpath(
             dirname(__DIR__, 4).DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'worker.php',
         );
-
-        assert($worker !== false);
+        assert($wrapper !== false);
         $phpFinder = new PhpExecutableFinder();
         $phpBin = $phpFinder->find(false);
         assert($phpBin !== false);
@@ -101,7 +103,7 @@ final class WrapperRunner implements RunnerInterface
             $parameters = array_merge($parameters, $options->passthruPhp);
         }
 
-        $parameters[] = $worker;
+        $parameters[] = $wrapper;
 
         $this->parameters = $parameters;
         $this->codeCoverageFilterRegistry = new CodeCoverageFilterRegistry();
@@ -110,14 +112,15 @@ final class WrapperRunner implements RunnerInterface
     public function run(): int
     {
         $directory = dirname(__DIR__);
-        assert(strlen($directory) > 0);
+        assert($directory !== '');
         ExcludeList::addDirectory($directory);
-
         TestResultFacade::init();
-
         EventFacade::instance()->seal();
-
-        $suiteLoader = new SuiteLoader($this->options, $this->output, $this->codeCoverageFilterRegistry);
+        $suiteLoader = new SuiteLoader(
+            $this->options,
+            $this->output,
+            $this->codeCoverageFilterRegistry,
+        );
         $this->pending = $this->getTestFiles($suiteLoader);
 
         $result = TestResultFacade::result();
@@ -142,7 +145,7 @@ final class WrapperRunner implements RunnerInterface
     {
         $batchSize = $this->options->maxBatchSize;
 
-        while ($this->pending !== [] && $this->workers !== []) {
+        while (count($this->pending) > 0 && count($this->workers) > 0) {
             foreach ($this->workers as $token => $worker) {
                 if (! $worker->isRunning()) {
                     throw $worker->getWorkerCrashedException();
@@ -160,13 +163,11 @@ final class WrapperRunner implements RunnerInterface
                 }
 
                 if (
-                    $this->exitCode > 0
+                    $this->exitcode > 0
                     && $this->options->configuration->stopOnFailure()
                 ) {
                     $this->pending = [];
                 } elseif (($pending = array_shift($this->pending)) !== null) {
-                    $this->debug(sprintf('Assigning %s to worker %d', $pending, $token));
-
                     $worker->assign($pending);
                     $this->batches[$token]++;
                 }
@@ -178,9 +179,10 @@ final class WrapperRunner implements RunnerInterface
 
     private function flushWorker(WrapperWorker $worker): void
     {
-        $this->exitCode = max($this->exitCode, $worker->getExitCode());
+        $this->exitcode = max($this->exitcode, $worker->getExitCode());
         $this->printer->printFeedback(
             $worker->progressFile,
+            $worker->unexpectedOutputFile,
             $this->teamcityFiles,
         );
         $worker->reset();
@@ -189,10 +191,10 @@ final class WrapperRunner implements RunnerInterface
     private function waitForAllToFinish(): void
     {
         $stopped = [];
-        while ($this->workers !== []) {
+        while (count($this->workers) > 0) {
             foreach ($this->workers as $index => $worker) {
                 if ($worker->isRunning()) {
-                    if (! array_key_exists($index, $stopped) && $worker->isFree()) {
+                    if (! isset($stopped[$index]) && $worker->isFree()) {
                         $worker->stop();
                         $stopped[$index] = true;
                     }
@@ -212,22 +214,19 @@ final class WrapperRunner implements RunnerInterface
         }
     }
 
+    /** @param  positive-int  $token */
     private function startWorker(int $token): WrapperWorker
     {
-        /** @var array<non-empty-string> $parameters */
-        $parameters = $this->parameters;
-
         $worker = new WrapperWorker(
             $this->output,
             $this->options,
-            $parameters,
+            $this->parameters,
             $token,
         );
-
         $worker->start();
-
         $this->batches[$token] = 0;
 
+        $this->unexpectedOutputFiles[] = $worker->unexpectedOutputFile;
         $this->testresultFiles[] = $worker->testresultFile;
 
         if (isset($worker->junitFile)) {
@@ -330,15 +329,16 @@ final class WrapperRunner implements RunnerInterface
         $this->generateCodeCoverageReports();
         $this->generateLogs();
 
-        $exitCode = Result::exitCode($this->options->configuration, $testResultSum);
+        $exitcode = Result::exitCode($this->options->configuration, $testResultSum);
 
+        $this->clearFiles($this->unexpectedOutputFiles);
         $this->clearFiles($this->testresultFiles);
         $this->clearFiles($this->coverageFiles);
         $this->clearFiles($this->junitFiles);
         $this->clearFiles($this->teamcityFiles);
         $this->clearFiles($this->testdoxFiles);
 
-        return $exitCode;
+        return $exitcode;
     }
 
     private function generateCodeCoverageReports(): void
@@ -348,10 +348,11 @@ final class WrapperRunner implements RunnerInterface
         }
 
         $coverageManager = new CodeCoverage();
-
-        // @phpstan-ignore-next-line
-        is_bool(true) && $coverageManager->init($this->options->configuration, $this->codeCoverageFilterRegistry, true);
-
+        $coverageManager->init(
+            $this->options->configuration,
+            $this->codeCoverageFilterRegistry,
+            false,
+        );
         $coverageMerger = new CoverageMerger($coverageManager->codeCoverage());
         foreach ($this->coverageFiles as $coverageFile) {
             $coverageMerger->addCoverageFromFile($coverageFile);
@@ -376,7 +377,7 @@ final class WrapperRunner implements RunnerInterface
         );
     }
 
-    /** @param  array<int, SplFileInfo>  $files */
+    /** @param  list<SplFileInfo>  $files */
     private function clearFiles(array $files): void
     {
         foreach ($files as $file) {
@@ -391,31 +392,19 @@ final class WrapperRunner implements RunnerInterface
     /**
      * Returns the test files to be executed.
      *
-     * @return array<int, string>
+     * @return array<int, non-empty-string>
      */
     private function getTestFiles(SuiteLoader $suiteLoader): array
     {
-        $this->debug(sprintf('Found %d test file%s', count($suiteLoader->files), count($suiteLoader->files) === 1 ? '' : 's'));
-
-        /** @var array<string, string> $files */
-        $files = $suiteLoader->files;
-
-        return [
+        /** @var array<string, non-empty-string> $files */
+        $files = [
             ...array_values(array_filter(
-                $files,
+                $suiteLoader->tests,
                 fn (string $filename): bool => ! str_ends_with($filename, "eval()'d code")
             )),
             ...TestSuite::getInstance()->tests->getFilenames(),
         ];
-    }
 
-    /**
-     * Prints a debug message.
-     */
-    private function debug(string $message): void
-    {
-        if ($this->options->verbose) {
-            $this->output->writeln("  <fg=blue>{$message}</>  ");
-        }
+        return $files; // @phpstan-ignore-line
     }
 }
