@@ -14,6 +14,7 @@ use Pest\Arch\Expectations\ToOnlyBeUsedIn;
 use Pest\Arch\Expectations\ToOnlyUse;
 use Pest\Arch\Expectations\ToUse;
 use Pest\Arch\Expectations\ToUseNothing;
+use Pest\Arch\PendingArchExpectation;
 use Pest\Arch\Support\FileLineFinder;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\Pipeable;
@@ -39,6 +40,7 @@ use PHPUnit\Framework\ExpectationFailedException;
  * @property EachExpectation $each Creates an expectation on each element on the traversable value.
  *
  * @mixin Mixins\Expectation<TValue>
+ * @mixin PendingArchExpectation
  */
 final class Expectation
 {
@@ -290,9 +292,15 @@ final class Expectation
      * @param  array<int, mixed>  $parameters
      * @return Expectation<TValue>|HigherOrderExpectation<Expectation<TValue>, TValue>
      */
-    public function __call(string $method, array $parameters): Expectation|HigherOrderExpectation
+    public function __call(string $method, array $parameters): Expectation|HigherOrderExpectation|PendingArchExpectation
     {
         if (! self::hasMethod($method)) {
+            if (! is_object($this->value) && method_exists(PendingArchExpectation::class, $method)) {
+                $pendingArchExpectation = new PendingArchExpectation($this, []);
+
+                return $pendingArchExpectation->$method(...$parameters); // @phpstan-ignore-line
+            }
+
             /* @phpstan-ignore-next-line */
             return new HigherOrderExpectation($this, call_user_func_array($this->value->$method(...), $parameters));
         }
@@ -336,6 +344,11 @@ final class Expectation
     public function __get(string $name)
     {
         if (! self::hasMethod($name)) {
+            if (! is_object($this->value) && method_exists(PendingArchExpectation::class, $name)) {
+                /* @phpstan-ignore-next-line */
+                return $this->{$name}();
+            }
+
             /* @phpstan-ignore-next-line */
             return new HigherOrderExpectation($this, $this->retrieve($name, $this->value));
         }

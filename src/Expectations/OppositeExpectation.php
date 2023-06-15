@@ -10,6 +10,7 @@ use Pest\Arch\Expectations\ToBeUsedIn;
 use Pest\Arch\Expectations\ToBeUsedInNothing;
 use Pest\Arch\Expectations\ToUse;
 use Pest\Arch\GroupArchExpectation;
+use Pest\Arch\PendingArchExpectation;
 use Pest\Arch\SingleArchExpectation;
 use Pest\Arch\Support\FileLineFinder;
 use Pest\Exceptions\InvalidExpectation;
@@ -318,6 +319,10 @@ final class OppositeExpectation
     public function __call(string $name, array $arguments): Expectation
     {
         try {
+            if (! is_object($this->original->value) && method_exists(PendingArchExpectation::class, $name)) {
+                throw InvalidExpectation::fromMethods(['not', $name]);
+            }
+
             /* @phpstan-ignore-next-line */
             $this->original->{$name}(...$arguments);
         } catch (ExpectationFailedException|AssertionFailedError) {
@@ -335,8 +340,12 @@ final class OppositeExpectation
     public function __get(string $name): Expectation
     {
         try {
+            if (! is_object($this->original->value) && method_exists(PendingArchExpectation::class, $name)) {
+                throw InvalidExpectation::fromMethods(['not', $name]);
+            }
+
             $this->original->{$name}; // @phpstan-ignore-line
-        } catch (ExpectationFailedException) {  // @phpstan-ignore-line
+        } catch (ExpectationFailedException) {
             return $this->original;
         }
 

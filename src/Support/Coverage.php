@@ -159,9 +159,11 @@ final class Coverage
      * ['11', '20..25', '50', '60..80'];
      * ```
      *
+     *
+     * @param  File  $file
      * @return array<int, string>
      */
-    public static function getMissingCoverage(File $file): array
+    public static function getMissingCoverage($file): array
     {
         $shouldBeNewLine = true;
 
