@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## [v2.7.0 (2023-06-15)](https://github.com/pestphp/pest/compare/v2.6.3...v2.7.0)
+
+### Added
+- Support for unexpected output on printer ([eb9f31e](https://github.com/pestphp/pest/commit/eb9f31edeb00a88c449874f3d48156128a00fff8))
+
+### Chore
+- Bumps PHPUnit to `^10.2.2` ([0e5470b](https://github.com/pestphp/pest/commit/0e5470b192b259ba2db7c02a50371216c98fc0a6))
+
 ## [v2.6.3 (2023-06-07)](https://github.com/pestphp/pest/compare/v2.6.2...v2.6.3)
 
 ### Chore
