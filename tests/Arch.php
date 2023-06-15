@@ -30,4 +30,4 @@ test('contracts')
         'NunoMaduro\Collision\Contracts',
         'Pest\Factories\TestCaseMethodFactory',
         'Symfony\Component\Console',
-    ]);
+    ])->toBeInterfaces();

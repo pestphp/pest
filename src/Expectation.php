@@ -480,6 +480,27 @@ final class Expectation
     }
 
     /**
+     * Asserts that the given expectation targets is an class.
+     */
+    public function toBeClass(): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => class_exists($object->name),
+            'to be class',
+            FileLineFinder::where(fn (string $line): bool => true),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation targets are classes.
+     */
+    public function toBeClasses(): ArchExpectation
+    {
+        return $this->toBeClass();
+    }
+
+    /**
      * Asserts that the given expectation target is interface.
      */
     public function toBeInterface(): ArchExpectation
