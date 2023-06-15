@@ -25,7 +25,7 @@ final class ServiceMessage
         $paramsToString = '';
 
         foreach ([...$this->parameters, 'flowId' => self::$flowId] as $key => $value) {
-            $value = self::escapeServiceMessage((string) $value);
+            $value = $this->escapeServiceMessage();
             $paramsToString .= " $key='$value'";
         }
 
@@ -127,7 +127,7 @@ final class ServiceMessage
         ]);
     }
 
-    private static function escapeServiceMessage(string $text): string
+    private function escapeServiceMessage(string $text): string
     {
         return str_replace(
             ['|', "'", "\n", "\r", ']', '['],
