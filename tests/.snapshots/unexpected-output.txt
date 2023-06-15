@@ -1,0 +1,20 @@
+this is unexpected output
+   WARN  Tests\Fixtures\UnexpectedOutput
+  ! output → This test printed output: this is unexpected output
+  ────────────────────────────────────────────────────────────────────────────  
+   RISKY  Tests\Fixtures\UnexpectedOutput > output                              
+  This test printed output: this is unexpected output
+
+  at src/Kernel.php:86
+     82▕     {
+     83▕         $args = CallsHandleArguments::execute($args);
+     84▕ 
+     85▕         try {
+  ➜  86▕             $this->application->run($args);
+     87▕         } catch (NoDirtyTestsFound) {
+     88▕             $this->output->writeln([
+     89▕                 '',
+     90▕                 '   INFO  No tests found.',
+
+
+  Tests:    1 risky (1 assertions)

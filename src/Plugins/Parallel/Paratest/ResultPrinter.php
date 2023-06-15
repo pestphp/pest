@@ -121,8 +121,7 @@ final class ResultPrinter
 
         $unexpectedOutput = $this->tail($outputFile);
         if ($unexpectedOutput !== '') {
-            // if unexpected output only contains the letter "T", like "T", or "TT", or "TTT", etc, then ignore it.
-            if (preg_match('/^T+$/', $unexpectedOutput) !== false) {
+            if (preg_match('/^T+$/', $unexpectedOutput) > 0) {
                 return;
             }
 

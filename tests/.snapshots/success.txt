@@ -808,6 +808,9 @@
    PASS  Tests\Fixtures\ExampleTest
   ✓ it example 2
 
+   WARN  Tests\Fixtures\UnexpectedOutput
+  - output
+
    PASS  Tests\Helpers\TestInHelpers
   ✓ it executes tests in the Helpers directory
 
@@ -1035,7 +1038,11 @@
   ✓ todo
   ✓ todo in parallel
 
+   PASS  Tests\Visual\UnexpectedOutput
+  ✓ unexpected output with ([''])
+  ✓ unexpected output with (['--parallel'])
+
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 8 todos, 17 skipped, 716 passed (1733 assertions)
+  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 8 todos, 18 skipped, 718 passed (1735 assertions)
