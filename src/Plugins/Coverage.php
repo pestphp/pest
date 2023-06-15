@@ -50,7 +50,7 @@ final class Coverage implements AddsOutput, HandlesArguments
      */
     public function handleArguments(array $originals): array
     {
-        $arguments = [...[''], ...array_values(array_filter($originals, function ($original): bool {
+        $arguments = [...[''], ...array_values(array_filter($originals, function (string $original): bool {
             foreach ([self::COVERAGE_OPTION, self::MIN_OPTION] as $option) {
                 if ($original === sprintf('--%s', $option)) {
                     return true;

@@ -381,9 +381,7 @@ final class Expectation
             $this,
             fn (ObjectDescription $object): bool => str_contains((string) file_get_contents($object->path), 'declare(strict_types=1);'),
             'to use strict types',
-            FileLineFinder::where(function (string $line): bool {
-                return str_contains($line, '<?php');
-            }),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, '<?php')),
         );
     }
 
@@ -396,9 +394,7 @@ final class Expectation
             $this,
             fn (ObjectDescription $object): bool => $object->reflectionClass->isFinal(),
             'to be final',
-            FileLineFinder::where(function (string $line): bool {
-                return str_contains($line, 'class');
-            }),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
 
@@ -411,9 +407,7 @@ final class Expectation
             $this,
             fn (ObjectDescription $object): bool => $object->reflectionClass->isReadOnly(),
             'to be readonly',
-            FileLineFinder::where(function (string $line): bool {
-                return str_contains($line, 'class');
-            }),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
 
@@ -426,9 +420,7 @@ final class Expectation
             $this,
             fn (ObjectDescription $object): bool => $object->reflectionClass->isTrait(),
             'to be trait',
-            FileLineFinder::where(function (string $line): bool {
-                return str_contains($line, 'class');
-            }),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
 
@@ -449,9 +441,7 @@ final class Expectation
             $this,
             fn (ObjectDescription $object): bool => $object->reflectionClass->isAbstract(),
             'to be abstract',
-            FileLineFinder::where(function (string $line): bool {
-                return str_contains($line, 'class');
-            }),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
 
@@ -464,9 +454,7 @@ final class Expectation
             $this,
             fn (ObjectDescription $object): bool => $object->reflectionClass->isEnum(),
             'to be enum',
-            FileLineFinder::where(function (string $line): bool {
-                return str_contains($line, 'class');
-            }),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
 
@@ -487,9 +475,7 @@ final class Expectation
             $this,
             fn (ObjectDescription $object): bool => $object->reflectionClass->isInterface(),
             'to be interface',
-            FileLineFinder::where(function (string $line): bool {
-                return str_contains($line, 'class');
-            }),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
 
@@ -512,9 +498,7 @@ final class Expectation
             $this,
             fn (ObjectDescription $object): bool => $object->reflectionClass->isSubclassOf($class),
             sprintf("to extend '%s'", $class),
-            FileLineFinder::where(function (string $line): bool {
-                return str_contains($line, 'class');
-            }),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
 
@@ -527,9 +511,7 @@ final class Expectation
             $this,
             fn (ObjectDescription $object): bool => $object->reflectionClass->getParentClass() === false,
             'to extend nothing',
-            FileLineFinder::where(function (string $line): bool {
-                return str_contains($line, 'class');
-            }),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
 
@@ -542,9 +524,7 @@ final class Expectation
             $this,
             fn (ObjectDescription $object): bool => $object->reflectionClass->getInterfaceNames() === [],
             'to implement nothing',
-            FileLineFinder::where(function (string $line): bool {
-                return str_contains($line, 'class');
-            }),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
 
@@ -562,9 +542,7 @@ final class Expectation
             fn (ObjectDescription $object): bool => count($interfaces) === count($object->reflectionClass->getInterfaceNames())
                 && array_diff($interfaces, $object->reflectionClass->getInterfaceNames()) === [],
             "to only implement '".implode("', '", $interfaces)."'",
-            FileLineFinder::where(function (string $line): bool {
-                return str_contains($line, 'class');
-            }),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
 
@@ -577,9 +555,7 @@ final class Expectation
             $this,
             fn (ObjectDescription $object): bool => str_ends_with($object->reflectionClass->getName(), $suffix),
             "to have suffix '{$suffix}'",
-            FileLineFinder::where(function (string $line): bool {
-                return str_contains($line, 'class');
-            }),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
 
@@ -592,9 +568,7 @@ final class Expectation
             $this,
             fn (ObjectDescription $object): bool => str_starts_with($object->reflectionClass->getName(), $suffix),
             "to have prefix '{$suffix}'",
-            FileLineFinder::where(function (string $line): bool {
-                return str_contains($line, 'class');
-            }),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
 
@@ -619,9 +593,7 @@ final class Expectation
                 return true;
             },
             "to implement '".implode("', '", $interfaces)."'",
-            FileLineFinder::where(function (string $line): bool {
-                return str_contains($line, 'class');
-            }),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
 

@@ -59,13 +59,18 @@ final class GitDirtyTestCaseFilter implements TestCaseFilter
             $dirtyFiles[substr($dirtyFile, 3)] = trim(substr($dirtyFile, 0, 3));
         }
 
-        $dirtyFiles = array_filter($dirtyFiles, fn ($status): bool => $status !== 'D');
+        $dirtyFiles = array_filter($dirtyFiles, fn (string $status): bool => $status !== 'D');
 
-        $dirtyFiles = array_map(fn ($file, $status): string => in_array($status, ['R', 'RM'], true) ? explode(' -> ', $file)[1] : $file, array_keys($dirtyFiles), $dirtyFiles);
+        $dirtyFiles = array_map(
+            fn (string $file, string $status): string => in_array($status, ['R', 'RM'], true)
+                ? explode(' -> ', $file)[1]
+                : $file, array_keys($dirtyFiles), $dirtyFiles,
+        );
 
         $dirtyFiles = array_filter(
             $dirtyFiles,
-            fn ($file): bool => str_starts_with('.'.DIRECTORY_SEPARATOR.$file, TestSuite::getInstance()->testPath) || str_starts_with($file, TestSuite::getInstance()->testPath)
+            fn (string $file): bool => str_starts_with('.'.DIRECTORY_SEPARATOR.$file, TestSuite::getInstance()->testPath)
+                || str_starts_with($file, TestSuite::getInstance()->testPath)
         );
 
         $dirtyFiles = array_values($dirtyFiles);

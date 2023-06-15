@@ -23,6 +23,7 @@ use ParaTest\WrapperRunner\WrapperWorker;
 use Pest\Result;
 use Pest\TestSuite;
 use PHPUnit\Event\Facade as EventFacade;
+use PHPUnit\Event\TestRunner\WarningTriggered;
 use PHPUnit\Runner\CodeCoverage;
 use PHPUnit\TestRunner\TestResult\Facade as TestResultFacade;
 use PHPUnit\TestRunner\TestResult\TestResult;
@@ -317,7 +318,10 @@ final class WrapperRunner implements RunnerInterface
             $testResultSum->testTriggeredPhpunitErrorEvents(),
             $testResultSum->testTriggeredPhpunitWarningEvents(),
             $testResultSum->testRunnerTriggeredDeprecationEvents(),
-            array_values(array_filter($testResultSum->testRunnerTriggeredWarningEvents(), fn ($event): bool => ! str_contains($event->message(), 'No tests found'))),
+            array_values(array_filter(
+                $testResultSum->testRunnerTriggeredWarningEvents(),
+                fn (WarningTriggered $event): bool => ! str_contains($event->message(), 'No tests found')
+            )),
         );
 
         $this->printer->printResults(

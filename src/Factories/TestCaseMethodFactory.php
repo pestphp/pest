@@ -147,11 +147,11 @@ final class TestCaseMethodFactory
         }
 
         $annotations = implode('', array_map(
-            static fn ($annotation): string => sprintf("\n     * %s", $annotation), $annotations,
+            static fn (string $annotation): string => sprintf("\n     * %s", $annotation), $annotations,
         ));
 
         $attributes = implode('', array_map(
-            static fn ($attribute): string => sprintf("\n        %s", $attribute), $attributes,
+            static fn (string $attribute): string => sprintf("\n        %s", $attribute), $attributes,
         ));
 
         return <<<PHP

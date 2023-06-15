@@ -84,6 +84,6 @@ final class ExpectationPipeline
      */
     public function carry(): Closure
     {
-        return fn ($stack, $pipe): Closure => fn () => $pipe($stack, ...$this->passables);
+        return fn (mixed $stack, callable $pipe): Closure => fn () => $pipe($stack, ...$this->passables);
     }
 }

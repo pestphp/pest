@@ -115,13 +115,13 @@ final class Parallel implements HandlesArguments
     private function runTestSuiteInParallel(array $arguments): int
     {
         $handlers = array_filter(
-            array_map(fn ($handler): object|string => Container::getInstance()->get($handler), self::HANDLERS),
-            fn ($handler): bool => $handler instanceof HandlesArguments,
+            array_map(fn (string $handler): object|string => Container::getInstance()->get($handler), self::HANDLERS),
+            fn (object|string $handler): bool => $handler instanceof HandlesArguments,
         );
 
         $filteredArguments = array_reduce(
             $handlers,
-            fn ($arguments, HandlesArguments $handler): array => $handler->handleArguments($arguments),
+            fn (array $arguments, HandlesArguments $handler): array => $handler->handleArguments($arguments),
             $arguments
         );
 
@@ -139,13 +139,13 @@ final class Parallel implements HandlesArguments
     private function runWorkerHandlers(array $arguments): array
     {
         $handlers = array_filter(
-            array_map(fn ($handler): object|string => Container::getInstance()->get($handler), self::HANDLERS),
-            fn ($handler): bool => $handler instanceof HandlersWorkerArguments,
+            array_map(fn (string $handler): object|string => Container::getInstance()->get($handler), self::HANDLERS),
+            fn (object|string $handler): bool => $handler instanceof HandlersWorkerArguments,
         );
 
         return array_reduce(
             $handlers,
-            fn ($arguments, HandlersWorkerArguments $handler): array => $handler->handleWorkerArguments($arguments),
+            fn (array $arguments, HandlersWorkerArguments $handler): array => $handler->handleWorkerArguments($arguments),
             $arguments
         );
     }
