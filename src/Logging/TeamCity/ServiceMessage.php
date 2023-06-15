@@ -25,7 +25,7 @@ final class ServiceMessage
         $paramsToString = '';
 
         foreach ([...$this->parameters, 'flowId' => self::$flowId] as $key => $value) {
-            $value = $this->escapeServiceMessage();
+            $value = $this->escapeServiceMessage((string) $value);
             $paramsToString .= " $key='$value'";
         }
 
