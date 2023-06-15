@@ -7,7 +7,7 @@ test('undefined method exceptions', function () {
         __FILE__,
         1,
         'foqwdqwd',
-        null
+        []
     );
 
     expect(fn () => $message->call($this))->toThrow(function (ReflectionException $exception) {
