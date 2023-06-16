@@ -38,6 +38,10 @@ use PHPUnit\Framework\ExpectationFailedException;
  *
  * @property OppositeExpectation $not Creates the opposite expectation.
  * @property EachExpectation $each Creates an expectation on each element on the traversable value.
+ * @property PendingArchExpectation $classes
+ * @property PendingArchExpectation $traits
+ * @property PendingArchExpectation $interfaces
+ * @property PendingArchExpectation $enums
  *
  * @mixin Mixins\Expectation<TValue>
  * @mixin PendingArchExpectation
