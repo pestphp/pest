@@ -53,6 +53,7 @@
   ✓ it appends CoversNothing to method attributes
   ✓ it does not append CoversNothing to other methods
   ✓ it throws exception if no class nor method has been found
+  ✓ a "describe" group of tests → it does not append CoversNothing to method attributes
 
    PASS  Tests\Features\DatasetsTests - 1 todo
   ✓ it throws exception if dataset does not exist
@@ -171,6 +172,29 @@
    DEPR  Tests\Features\Deprecated
   ! deprecated → str_contains(): Passing null to parameter #1 ($haystack) of type string is deprecated // tests/Features/Deprecated.php:6
   ! user deprecated → Since foo 1.0: This is a deprecation description // vendor/symfony/deprecation-contracts/function.php:25
+
+   PASS  Tests\Features\Describe - 5 todos
+  ✓ before each
+  ✓ hooks → value
+  ✓ hooks in different orders → value
+  ↓ todo
+  ✓ previous describable before each does not get applied here
+  ↓ todo on hook → should not fail
+  ↓ todo on hook → should run
+  ↓ todo on describe → should not fail
+  ↓ todo on describe → should run
+  ✓ should run
+  ✓ with with (1)
+  ✓ with on hook → value with (2)
+  ✓ with on describe → value with (3)
+
+   PASS  Tests\Features\DescriptionLess
+  ✓ get 'foo'
+  ✓ get 'foo' → get 'bar' → expect true → toBeTrue
+  ✓ get 'foo' → expect true → toBeTrue
+  ✓ a "describe" group of tests → get 'foo'
+  ✓ a "describe" group of tests → get 'foo' → get 'bar' → expect true → toBeTrue
+  ✓ a "describe" group of tests → get 'foo' → expect true → toBeTrue
 
    PASS  Tests\Features\Exceptions
   ✓ it gives access the the underlying expectException
@@ -643,6 +667,16 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toMatchSnapshot
+  ✓ pass
+  ✓ pass with __toString
+  ✓ pass with toString
+  ✓ pass with dataset with ('my-datas-set-value')
+  ✓ within describe → pass with dataset with ('my-datas-set-value')
+  ✓ failures
+  ✓ failures with custom message
+  ✓ not failures
+
    PASS  Tests\Features\Expect\toStartWith
   ✓ pass
   ✓ failures
@@ -714,18 +748,17 @@
   ✓ it is not incompleted because of expect
   ✓ it is not incompleted because of assert
   ✓ it is not incompleted because of test with assertions
+  … a "describe" group of tests → it is incompleted
 
    PASS  Tests\Features\It
   ✓ it is a test
   ✓ it is a higher order message test
+  ✓ a "describe" group of tests → it is a test
+  ✓ a "describe" group of tests → it is a higher order message test
 
    NOTI  Tests\Features\Notices
   ! notice → This is a notice description // tests/Features/Notices.php:4
-
-   PASS  Tests\Features\PendingHigherOrderTests
-  ✓ get 'foo'
-  ✓ get 'foo' → get 'bar' → expect true → toBeTrue
-  ✓ get 'foo' → expect true → toBeTrue
+  ! a "describe" group of tests → notice → This is a notice description // tests/Features/Notices.php:11
 
    PASS  Tests\Features\ScopedDatasets\Directory\NestedDirectory1\TestFileInNestedDirectoryWithDatasetsFile
   ✓ uses dataset with (1)
@@ -787,6 +820,7 @@
    PASS  Tests\Features\ThrowsNoExceptions
   ✓ it allows access to the underlying expectNotToPerformAssertions method
   ✓ it allows performing no expectations without being risky
+  ✓ a "describe" group of tests → it allows performing no expectations without being risky
 
    PASS  Tests\Features\Todo - 3 todos
   ↓ something todo later
@@ -797,6 +831,7 @@
    WARN  Tests\Features\Warnings
   ! warning → Undefined property: P\Tests\Features\Warnings::$fooqwdfwqdfqw
   ! user warning → This is a warning description
+  ! a "describe" group of tests → user warning → This is a warning description
 
    WARN  Tests\Fixtures\CollisionTest
   - error
@@ -1047,4 +1082,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 8 todos, 18 skipped, 718 passed (1735 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 18 skipped, 741 passed (1784 assertions)
