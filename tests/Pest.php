@@ -1,8 +1,15 @@
 <?php
 
+use Tests\CustomTestCase\CustomTestCase;
 use Tests\CustomTestCaseInSubFolders\SubFolder\SubFolder\CustomTestCaseInSubFolder;
 
 uses(CustomTestCaseInSubFolder::class)->in('PHPUnit/CustomTestCaseInSubFolders/SubFolder/SubFolder');
+
+// test case for all the directories inside PHPUnit/GlobPatternTests/SubFolder/
+uses(CustomTestCase::class)->in('PHPUnit/GlobPatternTests/SubFolder/*/');
+
+// test case for all the files that end with AsPattern.php inside PHPUnit/GlobPatternTests/SubFolder2/
+uses(CustomTestCase::class)->in('PHPUnit/GlobPatternTests/SubFolder2/*AsPattern.php');
 
 uses()->group('integration')->in('Visual');
 
