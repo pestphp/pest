@@ -77,6 +77,12 @@ final class Exporter
      */
     public function shortenedExport(mixed $value): string
     {
-        return (string) preg_replace(['#\.{3}#', '#\\\n\s*#'], ['…'], $this->exporter->shortenedExport($value));
+        $map = [
+            '#\.{3}#' => '…',
+            '#\\\n\s*#' => '',
+            '# Object \(…\)#' => '',
+        ];
+
+        return (string) preg_replace(array_keys($map), array_values($map), $this->exporter->shortenedExport($value));
     }
 }
