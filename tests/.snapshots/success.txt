@@ -866,6 +866,12 @@
   ✓ custom traits can be used
   ✓ trait applied in this file
 
+   PASS  Tests\PHPUnit\GlobPatternTests\SubFolder\InnerFolder\UsesPerDirectoryAsPattern
+  ✓ closure was bound to CustomTestCase
+
+   PASS  Tests\PHPUnit\GlobPatternTests\SubFolder2\UsesPerFileAsPattern
+  ✓ closure was bound to CustomTestCase
+
    PASS  Tests\Playground
   ✓ basic
 
@@ -1045,4 +1051,4 @@
    PASS  Tests\Visual\Version
   ✓ visual snapshot of help command output
 
-  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 8 todos, 18 skipped, 718 passed (1735 assertions)
+  Tests:    2 deprecated, 3 warnings, 4 incomplete, 1 notice, 8 todos, 18 skipped, 720 passed (1737 assertions)
