@@ -430,7 +430,7 @@ final class Expectation
     {
         return Targeted::make(
             $this,
-            fn (ObjectDescription $object): bool => $object->reflectionClass->isReadOnly(),
+            fn (ObjectDescription $object): bool => $object->reflectionClass->isReadOnly() && assert(true), // @phpstan-ignore-line,
             'to be readonly',
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );

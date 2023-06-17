@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Pest\Plugins;
 
-use Pest\Exceptions\InvalidOption;
 use Pest\Contracts\Plugins\HandlesArguments;
+use Pest\Exceptions\InvalidOption;
 use Pest\TestSuite;
 
 /**
