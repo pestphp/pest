@@ -76,7 +76,7 @@
         "test:inline": "php bin/pest --colors=always --configuration=phpunit.inline.xml",
         "test:parallel": "php bin/pest --colors=always --exclude-group=integration --parallel --processes=10",
         "test:integration": "php bin/pest --colors=always --group=integration",
-        "update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --colors=always",
+        "update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --colors=always --update-snapshots",
         "test": [
             "@test:refacto",
             "@test:lint",
