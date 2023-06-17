@@ -49,7 +49,9 @@ final class SnapshotRepository
             throw ShouldNotHappen::fromMessage('Snapshot file could not be read.');
         }
 
-        return [$snapshotFilename, $contents];
+        $snapshot = str_replace(dirname($this->testsPath).'/', '', $snapshotFilename);
+
+        return [$snapshot, $contents];
     }
 
     /**
