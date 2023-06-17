@@ -163,7 +163,7 @@ final class Coverage
      * @param  File  $file
      * @return array<int, string>
      */
-    public static function getMissingCoverage($file): array
+    public static function getMissingCoverage(mixed $file): array
     {
         $shouldBeNewLine = true;
 

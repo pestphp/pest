@@ -70,7 +70,8 @@
         "lint": "pint",
         "test:refacto": "rector --dry-run",
         "test:lint": "pint --test",
-        "test:types": "phpstan analyse --ansi --memory-limit=-1 --debug",
+        "test:type:check": "phpstan analyse --ansi --memory-limit=-1 --debug",
+        "test:type:coverage": "php bin/pest --type-coverage --min=100",
         "test:unit": "php bin/pest --colors=always --exclude-group=integration --compact",
         "test:inline": "php bin/pest --colors=always --configuration=phpunit.inline.xml",
         "test:parallel": "php bin/pest --colors=always --exclude-group=integration --parallel --processes=10",
@@ -79,7 +80,8 @@
         "test": [
             "@test:refacto",
             "@test:lint",
-            "@test:types",
+            "@test:type:check",
+            "@test:type:coverage",
             "@test:unit",
             "@test:parallel",
             "@test:integration"
@@ -100,6 +102,7 @@
                 "Pest\\Plugins\\ProcessIsolation",
                 "Pest\\Plugins\\Profile",
                 "Pest\\Plugins\\Retry",
+                "Pest\\Plugins\\Snapshot",
                 "Pest\\Plugins\\Version",
                 "Pest\\Plugins\\Parallel"
             ]

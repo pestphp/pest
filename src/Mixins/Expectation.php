@@ -14,11 +14,14 @@ use Pest\Matchers\Any;
 use Pest\Support\Arr;
 use Pest\Support\Exporter;
 use Pest\Support\NullClosure;
+use Pest\TestSuite;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Constraint\Constraint;
 use PHPUnit\Framework\ExpectationFailedException;
+use PHPUnit\Framework\TestCase;
 use ReflectionFunction;
 use ReflectionNamedType;
+use Stringable;
 use Throwable;
 
 /**
@@ -789,6 +792,41 @@ final class Expectation
             }
 
             Assert::assertEquals($value, $propertyValue, $message);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value "stringable" matches the given snapshot..
+     *
+     * @return self<TValue>
+     */
+    public function toMatchSnapshot(string $message = ''): self
+    {
+        $string = match (true) {
+            is_string($this->value) => $this->value,
+            is_object($this->value) && method_exists($this->value, '__toString') => $this->value->__toString(),
+            is_object($this->value) && method_exists($this->value, 'toString') => $this->value->toString(),
+            default => InvalidExpectationValue::expected('Stringable|string'),
+        };
+
+        $testCase = TestSuite::getInstance()->test;
+        assert($testCase instanceof TestCase);
+        $snapshots = TestSuite::getInstance()->snapshots;
+
+        if ($snapshots->has($testCase, $string)) {
+            [$filename, $content] = $snapshots->get($testCase, $string);
+
+            Assert::assertSame(
+                $content,
+                $string,
+                $message === '' ? "Failed asserting that the string value matches its snapshot ($filename)." : $message
+            );
+        } else {
+            $filename = $snapshots->save($testCase, $string);
+
+            $testCase::markTestIncomplete('Snapshot created at ['.$filename.'].');
         }
 
         return $this;

@@ -305,6 +305,14 @@ final class Expectation
                 return $pendingArchExpectation->$method(...$parameters); // @phpstan-ignore-line
             }
 
+            if (! is_object($this->value)) {
+                throw new BadMethodCallException(sprintf(
+                    'Method "%s" does not exist in %s.',
+                    $method,
+                    gettype($this->value)
+                ));
+            }
+
             /* @phpstan-ignore-next-line */
             return new HigherOrderExpectation($this, call_user_func_array($this->value->$method(...), $parameters));
         }
