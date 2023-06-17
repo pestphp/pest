@@ -808,6 +808,7 @@ final class Expectation
             is_string($this->value) => $this->value,
             is_object($this->value) && method_exists($this->value, '__toString') => $this->value->__toString(),
             is_object($this->value) && method_exists($this->value, 'toString') => $this->value->toString(),
+            $this->value instanceof \Illuminate\Testing\TestResponse => $this->value->getContent(), // @phpstan-ignore-line
             default => InvalidExpectationValue::expected('Stringable|string'),
         };
 
