@@ -9,6 +9,7 @@ use Closure;
 use DateTimeInterface;
 use Error;
 use InvalidArgumentException;
+use JsonSerializable;
 use Pest\Exceptions\InvalidExpectationValue;
 use Pest\Matchers\Any;
 use Pest\Support\Arr;
@@ -23,6 +24,7 @@ use ReflectionFunction;
 use ReflectionNamedType;
 use Stringable;
 use Throwable;
+use Traversable;
 
 /**
  * @internal
@@ -809,7 +811,11 @@ final class Expectation
             is_object($this->value) && method_exists($this->value, '__toString') => $this->value->__toString(),
             is_object($this->value) && method_exists($this->value, 'toString') => $this->value->toString(),
             $this->value instanceof \Illuminate\Testing\TestResponse => $this->value->getContent(), // @phpstan-ignore-line
-            default => InvalidExpectationValue::expected('Stringable|string'),
+            is_array($this->value) => json_encode($this->value, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT),
+            $this->value instanceof Traversable => json_encode(iterator_to_array($this->value), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT),
+            $this->value instanceof JsonSerializable => json_encode($this->value->jsonSerialize(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT),
+            is_object($this->value) && method_exists($this->value, 'toArray') => json_encode($this->value->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT),
+            default => InvalidExpectationValue::expected('array|object|string'),
         };
 
         $testCase = TestSuite::getInstance()->test;

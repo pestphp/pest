@@ -75,6 +75,34 @@ describe('within describe', function () {
     });
 })->with(['my-datas-set-value']);
 
+test('pass with `toArray`', function () {
+    TestSuite::getInstance()->snapshots->save($this, json_encode(['key' => $this->snapshotable], JSON_PRETTY_PRINT));
+
+    $object = new class($this->snapshotable)
+    {
+        public function __construct(protected string $snapshotable)
+        {
+        }
+
+        public function toArray()
+        {
+            return [
+                'key' => $this->snapshotable,
+            ];
+        }
+    };
+
+    expect($object)->toMatchSnapshot()->toMatchSnapshot();
+});
+
+test('pass with array', function () {
+    TestSuite::getInstance()->snapshots->save($this, json_encode(['key' => $this->snapshotable], JSON_PRETTY_PRINT));
+
+    expect([
+        'key' => $this->snapshotable,
+    ])->toMatchSnapshot()->toMatchSnapshot();
+});
+
 test('failures', function () {
     TestSuite::getInstance()->snapshots->save($this, $this->snapshotable);
 

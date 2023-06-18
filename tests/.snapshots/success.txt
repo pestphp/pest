@@ -673,6 +673,8 @@
   ✓ pass with toString
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
+  ✓ pass with toArray
+  ✓ pass with array
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
@@ -1079,7 +1081,7 @@
   ✓ todo
   ✓ todo in parallel
 
-   PASS  Tests\Visual\Version
-  ✓ visual snapshot of help command output
+   WARN  Tests\Visual\Version
+  - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 18 skipped, 741 passed (1784 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 742 passed (1787 assertions)
