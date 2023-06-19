@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## [v2.8.0 (2023-06-19)](https://github.com/pestphp/pest/compare/v2.7.0...v2.8.0)
+
+### Added
+- Support for `globs` in `uses` ([#829](https://github.com/pestphp/pest/pull/829))
+
 ## [v2.7.0 (2023-06-15)](https://github.com/pestphp/pest/compare/v2.6.3...v2.7.0)
 
 ### Added
