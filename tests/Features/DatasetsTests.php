@@ -360,4 +360,14 @@ it('can correctly resolve a bound dataset that returns an array but wants to be 
     },
 ]);
 
+it('will return dataset values by name', function () {
+    expect(dataset('numbers.closure'))->toBe([[1], [2]]);
+    expect(dataset('numbers.array'))->toBe([[1], [2]]);
+
+    expect(dataset('numbers.closure.wrapped'))->toBe([1, 2]);
+    expect(dataset('numbers.array.wrapped'))->toBe([1, 2]);
+
+    expect(dataset('numbers.generators.wrapped'))->toBe([1, 2, 3, 4]);
+});
+
 todo('forbids to define tests in Datasets dirs and Datasets.php files');

@@ -57,10 +57,15 @@ if (! function_exists('dataset')) {
     /**
      * Registers the given dataset.
      *
-     * @param  Closure|iterable<int|string, mixed>  $dataset
+     * @param  Closure|iterable<int|string, mixed>|null  $dataset
+     * @return array|void
      */
-    function dataset(string $name, Closure|iterable $dataset): void
+    function dataset(string $name, Closure|iterable $dataset = null)
     {
+        if ($dataset === null) {
+            return DatasetsRepository::getValue($name, Backtrace::file());
+        }
+
         $scope = DatasetInfo::scope(Backtrace::datasetsFile());
 
         DatasetsRepository::set($name, $dataset, $scope);

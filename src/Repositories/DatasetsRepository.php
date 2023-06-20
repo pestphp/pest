@@ -147,20 +147,7 @@ final class DatasetsRepository
         foreach ($datasets as $index => $data) {
             $processedDataset = [];
 
-            if (is_string($data)) {
-                $datasets[$index] = self::getScopedDataset($data, $currentTestFile);
-            }
-
-            if (is_callable($datasets[$index])) {
-                $datasets[$index] = call_user_func($datasets[$index]);
-            }
-
-            if ($datasets[$index] instanceof Traversable) {
-                $preserveKeysForArrayIterator = $datasets[$index] instanceof Generator
-                    && is_string($datasets[$index]->key());
-
-                $datasets[$index] = iterator_to_array($datasets[$index], $preserveKeysForArrayIterator);
-            }
+            $datasets[$index] = self::getValue($data, $currentTestFile);
 
             foreach ($datasets[$index] as $key => $values) {
                 $values = is_array($values) ? $values : [$values];
@@ -174,6 +161,31 @@ final class DatasetsRepository
         }
 
         return $processedDatasets;
+    }
+
+    /**
+     * @param  Closure|iterable<int|string, mixed>|string  $data
+     */
+    public static function getValue(Closure|iterable|string $data, string $currentTestFile): array
+    {
+        $dataset = [];
+
+        if (is_string($data)) {
+            $dataset = self::getScopedDataset($data, $currentTestFile);
+        }
+
+        if (is_callable($dataset)) {
+            $dataset = call_user_func($dataset);
+        }
+
+        if ($dataset instanceof Traversable) {
+            $preserveKeysForArrayIterator = $dataset instanceof Generator
+                && is_string($dataset->key());
+
+            $dataset = iterator_to_array($dataset, $preserveKeysForArrayIterator);
+        }
+
+        return $dataset;
     }
 
     /**
