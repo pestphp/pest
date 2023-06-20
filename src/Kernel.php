@@ -33,6 +33,7 @@ final class Kernel
         Bootstrappers\BootFiles::class,
         Bootstrappers\BootView::class,
         Bootstrappers\BootKernelDump::class,
+        Bootstrappers\BootExcludeList::class,
     ];
 
     /**

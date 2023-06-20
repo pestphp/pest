@@ -16,7 +16,6 @@
       9▕ })->skip(! isset($_SERVER['COLLISION_TEST']));
 
   1   tests/Fixtures/CollisionTest.php:4
-  2   src/Factories/TestCaseMethodFactory.php:100
 
 
   Tests:    1 failed, 2 passed (2 assertions)
