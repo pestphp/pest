@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## [v2.8.1 (2023-06-20)](https://github.com/pestphp/pest/compare/v2.8.0...v2.8.1)
+
+### Fixed
+- Fixes "Cannot find TestCase object on call stack" ([eb7bb34](https://github.com/pestphp/pest/commit/eb7bb348253f412e806a6ba6f0df46c0435d0dfe))
+
 ## [v2.8.0 (2023-06-19)](https://github.com/pestphp/pest/compare/v2.7.0...v2.8.0)
 
 ### Added
