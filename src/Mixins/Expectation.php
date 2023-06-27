@@ -22,7 +22,6 @@ use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
 use ReflectionFunction;
 use ReflectionNamedType;
-use Stringable;
 use Throwable;
 use Traversable;
 
