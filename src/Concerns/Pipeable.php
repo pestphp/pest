@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pest\Concerns;
 
 use Closure;
-use Pest\Expectation;
 
 /**
  * @internal
