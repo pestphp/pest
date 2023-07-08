@@ -542,7 +542,7 @@ final class Expectation
     {
         return Targeted::make(
             $this,
-            fn (ObjectDescription $object): bool => $object->reflectionClass->isSubclassOf($class),
+            fn (ObjectDescription $object): bool => $class === $object->reflectionClass->getName() || $object->reflectionClass->isSubclassOf($class),
             sprintf("to extend '%s'", $class),
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
