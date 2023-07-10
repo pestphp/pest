@@ -289,6 +289,50 @@ final class Expectation
     }
 
     /**
+     * Callback for toHaveProperties.
+     *
+     * This has been abstracted out so that it can be called recursively.
+     *
+     * @param  iterable<array-key, mixed>  $incoming The incoming array
+     * @param  iterable<array-key, mixed>  $expected The expected array
+     * @param  string  $message The message to display if the assertion fails
+     */
+    private function assert_object(mixed $incoming, iterable $expected, string $message): void
+    {
+        // normalize $incoming to an array
+        $incoming_array = is_object($incoming) && method_exists($incoming, 'toArray') ? $incoming->toArray() : (array) $incoming;
+
+        foreach ($expected as $name => $value) {
+
+            // Check if the key from $expected exists in $incoming
+            $key = is_int($name) && (is_string($value) || is_int($value)) ? $value : $name;
+
+            // Create a default useful message if one was not provided
+            $non_existent = $message;
+            if ($non_existent === '') {
+                $non_existent = "Failed asserting that `{$key}` exists";
+            }
+
+            Assert::assertTrue(array_key_exists($key, $incoming_array), $non_existent);
+
+            $incoming_value = $incoming_array[$key];
+
+            // if $value is an iterable, recurse
+            if (is_iterable($value)) {
+                $this->assert_object($incoming_value, $value, $message);
+
+                continue;
+            }
+
+            // $name exists and it is not an int (not a numeric key)
+            // so we can check against $value
+            if (! is_int($name)) {
+                Assert::assertEquals($value, $incoming_value, $message);
+            }
+        }
+    }
+
+    /**
      * Asserts that the value contains the provided properties $names.
      *
      * @param  iterable<array-key, string>  $names
@@ -296,9 +340,8 @@ final class Expectation
      */
     public function toHaveProperties(iterable $names, string $message = ''): self
     {
-        foreach ($names as $name => $value) {
-            is_int($name) ? $this->toHaveProperty($value, message: $message) : $this->toHaveProperty($name, $value, $message);
-        }
+        // @phpstan-ignore-next-line
+        $this->assert_object($this->value, $names, $message);
 
         return $this;
     }
