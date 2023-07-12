@@ -36,7 +36,7 @@ trait Pipeable
     /**
      * Register an interceptor that should replace an existing expectation.
      *
-     * @param string|Closure(mixed $value, mixed ...$arguments):bool $filter
+     * @param  string|Closure(mixed $value, mixed ...$arguments):bool  $filter
      */
     public function intercept(string $name, string|Closure $filter, Closure $handler): void
     {

@@ -60,7 +60,7 @@ final class TeamCityLogger
     public function __construct(
         private readonly OutputInterface $output,
         private readonly Converter $converter,
-        private readonly int|null $flowId,
+        private readonly ?int $flowId,
         private readonly bool $withoutDuration,
     ) {
         $this->registerSubscribers();

@@ -9,7 +9,7 @@ namespace Pest\Logging\TeamCity;
  */
 final class ServiceMessage
 {
-    private static int|null $flowId = null;
+    private static ?int $flowId = null;
 
     /**
      * @param  array<string, string|int|null>  $parameters
@@ -32,7 +32,7 @@ final class ServiceMessage
         return "##teamcity[$this->type$paramsToString]";
     }
 
-    public static function testSuiteStarted(string $name, string|null $location): self
+    public static function testSuiteStarted(string $name, ?string $location): self
     {
         return new self('testSuiteStarted', [
             'name' => $name,

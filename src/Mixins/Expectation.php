@@ -33,7 +33,7 @@ final class Expectation
     /**
      * The exporter instance, if any.
      */
-    private Exporter|null $exporter = null;
+    private ?Exporter $exporter = null;
 
     /**
      * Creates a new expectation.

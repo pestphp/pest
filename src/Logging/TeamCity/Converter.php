@@ -153,7 +153,7 @@ final class Converter
     /**
      * Gets the test suite location.
      */
-    public function getTestSuiteLocation(TestSuite $testSuite): string|null
+    public function getTestSuiteLocation(TestSuite $testSuite): ?string
     {
         $tests = $testSuite->tests()->asArray();
 
