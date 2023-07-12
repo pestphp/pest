@@ -294,7 +294,7 @@ final class Expectation
      * This has been abstracted out so that it can be called recursively.
      *
      * @param  iterable<array-key, mixed>  $incoming The incoming array
-     * @param  iterable<array-key, mixed>  $expected The expected array
+     * @param  array $expected The expected array
      * @param  string  $message The message to display if the assertion fails
      */
     private function assert_object(mixed $incoming, iterable $expected, string $message): void
@@ -305,7 +305,7 @@ final class Expectation
         foreach ($expected as $name => $value) {
 
             // Check if the key from $expected exists in $incoming
-            $key = is_int($name) && (is_string($value) || is_int($value)) ? $value : $name;
+            $key = array_is_list($expected) ? $value : $name;
 
             // Create a default useful message if one was not provided
             $non_existent = $message;
@@ -313,7 +313,11 @@ final class Expectation
                 $non_existent = "Failed asserting that `{$key}` exists";
             }
 
-            Assert::assertTrue(array_key_exists($key, $incoming_array), $non_existent);
+            if (array_is_list($incoming_array)) {
+                Assert::assertTrue(in_array($key, $incoming_array), $non_existent);
+            } else {
+                Assert::assertTrue(array_key_exists($key, $incoming_array), $non_existent);
+            }
 
             $incoming_value = $incoming_array[$key];
 
@@ -333,15 +337,15 @@ final class Expectation
     }
 
     /**
-     * Asserts that the value contains the provided properties $names.
+     * Asserts that the value contains the provided shape.
      *
      * @param  iterable<array-key, string>  $names
      * @return self<TValue>
      */
-    public function toHaveProperties(iterable $names, string $message = ''): self
+    public function toHaveProperties(iterable $shape, string $message = ''): self
     {
         // @phpstan-ignore-next-line
-        $this->assert_object($this->value, $names, $message);
+        $this->assert_object($this->value, $shape, $message);
 
         return $this;
     }
