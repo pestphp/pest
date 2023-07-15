@@ -9,5 +9,5 @@ namespace Pest\PendingCalls\Concerns;
  */
 trait Describable
 {
-    public string|null $describing = null;
+    public ?string $describing = null;
 }

@@ -89,7 +89,7 @@ final class DatasetsRepository
      * @param  array<Closure|iterable<int|string, mixed>|string>  $dataset
      * @return array<string, mixed>|null
      */
-    public static function resolve(array $dataset, string $currentTestFile): array|null
+    public static function resolve(array $dataset, string $currentTestFile): ?array
     {
         if ($dataset === []) {
             return null;

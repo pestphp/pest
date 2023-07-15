@@ -16,7 +16,7 @@ final class GitDirtyTestCaseFilter implements TestCaseFilter
     /**
      * @var string[]|null
      */
-    private array|null $changedFiles = null;
+    private ?array $changedFiles = null;
 
     public function __construct(private readonly string $projectRoot)
     {
