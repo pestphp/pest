@@ -32,7 +32,6 @@ We cannot thank our sponsors enough for their incredible support in funding Pest
 - [Codecourse](https://codecourse.com/)
 - [Laracasts](https://laracasts.com/)
 - [Localazy](https://localazy.com)
-- [Hyvor](https://hyvor.com/)
 - [Fathom Analytics](https://usefathom.com/)
 - [Meema](https://meema.io)
 - [Zapiet](https://www.zapiet.com)
