@@ -130,13 +130,7 @@ final class Expectation
             return;
         }
 
-        if (function_exists('dd')) {
-            dd($this->value, ...$arguments);
-        }
-
-        var_dump($this->value);
-
-        exit(1);
+        $this->dd($this->value, ...$arguments);
     }
 
     /**
