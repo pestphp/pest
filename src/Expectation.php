@@ -147,17 +147,7 @@ final class Expectation
      */
     public function ddUnless($boolean, mixed ...$arguments): void
     {
-        if ($boolean) {
-            return;
-        }
-
-        if (function_exists('dd')) {
-            dd($this->value, ...$arguments);
-        }
-
-        var_dump($this->value);
-
-        exit(1);
+        $this->ddWhen(! $boolean, ...$arguments);
     }
 
     /**
