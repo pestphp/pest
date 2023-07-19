@@ -7,12 +7,15 @@ namespace Pest;
 use BadMethodCallException;
 use Closure;
 use Pest\Arch\Contracts\ArchExpectation;
+use Pest\Arch\Expectations\Targeted;
 use Pest\Arch\Expectations\ToBeUsedIn;
 use Pest\Arch\Expectations\ToBeUsedInNothing;
 use Pest\Arch\Expectations\ToOnlyBeUsedIn;
 use Pest\Arch\Expectations\ToOnlyUse;
 use Pest\Arch\Expectations\ToUse;
 use Pest\Arch\Expectations\ToUseNothing;
+use Pest\Arch\PendingArchExpectation;
+use Pest\Arch\Support\FileLineFinder;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\Pipeable;
 use Pest\Concerns\Retrievable;
@@ -24,6 +27,7 @@ use Pest\Expectations\HigherOrderExpectation;
 use Pest\Expectations\OppositeExpectation;
 use Pest\Matchers\Any;
 use Pest\Support\ExpectationPipeline;
+use PHPUnit\Architecture\Elements\ObjectDescription;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\ExpectationFailedException;
 
@@ -34,8 +38,13 @@ use PHPUnit\Framework\ExpectationFailedException;
  *
  * @property OppositeExpectation $not Creates the opposite expectation.
  * @property EachExpectation $each Creates an expectation on each element on the traversable value.
+ * @property PendingArchExpectation $classes
+ * @property PendingArchExpectation $traits
+ * @property PendingArchExpectation $interfaces
+ * @property PendingArchExpectation $enums
  *
  * @mixin Mixins\Expectation<TValue>
+ * @mixin PendingArchExpectation
  */
 final class Expectation
 {
@@ -287,9 +296,23 @@ final class Expectation
      * @param  array<int, mixed>  $parameters
      * @return Expectation<TValue>|HigherOrderExpectation<Expectation<TValue>, TValue>
      */
-    public function __call(string $method, array $parameters): Expectation|HigherOrderExpectation
+    public function __call(string $method, array $parameters): Expectation|HigherOrderExpectation|PendingArchExpectation
     {
         if (! self::hasMethod($method)) {
+            if (! is_object($this->value) && method_exists(PendingArchExpectation::class, $method)) {
+                $pendingArchExpectation = new PendingArchExpectation($this, []);
+
+                return $pendingArchExpectation->$method(...$parameters); // @phpstan-ignore-line
+            }
+
+            if (! is_object($this->value)) {
+                throw new BadMethodCallException(sprintf(
+                    'Method "%s" does not exist in %s.',
+                    $method,
+                    gettype($this->value)
+                ));
+            }
+
             /* @phpstan-ignore-next-line */
             return new HigherOrderExpectation($this, call_user_func_array($this->value->$method(...), $parameters));
         }
@@ -333,6 +356,11 @@ final class Expectation
     public function __get(string $name)
     {
         if (! self::hasMethod($name)) {
+            if (! is_object($this->value) && method_exists(PendingArchExpectation::class, $name)) {
+                /* @phpstan-ignore-next-line */
+                return $this->{$name}();
+            }
+
             /* @phpstan-ignore-next-line */
             return new HigherOrderExpectation($this, $this->retrieve($name, $this->value));
         }
@@ -367,6 +395,252 @@ final class Expectation
     public function toUse(array|string $targets): ArchExpectation
     {
         return ToUse::make($this, $targets);
+    }
+
+    /**
+     * Asserts that the given expectation target use the "declare(strict_types=1)" declaration.
+     */
+    public function toUseStrictTypes(): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => str_contains((string) file_get_contents($object->path), 'declare(strict_types=1);'),
+            'to use strict types',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, '<?php')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target is final.
+     */
+    public function toBeFinal(): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->isFinal(),
+            'to be final',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target is readonly.
+     */
+    public function toBeReadonly(): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->isReadOnly() && assert(true), // @phpstan-ignore-line,
+            'to be readonly',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target is trait.
+     */
+    public function toBeTrait(): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->isTrait(),
+            'to be trait',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation targets are traits.
+     */
+    public function toBeTraits(): ArchExpectation
+    {
+        return $this->toBeTrait();
+    }
+
+    /**
+     * Asserts that the given expectation target is abstract.
+     */
+    public function toBeAbstract(): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->isAbstract(),
+            'to be abstract',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target is enum.
+     */
+    public function toBeEnum(): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->isEnum(),
+            'to be enum',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation targets are enums.
+     */
+    public function toBeEnums(): ArchExpectation
+    {
+        return $this->toBeEnum();
+    }
+
+    /**
+     * Asserts that the given expectation targets is an class.
+     */
+    public function toBeClass(): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => class_exists($object->name),
+            'to be class',
+            FileLineFinder::where(fn (string $line): bool => true),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation targets are classes.
+     */
+    public function toBeClasses(): ArchExpectation
+    {
+        return $this->toBeClass();
+    }
+
+    /**
+     * Asserts that the given expectation target is interface.
+     */
+    public function toBeInterface(): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->isInterface(),
+            'to be interface',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation targets are interfaces.
+     */
+    public function toBeInterfaces(): ArchExpectation
+    {
+        return $this->toBeInterface();
+    }
+
+    /**
+     * Asserts that the given expectation target to be subclass of the given class.
+     *
+     * @param  class-string  $class
+     */
+    public function toExtend(string $class): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => $class === $object->reflectionClass->getName() || $object->reflectionClass->isSubclassOf($class),
+            sprintf("to extend '%s'", $class),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target to be have a parent class.
+     */
+    public function toExtendNothing(): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->getParentClass() === false,
+            'to extend nothing',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target to not implement any interfaces.
+     */
+    public function toImplementNothing(): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->getInterfaceNames() === [],
+            'to implement nothing',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target to only implement the given interfaces.
+     *
+     * @param  array<int, class-string>|class-string  $interfaces
+     */
+    public function toOnlyImplement(array|string $interfaces): ArchExpectation
+    {
+        $interfaces = is_array($interfaces) ? $interfaces : [$interfaces];
+
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => count($interfaces) === count($object->reflectionClass->getInterfaceNames())
+                && array_diff($interfaces, $object->reflectionClass->getInterfaceNames()) === [],
+            "to only implement '".implode("', '", $interfaces)."'",
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target to have the given suffix.
+     */
+    public function toHaveSuffix(string $suffix): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => str_ends_with($object->reflectionClass->getName(), $suffix),
+            "to have suffix '{$suffix}'",
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target to have the given suffix.
+     */
+    public function toHavePrefix(string $suffix): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => str_starts_with($object->reflectionClass->getName(), $suffix),
+            "to have prefix '{$suffix}'",
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target to implement the given interfaces.
+     *
+     * @param  array<int, class-string>|class-string  $interfaces
+     */
+    public function toImplement(array|string $interfaces): ArchExpectation
+    {
+        $interfaces = is_array($interfaces) ? $interfaces : [$interfaces];
+
+        return Targeted::make(
+            $this,
+            function (ObjectDescription $object) use ($interfaces): bool {
+                foreach ($interfaces as $interface) {
+                    if (! $object->reflectionClass->implementsInterface($interface)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            },
+            "to implement '".implode("', '", $interfaces)."'",
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
     }
 
     /**

@@ -98,7 +98,7 @@ final class TestCaseFactory
     {
         if ('\\' === DIRECTORY_SEPARATOR) {
             // In case Windows, strtolower drive name, like in UsesCall.
-            $filename = (string) preg_replace_callback('~^(?P<drive>[a-z]+:\\\)~i', static fn ($match): string => strtolower($match['drive']), $filename);
+            $filename = (string) preg_replace_callback('~^(?P<drive>[a-z]+:\\\)~i', static fn (array $match): string => strtolower($match['drive']), $filename);
         }
 
         $filename = str_replace('\\\\', '\\', addslashes((string) realpath($filename)));
@@ -134,7 +134,7 @@ final class TestCaseFactory
 
         $hasPrintableTestCaseClassFQN = sprintf('\%s', HasPrintableTestCaseName::class);
         $traitsCode = sprintf('use %s;', implode(', ', array_map(
-            static fn ($trait): string => sprintf('\%s', $trait), $this->traits))
+            static fn (string $trait): string => sprintf('\%s', $trait), $this->traits))
         );
 
         $partsFQN = explode('\\', $classFQN);

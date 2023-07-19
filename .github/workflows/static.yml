@@ -30,8 +30,11 @@ jobs:
     - name: Install Dependencies
       run: composer update --prefer-stable --no-interaction --no-progress --ansi
 
-    - name: Types
-      run: composer test:types
+    - name: Type Check
+      run: composer test:type:check
+
+    - name: Type Coverage
+      run: composer test:type:coverage
 
     - name: Refacto
       run: composer test:refacto

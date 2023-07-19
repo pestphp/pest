@@ -15,3 +15,7 @@ it('is not incompleted because of assert')->assertTrue(true);
 it('is not incompleted because of test with assertions', function () {
     expect(true)->toBeTrue();
 });
+
+describe('a "describe" group of tests', function () {
+    it('is incompleted');
+});

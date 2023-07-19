@@ -22,40 +22,45 @@ final class TestCaseMethodFactory
     use HigherOrderable;
 
     /**
-     * Determines if the Test Case Method is a "todo".
+     * The test's describing, if any.
+     */
+    public ?string $describing = null;
+
+    /**
+     * Determines if the test is a "todo".
      */
     public bool $todo = false;
 
     /**
-     * The Test Case Dataset, if any.
+     * The test's datasets.
      *
      * @var array<Closure|iterable<int|string, mixed>|string>
      */
     public array $datasets = [];
 
     /**
-     * The Test Case depends, if any.
+     * The test's dependencies.
      *
      * @var array<int, string>
      */
     public array $depends = [];
 
     /**
-     * The Test Case groups, if any.
+     * The test's groups.
      *
      * @var array<int, string>
      */
     public array $groups = [];
 
     /**
-     * The covered classes and functions, if any.
+     * The covered classes and functions.
      *
      * @var array<int, \Pest\Factories\Covers\CoversClass|\Pest\Factories\Covers\CoversFunction|\Pest\Factories\Covers\CoversNothing>
      */
     public array $covers = [];
 
     /**
-     * Creates a new Factory instance.
+     * Creates a new test case method factory instance.
      */
     public function __construct(
         public string $filename,
@@ -70,7 +75,7 @@ final class TestCaseMethodFactory
     }
 
     /**
-     * Makes the Test Case classes.
+     * Creates the test's closure.
      */
     public function getClosure(TestCase $concrete): Closure
     {
@@ -142,11 +147,11 @@ final class TestCaseMethodFactory
         }
 
         $annotations = implode('', array_map(
-            static fn ($annotation): string => sprintf("\n     * %s", $annotation), $annotations,
+            static fn (string $annotation): string => sprintf("\n     * %s", $annotation), $annotations,
         ));
 
         $attributes = implode('', array_map(
-            static fn ($attribute): string => sprintf("\n        %s", $attribute), $attributes,
+            static fn (string $attribute): string => sprintf("\n        %s", $attribute), $attributes,
         ));
 
         return <<<PHP

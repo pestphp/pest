@@ -9,6 +9,7 @@ use Pest\Repositories\AfterAllRepository;
 use Pest\Repositories\AfterEachRepository;
 use Pest\Repositories\BeforeAllRepository;
 use Pest\Repositories\BeforeEachRepository;
+use Pest\Repositories\SnapshotRepository;
 use Pest\Repositories\TestRepository;
 use PHPUnit\Framework\TestCase;
 
@@ -48,6 +49,11 @@ final class TestSuite
     public AfterAllRepository $afterAll;
 
     /**
+     * Holds the snapshots repository.
+     */
+    public SnapshotRepository $snapshots;
+
+    /**
      * Holds the root path.
      */
     public string $rootPath;
@@ -69,8 +75,9 @@ final class TestSuite
         $this->tests = new TestRepository();
         $this->afterEach = new AfterEachRepository();
         $this->afterAll = new AfterAllRepository();
-
         $this->rootPath = (string) realpath($rootPath);
+
+        $this->snapshots = new SnapshotRepository($this->rootPath.'/'.$this->testPath, '.pest/snapshots');
     }
 
     /**

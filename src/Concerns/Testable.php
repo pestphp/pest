@@ -23,37 +23,42 @@ use Throwable;
 trait Testable
 {
     /**
-     * Test method description.
+     * The test's description.
      */
     private string $__description;
 
     /**
-     * Test "latest" method description.
+     * The test's latest description.
      */
     private static string $__latestDescription;
 
     /**
-     * The Test Case "test" closure.
+     * The test's describing, if any.
+     */
+    public ?string $__describing = null;
+
+    /**
+     * The test's test closure.
      */
     private Closure $__test;
 
     /**
-     * The Test Case "setUp" closure.
+     * The test's before each closure.
      */
     private ?Closure $__beforeEach = null;
 
     /**
-     * The Test Case "tearDown" closure.
+     * The test's after each closure.
      */
     private ?Closure $__afterEach = null;
 
     /**
-     * The Test Case "setUpBeforeClass" closure.
+     * The test's before all closure.
      */
     private static ?Closure $__beforeAll = null;
 
     /**
-     * The test "tearDownAfterClass" closure.
+     * The test's after all closure.
      */
     private static ?Closure $__afterAll = null;
 
@@ -78,6 +83,7 @@ trait Testable
         if ($test->hasMethod($name)) {
             $method = $test->getMethod($name);
             $this->__description = self::$__latestDescription = $method->description;
+            $this->__describing = $method->describing;
             $this->__test = $method->getClosure($this);
         }
     }
@@ -92,7 +98,7 @@ trait Testable
         }
 
         self::$__beforeAll = (self::$__beforeAll instanceof Closure)
-            ? ChainableClosure::fromStatic(self::$__beforeAll, $hook)
+            ? ChainableClosure::boundStatically(self::$__beforeAll, $hook)
             : $hook;
     }
 
@@ -106,7 +112,7 @@ trait Testable
         }
 
         self::$__afterAll = (self::$__afterAll instanceof Closure)
-            ? ChainableClosure::fromStatic(self::$__afterAll, $hook)
+            ? ChainableClosure::boundStatically(self::$__afterAll, $hook)
             : $hook;
     }
 
@@ -136,7 +142,7 @@ trait Testable
         }
 
         $this->{$property} = ($this->{$property} instanceof Closure)
-            ? ChainableClosure::from($this->{$property}, $hook)
+            ? ChainableClosure::bound($this->{$property}, $hook)
             : $hook;
     }
 
@@ -150,7 +156,7 @@ trait Testable
         $beforeAll = TestSuite::getInstance()->beforeAll->get(self::$__filename);
 
         if (self::$__beforeAll instanceof Closure) {
-            $beforeAll = ChainableClosure::fromStatic(self::$__beforeAll, $beforeAll);
+            $beforeAll = ChainableClosure::boundStatically(self::$__beforeAll, $beforeAll);
         }
 
         call_user_func(Closure::bind($beforeAll, null, self::class));
@@ -164,7 +170,7 @@ trait Testable
         $afterAll = TestSuite::getInstance()->afterAll->get(self::$__filename);
 
         if (self::$__afterAll instanceof Closure) {
-            $afterAll = ChainableClosure::fromStatic(self::$__afterAll, $afterAll);
+            $afterAll = ChainableClosure::boundStatically(self::$__afterAll, $afterAll);
         }
 
         call_user_func(Closure::bind($afterAll, null, self::class));
@@ -184,7 +190,7 @@ trait Testable
         $beforeEach = TestSuite::getInstance()->beforeEach->get(self::$__filename)[1];
 
         if ($this->__beforeEach instanceof Closure) {
-            $beforeEach = ChainableClosure::from($this->__beforeEach, $beforeEach);
+            $beforeEach = ChainableClosure::bound($this->__beforeEach, $beforeEach);
         }
 
         $this->__callClosure($beforeEach, func_get_args());
@@ -198,7 +204,7 @@ trait Testable
         $afterEach = TestSuite::getInstance()->afterEach->get(self::$__filename);
 
         if ($this->__afterEach instanceof Closure) {
-            $afterEach = ChainableClosure::from($this->__afterEach, $afterEach);
+            $afterEach = ChainableClosure::bound($this->__afterEach, $afterEach);
         }
 
         $this->__callClosure($afterEach, func_get_args());

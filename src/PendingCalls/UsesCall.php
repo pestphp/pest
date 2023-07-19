@@ -66,11 +66,11 @@ final class UsesCall
      */
     public function in(string ...$targets): void
     {
-        $targets = array_map(function ($path): string {
+        $targets = array_map(function (string $path): string {
             $startChar = DIRECTORY_SEPARATOR;
 
             if ('\\' === DIRECTORY_SEPARATOR || preg_match('~\A[A-Z]:(?![^/\\\\])~i', $path) > 0) {
-                $path = (string) preg_replace_callback('~^(?P<drive>[a-z]+:\\\)~i', fn ($match): string => strtolower($match['drive']), $path);
+                $path = (string) preg_replace_callback('~^(?P<drive>[a-z]+:\\\)~i', fn (array $match): string => strtolower($match['drive']), $path);
 
                 $startChar = strtolower((string) preg_replace('~^([a-z]+:\\\).*$~i', '$1', __DIR__));
             }

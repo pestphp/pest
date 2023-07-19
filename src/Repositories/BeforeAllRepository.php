@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pest\Repositories;
 
 use Closure;
-use Pest\Exceptions\BeforeEachAlreadyExist;
+use Pest\Exceptions\BeforeAllAlreadyExist;
 use Pest\Support\NullClosure;
 use Pest\Support\Reflection;
 
@@ -39,7 +39,7 @@ final class BeforeAllRepository
         $filename = Reflection::getFileNameFromClosure($closure);
 
         if (array_key_exists($filename, $this->state)) {
-            throw new BeforeEachAlreadyExist($filename);
+            throw new BeforeAllAlreadyExist($filename);
         }
 
         $this->state[$filename] = $closure;

@@ -10,6 +10,7 @@ use Pest\Factories\Covers\CoversClass;
 use Pest\Factories\Covers\CoversFunction;
 use Pest\Factories\Covers\CoversNothing;
 use Pest\Factories\TestCaseMethodFactory;
+use Pest\PendingCalls\Concerns\Describable;
 use Pest\Plugins\Only;
 use Pest\Support\Backtrace;
 use Pest\Support\Exporter;
@@ -25,10 +26,12 @@ use PHPUnit\Framework\TestCase;
  */
 final class TestCall
 {
+    use Describable;
+
     /**
      * The Test Case Factory.
      */
-    private readonly TestCaseMethodFactory $testCaseMethod;
+    public readonly TestCaseMethodFactory $testCaseMethod;
 
     /**
      * If test call is descriptionLess.
@@ -48,7 +51,9 @@ final class TestCall
 
         $this->descriptionLess = $description === null;
 
-        $this->testSuite->beforeEach->get($filename)[0]($this);
+        $this->describing = DescribeCall::describing();
+
+        $this->testSuite->beforeEach->get($this->filename)[0]($this);
     }
 
     /**
@@ -316,12 +321,14 @@ final class TestCall
     private function addChain(string $file, int $line, string $name, array $arguments = null): self
     {
         $exporter = Exporter::default();
+
         $this->testCaseMethod
             ->chains
             ->add($file, $line, $name, $arguments);
 
         if ($this->descriptionLess) {
             Exporter::default();
+
             if ($this->testCaseMethod->description !== null) {
                 $this->testCaseMethod->description .= ' → ';
             }
@@ -338,6 +345,11 @@ final class TestCall
      */
     public function __destruct()
     {
+        if (! is_null($this->describing)) {
+            $this->testCaseMethod->describing = $this->describing;
+            $this->testCaseMethod->description = sprintf('`%s` → %s', $this->describing, $this->testCaseMethod->description);
+        }
+
         $this->testSuite->tests->set($this->testCaseMethod);
     }
 }

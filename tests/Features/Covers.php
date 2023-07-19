@@ -68,3 +68,11 @@ it('throws exception if no class nor method has been found', function () {
 
     $testCall->covers('fakeName');
 })->throws(InvalidArgumentException::class, 'No class or method named "fakeName" has been found.');
+
+describe('a "describe" group of tests', function () {
+    it('does not append CoversNothing to method attributes', function () {
+        $phpDoc = (new ReflectionClass($this))->getMethod($this->name());
+
+        expect(str_contains($phpDoc->getDocComment(), '* @coversNothing'))->toBeTrue();
+    });
+})->coversNothing();

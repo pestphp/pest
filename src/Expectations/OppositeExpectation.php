@@ -5,15 +5,20 @@ declare(strict_types=1);
 namespace Pest\Expectations;
 
 use Pest\Arch\Contracts\ArchExpectation;
+use Pest\Arch\Expectations\Targeted;
 use Pest\Arch\Expectations\ToBeUsedIn;
 use Pest\Arch\Expectations\ToBeUsedInNothing;
 use Pest\Arch\Expectations\ToUse;
 use Pest\Arch\GroupArchExpectation;
+use Pest\Arch\PendingArchExpectation;
 use Pest\Arch\SingleArchExpectation;
+use Pest\Arch\Support\FileLineFinder;
 use Pest\Exceptions\InvalidExpectation;
 use Pest\Expectation;
 use Pest\Support\Arr;
 use Pest\Support\Exporter;
+use PHPUnit\Architecture\Elements\ObjectDescription;
+use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\ExpectationFailedException;
 
 /**
@@ -72,6 +77,191 @@ final class OppositeExpectation
     }
 
     /**
+     * Asserts that the given expectation target does not use the "declare(strict_types=1)" declaration.
+     */
+    public function toUseStrictTypes(): ArchExpectation
+    {
+        return Targeted::make(
+            $this->original,
+            fn (ObjectDescription $object): bool => ! str_contains((string) file_get_contents($object->path), 'declare(strict_types=1);'),
+            'not to use strict types',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, '<?php')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target is not final.
+     */
+    public function toBeFinal(): ArchExpectation
+    {
+        return Targeted::make(
+            $this->original,
+            fn (ObjectDescription $object): bool => ! $object->reflectionClass->isFinal(),
+            'not to be final',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target is not readonly.
+     */
+    public function toBeReadonly(): ArchExpectation
+    {
+        return Targeted::make(
+            $this->original,
+            fn (ObjectDescription $object): bool => ! $object->reflectionClass->isReadOnly() && assert(true), // @phpstan-ignore-line
+            'not to be readonly',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target is not trait.
+     */
+    public function toBeTrait(): ArchExpectation
+    {
+        return Targeted::make(
+            $this->original,
+            fn (ObjectDescription $object): bool => ! $object->reflectionClass->isTrait(),
+            'not to be trait',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target is not abstract.
+     */
+    public function toBeAbstract(): ArchExpectation
+    {
+        return Targeted::make(
+            $this->original,
+            fn (ObjectDescription $object): bool => ! $object->reflectionClass->isAbstract(),
+            'not to be abstract',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target is not enum.
+     */
+    public function toBeEnum(): ArchExpectation
+    {
+        return Targeted::make(
+            $this->original,
+            fn (ObjectDescription $object): bool => ! $object->reflectionClass->isEnum(),
+            'not to be enum',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target is not interface.
+     */
+    public function toBeInterface(): ArchExpectation
+    {
+        return Targeted::make(
+            $this->original,
+            fn (ObjectDescription $object): bool => ! $object->reflectionClass->isInterface(),
+            'not to be interface',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target to be subclass of the given class.
+     *
+     * @param  class-string  $class
+     */
+    public function toExtend(string $class): ArchExpectation
+    {
+        return Targeted::make(
+            $this->original,
+            fn (ObjectDescription $object): bool => ! $object->reflectionClass->isSubclassOf($class),
+            sprintf("not to extend '%s'", $class),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target to be not have any parent class.
+     */
+    public function toExtendNothing(): ArchExpectation
+    {
+        return Targeted::make(
+            $this->original,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->getParentClass() !== false,
+            'to extend a class',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target not to implement the given interfaces.
+     *
+     * @param  array<int, class-string>|string  $interfaces
+     */
+    public function toImplement(array|string $interfaces): ArchExpectation
+    {
+        $interfaces = is_array($interfaces) ? $interfaces : [$interfaces];
+
+        return Targeted::make(
+            $this->original,
+            function (ObjectDescription $object) use ($interfaces): bool {
+                foreach ($interfaces as $interface) {
+                    if ($object->reflectionClass->implementsInterface($interface)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            },
+            "not to implement '".implode("', '", $interfaces)."'",
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target to not implement any interfaces.
+     */
+    public function toImplementNothing(): ArchExpectation
+    {
+        return Targeted::make(
+            $this->original,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->getInterfaceNames() !== [],
+            'to implement an interface',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
+     * Not supported.
+     *
+     * @param  array<int, class-string>|string  $interfaces
+     */
+    public function toOnlyImplement(array|string $interfaces): never
+    {
+        throw InvalidExpectation::fromMethods(['not', 'toOnlyImplement']);
+    }
+
+    /**
+     * Not supported.
+     */
+    public function toHavePrefix(string $suffix): never
+    {
+        throw InvalidExpectation::fromMethods(['not', 'toHavePrefix']);
+    }
+
+    /**
+     * Not supported.
+     */
+    public function toHaveSuffix(string $suffix): never
+    {
+        throw InvalidExpectation::fromMethods(['not', 'toHaveSuffix']);
+    }
+
+    /**
+     * Not supported.
+     *
      * @param  array<int, string>|string  $targets
      */
     public function toOnlyUse(array|string $targets): never
@@ -79,6 +269,9 @@ final class OppositeExpectation
         throw InvalidExpectation::fromMethods(['not', 'toOnlyUse']);
     }
 
+    /**
+     * Not supported.
+     */
     public function toUseNothing(): never
     {
         throw InvalidExpectation::fromMethods(['not', 'toUseNothing']);
@@ -126,9 +319,13 @@ final class OppositeExpectation
     public function __call(string $name, array $arguments): Expectation
     {
         try {
+            if (! is_object($this->original->value) && method_exists(PendingArchExpectation::class, $name)) {
+                throw InvalidExpectation::fromMethods(['not', $name]);
+            }
+
             /* @phpstan-ignore-next-line */
             $this->original->{$name}(...$arguments);
-        } catch (ExpectationFailedException) {
+        } catch (ExpectationFailedException|AssertionFailedError) {
             return $this->original;
         }
 
@@ -143,8 +340,12 @@ final class OppositeExpectation
     public function __get(string $name): Expectation
     {
         try {
+            if (! is_object($this->original->value) && method_exists(PendingArchExpectation::class, $name)) {
+                throw InvalidExpectation::fromMethods(['not', $name]);
+            }
+
             $this->original->{$name}; // @phpstan-ignore-line
-        } catch (ExpectationFailedException) {  // @phpstan-ignore-line
+        } catch (ExpectationFailedException) {
             return $this->original;
         }
 
@@ -162,8 +363,13 @@ final class OppositeExpectation
 
         $exporter = Exporter::default();
 
-        $toString = fn ($argument): string => $exporter->shortenedExport($argument);
+        $toString = fn (mixed $argument): string => $exporter->shortenedExport($argument);
 
-        throw new ExpectationFailedException(sprintf('Expecting %s not %s %s.', $toString($this->original->value), strtolower((string) preg_replace('/(?<!\ )[A-Z]/', ' $0', $name)), implode(' ', array_map(fn ($argument): string => $toString($argument), $arguments))));
+        throw new ExpectationFailedException(sprintf(
+            'Expecting %s not %s %s.',
+            $toString($this->original->value),
+            strtolower((string) preg_replace('/(?<!\ )[A-Z]/', ' $0', $name)),
+            implode(' ', array_map(fn (mixed $argument): string => $toString($argument), $arguments)),
+        ));
     }
 }

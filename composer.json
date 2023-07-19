@@ -1,6 +1,6 @@
 {
     "name": "pestphp/pest",
-    "description": "An elegant PHP Testing Framework.",
+    "description": "The elegant PHP Testing Framework.",
     "keywords": [
         "php",
         "framework",
@@ -50,9 +50,11 @@
     },
     "require-dev": {
         "pestphp/pest-dev-tools": "^2.12.0",
+        "pestphp/pest-plugin-type-coverage": "^2.0.0",
         "symfony/process": "^6.3.0"
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "config": {
         "sort-packages": true,
         "preferred-install": "dist",
@@ -68,16 +70,18 @@
         "lint": "pint",
         "test:refacto": "rector --dry-run",
         "test:lint": "pint --test",
-        "test:types": "phpstan analyse --ansi --memory-limit=-1 --debug",
+        "test:type:check": "phpstan analyse --ansi --memory-limit=-1 --debug",
+        "test:type:coverage": "php bin/pest --type-coverage --min=100",
         "test:unit": "php bin/pest --colors=always --exclude-group=integration --compact",
         "test:inline": "php bin/pest --colors=always --configuration=phpunit.inline.xml",
         "test:parallel": "php bin/pest --colors=always --exclude-group=integration --parallel --processes=10",
         "test:integration": "php bin/pest --colors=always --group=integration",
-        "update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --colors=always",
+        "update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --colors=always --update-snapshots",
         "test": [
             "@test:refacto",
             "@test:lint",
-            "@test:types",
+            "@test:type:check",
+            "@test:type:coverage",
             "@test:unit",
             "@test:parallel",
             "@test:integration"
@@ -98,6 +102,7 @@
                 "Pest\\Plugins\\ProcessIsolation",
                 "Pest\\Plugins\\Profile",
                 "Pest\\Plugins\\Retry",
+                "Pest\\Plugins\\Snapshot",
                 "Pest\\Plugins\\Version",
                 "Pest\\Plugins\\Parallel"
             ]

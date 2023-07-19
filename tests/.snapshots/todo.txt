@@ -7,6 +7,13 @@
    TODO  Tests\Features\DatasetsTests - 1 todo
   ↓ forbids to define tests in Datasets dirs and Datasets.php files
 
+   TODO  Tests\Features\Describe - 5 todos
+  ↓ todo
+  ↓ todo on hook → should not fail
+  ↓ todo on hook → should run
+  ↓ todo on describe → should not fail
+  ↓ todo on describe → should run
+
    TODO  Tests\Features\Todo - 3 todos
   ↓ something todo later
   ↓ something todo later chained
@@ -15,4 +22,4 @@
    PASS  Tests\CustomTestCase\ExecutedTest
   ✓ that gets executed
 
-  Tests:    8 todos, 1 passed (1 assertions)
+  Tests:    13 todos, 1 passed (1 assertions)

@@ -44,6 +44,6 @@ trait HandleArguments
 
         unset($arguments[$argument]);
 
-        return array_flip($arguments);
+        return array_values(array_flip($arguments));
     }
 }

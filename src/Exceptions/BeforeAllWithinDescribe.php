@@ -12,13 +12,13 @@ use Symfony\Component\Console\Exception\ExceptionInterface;
 /**
  * @internal
  */
-final class BeforeEachAlreadyExist extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
+final class BeforeAllWithinDescribe extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
 {
     /**
      * Creates a new Exception instance.
      */
     public function __construct(string $filename)
     {
-        parent::__construct(sprintf('The beforeEach already exists in the filename `%s`.', $filename));
+        parent::__construct(sprintf('The beforeAll method can not be used within describe functions. Filename `%s`.', $filename));
     }
 }

@@ -107,6 +107,10 @@ final class Help implements HandlesArguments
                 'arg' => '--parallel',
                 'desc' => 'Run tests in parallel',
             ],
+            [
+                'arg' => '--update-snapshots',
+                'desc' => 'Update snapshots for tests using the "toMatchSnapshot" expectation',
+            ],
         ], ...$content['Execution']];
 
         $content['Selection'] = [[

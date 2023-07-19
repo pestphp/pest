@@ -12,13 +12,13 @@ use Symfony\Component\Console\Exception\ExceptionInterface;
 /**
  * @internal
  */
-final class AfterEachAlreadyExist extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
+final class AfterAllWithinDescribe extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
 {
     /**
      * Creates a new Exception instance.
      */
     public function __construct(string $filename)
     {
-        parent::__construct(sprintf('The afterEach already exists in the filename `%s`.', $filename));
+        parent::__construct(sprintf('The afterAll method can not be used within describe functions. Filename `%s`.', $filename));
     }
 }
