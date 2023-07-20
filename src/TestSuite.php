@@ -76,8 +76,10 @@ final class TestSuite
         $this->afterEach = new AfterEachRepository();
         $this->afterAll = new AfterAllRepository();
         $this->rootPath = (string) realpath($rootPath);
-
-        $this->snapshots = new SnapshotRepository($this->rootPath.'/'.$this->testPath, '.pest/snapshots');
+        $this->snapshots = new SnapshotRepository(
+            implode(DIRECTORY_SEPARATOR, [$this->rootPath, $this->testPath]),
+            implode(DIRECTORY_SEPARATOR, ['.pest', 'snapshots']),
+        );
     }
 
     /**
