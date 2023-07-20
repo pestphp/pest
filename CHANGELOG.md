@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## [v2.9.2 (2023-07-20)](https://github.com/pestphp/pest/compare/v2.9.1...v2.9.2)
+
+TODO
+
 ## [v2.9.1 (2023-07-20)](https://github.com/pestphp/pest/compare/v2.9.0...v2.9.1)
 
 TODO

@@ -115,7 +115,7 @@ final class Backtrace
                 continue;
             }
 
-            if (str_contains($trace['file'], 'pest'. DIRECTORY_SEPARATOR . 'src')) {
+            if (str_contains($trace['file'], 'pest'.DIRECTORY_SEPARATOR.'src')) {
                 continue;
             }
 
