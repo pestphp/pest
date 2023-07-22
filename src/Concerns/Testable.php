@@ -185,6 +185,10 @@ trait Testable
     {
         TestSuite::getInstance()->test = $this;
 
+        $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
+
+        $this->__description = self::$__latestDescription = $this->dataName() ? $method->description.' with '.$this->dataName() : $method->description;
+
         parent::setUp();
 
         $beforeEach = TestSuite::getInstance()->beforeEach->get(self::$__filename)[1];
@@ -234,10 +238,6 @@ trait Testable
      */
     private function __resolveTestArguments(array $arguments): array
     {
-        $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
-
-        $this->__description = self::$__latestDescription = $this->dataName() ? $method->description.' with '.$this->dataName() : $method->description;
-
         $underlyingTest = Reflection::getFunctionVariable($this->__test, 'closure');
         $testParameterTypes = array_values(Reflection::getFunctionArguments($underlyingTest));
 
