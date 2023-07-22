@@ -2,17 +2,41 @@
 
 ## Unreleased
 
+## [v2.9.4 (2023-07-22)](https://github.com/pestphp/pest/compare/v2.9.3...v2.9.4)
+
+### Fixed
+
+- Output on `describe` `beforeEach` failure ([5637dfa](https://github.com/pestphp/pest/commit/5637dfa75d1a331adc810935536cde7c3196af06))
+
+## [v2.9.3 (2023-07-20)](https://github.com/pestphp/pest/compare/v2.9.2...v2.9.3)
+
+### Fixed
+
+- Snapshots directory on Windows environments ([cf52752](https://github.com/pestphp/pest/commit/cf5275293fe693ec2cf4dbadbadae01daaa08169))
+
 ## [v2.9.2 (2023-07-20)](https://github.com/pestphp/pest/compare/v2.9.1...v2.9.2)
 
-TODO
+### Fixed
+
+- `beforeEach` on Windows environments ([a37a3b9](https://github.com/pestphp/pest/commit/a37a3b9f9931bc1ab1ea9e1d6d38dfb55dde3f74))
 
 ## [v2.9.1 (2023-07-20)](https://github.com/pestphp/pest/compare/v2.9.0...v2.9.1)
 
-TODO
+### Chore
+
+- Bumps PHPUnit to `^10.2.6` ([8fdb0b3](https://github.com/pestphp/pest/commit/8fdb0b3d32ce9ee12bd182f22751c2b41a53e97b))
 
 ## [v2.9.0 (2023-07-19)](https://github.com/pestphp/pest/compare/v2.8.1...v2.9.0)
 
-TODO
+> "Spicy Summer" is the codename assigned to Pest 2.9, for full details check our announcement: [https://pestphp.com/docs/pest-spicy-summer-release](https://pestphp.com/docs/pest-spicy-summer-release)
+
+### Added
+
+- Built-in Snapshot Testing ([c828756](https://github.com/pestphp/pest/commit/c8287567eb8c3dbea5845b2a6f70804b094b4b60))
+- Describe Blocks ([c828756](https://github.com/pestphp/pest/commit/c8287567eb8c3dbea5845b2a6f70804b094b4b60))
+- Architectural Testing++ ([c828756](https://github.com/pestphp/pest/commit/c8287567eb8c3dbea5845b2a6f70804b094b4b60))
+- Type Coverage Plugin ([c828756](https://github.com/pestphp/pest/commit/c8287567eb8c3dbea5845b2a6f70804b094b4b60))
+- Drift Plugin ([c828756](https://github.com/pestphp/pest/commit/c8287567eb8c3dbea5845b2a6f70804b094b4b60))
 
 ## [v2.8.1 (2023-06-20)](https://github.com/pestphp/pest/compare/v2.8.0...v2.8.1)
 
