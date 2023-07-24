@@ -417,7 +417,7 @@ final class Expectation
     {
         return Targeted::make(
             $this,
-            fn (ObjectDescription $object): bool => $object->reflectionClass->isFinal(),
+            fn (ObjectDescription $object): bool => ! enum_exists($object->name) && $object->reflectionClass->isFinal(),
             'to be final',
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
@@ -430,7 +430,7 @@ final class Expectation
     {
         return Targeted::make(
             $this,
-            fn (ObjectDescription $object): bool => $object->reflectionClass->isReadOnly() && assert(true), // @phpstan-ignore-line,
+            fn (ObjectDescription $object): bool => ! enum_exists($object->name) && $object->reflectionClass->isReadOnly(),
             'to be readonly',
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
@@ -498,7 +498,7 @@ final class Expectation
     {
         return Targeted::make(
             $this,
-            fn (ObjectDescription $object): bool => class_exists($object->name),
+            fn (ObjectDescription $object): bool => class_exists($object->name) && ! enum_exists($object->name),
             'to be class',
             FileLineFinder::where(fn (string $line): bool => true),
         );
@@ -595,12 +595,12 @@ final class Expectation
     /**
      * Asserts that the given expectation target to have the given suffix.
      */
-    public function toHaveSuffix(string $suffix): ArchExpectation
+    public function toHavePrefix(string $suffix): ArchExpectation
     {
         return Targeted::make(
             $this,
-            fn (ObjectDescription $object): bool => str_ends_with($object->reflectionClass->getName(), $suffix),
-            "to have suffix '{$suffix}'",
+            fn (ObjectDescription $object): bool => str_starts_with($object->reflectionClass->getName(), $suffix),
+            "to have prefix '{$suffix}'",
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
@@ -608,12 +608,12 @@ final class Expectation
     /**
      * Asserts that the given expectation target to have the given suffix.
      */
-    public function toHavePrefix(string $suffix): ArchExpectation
+    public function toHaveSuffix(string $suffix): ArchExpectation
     {
         return Targeted::make(
             $this,
-            fn (ObjectDescription $object): bool => str_starts_with($object->reflectionClass->getName(), $suffix),
-            "to have prefix '{$suffix}'",
+            fn (ObjectDescription $object): bool => str_ends_with($object->reflectionClass->getName(), $suffix),
+            "to have suffix '{$suffix}'",
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
