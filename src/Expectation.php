@@ -71,8 +71,12 @@ final class Expectation
      * @param  TAndValue  $value
      * @return self<TAndValue>
      */
-    public function and(mixed $value): Expectation
+    public function and(mixed $value = null): Expectation
     {
+        if (is_null($value)) {
+            return new self($this->value);
+        }
+
         return $value instanceof self ? $value : new self($value);
     }
 
