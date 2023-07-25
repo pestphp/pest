@@ -73,7 +73,7 @@ final class Coverage
      * Reports the code coverage report to the
      * console and returns the result in float.
      */
-    public static function report(OutputInterface $output): float
+    public static function report(OutputInterface $output, float $coverageMin, bool $showErrorsOnly): float
     {
         if (! file_exists($reportPath = self::getPath())) {
             if (self::usingXdebug()) {
@@ -124,6 +124,10 @@ final class Coverage
             $color = $percentage === '100.0' ? 'green' : ($percentage === '0.0' ? 'red' : 'yellow');
 
             $truncateAt = max(1, terminal()->width() - 12);
+
+            if ($showErrorsOnly && (float) $percentage >= $coverageMin) {
+                continue;
+            }
 
             renderUsing($output);
             render(<<<HTML
