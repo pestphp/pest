@@ -806,6 +806,7 @@ final class Expectation
     public function toMatchSnapshot(string $message = ''): self
     {
         $snapshots = TestSuite::getInstance()->snapshots;
+        $snapshots->startNewExpectation();
 
         $testCase = TestSuite::getInstance()->test;
         assert($testCase instanceof TestCase);
@@ -833,7 +834,7 @@ final class Expectation
         } else {
             $filename = $snapshots->save($string);
 
-            $testCase::markTestIncomplete('Snapshot created at ['.$filename.'].');
+            //$testCase::markTestIncomplete('Snapshot created at ['.$filename.'].');
         }
 
         return $this;

@@ -12,6 +12,8 @@ use Pest\TestSuite;
  */
 final class SnapshotRepository
 {
+    private static array $expectationsCounter = [];
+
     /**
      * Creates a snapshot repository instance.
      */
@@ -106,6 +108,33 @@ final class SnapshotRepository
         // remove extension from filename
         $relativePath = substr($relativePath, 0, (int) strrpos($relativePath, '.'));
 
-        return sprintf('%s/%s.snap', $this->testsPath.'/'.$this->snapshotsPath.$relativePath, TestSuite::getInstance()->getDescription());
+        $description = TestSuite::getInstance()->getDescription();
+
+        if($this->getCurrentSnapshotCounter() > 1){
+            $description .= '__' . $this->getCurrentSnapshotCounter();
+        }
+
+        return sprintf('%s/%s.snap', $this->testsPath.'/'.$this->snapshotsPath.$relativePath, $description);
+    }
+
+    private function getCurrentSnapshotKey(): string
+    {
+        return TestSuite::getInstance()->getFilename().'###'.TestSuite::getInstance()->getDescription();
+    }
+
+    private function getCurrentSnapshotCounter(): int
+    {
+        return self::$expectationsCounter[$this->getCurrentSnapshotKey()] ?? 0;
+    }
+
+    public function startNewExpectation(): void
+    {
+        $key = $this->getCurrentSnapshotKey();
+
+        if(!isset(self::$expectationsCounter[$key])){
+            self::$expectationsCounter[$key] = 0;
+        }
+
+        self::$expectationsCounter[$key]++;
     }
 }

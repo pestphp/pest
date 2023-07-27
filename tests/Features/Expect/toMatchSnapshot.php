@@ -120,3 +120,15 @@ test('not failures', function () {
 
     expect($this->snapshotable)->not->toMatchSnapshot();
 })->throws(ExpectationFailedException::class);
+
+test('multiple snapshot expectations', function () {
+    expect("foo bar 1")->toMatchSnapshot();
+
+    expect("foo bar 2")->toMatchSnapshot();
+});
+
+test('multiple snapshot expectations with datasets', function () {
+    expect("foo bar 1")->toMatchSnapshot();
+
+    expect("foo bar 2")->toMatchSnapshot();
+})->with([1, 'foo', 'bar', 'baz']);
