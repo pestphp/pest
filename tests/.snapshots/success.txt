@@ -762,6 +762,95 @@
   ! notice → This is a notice description // tests/Features/Notices.php:4
   ! a "describe" group of tests → notice → This is a notice description // tests/Features/Notices.php:11
 
+   PASS  Tests\Features\Repeat
+  ✓ once
+  ✓ multiple times @ repetition 1 of 5
+  ✓ multiple times @ repetition 2 of 5
+  ✓ multiple times @ repetition 3 of 5
+  ✓ multiple times @ repetition 4 of 5
+  ✓ multiple times @ repetition 5 of 5
+  ✓ multiple times with single dataset dataset "a" @ repetition 1 of 6
+  ✓ multiple times with single dataset dataset "b" @ repetition 1 of 6
+  ✓ multiple times with single dataset dataset "c" @ repetition 1 of 6
+  ✓ multiple times with single dataset dataset "a" @ repetition 2 of 6
+  ✓ multiple times with single dataset dataset "b" @ repetition 2 of 6
+  ✓ multiple times with single dataset dataset "c" @ repetition 2 of 6
+  ✓ multiple times with single dataset dataset "a" @ repetition 3 of 6
+  ✓ multiple times with single dataset dataset "b" @ repetition 3 of 6
+  ✓ multiple times with single dataset dataset "c" @ repetition 3 of 6
+  ✓ multiple times with single dataset dataset "a" @ repetition 4 of 6
+  ✓ multiple times with single dataset dataset "b" @ repetition 4 of 6
+  ✓ multiple times with single dataset dataset "c" @ repetition 4 of 6
+  ✓ multiple times with single dataset dataset "a" @ repetition 5 of 6
+  ✓ multiple times with single dataset dataset "b" @ repetition 5 of 6
+  ✓ multiple times with single dataset dataset "c" @ repetition 5 of 6
+  ✓ multiple times with single dataset dataset "a" @ repetition 6 of 6
+  ✓ multiple times with single dataset dataset "b" @ repetition 6 of 6
+  ✓ multiple times with single dataset dataset "c" @ repetition 6 of 6
+  ✓ multiple times with multiple dataset dataset "a" / (4) @ repetition 1 of 7
+  ✓ multiple times with multiple dataset dataset "a" / (5) @ repetition 1 of 7
+  ✓ multiple times with multiple dataset dataset "a" / (6) @ repetition 1 of 7
+  ✓ multiple times with multiple dataset dataset "b" / (4) @ repetition 1 of 7
+  ✓ multiple times with multiple dataset dataset "b" / (5) @ repetition 1 of 7
+  ✓ multiple times with multiple dataset dataset "b" / (6) @ repetition 1 of 7
+  ✓ multiple times with multiple dataset dataset "c" / (4) @ repetition 1 of 7
+  ✓ multiple times with multiple dataset dataset "c" / (5) @ repetition 1 of 7
+  ✓ multiple times with multiple dataset dataset "c" / (6) @ repetition 1 of 7
+  ✓ multiple times with multiple dataset dataset "a" / (4) @ repetition 2 of 7
+  ✓ multiple times with multiple dataset dataset "a" / (5) @ repetition 2 of 7
+  ✓ multiple times with multiple dataset dataset "a" / (6) @ repetition 2 of 7
+  ✓ multiple times with multiple dataset dataset "b" / (4) @ repetition 2 of 7
+  ✓ multiple times with multiple dataset dataset "b" / (5) @ repetition 2 of 7
+  ✓ multiple times with multiple dataset dataset "b" / (6) @ repetition 2 of 7
+  ✓ multiple times with multiple dataset dataset "c" / (4) @ repetition 2 of 7
+  ✓ multiple times with multiple dataset dataset "c" / (5) @ repetition 2 of 7
+  ✓ multiple times with multiple dataset dataset "c" / (6) @ repetition 2 of 7
+  ✓ multiple times with multiple dataset dataset "a" / (4) @ repetition 3 of 7
+  ✓ multiple times with multiple dataset dataset "a" / (5) @ repetition 3 of 7
+  ✓ multiple times with multiple dataset dataset "a" / (6) @ repetition 3 of 7
+  ✓ multiple times with multiple dataset dataset "b" / (4) @ repetition 3 of 7
+  ✓ multiple times with multiple dataset dataset "b" / (5) @ repetition 3 of 7
+  ✓ multiple times with multiple dataset dataset "b" / (6) @ repetition 3 of 7
+  ✓ multiple times with multiple dataset dataset "c" / (4) @ repetition 3 of 7
+  ✓ multiple times with multiple dataset dataset "c" / (5) @ repetition 3 of 7
+  ✓ multiple times with multiple dataset dataset "c" / (6) @ repetition 3 of 7
+  ✓ multiple times with multiple dataset dataset "a" / (4) @ repetition 4 of 7
+  ✓ multiple times with multiple dataset dataset "a" / (5) @ repetition 4 of 7
+  ✓ multiple times with multiple dataset dataset "a" / (6) @ repetition 4 of 7
+  ✓ multiple times with multiple dataset dataset "b" / (4) @ repetition 4 of 7
+  ✓ multiple times with multiple dataset dataset "b" / (5) @ repetition 4 of 7
+  ✓ multiple times with multiple dataset dataset "b" / (6) @ repetition 4 of 7
+  ✓ multiple times with multiple dataset dataset "c" / (4) @ repetition 4 of 7
+  ✓ multiple times with multiple dataset dataset "c" / (5) @ repetition 4 of 7
+  ✓ multiple times with multiple dataset dataset "c" / (6) @ repetition 4 of 7
+  ✓ multiple times with multiple dataset dataset "a" / (4) @ repetition 5 of 7
+  ✓ multiple times with multiple dataset dataset "a" / (5) @ repetition 5 of 7
+  ✓ multiple times with multiple dataset dataset "a" / (6) @ repetition 5 of 7
+  ✓ multiple times with multiple dataset dataset "b" / (4) @ repetition 5 of 7
+  ✓ multiple times with multiple dataset dataset "b" / (5) @ repetition 5 of 7
+  ✓ multiple times with multiple dataset dataset "b" / (6) @ repetition 5 of 7
+  ✓ multiple times with multiple dataset dataset "c" / (4) @ repetition 5 of 7
+  ✓ multiple times with multiple dataset dataset "c" / (5) @ repetition 5 of 7
+  ✓ multiple times with multiple dataset dataset "c" / (6) @ repetition 5 of 7
+  ✓ multiple times with multiple dataset dataset "a" / (4) @ repetition 6 of 7
+  ✓ multiple times with multiple dataset dataset "a" / (5) @ repetition 6 of 7
+  ✓ multiple times with multiple dataset dataset "a" / (6) @ repetition 6 of 7
+  ✓ multiple times with multiple dataset dataset "b" / (4) @ repetition 6 of 7
+  ✓ multiple times with multiple dataset dataset "b" / (5) @ repetition 6 of 7
+  ✓ multiple times with multiple dataset dataset "b" / (6) @ repetition 6 of 7
+  ✓ multiple times with multiple dataset dataset "c" / (4) @ repetition 6 of 7
+  ✓ multiple times with multiple dataset dataset "c" / (5) @ repetition 6 of 7
+  ✓ multiple times with multiple dataset dataset "c" / (6) @ repetition 6 of 7
+  ✓ multiple times with multiple dataset dataset "a" / (4) @ repetition 7 of 7
+  ✓ multiple times with multiple dataset dataset "a" / (5) @ repetition 7 of 7
+  ✓ multiple times with multiple dataset dataset "a" / (6) @ repetition 7 of 7
+  ✓ multiple times with multiple dataset dataset "b" / (4) @ repetition 7 of 7
+  ✓ multiple times with multiple dataset dataset "b" / (5) @ repetition 7 of 7
+  ✓ multiple times with multiple dataset dataset "b" / (6) @ repetition 7 of 7
+  ✓ multiple times with multiple dataset dataset "c" / (4) @ repetition 7 of 7
+  ✓ multiple times with multiple dataset dataset "c" / (5) @ repetition 7 of 7
+  ✓ multiple times with multiple dataset dataset "c" / (6) @ repetition 7 of 7
+
    PASS  Tests\Features\ScopedDatasets\Directory\NestedDirectory1\TestFileInNestedDirectoryWithDatasetsFile
   ✓ uses dataset with (1)
   ✓ uses dataset with (2)
@@ -1085,4 +1174,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 743 passed (1777 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 830 passed (1927 assertions)
