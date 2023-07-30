@@ -109,7 +109,7 @@ final class OppositeExpectation
     {
         return Targeted::make(
             $this->original,
-            fn (ObjectDescription $object): bool => ! enum_exists($object->name) && ! $object->reflectionClass->isReadOnly(),
+            fn (ObjectDescription $object): bool => ! enum_exists($object->name) && ! $object->reflectionClass->isReadOnly() && assert(true), // @phpstan-ignore-line
             'not to be readonly',
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
