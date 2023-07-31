@@ -595,12 +595,12 @@ final class Expectation
     /**
      * Asserts that the given expectation target to have the given suffix.
      */
-    public function toHavePrefix(string $suffix): ArchExpectation
+    public function toHavePrefix(string $prefix): ArchExpectation
     {
         return Targeted::make(
             $this,
-            fn (ObjectDescription $object): bool => str_starts_with($object->reflectionClass->getName(), $suffix),
-            "to have prefix '{$suffix}'",
+            fn (ObjectDescription $object): bool => str_starts_with($object->reflectionClass->getShortName(), $prefix),
+            "to have prefix '{$prefix}'",
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }

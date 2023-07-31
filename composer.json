@@ -42,6 +42,7 @@
         "psr-4": {
             "Tests\\Fixtures\\Covers\\": "tests/Fixtures/Covers",
             "Tests\\Fixtures\\Inheritance\\": "tests/Fixtures/Inheritance",
+            "Tests\\Fixtures\\Arch\\": "tests/Fixtures/Arch",
             "Tests\\": "tests/PHPUnit/"
         },
         "files": [

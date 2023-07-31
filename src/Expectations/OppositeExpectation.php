@@ -291,17 +291,27 @@ final class OppositeExpectation
     /**
      * Not supported.
      */
-    public function toHavePrefix(string $suffix): never
+    public function toHavePrefix(string $prefix): ArchExpectation
     {
-        throw InvalidExpectation::fromMethods(['not', 'toHavePrefix']);
+        return Targeted::make(
+            $this->original,
+            fn (ObjectDescription $object): bool => ! str_starts_with($object->reflectionClass->getShortName(), $prefix),
+            "not to have prefix '{$prefix}'",
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
     }
 
     /**
      * Not supported.
      */
-    public function toHaveSuffix(string $suffix): never
+    public function toHaveSuffix(string $suffix): ArchExpectation
     {
-        throw InvalidExpectation::fromMethods(['not', 'toHaveSuffix']);
+        return Targeted::make(
+            $this->original,
+            fn (ObjectDescription $object): bool => ! str_ends_with($object->reflectionClass->getName(), $suffix),
+            "not to have suffix '{$suffix}'",
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
     }
 
     /**
