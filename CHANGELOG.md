@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## [v2.10.1 (2023-07-31)](https://github.com/pestphp/pest/compare/v2.10.0...v2.10.1)
+
+### Fixed
+
+- `not->toHaveSuffix` and `toHavePrefix` expectations ([#888](https://github.com/pestphp/pest/pull/888))
+
 ## [v2.10.0 (2023-07-31)](https://github.com/pestphp/pest/compare/v2.9.5...v2.10.0)
 
 ### Added

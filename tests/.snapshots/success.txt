@@ -629,6 +629,12 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toHavePrefix
+  ✓ missing prefix
+  ✓ has prefix
+  ✓ opposite missing prefix
+  ✓ opposite has prefix
+
    PASS  Tests\Features\Expect\toHaveProperties
   ✓ pass
   ✓ failures
@@ -641,6 +647,12 @@
   ✓ failures with message
   ✓ failures with message and Any matcher
   ✓ not failures
+
+   PASS  Tests\Features\Expect\toHaveSuffix
+  ✓ missing suffix
+  ✓ has suffix
+  ✓ opposite missing suffix
+  ✓ opposite has suffix
 
    PASS  Tests\Features\Expect\toMatch
   ✓ pass
@@ -1174,4 +1186,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 830 passed (1927 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 838 passed (1939 assertions)
