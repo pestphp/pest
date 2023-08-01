@@ -701,7 +701,7 @@ final class Expectation
     {
         return Targeted::make(
             $this,
-            fn(ObjectDescription $object): bool => $object->reflectionClass->hasMethod('__invoke'),
+            fn (ObjectDescription $object): bool => $object->reflectionClass->hasMethod('__invoke'),
             'to be invokable',
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class'))
         );

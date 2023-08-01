@@ -372,7 +372,7 @@ final class OppositeExpectation
     {
         return Targeted::make(
             $this->original,
-            fn(ObjectDescription $object): bool => !$object->reflectionClass->hasMethod('__invoke'),
+            fn (ObjectDescription $object): bool => ! $object->reflectionClass->hasMethod('__invoke'),
             'to not be invokable',
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class'))
         );
