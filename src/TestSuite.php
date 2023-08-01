@@ -100,7 +100,7 @@ final class TestSuite
             return self::$instance;
         }
 
-        if (! self::$instance instanceof self) {
+        if (!self::$instance instanceof self) {
             Panic::with(new InvalidPestCommand());
         }
 
@@ -112,6 +112,13 @@ final class TestSuite
         assert($this->test instanceof TestCase);
 
         return (fn () => self::$__filename)->call($this->test, $this->test::class); // @phpstan-ignore-line
+    }
+
+    public function registerSnapshotChange(string $message): void
+    {
+        assert($this->test instanceof TestCase);
+
+        (fn () => $this->__snapshotChanges[] = $message)->call($this->test, $this->test::class); // @phpstan-ignore-line
     }
 
     public function getDescription(): string

@@ -834,7 +834,8 @@ final class Expectation
         } else {
             $filename = $snapshots->save($string);
 
-            //$testCase::markTestIncomplete('Snapshot created at ['.$filename.'].');
+            // $testCase::markTestIncomplete('Snapshot created at ['.$filename.'].');
+            TestSuite::getInstance()->registerSnapshotChange("Snapshot created at [$filename]");
         }
 
         return $this;
