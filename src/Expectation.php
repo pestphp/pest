@@ -693,4 +693,17 @@ final class Expectation
     {
         return ToBeUsedInNothing::make($this);
     }
+
+    /**
+     * Asserts that the given expectation dependency is an invokable class.
+     */
+    public function toBeInvokable(): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->hasMethod('__invoke'),
+            'to be invokable',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class'))
+        );
+    }
 }

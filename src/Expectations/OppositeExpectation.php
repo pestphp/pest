@@ -366,6 +366,19 @@ final class OppositeExpectation
     }
 
     /**
+     * Asserts that the given expectation dependency is not an invokable class.
+     */
+    public function toBeInvokable(): ArchExpectation
+    {
+        return Targeted::make(
+            $this->original,
+            fn (ObjectDescription $object): bool => ! $object->reflectionClass->hasMethod('__invoke'),
+            'to not be invokable',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class'))
+        );
+    }
+
+    /**
      * Handle dynamic method calls into the original expectation.
      *
      * @param  array<int, mixed>  $arguments
