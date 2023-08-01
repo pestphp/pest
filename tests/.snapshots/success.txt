@@ -411,6 +411,14 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toBeInvokable
+  ✓ class is invokable
+  ✓ opposite class is invokable
+  ✓ class is invokable via a parent class
+  ✓ class is invokable via a trait
+  ✓ failure when the class is not invokable
+  ✓ class is not invokable
+
    PASS  Tests\Features\Expect\toBeIterable
   ✓ pass
   ✓ failures
@@ -1186,4 +1194,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 838 passed (1939 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 844 passed (1947 assertions)

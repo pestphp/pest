@@ -46,6 +46,7 @@ $bootPest = (static function (): void {
     ];
 
     foreach ($composerAutoloadFiles as $file) {
+
         if (file_exists($file)) {
             require_once $file;
             define('PHPUNIT_COMPOSER_INSTALL', $file);
