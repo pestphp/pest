@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## [v2.11.0 (2023-08-01)](https://github.com/pestphp/pest/compare/v2.10.1...v2.11.0)
+
+### Added
+
+- `toBeInvokable`expectation ([#891](https://github.com/pestphp/pest/pull/891))
+
 ## [v2.10.1 (2023-07-31)](https://github.com/pestphp/pest/compare/v2.10.0...v2.10.1)
 
 ### Fixed
