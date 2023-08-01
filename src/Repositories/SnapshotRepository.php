@@ -110,8 +110,8 @@ final class SnapshotRepository
 
         $description = TestSuite::getInstance()->getDescription();
 
-        if($this->getCurrentSnapshotCounter() > 1){
-            $description .= '__' . $this->getCurrentSnapshotCounter();
+        if ($this->getCurrentSnapshotCounter() > 1) {
+            $description .= '__'.$this->getCurrentSnapshotCounter();
         }
 
         return sprintf('%s/%s.snap', $this->testsPath.'/'.$this->snapshotsPath.$relativePath, $description);
@@ -131,7 +131,7 @@ final class SnapshotRepository
     {
         $key = $this->getCurrentSnapshotKey();
 
-        if(!isset(self::$expectationsCounter[$key])){
+        if (! isset(self::$expectationsCounter[$key])) {
             self::$expectationsCounter[$key] = 0;
         }
 
