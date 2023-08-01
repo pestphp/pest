@@ -128,6 +128,6 @@ final class TestSuite
     {
         assert($this->test instanceof TestCase);
 
-        (fn () => $this->__snapshotChanges[] = $message)->call($this->test, $this->test::class); // @phpstan-ignore-line
+        (fn (): string => $this->__snapshotChanges[] = $message)->call($this->test, $this->test::class); // @phpstan-ignore-line
     }
 }
