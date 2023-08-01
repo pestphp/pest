@@ -114,13 +114,6 @@ final class TestSuite
         return (fn () => self::$__filename)->call($this->test, $this->test::class); // @phpstan-ignore-line
     }
 
-    public function registerSnapshotChange(string $message): void
-    {
-        assert($this->test instanceof TestCase);
-
-        (fn () => $this->__snapshotChanges[] = $message)->call($this->test, $this->test::class); // @phpstan-ignore-line
-    }
-
     public function getDescription(): string
     {
         assert($this->test instanceof TestCase);
@@ -129,5 +122,12 @@ final class TestSuite
         $datasetAsString = str_replace('__pest_evaluable_', '', Str::evaluable($this->test->dataSetAsStringWithData()));
 
         return str_replace(' ', '_', $description.$datasetAsString);
+    }
+
+    public function registerSnapshotChange(string $message): void
+    {
+        assert($this->test instanceof TestCase);
+
+        (fn () => $this->__snapshotChanges[] = $message)->call($this->test, $this->test::class); // @phpstan-ignore-line
     }
 }
