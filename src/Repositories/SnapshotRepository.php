@@ -12,6 +12,7 @@ use Pest\TestSuite;
  */
 final class SnapshotRepository
 {
+    /** @var array<string, int> */
     private static array $expectationsCounter = [];
 
     /**
