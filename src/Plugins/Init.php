@@ -30,7 +30,9 @@ final class Init implements HandlesArguments
         'Pest.php.stub' => 'tests/Pest.php',
         'TestCase.php.stub' => 'tests/TestCase.php',
         'Unit/ExampleTest.php.stub' => 'tests/Unit/ExampleTest.php',
+        'Unit/.gitkeep.stub' => 'tests/Unit/.gitkeep',
         'Feature/ExampleTest.php.stub' => 'tests/Feature/ExampleTest.php',
+        'Feature/.gitkeep.stub' => 'tests/Feature/.gitkeep',
     ];
 
     /**
