@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pest\PendingCalls;
 
 use Closure;
-use InvalidArgumentException;
+use Pest\Exceptions\InvalidArgumentException;
 use Pest\Factories\Covers\CoversClass;
 use Pest\Factories\Covers\CoversFunction;
 use Pest\Factories\Covers\CoversNothing;
@@ -212,6 +212,20 @@ final class TestCall
         return PHP_OS_FAMILY === $osFamily
             ? $this->skip($message)
             : $this;
+    }
+
+    /**
+     * Repeats the current test the given number of times.
+     */
+    public function repeat(int $times): self
+    {
+        if ($times < 1) {
+            throw new InvalidArgumentException('The number of repetitions must be greater than 0.');
+        }
+
+        $this->testCaseMethod->repetitions = $times;
+
+        return $this;
     }
 
     /**

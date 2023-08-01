@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+## [v2.11.0 (2023-08-01)](https://github.com/pestphp/pest/compare/v2.10.1...v2.11.0)
+
+### Added
+
+- `toBeInvokable`expectation ([#891](https://github.com/pestphp/pest/pull/891))
+
+## [v2.10.1 (2023-07-31)](https://github.com/pestphp/pest/compare/v2.10.0...v2.10.1)
+
+### Fixed
+
+- `not->toHaveSuffix` and `toHavePrefix` expectations ([#888](https://github.com/pestphp/pest/pull/888))
+
+## [v2.10.0 (2023-07-31)](https://github.com/pestphp/pest/compare/v2.9.5...v2.10.0)
+
+### Added
+
+- `repeat` feature ([f3f35a2](https://github.com/pestphp/pest/commit/f3f35a2ed119f63eefd323a8c66d3387e908df3f))
+
+### Fixed
+
+- `-v` option ([86a6b32](https://github.com/pestphp/pest/commit/86a6b3271518742dc39761228687a5107551d279))
+
+## [v2.9.5 (2023-07-22)](https://github.com/pestphp/pest/compare/v2.9.4...v2.9.5)
+
+### Fixed
+
+- Assertions count on arch expectations ([632ffc2](https://github.com/pestphp/pest/commit/632ffc2f8e1fe45f739b12b818426ae14700079e))
+
 ## [v2.9.4 (2023-07-22)](https://github.com/pestphp/pest/compare/v2.9.3...v2.9.4)
 
 ### Fixed

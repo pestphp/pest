@@ -430,7 +430,7 @@ final class Expectation
     {
         return Targeted::make(
             $this,
-            fn (ObjectDescription $object): bool => ! enum_exists($object->name) && $object->reflectionClass->isReadOnly(), //@phpstan-ignore-line
+            fn (ObjectDescription $object): bool => ! enum_exists($object->name) && $object->reflectionClass->isReadOnly() && assert(true), // @phpstan-ignore-line
             'to be readonly',
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
@@ -593,14 +593,14 @@ final class Expectation
     }
 
     /**
-     * Asserts that the given expectation target to have the given suffix.
+     * Asserts that the given expectation target to have the given prefix.
      */
-    public function toHavePrefix(string $suffix): ArchExpectation
+    public function toHavePrefix(string $prefix): ArchExpectation
     {
         return Targeted::make(
             $this,
-            fn (ObjectDescription $object): bool => str_starts_with($object->reflectionClass->getName(), $suffix),
-            "to have prefix '{$suffix}'",
+            fn (ObjectDescription $object): bool => str_starts_with($object->reflectionClass->getShortName(), $prefix),
+            "to have prefix '{$prefix}'",
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
@@ -692,5 +692,18 @@ final class Expectation
     public function toBeUsedInNothing(): ArchExpectation
     {
         return ToBeUsedInNothing::make($this);
+    }
+
+    /**
+     * Asserts that the given expectation dependency is an invokable class.
+     */
+    public function toBeInvokable(): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->hasMethod('__invoke'),
+            'to be invokable',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class'))
+        );
     }
 }

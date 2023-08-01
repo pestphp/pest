@@ -187,7 +187,24 @@ trait Testable
 
         $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
 
-        $this->__description = self::$__latestDescription = $this->dataName() ? $method->description.' with '.$this->dataName() : $method->description;
+        $description = $this->dataName() ? $method->description.' with '.$this->dataName() : $method->description;
+
+        if ($method->repetitions > 1) {
+            $matches = [];
+            preg_match('/\((.*?)\)/', $description, $matches);
+
+            if (count($matches) > 1) {
+                if (str_contains($description, 'with '.$matches[0].' /')) {
+                    $description = str_replace('with '.$matches[0].' /', '', $description);
+                } else {
+                    $description = str_replace('with '.$matches[0], '', $description);
+                }
+            }
+
+            $description .= ' @ repetition '.($matches[1].' of '.$method->repetitions);
+        }
+
+        $this->__description = self::$__latestDescription = $description;
 
         parent::setUp();
 
@@ -238,6 +255,12 @@ trait Testable
      */
     private function __resolveTestArguments(array $arguments): array
     {
+        $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
+
+        if ($method->repetitions > 1) {
+            array_shift($arguments);
+        }
+
         $underlyingTest = Reflection::getFunctionVariable($this->__test, 'closure');
         $testParameterTypes = array_values(Reflection::getFunctionArguments($underlyingTest));
 
