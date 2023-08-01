@@ -289,7 +289,7 @@ final class OppositeExpectation
     }
 
     /**
-     * Not supported.
+     * Asserts that the given expectation target to not have the given prefix.
      */
     public function toHavePrefix(string $prefix): ArchExpectation
     {
@@ -302,7 +302,7 @@ final class OppositeExpectation
     }
 
     /**
-     * Not supported.
+     * Asserts that the given expectation target to not have the given suffix.
      */
     public function toHaveSuffix(string $suffix): ArchExpectation
     {

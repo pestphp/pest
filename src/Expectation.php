@@ -593,7 +593,7 @@ final class Expectation
     }
 
     /**
-     * Asserts that the given expectation target to have the given suffix.
+     * Asserts that the given expectation target to have the given prefix.
      */
     public function toHavePrefix(string $prefix): ArchExpectation
     {
