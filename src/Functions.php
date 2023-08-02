@@ -18,6 +18,24 @@ use Pest\Support\HigherOrderTapProxy;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestCase;
 
+if(!isset($_SERVER['IS_PEST_RUNNING'])) {
+    if(!function_exists('describe')) {
+        function describe($description, $closure) {
+        }
+    }
+
+    if(!function_exists('it')) {
+        function it($description, $closure) {
+        }
+    }
+
+    if(!function_exists('test')) {
+        function test($description, $closure) {
+        }
+    }
+}
+
+
 if (! function_exists('expect')) {
     /**
      * Creates a new expectation.

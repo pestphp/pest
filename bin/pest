@@ -10,6 +10,8 @@ use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
 (static function () {
+    $_SERVER['IS_PEST_RUNNING'] = true;
+
     // Ensures Collision's Printer is registered.
     $_SERVER['COLLISION_PRINTER'] = 'DefaultPrinter';
 
