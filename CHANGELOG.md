@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## [v2.12.0 (2023-08-02)](https://github.com/pestphp/pest/compare/v2.11.0...v2.12.0)
+
+### Added
+
+- Allows multiple `toMatchSnapshot` per test ([#881](https://github.com/pestphp/pest/pull/881))
+
+### Changed
+
+- Bumps PHPUnit to `^10.2.7` ([43107c1](https://github.com/pestphp/pest/commit/43107c17436e41e23018ae31705c688168c14784))
+
 ## [v2.11.0 (2023-08-01)](https://github.com/pestphp/pest/compare/v2.10.1...v2.11.0)
 
 ### Added
