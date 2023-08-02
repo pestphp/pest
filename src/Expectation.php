@@ -186,7 +186,7 @@ final class Expectation
             throw new BadMethodCallException('Expectation value is not iterable.');
         }
 
-        if (empty($callbacks)) {
+        if (count($callbacks) == 0) {
             throw new InvalidArgumentException('No sequence expectations defined.');
         }
 
