@@ -132,3 +132,17 @@ test('multiple snapshot expectations with datasets', function () {
 
     expect('foo bar 2')->toMatchSnapshot();
 })->with([1, 'foo', 'bar', 'baz']);
+
+describe('describable', function () {
+    test('multiple snapshot expectations with describe', function () {
+        expect('foo bar 1')->toMatchSnapshot();
+
+        expect('foo bar 2')->toMatchSnapshot();
+    });
+});
+
+test('multiple snapshot expectations with repeat', function () {
+    expect('foo bar 1')->toMatchSnapshot();
+
+    expect('foo bar 2')->toMatchSnapshot();
+})->repeat(10);

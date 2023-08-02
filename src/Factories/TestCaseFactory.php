@@ -189,29 +189,7 @@ final class TestCaseFactory
 
                 private static \$__filename = '$filename';
 
-                private array \$__snapshotChanges = [];
-
                 $methodsCode
-
-                /** @postCondition */
-                protected function __MarkTestIncompleteIfSnapshotHaveChanged(): void
-                {
-                    if (empty(\$this->__snapshotChanges)) {
-                        return;
-                    }
-
-                    if (count(\$this->__snapshotChanges) === 1) {
-                        \$this->markTestIncomplete(\$this->__snapshotChanges[0]);
-
-                        return;
-                    }
-
-                    \$formattedMessages = implode(PHP_EOL, array_map(function (string \$message) {
-                        return "- \$message";
-                    }, \$this->__snapshotChanges));
-
-                    \$this->markTestIncomplete(\$formattedMessages);
-                }
             }
             PHP;
 
