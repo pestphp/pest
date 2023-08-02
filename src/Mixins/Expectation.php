@@ -827,14 +827,13 @@ final class Expectation
             [$filename, $content] = $snapshots->get();
 
             Assert::assertSame(
-                $content,
-                $string,
+                strtr($content, ["\r\n" => "\n", "\r" => "\n"]),
+                strtr($string, ["\r\n" => "\n", "\r" => "\n"]),
                 $message === '' ? "Failed asserting that the string value matches its snapshot ($filename)." : $message
             );
         } else {
             $filename = $snapshots->save($string);
 
-            // $testCase::markTestIncomplete('Snapshot created at ['.$filename.'].');
             TestSuite::getInstance()->registerSnapshotChange("Snapshot created at [$filename]");
         }
 
