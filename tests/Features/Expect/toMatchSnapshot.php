@@ -36,7 +36,7 @@ test('pass with `__toString`', function () {
         }
     };
 
-    expect($object)->toMatchSnapshot()->toMatchSnapshot();
+    expect($object)->toMatchSnapshot();
 });
 
 test('pass with `toString`', function () {
@@ -54,7 +54,7 @@ test('pass with `toString`', function () {
         }
     };
 
-    expect($object)->toMatchSnapshot()->toMatchSnapshot();
+    expect($object)->toMatchSnapshot();
 });
 
 test('pass with dataset', function ($data) {
@@ -92,7 +92,7 @@ test('pass with `toArray`', function () {
         }
     };
 
-    expect($object)->toMatchSnapshot()->toMatchSnapshot();
+    expect($object)->toMatchSnapshot();
 });
 
 test('pass with array', function () {
@@ -100,7 +100,7 @@ test('pass with array', function () {
 
     expect([
         'key' => $this->snapshotable,
-    ])->toMatchSnapshot()->toMatchSnapshot();
+    ])->toMatchSnapshot();
 });
 
 test('failures', function () {
