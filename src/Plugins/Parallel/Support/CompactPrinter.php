@@ -134,6 +134,10 @@ final class CompactPrinter
             null,
             null,
             null,
+            null,
+            null,
+            null,
+            null,
         );
 
         $telemetry = new Info(
