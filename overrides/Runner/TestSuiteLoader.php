@@ -61,6 +61,11 @@ final class TestSuiteLoader
     private static array $loadedClasses = [];
 
     /**
+     * @psalm-var array<string, array<class-string>>
+     */
+    private static array $loadedClassesByFilename = [];
+
+    /**
      * @psalm-var list<class-string>
      */
     private static array $declaredClasses = [];
@@ -96,6 +101,17 @@ final class TestSuiteLoader
         );
 
         self::$loadedClasses = array_merge($loadedClasses, self::$loadedClasses);
+
+        foreach ($loadedClasses as $loadedClass) {
+            $reflection = new ReflectionClass($loadedClass);
+            $filename = $reflection->getFileName();
+            self::$loadedClassesByFilename[$filename] = [
+                $loadedClass,
+                ...self::$loadedClassesByFilename[$filename] ?? [],
+            ];
+        }
+
+        $loadedClasses = array_merge(self::$loadedClassesByFilename[$suiteClassFile] ?? [], $loadedClasses);
 
         if (empty($loadedClasses)) {
             return $this->exceptionFor($suiteClassName, $suiteClassFile);
