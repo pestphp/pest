@@ -19,7 +19,13 @@
   ↓ something todo later chained
   ↓ something todo later chained and with function body
 
+   PASS  Tests\CustomTestCase\ChildTest
+  ✓ override method
+
    PASS  Tests\CustomTestCase\ExecutedTest
   ✓ that gets executed
 
-  Tests:    13 todos, 1 passed (1 assertions)
+   PASS  Tests\CustomTestCase\ParentTest
+  ✓ override method
+
+  Tests:    13 todos, 3 passed (3 assertions)
