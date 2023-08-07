@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## [v2.12.1 (2023-08-07)](https://github.com/pestphp/pest/compare/v2.12.0...v2.12.1)
+
+### Fixed
+
+- Running tests from `uses` parent class ([#898](https://github.com/pestphp/pest/pull/898))
+
 ## [v2.12.0 (2023-08-02)](https://github.com/pestphp/pest/compare/v2.11.0...v2.12.0)
 
 ### Added
