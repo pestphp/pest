@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## [v2.12.1 (2023-08-07)](https://github.com/pestphp/pest/compare/v2.12.0...v2.12.1)
+## [v2.12.2 (2023-08-07)](https://github.com/pestphp/pest/compare/v2.12.0...v2.12.2)
 
 ### Fixed
 
