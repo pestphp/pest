@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## [v2.13.0 (2023-08-09)](https://github.com/pestphp/pest/compare/v2.12.2...v2.13.0)
+
+### Added
+
+- `expect()->ddWhen` and `expect()->ddUnless` ([306b7eb](https://github.com/pestphp/pest/commit/306b7eb2a6a57e570d58228b46501ad9ba4062b4))
+
 ## [v2.12.2 (2023-08-07)](https://github.com/pestphp/pest/compare/v2.12.0...v2.12.2)
 
 ### Fixed
