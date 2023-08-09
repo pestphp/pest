@@ -130,27 +130,35 @@ final class Expectation
     /**
      * Dump the expectation value when the result of the condition is truthy.
      *
-     * @param  bool  $boolean
-     * @return never
+     * @param  (\Closure(TValue): bool)|bool  $condition
+     * @return self<TValue>
      */
-    public function ddWhen($boolean, mixed ...$arguments): void
+    public function ddWhen(Closure|bool $condition, mixed ...$arguments): Expectation
     {
-        if (! $boolean) {
-            return;
+        $condition = $condition instanceof Closure ? $condition($this->value) : $condition;
+
+        if (! $condition) {
+            return $this;
         }
 
-        $this->dd($this->value, ...$arguments);
+        $this->dd(...$arguments);
     }
 
     /**
      * Dump the expectation value when the result of the condition is falsy.
      *
-     * @param  bool  $boolean
-     * @return never
+     * @param  (\Closure(TValue): bool)|bool  $condition
+     * @return self<TValue>
      */
-    public function ddUnless($boolean, mixed ...$arguments): void
+    public function ddUnless(Closure|bool $condition, mixed ...$arguments): Expectation
     {
-        $this->ddWhen(! $boolean, ...$arguments);
+        $condition = $condition instanceof Closure ? $condition($this->value) : $condition;
+
+        if ($condition) {
+            return $this;
+        }
+
+        $this->dd(...$arguments);
     }
 
     /**
