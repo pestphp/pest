@@ -128,6 +128,32 @@ final class Expectation
     }
 
     /**
+     * Dump the expectation value when the result of the condition is truthy.
+     *
+     * @param  bool  $boolean
+     * @return never
+     */
+    public function ddWhen($boolean, mixed ...$arguments): void
+    {
+        if (! $boolean) {
+            return;
+        }
+
+        $this->dd($this->value, ...$arguments);
+    }
+
+    /**
+     * Dump the expectation value when the result of the condition is falsy.
+     *
+     * @param  bool  $boolean
+     * @return never
+     */
+    public function ddUnless($boolean, mixed ...$arguments): void
+    {
+        $this->ddWhen(! $boolean, ...$arguments);
+    }
+
+    /**
      * Send the expectation value to Ray along with all given arguments.
      *
      * @return self<TValue>
