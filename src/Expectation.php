@@ -60,7 +60,9 @@ final class Expectation
     public function __construct(
         public mixed $value
     ) {
-        // ..
+        if ($this->value instanceof Closure) {
+            $this->value = $value();
+        }
     }
 
     /**
