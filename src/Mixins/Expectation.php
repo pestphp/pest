@@ -969,7 +969,7 @@ final class Expectation
      */
     public function toBeUppercase(string $message = ''): self
     {
-        Assert::assertTrue(ctype_upper($this->value), $message);
+        Assert::assertTrue(ctype_upper((string) $this->value), $message);
 
         return $this;
     }
@@ -981,7 +981,7 @@ final class Expectation
      */
     public function toBeLowercase(string $message = ''): self
     {
-        Assert::assertTrue(ctype_lower($this->value), $message);
+        Assert::assertTrue(ctype_lower((string) $this->value), $message);
 
         return $this;
     }
@@ -993,7 +993,7 @@ final class Expectation
      */
     public function toBeAlphaNumeric(string $message = ''): self
     {
-        Assert::assertTrue(ctype_alnum($this->value), $message);
+        Assert::assertTrue(ctype_alnum((string) $this->value), $message);
 
         return $this;
     }
@@ -1005,7 +1005,7 @@ final class Expectation
      */
     public function toBeAlpha(string $message = ''): self
     {
-        Assert::assertTrue(ctype_alpha($this->value), $message);
+        Assert::assertTrue(ctype_alpha((string) $this->value), $message);
 
         return $this;
     }
