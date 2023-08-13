@@ -95,12 +95,8 @@ final class Str
 
     /**
      * Get the plural form of an English word.
-     *
-     * @param  string  $value
-     * @param  int     $count
-     * @return string|null
      */
-    public static function plural(string $value, int $count = 2): string|null
+    public static function plural(string $value, int $count = 2): ?string
     {
         return Pluralizer::plural($value, $count);
     }

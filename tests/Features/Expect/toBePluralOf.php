@@ -26,7 +26,7 @@ it('passes', function (string $pluralizedWord, string $singularWord) {
     'dog' => ['dogs', 'dog'],
     'relation' => ['relations', 'relation'],
     'shine' => ['shines', 'shine'],
-    'command' => ['commands', 'command']
+    'command' => ['commands', 'command'],
 ]);
 
 test('failures', function () {

@@ -15,7 +15,6 @@ use Pest\Matchers\Any;
 use Pest\Support\Arr;
 use Pest\Support\Exporter;
 use Pest\Support\NullClosure;
-use Pest\Support\Pluralizer;
 use Pest\Support\Str;
 use Pest\TestSuite;
 use PHPUnit\Framework\Assert;
@@ -1015,8 +1014,6 @@ final class Expectation
     /**
      * Asserts that the value starts with $expected.
      *
-     * @param string $singularWord
-     * @param string $message
      * @return self<TValue>
      */
     public function toBePluralOf(string $singularWord, string $message = ''): self
