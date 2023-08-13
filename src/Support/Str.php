@@ -92,4 +92,16 @@ final class Str
     {
         return $search === '' ? $subject : array_reverse(explode($search, $subject, 2))[0];
     }
+
+    /**
+     * Get the plural form of an English word.
+     *
+     * @param  string  $value
+     * @param  int     $count
+     * @return string
+     */
+    public static function plural(string $value, int $count = 2): string
+    {
+        return Pluralizer::plural($value, $count);
+    }
 }

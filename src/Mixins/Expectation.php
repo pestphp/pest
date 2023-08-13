@@ -15,6 +15,8 @@ use Pest\Matchers\Any;
 use Pest\Support\Arr;
 use Pest\Support\Exporter;
 use Pest\Support\NullClosure;
+use Pest\Support\Pluralizer;
+use Pest\Support\Str;
 use Pest\TestSuite;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Constraint\Constraint;
@@ -1006,6 +1008,23 @@ final class Expectation
     public function toBeAlpha(string $message = ''): self
     {
         Assert::assertTrue(ctype_alpha((string) $this->value), $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value starts with $expected.
+     *
+     * @param  non-empty-string  $expected
+     * @return self<TValue>
+     */
+    public function toBePluralOf(string $expected, string $message = ''): self
+    {
+        if (! is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
+        Assert::assertSame(Str::plural($expected), $this->value);
 
         return $this;
     }
