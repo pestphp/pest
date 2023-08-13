@@ -961,4 +961,52 @@ final class Expectation
 
         return $this->exporter->shortenedExport($value);
     }
+
+    /**
+     * Asserts that the value is uppercase.
+     *
+     * @return self<TValue>
+     */
+    public function toBeUppercase(string $message = ''): self
+    {
+        Assert::assertTrue(ctype_upper((string) $this->value), $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is lowercase.
+     *
+     * @return self<TValue>
+     */
+    public function toBeLowercase(string $message = ''): self
+    {
+        Assert::assertTrue(ctype_lower((string) $this->value), $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is alphanumeric.
+     *
+     * @return self<TValue>
+     */
+    public function toBeAlphaNumeric(string $message = ''): self
+    {
+        Assert::assertTrue(ctype_alnum((string) $this->value), $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is alpha.
+     *
+     * @return self<TValue>
+     */
+    public function toBeAlpha(string $message = ''): self
+    {
+        Assert::assertTrue(ctype_alpha((string) $this->value), $message);
+
+        return $this;
+    }
 }
