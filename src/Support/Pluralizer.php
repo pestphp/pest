@@ -151,9 +151,9 @@ final class Pluralizer {
      * Get the singular form of the given word.
      *
      * @param  string  $value
-     * @return string
+     * @return string|null
      */
-    public static function singular(string $value): string
+    public static function singular(string $value): string|null
     {
         if (isset(Pluralizer::$singularCache[$value]))
         {
@@ -161,64 +161,71 @@ final class Pluralizer {
         }
 
         $result = Pluralizer::inflect($value, Pluralizer::$singular, Pluralizer::$irregular);
-        Pluralizer::$singularCache[$value] = $result;
 
-        return $result;
+        if (!is_null($result)) {
+            Pluralizer::$singularCache[$value] = $result;
+        }
+
+        return $result ?? null;
     }
 
     /**
      * Get the plural form of the given word.
      *
-     * @param  string  $value
-     * @param  int     $count
-     * @return string
+     * @param string $value
+     * @param int $count
+     * @return string|null
      */
-    public static function plural($value, $count = 2)
+    public static function plural(string $value, int $count = 2): string|null
     {
         if ($count == 1) return $value;
 
-        if (in_array($value, static::$irregular)) return $value;
+        if (in_array($value, Pluralizer::$irregular, true)) return $value;
 
         // First we'll check the cache of inflected values. We cache each word that
-        // is inflected so we don't have to spin through the regular expressions
+        // is inflected, so we don't have to spin through the regular expressions
         // on each subsequent method calls for this word by the app developer.
-        if (isset(static::$pluralCache[$value]))
+        if (isset(Pluralizer::$pluralCache[$value]))
         {
-            return static::$pluralCache[$value];
+            return Pluralizer::$pluralCache[$value];
         }
 
-        $irregular = array_flip(static::$irregular);
+        $irregular = array_flip(Pluralizer::$irregular);
 
         // When doing the singular to plural transformation, we'll flip the irregular
         // array since we need to swap sides on the keys and values. After we have
         // the transformed value we will cache it in memory for faster look-ups.
-        $plural = static::$plural;
+        $plural = Pluralizer::$plural;
 
-        $result = static::inflect($value, $plural, $irregular);
+        $result = Pluralizer::inflect($value, $plural, $irregular);
 
-        return static::$pluralCache[$value] = $result;
+        if (!is_null($result)) {
+            return Pluralizer::$pluralCache[$value] = $result;
+        }
+
+        return null;
     }
 
     /**
      * Perform auto inflection on an English word.
      *
-     * @param  string  $value
-     * @param  array   $source
-     * @param  array   $irregular
-     * @return string
+     * @param string $value
+     * @param array<string> $source
+     * @param array<string> $irregular
+     * @return string|null
      */
-    protected static function inflect($value, $source, $irregular)
+    private static function inflect(string $value, array $source, array $irregular): string|null
     {
-        if (static::uncountable($value)) return $value;
+        if (Pluralizer::uncountable($value)) return $value;
 
         // Next, we will check the "irregular" patterns which contain words that are
         // not easily summarized in regular expression rules, like "children" and
         // "teeth", both of which cannot get inflected using our typical rules.
-        foreach ($irregular as $irregular => $pattern)
+        foreach ($irregular as $irregularKey => $pattern)
         {
-            if (preg_match($pattern = '/'.$pattern.'$/i', $value))
+            if (preg_match($pattern = '/'.$pattern.'$/i', $value) === 1)
             {
-                $irregular = static::matchCase($irregular, $value);
+                $irregular = Pluralizer::matchCase($irregularKey, $value);
 
                 return preg_replace($pattern, $irregular, $value);
             }
@@ -226,39 +233,43 @@ final class Pluralizer {
 
         // Finally, we'll spin through the array of regular expressions and look for
         // matches for the word. If we find a match, we will cache and return the
-        // transformed value so we will quickly look it up on subsequent calls.
-        foreach ($source as $pattern => $inflected)
+        // transformed value, so we will quickly look it up on subsequent calls.
+        foreach ($source as $patternKey => $inflected)
         {
-            if (preg_match($pattern, $value))
+            if (preg_match($patternKey, $value) === 1)
             {
-                $inflected = preg_replace($pattern, $inflected, $value);
+                $inflected = preg_replace($patternKey, $inflected, $value);
 
-                return static::matchCase($inflected, $value);
+                if (!is_null($inflected)) {
+                    return Pluralizer::matchCase($inflected, $value);
+                }
             }
         }
+
+        return null;
     }
 
     /**
      * Determine if the given value is uncountable.
      *
-     * @param  string  $value
+     * @param string $value
      * @return bool
      */
-    protected static function uncountable($value)
+    private static function uncountable(string $value): bool
     {
-        return in_array(strtolower($value), static::$uncountable);
+        return in_array(strtolower($value), Pluralizer::$uncountable, true);
     }
 
     /**
      * Attempt to match the case on two strings.
      *
-     * @param  string  $value
-     * @param  string  $comparison
+     * @param string $value
+     * @param string $comparison
      * @return string
      */
-    protected static function matchCase($value, $comparison)
+    private static function matchCase(string $value, string $comparison): string
     {
-        $functions = array('mb_strtolower', 'mb_strtoupper', 'ucfirst', 'ucwords');
+        $functions = ['mb_strtolower', 'mb_strtoupper', 'ucfirst', 'ucwords'];
 
         foreach ($functions as $function)
         {
