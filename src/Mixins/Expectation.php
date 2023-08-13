@@ -1015,16 +1015,17 @@ final class Expectation
     /**
      * Asserts that the value starts with $expected.
      *
-     * @param  non-empty-string  $expected
+     * @param string $singularWord
+     * @param string $message
      * @return self<TValue>
      */
-    public function toBePluralOf(string $expected, string $message = ''): self
+    public function toBePluralOf(string $singularWord, string $message = ''): self
     {
         if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
         }
 
-        Assert::assertSame(Str::plural($expected), $this->value);
+        Assert::assertSame(Str::plural($singularWord), $this->value, $message);
 
         return $this;
     }

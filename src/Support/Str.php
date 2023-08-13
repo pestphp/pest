@@ -98,9 +98,9 @@ final class Str
      *
      * @param  string  $value
      * @param  int     $count
-     * @return string
+     * @return string|null
      */
-    public static function plural(string $value, int $count = 2): string
+    public static function plural(string $value, int $count = 2): string|null
     {
         return Pluralizer::plural($value, $count);
     }
