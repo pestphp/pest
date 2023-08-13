@@ -9,9 +9,9 @@ final class Pluralizer {
     /**
      * Plural word form rules.
      *
-     * @var array
+     * @var array<string>
      */
-    public static $plural = array(
+    public static array $plural = [
         '/(quiz)$/i' => "$1zes",
         '/^(ox)$/i' => "$1en",
         '/([m|l])ouse$/i' => "$1ice",
@@ -32,14 +32,14 @@ final class Pluralizer {
         '/(us)$/i' => "$1es",
         '/s$/i' => "s",
         '/$/' => "s",
-    );
+    ];
 
     /**
      * Singular word form rules.
      *
-     * @var array
+     * @var array<string>
      */
-    public static $singular = array(
+    public static array $singular = [
         '/(quiz)zes$/i' => "$1",
         '/(matr)ices$/i' => "$1ix",
         '/(vert|vort|ind)ices$/i' => "$1ex",
@@ -70,14 +70,14 @@ final class Pluralizer {
         '/(us)es$/i' => "$1",
         '/(us|ss)$/i' => "$1",
         '/s$/i' => "",
-    );
+    ];
 
     /**
      * Irregular word forms.
      *
-     * @var array
+     * @var array<string>
      */
-    public static $irregular = array(
+    public static array $irregular = [
         'child' => 'children',
         'corpus' => 'corpora',
         'criterion' => 'criteria',
@@ -100,14 +100,14 @@ final class Pluralizer {
         'tech' => 'techs',
         'tooth' => 'teeth',
         'viscus' => 'viscera',
-    );
+    ];
 
     /**
      * Uncountable word forms.
      *
-     * @var array
+     * @var array<string>
      */
-    public static $uncountable = array(
+    public static array $uncountable = [
         'audio',
         'bison',
         'chassis',
@@ -131,21 +131,21 @@ final class Pluralizer {
         'species',
         'swine',
         'traffic',
-    );
+    ];
 
     /**
      * The cached copies of the plural inflections.
      *
-     * @var array
+     * @var array<string>
      */
-    protected static $pluralCache = array();
+    protected static array $pluralCache = [];
 
     /**
      * The cached copies of the singular inflections.
      *
-     * @var array
+     * @var array<string>
      */
-    protected static $singularCache = array();
+    protected static array $singularCache = [];
 
     /**
      * Get the singular form of the given word.
@@ -153,16 +153,17 @@ final class Pluralizer {
      * @param  string  $value
      * @return string
      */
-    public static function singular($value)
+    public static function singular(string $value): string
     {
-        if (isset(static::$singularCache[$value]))
+        if (isset(Pluralizer::$singularCache[$value]))
         {
-            return static::$singularCache[$value];
+            return Pluralizer::$singularCache[$value];
         }
 
-        $result = static::inflect($value, static::$singular, static::$irregular);
+        $result = Pluralizer::inflect($value, Pluralizer::$singular, Pluralizer::$irregular);
+        Pluralizer::$singularCache[$value] = $result;
 
-        return static::$singularCache[$value] = $result ?: $value;
+        return $result;
     }
 
     /**
