@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## [v2.14.0 (2023-08-14)](https://github.com/pestphp/pest/compare/v2.13.0...v2.14.0)
+
+### Added
+
+- `toBeUppercase()`, `toBeLowercase()`, `toBeAlphaNumeric()`, `toBeAlpha()` ([#906](https://github.com/pestphp/pest/pull/906))
+
 ## [v2.13.0 (2023-08-09)](https://github.com/pestphp/pest/compare/v2.12.2...v2.13.0)
 
 ### Added
