@@ -12,6 +12,7 @@ body:
     attributes:
       label: What Happened
       description: What did you expect to happen?
+      placeholder: When I use expect()->toBeTrue() in my tests, I get an error
     validations:
       required: true
   - type: textarea
@@ -19,7 +20,7 @@ body:
     attributes:
       label: How to Reproduce
       description: How did this occur, please add any config values used and provide a set of reliable steps if possible.
-      placeholder: When I use expect()->toBeTrue() in my tests, I get an error.
+      placeholder: Install a fresh Laravel app, add Pest, add a test that uses expect()->toBeTrue()
     validations:
       required: true
   - type: input
