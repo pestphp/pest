@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## [v2.14.1 (2023-08-16)](https://github.com/pestphp/pest/compare/v2.14.0...v2.14.1)
+
+### Changed
+
+- Bumps PHPUnit to `^10.3.2` ([e012517](https://github.com/pestphp/pest/commit/e012517b1643002b36a68096f4a5e26682b1e175))
+
 ## [v2.14.0 (2023-08-14)](https://github.com/pestphp/pest/compare/v2.13.0...v2.14.0)
 
 ### Added
