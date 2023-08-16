@@ -4,6 +4,16 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Parallel\Paratest;
 
+use ParaTest\Options;
+use Pest\Plugins\Parallel\Support\CompactPrinter;
+use Pest\Support\StateGenerator;
+use PHPUnit\TestRunner\TestResult\TestResult;
+use PHPUnit\TextUI\Output\Printer;
+use SebastianBergmann\Timer\Duration;
+use SplFileInfo;
+use Symfony\Component\Console\Formatter\OutputFormatter;
+use Symfony\Component\Console\Output\OutputInterface;
+
 use function assert;
 use function fclose;
 use function feof;
@@ -12,16 +22,7 @@ use function fread;
 use function fseek;
 use function ftell;
 use function fwrite;
-use ParaTest\Options;
-use Pest\Plugins\Parallel\Support\CompactPrinter;
-use Pest\Support\StateGenerator;
-use PHPUnit\TestRunner\TestResult\TestResult;
-use PHPUnit\TextUI\Output\Printer;
-use SebastianBergmann\Timer\Duration;
-use SplFileInfo;
 use function strlen;
-use Symfony\Component\Console\Formatter\OutputFormatter;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @internal
