@@ -24,6 +24,12 @@ body:
     validations:
       required: true
   - type: input
+    id: repository-sample
+    attributes:
+      label: Sample Repository
+      description: If possible, please provide a sample repository that reproduces the issue.
+      placeholder: https://github.com.br/your-username/your-repository
+  - type: input
     id: pest-version
     attributes:
       label: Pest Version
