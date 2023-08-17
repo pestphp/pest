@@ -1,0 +1,66 @@
+name: Bug Report
+description: Report an Issue or Bug with the Pest
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        We're sorry to hear you have a problem. Can you help us solve it by providing the following details.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What Happened
+      description: What did you expect to happen?
+      placeholder: When I use expect()->toBeTrue() in my tests, I get an error
+    validations:
+      required: true
+  - type: textarea
+    id: how-to-reproduce
+    attributes:
+      label: How to Reproduce
+      description: How did this occur, please add any config values used and provide a set of reliable steps if possible.
+      placeholder: Install a fresh Laravel app, add Pest, add a test that uses expect()->toBeTrue()
+    validations:
+      required: true
+  - type: input
+    id: repository-sample
+    attributes:
+      label: Sample Repository
+      description: If possible, please provide a sample repository that reproduces the issue.
+      placeholder: https://github.com.br/your-username/your-repository
+  - type: input
+    id: pest-version
+    attributes:
+      label: Pest Version
+      description: What version of our Package are you running? Please be as specific as possible
+      placeholder: 2.14.1
+    validations:
+      required: true
+  - type: input
+    id: php-version
+    attributes:
+      label: PHP Version
+      description: What version of PHP are you running? Please be as specific as possible
+      placeholder: 8.1.20
+    validations:
+      required: true
+  - type: dropdown
+    id: operating-systems
+    attributes:
+      label: Operation System
+      description: On which operating systems does the problem occur? You can select more than one.
+      multiple: true
+      options:
+        - macOS
+        - Windows
+        - Linux
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Use this field to provide any other notes that you feel might be relevant to the issue.
+    validations:
+      required: false
