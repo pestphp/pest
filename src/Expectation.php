@@ -806,4 +806,26 @@ final class Expectation
 
         return $this;
     }
+
+    /**
+     * Asserts that the given expectation is iterable and contains StudlyCase keys.
+     *
+     * @return self<TValue>
+     */
+    public function toHaveStudlyCaseKeys(string $message = ''): self
+    {
+        if (! is_iterable($this->value)) {
+            InvalidExpectationValue::expected('iterable');
+        }
+
+        foreach ($this->value as $k => $item) {
+            $this->and($k)->toBeStudlyCase($message);
+
+            if (is_array($item)) {
+                $this->and($item)->toHaveStudlyCaseKeys($message);
+            }
+        }
+
+        return $this;
+    }
 }
