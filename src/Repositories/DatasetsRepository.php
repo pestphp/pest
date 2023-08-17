@@ -10,9 +10,8 @@ use Pest\Exceptions\DatasetAlreadyExists;
 use Pest\Exceptions\DatasetDoesNotExist;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Support\Exporter;
-use Traversable;
-
 use function sprintf;
+use Traversable;
 
 /**
  * @internal

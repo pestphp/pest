@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Pest\Expectations;
 
-use Pest\Expectation;
-
 use function expect;
+use Pest\Expectation;
 
 /**
  * @internal
