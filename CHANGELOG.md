@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## [v2.15.0 (2023-08-17)](https://github.com/pestphp/pest/compare/v2.14.1...v2.15.0)
+
+### Added
+
+- PHP 8.3 support ([0b261ef](https://github.com/pestphp/pest/commit/0b261ef97b7ceed20cbeeb2b0b41e08e0a8fcaa1))
+
 ## [v2.14.1 (2023-08-16)](https://github.com/pestphp/pest/compare/v2.14.0...v2.14.1)
 
 ### Changed
