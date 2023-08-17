@@ -1033,4 +1033,16 @@ final class Expectation
 
         return $this;
     }
+
+    /**
+     * Asserts that the value is camelCase.
+     *
+     * @return self<TValue>
+     */
+    public function toBeCamelCase(string $message = ''): self
+    {
+        Assert::assertTrue((bool) preg_match('/^\p{Ll}[\p{Ll}\p{Lu}]+$/u', (string) $this->value), $message);
+
+        return $this;
+    }
 }
