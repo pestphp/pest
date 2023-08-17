@@ -740,4 +740,26 @@ final class Expectation
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class'))
         );
     }
+
+    /**
+     * Asserts that the given expectation is iterable and contains snake_case keys.
+     *
+     * @return self<TValue>
+     */
+    public function toHaveSnakeCaseKeys(string $message = ''): self
+    {
+        if (! is_iterable($this->value)) {
+            InvalidExpectationValue::expected('iterable');
+        }
+
+        foreach ($this->value as $k => $item) {
+            $this->and($k)->toBeSnakeCase($message);
+
+            if (is_array($item)) {
+                $this->and($item)->toHaveSnakeCaseKeys($message);
+            }
+        }
+
+        return $this;
+    }
 }
