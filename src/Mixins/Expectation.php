@@ -1021,4 +1021,16 @@ final class Expectation
 
         return $this;
     }
+
+    /**
+     * Asserts that the value is kebab-case.
+     *
+     * @return self<TValue>
+     */
+    public function toBeKebabCase(string $message = ''): self
+    {
+        Assert::assertTrue((bool) preg_match('/^[\p{Ll}-]+$/u', (string) $this->value), $message);
+
+        return $this;
+    }
 }
