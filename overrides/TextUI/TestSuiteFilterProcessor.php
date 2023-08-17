@@ -45,13 +45,14 @@ declare(strict_types=1);
 
 namespace PHPUnit\TextUI;
 
-use function array_map;
 use Pest\Plugins\Only;
 use PHPUnit\Event;
 use PHPUnit\Framework\TestSuite;
 use PHPUnit\Runner\Filter\Factory;
 use PHPUnit\TextUI\Configuration\Configuration;
 use PHPUnit\TextUI\Configuration\FilterNotConfiguredException;
+
+use function array_map;
 
 /**
  * @internal This class is not covered by the backward compatibility promise for PHPUnit

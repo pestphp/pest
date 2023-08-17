@@ -4,15 +4,8 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Parallel\Paratest;
 
-use function array_merge;
-use function array_merge_recursive;
-use function array_shift;
-use function assert;
-use function count;
 use const DIRECTORY_SEPARATOR;
-use function dirname;
-use function file_get_contents;
-use function max;
+
 use NunoMaduro\Collision\Adapters\Phpunit\Support\ResultReflection;
 use ParaTest\Coverage\CoverageMerger;
 use ParaTest\JUnit\LogMerger;
@@ -30,11 +23,20 @@ use PHPUnit\TestRunner\TestResult\Facade as TestResultFacade;
 use PHPUnit\TestRunner\TestResult\TestResult;
 use PHPUnit\TextUI\Configuration\CodeCoverageFilterRegistry;
 use PHPUnit\Util\ExcludeList;
-use function realpath;
 use SebastianBergmann\Timer\Timer;
 use SplFileInfo;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
+
+use function array_merge;
+use function array_merge_recursive;
+use function array_shift;
+use function assert;
+use function count;
+use function dirname;
+use function file_get_contents;
+use function max;
+use function realpath;
 use function unlink;
 use function unserialize;
 use function usleep;

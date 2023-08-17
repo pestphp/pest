@@ -6,9 +6,10 @@ namespace Pest\Plugins;
 
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Support\View;
-use function Pest\version;
 use PHPUnit\TextUI\Help as PHPUnitHelp;
 use Symfony\Component\Console\Output\OutputInterface;
+
+use function Pest\version;
 
 /**
  * @internal

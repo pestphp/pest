@@ -6,6 +6,7 @@ namespace Pest\Plugins;
 
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Support\View;
+
 use function Pest\version;
 
 /**
