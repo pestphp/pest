@@ -1009,4 +1009,16 @@ final class Expectation
 
         return $this;
     }
+
+    /**
+     * Asserts that the value is snake_case.
+     *
+     * @return self<TValue>
+     */
+    public function toBeSnakeCase(string $message = ''): self
+    {
+        Assert::assertTrue((bool) preg_match('/^[\p{Ll}_]+$/u', (string) $this->value), $message);
+
+        return $this;
+    }
 }
