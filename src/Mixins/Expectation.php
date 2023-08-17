@@ -1045,4 +1045,16 @@ final class Expectation
 
         return $this;
     }
+
+    /**
+     * Asserts that the value is StudlyCase.
+     *
+     * @return self<TValue>
+     */
+    public function toBeStudlyCase(string $message = ''): self
+    {
+        Assert::assertTrue((bool) preg_match('/^\p{Lu}+\p{Ll}[\p{Ll}\p{Lu}]+$/u', (string) $this->value), $message);
+
+        return $this;
+    }
 }
