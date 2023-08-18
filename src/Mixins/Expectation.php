@@ -503,6 +503,18 @@ final class Expectation
     }
 
     /**
+     * Asserts that the value contains only digits.
+     *
+     * @return self<TValue>
+     */
+    public function toBeDigits(string $message = ''): self
+    {
+        Assert::assertTrue(ctype_digit((string) $this->value), $message);
+
+        return $this;
+    }
+
+    /**
      * Asserts that the value is of type object.
      *
      * @return self<TValue>
