@@ -16,8 +16,9 @@ use PHPUnit\TestRunner\TestResult\TestResult as PHPUnitTestResult;
 use SebastianBergmann\Timer\Duration;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
-use function Termwind\render;
 use Termwind\Terminal;
+
+use function Termwind\render;
 use function Termwind\terminal;
 
 /**
@@ -130,6 +131,10 @@ final class CompactPrinter
             $status['collected'],
             $status['threshold'],
             $status['roots'],
+            null,
+            null,
+            null,
+            null,
             null,
             null,
             null,

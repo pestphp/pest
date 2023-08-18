@@ -13,10 +13,11 @@ use Pest\Plugins\Parallel\Paratest\CleanConsoleOutput;
 use Pest\Support\Arr;
 use Pest\Support\Container;
 use Pest\TestSuite;
-use function Pest\version;
 use Stringable;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArgvInput;
+
+use function Pest\version;
 
 final class Parallel implements HandlesArguments
 {

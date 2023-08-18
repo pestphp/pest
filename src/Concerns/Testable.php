@@ -63,6 +63,11 @@ trait Testable
     private static ?Closure $__afterAll = null;
 
     /**
+     * The list of snapshot changes, if any.
+     */
+    private array $__snapshotChanges = [];
+
+    /**
      * Resets the test case static properties.
      */
     public static function flush(): void
@@ -329,6 +334,24 @@ trait Testable
     private function __callClosure(Closure $closure, array $arguments): mixed
     {
         return ExceptionTrace::ensure(fn (): mixed => call_user_func_array(Closure::bind($closure, $this, $this::class), $arguments));
+    }
+
+    /** @postCondition */
+    protected function __MarkTestIncompleteIfSnapshotHaveChanged(): void
+    {
+        if (count($this->__snapshotChanges) === 0) {
+            return;
+        }
+
+        if (count($this->__snapshotChanges) === 1) {
+            $this->markTestIncomplete($this->__snapshotChanges[0]);
+
+            return;
+        }
+
+        $messages = implode(PHP_EOL, array_map(static fn (string $message): string => '- $message', $this->__snapshotChanges));
+
+        $this->markTestIncomplete($messages);
     }
 
     /**

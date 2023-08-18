@@ -503,6 +503,18 @@ final class Expectation
     }
 
     /**
+     * Asserts that the value contains only digits.
+     *
+     * @return self<TValue>
+     */
+    public function toBeDigits(string $message = ''): self
+    {
+        Assert::assertTrue(ctype_digit((string) $this->value), $message);
+
+        return $this;
+    }
+
+    /**
      * Asserts that the value is of type object.
      *
      * @return self<TValue>
@@ -805,6 +817,12 @@ final class Expectation
      */
     public function toMatchSnapshot(string $message = ''): self
     {
+        $snapshots = TestSuite::getInstance()->snapshots;
+        $snapshots->startNewExpectation();
+
+        $testCase = TestSuite::getInstance()->test;
+        assert($testCase instanceof TestCase);
+
         $string = match (true) {
             is_string($this->value) => $this->value,
             is_object($this->value) && method_exists($this->value, '__toString') => $this->value->__toString(),
@@ -817,22 +835,18 @@ final class Expectation
             default => InvalidExpectationValue::expected('array|object|string'),
         };
 
-        $testCase = TestSuite::getInstance()->test;
-        assert($testCase instanceof TestCase);
-        $snapshots = TestSuite::getInstance()->snapshots;
-
-        if ($snapshots->has($testCase, $string)) {
-            [$filename, $content] = $snapshots->get($testCase, $string);
+        if ($snapshots->has()) {
+            [$filename, $content] = $snapshots->get();
 
             Assert::assertSame(
-                $content,
-                $string,
+                strtr($content, ["\r\n" => "\n", "\r" => "\n"]),
+                strtr($string, ["\r\n" => "\n", "\r" => "\n"]),
                 $message === '' ? "Failed asserting that the string value matches its snapshot ($filename)." : $message
             );
         } else {
-            $filename = $snapshots->save($testCase, $string);
+            $filename = $snapshots->save($string);
 
-            $testCase::markTestIncomplete('Snapshot created at ['.$filename.'].');
+            TestSuite::getInstance()->registerSnapshotChange("Snapshot created at [$filename]");
         }
 
         return $this;
@@ -958,5 +972,53 @@ final class Expectation
         }
 
         return $this->exporter->shortenedExport($value);
+    }
+
+    /**
+     * Asserts that the value is uppercase.
+     *
+     * @return self<TValue>
+     */
+    public function toBeUppercase(string $message = ''): self
+    {
+        Assert::assertTrue(ctype_upper((string) $this->value), $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is lowercase.
+     *
+     * @return self<TValue>
+     */
+    public function toBeLowercase(string $message = ''): self
+    {
+        Assert::assertTrue(ctype_lower((string) $this->value), $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is alphanumeric.
+     *
+     * @return self<TValue>
+     */
+    public function toBeAlphaNumeric(string $message = ''): self
+    {
+        Assert::assertTrue(ctype_alnum((string) $this->value), $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is alpha.
+     *
+     * @return self<TValue>
+     */
+    public function toBeAlpha(string $message = ''): self
+    {
+        Assert::assertTrue(ctype_alpha((string) $this->value), $message);
+
+        return $this;
     }
 }

@@ -74,64 +74,76 @@ final class StateGenerator
             ));
         }
 
-        foreach ($testResult->testTriggeredDeprecationEvents() as $testResultEvent) {
-            $testResultEvent = $testResultEvent[0];
+        foreach ($testResult->deprecations() as $testResultEvent) {
+            foreach ($testResultEvent->triggeringTests() as $triggeringTest) {
+                ['test' => $test] = $triggeringTest;
 
-            $state->add(TestResult::fromPestParallelTestCase(
-                $testResultEvent->test(),
-                TestResult::DEPRECATED,
-                ThrowableBuilder::from(new TestOutcome($testResultEvent->message()))
-            ));
+                $state->add(TestResult::fromPestParallelTestCase(
+                    $test,
+                    TestResult::DEPRECATED,
+                    ThrowableBuilder::from(new TestOutcome($testResultEvent->description()))
+                ));
+            }
         }
 
-        foreach ($testResult->testTriggeredPhpDeprecationEvents() as $testResultEvent) {
-            $testResultEvent = $testResultEvent[0];
+        foreach ($testResult->phpDeprecations() as $testResultEvent) {
+            foreach ($testResultEvent->triggeringTests() as $triggeringTest) {
+                ['test' => $test] = $triggeringTest;
 
-            $state->add(TestResult::fromPestParallelTestCase(
-                $testResultEvent->test(),
-                TestResult::DEPRECATED,
-                ThrowableBuilder::from(new TestOutcome($testResultEvent->message()))
-            ));
+                $state->add(TestResult::fromPestParallelTestCase(
+                    $test,
+                    TestResult::DEPRECATED,
+                    ThrowableBuilder::from(new TestOutcome($testResultEvent->description()))
+                ));
+            }
         }
 
-        foreach ($testResult->testTriggeredNoticeEvents() as $testResultEvent) {
-            $testResultEvent = $testResultEvent[0];
+        foreach ($testResult->notices() as $testResultEvent) {
+            foreach ($testResultEvent->triggeringTests() as $triggeringTest) {
+                ['test' => $test] = $triggeringTest;
 
-            $state->add(TestResult::fromPestParallelTestCase(
-                $testResultEvent->test(),
-                TestResult::NOTICE,
-                ThrowableBuilder::from(new TestOutcome($testResultEvent->message()))
-            ));
+                $state->add(TestResult::fromPestParallelTestCase(
+                    $test,
+                    TestResult::NOTICE,
+                    ThrowableBuilder::from(new TestOutcome($testResultEvent->description()))
+                ));
+            }
         }
 
-        foreach ($testResult->testTriggeredPhpNoticeEvents() as $testResultEvent) {
-            $testResultEvent = $testResultEvent[0];
+        foreach ($testResult->phpNotices() as $testResultEvent) {
+            foreach ($testResultEvent->triggeringTests() as $triggeringTest) {
+                ['test' => $test] = $triggeringTest;
 
-            $state->add(TestResult::fromPestParallelTestCase(
-                $testResultEvent->test(),
-                TestResult::NOTICE,
-                ThrowableBuilder::from(new TestOutcome($testResultEvent->message()))
-            ));
+                $state->add(TestResult::fromPestParallelTestCase(
+                    $test,
+                    TestResult::NOTICE,
+                    ThrowableBuilder::from(new TestOutcome($testResultEvent->description()))
+                ));
+            }
         }
 
-        foreach ($testResult->testTriggeredWarningEvents() as $testResultEvent) {
-            $testResultEvent = $testResultEvent[0];
+        foreach ($testResult->warnings() as $testResultEvent) {
+            foreach ($testResultEvent->triggeringTests() as $triggeringTest) {
+                ['test' => $test] = $triggeringTest;
 
-            $state->add(TestResult::fromPestParallelTestCase(
-                $testResultEvent->test(),
-                TestResult::WARN,
-                ThrowableBuilder::from(new TestOutcome($testResultEvent->message()))
-            ));
+                $state->add(TestResult::fromPestParallelTestCase(
+                    $test,
+                    TestResult::WARN,
+                    ThrowableBuilder::from(new TestOutcome($testResultEvent->description()))
+                ));
+            }
         }
 
-        foreach ($testResult->testTriggeredPhpWarningEvents() as $testResultEvent) {
-            $testResultEvent = $testResultEvent[0];
+        foreach ($testResult->phpWarnings() as $testResultEvent) {
+            foreach ($testResultEvent->triggeringTests() as $triggeringTest) {
+                ['test' => $test] = $triggeringTest;
 
-            $state->add(TestResult::fromPestParallelTestCase(
-                $testResultEvent->test(),
-                TestResult::WARN,
-                ThrowableBuilder::from(new TestOutcome($testResultEvent->message()))
-            ));
+                $state->add(TestResult::fromPestParallelTestCase(
+                    $test,
+                    TestResult::WARN,
+                    ThrowableBuilder::from(new TestOutcome($testResultEvent->description()))
+                ));
+            }
         }
 
         // for each test that passed, we need to add it to the state
@@ -140,7 +152,7 @@ final class StateGenerator
                 new TestMethod(
                     "$i", // @phpstan-ignore-line
                     '', // @phpstan-ignore-line
-                    '',
+                    '', // @phpstan-ignore-line
                     1,
                     TestDoxBuilder::fromClassNameAndMethodName('', ''), // @phpstan-ignore-line
                     MetadataCollection::fromArray([]),

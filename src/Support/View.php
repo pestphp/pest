@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace Pest\Support;
 
 use Symfony\Component\Console\Output\OutputInterface;
+use Termwind\Termwind;
+
 use function Termwind\render;
 use function Termwind\renderUsing;
-use Termwind\Termwind;
 
 /**
  * @internal

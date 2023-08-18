@@ -40,7 +40,7 @@ final class KernelDump
      */
     public function disable(): void
     {
-        @ob_clean(); // @phpstan-ignore-line
+        @ob_clean();
 
         if ($this->buffer !== '') {
             $this->flush();

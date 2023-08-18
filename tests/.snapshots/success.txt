@@ -312,6 +312,18 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toBeAlpha
+  ✓ pass
+  ✓ failures
+  ✓ failures with custom message
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeAlphaNumeric
+  ✓ pass
+  ✓ failures
+  ✓ failures with custom message
+  ✓ not failures
+
    PASS  Tests\Features\Expect\toBeArray
   ✓ pass
   ✓ failures
@@ -447,6 +459,12 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toBeLowercase
+  ✓ pass
+  ✓ failures
+  ✓ failures with custom message
+  ✓ not failures
+
    PASS  Tests\Features\Expect\toBeNAN
   ✓ pass
   ✓ failures
@@ -518,6 +536,12 @@
   ✓ passes as not truthy with (null)
   ✓ passes as not truthy with (0)
   ✓ passes as not truthy with ('0')
+  ✓ failures
+  ✓ failures with custom message
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeUppercase
+  ✓ pass
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
@@ -700,6 +724,22 @@
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
+  ✓ multiple snapshot expectations
+  ✓ multiple snapshot expectations with datasets with (1)
+  ✓ multiple snapshot expectations with datasets with ('foo')
+  ✓ multiple snapshot expectations with datasets with ('bar')
+  ✓ multiple snapshot expectations with datasets with ('baz')
+  ✓ describable → multiple snapshot expectations with describe
+  ✓ multiple snapshot expectations with repeat @ repetition 1 of 10
+  ✓ multiple snapshot expectations with repeat @ repetition 2 of 10
+  ✓ multiple snapshot expectations with repeat @ repetition 3 of 10
+  ✓ multiple snapshot expectations with repeat @ repetition 4 of 10
+  ✓ multiple snapshot expectations with repeat @ repetition 5 of 10
+  ✓ multiple snapshot expectations with repeat @ repetition 6 of 10
+  ✓ multiple snapshot expectations with repeat @ repetition 7 of 10
+  ✓ multiple snapshot expectations with repeat @ repetition 8 of 10
+  ✓ multiple snapshot expectations with repeat @ repetition 9 of 10
+  ✓ multiple snapshot expectations with repeat @ repetition 10 of 10
 
    PASS  Tests\Features\Expect\toStartWith
   ✓ pass
@@ -1001,8 +1041,14 @@
    PASS  Tests\PHPUnit\CustomAffixes\snakecasespec
   ✓ it runs file names like snake_case_spec.php
 
+   PASS  Tests\CustomTestCase\ChildTest
+  ✓ override method
+
    PASS  Tests\CustomTestCase\ExecutedTest
   ✓ that gets executed
+
+   PASS  Tests\CustomTestCase\ParentTest
+  ✓ override method
 
    PASS  Tests\PHPUnit\CustomTestCase\UsesPerDirectory
   ✓ closure was bound to CustomTestCase
@@ -1196,4 +1242,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 846 passed (1968 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 878 passed (2013 assertions)

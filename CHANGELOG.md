@@ -2,6 +2,46 @@
 
 ## Unreleased
 
+## [v2.15.0 (2023-08-17)](https://github.com/pestphp/pest/compare/v2.14.1...v2.15.0)
+
+### Added
+
+- PHP 8.3 support ([0b261ef](https://github.com/pestphp/pest/commit/0b261ef97b7ceed20cbeeb2b0b41e08e0a8fcaa1))
+
+## [v2.14.1 (2023-08-16)](https://github.com/pestphp/pest/compare/v2.14.0...v2.14.1)
+
+### Changed
+
+- Bumps PHPUnit to `^10.3.2` ([e012517](https://github.com/pestphp/pest/commit/e012517b1643002b36a68096f4a5e26682b1e175))
+
+## [v2.14.0 (2023-08-14)](https://github.com/pestphp/pest/compare/v2.13.0...v2.14.0)
+
+### Added
+
+- `toBeUppercase()`, `toBeLowercase()`, `toBeAlphaNumeric()`, `toBeAlpha()` ([#906](https://github.com/pestphp/pest/pull/906))
+
+## [v2.13.0 (2023-08-09)](https://github.com/pestphp/pest/compare/v2.12.2...v2.13.0)
+
+### Added
+
+- `expect()->ddWhen` and `expect()->ddUnless` ([306b7eb](https://github.com/pestphp/pest/commit/306b7eb2a6a57e570d58228b46501ad9ba4062b4))
+
+## [v2.12.2 (2023-08-07)](https://github.com/pestphp/pest/compare/v2.12.0...v2.12.2)
+
+### Fixed
+
+- Running tests from `uses` parent class ([#898](https://github.com/pestphp/pest/pull/898))
+
+## [v2.12.0 (2023-08-02)](https://github.com/pestphp/pest/compare/v2.11.0...v2.12.0)
+
+### Added
+
+- Allows multiple `toMatchSnapshot` per test ([#881](https://github.com/pestphp/pest/pull/881))
+
+### Changed
+
+- Bumps PHPUnit to `^10.2.7` ([43107c1](https://github.com/pestphp/pest/commit/43107c17436e41e23018ae31705c688168c14784))
+
 ## [v2.11.0 (2023-08-01)](https://github.com/pestphp/pest/compare/v2.10.1...v2.11.0)
 
 ### Added

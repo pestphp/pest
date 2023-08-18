@@ -129,6 +129,40 @@ final class Expectation
     }
 
     /**
+     * Dump the expectation value when the result of the condition is truthy.
+     *
+     * @param  (\Closure(TValue): bool)|bool  $condition
+     * @return self<TValue>
+     */
+    public function ddWhen(Closure|bool $condition, mixed ...$arguments): Expectation
+    {
+        $condition = $condition instanceof Closure ? $condition($this->value) : $condition;
+
+        if (! $condition) {
+            return $this;
+        }
+
+        $this->dd(...$arguments);
+    }
+
+    /**
+     * Dump the expectation value when the result of the condition is falsy.
+     *
+     * @param  (\Closure(TValue): bool)|bool  $condition
+     * @return self<TValue>
+     */
+    public function ddUnless(Closure|bool $condition, mixed ...$arguments): Expectation
+    {
+        $condition = $condition instanceof Closure ? $condition($this->value) : $condition;
+
+        if ($condition) {
+            return $this;
+        }
+
+        $this->dd(...$arguments);
+    }
+
+    /**
      * Send the expectation value to Ray along with all given arguments.
      *
      * @return self<TValue>
