@@ -740,4 +740,100 @@ final class Expectation
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class'))
         );
     }
+
+    /**
+     * Asserts that the given expectation is iterable and contains snake_case keys.
+     *
+     * @return self<TValue>
+     */
+    public function toHaveSnakeCaseKeys(string $message = ''): self
+    {
+        if (! is_iterable($this->value)) {
+            InvalidExpectationValue::expected('iterable');
+        }
+
+        foreach ($this->value as $k => $item) {
+            if (is_string($k)) {
+                $this->and($k)->toBeSnakeCase($message);
+            }
+
+            if (is_array($item)) {
+                $this->and($item)->toHaveSnakeCaseKeys($message);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the given expectation is iterable and contains kebab-case keys.
+     *
+     * @return self<TValue>
+     */
+    public function toHaveKebabCaseKeys(string $message = ''): self
+    {
+        if (! is_iterable($this->value)) {
+            InvalidExpectationValue::expected('iterable');
+        }
+
+        foreach ($this->value as $k => $item) {
+            if (is_string($k)) {
+                $this->and($k)->toBeKebabCase($message);
+            }
+
+            if (is_array($item)) {
+                $this->and($item)->toHaveKebabCaseKeys($message);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the given expectation is iterable and contains camelCase keys.
+     *
+     * @return self<TValue>
+     */
+    public function toHaveCamelCaseKeys(string $message = ''): self
+    {
+        if (! is_iterable($this->value)) {
+            InvalidExpectationValue::expected('iterable');
+        }
+
+        foreach ($this->value as $k => $item) {
+            if (is_string($k)) {
+                $this->and($k)->toBeCamelCase($message);
+            }
+
+            if (is_array($item)) {
+                $this->and($item)->toHaveCamelCaseKeys($message);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the given expectation is iterable and contains StudlyCase keys.
+     *
+     * @return self<TValue>
+     */
+    public function toHaveStudlyCaseKeys(string $message = ''): self
+    {
+        if (! is_iterable($this->value)) {
+            InvalidExpectationValue::expected('iterable');
+        }
+
+        foreach ($this->value as $k => $item) {
+            if (is_string($k)) {
+                $this->and($k)->toBeStudlyCase($message);
+            }
+
+            if (is_array($item)) {
+                $this->and($item)->toHaveStudlyCaseKeys($message);
+            }
+        }
+
+        return $this;
+    }
 }

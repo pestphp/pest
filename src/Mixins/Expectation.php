@@ -1021,4 +1021,76 @@ final class Expectation
 
         return $this;
     }
+
+    /**
+     * Asserts that the value is snake_case.
+     *
+     * @return self<TValue>
+     */
+    public function toBeSnakeCase(string $message = ''): self
+    {
+        $value = (string) $this->value;
+
+        if ($message === '') {
+            $message = "Failed asserting that {$value} is snake_case.";
+        }
+
+        Assert::assertTrue((bool) preg_match('/^[\p{Ll}_]+$/u', $value), $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is kebab-case.
+     *
+     * @return self<TValue>
+     */
+    public function toBeKebabCase(string $message = ''): self
+    {
+        $value = (string) $this->value;
+
+        if ($message === '') {
+            $message = "Failed asserting that {$value} is kebab-case.";
+        }
+
+        Assert::assertTrue((bool) preg_match('/^[\p{Ll}-]+$/u', $value), $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is camelCase.
+     *
+     * @return self<TValue>
+     */
+    public function toBeCamelCase(string $message = ''): self
+    {
+        $value = (string) $this->value;
+
+        if ($message === '') {
+            $message = "Failed asserting that {$value} is camelCase.";
+        }
+
+        Assert::assertTrue((bool) preg_match('/^\p{Ll}[\p{Ll}\p{Lu}]+$/u', $value), $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is StudlyCase.
+     *
+     * @return self<TValue>
+     */
+    public function toBeStudlyCase(string $message = ''): self
+    {
+        $value = (string) $this->value;
+
+        if ($message === '') {
+            $message = "Failed asserting that {$value} is StudlyCase.";
+        }
+
+        Assert::assertTrue((bool) preg_match('/^\p{Lu}+\p{Ll}[\p{Ll}\p{Lu}]+$/u', $value), $message);
+
+        return $this;
+    }
 }
