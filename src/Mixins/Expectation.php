@@ -1017,7 +1017,13 @@ final class Expectation
      */
     public function toBeSnakeCase(string $message = ''): self
     {
-        Assert::assertTrue((bool) preg_match('/^[\p{Ll}_]+$/u', (string) $this->value), $message);
+        $value = (string) $this->value;
+
+        if ($message === '') {
+            $message = "Failed asserting that {$value} is snake_case.";
+        }
+
+        Assert::assertTrue((bool) preg_match('/^[\p{Ll}_]+$/u', $value), $message);
 
         return $this;
     }
@@ -1029,7 +1035,13 @@ final class Expectation
      */
     public function toBeKebabCase(string $message = ''): self
     {
-        Assert::assertTrue((bool) preg_match('/^[\p{Ll}-]+$/u', (string) $this->value), $message);
+        $value = (string) $this->value;
+
+        if ($message === '') {
+            $message = "Failed asserting that {$value} is kebab-case.";
+        }
+
+        Assert::assertTrue((bool) preg_match('/^[\p{Ll}-]+$/u', $value), $message);
 
         return $this;
     }
@@ -1041,7 +1053,13 @@ final class Expectation
      */
     public function toBeCamelCase(string $message = ''): self
     {
-        Assert::assertTrue((bool) preg_match('/^\p{Ll}[\p{Ll}\p{Lu}]+$/u', (string) $this->value), $message);
+        $value = (string) $this->value;
+
+        if ($message === '') {
+            $message = "Failed asserting that {$value} is camelCase.";
+        }
+
+        Assert::assertTrue((bool) preg_match('/^\p{Ll}[\p{Ll}\p{Lu}]+$/u', $value), $message);
 
         return $this;
     }
@@ -1053,7 +1071,13 @@ final class Expectation
      */
     public function toBeStudlyCase(string $message = ''): self
     {
-        Assert::assertTrue((bool) preg_match('/^\p{Lu}+\p{Ll}[\p{Ll}\p{Lu}]+$/u', (string) $this->value), $message);
+        $value = (string) $this->value;
+
+        if ($message === '') {
+            $message = "Failed asserting that {$value} is StudlyCase.";
+        }
+
+        Assert::assertTrue((bool) preg_match('/^\p{Lu}+\p{Ll}[\p{Ll}\p{Lu}]+$/u', $value), $message);
 
         return $this;
     }
