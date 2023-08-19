@@ -342,6 +342,12 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toBeCamelCase
+  ✓ pass
+  ✓ failures
+  ✓ failures with custom message
+  ✓ not failures
+
    PASS  Tests\Features\Expect\toBeDigits
   ✓ pass
   ✓ failures
@@ -451,6 +457,12 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toBeKebabCase
+  ✓ pass
+  ✓ failures
+  ✓ failures with custom message
+  ✓ not failures
+
    PASS  Tests\Features\Expect\toBeLessThan
   ✓ passes
   ✓ passes with DateTime and DateTimeImmutable
@@ -519,7 +531,19 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toBeSnakeCase
+  ✓ pass
+  ✓ failures
+  ✓ failures with custom message
+  ✓ not failures
+
    PASS  Tests\Features\Expect\toBeString
+  ✓ pass
+  ✓ failures
+  ✓ failures with custom message
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeStudlyCase
   ✓ pass
   ✓ failures
   ✓ failures with custom message
@@ -606,7 +630,19 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toHaveCamelCaseKeys
+  ✓ pass
+  ✓ failures
+  ✓ failures with message
+  ✓ not failures
+
    PASS  Tests\Features\Expect\toHaveCount
+  ✓ pass
+  ✓ failures
+  ✓ failures with message
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toHaveKebabCaseKeys
   ✓ pass
   ✓ failures
   ✓ failures with message
@@ -686,6 +722,18 @@
   ✓ failures
   ✓ failures with message
   ✓ failures with message and Any matcher
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toHaveSnakeCaseKeys
+  ✓ pass
+  ✓ failures
+  ✓ failures with message
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toHaveStudlyCaseKeys
+  ✓ pass
+  ✓ failures
+  ✓ failures with message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toHaveSuffix
@@ -1248,4 +1296,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 882 passed (2022 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 916 passed (2190 assertions)
