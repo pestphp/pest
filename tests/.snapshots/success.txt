@@ -297,12 +297,14 @@
 
    PASS  Tests\Features\Expect\sequence
   ✓ an exception is thrown if the the type is not iterable
+  ✓ an exception is thrown if there are no expectations
   ✓ allows for sequences of checks to be run on iterable data
   ✓ loops back to the start if it runs out of sequence items
-  ✓ fails if the number of iterable items is greater than the number of expectations
+  ✓ fails if the number of iterable items is less than the number of expectations
   ✓ it works with associative arrays
   ✓ it can be passed non-callable values
   ✓ it can be passed a mixture of value types
+  ✓ it works with traversables
 
    PASS  Tests\Features\Expect\toBe
   ✓ strict comparisons

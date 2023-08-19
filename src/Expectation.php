@@ -6,6 +6,8 @@ namespace Pest;
 
 use BadMethodCallException;
 use Closure;
+use InvalidArgumentException;
+use OutOfRangeException;
 use Pest\Arch\Contracts\ArchExpectation;
 use Pest\Arch\Expectations\Targeted;
 use Pest\Arch\Expectations\ToBeUsedIn;
@@ -28,7 +30,6 @@ use Pest\Expectations\OppositeExpectation;
 use Pest\Matchers\Any;
 use Pest\Support\ExpectationPipeline;
 use PHPUnit\Architecture\Elements\ObjectDescription;
-use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\ExpectationFailedException;
 
 /**
@@ -219,30 +220,26 @@ final class Expectation
             throw new BadMethodCallException('Expectation value is not iterable.');
         }
 
-        $value = is_array($this->value) ? $this->value : iterator_to_array($this->value);
-        $keys = array_keys($value);
-        $values = array_values($value);
-        $callbacksCount = count($callbacks);
-
-        $index = 0;
-
-        while (count($callbacks) < count($values)) {
-            $callbacks[] = $callbacks[$index];
-            $index = $index < count($values) - 1 ? $index + 1 : 0;
+        if (count($callbacks) == 0) {
+            throw new InvalidArgumentException('No sequence expectations defined.');
         }
 
-        if ($callbacksCount > count($values)) {
-            Assert::assertLessThanOrEqual(count($value), count($callbacks));
-        }
+        $index = $valuesCount = 0;
 
-        foreach ($values as $key => $item) {
-            if ($callbacks[$key] instanceof Closure) {
-                call_user_func($callbacks[$key], new self($item), new self($keys[$key]));
+        foreach ($this->value as $key => $value) {
+            $valuesCount++;
 
-                continue;
+            if ($callbacks[$index] instanceof Closure) {
+                $callbacks[$index](new self($value), new self($key));
+            } else {
+                (new self($value))->toEqual($callbacks[$index]);
             }
 
-            (new self($item))->toEqual($callbacks[$key]);
+            $index = isset($callbacks[$index + 1]) ? $index + 1 : 0;
+        }
+
+        if (count($callbacks) > $valuesCount) {
+            throw new OutOfRangeException('Sequence expectations are more than the iterable items.');
         }
 
         return $this;
