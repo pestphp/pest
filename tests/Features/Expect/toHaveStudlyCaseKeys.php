@@ -11,6 +11,11 @@ $array = [
             'Studly' => true,
             'StudlyCase' => true,
         ],
+        'List' => [
+            'abc',
+            'def',
+            'ghi',
+        ],
     ],
 ];
 

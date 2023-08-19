@@ -11,6 +11,11 @@ $array = [
             'camel' => true,
             'camelCase' => true,
         ],
+        'list' => [
+            'abc',
+            'def',
+            'ghi',
+        ],
     ],
 ];
 

@@ -11,6 +11,11 @@ $array = [
             'snake' => true,
             'snake_case' => true,
         ],
+        'list' => [
+            'abc',
+            'def',
+            'ghi',
+        ],
     ],
 ];
 

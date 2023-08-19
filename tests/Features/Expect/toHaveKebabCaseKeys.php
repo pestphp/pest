@@ -11,6 +11,11 @@ $array = [
             'kebab' => true,
             'kebab-case' => true,
         ],
+        'list' => [
+            'abc',
+            'def',
+            'ghi',
+        ],
     ],
 ];
 

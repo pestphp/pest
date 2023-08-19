@@ -753,7 +753,9 @@ final class Expectation
         }
 
         foreach ($this->value as $k => $item) {
-            $this->and($k)->toBeSnakeCase($message);
+            if (is_string($k)) {
+                $this->and($k)->toBeSnakeCase($message);
+            }
 
             if (is_array($item)) {
                 $this->and($item)->toHaveSnakeCaseKeys($message);
@@ -775,7 +777,9 @@ final class Expectation
         }
 
         foreach ($this->value as $k => $item) {
-            $this->and($k)->toBeKebabCase($message);
+            if (is_string($k)) {
+                $this->and($k)->toBeKebabCase($message);
+            }
 
             if (is_array($item)) {
                 $this->and($item)->toHaveKebabCaseKeys($message);
@@ -797,7 +801,9 @@ final class Expectation
         }
 
         foreach ($this->value as $k => $item) {
-            $this->and($k)->toBeCamelCase($message);
+            if (is_string($k)) {
+                $this->and($k)->toBeCamelCase($message);
+            }
 
             if (is_array($item)) {
                 $this->and($item)->toHaveCamelCaseKeys($message);
@@ -819,7 +825,9 @@ final class Expectation
         }
 
         foreach ($this->value as $k => $item) {
-            $this->and($k)->toBeStudlyCase($message);
+            if (is_string($k)) {
+                $this->and($k)->toBeStudlyCase($message);
+            }
 
             if (is_array($item)) {
                 $this->and($item)->toHaveStudlyCaseKeys($message);
