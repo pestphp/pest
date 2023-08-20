@@ -4,22 +4,13 @@ declare(strict_types=1);
 
 namespace Pest\Logging\JUnit;
 
-use NunoMaduro\Collision\Adapters\Phpunit\State;
 use Pest\Exceptions\ShouldNotHappen;
-use Pest\Support\StateGenerator;
 use Pest\Support\Str;
 use PHPUnit\Event\Code\Test;
 use PHPUnit\Event\Code\TestMethod;
 use PHPUnit\Event\Code\Throwable;
-use PHPUnit\Event\Test\BeforeFirstTestMethodErrored;
-use PHPUnit\Event\Test\ConsideredRisky;
-use PHPUnit\Event\Test\Errored;
-use PHPUnit\Event\Test\Failed;
-use PHPUnit\Event\Test\MarkedIncomplete;
-use PHPUnit\Event\Test\Skipped;
 use PHPUnit\Event\TestSuite\TestSuite;
 use PHPUnit\Framework\Exception as FrameworkException;
-use PHPUnit\TestRunner\TestResult\TestResult as PhpUnitTestResult;
 
 /**
  * @internal
@@ -28,15 +19,12 @@ final class Converter
 {
     private const PREFIX = 'P\\';
 
-    private readonly StateGenerator $stateGenerator;
-
     /**
      * Creates a new instance of the Converter.
      */
     public function __construct(
         private readonly string $rootPath,
     ) {
-        $this->stateGenerator = new StateGenerator();
     }
 
     /**
@@ -71,6 +59,14 @@ final class Converter
         }
 
         return "$relativePath::$description";
+    }
+
+    /**
+     * Gets the trimmed test class name.
+     */
+    public function getTrimmedTestClassName(TestMethod $test): string
+    {
+        return Str::after($test->className(), self::PREFIX);
     }
 
     /**
@@ -177,52 +173,11 @@ final class Converter
     }
 
     /**
-     * Gets the test suite size.
-     */
-    public function getTestSuiteSize(TestSuite $testSuite): int
-    {
-        return $testSuite->count();
-    }
-
-    /**
      * Transforms the given path in relative path.
      */
     private function toRelativePath(string $path): string
     {
         // Remove cwd from the path.
         return str_replace("$this->rootPath".DIRECTORY_SEPARATOR, '', $path);
-    }
-
-    /**
-     * Get the test result.
-     */
-    public function getStateFromResult(PhpUnitTestResult $result): State
-    {
-        $events = [
-            ...$result->testErroredEvents(),
-            ...$result->testFailedEvents(),
-            ...$result->testSkippedEvents(),
-            ...array_merge(...array_values($result->testConsideredRiskyEvents())),
-            ...$result->testMarkedIncompleteEvents(),
-        ];
-
-        $numberOfNotPassedTests = count(
-            array_unique(
-                array_map(
-                    function (BeforeFirstTestMethodErrored|Errored|Failed|Skipped|ConsideredRisky|MarkedIncomplete $event): string {
-                        if ($event instanceof BeforeFirstTestMethodErrored) {
-                            return $event->testClassName();
-                        }
-
-                        return $this->getTestCaseLocation($event->test());
-                    },
-                    $events
-                )
-            )
-        );
-
-        $numberOfPassedTests = $result->numberOfTestsRun() - $numberOfNotPassedTests;
-
-        return $this->stateGenerator->fromPhpUnitTestResult($numberOfPassedTests, $result);
     }
 }

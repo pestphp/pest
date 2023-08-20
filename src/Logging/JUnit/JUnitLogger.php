@@ -15,7 +15,6 @@ use Pest\Logging\JUnit\Subscriber\TestRunnerExecutionFinishedSubscriber;
 use Pest\Logging\JUnit\Subscriber\TestSkippedSubscriber;
 use Pest\Logging\JUnit\Subscriber\TestSuiteFinishedSubscriber;
 use Pest\Logging\JUnit\Subscriber\TestSuiteStartedSubscriber;
-use Pest\TestSuite;
 use PHPUnit\Event\Code\TestMethod;
 use PHPUnit\Event\EventFacadeIsSealedException;
 use PHPUnit\Event\Facade;
@@ -88,7 +87,7 @@ final class JUnitLogger
 
     private bool $prepared = false;
 
-    /**✅
+    /**
      * @throws EventFacadeIsSealedException
      * @throws UnknownSubscriberTypeException
      */
@@ -271,7 +270,7 @@ final class JUnitLogger
         $this->prepared = false;
     }
 
-    /**✅
+    /**
      * @throws EventFacadeIsSealedException
      * @throws UnknownSubscriberTypeException
      */
@@ -315,16 +314,16 @@ final class JUnitLogger
 
         assert($this->currentTestCase !== null);
 
+        $throwable = $event->throwable();
+
         $testName = $this->converter->getTestCaseMethodName($event->test());
-        //        $message = $this->converter->getExceptionMessage($event->throwable());
-        //        $details = $this->converter->getExceptionDetails($event->throwable());
+        $message = $this->converter->getExceptionMessage($throwable);
+        $details = $this->converter->getExceptionDetails($throwable);
 
         $buffer = $testName;
-
-        $throwable = $event->throwable();
         $buffer .= trim(
-            $throwable->description().PHP_EOL.
-            $throwable->stackTrace(),
+            $message.PHP_EOL.
+            $details,
         );
 
         $fault = $this->document->createElement(
@@ -374,22 +373,18 @@ final class JUnitLogger
     {
         $testCase = $this->document->createElement('testcase');
 
-        $file = $this->converter->getTestCaseLocation($event->test());
+        $test = $event->test();
+        $file = $this->converter->getTestCaseLocation($test);
 
-        $testCase->setAttribute('name', $this->converter->getTestCaseMethodName($event->test()));
-//        $testCase->setAttribute('name', $event->test()->name());
+        $testCase->setAttribute('name', $this->converter->getTestCaseMethodName($test));
         $testCase->setAttribute('file', $file);
-//        $testCase->setAttribute('file', $event->test()->file());
 
-        if ($event->test()->isTestMethod()) {
-            assert($event->test() instanceof TestMethod);
+        if ($test->isTestMethod()) {
+            assert($test instanceof TestMethod);
 
-            //dd(TestSuite::getInstance()->tests->get($file));
-            // add classname, and line to this
-
-            $testCase->setAttribute('line', (string) $event->test()->line()); //@todo figure out how to get line number in original pest file
-            $testCase->setAttribute('class', $event->test()->name());
-            $testCase->setAttribute('classname', str_replace('\\', '.', $event->test()->name()));
+            $className = $this->converter->getTrimmedTestClassName($test);
+            $testCase->setAttribute('class', $className);
+            $testCase->setAttribute('classname', str_replace('\\', '.', $className));
         }
 
         $this->currentTestCase = $testCase;
