@@ -105,8 +105,6 @@ final class JUnitLogger
         $this->printer->print($this->document->saveXML());
 
         $this->printer->flush();
-
-        $this->output->writeln('Junit finished');
     }
 
     public function testSuiteStarted(Started $event): void
