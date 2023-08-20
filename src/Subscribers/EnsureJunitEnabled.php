@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Pest\Subscribers;
 
+use Pest\Logging\Converter;
 use Pest\Logging\JUnit\JUnitLogger;
-use Pest\Logging\JUnit\Converter;
 use Pest\Support\Container;
 use Pest\TestSuite;
 use PHPUnit\Event\TestRunner\Configured;

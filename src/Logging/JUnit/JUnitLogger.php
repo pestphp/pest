@@ -6,6 +6,7 @@ namespace Pest\Logging\JUnit;
 
 use DOMDocument;
 use DOMElement;
+use Pest\Logging\Converter;
 use Pest\Logging\JUnit\Subscriber\TestErroredSubscriber;
 use Pest\Logging\JUnit\Subscriber\TestFailedSubscriber;
 use Pest\Logging\JUnit\Subscriber\TestFinishedSubscriber;
