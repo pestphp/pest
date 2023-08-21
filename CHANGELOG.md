@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+## [v2.16.0 (2023-08-21)](https://github.com/pestphp/pest/compare/v2.15.0...v2.16.0)
+
+### Added
+
+- `toBeDigits` ([#911](https://github.com/pestphp/pest/pull/911))
+- `toBeCamelCase`, `toBeKebabCase`, `toBeSnakeCase`, `toBeStudlyCase`, `toHaveSnakeCaseKeys`, `toHaveKebabCaseKeys`, `toHaveCamelCaseKeys`, `toHaveStudlyCaseKeys`` ([#921](https://github.com/pestphp/pest/pull/921))
+
+### Changed
+
+- `phpunit.xml` stub ([#915](https://github.com/pestphp/pest/pull/915))
+
+### Fixed
+
+- Nested sequences ([#895](https://github.com/pestphp/pest/pull/895))
+
 ## [v2.15.0 (2023-08-17)](https://github.com/pestphp/pest/compare/v2.14.1...v2.15.0)
 
 ### Added
