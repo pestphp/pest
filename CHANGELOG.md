@@ -8,6 +8,7 @@
 
 - `toBeDigits` ([#911](https://github.com/pestphp/pest/pull/911))
 - `toBeCamelCase`, `toBeKebabCase`, `toBeSnakeCase`, `toBeStudlyCase`, `toHaveSnakeCaseKeys`, `toHaveKebabCaseKeys`, `toHaveCamelCaseKeys`, `toHaveStudlyCaseKeys`` ([#921](https://github.com/pestphp/pest/pull/921))
+- native functions support on `arch` expectations, e.g: `expect('sleep')->toBeUsed();` ([#4](https://github.com/pestphp/pest-plugin-arch/pull/4))
 
 ### Changed
 
