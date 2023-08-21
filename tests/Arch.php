@@ -3,7 +3,7 @@
 use Pest\Expectation;
 
 test('globals')
-    ->expect(['dd', 'dump', 'ray'])
+    ->expect(['dd', 'dump', 'ray', 'die', 'var_dump', 'sleep'])
     ->not->toBeUsed()
     ->ignoring(Expectation::class);
 
