@@ -264,7 +264,7 @@ final class Expectation
     public function toHaveCount(int $count, string $message = ''): self
     {
         if (! is_countable($this->value) && ! is_iterable($this->value)) {
-            InvalidExpectationValue::expected('string');
+            InvalidExpectationValue::expected('countable|iterable');
         }
 
         Assert::assertCount($count, $this->value, $message);
