@@ -1,10 +1,15 @@
 <?php
 
+use Pest\Exceptions\InvalidExpectationValue;
 use PHPUnit\Framework\ExpectationFailedException;
 
 test('pass', function () {
     expect([1, 2, 3])->toHaveCount(3);
 });
+
+test('failures with invalid type', function () {
+    expect('foo')->toHaveCount(3);
+})->throws(InvalidExpectationValue::class, 'Invalid expectation value type. Expected [countable|iterable]');
 
 test('failures', function () {
     expect([1, 2, 3])->toHaveCount(4);
