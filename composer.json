@@ -21,8 +21,8 @@
         "brianium/paratest": "^7.2.5",
         "nunomaduro/collision": "^7.8.1",
         "nunomaduro/termwind": "^1.15.1",
-        "pestphp/pest-plugin": "^2.0.1",
-        "pestphp/pest-plugin-arch": "^2.3.1",
+        "pestphp/pest-plugin": "^2.1.1",
+        "pestphp/pest-plugin-arch": "^2.3.3",
         "phpunit/phpunit": "^10.3.2"
     },
     "conflict": {
@@ -51,7 +51,7 @@
     },
     "require-dev": {
         "pestphp/pest-dev-tools": "^2.16.0",
-        "pestphp/pest-plugin-type-coverage": "^2.0.0",
+        "pestphp/pest-plugin-type-coverage": "^2.1.0",
         "symfony/process": "^6.3.2"
     },
     "minimum-stability": "dev",
