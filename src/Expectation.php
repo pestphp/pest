@@ -69,12 +69,12 @@ final class Expectation
      *
      * @template TAndValue
      *
-     * @param  TAndValue  $value
+     * @param  TAndValue|null  $value
      * @return self<TAndValue>
      */
-    public function and(mixed $value): Expectation
+    public function and(mixed $value = null): Expectation
     {
-        return $value instanceof self ? $value : new self($value);
+        return $value instanceof self ? $value : (is_null($value) ? $this : new self($value));
     }
 
     /**
