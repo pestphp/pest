@@ -6,7 +6,6 @@ namespace Pest\Mixins;
 
 use BadMethodCallException;
 use Closure;
-use Countable;
 use DateTimeInterface;
 use Error;
 use InvalidArgumentException;
@@ -276,9 +275,10 @@ final class Expectation
     /**
      * Asserts that the size of the value and $expected are the same.
      *
+     * @param  array<int|string, mixed>  $expected
      * @return self<TValue>
      */
-    public function toHaveSameSize(Countable|iterable $expected, string $message = ''): self
+    public function toHaveSameSize(iterable $expected, string $message = ''): self
     {
         if (! is_countable($this->value) && ! is_iterable($this->value)) {
             InvalidExpectationValue::expected('countable|iterable');
