@@ -273,6 +273,23 @@ final class Expectation
     }
 
     /**
+     * Asserts that the size of the value and $expected are the same.
+     *
+     * @param  array<int|string, mixed>  $expected
+     * @return self<TValue>
+     */
+    public function toHaveSameSize(iterable $expected, string $message = ''): self
+    {
+        if (! is_countable($this->value) && ! is_iterable($this->value)) {
+            InvalidExpectationValue::expected('countable|iterable');
+        }
+
+        Assert::assertSameSize($expected, $this->value, $message);
+
+        return $this;
+    }
+
+    /**
      * Asserts that the value contains the property $name.
      *
      * @return self<TValue>
