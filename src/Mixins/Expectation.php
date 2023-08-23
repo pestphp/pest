@@ -437,6 +437,26 @@ final class Expectation
     }
 
     /**
+     * Asserts that the value is an instance of enumeration $enum.
+     *
+     * @param  class-string  $enum
+     * @return self<TValue>
+     */
+    public function toBeEnumeration(string $enum, string $message = ''): self
+    {
+        if (! enum_exists($enum) || $enum::cases() === []) {
+            throw new InvalidArgumentException("The enum class '$enum' does not exist or does not have any cases.");
+        }
+
+        $resolve = $enum::tryFrom($this->value);
+
+        Assert::assertNotNull($resolve, $message);
+        Assert::assertInstanceOf($enum, $resolve, $message);
+
+        return $this;
+    }
+
+    /**
      * Asserts that the value is an array.
      *
      * @return self<TValue>
