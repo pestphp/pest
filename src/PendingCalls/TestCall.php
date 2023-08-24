@@ -105,6 +105,24 @@ final class TestCall
     }
 
     /**
+     * Asserts that the test throws the given `$exceptionClass` when called if the given condition is falsy.
+     *
+     * @param  (callable(): bool)|bool  $condition
+     */
+    public function throwsUnless(callable|bool $condition, string|int $exception, string $exceptionMessage = null, int $exceptionCode = null): self
+    {
+        $condition = is_callable($condition)
+            ? $condition
+            : static fn (): bool => $condition;
+
+        if (! $condition()) {
+            return $this->throws($exception, $exceptionMessage, $exceptionCode);
+        }
+
+        return $this;
+    }
+
+    /**
      * Runs the current test multiple times with
      * each item of the given `iterable`.
      *
