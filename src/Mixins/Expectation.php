@@ -448,6 +448,10 @@ final class Expectation
             throw new InvalidArgumentException("The enum class '$enum' does not exist or does not have any cases.");
         }
 
+        if ($this->value instanceof $enum) {
+            return $this;
+        }
+
         $resolve = $enum::tryFrom($this->value);
 
         Assert::assertNotNull($resolve, $message);

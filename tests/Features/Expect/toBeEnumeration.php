@@ -7,6 +7,7 @@ test('pass', function () {
     expect(2)->toBeEnumeration('Tests\\Fixtures\\Features\\BackedIntEnumeration');
     expect('foo')->toBeEnumeration('Tests\\Fixtures\\Features\\BackedStringEnumeration');
     expect('bar')->toBeEnumeration('Tests\\Fixtures\\Features\\BackedStringEnumeration');
+    expect('bar')->toBeEnumeration('Tests\\Fixtures\\Features\\BackedStringEnumeration');
 });
 
 test('failures', function () {
