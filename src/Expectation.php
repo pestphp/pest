@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest;
 
+use Attribute;
 use BadMethodCallException;
 use Closure;
 use InvalidArgumentException;
@@ -837,7 +838,7 @@ final class Expectation
     /**
      * Asserts that the given expectation target to have the given attribute.
      *
-     * @param  class-string  $attribute
+     * @param  class-string<Attribute>  $attribute
      */
     public function toHaveAttribute(string $attribute): ArchExpectation
     {
