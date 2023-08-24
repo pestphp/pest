@@ -379,6 +379,21 @@ final class OppositeExpectation
     }
 
     /**
+     * Asserts that the given expectation target not to have the given attribute.
+     *
+     * @param  class-string  $attribute
+     */
+    public function toHaveAttribute(string $attribute): ArchExpectation
+    {
+        return Targeted::make(
+            $this->original,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->getAttributes($attribute) === [],
+            "to not have attribute '{$attribute}'",
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class'))
+        );
+    }
+
+    /**
      * Handle dynamic method calls into the original expectation.
      *
      * @param  array<int, mixed>  $arguments
