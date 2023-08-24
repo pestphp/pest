@@ -9,5 +9,4 @@ use Tests\Fixtures\Arch\ToHaveAttribute\Attributes\AsAttribute;
 #[AsAttribute]
 class HaveAttributeClass
 {
-
 }

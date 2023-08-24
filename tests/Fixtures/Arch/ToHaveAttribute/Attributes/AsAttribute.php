@@ -9,5 +9,4 @@ use Attribute;
 #[Attribute()]
 class AsAttribute
 {
-
 }

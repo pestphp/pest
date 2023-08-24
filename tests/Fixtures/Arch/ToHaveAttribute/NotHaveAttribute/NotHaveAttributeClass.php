@@ -6,5 +6,4 @@ namespace Tests\Fixtures\Arch\ToHaveAttribute\NotHaveAttribute;
 
 class NotHaveAttributeClass
 {
-
 }
