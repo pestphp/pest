@@ -105,7 +105,7 @@ final class TestCall
     }
 
     /**
-     * Asserts that the test throws the given `$exceptionClass` when called if the given condition is falsy.
+     * Asserts that the test throws the given `$exceptionClass` when called if the given condition is false.
      *
      * @param  (callable(): bool)|bool  $condition
      */
