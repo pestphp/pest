@@ -33,6 +33,6 @@ final class DatasetInfo
             return dirname($file);
         }
 
-        return $file;
+        return dirname($file, 1);
     }
 }
