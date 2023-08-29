@@ -638,6 +638,7 @@
 
    PASS  Tests\Features\Expect\toHaveCount
   ✓ pass
+  ✓ failures with invalid type
   ✓ failures
   ✓ failures with message
   ✓ not failures
@@ -722,6 +723,13 @@
   ✓ failures
   ✓ failures with message
   ✓ failures with message and Any matcher
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toHaveSameSize
+  ✓ failures with wrong type
+  ✓ pass
+  ✓ failures
+  ✓ failures with message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toHaveSnakeCaseKeys
@@ -1007,6 +1015,9 @@
   ✓ uses dataset with (1)
   ✓ uses dataset with (2)
   ✓ the right dataset is taken
+  ✓ it can see datasets defined in Pest.php file with ('A')
+  ✓ it can see datasets defined in Pest.php file with ('B')
+  ✓ Pest.php dataset is taken
 
    WARN  Tests\Features\Skip
   ✓ it do not skips
@@ -1296,4 +1307,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 916 passed (2190 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 925 passed (2204 assertions)
