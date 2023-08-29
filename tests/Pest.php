@@ -37,3 +37,5 @@ function helper_returns_string()
 {
     return 'string';
 }
+
+dataset('dataset_in_pest_file', ['A', 'B']);
