@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## [v2.16.1 (2023-08-29)](https://github.com/pestphp/pest/compare/v2.16.0...v2.16.1)
+
+> New changelog format starting this release.
+
+### Added
+* `toHaveSameSize` expectation by @hungthai1401 in https://github.com/pestphp/pest/pull/924, https://github.com/pestphp/pest/pull/930
+
+### Fixed
+* Inconsistent type have count exception by @hungthai1401 in https://github.com/pestphp/pest/pull/923
+* Datasets defined in `Pest.php` 
+
 ## [v2.16.0 (2023-08-21)](https://github.com/pestphp/pest/compare/v2.15.0...v2.16.0)
 
 ### Added
