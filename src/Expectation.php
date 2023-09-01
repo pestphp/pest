@@ -502,7 +502,7 @@ final class Expectation
     }
 
     /**
-     * Asserts that the given expectation target have a specific method.
+     * Asserts that the given expectation target has a specific method.
      */
     public function toHaveMethod(string $method): ArchExpectation
     {
