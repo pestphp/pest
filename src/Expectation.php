@@ -502,6 +502,19 @@ final class Expectation
     }
 
     /**
+     * Asserts that the given expectation target have a specific method.
+     */
+    public function toHaveMethod(string $method): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->hasMethod($method),
+            'to have method',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
      * Asserts that the given expectation target is enum.
      */
     public function toBeEnum(): ArchExpectation

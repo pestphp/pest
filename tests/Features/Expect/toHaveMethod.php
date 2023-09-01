@@ -1,28 +1,29 @@
 <?php
 
-use PHPUnit\Framework\ExpectationFailedException;
+use Pest\Arch\Exceptions\ArchExpectationFailedException;
 
-$object = new class
-{
-    public function foo(): void
-    {
-    }
-};
+test('class has method')
+    ->expect('Tests\Fixtures\Arch\ToHaveMethod\HasMethod\HasMethod')
+    ->toHaveMethod('foo');
 
-test('pass', function () use ($object) {
-    expect($object)->toHaveMethod('foo')
-        ->and($object)->toHaveMethod('foo')
-        ->and($object)->not->toHaveMethod('fooNull');
-});
+test('opposite class has method')
+    ->throws(ArchExpectationFailedException::class)
+    ->expect('Tests\Fixtures\Arch\ToHaveMethod\HasMethod\HasMethod')
+    ->not->toHaveMethod('foo');
 
-test('failures', function () use ($object) {
-    expect($object)->toHaveMethod('bar');
-})->throws(ExpectationFailedException::class);
+test('class has method via a parent class')
+    ->expect('Tests\Fixtures\Arch\ToHaveMethod\HasMethod\HasMethodViaParent')
+    ->toHaveMethod('foo');
 
-test('failures with message', function () use ($object) {
-    expect($object)->toHaveMethod(name: 'bar', message: 'oh no!');
-})->throws(ExpectationFailedException::class, 'oh no!');
+test('class has method via a trait')
+    ->expect('Tests\Fixtures\Arch\ToHaveMethod\HasMethod\HasMethodViaTrait')
+    ->toHaveMethod('foo');
 
-test('not failures', function () use ($object) {
-    expect($object)->not->toHaveMethod('foo');
-})->throws(ExpectationFailedException::class);
+test('failure when the class has no method')
+    ->throws(ArchExpectationFailedException::class)
+    ->expect('Tests\Fixtures\Arch\ToHaveMethod\HasNoMethod\HasNoMethodClass')
+    ->toHaveMethod('foo');
+
+test('class has no method')
+    ->expect('Tests\Fixtures\Arch\ToHaveMethod\HasNoMethod\HasNoMethodClass')
+    ->not->toHaveMethod('foo');
