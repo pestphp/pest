@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## [v2.17.0 (2023-09-04)](https://github.com/pestphp/pest/compare/v2.16.1...v2.17.0)
+
+### Added
+
+- `toHaveMethod` expectation ([#947](https://github.com/pestphp/pest/pull/947))
+- `toHaveAttribute` expectation ([#934](https://github.com/pestphp/pest/pull/934))
+
 ## [v2.16.1 (2023-08-29)](https://github.com/pestphp/pest/compare/v2.16.0...v2.16.1)
 
 > New changelog format starting this release.
