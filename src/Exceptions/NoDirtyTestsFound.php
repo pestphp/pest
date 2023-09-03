@@ -14,7 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @internal
  */
-final class NoDirtyTestsFound extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace, Panicable
+final class NoDirtyTestsFound extends InvalidArgumentException implements ExceptionInterface, Panicable, RenderlessEditor, RenderlessTrace
 {
     /**
      * Renders the panic on the given output.
