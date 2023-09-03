@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Expectations;
 
+use Attribute;
 use Pest\Arch\Contracts\ArchExpectation;
 use Pest\Arch\Expectations\Targeted;
 use Pest\Arch\Expectations\ToBeUsedIn;
@@ -387,6 +388,21 @@ final class OppositeExpectation
             $this->original,
             fn (ObjectDescription $object): bool => ! $object->reflectionClass->hasMethod('__invoke'),
             'to not be invokable',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class'))
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target not to have the given attribute.
+     *
+     * @param  class-string<Attribute>  $attribute
+     */
+    public function toHaveAttribute(string $attribute): ArchExpectation
+    {
+        return Targeted::make(
+            $this->original,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->getAttributes($attribute) === [],
+            "to not have attribute '{$attribute}'",
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class'))
         );
     }

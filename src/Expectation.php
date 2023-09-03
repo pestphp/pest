@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest;
 
+use Attribute;
 use BadMethodCallException;
 use Closure;
 use InvalidArgumentException;
@@ -845,5 +846,20 @@ final class Expectation
         }
 
         return $this;
+    }
+
+    /**
+     * Asserts that the given expectation target to have the given attribute.
+     *
+     * @param  class-string<Attribute>  $attribute
+     */
+    public function toHaveAttribute(string $attribute): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => $object->reflectionClass->getAttributes($attribute) !== [],
+            "to have attribute '{$attribute}'",
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
     }
 }
