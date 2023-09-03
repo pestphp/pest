@@ -150,6 +150,19 @@ final class OppositeExpectation
     }
 
     /**
+     * Asserts that the given expectation target does not have a specific method.
+     */
+    public function toHaveMethod(string $method): ArchExpectation
+    {
+        return Targeted::make(
+            $this->original,
+            fn (ObjectDescription $object): bool => ! $object->reflectionClass->hasMethod($method),
+            'to not have method',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
      * Asserts that the given expectation target is not enum.
      */
     public function toBeEnum(): ArchExpectation
