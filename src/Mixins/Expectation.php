@@ -950,7 +950,7 @@ final class Expectation
             }
 
             if (! class_exists($exception)) {
-                if ($e instanceof Error && $e->getMessage() === "Class \"$exception\" not found") {
+                if ($e instanceof Error && "Class \"$exception\" not found" === $e->getMessage()) {
                     Assert::assertTrue(true);
 
                     throw $e;

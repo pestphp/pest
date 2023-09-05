@@ -241,7 +241,7 @@ final class TestCaseFactory
                 throw ShouldNotHappen::fromMessage('The test description may not be empty.');
             }
 
-            if (Str::evaluable($method->description) === $methodName) {
+            if ($methodName === Str::evaluable($method->description)) {
                 return true;
             }
         }
@@ -259,7 +259,7 @@ final class TestCaseFactory
                 throw ShouldNotHappen::fromMessage('The test description may not be empty.');
             }
 
-            if (Str::evaluable($method->description) === $methodName) {
+            if ($methodName === Str::evaluable($method->description)) {
                 return $method;
             }
         }

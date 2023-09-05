@@ -132,7 +132,7 @@ final class TestSuiteLoader
                     continue;
                 }
 
-                if ($class->isAbstract() || ($class->getFileName() !== $suiteClassFile)) {
+                if ($class->isAbstract() || ($suiteClassFile !== $class->getFileName())) {
                     if (! str_contains($class->getFileName(), 'TestCaseFactory.php')) {
                         continue;
                     }
