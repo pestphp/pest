@@ -76,3 +76,23 @@ describe('with on describe', function () {
         expect($foo)->toBe(3);
     });
 })->with([3]);
+
+describe('depends on describe', function () {
+    test('foo', function () {
+        expect('foo')->toBe('foo');
+    });
+
+    test('bar', function () {
+        expect('bar')->toBe('bar');
+    })->depends('foo');
+});
+
+describe('depends on describe using with', function () {
+    test('foo', function ($foo) {
+        expect($foo)->toBe(3);
+    });
+
+    test('bar', function ($foo) {
+        expect($foo + $foo)->toBe(6);
+    })->depends('foo');
+})->with([3]);

@@ -19,7 +19,7 @@ final class Depends implements AddsAnnotations
     public function __invoke(TestCaseMethodFactory $method, array $annotations): array
     {
         foreach ($method->depends as $depend) {
-            $depend = Str::evaluable($depend);
+            $depend = Str::evaluable($method->describing !== null ? Str::describe($method->describing, $depend) : $depend);
 
             $annotations[] = "@depends $depend";
         }

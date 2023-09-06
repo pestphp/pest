@@ -239,7 +239,7 @@ final class Expectation
             $index = isset($callbacks[$index + 1]) ? $index + 1 : 0;
         }
 
-        if (count($callbacks) > $valuesCount) {
+        if ($valuesCount < count($callbacks)) {
             throw new OutOfRangeException('Sequence expectations are more than the iterable items.');
         }
 

@@ -51,7 +51,7 @@ final class Str
             return true;
         }
 
-        return substr($target, -$length) === $search;
+        return $search === substr($target, -$length);
     }
 
     /**
@@ -99,5 +99,13 @@ final class Str
     public static function isUuid(string $value): bool
     {
         return preg_match('/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/iD', $value) > 0;
+    }
+
+    /**
+     * Creates a describe block as `$describeDescription` → `$testDescription` format.
+     */
+    public static function describe(string $describeDescription, string $testDescription): string
+    {
+        return sprintf('`%s` → %s', $describeDescription, $testDescription);
     }
 }
