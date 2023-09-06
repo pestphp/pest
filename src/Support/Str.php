@@ -94,10 +94,10 @@ final class Str
     }
 
     /**
-     * Creates a describe block as `$right` → `$left` format.
+     * Creates a describe block as `$describeDescription` → `$testDescription` format.
      */
-    public static function describe(string $right, string $left): string
+    public static function describe(string $describeDescription, string $testDescription): string
     {
-        return sprintf('`%s` → %s', $right, $left);
+        return sprintf('`%s` → %s', $describeDescription, $testDescription);
     }
 }
