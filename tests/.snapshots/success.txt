@@ -187,6 +187,10 @@
   ✓ with with (1)
   ✓ with on hook → value with (2)
   ✓ with on describe → value with (3)
+  ✓ depends on describe → foo
+  ✓ depends on describe → bar
+  ✓ depends on describe using with → foo with (3)
+  ✓ depends on describe using with → bar with (3)
 
    PASS  Tests\Features\DescriptionLess
   ✓ get 'foo'
@@ -574,6 +578,13 @@
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeUuid
+  ✓ failures with wrong type
+  ✓ pass
+  ✓ failures
+  ✓ failures with message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeWritableDirectory
@@ -1314,4 +1325,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 930 passed (2200 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 939 passed (2220 assertions)
