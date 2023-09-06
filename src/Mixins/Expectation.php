@@ -16,6 +16,7 @@ use Pest\Matchers\Any;
 use Pest\Support\Arr;
 use Pest\Support\Exporter;
 use Pest\Support\NullClosure;
+use Pest\Support\Str;
 use Pest\TestSuite;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Constraint\Constraint;
@@ -1108,6 +1109,22 @@ final class Expectation
         }
 
         Assert::assertTrue((bool) preg_match('/^\p{Lu}+\p{Ll}[\p{Ll}\p{Lu}]+$/u', $value), $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is UUID.
+     *
+     * @return self<TValue>
+     */
+    public function toBeUuid(string $message = ''): self
+    {
+        if (! is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
+        Assert::assertTrue(Str::isUuid($this->value), $message);
 
         return $this;
     }

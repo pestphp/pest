@@ -94,6 +94,14 @@ final class Str
     }
 
     /**
+     * Determine if a given value is a valid UUID.
+     */
+    public static function isUuid(string $value): bool
+    {
+        return preg_match('/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/iD', $value) > 0;
+    }
+
+    /**
      * Creates a describe block as `$describeDescription` → `$testDescription` format.
      */
     public static function describe(string $describeDescription, string $testDescription): string
