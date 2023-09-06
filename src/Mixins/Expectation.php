@@ -1118,7 +1118,7 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toBeUUID(string $message = ''): self
+    public function toBeUuid(string $message = ''): self
     {
         if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
