@@ -185,7 +185,7 @@ final class OppositeExpectation
     }
 
     /**
-     * Asserts that the given expectation targets is an class.
+     * Asserts that the given expectation targets is not class.
      */
     public function toBeClass(): ArchExpectation
     {
@@ -227,7 +227,7 @@ final class OppositeExpectation
     }
 
     /**
-     * Asserts that the given expectation target to be subclass of the given class.
+     * Asserts that the given expectation target to be not subclass of the given class.
      *
      * @param  class-string  $class
      */
