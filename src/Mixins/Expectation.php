@@ -927,7 +927,7 @@ final class Expectation
             $callback = $exception;
             $parameters = (new ReflectionFunction($exception))->getParameters();
 
-            if (1 !== count($parameters)) {
+            if (count($parameters) !== 1) {
                 throw new InvalidArgumentException('The given closure must have a single parameter type-hinted as the class string.');
             }
 

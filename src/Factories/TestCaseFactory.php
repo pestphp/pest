@@ -142,7 +142,7 @@ final class TestCaseFactory
         $namespace = implode('\\', $partsFQN);
         $baseClass = sprintf('\%s', $this->class);
 
-        if ('' === trim($className)) {
+        if (trim($className) === '') {
             $className = 'InvalidTestName'.Str::random();
         }
 
