@@ -51,7 +51,7 @@ final class Str
             return true;
         }
 
-        return substr($target, -$length) === $search;
+        return $search === substr($target, -$length);
     }
 
     /**
@@ -91,5 +91,13 @@ final class Str
     public static function after(string $subject, string $search): string
     {
         return $search === '' ? $subject : array_reverse(explode($search, $subject, 2))[0];
+    }
+
+    /**
+     * Creates a describe block as `$right` → `$left` format.
+     */
+    public static function describe(string $right, string $left): string
+    {
+        return sprintf('`%s` → %s', $right, $left);
     }
 }

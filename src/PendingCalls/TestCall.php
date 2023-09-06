@@ -16,6 +16,7 @@ use Pest\Support\Backtrace;
 use Pest\Support\Exporter;
 use Pest\Support\HigherOrderCallables;
 use Pest\Support\NullClosure;
+use Pest\Support\Str;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestCase;
 
@@ -209,7 +210,7 @@ final class TestCall
      */
     private function skipOn(string $osFamily, string $message): self
     {
-        return PHP_OS_FAMILY === $osFamily
+        return $osFamily === PHP_OS_FAMILY
             ? $this->skip($message)
             : $this;
     }
@@ -361,7 +362,7 @@ final class TestCall
     {
         if (! is_null($this->describing)) {
             $this->testCaseMethod->describing = $this->describing;
-            $this->testCaseMethod->description = sprintf('`%s` → %s', $this->describing, $this->testCaseMethod->description);
+            $this->testCaseMethod->description = Str::describe($this->describing, $this->testCaseMethod->description); // @phpstan-ignore-line
         }
 
         $this->testSuite->tests->set($this->testCaseMethod);
