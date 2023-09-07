@@ -22,6 +22,7 @@ use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Constraint\Constraint;
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 use ReflectionFunction;
 use ReflectionNamedType;
 use Throwable;
@@ -1125,6 +1126,21 @@ final class Expectation
         }
 
         Assert::assertTrue(Str::isUuid($this->value), $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is an anonymous class.
+     *
+     * @return self<TValue>
+     */
+    public function toBeAnonymous(string $message = ''): self
+    {
+        $this->toBeObject();
+
+        // @phpstan-ignore-next-line
+        Assert::assertTrue((new ReflectionClass($this->value))->isAnonymous(), $message);
 
         return $this;
     }
