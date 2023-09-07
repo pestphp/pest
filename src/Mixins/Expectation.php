@@ -13,6 +13,7 @@ use InvalidArgumentException;
 use JsonSerializable;
 use Pest\Exceptions\InvalidExpectationValue;
 use Pest\Matchers\Any;
+use Pest\Plugins\Snapshot;
 use Pest\Support\Arr;
 use Pest\Support\Exporter;
 use Pest\Support\NullClosure;
@@ -844,15 +845,19 @@ final class Expectation
 
         $string = match (true) {
             is_string($this->value) => $this->value,
+            is_object($this->value) && array_key_exists($this->value::class, Snapshot::getInterceptors()) => Snapshot::getInterceptors()[$this->value::class]($this->value),
             is_object($this->value) && method_exists($this->value, '__toString') => $this->value->__toString(),
             is_object($this->value) && method_exists($this->value, 'toString') => $this->value->toString(),
-            $this->value instanceof \Illuminate\Testing\TestResponse => $this->value->getContent(), // @phpstan-ignore-line
             is_array($this->value) => json_encode($this->value, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT),
             $this->value instanceof Traversable => json_encode(iterator_to_array($this->value), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT),
             $this->value instanceof JsonSerializable => json_encode($this->value->jsonSerialize(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT),
             is_object($this->value) && method_exists($this->value, 'toArray') => json_encode($this->value->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT),
             default => InvalidExpectationValue::expected('array|object|string'),
         };
+
+        foreach (Snapshot::getMacros() as $macro) {
+            $string = $macro($string);
+        }
 
         if ($snapshots->has()) {
             [$filename, $content] = $snapshots->get();

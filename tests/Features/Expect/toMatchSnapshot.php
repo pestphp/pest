@@ -1,7 +1,9 @@
 <?php
 
+use Pest\Plugins\Snapshot;
 use Pest\TestSuite;
 use PHPUnit\Framework\ExpectationFailedException;
+use Tests\Fixtures\Snapshot\Color;
 
 beforeEach(function () {
     $this->snapshotable = <<<'HTML'
@@ -146,3 +148,32 @@ test('multiple snapshot expectations with repeat', function () {
 
     expect('foo bar 2')->toMatchSnapshot();
 })->repeat(10);
+
+test('custom macro', function () {
+    Snapshot::macro('test', function (string $value) {
+        return preg_replace('/key="[0-9]*"/', 'key="..."', $value);
+    });
+
+    expect('<div key="'.random_int(1, 999).'">foo</div>')
+        ->toMatchSnapshot();
+});
+
+test('disable macro', function () {
+    Snapshot::macro('test', function (string $value) {
+        return preg_replace('/key="[0-9]*"/', 'key="..."', $value);
+    });
+
+    Snapshot::disableMacro('test');
+
+    expect('<div key="111">foo</div>')
+        ->toMatchSnapshot();
+});
+
+test('intercept', function () {
+    Snapshot::intercept(Color::class, function (Color $color): string {
+        return $color->getStyle();
+    });
+
+    expect(new Color(255, 0, 0))
+        ->toMatchSnapshot();
+});

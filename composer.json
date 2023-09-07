@@ -43,6 +43,7 @@
             "Tests\\Fixtures\\Covers\\": "tests/Fixtures/Covers",
             "Tests\\Fixtures\\Inheritance\\": "tests/Fixtures/Inheritance",
             "Tests\\Fixtures\\Arch\\": "tests/Fixtures/Arch",
+            "Tests\\Fixtures\\Snapshot\\": "tests/Fixtures/Snapshot",
             "Tests\\": "tests/PHPUnit/"
         },
         "files": [

@@ -820,6 +820,9 @@
   ✓ multiple snapshot expectations with repeat @ repetition 8 of 10
   ✓ multiple snapshot expectations with repeat @ repetition 9 of 10
   ✓ multiple snapshot expectations with repeat @ repetition 10 of 10
+  ✓ custom macro
+  ✓ disable macro
+  ✓ intercept
 
    PASS  Tests\Features\Expect\toStartWith
   ✓ pass
@@ -1325,4 +1328,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 939 passed (2220 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 942 passed (2223 assertions)
