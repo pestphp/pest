@@ -12,7 +12,6 @@
       		<directory suffix="Test.php">./tests/Feature</directory>
     	</testsuite>
   	</testsuites>
-  	<coverage/>
   	<php>
     	<env name="APP_ENV" value="testing"/>
     	<env name="BCRYPT_ROUNDS" value="4"/>
