@@ -5,10 +5,10 @@ When releasing a new version of Pest there are some checks and updates that need
 > **For Pest v1 you should use the `1.x` branch instead.**
 
 - Clear your local repository with: `git add . && git reset --hard && git checkout 2.x`
-- On the GitHub repository, check the contents of [github.com/pestphp/pest/compare/{latest_version}...2.x](https://github.com/pestphp/pest/compare/{latest_version}...master) and update the [changelog](CHANGELOG.md) file with the main changes for this release
+- On the GitHub repository, check the contents of [github.com/pestphp/pest/compare/{latest_version}...2.x](https://github.com/pestphp/pest/compare/{latest_version}...2.x)
 - Update the version number in [src/Pest.php](src/Pest.php)
 - Run the tests locally using: `composer test`
-- Commit the CHANGELOG and Pest file with the message: `git commit -m "release: vX.X.X"`
+- Commit the Pest file with the message: `git commit -m "release: vX.X.X"`
 - Push the changes to GitHub
 - Check that the CI is passing as expected: [github.com/pestphp/pest/actions](https://github.com/pestphp/pest/actions)
 - Tag and push the tag with `git tag vX.X.X && git push --tags`
