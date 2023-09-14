@@ -399,6 +399,7 @@ final class OppositeExpectation
      */
     public function toUseTrait(array|string $traits): ArchExpectation
     {
+        /** @var string[] $traits */
         $traits = is_array($traits) ? $traits : [$traits];
 
         return Targeted::make(
