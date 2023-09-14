@@ -393,6 +393,28 @@ final class OppositeExpectation
     }
 
     /**
+     * Asserts that the given expectation dependency does not use the given trait.
+     */
+    public function toUseTrait(string $trait): ArchExpectation
+    {
+        return Targeted::make(
+            $this->original,
+            function (ObjectDescription $object) use ($trait): bool {
+                $allTraits = $object->reflectionClass->getTraits();
+
+                // Find the traits used by all the parent classes.
+                foreach (class_parents($object->name) as $parent) {
+                    $allTraits = [...$allTraits, ...class_uses($parent)];
+                }
+
+                return !array_key_exists($trait, $allTraits);
+            },
+            sprintf("to not use trait '%s'", $trait),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class'))
+        );
+    }
+
+    /**
      * Asserts that the given expectation target not to have the given attribute.
      *
      * @param  class-string<Attribute>  $attribute

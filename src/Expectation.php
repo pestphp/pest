@@ -759,30 +759,19 @@ final class Expectation
     {
         return Targeted::make(
             $this,
-            fn (ObjectDescription $object): bool => $this->objectUsesTrait($object, $trait),
+            function (ObjectDescription $object) use ($trait): bool {
+                $allTraits = $object->reflectionClass->getTraits();
+
+                // Find the traits used by all the parent classes.
+                foreach (class_parents($object->name) as $parent) {
+                    $allTraits = [...$allTraits, ...class_uses($parent)];
+                }
+
+                return array_key_exists($trait, $allTraits);
+            },
             sprintf("to use trait '%s'", $trait),
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class'))
         );
-    }
-
-    /**
-     * Determine whether the given object uses the given trait. The trait may
-     * be used in the object itself or in one of its parent classes.
-     *
-     * @param ObjectDescription $object
-     * @param string $trait
-     * @return bool
-     */
-    private function objectUsesTrait(ObjectDescription $object, string $trait): bool
-    {
-        $allTraits = $object->reflectionClass->getTraits();
-
-        // Find the traits used by all the parent classes.
-        foreach (class_parents($object->name) as $parent) {
-            $allTraits = [...$allTraits, ...class_uses($parent)];
-        }
-
-        return array_key_exists($trait, $allTraits);
     }
 
     /**
