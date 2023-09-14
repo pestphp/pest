@@ -754,6 +754,8 @@ final class Expectation
 
     /**
      * Asserts that the given expectation dependency uses the given trait.
+     *
+     * @param array<int, string>|string $traits
      */
     public function toUseTrait(array|string $traits): ArchExpectation
     {
