@@ -755,7 +755,7 @@ final class Expectation
     /**
      * Asserts that the given expectation dependency uses the given trait.
      *
-     * @param array<int, string>|string $traits
+     * @param  array<int, string>|string  $traits
      */
     public function toUseTrait(array|string $traits): ArchExpectation
     {
@@ -773,7 +773,7 @@ final class Expectation
                         $allTraits = [...$allTraits, ...class_uses($parent)];
                     }
 
-                    if (!array_key_exists($trait, $allTraits)) {
+                    if (! array_key_exists($trait, $allTraits)) {
                         return false;
                     }
                 }

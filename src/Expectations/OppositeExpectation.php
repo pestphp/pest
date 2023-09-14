@@ -395,7 +395,7 @@ final class OppositeExpectation
     /**
      * Asserts that the given expectation dependency does not use the given trait.
      *
-     * @param array<int, string>|string $traits
+     * @param  array<int, string>|string  $traits
      */
     public function toUseTrait(array|string $traits): ArchExpectation
     {
