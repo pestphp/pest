@@ -29,6 +29,13 @@ describe('toUseTrait', function () {
         ->toUseTrait(TraitOne::class)
         ->toUseTrait(TraitTwo::class);
 
+    test('check class uses multiple traits in array format')
+        ->expect('Tests\\Fixtures\\Arch\\ToUseTrait\\UsesTraitOneAndTwo')
+        ->toUseTrait([
+            TraitOne::class,
+            TraitTwo::class,
+        ]);
+
     test('failure when the class does not use a trait')
         ->throws(ArchExpectationFailedException::class)
         ->expect('Tests\\Fixtures\\Arch\\ToUseTrait\\UsesTraitOne')
