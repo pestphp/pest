@@ -33,6 +33,41 @@ uses()
     })
     ->in('Hooks');
 
+uses()
+    ->beforeEach(function () {
+        expect($this)
+            ->toHaveProperty('baz')
+            ->and($this->baz)
+            ->toBe(0);
+
+        $this->baz = 1;
+    })
+    ->beforeAll(function () {
+        expect($_SERVER['globalHook'])
+            ->toHaveProperty('beforeAll')
+            ->and($_SERVER['globalHook']->beforeAll)
+            ->toBe(0);
+
+        $_SERVER['globalHook']->beforeAll = 1;
+    })
+    ->afterEach(function () {
+        expect($this)
+            ->toHaveProperty('ith')
+            ->and($this->ith)
+            ->toBe(0);
+
+        $this->ith = 1;
+    })
+    ->afterAll(function () {
+        expect($_SERVER['globalHook'])
+            ->toHaveProperty('afterAll')
+            ->and($_SERVER['globalHook']->afterAll)
+            ->toBe(0);
+
+        $_SERVER['globalHook']->afterAll = 1;
+    })
+    ->in('Hooks');
+
 function helper_returns_string()
 {
     return 'string';
