@@ -6,5 +6,4 @@ namespace Tests\Fixtures\Arch\ToHaveDestructor\HasNoDestructor;
 
 class HasNoDestructor
 {
-
 }

@@ -6,5 +6,4 @@ namespace Tests\Fixtures\Arch\ToHaveConstructor\HasNoConstructor;
 
 class HasNoConstructor
 {
-
 }
