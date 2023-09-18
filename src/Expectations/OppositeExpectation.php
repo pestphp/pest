@@ -469,4 +469,20 @@ final class OppositeExpectation
             implode(' ', array_map(fn (mixed $argument): string => $toString($argument), $arguments)),
         ));
     }
+
+    /**
+     * Asserts that the given expectation target does not have a constructor method.
+     */
+    public function toHaveConstructor(): ArchExpectation
+    {
+        return $this->toHaveMethod('__construct');
+    }
+
+    /**
+     * Asserts that the given expectation target does not have a destructor method.
+     */
+    public function toHaveDestructor(): ArchExpectation
+    {
+        return $this->toHaveMethod('__destruct');
+    }
 }
