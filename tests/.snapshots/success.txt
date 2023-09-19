@@ -652,12 +652,20 @@
   ✓ failures with message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toHaveConstructor
+  ✓ class has constructor
+  ✓ class has no constructor
+
    PASS  Tests\Features\Expect\toHaveCount
   ✓ pass
   ✓ failures with invalid type
   ✓ failures
   ✓ failures with message
   ✓ not failures
+
+   PASS  Tests\Features\Expect\toHaveDestructor
+  ✓ class has destructor
+  ✓ class has no destructor
 
    PASS  Tests\Features\Expect\toHaveKebabCaseKeys
   ✓ pass
@@ -1325,4 +1333,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 939 passed (2220 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 943 passed (2224 assertions)
