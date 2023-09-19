@@ -30,7 +30,7 @@ trait Testable
     /**
      * The test's latest description.
      */
-    private static string $__latestDescription;
+    private static ?string $__latestDescription = '';
 
     /**
      * The test's describing, if any.
