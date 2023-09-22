@@ -1128,4 +1128,17 @@ final class Expectation
 
         return $this;
     }
+
+    /**
+     * Asserts that the value is between 2 specified values
+     *
+     * @return self<TValue>
+     */
+    public function toBeBetween(int|float|DateTimeInterface $lowestValue, int|float|DateTimeInterface $highestValue, string $message = ''): self
+    {
+        Assert::assertGreaterThanOrEqual($lowestValue, $this->value, $message);
+        Assert::assertLessThanOrEqual($highestValue, $this->value, $message);
+
+        return $this;
+    }
 }
