@@ -334,6 +334,18 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toBeBetween
+  ✓ passes with int
+  ✓ passes with float
+  ✓ passes with float and int
+  ✓ passes with DateTime
+  ✓ failure with int
+  ✓ failure with float
+  ✓ failure with float and int
+  ✓ failure with DateTime
+  ✓ failures with custom message
+  ✓ not failures
+
    PASS  Tests\Features\Expect\toBeBool
   ✓ pass
   ✓ failures
@@ -1333,4 +1345,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 943 passed (2224 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 953 passed (2269 assertions)

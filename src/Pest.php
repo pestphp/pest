@@ -6,7 +6,7 @@ namespace Pest;
 
 function version(): string
 {
-    return '2.19.1';
+    return '2.20.0';
 }
 
 function testDirectory(string $file = ''): string
