@@ -197,6 +197,21 @@ final class Expectation
     }
 
     /**
+     * Asserts that $needle equals an element of the value.
+     * 
+     * @return self<TValue>
+     */
+    public function toContainEquals(mixed ...$needles): self
+    {
+        foreach ($needles as $needle) {
+            if (! is_iterable($this->value)) {
+                InvalidExpectationValue::expected('iterable');
+            }
+            Assert::assertContainsEquals($needle, $this->value);
+        }
+    }
+
+    /**
      * Asserts that the value starts with $expected.
      *
      * @param  non-empty-string  $expected
