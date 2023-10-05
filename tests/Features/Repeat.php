@@ -16,3 +16,7 @@ test('multiple times with multiple dataset', function (int $numberA, int $number
     expect([1, 2, 3])->toContain($numberA)
         ->and([4, 5, 6])->toContain($numberB);
 })->repeat(times: 7)->with(['a' => 1, 'b' => 2, 'c' => 3], [4, 5, 6]);
+
+test('multiple times with iterator as argument', function (int $iteration) {
+    expect($iteration)->toBeGreaterThan(0);
+})->repeat(times: 8);

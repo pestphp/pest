@@ -262,7 +262,7 @@ trait Testable
     {
         $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
 
-        if ($method->repetitions > 1) {
+        if ($method->repetitions > 1 && $method->datasets !== []) {
             array_shift($arguments);
         }
 

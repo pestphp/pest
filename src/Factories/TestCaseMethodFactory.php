@@ -116,7 +116,7 @@ final class TestCaseMethodFactory
      */
     public function receivesArguments(): bool
     {
-        return $this->datasets !== [] || $this->depends !== [];
+        return $this->datasets !== [] || $this->depends !== [] || $this->repetitions > 1;
     }
 
     /**
