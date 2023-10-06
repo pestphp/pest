@@ -17,6 +17,29 @@ test('multiple times with multiple dataset', function (int $numberA, int $number
         ->and([4, 5, 6])->toContain($numberB);
 })->repeat(times: 7)->with(['a' => 1, 'b' => 2, 'c' => 3], [4, 5, 6]);
 
-test('multiple times with iterator as argument', function (int $iteration) {
-    expect($iteration)->toBeGreaterThan(0);
-})->repeat(times: 8);
+test('multiple times with iterator', function (int $iteration) {
+    expect($iteration)
+        ->toBeNumeric()
+        ->toBeGreaterThan(0);
+})->repeat(times: 2);
+
+test('multiple times with repeat iterator with single dataset', function (string $letter, int $iteration) {
+    expect($letter)
+        ->toBeString()
+        ->toBeIn(['a', 'b', 'c'])
+        ->and($iteration)
+        ->toBeNumeric()
+        ->toBeGreaterThan(0);
+})->repeat(times: 2)->with(['a', 'b', 'c']);
+
+test('multiple times with repeat iterator with multiple dataset', function (string $letterA, string $letterB, int $iteration) {
+    expect($letterA)
+        ->toBeString()
+        ->toBeIn(['a', 'b', 'c'])
+        ->and($letterB)
+        ->toBeString()
+        ->toBeIn(['d', 'e', 'f'])
+        ->and($iteration)
+        ->toBeNumeric()
+        ->toBeGreaterThan(0);
+})->repeat(times: 2)->with(['a', 'b', 'c'], ['d', 'e', 'f']);

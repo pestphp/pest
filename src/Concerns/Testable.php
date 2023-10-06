@@ -262,8 +262,9 @@ trait Testable
     {
         $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
 
-        if ($method->repetitions > 1 && $method->datasets !== []) {
-            array_shift($arguments);
+        if ($method->repetitions > 1) {
+            $firstArgument = array_shift($arguments);
+            $arguments[] = $firstArgument;
         }
 
         $underlyingTest = Reflection::getFunctionVariable($this->__test, 'closure');
