@@ -263,6 +263,10 @@ trait Testable
         $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
 
         if ($method->repetitions > 1) {
+            // If the test is repeated, the first argument is the iteration number
+            // we need to move it to the end of the arguments list
+            // so that the datasets are the first n arguments
+            // and the iteration number is the last argument
             $firstArgument = array_shift($arguments);
             $arguments[] = $firstArgument;
         }
