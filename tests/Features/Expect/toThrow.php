@@ -57,8 +57,9 @@ test('failures 3', function () {
     expect(function () {
         throw new Exception();
     })->toThrow(function (RuntimeException $e) {
+        //
     });
-})->throws(ExpectationFailedException::class, 'Failed asserting that Exception Object');
+})->throws(ExpectationFailedException::class, 'Failed asserting that an object is an instance of class RuntimeException.');
 
 test('failures 4', function () {
     expect(function () {
@@ -73,7 +74,7 @@ test('failures 5', function () {
     expect(function () {
         throw new Exception('actual message');
     })->toThrow('expected message');
-})->throws(ExpectationFailedException::class, 'Failed asserting that \'actual message\' contains "expected message".');
+})->throws(ExpectationFailedException::class, 'Failed asserting that \'actual message\' [ASCII](length: 14) contains "expected message" [ASCII](length: 16).');
 
 test('failures 6', function () {
     expect(function () {

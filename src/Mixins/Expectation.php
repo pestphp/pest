@@ -967,6 +967,7 @@ final class Expectation
             }
 
             Assert::assertInstanceOf($exception, $e, $message);
+
             $callback($e);
 
             return $this;
