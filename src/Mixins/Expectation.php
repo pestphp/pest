@@ -1142,4 +1142,20 @@ final class Expectation
 
         return $this;
     }
+
+    /**
+     * Asserts that the value is a url
+     *
+     * @return self<TValue>
+     */
+    public function toBeUrl(string $message = ''): self
+    {
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is a url.";
+        }
+
+        Assert::assertTrue(Str::isUrl((string) $this->value), $message);
+
+        return $this;
+    }
 }

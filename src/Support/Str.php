@@ -108,4 +108,12 @@ final class Str
     {
         return sprintf('`%s` → %s', $describeDescription, $testDescription);
     }
+
+    /**
+     * Determine if a given value is a valid URL.
+     */
+    public static function isUrl(string $value): bool
+    {
+        return (bool) filter_var($value, FILTER_VALIDATE_URL);
+    }
 }
