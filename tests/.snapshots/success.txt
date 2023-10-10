@@ -592,6 +592,13 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toBeUrl
+  ✓ pass
+  ✓ failures
+  ✓ failures with custom message
+  ✓ failures with default message
+  ✓ not failures
+
    PASS  Tests\Features\Expect\toBeUuid
   ✓ failures with wrong type
   ✓ pass
@@ -1345,4 +1352,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 953 passed (2269 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 958 passed (2281 assertions)
