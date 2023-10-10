@@ -22,11 +22,11 @@
         "nunomaduro/collision": "^7.9.0|^8.0.0",
         "nunomaduro/termwind": "^1.15.1|^2.0.0",
         "pestphp/pest-plugin": "^2.1.1",
-        "pestphp/pest-plugin-arch": "^2.3.3",
-        "phpunit/phpunit": "^10.4.0"
+        "pestphp/pest-plugin-arch": "^2.4.0",
+        "phpunit/phpunit": "^10.4.1"
     },
     "conflict": {
-        "phpunit/phpunit": ">10.4.0",
+        "phpunit/phpunit": ">10.4.1",
         "sebastian/exporter": "<5.1.0",
         "webmozart/assert": "<1.11.0"
     },
