@@ -9,7 +9,7 @@ $run = function (string $target, $decorated = false) {
 
     $process->run();
 
-    return $decorated ? $process->getOutput() : preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $process->getOutput());
+    return $decorated ? $process->getOutput() : removeAnsiEscapeSequences($process->getOutput());
 };
 
 $snapshot = function ($name) {

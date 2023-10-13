@@ -11,7 +11,7 @@ $run = function () {
 
     $process->run();
 
-    return preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $process->getOutput());
+    return removeAnsiEscapeSequences($process->getOutput());
 };
 
 test('parallel', function () use ($run) {
