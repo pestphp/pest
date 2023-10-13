@@ -8,16 +8,16 @@ $foo->beforeEach = false;
 $foo->afterEach = false;
 $foo->afterAll = false;
 
-beforeAll(function () {
+beforeAll(function () use ($foo) {
     $foo->beforeAll = true;
 });
-beforeEach(function () {
+beforeEach(function () use ($foo) {
     $foo->beforeEach = true;
 });
-afterEach(function () {
+afterEach(function () use ($foo) {
     $foo->afterEach = true;
 });
-afterAll(function () {
+afterAll(function () use ($foo) {
     $foo->afterAll = true;
 });
 
