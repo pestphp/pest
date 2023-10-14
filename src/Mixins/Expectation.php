@@ -1158,4 +1158,20 @@ final class Expectation
 
         return $this;
     }
+
+    /**
+     * Asserts that the value is a valid email address
+     *
+     * @return self<TValue>
+     */
+    public function toBeEmailAddress(string $message = ''): self
+    {
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is an email address.";
+        }
+
+        Assert::assertTrue(Str::isEmailAddress((string) $this->value), $message);
+
+        return $this;
+    }
 }
