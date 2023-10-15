@@ -23,9 +23,10 @@ final class Thanks
      * @var array<string, string>
      */
     private const FUNDING_MESSAGES = [
-        'Star the project on GitHub' => 'https://github.com/pestphp/pest',
-        'Tweet about the project' => 'https://twitter.com/pestphp',
-        'Sponsor the project' => 'https://github.com/sponsors/nunomaduro',
+        'Star' => 'https://github.com/pestphp/pest',
+        'News' => 'https://twitter.com/pestphp',
+        'Videos' => 'https://youtube.com/@nunomaduro',
+        'Sponsor' => 'https://github.com/sponsors/nunomaduro',
     ];
 
     /**
