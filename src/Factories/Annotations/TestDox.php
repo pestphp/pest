@@ -18,7 +18,7 @@ final class TestDox implements AddsAnnotations
        * Escapes docblock according to
        * https://manual.phpdoc.org/HTMLframesConverter/default/phpDocumentor/tutorial_phpDocumentor.howto.pkg.html#basics.desc
        *
-       * note: '@' escaping is not needed as it cannot be the first character of the line (it always starts with @testdox).
+       * Note: '@' escaping is not needed as it cannot be the first character of the line (it always starts with @testdox).
        */
         assert($method->description !== null);
         $methodDescription = str_replace('*/', '{@*}', $method->description);
