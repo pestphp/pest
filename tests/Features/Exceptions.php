@@ -59,3 +59,37 @@ it('can just define the message if given condition is 1', function () {
 it('can just define the code if given condition is 1', function () {
     throw new Exception('Something bad happened', 1);
 })->throwsIf(1, 1);
+
+it('not catch exceptions if given condition is true', function () {
+    $this->assertTrue(true);
+})->throwsUnless(true, Exception::class);
+
+it('catch exceptions if given condition is false', function () {
+    throw new Exception('Something bad happened');
+})->throwsUnless(function () {
+    return false;
+}, Exception::class);
+
+it('catch exceptions and messages if given condition is false', function () {
+    throw new Exception('Something bad happened');
+})->throwsUnless(false, Exception::class, 'Something bad happened');
+
+it('catch exceptions, messages and code if given condition is false', function () {
+    throw new Exception('Something bad happened', 1);
+})->throwsUnless(false, Exception::class, 'Something bad happened', 1);
+
+it('can just define the message if given condition is false', function () {
+    throw new Exception('Something bad happened');
+})->throwsUnless(false, 'Something bad happened');
+
+it('can just define the code if given condition is false', function () {
+    throw new Exception('Something bad happened', 1);
+})->throwsUnless(false, 1);
+
+it('can just define the message if given condition is 0', function () {
+    throw new Exception('Something bad happened');
+})->throwsUnless(0, 'Something bad happened');
+
+it('can just define the code if given condition is 0', function () {
+    throw new Exception('Something bad happened', 1);
+})->throwsUnless(0, 1);
