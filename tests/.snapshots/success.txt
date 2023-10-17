@@ -215,6 +215,14 @@
   ✓ it can just define the code if given condition is true
   ✓ it can just define the message if given condition is 1
   ✓ it can just define the code if given condition is 1
+  ✓ it not catch exceptions if given condition is true
+  ✓ it catch exceptions if given condition is false
+  ✓ it catch exceptions and messages if given condition is false
+  ✓ it catch exceptions, messages and code if given condition is false
+  ✓ it can just define the message if given condition is false
+  ✓ it can just define the code if given condition is false
+  ✓ it can just define the message if given condition is 0
+  ✓ it can just define the code if given condition is 0
 
    PASS  Tests\Features\Expect\HigherOrder\methods
   ✓ it can access methods
@@ -1352,4 +1360,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 958 passed (2281 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 966 passed (2292 assertions)
