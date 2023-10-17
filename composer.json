@@ -19,10 +19,10 @@
     "require": {
         "php": "^8.1.0",
         "brianium/paratest": "^7.3.0",
-        "nunomaduro/collision": "^7.9.0|^8.0.0",
+        "nunomaduro/collision": "^7.10.0|^8.0.0",
         "nunomaduro/termwind": "^1.15.1|^2.0.0",
         "pestphp/pest-plugin": "^2.1.1",
-        "pestphp/pest-plugin-arch": "^2.4.0",
+        "pestphp/pest-plugin-arch": "^2.4.1",
         "phpunit/phpunit": "^10.4.1"
     },
     "conflict": {
