@@ -301,7 +301,7 @@ final class Expectation
         $this->toBeObject();
 
         // @phpstan-ignore-next-line
-        Assert::assertTrue(property_exists($this->value, $name), $message);
+        Assert::assertTrue(property_exists($this->value, $name) || isset($this->value->$name), $message);
 
         if (! $value instanceof Any) {
             /* @phpstan-ignore-next-line */

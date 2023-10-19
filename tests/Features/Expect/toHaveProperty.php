@@ -13,6 +13,21 @@ test('pass', function () use ($obj) {
     expect($obj)->toHaveProperty('fooNull', null);
 });
 
+test('dynamic properties', function () {
+    $object = new class {
+        public function __isset(string $name): bool {
+            if ($name === 'foo') {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    };
+
+    expect($object)->toHaveProperty('foo');
+    expect($object)->not->toHaveProperty('bar');
+});
+
 test('failures', function () use ($obj) {
     expect($obj)->toHaveProperty('bar');
 })->throws(ExpectationFailedException::class);
