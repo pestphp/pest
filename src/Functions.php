@@ -24,8 +24,8 @@ if (! function_exists('expect')) {
      *
      * @template TValue
      *
-     * @param  TValue|null  $value
-     * @return Expectation<TValue|null>
+     * @param  TValue  $value
+     * @return Expectation<TValue>
      */
     function expect(mixed $value = null): Expectation
     {
