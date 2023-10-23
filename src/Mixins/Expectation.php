@@ -314,7 +314,7 @@ final class Expectation
     /**
      * Asserts that the value contains the provided properties $names.
      *
-     * @param  iterable<array-key, string>  $names
+     * @param  iterable<array-key, mixed>  $names
      * @return self<TValue>
      */
     public function toHaveProperties(iterable $names, string $message = ''): self
