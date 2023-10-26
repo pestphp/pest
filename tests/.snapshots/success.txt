@@ -1120,16 +1120,8 @@
    PASS  Tests\Helpers\TestInHelpers
   ✓ it executes tests in the Helpers directory
 
-   PASS  Tests\Hooks\AfterAllTest
-  ✓ global afterAll execution order
-  ✓ it only gets called once per file
-
    PASS  Tests\Hooks\AfterEachTest
   ✓ global afterEach execution order
-
-   PASS  Tests\Hooks\BeforeAllTest
-  ✓ global beforeAll execution order
-  ✓ it only gets called once per file
 
    PASS  Tests\Hooks\BeforeEachTest
   ✓ global beforeEach execution order
@@ -1360,4 +1352,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 966 passed (2292 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 962 passed (2280 assertions)
