@@ -23,10 +23,10 @@
         "nunomaduro/termwind": "^1.15.1|^2.0.0",
         "pestphp/pest-plugin": "^2.1.1",
         "pestphp/pest-plugin-arch": "^2.4.1",
-        "phpunit/phpunit": "^10.4.1"
+        "phpunit/phpunit": "^10.4.2"
     },
     "conflict": {
-        "phpunit/phpunit": ">10.4.1",
+        "phpunit/phpunit": ">10.4.2",
         "sebastian/exporter": "<5.1.0",
         "webmozart/assert": "<1.11.0"
     },
@@ -76,7 +76,7 @@
         "test:type:coverage": "php bin/pest --type-coverage --min=100",
         "test:unit": "php bin/pest --colors=always --exclude-group=integration --compact",
         "test:inline": "php bin/pest --colors=always --configuration=phpunit.inline.xml",
-        "test:parallel": "php bin/pest --colors=always --exclude-group=integration --parallel --processes=10",
+        "test:parallel": "php bin/pest --colors=always --exclude-group=integration --parallel --processes=3",
         "test:integration": "php bin/pest --colors=always --group=integration",
         "update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --colors=always --update-snapshots",
         "test": [
