@@ -1,3 +1,4 @@
 parameters:
     universalObjectCratesClasses:
         - Pest\Support\HigherOrderTapProxy
+        - Pest\Expectation
