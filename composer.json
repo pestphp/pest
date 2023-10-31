@@ -109,6 +109,11 @@
                 "Pest\\Plugins\\Version",
                 "Pest\\Plugins\\Parallel"
             ]
+        },
+        "phpstan": {
+            "includes": [
+                "extension.neon"
+            ]
         }
     }
 }
