@@ -180,10 +180,14 @@ final class Expectation
     /**
      * Creates the opposite expectation for the value.
      *
-     * @return OppositeExpectation<TValue>
+     * @return OppositeExpectation<TValue>|self<TValue>
      */
-    public function not(): OppositeExpectation
+    public function not(bool $condition = true): OppositeExpectation|self
     {
+        if (! $condition) {
+            return $this;
+        }
+
         return new OppositeExpectation($this);
     }
 
