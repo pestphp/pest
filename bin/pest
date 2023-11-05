@@ -21,12 +21,10 @@ use Symfony\Component\Console\Output\ConsoleOutput;
     foreach ($args as $key => $value) {
         if ($value === '--compact') {
             $_SERVER['COLLISION_PRINTER_COMPACT'] = 'true';
-            unset($args[$key]);
         }
 
         if ($value === '--profile') {
             $_SERVER['COLLISION_PRINTER_PROFILE'] = 'true';
-            unset($args[$key]);
         }
 
         if (str_contains($value, '--test-directory')) {
@@ -35,12 +33,10 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
         if ($value === '--dirty') {
             $dirty = true;
-            unset($args[$key]);
         }
 
         if ($value === '--todos') {
             $todo = true;
-            unset($args[$key]);
         }
 
         if (str_contains($value, '--teamcity')) {

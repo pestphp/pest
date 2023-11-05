@@ -87,6 +87,24 @@ final class Kernel
     {
         $args = CallsHandleArguments::execute($args);
 
+        foreach ($args as $key => $value) {
+            $optionsToRemove = [
+                '--compact',
+                '--profile',
+                '--dirty',
+                '--todos',
+            ];
+
+            $shouldRemoveOption = (bool) count(array_filter(
+                $optionsToRemove,
+                fn ($option) => str_contains($value, $option)
+            ));
+
+            if ($shouldRemoveOption) {
+                unset($args[$key]);
+            }
+        }
+
         try {
             $this->application->run($args);
         } catch (NoDirtyTestsFound) {
