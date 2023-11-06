@@ -4,15 +4,15 @@ use PHPUnit\Framework\ExpectationFailedException;
 
 
 test('passes arrays', function () {
-    expect([1, 2, 42])->toContain('42');
+    expect([1, 2, 42])->toContainEquals('42');
 });
 
 test('passes arrays with multiple needles', function () {
-    expect([1, 2, 42])->toContain('42', '2');
+    expect([1, 2, 42])->toContainEquals('42', '2');
 });
 
 test('failures', function () {
-    expect([1, 2, 42])->toContain('3');
+    expect([1, 2, 42])->toContainEquals('3');
 })->throws(ExpectationFailedException::class);
 
 test('failures with multiple needles (all failing)', function () {
