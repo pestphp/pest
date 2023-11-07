@@ -1194,6 +1194,7 @@
   ✓ it show the correct description for mixed named and not-named datasets
   ✓ it shows the correct description for long texts with newlines
   ✓ it shows the correct description for arrays with many elements
+  ✓ it shows the correct description of datasets with html
 
    PASS  Tests\Unit\Expectations\OppositeExpectation
   ✓ it throw expectation failed exception with string argument
@@ -1352,4 +1353,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 962 passed (2280 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 963 passed (2281 assertions)
