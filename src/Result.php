@@ -54,8 +54,8 @@ final class Result
                 $returnCode = self::FAILURE_EXIT;
             }
 
-            $warnings = $result->numberOfTestsWithTestTriggeredPhpunitWarningEvents() +
-                +count($result->warnings())
+            $warnings = $result->numberOfTestsWithTestTriggeredPhpunitWarningEvents()
+                + count($result->warnings())
                 + count($result->phpWarnings());
 
             if ($configuration->failOnWarning() && $warnings > 0) {
