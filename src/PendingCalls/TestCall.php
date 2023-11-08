@@ -526,8 +526,8 @@ final class TestCall
             $isTrait = trait_exists($classOrFunction);
             $isFunction = function_exists($classOrFunction);
 
-            if (! $isClass && ! $isFunction) {
-                throw new InvalidArgumentException(sprintf('No class or method named "%s" has been found.', $classOrFunction));
+            if (! $isClass && ! $isTrait && ! $isFunction) {
+                throw new InvalidArgumentException(sprintf('No class, trait or method named "%s" has been found.', $classOrFunction));
             }
 
             if ($isClass) {
