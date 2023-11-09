@@ -1,6 +1,5 @@
 <?php
 
-use PHPUnit\Framework\ExpectationFailedException;
 use Pest\Exceptions\InvalidMethod;
 
 test('passes strings', function () {
