@@ -209,7 +209,7 @@ final class Expectation
             // @phpstan-ignore-next-line
             Assert::assertStringContainsString((string) $needle, $this->value);
             // @phpstan-ignore-next-line
-            Assert::$method($count, substr_count($this->value, $needle), $message);
+            Assert::$method($count, substr_count($this->value, (string) $needle), $message);
         } else {
             if (! is_iterable($this->value)) {
                 InvalidExpectationValue::expected('iterable');
