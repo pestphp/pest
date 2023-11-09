@@ -669,8 +669,14 @@
 
    PASS  Tests\Features\Expect\toContainOp
   ✓ passes strings
+  ✓ not success with greater than
+  ✓ passes with greater than
   ✓ not success with greater than or equal
   ✓ passes with greater than or equal
+  ✓ not success with less than
+  ✓ passes with less than
+  ✓ not success with less than or equal
+  ✓ passes with less than or equal
   ✓ not success with equals
   ✓ passes with equals
   ✓ failures
@@ -1384,4 +1390,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 988 passed (3406 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 994 passed (3432 assertions)
