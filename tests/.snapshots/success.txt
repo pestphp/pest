@@ -639,10 +639,41 @@
   ✓ not failures with multiple needles (all failing)
   ✓ not failures with multiple needles (some failing)
 
+   PASS  Tests\Features\Expect\toContainAtLeast
+  ✓ passes strings
+  ✓ passes arrays
+  ✓ passes with array needles
+  ✓ not success
+  ✓ passes when exact
+  ✓ failures
+  ✓ not failures
+  ✓ failures when count is zero
+  ✓ failures when count is negative
+
+   PASS  Tests\Features\Expect\toContainExact
+  ✓ passes strings
+  ✓ passes arrays
+  ✓ passes with array needles
+  ✓ not success
+  ✓ failures when not exact
+  ✓ failures
+  ✓ not failures
+  ✓ failures when count is zero
+  ✓ failures when count is negative
+
    PASS  Tests\Features\Expect\toContainOnlyInstancesOf
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toContainOp
+  ✓ passes strings
+  ✓ not success with greater than or equal
+  ✓ passes with greater than or equal
+  ✓ not success with equals
+  ✓ passes with equals
+  ✓ failures
   ✓ not failures
 
    PASS  Tests\Features\Expect\toEndWith
@@ -1353,4 +1384,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 963 passed (2281 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 988 passed (3406 assertions)

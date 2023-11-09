@@ -12,6 +12,7 @@ use Error;
 use InvalidArgumentException;
 use JsonSerializable;
 use Pest\Exceptions\InvalidExpectationValue;
+use Pest\Exceptions\InvalidMethod;
 use Pest\Matchers\Any;
 use Pest\Support\Arr;
 use Pest\Support\Exporter;
@@ -182,16 +183,69 @@ final class Expectation
     public function toContain(mixed ...$needles): self
     {
         foreach ($needles as $needle) {
-            if (is_string($this->value)) {
-                // @phpstan-ignore-next-line
-                Assert::assertStringContainsString((string) $needle, $this->value);
-            } else {
-                if (! is_iterable($this->value)) {
-                    InvalidExpectationValue::expected('iterable');
-                }
-                Assert::assertContains($needle, $this->value);
-            }
+            $this->toContainAtLeast(1, $needle);
         }
+
+        return $this;
+    }
+
+    /**
+     * Asserts that $needle exists in the value depending on $op $count times.
+     *
+     * @return self<TValue>
+     */
+    public function toContainOp(string $op, int $count, mixed $needle, string $message = ''): self
+    {
+        Assert::assertGreaterThanOrEqual(0, $count);
+
+        $op = str_replace(' ', '', ucwords($op));
+        $method = "assert$op";
+
+        if (! method_exists(Assert::class, $method)) {
+            throw InvalidMethod::fromName($method);
+        }
+
+        if (is_string($this->value)) {
+            // @phpstan-ignore-next-line
+            Assert::assertStringContainsString((string) $needle, $this->value);
+            Assert::$method($count, substr_count($this->value, $needle), $message);
+        } else {
+            if (! is_iterable($this->value)) {
+                InvalidExpectationValue::expected('iterable');
+            }
+            Assert::assertContains($needle, $this->value);
+            $found = 0;
+            foreach ($this->value as $val) {
+                if ($val === $needle) {
+                    $found++;
+                }
+            }
+            Assert::$method($count, $found, $message);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Asserts that $needle exists in the value at least $count times.
+     *
+     * @return self<TValue>
+     */
+    public function toContainAtLeast(int $count, mixed $needle, string $message = ''): self
+    {
+        $this->toContainOp('greater than or equal', $count, $needle, $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that $needle exists in the value exactly $count times.
+     *
+     * @return self<TValue>
+     */
+    public function toContainExact(int $count, mixed $needle, string $message = ''): self
+    {
+        $this->toContainOp('equals', $count, $needle, $message);
 
         return $this;
     }
