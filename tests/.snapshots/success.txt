@@ -650,6 +650,17 @@
   ✓ failures when count is zero
   ✓ failures when count is negative
 
+   PASS  Tests\Features\Expect\toContainAtMost
+  ✓ passes strings
+  ✓ passes arrays
+  ✓ passes with array needles
+  ✓ not success
+  ✓ passes when exact
+  ✓ failures
+  ✓ not failures
+  ✓ failures when count is zero
+  ✓ failures when count is negative
+
    PASS  Tests\Features\Expect\toContainExact
   ✓ passes strings
   ✓ passes arrays
@@ -1390,4 +1401,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 994 passed (3432 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 1003 passed (3476 assertions)

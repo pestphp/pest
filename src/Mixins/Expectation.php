@@ -241,6 +241,18 @@ final class Expectation
     }
 
     /**
+     * Asserts that $needle exists in the value at most $count times.
+     *
+     * @return self<TValue>
+     */
+    public function toContainAtMost(int $count, mixed $needle, string $message = ''): self
+    {
+        $this->toContainOp('less than or equal', $count, $needle, $message);
+
+        return $this;
+    }
+
+    /**
      * Asserts that $needle exists in the value exactly $count times.
      *
      * @return self<TValue>
