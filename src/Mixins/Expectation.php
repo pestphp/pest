@@ -208,6 +208,7 @@ final class Expectation
         if (is_string($this->value)) {
             // @phpstan-ignore-next-line
             Assert::assertStringContainsString((string) $needle, $this->value);
+            // @phpstan-ignore-next-line
             Assert::$method($count, substr_count($this->value, $needle), $message);
         } else {
             if (! is_iterable($this->value)) {
@@ -220,6 +221,7 @@ final class Expectation
                     $found++;
                 }
             }
+            // @phpstan-ignore-next-line
             Assert::$method($count, $found, $message);
         }
 
