@@ -66,6 +66,20 @@ final class Expectation
     }
 
     /**
+     * Allows you to target a value in a table
+     *
+     * @return self<TAndValue>
+     */
+    public function at(string|int $key): Expectation
+    {
+        if (! is_iterable($this->value)) {
+            InvalidExpectationValue::expected('iterable');
+        }
+
+        return new self($this->value[$key]);
+    }
+
+    /**
      * Creates a new expectation.
      *
      * @template TAndValue
