@@ -214,13 +214,16 @@ final class Expectation
             if (! is_iterable($this->value)) {
                 InvalidExpectationValue::expected('iterable');
             }
+
             Assert::assertContains($needle, $this->value);
+
             $found = 0;
             foreach ($this->value as $val) {
                 if ($val === $needle) {
                     $found++;
                 }
             }
+
             // @phpstan-ignore-next-line
             Assert::$method($count, $found, $message);
         }
