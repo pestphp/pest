@@ -224,35 +224,45 @@ final class TestCall
     }
 
     /**
-     * Runs the current test only if the given test is running on Windows.
-     */
-    public function onlyOnWindows(): self
-    {
-        return $this->skipOnLinux()->skipOnMac();
-    }
-
-    /**
-     * Runs the current test only if the given test is running on Mac.
-     */
-    public function onlyOnMac(): self
-    {
-        return $this->skipOnWindows()->skipOnLinux();
-    }
-
-    /**
-     * Run the current test only if the given test is running on Linux.
-     */
-    public function onlyOnLinux(): self
-    {
-        return $this->skipOnWindows()->skipOnMac();
-    }
-
-    /**
      * Skips the current test if the given test is running on the given operating systems.
      */
     private function skipOn(string $osFamily, string $message): self
     {
         return $osFamily === PHP_OS_FAMILY
+            ? $this->skip($message)
+            : $this;
+    }
+
+    /**
+     * Skips the current test unless the given test is running on Windows.
+     */
+    public function onlyOnWindows(): self
+    {
+        return $this->onlyOn('Windows', 'This test is skipped unless on [Windows].');
+    }
+
+    /**
+     * Skips the current test unless the given test is running on Mac.
+     */
+    public function onlyOnMac(): self
+    {
+        return $this->onlyOn('Darwin', 'This test is skipped unless on [Mac].');
+    }
+
+    /**
+     * Skips the current test unless the given test is running on Linux.
+     */
+    public function onlyOnLinux(): self
+    {
+        return $this->onlyOn('Linux', 'This test is skipped unless on [Linux].');
+    }
+
+    /**
+     * Skips the current test unless the given test is running on the given operating system.
+     */
+    private function onlyOn(string $osFamily, string $message): self
+    {
+        return $osFamily !== PHP_OS_FAMILY
             ? $this->skip($message)
             : $this;
     }
