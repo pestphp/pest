@@ -224,6 +224,30 @@ final class TestCall
     }
 
     /**
+     * Runs the current test only if the given test is running on Windows.
+     */
+    public function onlyOnWindows(): self
+    {
+        return $this->skipOnLinux()->skipOnMac();
+    }
+
+    /**
+     * Runs the current test only if the given test is running on Mac.
+     */
+    public function onlyOnMac(): self
+    {
+        return $this->skipOnWindows()->skipOnLinux();
+    }
+
+    /**
+     * Run the current test only if the given test is running on Linux.
+     */
+    public function onlyOnLinux(): self
+    {
+        return $this->skipOnWindows()->skipOnMac();
+    }
+
+    /**
      * Skips the current test if the given test is running on the given operating systems.
      */
     private function skipOn(string $osFamily, string $message): self
