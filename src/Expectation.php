@@ -878,4 +878,50 @@ final class Expectation
     {
         return $this->toHaveMethod('__destruct');
     }
+
+    /**
+     * Asserts that the given expectation target is a backed enum of given type.
+     */
+    private function toBeBackedEnum(string $backingType): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => (new \ReflectionEnum($object->name))->isBacked()
+                && (string)(new \ReflectionEnum($object->name))->getBackingType() === $backingType,
+            'to be ' . $backingType . ' backed enum',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation targets are string backed enums.
+     */
+    public function toBeStringBackedEnums(): ArchExpectation
+    {
+        return $this->toBeStringBackedEnum();
+    }
+
+    /**
+     * Asserts that the given expectation targets are int backed enums.
+     */
+    public function toBeIntBackedEnums(): ArchExpectation
+    {
+        return $this->toBeIntBackedEnum();
+    }
+
+    /**
+     * Asserts that the given expectation target is a string backed enum.
+     */
+    public function toBeStringBackedEnum(): ArchExpectation
+    {
+        return $this->toBeBackedEnum('string');
+    }
+
+    /**
+     * Asserts that the given expectation target is an int backed enum.
+     */
+    public function toBeIntBackedEnum(): ArchExpectation
+    {
+        return $this->toBeBackedEnum('int');
+    }
 }
