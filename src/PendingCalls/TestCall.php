@@ -234,6 +234,30 @@ final class TestCall
     }
 
     /**
+     * Skips the current test unless the given test is running on Windows.
+     */
+    public function onlyOnWindows(): self
+    {
+        return $this->skipOnMac()->skipOnLinux();
+    }
+
+    /**
+     * Skips the current test unless the given test is running on Mac.
+     */
+    public function onlyOnMac(): self
+    {
+        return $this->skipOnWindows()->skipOnLinux();
+    }
+
+    /**
+     * Skips the current test unless the given test is running on Linux.
+     */
+    public function onlyOnLinux(): self
+    {
+        return $this->skipOnWindows()->skipOnMac();
+    }
+
+    /**
      * Repeats the current test the given number of times.
      */
     public function repeat(int $times): self
