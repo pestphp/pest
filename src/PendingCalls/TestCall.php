@@ -238,7 +238,7 @@ final class TestCall
      */
     public function onlyOnWindows(): self
     {
-        return $this->onlyOn('Windows', 'This test is skipped unless on [Windows].');
+        return $this->skipOnMac()->skipOnLinux();
     }
 
     /**
@@ -246,7 +246,7 @@ final class TestCall
      */
     public function onlyOnMac(): self
     {
-        return $this->onlyOn('Darwin', 'This test is skipped unless on [Mac].');
+        return $this->skipOnWindows()->skipOnLinux();
     }
 
     /**
@@ -254,17 +254,7 @@ final class TestCall
      */
     public function onlyOnLinux(): self
     {
-        return $this->onlyOn('Linux', 'This test is skipped unless on [Linux].');
-    }
-
-    /**
-     * Skips the current test unless the given test is running on the given operating system.
-     */
-    private function onlyOn(string $osFamily, string $message): self
-    {
-        return $osFamily !== PHP_OS_FAMILY
-            ? $this->skip($message)
-            : $this;
+        return $this->skipOnWindows()->skipOnMac();
     }
 
     /**
