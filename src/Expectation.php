@@ -34,8 +34,6 @@ use PHPUnit\Architecture\Elements\ObjectDescription;
 use PHPUnit\Framework\ExpectationFailedException;
 
 /**
- * @internal
- *
  * @template TValue
  *
  * @property OppositeExpectation $not Creates the opposite expectation.
