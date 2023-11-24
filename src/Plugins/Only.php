@@ -33,6 +33,8 @@ final class Only implements Shutdownable
         if (file_exists($lockFile)) {
             unlink($lockFile);
         }
+
+        echo "The tests executed were tests filtered using <href=https://pestphp.com/docs/filtering-tests#content-only>only</>";
     }
 
     /**
