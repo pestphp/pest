@@ -34,7 +34,7 @@ final class Only implements Shutdownable
             unlink($lockFile);
         }
 
-        echo "The tests executed were tests filtered using <href=https://pestphp.com/docs/filtering-tests#content-only>only</>";
+        echo 'The tests executed were tests filtered using <href=https://pestphp.com/docs/filtering-tests#content-only>only</>';
     }
 
     /**
