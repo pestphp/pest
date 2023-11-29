@@ -836,6 +836,7 @@
   ✓ within describe → pass with dataset with ('my-datas-set-value')
   ✓ pass with toArray
   ✓ pass with array
+  ✓ pass with toSnapshot
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
@@ -1353,4 +1354,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 963 passed (2281 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 964 passed (2282 assertions)
