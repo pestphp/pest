@@ -103,6 +103,26 @@ test('pass with array', function () {
     ])->toMatchSnapshot();
 });
 
+test('pass with `toSnapshot`', function () {
+    TestSuite::getInstance()->snapshots->save(json_encode(['key' => $this->snapshotable], JSON_PRETTY_PRINT));
+
+    $object = new class($this->snapshotable)
+    {
+        public function __construct(protected string $snapshotable)
+        {
+        }
+
+        public function toSnapshot()
+        {
+            return json_encode([
+                'key' => $this->snapshotable,
+            ], JSON_PRETTY_PRINT);
+        }
+    };
+
+    expect($object)->toMatchSnapshot();
+});
+
 test('failures', function () {
     TestSuite::getInstance()->snapshots->save($this->snapshotable);
 
