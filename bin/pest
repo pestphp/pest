@@ -38,7 +38,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
             unset($args[$key]);
         }
 
-        if (str_contains($value, '--todo')) {
+        if (in_array($value, ['--todo', '--todos'], true)) {
             $todo = true;
             unset($args[$key]);
         }
