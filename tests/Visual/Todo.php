@@ -26,10 +26,18 @@ $snapshot = function ($name) {
     ]));
 };
 
+test('todos', function () use ($run, $snapshot) {
+    expect($run('--todos', false))->toContain($snapshot('todos'));
+})->skipOnWindows();
+
+test('todos in parallel', function () use ($run, $snapshot) {
+    expect($run('--todos', true))->toContain($snapshot('todos'));
+})->skipOnWindows();
+
 test('todo', function () use ($run, $snapshot) {
-    expect($run('--todos', false))->toContain($snapshot('todo'));
+    expect($run('--todo', false))->toContain($snapshot('todo'));
 })->skipOnWindows();
 
 test('todo in parallel', function () use ($run, $snapshot) {
-    expect($run('--todos', true))->toContain($snapshot('todo'));
+    expect($run('--todo', true))->toContain($snapshot('todo'));
 })->skipOnWindows();
