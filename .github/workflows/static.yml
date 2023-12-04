@@ -13,6 +13,7 @@ jobs:
 
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: true
       matrix:
         dependency-version: [prefer-lowest, prefer-stable]
 
