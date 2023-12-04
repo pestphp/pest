@@ -6,7 +6,6 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
-
 jobs:
   ci:
     if: github.event_name != 'schedule' || github.repository == 'pestphp/pest'
@@ -40,11 +39,13 @@ jobs:
         echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
     - name: Install PHP dependencies
-      run: composer update --${{ matrix.dependency-version }} --no-interaction --no-progress --ansi
+      run: composer update --${{ matrix.dependency-version }} --no-interaction --no-progress --ansi --with="symfony/console:${{ matrix.symfony }}"
 
     - name: Unit Tests
       run: composer test:unit
 
-    - name: Unit Tests in Parallel
+    - name: Parallel Tests
       run: composer test:parallel
 
+    - name: Integration Tests
+      run: composer test:integration
