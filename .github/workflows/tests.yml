@@ -7,8 +7,10 @@ on:
     - cron: '0 0 * * *'
 
 jobs:
-  ci:
+  tests:
     if: github.event_name != 'schedule' || github.repository == 'pestphp/pest'
+    name: Tests
+
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
