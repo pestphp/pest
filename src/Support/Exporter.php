@@ -41,7 +41,7 @@ final class Exporter
      *
      * @param  array<int|string, mixed>  $data
      */
-    public function shortenedRecursiveExport(array &$data, Context $context = null): string
+    public function shortenedRecursiveExport(array &$data, ?Context $context = null): string
     {
         $result = [];
         $array = $data;

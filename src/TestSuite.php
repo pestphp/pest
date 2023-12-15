@@ -87,8 +87,8 @@ final class TestSuite
      * Returns the current instance of the test suite.
      */
     public static function getInstance(
-        string $rootPath = null,
-        string $testPath = null,
+        ?string $rootPath = null,
+        ?string $testPath = null,
     ): TestSuite {
         if (is_string($rootPath) && is_string($testPath)) {
             self::$instance = new TestSuite($rootPath, $testPath);

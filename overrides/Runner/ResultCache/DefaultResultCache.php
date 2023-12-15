@@ -91,7 +91,7 @@ final class DefaultResultCache implements ResultCache
      */
     private array $times = [];
 
-    public function __construct(string $filepath = null)
+    public function __construct(?string $filepath = null)
     {
         if ($filepath !== null && is_dir($filepath)) {
             $filepath .= DIRECTORY_SEPARATOR.self::DEFAULT_RESULT_CACHE_FILENAME;

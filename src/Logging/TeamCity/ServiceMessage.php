@@ -106,7 +106,7 @@ final class ServiceMessage
         ]);
     }
 
-    public static function testIgnored(string $name, string $message, string $details = null): self
+    public static function testIgnored(string $name, string $message, ?string $details = null): self
     {
         return new self('testIgnored', [
             'name' => $name,
