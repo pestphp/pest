@@ -28,20 +28,6 @@ final class Coverage implements AddsOutput, HandlesArguments
     private const MIN_OPTION = 'min';
 
     /**
-     * @var string
-     */
-    private const ERRORS_ONLY_OPTION = 'errors-only';
-
-    /**
-     * @var string[]
-     */
-    private const ALLOWED_OPTIONS = [
-        self::COVERAGE_OPTION,
-        self::MIN_OPTION,
-        self::ERRORS_ONLY_OPTION,
-    ];
-
-    /**
      * Whether it should show the coverage or not.
      */
     public bool $coverage = false;
@@ -50,11 +36,6 @@ final class Coverage implements AddsOutput, HandlesArguments
      * The minimum coverage.
      */
     public float $coverageMin = 0.0;
-
-    /**
-     * Whether it should show only errors or not.
-     */
-    public bool $errorsOnly = false;
 
     /**
      * Creates a new Plugin instance.
@@ -70,7 +51,7 @@ final class Coverage implements AddsOutput, HandlesArguments
     public function handleArguments(array $originals): array
     {
         $arguments = [...[''], ...array_values(array_filter($originals, function (string $original): bool {
-            foreach (self::ALLOWED_OPTIONS as $option) {
+            foreach ([self::COVERAGE_OPTION, self::MIN_OPTION] as $option) {
                 if ($original === sprintf('--%s', $option)) {
                     return true;
                 }
@@ -92,7 +73,6 @@ final class Coverage implements AddsOutput, HandlesArguments
         $inputs = [];
         $inputs[] = new InputOption(self::COVERAGE_OPTION, null, InputOption::VALUE_NONE);
         $inputs[] = new InputOption(self::MIN_OPTION, null, InputOption::VALUE_REQUIRED);
-        $inputs[] = new InputOption(self::ERRORS_ONLY_OPTION, null, InputOption::VALUE_NONE);
 
         $input = new ArgvInput($arguments, new InputDefinition($inputs));
         if ((bool) $input->getOption(self::COVERAGE_OPTION)) {
@@ -126,10 +106,6 @@ final class Coverage implements AddsOutput, HandlesArguments
             $this->coverageMin = (float) $minOption;
         }
 
-        if ((bool) $input->getOption(self::ERRORS_ONLY_OPTION)) {
-            $this->errorsOnly = true;
-        }
-
         return $originals;
     }
 
@@ -146,7 +122,7 @@ final class Coverage implements AddsOutput, HandlesArguments
                 exit(1);
             }
 
-            $coverage = \Pest\Support\Coverage::report($this->output, $this->coverageMin, $this->errorsOnly);
+            $coverage = \Pest\Support\Coverage::report($this->output);
 
             $exitCode = (int) ($coverage < $this->coverageMin);
 

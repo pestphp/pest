@@ -34,18 +34,6 @@ it('adds coverage if --min exist', function () {
     expect($plugin->coverageMin)->toEqual(2.4);
 });
 
-it('adds coverage if --errors-only exist', function () {
-    $plugin = new CoveragePlugin(new ConsoleOutput());
-    expect($plugin->errorsOnly)->toBeFalse()
-        ->and($plugin->coverage)->toBeFalse();
-
-    $plugin->handleArguments([]);
-    expect($plugin->errorsOnly)->toBeFalse();
-
-    $plugin->handleArguments(['--errors-only']);
-    expect($plugin->errorsOnly)->toBeTrue();
-});
-
 it('generates coverage based on file input', function () {
     expect(Coverage::getMissingCoverage(new class()
     {
