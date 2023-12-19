@@ -15,15 +15,18 @@ final class ChainableClosure
     /**
      * Calls the given `$closure` when the given condition is true, "bound" to the same object.
      */
-    public static function boundWhen(Closure $condition, Closure $next): Closure
+    public static function boundWhen(object $self, Closure $condition, Closure $next): Closure
     {
-        return function () use ($condition, $next): void {
-            if (! is_object($this)) { // @phpstan-ignore-line
-                throw ShouldNotHappen::fromMessage('$this not bound to chainable closure.');
+        return function () use ($self, $condition, $next): void {
+            if (! is_object($self)) { // @phpstan-ignore-line
+                throw ShouldNotHappen::fromMessage('Object not provided for chainable closure.');
             }
 
-            if (\Pest\Support\Closure::bind($condition, $this, self::class)(...func_get_args())) {
-                \Pest\Support\Closure::bind($next, $this, self::class)(...func_get_args());
+            $boundCondition = Closure::bind($condition, $self, get_class($self));
+            $boundNext = Closure::bind($next, $self, get_class($self));
+
+            if ($boundCondition(...func_get_args())) {
+                $boundNext(...func_get_args());
             }
         };
     }
@@ -31,15 +34,18 @@ final class ChainableClosure
     /**
      * Calls the given `$closure` and chains the `$next` closure, "bound" to the same object.
      */
-    public static function bound(Closure $closure, Closure $next): Closure
+    public static function bound(object $self, Closure $closure, Closure $next): Closure
     {
-        return function () use ($closure, $next): void {
-            if (! is_object($this)) { // @phpstan-ignore-line
-                throw ShouldNotHappen::fromMessage('$this not bound to chainable closure.');
+        return function () use ($self, $closure, $next): void {
+            if (! is_object($self)) { // @phpstan-ignore-line
+                throw ShouldNotHappen::fromMessage('Object not provided for chainable closure.');
             }
 
-            \Pest\Support\Closure::bind($closure, $this, self::class)(...func_get_args());
-            \Pest\Support\Closure::bind($next, $this, self::class)(...func_get_args());
+            $boundClosure = Closure::bind($closure, $self, get_class($self));
+            $boundNext = Closure::bind($next, $self, get_class($self));
+
+            $boundClosure(...func_get_args());
+            $boundNext(...func_get_args());
         };
     }
 
@@ -60,8 +66,11 @@ final class ChainableClosure
     public static function boundStatically(Closure $closure, Closure $next): Closure
     {
         return static function () use ($closure, $next): void {
-            \Pest\Support\Closure::bind($closure, null, self::class)(...func_get_args());
-            \Pest\Support\Closure::bind($next, null, self::class)(...func_get_args());
+            $boundClosure = Closure::bind($closure, null, self::class);
+            $boundNext = Closure::bind($next, null, self::class);
+
+            $boundClosure(...func_get_args());
+            $boundNext(...func_get_args());
         };
     }
 }
