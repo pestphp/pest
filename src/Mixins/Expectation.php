@@ -53,6 +53,16 @@ final class Expectation
     }
 
     /**
+     * Returns the expectation value.
+     *
+     * @return TValue
+     */
+    public function value(): mixed
+    {
+        return $this->value;
+    }
+
+    /**
      * Asserts that two variables have the same type and
      * value. Used on objects, it asserts that two
      * variables reference the same object.

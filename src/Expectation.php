@@ -64,6 +64,16 @@ final class Expectation
     }
 
     /**
+     * Returns the expectation value.
+     *
+     * @return TValue
+     */
+    public function value(): mixed
+    {
+        return $this->value;
+    }
+
+    /**
      * Creates a new expectation.
      *
      * @template TAndValue
