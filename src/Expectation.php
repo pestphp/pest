@@ -535,7 +535,7 @@ final class Expectation
     }
 
     /**
-     * Asserts that the given expectation targets is an class.
+     * Asserts that the given expectation target is a class.
      */
     public function toBeClass(): ArchExpectation
     {
