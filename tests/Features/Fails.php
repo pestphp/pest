@@ -1,7 +1,5 @@
 <?php
 
-use PHPUnit\Framework\AssertionFailedError;
-
 it('may fail', function () {
     $this->fail();
 })->fails();

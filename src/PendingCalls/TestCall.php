@@ -18,8 +18,8 @@ use Pest\Support\HigherOrderCallables;
 use Pest\Support\NullClosure;
 use Pest\Support\Str;
 use Pest\TestSuite;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\AssertionFailedError;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
