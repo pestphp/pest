@@ -34,8 +34,40 @@ it('ensures it work with nested array', function () {
     expect($nestedArray)
         ->at(0)->at(1)->toBe(2)
         ->and($nestedArray)
-        ->at(1)->foo->toBe('bar');
+        ->at(1)->at('foo')->toBe('bar');
 });
+
+it('ensures it work with nested dictionary', function () {
+    $nestedDictionary = [
+        'foo' => [
+            'bar' => [
+                'john' => 'doe',
+            ],
+        ],
+    ];
+
+    expect($nestedDictionary)
+        ->foo->at('bar')->at('john')->toBe('doe');
+});
+
+it('ensures it work with dot notation', function () {
+    $nestedDictionary = [
+        'foo' => [
+            'bar' => [
+                'john' => 'doe',
+            ],
+        ],
+    ];
+
+    expect($nestedDictionary)
+        ->at('foo.bar.john')->toBe('doe');
+});
+
+it('ensures it return an out of range exception', function () {
+    $array = [1, 2, 3, 4];
+
+    expect($array)->at(4);
+})->throws('Index out of range: 4');
 
 it('ensures it throw an invalid expectation value', function () {
     $boolean = false;

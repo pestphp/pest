@@ -76,6 +76,31 @@ final class Expectation
             InvalidExpectationValue::expected('iterable');
         }
 
+        if(gettype($key) === 'string') {
+            if(strpos($key, '.') !== false) {
+                $keys = explode('.', $key);
+                $value = $this->value;
+                foreach($keys as $nestedKey) {
+                    if(!isset($value[$nestedKey])) {
+                        throw new OutOfRangeException(sprintf(
+                            'Key "%s" does not exist in %s.',
+                            $nestedKey,
+                            gettype($value)
+                        ));
+                    }
+                    $value = $value[$nestedKey];
+                }
+                return new self($value);
+            }
+        }
+
+        if (! isset($this->value[$key])) {
+            throw new OutOfRangeException(sprintf(
+                'Index out of range: %s.',
+                $key
+            ));
+        }
+
         return new self($this->value[$key]);
     }
 
