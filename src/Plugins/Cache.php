@@ -30,10 +30,12 @@ final class Cache implements HandlesArguments
      */
     public function handleArguments(array $arguments): array
     {
-        $arguments = $this->pushArgument(
-            sprintf('--cache-directory=%s', realpath(self::TEMPORARY_FOLDER)),
-            $arguments
-        );
+        if (! $this->hasArgument('--cache-directory', $arguments)) {
+            $arguments = $this->pushArgument(
+                sprintf('--cache-directory=%s', realpath(self::TEMPORARY_FOLDER)),
+                $arguments
+            );
+        }
 
         if (! $this->hasArgument('--parallel', $arguments)) {
             return $this->pushArgument('--cache-result', $arguments);
