@@ -1212,6 +1212,14 @@
    PASS  Tests\Unit\Overrides\ThrowableBuilder
   ✓ collision editor can be added to the stack trace
 
+   PASS  Tests\Unit\Plugins\Concerns\HandleArguments
+  ✓ method hasArgument with ('--long-argument', true)
+  ✓ method hasArgument with ('-a', true)
+  ✓ method hasArgument with ('--with-equal-sign', true)
+  ✓ method hasArgument with ('someValue', true)
+  ✓ method hasArgument with ('--a', false)
+  ✓ method hasArgument with ('--undefined-argument', false)
+
    PASS  Tests\Unit\Plugins\Environment
   ✓ environment is set to CI when --ci option is used
   ✓ environment is set to Local when --ci option is not used
@@ -1364,4 +1372,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 970 passed (2296 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 976 passed (2302 assertions)
