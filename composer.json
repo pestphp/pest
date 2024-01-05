@@ -20,7 +20,7 @@
         "php": "^8.2.0",
         "nunomaduro/collision": "dev-feat/phpunit11",
         "nunomaduro/termwind": "^2.0.0",
-        "pestphp/pest-plugin": "^2.1.1",
+        "pestphp/pest-plugin": "^3.0.0",
         "phpunit/phpunit": "^11.0.0"
     },
     "conflict": {
