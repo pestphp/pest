@@ -45,6 +45,8 @@ declare(strict_types=1);
 
 namespace PHPUnit\TextUI\Command;
 
+use const PHP_EOL;
+
 use PHPUnit\TextUI\Configuration\CodeCoverageFilterRegistry;
 use PHPUnit\TextUI\Configuration\Configuration;
 use PHPUnit\TextUI\Configuration\NoCoverageCacheDirectoryException;
@@ -55,11 +57,11 @@ use SebastianBergmann\Timer\Timer;
 /**
  * @internal This class is not covered by the backward compatibility promise for PHPUnit
  */
-final class WarmCodeCoverageCacheCommand implements Command
+final readonly class WarmCodeCoverageCacheCommand implements Command
 {
-    private readonly Configuration $configuration;
+    private Configuration $configuration;
 
-    private readonly CodeCoverageFilterRegistry $codeCoverageFilterRegistry;
+    private CodeCoverageFilterRegistry $codeCoverageFilterRegistry;
 
     public function __construct(Configuration $configuration, CodeCoverageFilterRegistry $codeCoverageFilterRegistry)
     {
@@ -76,16 +78,16 @@ final class WarmCodeCoverageCacheCommand implements Command
         if (! $this->configuration->hasCoverageCacheDirectory()) {
             return Result::from(
                 'Cache for static analysis has not been configured'.PHP_EOL,
-                Result::FAILURE
+                Result::FAILURE,
             );
         }
 
-        $this->codeCoverageFilterRegistry->init($this->configuration);
+        $this->codeCoverageFilterRegistry->init($this->configuration, true);
 
         if (! $this->codeCoverageFilterRegistry->configured()) {
             return Result::from(
                 'Filter for code coverage has not been configured'.PHP_EOL,
-                Result::FAILURE
+                Result::FAILURE,
             );
         }
 
@@ -96,7 +98,7 @@ final class WarmCodeCoverageCacheCommand implements Command
             $this->configuration->coverageCacheDirectory(),
             ! $this->configuration->disableCodeCoverageIgnore(),
             $this->configuration->ignoreDeprecatedCodeUnitsFromCodeCoverage(),
-            $this->codeCoverageFilterRegistry->get()
+            $this->codeCoverageFilterRegistry->get(),
         );
 
         return Result::from();

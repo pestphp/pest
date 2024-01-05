@@ -43,7 +43,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace PHPUnit\TextUI\Output\Default\ProgressPrinter;
+namespace Pest\Logging\TeamCity\Subscriber;
 
 use PHPUnit\Event\Test\Skipped;
 use PHPUnit\Event\Test\SkippedSubscriber;
@@ -51,21 +51,16 @@ use ReflectionClass;
 
 /**
  * @internal This class is not covered by the backward compatibility promise for PHPUnit
- *
- * This file is overridden to allow Pest Parallel to show todo items in the progress output.
  */
 final class TestSkippedSubscriber extends Subscriber implements SkippedSubscriber
 {
-    /**
-     * Notifies the printer that a test was skipped.
-     */
     public function notify(Skipped $event): void
     {
         if (str_contains($event->message(), '__TODO__')) {
             $this->printTodoItem();
         }
 
-        $this->printer()->testSkipped();
+        $this->logger()->testSkipped($event);
     }
 
     /**

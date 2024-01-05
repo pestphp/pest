@@ -82,11 +82,6 @@ final class DefaultResultCache implements ResultCache
     private array $defects = [];
 
     /**
-     * @psalm-var array<string, TestStatus>
-     */
-    private array $currentDefects = [];
-
-    /**
      * @psalm-var array<string, float>
      */
     private array $times = [];
@@ -102,10 +97,11 @@ final class DefaultResultCache implements ResultCache
 
     public function setStatus(string $id, TestStatus $status): void
     {
-        if ($status->isFailure() || $status->isError()) {
-            $this->currentDefects[$id] = $status;
-            $this->defects[$id] = $status;
+        if ($status->isSuccess()) {
+            return;
         }
+
+        $this->defects[$id] = $status;
     }
 
     public function status(string $id): TestStatus
@@ -115,10 +111,6 @@ final class DefaultResultCache implements ResultCache
 
     public function setTime(string $id, float $time): void
     {
-        if (! isset($this->currentDefects[$id])) {
-            unset($this->defects[$id]);
-        }
-
         $this->times[$id] = $time;
     }
 
@@ -135,7 +127,7 @@ final class DefaultResultCache implements ResultCache
 
         $data = json_decode(
             file_get_contents($this->cacheFilename),
-            true
+            true,
         );
 
         if ($data === null) {
@@ -183,7 +175,7 @@ final class DefaultResultCache implements ResultCache
         file_put_contents(
             $this->cacheFilename,
             json_encode($data),
-            LOCK_EX
+            LOCK_EX,
         );
     }
 

@@ -57,7 +57,7 @@ use function array_map;
 /**
  * @internal This class is not covered by the backward compatibility promise for PHPUnit
  */
-final class TestSuiteFilterProcessor
+final readonly class TestSuiteFilterProcessor
 {
     private Factory $filterFactory;
 
@@ -75,6 +75,7 @@ final class TestSuiteFilterProcessor
         if (! $configuration->hasFilter() &&
             ! $configuration->hasGroups() &&
             ! $configuration->hasExcludeGroups() &&
+            ! $configuration->hasExcludeFilter() &&
             ! $configuration->hasTestsCovering() &&
             ! $configuration->hasTestsUsing() &&
             ! Only::isEnabled()
@@ -84,7 +85,7 @@ final class TestSuiteFilterProcessor
 
         if ($configuration->hasExcludeGroups()) {
             $this->filterFactory->addExcludeGroupFilter(
-                $configuration->excludeGroups()
+                $configuration->excludeGroups(),
             );
         }
 
@@ -92,7 +93,7 @@ final class TestSuiteFilterProcessor
             $this->filterFactory->addIncludeGroupFilter(['__pest_only']);
         } elseif ($configuration->hasGroups()) {
             $this->filterFactory->addIncludeGroupFilter(
-                $configuration->groups()
+                $configuration->groups(),
             );
         }
 
@@ -100,8 +101,8 @@ final class TestSuiteFilterProcessor
             $this->filterFactory->addIncludeGroupFilter(
                 array_map(
                     static fn (string $name): string => '__phpunit_covers_'.$name,
-                    $configuration->testsCovering()
-                )
+                    $configuration->testsCovering(),
+                ),
             );
         }
 
@@ -109,21 +110,27 @@ final class TestSuiteFilterProcessor
             $this->filterFactory->addIncludeGroupFilter(
                 array_map(
                     static fn (string $name): string => '__phpunit_uses_'.$name,
-                    $configuration->testsUsing()
-                )
+                    $configuration->testsUsing(),
+                ),
+            );
+        }
+
+        if ($configuration->hasExcludeFilter()) {
+            $this->filterFactory->addExcludeNameFilter(
+                $configuration->excludeFilter(),
             );
         }
 
         if ($configuration->hasFilter()) {
-            $this->filterFactory->addNameFilter(
-                $configuration->filter()
+            $this->filterFactory->addIncludeNameFilter(
+                $configuration->filter(),
             );
         }
 
         $suite->injectFilter($this->filterFactory);
 
         Event\Facade::emitter()->testSuiteFiltered(
-            Event\TestSuite\TestSuiteBuilder::from($suite)
+            Event\TestSuite\TestSuiteBuilder::from($suite),
         );
     }
 }
