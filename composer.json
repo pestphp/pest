@@ -21,6 +21,7 @@
         "nunomaduro/collision": "dev-feat/phpunit11",
         "nunomaduro/termwind": "^2.0.0",
         "pestphp/pest-plugin": "^3.0.0",
+        "pestphp/pest-plugin-arch": "^3.0.0",
         "phpunit/phpunit": "^11.0.0"
     },
     "conflict": {
@@ -49,7 +50,7 @@
     },
     "require-dev": {
         "pestphp/pest-dev-tools": "^3.0.0",
-        "pestphp/pest-plugin-type-coverage": "^2.6.0",
+        "pestphp/pest-plugin-type-coverage": "^3.0.0",
         "symfony/process": "^7.0.0"
     },
     "minimum-stability": "dev",
