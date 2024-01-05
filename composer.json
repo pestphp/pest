@@ -24,7 +24,6 @@
         "phpunit/phpunit": "^11.0.0"
     },
     "conflict": {
-        "phpunit/phpunit": ">11.0.0",
         "sebastian/exporter": "<6.0.0",
         "webmozart/assert": "<1.11.0"
     },
