@@ -34,7 +34,6 @@ final class TestCaseFactory
     private const ANNOTATIONS = [
         Annotations\Depends::class,
         Annotations\Groups::class,
-        Annotations\CoversNothing::class,
         Annotations\TestDox::class,
     ];
 

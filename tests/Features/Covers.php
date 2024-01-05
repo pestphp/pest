@@ -51,28 +51,15 @@ it('uses the correct PHPUnit attribute for trait', function () {
     expect($attributes[4]->getArguments()[0])->toBe('Tests\Fixtures\Covers\CoversTrait');
 })->coversClass(CoversTrait::class);
 
-it('appends CoversNothing to method attributes', function () {
-    $phpDoc = (new ReflectionClass($this))->getMethod($this->name());
+it('uses the correct PHPUnit attribute for covers nothing', function () {
+    $attributes = (new ReflectionClass($this))->getAttributes();
 
-    expect(str_contains($phpDoc->getDocComment(), '* @coversNothing'))->toBeTrue();
+    expect($attributes[5]->getName())->toBe('PHPUnit\Framework\Attributes\CoversNothing');
+    expect($attributes[5]->getArguments())->toHaveCount(0);
 })->coversNothing();
-
-it('does not append CoversNothing to other methods', function () {
-    $phpDoc = (new ReflectionClass($this))->getMethod($this->name());
-
-    expect(str_contains($phpDoc->getDocComment(), '* @coversNothing'))->toBeFalse();
-});
 
 it('throws exception if no class nor method has been found', function () {
     $testCall = new TestCall(TestSuite::getInstance(), 'filename', 'description', fn () => 'closure');
 
     $testCall->covers('fakeName');
 })->throws(InvalidArgumentException::class, 'No class or method named "fakeName" has been found.');
-
-describe('a "describe" group of tests', function () {
-    it('does not append CoversNothing to method attributes', function () {
-        $phpDoc = (new ReflectionClass($this))->getMethod($this->name());
-
-        expect(str_contains($phpDoc->getDocComment(), '* @coversNothing'))->toBeTrue();
-    });
-})->coversNothing();

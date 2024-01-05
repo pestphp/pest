@@ -36,6 +36,8 @@ final class Covers extends Attribute
                 $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversClass({$covering->class}::class)]";
             } elseif ($covering instanceof CoversFunction) {
                 $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversFunction('{$covering->function}')]";
+            } else {
+                $attributes[] = "#[\PHPUnit\Framework\Attributes\CoversNothing()]";
             }
         }
 
