@@ -51,7 +51,7 @@
     "require-dev": {
         "pestphp/pest-dev-tools": "^3.0.0",
         "pestphp/pest-plugin-type-coverage": "^3.0.0",
-        "symfony/process": "^7.0.0"
+        "symfony/process": "^7.0.2"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,

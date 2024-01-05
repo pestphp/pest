@@ -6,9 +6,7 @@ namespace Pest\PendingCalls;
 
 use Closure;
 use Pest\Exceptions\InvalidArgumentException;
-use Pest\Factories\Covers\CoversClass;
-use Pest\Factories\Covers\CoversFunction;
-use Pest\Factories\Covers\CoversNothing;
+use Pest\Factories\Attribute;
 use Pest\Factories\TestCaseMethodFactory;
 use Pest\PendingCalls\Concerns\Describable;
 use Pest\Plugins\Only;
@@ -29,6 +27,13 @@ use PHPUnit\Framework\TestCase;
 final class TestCall
 {
     use Describable;
+
+    /**
+     * The list of test case factory attributes.
+     *
+     * @var array<int, Attribute>
+     */
+    private array $testCaseFactoryAttributes = [];
 
     /**
      * The Test Case Factory.
@@ -165,7 +170,10 @@ final class TestCall
     public function group(string ...$groups): self
     {
         foreach ($groups as $group) {
-            $this->testCaseMethod->groups[] = $group;
+            $this->testCaseMethod->attributes[] = new Attribute(
+                \PHPUnit\Framework\Attributes\Group::class,
+                [$group],
+            );
         }
 
         return $this;
@@ -321,7 +329,10 @@ final class TestCall
     public function coversClass(string ...$classes): self
     {
         foreach ($classes as $class) {
-            $this->testCaseMethod->covers[] = new CoversClass($class);
+            $this->testCaseFactoryAttributes[] = new Attribute(
+                \PHPUnit\Framework\Attributes\CoversClass::class,
+                [$class],
+            );
         }
 
         return $this;
@@ -333,7 +344,10 @@ final class TestCall
     public function coversFunction(string ...$functions): self
     {
         foreach ($functions as $function) {
-            $this->testCaseMethod->covers[] = new CoversFunction($function);
+            $this->testCaseFactoryAttributes[] = new Attribute(
+                \PHPUnit\Framework\Attributes\CoversFunction::class,
+                [$function],
+            );
         }
 
         return $this;
@@ -344,7 +358,10 @@ final class TestCall
      */
     public function coversNothing(): self
     {
-        $this->testCaseMethod->covers = [new CoversNothing()];
+        $this->testCaseMethod->attributes[] = new Attribute(
+            \PHPUnit\Framework\Attributes\CoversNothing::class,
+            [],
+        );
 
         return $this;
     }
@@ -417,5 +434,9 @@ final class TestCall
         }
 
         $this->testSuite->tests->set($this->testCaseMethod);
+
+        foreach ($this->testCaseFactoryAttributes as $attribute) {
+            $this->testSuite->tests->get($this->filename)->attributes[] = $attribute;
+        }
     }
 }

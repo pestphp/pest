@@ -9,9 +9,11 @@ use Pest\Contracts\TestCaseFilter;
 use Pest\Contracts\TestCaseMethodFilter;
 use Pest\Exceptions\TestCaseAlreadyInUse;
 use Pest\Exceptions\TestCaseClassOrTraitNotFound;
+use Pest\Factories\Attribute;
 use Pest\Factories\TestCaseFactory;
 use Pest\Factories\TestCaseMethodFactory;
 use Pest\Support\Str;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -181,12 +183,11 @@ final class TestRepository
 
                 foreach ($testCase->methods as $method) {
                     foreach ($groups as $group) {
-                        $method->groups[] = $group;
+                        $method->attributes[] = new Attribute(
+                            Group::class,
+                            [$group],
+                        );
                     }
-                }
-
-                foreach ($testCase->methods as $method) {
-                    $method->groups = [...$groups, ...$method->groups];
                 }
 
                 $testCase->factoryProxies->add($testCase->filename, 0, '__addBeforeAll', [$hooks[0] ?? null]);

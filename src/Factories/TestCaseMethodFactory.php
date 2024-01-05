@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Pest\Factories;
 
 use Closure;
-use Pest\Contracts\AddsAnnotations;
+use Pest\Evaluators\Attributes;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Factories\Concerns\HigherOrderable;
 use Pest\Repositories\DatasetsRepository;
 use Pest\Support\Str;
 use Pest\TestSuite;
 use PHPUnit\Framework\Assert;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -20,6 +21,13 @@ use PHPUnit\Framework\TestCase;
 final class TestCaseMethodFactory
 {
     use HigherOrderable;
+
+    /**
+     * The list of attributes.
+     *
+     * @var array<int, class-string<Attribute>>
+     */
+    public array $attributes = [];
 
     /**
      * The test's describing, if any.
@@ -56,13 +64,6 @@ final class TestCaseMethodFactory
      * @var array<int, string>
      */
     public array $groups = [];
-
-    /**
-     * The covered classes and functions.
-     *
-     * @var array<int, \Pest\Factories\Covers\CoversClass|\Pest\Factories\Covers\CoversFunction|\Pest\Factories\Covers\CoversNothing>
-     */
-    public array $covers = [];
 
     /**
      * Creates a new test case method factory instance.
@@ -121,11 +122,8 @@ final class TestCaseMethodFactory
 
     /**
      * Creates a PHPUnit method as a string ready for evaluation.
-     *
-     * @param  array<int, class-string<AddsAnnotations>>  $annotationsToUse
-     * @param  array<int, class-string<\Pest\Factories\Attributes\Attribute>>  $attributesToUse
      */
-    public function buildForEvaluation(array $annotationsToUse, array $attributesToUse): string
+    public function buildForEvaluation(): string
     {
         if ($this->description === null) {
             throw ShouldNotHappen::fromMessage('The test description may not be empty.');
@@ -134,36 +132,42 @@ final class TestCaseMethodFactory
         $methodName = Str::evaluable($this->description);
 
         $datasetsCode = '';
-        $annotations = ['@test'];
-        $attributes = [];
 
-        foreach ($annotationsToUse as $annotation) {
-            $annotations = (new $annotation())->__invoke($this, $annotations);
-        }
+        // prepend attribute
+        $this->attributes = [
+            new Attribute(
+                \PHPUnit\Framework\Attributes\Test::class,
+                [],
+            ),
+            new Attribute(
+                \PHPUnit\Framework\Attributes\TestDox::class,
+                [str_replace('*/', '{@*}', $this->description)],
+            ),
+            ...$this->attributes,
+        ];
 
-        foreach ($attributesToUse as $attribute) {
-            $attributes = (new $attribute())->__invoke($this, $attributes);
+        foreach ($this->depends as $depend) {
+            $depend = Str::evaluable($this->describing !== null ? Str::describe($this->describing, $depend) : $depend);
+
+            $this->attributes[] = new Attribute(
+                \PHPUnit\Framework\Attributes\Depends::class,
+                [$depend],
+            );
         }
 
         if ($this->datasets !== [] || $this->repetitions > 1) {
             $dataProviderName = $methodName.'_dataset';
-            $annotations[] = "@dataProvider $dataProviderName";
+            $this->attributes[] = new Attribute(
+                DataProvider::class,
+                [$dataProviderName],
+            );
             $datasetsCode = $this->buildDatasetForEvaluation($methodName, $dataProviderName);
         }
 
-        $annotations = implode('', array_map(
-            static fn (string $annotation): string => sprintf("\n     * %s", $annotation), $annotations,
-        ));
-
-        $attributes = implode('', array_map(
-            static fn (string $attribute): string => sprintf("\n        %s", $attribute), $attributes,
-        ));
+        $attributesCode = Attributes::code($this->attributes);
 
         return <<<PHP
-
-                /**$annotations
-                 */
-                $attributes
+            $attributesCode
                 public function $methodName()
                 {
                     \$test = \Pest\TestSuite::getInstance()->tests->get(self::\$__filename)->getMethod(\$this->name())->getClosure(\$this);
@@ -173,7 +177,7 @@ final class TestCaseMethodFactory
                         ...func_get_args(),
                     );
                 }
-                $datasetsCode
+            $datasetsCode
             PHP;
     }
 

@@ -10,6 +10,7 @@ use Pest\Support\ChainableClosure;
 use Pest\Support\ExceptionTrace;
 use Pest\Support\Reflection;
 use Pest\TestSuite;
+use PHPUnit\Framework\Attributes\PostCondition;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use ReflectionFunction;
@@ -337,7 +338,7 @@ trait Testable
         return ExceptionTrace::ensure(fn (): mixed => call_user_func_array(Closure::bind($closure, $this, $this::class), $arguments));
     }
 
-    /** @postCondition */
+    #[PostCondition]
     protected function __MarkTestIncompleteIfSnapshotHaveChanged(): void
     {
         if (count($this->__snapshotChanges) === 0) {
