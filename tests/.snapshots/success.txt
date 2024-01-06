@@ -1093,7 +1093,7 @@
   - it can use something in the test case as a condition → This test was skipped
   - it can user higher order callables and skip
   - it can skip on specific php version
-  - it can skip on php versions greater than
+  - it can skip on php versions depending on operator
 
    PASS  Tests\Features\Test
   ✓ a test
