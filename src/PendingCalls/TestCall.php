@@ -267,6 +267,16 @@ final class TestCall
     }
 
     /**
+     * Skips the current test if the given test is running on the given php version.
+     */
+    public function skipOnPhp(string $version, string $operator = '=', string $message = ''): self
+    {
+        return version_compare(PHP_VERSION, $version, $operator)
+            ? $this->skip($message)
+            : $this;
+    }
+
+    /**
      * Repeats the current test the given number of times.
      */
     public function repeat(int $times): self

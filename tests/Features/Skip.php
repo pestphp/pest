@@ -54,3 +54,11 @@ it('can user higher order callables and skip')
         return $this->shouldSkip;
     })
     ->toBeFalse();
+
+it('can skip on specific php version')
+    ->skipOnPhp(PHP_VERSION)
+    ->assertTrue(false);
+
+it('can skip on php versions greater than')
+    ->skipOnPhp("7.4.0", ">")
+    ->assertTrue(false);
