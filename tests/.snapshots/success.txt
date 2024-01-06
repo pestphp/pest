@@ -1092,6 +1092,8 @@
   - it skips when skip after assertion
   - it can use something in the test case as a condition → This test was skipped
   - it can user higher order callables and skip
+  - it can skip on specific php version
+  - it can skip on php versions greater than
 
    PASS  Tests\Features\Test
   ✓ a test
@@ -1372,4 +1374,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 976 passed (2302 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 21 skipped, 976 passed (2302 assertions)
