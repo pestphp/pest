@@ -149,10 +149,25 @@ final class TestCall
 
     /**
      * Sets the test depends.
+     *
+     * @param  array<string|array<string, string>>  $depends
      */
-    public function depends(string ...$depends): self
+    public function depends(string|array ...$depends): self
     {
         foreach ($depends as $depend) {
+            // Unpack and format class reference as array
+            if (is_array($depend)) {
+                if (count($depend) !== 2) {
+                    throw new InvalidArgumentException('Depends array must have 2 elements.');
+                }
+                [$file, $test] = $depend;
+                if (! is_string($file) || ! is_string($test)) {
+                    throw new InvalidArgumentException('Depends array must have 2 string elements.');
+                }
+                $file = ltrim($file, '\\');
+                $depend = 'P\\'.$file.'::'.$test;
+            }
+
             $this->testCaseMethod->depends[] = $depend;
         }
 
