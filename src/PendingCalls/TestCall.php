@@ -435,8 +435,8 @@ final class TestCall
 
         $this->testSuite->tests->set($this->testCaseMethod);
 
-        foreach ($this->testCaseFactoryAttributes as $attribute) {
-            $this->testSuite->tests->get($this->filename)->attributes[] = $attribute;
+        if (! is_null($testCase = $this->testSuite->tests->get($this->filename))) {
+            $testCase->attributes = array_merge($testCase->attributes, $this->testCaseFactoryAttributes);
         }
     }
 }

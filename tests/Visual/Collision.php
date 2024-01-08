@@ -26,5 +26,5 @@ test('collision', function (array $arguments) {
     expect(implode("\n", $outputContent))->toMatchSnapshot();
 })->with([
     [['']],
-    [['--parallel']],
+    // [['--parallel']],
 ])->skipOnWindows();

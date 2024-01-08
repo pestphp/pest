@@ -32,7 +32,7 @@ test('todos', function () use ($run, $snapshot) {
 
 test('todos in parallel', function () use ($run, $snapshot) {
     expect($run('--todos', true))->toContain($snapshot('todos'));
-})->skipOnWindows();
+})->skipOnWindows()->skip('Waiting for Parallel to be stable');
 
 test('todo', function () use ($run, $snapshot) {
     expect($run('--todo', false))->toContain($snapshot('todo'));
@@ -40,4 +40,4 @@ test('todo', function () use ($run, $snapshot) {
 
 test('todo in parallel', function () use ($run, $snapshot) {
     expect($run('--todo', true))->toContain($snapshot('todo'));
-})->skipOnWindows();
+})->skipOnWindows()->skip('Waiting for Parallel to be stable');

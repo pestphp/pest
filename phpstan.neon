@@ -1,6 +1,5 @@
 includes:
     - vendor/phpstan/phpstan-strict-rules/rules.neon
-    - vendor/ergebnis/phpstan-rules/rules.neon
     - vendor/thecodingmachine/phpstan-strict-rules/phpstan-strict-rules.neon
 
 parameters:

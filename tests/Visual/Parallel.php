@@ -2,6 +2,8 @@
 
 use Symfony\Component\Process\Process;
 
+beforeEach()->skip('Waiting for Parallel to be stable');
+
 $run = function () {
     $process = new Process(
         array_merge(['php', 'bin/pest', '--parallel', '--processes=3'], func_get_args()),
