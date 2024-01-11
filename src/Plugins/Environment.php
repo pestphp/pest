@@ -45,7 +45,7 @@ final class Environment implements HandlesArguments
     /**
      * Gets the environment name.
      */
-    public static function name(string $name = null): string
+    public static function name(?string $name = null): string
     {
         if (is_string($name)) {
             self::$name = $name;

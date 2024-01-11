@@ -40,7 +40,7 @@ final class BeforeEachCall
     public function __construct(
         public readonly TestSuite $testSuite,
         private readonly string $filename,
-        Closure $closure = null
+        ?Closure $closure = null
     ) {
         $this->closure = $closure instanceof Closure ? $closure : NullClosure::create();
 

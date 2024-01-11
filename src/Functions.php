@@ -55,7 +55,7 @@ if (! function_exists('beforeEach')) {
      *
      * @return HigherOrderTapProxy<Expectable|TestCall|TestCase>|Expectable|TestCall|TestCase|mixed
      */
-    function beforeEach(Closure $closure = null): BeforeEachCall
+    function beforeEach(?Closure $closure = null): BeforeEachCall
     {
         $filename = Backtrace::file();
 
@@ -116,7 +116,7 @@ if (! function_exists('test')) {
      *
      * @return Expectable|TestCall|TestCase|mixed
      */
-    function test(string $description = null, Closure $closure = null): HigherOrderTapProxy|TestCall
+    function test(?string $description = null, ?Closure $closure = null): HigherOrderTapProxy|TestCall
     {
         if ($description === null && TestSuite::getInstance()->test instanceof \PHPUnit\Framework\TestCase) {
             return new HigherOrderTapProxy(TestSuite::getInstance()->test);
@@ -136,7 +136,7 @@ if (! function_exists('it')) {
      *
      * @return Expectable|TestCall|TestCase|mixed
      */
-    function it(string $description, Closure $closure = null): TestCall
+    function it(string $description, ?Closure $closure = null): TestCall
     {
         $description = sprintf('it %s', $description);
 
@@ -171,7 +171,7 @@ if (! function_exists('afterEach')) {
      *
      * @return Expectable|HigherOrderTapProxy<Expectable|TestCall|TestCase>|TestCall|mixed
      */
-    function afterEach(Closure $closure = null): AfterEachCall
+    function afterEach(?Closure $closure = null): AfterEachCall
     {
         $filename = Backtrace::file();
 
