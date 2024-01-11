@@ -1092,7 +1092,6 @@
 
    WARN  Tests\Features\SkipOnPhp
   ✓ it can run on php version
-  - it can skip on specific php version → This test is skipped on PHP [==8.3.1].
   ✓ it can run on specific php version
   - it can skip on php versions depending on constraint → This test is skipped on PHP [>=7.4.0].
 
@@ -1374,4 +1373,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 21 skipped, 978 passed (2304 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 24 skipped, 970 passed (2295 assertions)
