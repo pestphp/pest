@@ -51,8 +51,8 @@ final class TestCall
     public function __construct(
         private readonly TestSuite $testSuite,
         private readonly string $filename,
-        ?string $description = null,
-        ?Closure $closure = null
+        string $description = null,
+        Closure $closure = null
     ) {
         $this->testCaseMethod = new TestCaseMethodFactory($filename, $description, $closure);
 
@@ -66,7 +66,7 @@ final class TestCall
     /**
      * Asserts that the test fails with the given message.
      */
-    public function fails(?string $message = null): self
+    public function fails(string $message = null): self
     {
         return $this->throws(AssertionFailedError::class, $message);
     }
@@ -74,7 +74,7 @@ final class TestCall
     /**
      * Asserts that the test throws the given `$exceptionClass` when called.
      */
-    public function throws(string|int $exception, ?string $exceptionMessage = null, ?int $exceptionCode = null): self
+    public function throws(string|int $exception, string $exceptionMessage = null, int $exceptionCode = null): self
     {
         if (is_int($exception)) {
             $exceptionCode = $exception;
@@ -106,7 +106,7 @@ final class TestCall
      *
      * @param  (callable(): bool)|bool  $condition
      */
-    public function throwsIf(callable|bool $condition, string|int $exception, ?string $exceptionMessage = null, ?int $exceptionCode = null): self
+    public function throwsIf(callable|bool $condition, string|int $exception, string $exceptionMessage = null, int $exceptionCode = null): self
     {
         $condition = is_callable($condition)
             ? $condition
@@ -124,7 +124,7 @@ final class TestCall
      *
      * @param  (callable(): bool)|bool  $condition
      */
-    public function throwsUnless(callable|bool $condition, string|int $exception, ?string $exceptionMessage = null, ?int $exceptionCode = null): self
+    public function throwsUnless(callable|bool $condition, string|int $exception, string $exceptionMessage = null, int $exceptionCode = null): self
     {
         $condition = is_callable($condition)
             ? $condition
@@ -401,7 +401,7 @@ final class TestCall
      *
      * @param  array<int, mixed>|null  $arguments
      */
-    private function addChain(string $file, int $line, string $name, ?array $arguments = null): self
+    private function addChain(string $file, int $line, string $name, array $arguments = null): self
     {
         $exporter = Exporter::default();
 
