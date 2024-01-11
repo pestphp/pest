@@ -209,11 +209,36 @@ final class TestCall
     }
 
     /**
+     * Skips the current test on the given PHP version.
+     */
+    public function skipOnPhp(string $version): self
+    {
+        if (mb_strlen($version) < 2) {
+            throw new InvalidArgumentException('The version must start with [<] or [>].');
+        }
+
+        if (str_starts_with($version, '>=') || str_starts_with($version, '<=')) {
+            $operator = substr($version, 0, 2);
+            $version = substr($version, 2);
+        } elseif (str_starts_with($version, '>') || str_starts_with($version, '<')) {
+            $operator = $version[0];
+            $version = substr($version, 1);
+            // ensure starts with number:
+        } elseif (is_numeric($version[0])) {
+            $operator = '==';
+        } else {
+            throw new InvalidArgumentException('The version must start with [<, >, <=, >=] or a number.');
+        }
+
+        return $this->skip(version_compare(PHP_VERSION, $version, $operator), sprintf('This test is skipped on PHP [%s%s].', $operator, $version));
+    }
+
+    /**
      * Skips the current test if the given test is running on Windows.
      */
     public function skipOnWindows(): self
     {
-        return $this->skipOn('Windows', 'This test is skipped on [Windows].');
+        return $this->skipOnOs('Windows', 'This test is skipped on [Windows].');
     }
 
     /**
@@ -221,7 +246,7 @@ final class TestCall
      */
     public function skipOnMac(): self
     {
-        return $this->skipOn('Darwin', 'This test is skipped on [Mac].');
+        return $this->skipOnOs('Darwin', 'This test is skipped on [Mac].');
     }
 
     /**
@@ -229,13 +254,13 @@ final class TestCall
      */
     public function skipOnLinux(): self
     {
-        return $this->skipOn('Linux', 'This test is skipped on [Linux].');
+        return $this->skipOnOs('Linux', 'This test is skipped on [Linux].');
     }
 
     /**
      * Skips the current test if the given test is running on the given operating systems.
      */
-    private function skipOn(string $osFamily, string $message): self
+    private function skipOnOs(string $osFamily, string $message): self
     {
         return $osFamily === PHP_OS_FAMILY
             ? $this->skip($message)
