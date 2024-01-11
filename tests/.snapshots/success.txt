@@ -38,9 +38,9 @@
   ↓ is marked as todo 3
   ↓ shouldBeMarkedAsTodo
 
-   WARN  Tests\Features\Coverage
+   PASS  Tests\Features\Coverage
   ✓ it has plugin
-  - it adds coverage if --coverage exist → Coverage is not available
+  ✓ it adds coverage if --coverage exist
   ✓ it adds coverage if --min exist
   ✓ it generates coverage based on file input
 
@@ -1368,4 +1368,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 23 skipped, 968 passed (2293 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 22 skipped, 969 passed (2298 assertions)
