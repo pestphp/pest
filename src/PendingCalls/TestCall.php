@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\PendingCalls;
 
 use Closure;
+use Composer\Semver\Semver;
 use Pest\Exceptions\InvalidArgumentException;
 use Pest\Factories\Covers\CoversClass;
 use Pest\Factories\Covers\CoversFunction;
@@ -269,9 +270,9 @@ final class TestCall
     /**
      * Skips the current test if the given test is running on the given php version.
      */
-    public function skipOnPhp(string $version, string $operator = '=', string $message = ''): self
+    public function skipOnPhp(string $version, string $message = ''): self
     {
-        return version_compare(PHP_VERSION, $version, $operator)
+        return Semver::satisfies(PHP_VERSION, $version)
             ? $this->skip($message)
             : $this;
     }

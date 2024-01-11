@@ -60,5 +60,5 @@ it('can skip on specific php version')
     ->assertTrue(false);
 
 it('can skip on php versions depending on operator')
-    ->skipOnPhp('7.4.0', '>')
+    ->skipOnPhp('>=7.4.0')
     ->assertTrue(false);
