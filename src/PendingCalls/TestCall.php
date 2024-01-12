@@ -404,6 +404,16 @@ final class TestCall
     }
 
     /**
+     * Registers a closure to be called after the test has been executed.
+     */
+    public function after(Closure $after): self
+    {
+        $this->testCaseMethod->after = $after;
+
+        return $this;
+    }
+
+    /**
      * Saves the property accessors to be used on the target.
      */
     public function __get(string $name): self
