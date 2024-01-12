@@ -214,7 +214,7 @@ final class TestCaseMethodFactory
      */
     public function __destruct()
     {
-        if ($this->after !== null) {
+        if ($this->after instanceof Closure) {
             ($this->after)();
         }
     }
