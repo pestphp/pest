@@ -208,4 +208,14 @@ final class TestCaseMethodFactory
 
         EOF;
     }
+
+    /**
+     * Execute the 'after' callback, if set.
+     */
+    public function __destruct()
+    {
+        if ($this->after !== null) {
+            ($this->after)();
+        }
+    }
 }
