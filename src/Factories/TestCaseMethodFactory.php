@@ -66,6 +66,11 @@ final class TestCaseMethodFactory
     public array $groups = [];
 
     /**
+     * Callback to run after the test has been executed.
+     */
+    public ?Closure $after = null;
+
+    /**
      * Creates a new test case method factory instance.
      */
     public function __construct(
