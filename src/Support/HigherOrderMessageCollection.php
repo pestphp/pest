@@ -58,7 +58,7 @@ final class HigherOrderMessageCollection
     /**
      * Count the number of messages with the given name.
      *
-     * @param  string  $name A higher order message name (usually a method name)
+     * @param  string  $name  A higher order message name (usually a method name)
      */
     public function count(string $name): int
     {

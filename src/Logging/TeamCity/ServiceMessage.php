@@ -63,7 +63,7 @@ final class ServiceMessage
     }
 
     /**
-     * @param  int  $duration in milliseconds
+     * @param  int  $duration  in milliseconds
      */
     public static function testFinished(string $name, int $duration): self
     {
