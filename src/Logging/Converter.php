@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pest\Logging\TeamCity;
+namespace Pest\Logging;
 
 use NunoMaduro\Collision\Adapters\Phpunit\State;
 use Pest\Exceptions\ShouldNotHappen;
@@ -148,6 +148,14 @@ final class Converter
         }
 
         return Str::after($name, self::PREFIX);
+    }
+
+    /**
+     * Gets the trimmed test class name.
+     */
+    public function getTrimmedTestClassName(TestMethod $test): string
+    {
+        return Str::after($test->className(), self::PREFIX);
     }
 
     /**
