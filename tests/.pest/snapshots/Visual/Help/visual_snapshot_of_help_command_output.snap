@@ -1,5 +1,5 @@
 
-  Pest Testing Framework 2.31.0.  
+  Pest Testing Framework 2.32.0.  
 
   USAGE: pest <file> [options]  
 
@@ -84,6 +84,7 @@
   --reverse-list .............................. Print defects in reverse order  
   --teamcity . Replace default progress and result output with TeamCity format  
   --testdox ................ Replace default result output with TestDox format  
+  --debug  Replace default progress and result output with debugging information  
   --compact ................ Replace default result output with Compact format  
 
   LOGGING OPTIONS:

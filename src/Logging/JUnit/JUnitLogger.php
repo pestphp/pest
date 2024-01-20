@@ -16,7 +16,6 @@ use Pest\Logging\JUnit\Subscriber\TestRunnerExecutionFinishedSubscriber;
 use Pest\Logging\JUnit\Subscriber\TestSkippedSubscriber;
 use Pest\Logging\JUnit\Subscriber\TestSuiteFinishedSubscriber;
 use Pest\Logging\JUnit\Subscriber\TestSuiteStartedSubscriber;
-use PHPUnit\Event\Code\TestMethod;
 use PHPUnit\Event\EventFacadeIsSealedException;
 use PHPUnit\Event\Facade;
 use PHPUnit\Event\InvalidArgumentException;
@@ -33,14 +32,12 @@ use PHPUnit\Event\TestSuite\Started;
 use PHPUnit\Event\UnknownSubscriberTypeException;
 use PHPUnit\TextUI\Output\Printer;
 use PHPUnit\Util\Xml;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @internal
  */
 final class JUnitLogger
 {
-
     private DOMDocument $document;
 
     private DOMElement $root;
@@ -76,7 +73,7 @@ final class JUnitLogger
     private array $testSuiteSkipped = [0];
 
     /**
-     * @psalm-var array<int,int>
+     * @psalm-var array<int,int|float>
      */
     private array $testSuiteTimes = [0];
 
@@ -94,7 +91,6 @@ final class JUnitLogger
      */
     public function __construct(
         private readonly Printer $printer,
-        private readonly OutputInterface $output,
         private readonly Converter $converter,
     ) {
         $this->registerSubscribers();
@@ -103,7 +99,7 @@ final class JUnitLogger
 
     public function flush(): void
     {
-        $this->printer->print($this->document->saveXML());
+        $this->printer->print((string) $this->document->saveXML());
 
         $this->printer->flush();
     }
@@ -240,8 +236,8 @@ final class JUnitLogger
      */
     private function handleFinish(Info $telemetryInfo, int $numberOfAssertionsPerformed): void
     {
-        assert($this->currentTestCase !== null);
-        assert($this->time !== null);
+        assert($this->currentTestCase instanceof \DOMElement);
+        assert($this->time instanceof \PHPUnit\Event\Telemetry\HRTime);
 
         $time = $telemetryInfo->time()->duration($this->time)->asFloat();
 
@@ -292,8 +288,6 @@ final class JUnitLogger
 
     private function createDocument(): void
     {
-        $this->output->writeln('Start Junit');
-
         $this->document = new DOMDocument('1.0', 'UTF-8');
         $this->document->formatOutput = true;
 
@@ -311,7 +305,7 @@ final class JUnitLogger
             $this->createTestCase($event);
         }
 
-        assert($this->currentTestCase !== null);
+        assert($this->currentTestCase instanceof \DOMElement);
 
         $throwable = $event->throwable();
 
@@ -349,7 +343,7 @@ final class JUnitLogger
             $this->createTestCase($event);
         }
 
-        assert($this->currentTestCase !== null);
+        assert($this->currentTestCase instanceof \DOMElement);
 
         $skipped = $this->document->createElement('skipped');
 
@@ -379,8 +373,6 @@ final class JUnitLogger
         $testCase->setAttribute('file', $file);
 
         if ($test->isTestMethod()) {
-            assert($test instanceof TestMethod);
-
             $className = $this->converter->getTrimmedTestClassName($test);
             $testCase->setAttribute('class', $className);
             $testCase->setAttribute('classname', str_replace('\\', '.', $className));

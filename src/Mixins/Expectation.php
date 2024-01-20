@@ -320,7 +320,7 @@ final class Expectation
     public function toHaveProperties(iterable $names, string $message = ''): self
     {
         foreach ($names as $name => $value) {
-            is_int($name) ? $this->toHaveProperty($value, message: $message) : $this->toHaveProperty($name, $value, $message);
+            is_int($name) ? $this->toHaveProperty($value, message: $message) : $this->toHaveProperty($name, $value, $message); // @phpstan-ignore-line
         }
 
         return $this;

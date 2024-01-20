@@ -107,7 +107,8 @@
                 "Pest\\Plugins\\Snapshot",
                 "Pest\\Plugins\\Verbose",
                 "Pest\\Plugins\\Version",
-                "Pest\\Plugins\\Parallel"
+                "Pest\\Plugins\\Parallel",
+                "Pest\\Plugins\\JUnit"
             ]
         },
         "phpstan": {

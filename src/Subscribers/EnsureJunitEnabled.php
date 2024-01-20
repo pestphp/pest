@@ -13,7 +13,6 @@ use PHPUnit\Event\TestRunner\ConfiguredSubscriber;
 use PHPUnit\TextUI\Configuration\Configuration;
 use PHPUnit\TextUI\Output\DefaultPrinter;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @internal
@@ -25,7 +24,6 @@ final class EnsureJunitEnabled implements ConfiguredSubscriber
      */
     public function __construct(
         private readonly InputInterface $input,
-        private readonly OutputInterface $output,
         private readonly TestSuite $testSuite,
     ) {
     }
@@ -39,9 +37,11 @@ final class EnsureJunitEnabled implements ConfiguredSubscriber
             return;
         }
 
+        $configuration = Container::getInstance()->get(Configuration::class);
+        assert($configuration instanceof Configuration);
+
         new JUnitLogger(
-            DefaultPrinter::from(Container::getInstance()->get(Configuration::class)->logfileJunit()),
-            $this->output,
+            DefaultPrinter::from($configuration->logfileJunit()),
             new Converter($this->testSuite->rootPath),
         );
     }
