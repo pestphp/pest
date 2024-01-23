@@ -15,12 +15,9 @@ jobs:
       fail-fast: true
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        symfony: ['7.0.2']
+        symfony: ['7.0']
         php: ['8.2', '8.3']
         dependency_version: [prefer-lowest, prefer-stable]
-        exclude:
-          - php: '8.1'
-            symfony: '7.0.2'
 
     name: PHP ${{ matrix.php }} - Symfony ^${{ matrix.symfony }} - ${{ matrix.os }} - ${{ matrix.dependency_version }}
 
@@ -41,7 +38,7 @@ jobs:
         echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
     - name: Install PHP dependencies
-      run: composer update --${{ matrix.dependency_version }} --no-interaction --no-progress --ansi --with="symfony/console:^${{ matrix.symfony }}"
+      run: composer update --${{ matrix.dependency_version }} --no-interaction --no-progress --ansi --with="symfony/console:~${{ matrix.symfony }}"
 
     - name: Unit Tests
       run: composer test:unit

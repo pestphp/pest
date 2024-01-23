@@ -18,7 +18,7 @@
     ],
     "require": {
         "php": "^8.2.0",
-        "nunomaduro/collision": "^8.0.1",
+        "nunomaduro/collision": "^8.1.0",
         "nunomaduro/termwind": "^2.0.0",
         "pestphp/pest-plugin": "^3.0.0",
         "pestphp/pest-plugin-arch": "^3.0.0",
@@ -105,7 +105,8 @@
                 "Pest\\Plugins\\Snapshot",
                 "Pest\\Plugins\\Verbose",
                 "Pest\\Plugins\\Version",
-                "Pest\\Plugins\\Parallel"
+                "Pest\\Plugins\\Parallel",
+                "Pest\\Plugins\\JUnit"
             ]
         },
         "phpstan": {

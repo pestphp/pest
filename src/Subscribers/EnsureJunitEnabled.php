@@ -5,24 +5,25 @@ declare(strict_types=1);
 namespace Pest\Subscribers;
 
 use Pest\Logging\Converter;
-use Pest\Logging\TeamCity\TeamCityLogger;
+use Pest\Logging\JUnit\JUnitLogger;
+use Pest\Support\Container;
 use Pest\TestSuite;
 use PHPUnit\Event\TestRunner\Configured;
 use PHPUnit\Event\TestRunner\ConfiguredSubscriber;
+use PHPUnit\TextUI\Configuration\Configuration;
+use PHPUnit\TextUI\Output\DefaultPrinter;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @internal
  */
-final class EnsureTeamCityEnabled implements ConfiguredSubscriber
+final class EnsureJunitEnabled implements ConfiguredSubscriber
 {
     /**
      * Creates a new Configured Subscriber instance.
      */
     public function __construct(
         private readonly InputInterface $input,
-        private readonly OutputInterface $output,
         private readonly TestSuite $testSuite,
     ) {
     }
@@ -32,18 +33,16 @@ final class EnsureTeamCityEnabled implements ConfiguredSubscriber
      */
     public function notify(Configured $event): void
     {
-        if (! $this->input->hasParameterOption('--teamcity')) {
+        if (! $this->input->hasParameterOption('--log-junit')) {
             return;
         }
 
-        $flowId = getenv('FLOW_ID');
-        $flowId = is_string($flowId) ? (int) $flowId : getmypid();
+        $configuration = Container::getInstance()->get(Configuration::class);
+        assert($configuration instanceof Configuration);
 
-        new TeamCityLogger(
-            $this->output,
+        new JUnitLogger(
+            DefaultPrinter::from($configuration->logfileJunit()),
             new Converter($this->testSuite->rootPath),
-            $flowId === false ? null : $flowId,
-            getenv('COLLISION_IGNORE_DURATION') !== false
         );
     }
 }

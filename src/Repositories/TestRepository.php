@@ -32,12 +32,12 @@ final class TestRepository
     private array $uses = [];
 
     /**
-     * @var  array<int, TestCaseFilter>
+     * @var array<int, TestCaseFilter>
      */
     private array $testCaseFilters = [];
 
     /**
-     * @var  array<int, TestCaseMethodFilter>
+     * @var array<int, TestCaseMethodFilter>
      */
     private array $testCaseMethodFilters = [];
 

@@ -24,7 +24,7 @@ final class Str
      * Create a (unsecure & non-cryptographically safe) random alpha-numeric
      * string value.
      *
-     * @param  int  $length the length of the resulting randomized string
+     * @param  int  $length  the length of the resulting randomized string
      *
      * @see https://github.com/laravel/framework/blob/4.2/src/Illuminate/Support/Str.php#L240-L242
      */
