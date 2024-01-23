@@ -1,5 +1,5 @@
 
-  Pest Testing Framework 3.0.0-dev-0003.  
+  Pest Testing Framework 3.0.0-dev-0004.
 
   USAGE: pest <file> [options]  
 
@@ -30,11 +30,11 @@
   --exclude-group [name] ........... Exclude tests from the specified group(s)  
   --covers [name] ................. Only run tests that intend to cover [name]  
   --uses [name] ..................... Only run tests that intend to use [name]  
-  --list-test-files ................................ List available test files  
+  --list-test-files ................................ List available test files
   --list-tests .......................................... List available tests  
   --list-tests-xml [file] ................. List available tests in XML format  
   --filter [pattern] ............................... Filter which tests to run  
-  --exclude-filter [pattern] .. Exclude tests for the specified filter pattern  
+  --exclude-filter [pattern] .. Exclude tests for the specified filter pattern
   --test-suffix [suffixes]  Only search for test in files with specified suffix(es). Default: Test.php,.phpt  
 
   EXECUTION OPTIONS:
