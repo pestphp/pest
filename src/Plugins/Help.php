@@ -93,10 +93,9 @@ final class Help implements HandlesArguments
      */
     private function getContent(): array
     {
-        $helpReflection = new \ReflectionClass(PHPUnitHelp::class);
+        $helpReflection = new PHPUnitHelp();
 
-        /** @var array<string, array<int, array{arg: string, desc: string}>> $content */
-        $content = $helpReflection->getConstant('HELP_TEXT');
+        $content = (fn (): array => $this->elements())->call($helpReflection);
 
         $content['Configuration'] = [...[[
             'arg' => '--init',
