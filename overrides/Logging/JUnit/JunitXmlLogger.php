@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 /*
  * This file is part of PHPUnit.
  *
@@ -7,14 +9,9 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace PHPUnit\Logging\JUnit;
 
-use function assert;
-use function basename;
-use function is_int;
-use function sprintf;
-use function str_replace;
-use function trim;
 use DOMDocument;
 use DOMElement;
 use PHPUnit\Event\Code\Test;
@@ -36,14 +33,24 @@ use PHPUnit\Event\UnknownSubscriberTypeException;
 use PHPUnit\TextUI\Output\Printer;
 use PHPUnit\Util\Xml;
 
+use function assert;
+use function basename;
+use function is_int;
+use function sprintf;
+use function str_replace;
+use function trim;
+
 /**
  * @internal This class is not covered by the backward compatibility promise for PHPUnit
  */
 final class JunitXmlLogger
 {
     private readonly Printer $printer;
+
     private readonly \Pest\Logging\Converter $converter; // pest-added
+
     private DOMDocument $document;
+
     private DOMElement $root;
 
     /**
@@ -79,12 +86,17 @@ final class JunitXmlLogger
     /**
      * @psalm-var array<int,int>
      */
-    private array $testSuiteTimes        = [0];
-    private int $testSuiteLevel          = 0;
+    private array $testSuiteTimes = [0];
+
+    private int $testSuiteLevel = 0;
+
     private ?DOMElement $currentTestCase = null;
-    private ?HRTime $time                = null;
-    private bool $prepared               = false;
-    private bool $preparationFailed      = false;
+
+    private ?HRTime $time = null;
+
+    private bool $prepared = false;
+
+    private bool $preparationFailed = false;
 
     /**
      * @throws EventFacadeIsSealedException
@@ -122,13 +134,13 @@ final class JunitXmlLogger
         }
 
         $this->testSuiteLevel++;
-        $this->testSuites[$this->testSuiteLevel]          = $testSuite;
-        $this->testSuiteTests[$this->testSuiteLevel]      = 0;
+        $this->testSuites[$this->testSuiteLevel] = $testSuite;
+        $this->testSuiteTests[$this->testSuiteLevel] = 0;
         $this->testSuiteAssertions[$this->testSuiteLevel] = 0;
-        $this->testSuiteErrors[$this->testSuiteLevel]     = 0;
-        $this->testSuiteFailures[$this->testSuiteLevel]   = 0;
-        $this->testSuiteSkipped[$this->testSuiteLevel]    = 0;
-        $this->testSuiteTimes[$this->testSuiteLevel]      = 0;
+        $this->testSuiteErrors[$this->testSuiteLevel] = 0;
+        $this->testSuiteFailures[$this->testSuiteLevel] = 0;
+        $this->testSuiteSkipped[$this->testSuiteLevel] = 0;
+        $this->testSuiteTimes[$this->testSuiteLevel] = 0;
     }
 
     public function testSuiteFinished(): void
@@ -164,12 +176,12 @@ final class JunitXmlLogger
         );
 
         if ($this->testSuiteLevel > 1) {
-            $this->testSuiteTests[$this->testSuiteLevel - 1]      += $this->testSuiteTests[$this->testSuiteLevel];
+            $this->testSuiteTests[$this->testSuiteLevel - 1] += $this->testSuiteTests[$this->testSuiteLevel];
             $this->testSuiteAssertions[$this->testSuiteLevel - 1] += $this->testSuiteAssertions[$this->testSuiteLevel];
-            $this->testSuiteErrors[$this->testSuiteLevel - 1]     += $this->testSuiteErrors[$this->testSuiteLevel];
-            $this->testSuiteFailures[$this->testSuiteLevel - 1]   += $this->testSuiteFailures[$this->testSuiteLevel];
-            $this->testSuiteSkipped[$this->testSuiteLevel - 1]    += $this->testSuiteSkipped[$this->testSuiteLevel];
-            $this->testSuiteTimes[$this->testSuiteLevel - 1]      += $this->testSuiteTimes[$this->testSuiteLevel];
+            $this->testSuiteErrors[$this->testSuiteLevel - 1] += $this->testSuiteErrors[$this->testSuiteLevel];
+            $this->testSuiteFailures[$this->testSuiteLevel - 1] += $this->testSuiteFailures[$this->testSuiteLevel];
+            $this->testSuiteSkipped[$this->testSuiteLevel - 1] += $this->testSuiteSkipped[$this->testSuiteLevel];
+            $this->testSuiteTimes[$this->testSuiteLevel - 1] += $this->testSuiteTimes[$this->testSuiteLevel];
         }
 
         $this->testSuiteLevel--;
@@ -277,8 +289,8 @@ final class JunitXmlLogger
         $this->testSuiteTimes[$this->testSuiteLevel] += $time;
 
         $this->currentTestCase = null;
-        $this->time            = null;
-        $this->prepared        = false;
+        $this->time = null;
+        $this->prepared = false;
     }
 
     /**
@@ -304,7 +316,7 @@ final class JunitXmlLogger
 
     private function createDocument(): void
     {
-        $this->document               = new DOMDocument('1.0', 'UTF-8');
+        $this->document = new DOMDocument('1.0', 'UTF-8');
         $this->document->formatOutput = true;
 
         $this->root = $this->document->createElement('testsuites');
@@ -316,7 +328,7 @@ final class JunitXmlLogger
      */
     private function handleFault(Errored|Failed $event, string $type): void
     {
-        if (!$this->prepared) {
+        if (! $this->prepared) {
             $this->createTestCase($event);
         }
 
@@ -326,7 +338,7 @@ final class JunitXmlLogger
 
         $throwable = $event->throwable();
         $buffer .= trim(
-            $this->converter->getExceptionMessage($throwable) . PHP_EOL . // pest-changed
+            $this->converter->getExceptionMessage($throwable).PHP_EOL. // pest-changed
             $this->converter->getExceptionDetails($throwable), // pest-changed
         );
 
@@ -339,7 +351,7 @@ final class JunitXmlLogger
 
         $this->currentTestCase->appendChild($fault);
 
-        if (!$this->prepared) {
+        if (! $this->prepared) {
             $this->handleFinish($event->telemetryInfo(), 0);
         }
     }
@@ -349,7 +361,7 @@ final class JunitXmlLogger
      */
     private function handleIncompleteOrSkipped(MarkedIncomplete|Skipped $event): void
     {
-        if (!$this->prepared) {
+        if (! $this->prepared) {
             $this->createTestCase($event);
         }
 
@@ -361,7 +373,7 @@ final class JunitXmlLogger
 
         $this->testSuiteSkipped[$this->testSuiteLevel]++;
 
-        if (!$this->prepared) {
+        if (! $this->prepared) {
             $this->handleFinish($event->telemetryInfo(), 0);
         }
     }
@@ -396,7 +408,7 @@ final class JunitXmlLogger
 
         assert($test instanceof TestMethod);
 
-        if (!$test->testData()->hasDataFromDataProvider()) {
+        if (! $test->testData()->hasDataFromDataProvider()) {
             return $test->methodName();
         }
 
@@ -442,6 +454,6 @@ final class JunitXmlLogger
         }
 
         $this->currentTestCase = $testCase;
-        $this->time            = $event->telemetryInfo()->time();
+        $this->time = $event->telemetryInfo()->time();
     }
 }
