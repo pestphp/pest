@@ -82,6 +82,7 @@ final class Kernel
     /**
      * Runs the application, and returns the exit code.
      *
+     * @param  array<int, string>  $originalArguments
      * @param  array<int, string>  $arguments
      */
     public function handle(array $originalArguments, array $arguments): int
