@@ -32,6 +32,7 @@ use Pest\Matchers\Any;
 use Pest\Support\ExpectationPipeline;
 use PHPUnit\Architecture\Elements\ObjectDescription;
 use PHPUnit\Framework\ExpectationFailedException;
+use ReflectionEnum;
 
 /**
  * @template TValue
@@ -890,9 +891,10 @@ final class Expectation
     {
         return Targeted::make(
             $this,
-            fn (ObjectDescription $object): bool => (new \ReflectionEnum($object->name))->isBacked()
-                && (string)(new \ReflectionEnum($object->name))->getBackingType() === $backingType,
-            'to be ' . $backingType . ' backed enum',
+            fn (ObjectDescription $object): bool => $object->reflectionClass->isEnum()
+                && (new ReflectionEnum($object->name))->isBacked() // @phpstan-ignore-line
+                && (string) (new ReflectionEnum($object->name))->getBackingType() === $backingType, // @phpstan-ignore-line
+            'to be '.$backingType.' backed enum',
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }

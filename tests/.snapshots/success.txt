@@ -467,6 +467,10 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toBeIntBackedEnum
+  ✓ enum is backed by int
+  ✓ enum is not backed by int
+
    PASS  Tests\Features\Expect\toBeInvokable
   ✓ class is invokable
   ✓ opposite class is invokable
@@ -574,6 +578,10 @@
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeStringBackedEnum
+  ✓ enum is backed by string
+  ✓ enum is not backed by string
 
    PASS  Tests\Features\Expect\toBeStudlyCase
   ✓ pass
@@ -1404,4 +1412,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 20 skipped, 995 passed (2391 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 20 skipped, 1003 passed (2407 assertions)

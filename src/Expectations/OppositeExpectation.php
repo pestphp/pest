@@ -493,9 +493,10 @@ final class OppositeExpectation
     {
         return Targeted::make(
             $this->original,
-            fn (ObjectDescription $object): bool => (new \ReflectionEnum($object->name))->isBacked()
-                && (string)(new \ReflectionEnum($object->name))->getBackingType() !== $backingType,
-            'not to be ' . $backingType . ' backed enum',
+            fn (ObjectDescription $object): bool => ! $object->reflectionClass->isEnum()
+                || ! (new \ReflectionEnum($object->name))->isBacked() // @phpstan-ignore-line
+                || (string) (new \ReflectionEnum($object->name))->getBackingType() !== $backingType, // @phpstan-ignore-line
+            'not to be '.$backingType.' backed enum',
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
