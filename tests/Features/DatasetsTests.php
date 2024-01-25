@@ -361,3 +361,23 @@ it('can correctly resolve a bound dataset that returns an array but wants to be 
 ]);
 
 todo('forbids to define tests in Datasets dirs and Datasets.php files');
+
+dataset('greeting-string', [
+    'formal' => 'Evening',
+    'informal' => 'yo',
+]);
+
+it('may be used with high order')
+    ->with('greeting-string')
+    ->expect(fn (string $greeting) => $greeting)
+    ->throwsNoExceptions();
+
+dataset('greeting-bound', [
+    'formal' => fn () => 'Evening',
+    'informal' => fn () => 'yo',
+]);
+
+it('may be used with high order even when bound')
+    ->with('greeting-bound')
+    ->expect(fn (string $greeting) => $greeting)
+    ->throws(InvalidArgumentException::class);
