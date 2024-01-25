@@ -154,6 +154,10 @@
   ✓ it can correctly resolve a bound dataset that returns an array with (Closure)
   ✓ it can correctly resolve a bound dataset that returns an array but wants to be spread with (Closure)
   ↓ forbids to define tests in Datasets dirs and Datasets.php files
+  ✓ it may be used with high order with dataset "formal"
+  ✓ it may be used with high order with dataset "informal"
+  ✓ it may be used with high order even when bound with dataset "formal"
+  ✓ it may be used with high order even when bound with dataset "informal"
 
    PASS  Tests\Features\Depends
   ✓ first
@@ -1134,8 +1138,16 @@
    PASS  Tests\Helpers\TestInHelpers
   ✓ it executes tests in the Helpers directory
 
+   PASS  Tests\Hooks\AfterAllTest
+  ✓ global afterAll execution order
+  ✓ it only gets called once per file
+
    PASS  Tests\Hooks\AfterEachTest
   ✓ global afterEach execution order
+
+   PASS  Tests\Hooks\BeforeAllTest
+  ✓ global beforeAll execution order
+  ✓ it only gets called once per file
 
    PASS  Tests\Hooks\BeforeEachTest
   ✓ global beforeEach execution order
@@ -1377,5 +1389,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 953 passed (2323 assertions)
-
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 20 skipped, 986 passed (2372 assertions)
