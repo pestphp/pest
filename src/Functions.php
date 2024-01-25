@@ -194,3 +194,16 @@ if (! function_exists('afterAll')) {
         TestSuite::getInstance()->afterAll->set($closure);
     }
 }
+
+if (! function_exists('removeAnsiEscapeSequences')) {
+    /**
+     * Remove ANSI escape sequences from a given string.
+     *
+     * @param  string  $input The string containing ANSI escape sequences.
+     * @return string|null A new string with all ANSI escape sequences removed.
+     */
+    function removeAnsiEscapeSequences(string $input): ?string
+    {
+        return preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $input);
+    }
+}
