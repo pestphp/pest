@@ -9,6 +9,7 @@ use Pest\Exceptions\NoDirtyTestsFound;
 use Pest\Plugins\Actions\CallsAddsOutput;
 use Pest\Plugins\Actions\CallsBoot;
 use Pest\Plugins\Actions\CallsHandleArguments;
+use Pest\Plugins\Actions\CallsHandleOriginalArguments;
 use Pest\Plugins\Actions\CallsShutdown;
 use Pest\Support\Container;
 use PHPUnit\TestRunner\TestResult\Facade;
@@ -59,6 +60,11 @@ final class Kernel
             ->add(OutputInterface::class, $output)
             ->add(Container::class, $container);
 
+        $kernel = new self(
+            new Application(),
+            $output,
+        );
+
         foreach (self::BOOTSTRAPPERS as $bootstrapper) {
             $bootstrapper = Container::getInstance()->get($bootstrapper);
             assert($bootstrapper instanceof Bootstrapper);
@@ -68,11 +74,6 @@ final class Kernel
 
         CallsBoot::execute();
 
-        $kernel = new self(
-            new Application(),
-            $output,
-        );
-
         Container::getInstance()->add(self::class, $kernel);
 
         return $kernel;
@@ -81,14 +82,16 @@ final class Kernel
     /**
      * Runs the application, and returns the exit code.
      *
-     * @param  array<int, string>  $args
+     * @param  array<int, string>  $arguments
      */
-    public function handle(array $args): int
+    public function handle(array $originalArguments, array $arguments): int
     {
-        $args = CallsHandleArguments::execute($args);
+        CallsHandleOriginalArguments::execute($originalArguments);
+
+        $arguments = CallsHandleArguments::execute($arguments);
 
         try {
-            $this->application->run($args);
+            $this->application->run($arguments);
         } catch (NoDirtyTestsFound) {
             $this->output->writeln([
                 '',
