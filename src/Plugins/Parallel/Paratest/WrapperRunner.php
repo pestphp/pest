@@ -363,6 +363,15 @@ final class WrapperRunner implements RunnerInterface
             $this->codeCoverageFilterRegistry,
             false,
         );
+        if (! $coverageManager->isActive()) {
+            $this->output->writeln([
+                '',
+                '  <fg=black;bg=yellow;options=bold> WARN </> No code coverage driver is available.</>',
+                '',
+            ]);
+
+            return;
+        }
         $coverageMerger = new CoverageMerger($coverageManager->codeCoverage());
         foreach ($this->coverageFiles as $coverageFile) {
             $coverageMerger->addCoverageFromFile($coverageFile);
