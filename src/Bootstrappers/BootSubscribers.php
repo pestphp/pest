@@ -25,7 +25,6 @@ final class BootSubscribers implements Bootstrapper
         Subscribers\EnsureIgnorableTestCasesAreIgnored::class,
         Subscribers\EnsureKernelDumpIsFlushed::class,
         Subscribers\EnsureTeamCityEnabled::class,
-        Subscribers\EnsureJunitEnabled::class,
     ];
 
     /**
