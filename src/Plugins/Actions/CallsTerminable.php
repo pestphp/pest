@@ -10,20 +10,20 @@ use Pest\Plugin\Loader;
 /**
  * @internal
  */
-final class CallsShutdown
+final class CallsTerminable
 {
     /**
      * Executes the Plugin action.
      *
-     * Provides an opportunity for any plugins to shutdown.
+     * Provides an opportunity for any plugins to terminate.
      */
     public static function execute(): void
     {
-        $plugins = Loader::getPlugins(Plugins\Shutdownable::class);
+        $plugins = Loader::getPlugins(Plugins\Terminable::class);
 
-        /** @var Plugins\Shutdownable $plugin */
+        /** @var Plugins\Terminable $plugin */
         foreach ($plugins as $plugin) {
-            $plugin->shutdown();
+            $plugin->terminate();
         }
     }
 }

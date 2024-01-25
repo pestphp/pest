@@ -90,7 +90,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
         $result = $kernel->handle($originalArguments, $arguments);
 
-        $kernel->shutdown();
+        $kernel->terminate();
     } catch (Throwable|Error $e) {
         Panic::with($e);
     }
