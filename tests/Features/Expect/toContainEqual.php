@@ -2,7 +2,6 @@
 
 use PHPUnit\Framework\ExpectationFailedException;
 
-
 test('passes arrays', function () {
     expect([1, 2, 42])->toContainEqual('42');
 });

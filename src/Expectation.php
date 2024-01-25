@@ -347,9 +347,15 @@ final class Expectation
             return new HigherOrderExpectation($this, call_user_func_array($this->value->$method(...), $parameters));
         }
 
-        ExpectationPipeline::for($this->getExpectationClosure($method))
+        $closure = $this->getExpectationClosure($method);
+        $reflectionClosure = new \ReflectionFunction($closure);
+        $expectation = $reflectionClosure->getClosureThis();
+
+        assert(is_object($expectation));
+
+        ExpectationPipeline::for($closure)
             ->send(...$parameters)
-            ->through($this->pipes($method, $this, Expectation::class))
+            ->through($this->pipes($method, $expectation, Expectation::class))
             ->run();
 
         return $this;

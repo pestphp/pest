@@ -643,6 +643,16 @@
   ✓ not failures with multiple needles (all failing)
   ✓ not failures with multiple needles (some failing)
 
+   PASS  Tests\Features\Expect\toContainEqual
+  ✓ passes arrays
+  ✓ passes arrays with multiple needles
+  ✓ failures
+  ✓ failures with multiple needles (all failing)
+  ✓ failures with multiple needles (some failing)
+  ✓ not failures
+  ✓ not failures with multiple needles (all failing)
+  ✓ not failures with multiple needles (some failing)
+
    PASS  Tests\Features\Expect\toContainOnlyInstancesOf
   ✓ pass
   ✓ failures
@@ -834,6 +844,7 @@
 
    PASS  Tests\Features\Expect\toMatchSnapshot
   ✓ pass
+  ✓ pass using pipes
   ✓ pass with __toString
   ✓ pass with toString
   ✓ pass with dataset with ('my-datas-set-value')
@@ -1389,4 +1400,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 20 skipped, 986 passed (2372 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 20 skipped, 995 passed (2391 assertions)

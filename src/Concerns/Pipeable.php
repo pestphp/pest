@@ -60,7 +60,7 @@ trait Pipeable
     }
 
     /**
-     * Get th list of pipes by the given name.
+     * Get the list of pipes by the given name.
      *
      * @return array<int, Closure>
      */
