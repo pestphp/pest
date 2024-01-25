@@ -430,6 +430,7 @@
    PASS  Tests\Features\Expect\toBeGreaterThan
   ✓ passes
   ✓ passes with DateTime and DateTimeImmutable
+  ✓ passes with strings
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
@@ -437,6 +438,7 @@
    PASS  Tests\Features\Expect\toBeGreaterThanOrEqual
   ✓ passes
   ✓ passes with DateTime and DateTimeImmutable
+  ✓ passes with strings
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
@@ -494,6 +496,7 @@
    PASS  Tests\Features\Expect\toBeLessThan
   ✓ passes
   ✓ passes with DateTime and DateTimeImmutable
+  ✓ passes with strings
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
@@ -501,6 +504,7 @@
    PASS  Tests\Features\Expect\toBeLessThanOrEqual
   ✓ passes
   ✓ passes with DateTime and DateTimeImmutable
+  ✓ passes with strings
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
