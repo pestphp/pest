@@ -160,8 +160,8 @@ final class Kernel
                     'content' => sprintf('%s in %s:%d', $message, $file, $line),
                 ]);
             }
-        }
 
-        exit(1);
+            exit(1);
+        }
     }
 }
