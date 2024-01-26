@@ -161,5 +161,7 @@ final class Kernel
                 ]);
             }
         }
+
+        exit(1);
     }
 }
