@@ -1379,6 +1379,10 @@
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
 
+   PASS  Tests\Visual\JUnit
+  ✓ junit output
+  ✓ junit with parallel
+
    PASS  Tests\Visual\Parallel
   ✓ parallel
   ✓ a parallel test can extend another test with same name
@@ -1404,4 +1408,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 20 skipped, 999 passed (2359 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 20 skipped, 1001 passed (2387 assertions)
