@@ -26,12 +26,16 @@ $run = function () {
     }
 };
 
-test('junit output', function () use ($run) {
+$normalizedPath = function (string $path) {
+    return str_replace('/', DIRECTORY_SEPARATOR, $path);
+};
+
+test('junit output', function () use ($normalizedPath, $run) {
     $result = $run('tests/.tests/SuccessOnly.php');
 
     expect($result['testsuite']['@attributes'])
         ->name->toBe('Tests\tests\SuccessOnly')
-        ->file->toBe('tests/.tests/SuccessOnly.php')
+        ->file->toBe($normalizedPath('tests/.tests/SuccessOnly.php'))
         ->tests->toBe('2')
         ->assertions->toBe('2')
         ->errors->toBe('0')
@@ -43,19 +47,19 @@ test('junit output', function () use ($run) {
 
     expect($result['testsuite']['testcase'][0]['@attributes'])
         ->name->toBe('it can pass with comparison')
-        ->file->toBe('tests/.tests/SuccessOnly.php::it can pass with comparison')
+        ->file->toBe($normalizedPath('tests/.tests/SuccessOnly.php::it can pass with comparison'))
         ->class->toBe('Tests\tests\SuccessOnly')
         ->classname->toBe('Tests.tests.SuccessOnly')
         ->assertions->toBe('1')
         ->time->toStartWith('0.0');
 });
 
-test('junit with parallel', function () use ($run) {
+test('junit with parallel', function () use ($normalizedPath, $run) {
     $result = $run('tests/.tests/SuccessOnly.php', '--parallel', '--processes=1', '--filter', 'can pass with comparison');
 
     expect($result['testsuite']['@attributes'])
         ->name->toBe('Tests\tests\SuccessOnly')
-        ->file->toBe('tests/.tests/SuccessOnly.php')
+        ->file->toBe($normalizedPath('tests/.tests/SuccessOnly.php'))
         ->tests->toBe('1')
         ->assertions->toBe('1')
         ->errors->toBe('0')
@@ -67,7 +71,7 @@ test('junit with parallel', function () use ($run) {
 
     expect($result['testsuite']['testcase']['@attributes'])
         ->name->toBe('it can pass with comparison')
-        ->file->toBe('tests/.tests/SuccessOnly.php::it can pass with comparison')
+        ->file->toBe($normalizedPath('tests/.tests/SuccessOnly.php::it can pass with comparison'))
         ->class->toBe('Tests\tests\SuccessOnly')
         ->classname->toBe('Tests.tests.SuccessOnly')
         ->assertions->toBe('1')
