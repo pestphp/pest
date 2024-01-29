@@ -139,6 +139,10 @@ final class Kernel
         $this->terminate();
 
         if (is_array($error = error_get_last())) {
+            if (! in_array($error['type'], [E_ERROR, E_CORE_ERROR])) {
+                return;
+            }
+
             $message = $error['message'];
             $file = $error['file'];
             $line = $error['line'];
