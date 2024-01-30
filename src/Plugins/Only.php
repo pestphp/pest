@@ -40,6 +40,10 @@ final class Only implements Terminable
      */
     public static function enable(TestCall $testCall): void
     {
+        if (Environment::name() == Environment::CI) {
+            return;
+        }
+
         $testCall->group('__pest_only');
 
         $lockFile = self::TEMPORARY_FOLDER.DIRECTORY_SEPARATOR.'only.lock';
