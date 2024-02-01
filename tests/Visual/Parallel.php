@@ -13,12 +13,12 @@ $run = function () {
 
     $process->run();
 
-    return preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $process->getOutput());
+    return removeAnsiEscapeSequences($process->getOutput());
 };
 
 test('parallel', function () use ($run) {
     expect($run('--exclude-group=integration'))
-        ->toContain('Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 16 skipped, 965 passed (2285 assertions)')
+        ->toContain('Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 16 skipped, 994 passed (2348 assertions)')
         ->toContain('Parallel: 3 processes');
 })->skipOnWindows();
 

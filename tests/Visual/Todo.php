@@ -11,9 +11,7 @@ $run = function (string $target, bool $parallel) {
 
     expect($process->getExitCode())->toBe(0);
 
-    $outputContent = preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $process->getOutput());
-
-    return $outputContent;
+    return removeAnsiEscapeSequences($process->getOutput());
 };
 
 $snapshot = function ($name) {

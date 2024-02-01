@@ -7,10 +7,10 @@ namespace Pest\Contracts\Plugins;
 /**
  * @internal
  */
-interface Shutdownable
+interface Terminable
 {
     /**
-     * Shutdowns the plugin.
+     * Terminates the plugin.
      */
-    public function shutdown(): void;
+    public function terminate(): void;
 }

@@ -10,7 +10,7 @@ test('collision', function (array $arguments) {
 
         $process->run();
 
-        return preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $process->getOutput());
+        return removeAnsiEscapeSequences($process->getOutput());
     };
 
     $outputContent = explode("\n", $output());

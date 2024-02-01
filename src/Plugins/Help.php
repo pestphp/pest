@@ -61,6 +61,10 @@ final class Help implements HandlesArguments
 
                     assert(is_string($argument));
 
+                    if (trim($argument) === '--process-isolation') {
+                        continue;
+                    }
+
                     View::render('components.two-column-detail', [
                         'left' => $this->colorizeOptions($argument),
                         'right' => preg_replace(['/</', '/>/'], ['[', ']'], $description),

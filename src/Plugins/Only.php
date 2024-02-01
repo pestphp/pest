@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Pest\Plugins;
 
-use Pest\Contracts\Plugins\Shutdownable;
+use Pest\Contracts\Plugins\Terminable;
 use Pest\PendingCalls\TestCall;
 
 /**
  * @internal
  */
-final class Only implements Shutdownable
+final class Only implements Terminable
 {
     /**
      * The temporary folder.
@@ -26,7 +26,7 @@ final class Only implements Shutdownable
     /**
      * {@inheritDoc}
      */
-    public function shutdown(): void
+    public function terminate(): void
     {
         $lockFile = self::TEMPORARY_FOLDER.DIRECTORY_SEPARATOR.'only.lock';
 
@@ -40,6 +40,10 @@ final class Only implements Shutdownable
      */
     public static function enable(TestCall $testCall): void
     {
+        if (Environment::name() == Environment::CI) {
+            return;
+        }
+
         $testCall->group('__pest_only');
 
         $lockFile = self::TEMPORARY_FOLDER.DIRECTORY_SEPARATOR.'only.lock';

@@ -296,7 +296,7 @@ trait Testable
             return $arguments;
         }
 
-        if (in_array($testParameterTypes[0], [Closure::class, 'callable'])) {
+        if (isset($testParameterTypes[0]) && in_array($testParameterTypes[0], [Closure::class, 'callable'])) {
             return $arguments;
         }
 

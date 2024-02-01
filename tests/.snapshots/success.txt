@@ -151,6 +151,10 @@
   ✓ it can correctly resolve a bound dataset that returns an array with (Closure)
   ✓ it can correctly resolve a bound dataset that returns an array but wants to be spread with (Closure)
   ↓ forbids to define tests in Datasets dirs and Datasets.php files
+  ✓ it may be used with high order with dataset "formal"
+  ✓ it may be used with high order with dataset "informal"
+  ✓ it may be used with high order even when bound with dataset "formal"
+  ✓ it may be used with high order even when bound with dataset "informal"
 
    PASS  Tests\Features\Depends
   ✓ first
@@ -423,6 +427,7 @@
    PASS  Tests\Features\Expect\toBeGreaterThan
   ✓ passes
   ✓ passes with DateTime and DateTimeImmutable
+  ✓ passes with strings
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
@@ -430,6 +435,7 @@
    PASS  Tests\Features\Expect\toBeGreaterThanOrEqual
   ✓ passes
   ✓ passes with DateTime and DateTimeImmutable
+  ✓ passes with strings
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
@@ -457,6 +463,10 @@
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeIntBackedEnum
+  ✓ enum is backed by int
+  ✓ enum is not backed by int
 
    PASS  Tests\Features\Expect\toBeInvokable
   ✓ class is invokable
@@ -487,6 +497,7 @@
    PASS  Tests\Features\Expect\toBeLessThan
   ✓ passes
   ✓ passes with DateTime and DateTimeImmutable
+  ✓ passes with strings
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
@@ -494,6 +505,7 @@
    PASS  Tests\Features\Expect\toBeLessThanOrEqual
   ✓ passes
   ✓ passes with DateTime and DateTimeImmutable
+  ✓ passes with strings
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
@@ -564,6 +576,10 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toBeStringBackedEnum
+  ✓ enum is backed by string
+  ✓ enum is not backed by string
+
    PASS  Tests\Features\Expect\toBeStudlyCase
   ✓ pass
   ✓ failures
@@ -629,6 +645,16 @@
   ✓ passes arrays
   ✓ passes arrays with multiple needles
   ✓ passes with array needles
+  ✓ failures
+  ✓ failures with multiple needles (all failing)
+  ✓ failures with multiple needles (some failing)
+  ✓ not failures
+  ✓ not failures with multiple needles (all failing)
+  ✓ not failures with multiple needles (some failing)
+
+   PASS  Tests\Features\Expect\toContainEqual
+  ✓ passes arrays
+  ✓ passes arrays with multiple needles
   ✓ failures
   ✓ failures with multiple needles (all failing)
   ✓ failures with multiple needles (some failing)
@@ -827,6 +853,7 @@
 
    PASS  Tests\Features\Expect\toMatchSnapshot
   ✓ pass
+  ✓ pass using pipes
   ✓ pass with __toString
   ✓ pass with toString
   ✓ pass with dataset with ('my-datas-set-value')
@@ -1137,6 +1164,16 @@
    PASS  Tests\Hooks\BeforeEachTest
   ✓ global beforeEach execution order
 
+   PASS  Tests\Overrides\VersionsTest
+  ✓ versions with dataset "Runner/Filter/NameFilterIterator.php"
+  ✓ versions with dataset "Runner/ResultCache/DefaultResultCache.php"
+  ✓ versions with dataset "Runner/TestSuiteLoader.php"
+  ✓ versions with dataset "TextUI/Command/Commands/WarmCodeCoverageCacheCommand.php"
+  ✓ versions with dataset "TextUI/Output/Default/ProgressPrinter/Subscriber/TestSkippedSubscriber.php"
+  ✓ versions with dataset "TextUI/TestSuiteFilterProcessor.php"
+  ✓ versions with dataset "Event/Value/ThrowableBuilder.php"
+  ✓ versions with dataset "Logging/JUnit/JunitXmlLogger.php"
+
    PASS  Tests\PHPUnit\CustomAffixes\InvalidTestName
   ✓ it runs file names like @#$%^&()-_=+.php
 
@@ -1348,9 +1385,13 @@
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
 
-   WARN  Tests\Visual\Parallel
-  - parallel → Waiting for Parallel to be stable
-  - a parallel test can extend another test with same name → Waiting for Parallel to be stable
+   PASS  Tests\Visual\JUnit
+  ✓ junit output
+  ✓ junit with parallel
+
+   PASS  Tests\Visual\Parallel
+  ✓ parallel
+  ✓ a parallel test can extend another test with same name
 
    PASS  Tests\Visual\SingleTestOrDirectory
   ✓ allows to run a single test

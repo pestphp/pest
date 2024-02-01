@@ -16,6 +16,11 @@ test('passes with DateTime and DateTimeImmutable', function () {
     expect($past)->not->toBeGreaterThan($now);
 });
 
+test('passes with strings', function () {
+    expect('b')->toBeGreaterThan('a');
+    expect('a')->not->toBeGreaterThan('a');
+});
+
 test('failures', function () {
     expect(4)->toBeGreaterThan(4);
 })->throws(ExpectationFailedException::class);

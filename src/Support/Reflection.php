@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Support;
 
 use Closure;
+use InvalidArgumentException;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\TestSuite;
 use ReflectionClass;
@@ -66,9 +67,17 @@ final class Reflection
     {
         $test = TestSuite::getInstance()->test;
 
-        return $test instanceof \PHPUnit\Framework\TestCase
-            ? Closure::fromCallable($callable)->bindTo($test)(...$test->providedData())
-            : self::bindCallable($callable);
+        if (! $test instanceof \PHPUnit\Framework\TestCase) {
+            return self::bindCallable($callable);
+        }
+
+        foreach ($test->providedData() as $value) {
+            if ($value instanceof Closure) {
+                throw new InvalidArgumentException('Bound datasets are not supported while doing high order testing.');
+            }
+        }
+
+        return Closure::fromCallable($callable)->bindTo($test)(...$test->providedData());
     }
 
     /**

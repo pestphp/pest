@@ -51,7 +51,7 @@
     "require-dev": {
         "pestphp/pest-dev-tools": "^3.0.0",
         "pestphp/pest-plugin-type-coverage": "^3.0.0",
-        "symfony/process": "^7.0.2"
+        "symfony/process": "^7.0.3"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -105,8 +105,7 @@
                 "Pest\\Plugins\\Snapshot",
                 "Pest\\Plugins\\Verbose",
                 "Pest\\Plugins\\Version",
-                "Pest\\Plugins\\Parallel",
-                "Pest\\Plugins\\JUnit"
+                "Pest\\Plugins\\Parallel"
             ]
         },
         "phpstan": {

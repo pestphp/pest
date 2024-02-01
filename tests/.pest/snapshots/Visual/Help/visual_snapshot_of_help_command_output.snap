@@ -1,5 +1,5 @@
 
-  Pest Testing Framework 3.0.0-dev-0004.
+  Pest Testing Framework 3.0.0-dev-0005.
 
   USAGE: pest <file> [options]  
 
@@ -40,7 +40,6 @@
   EXECUTION OPTIONS:
   --parallel ........................................... Run tests in parallel  
   --update-snapshots  Update snapshots for tests using the "toMatchSnapshot" expectation  
-  --process-isolation ................ Run each test in a separate PHP process  
   --globals-backup ................. Backup and restore $GLOBALS for each test  
   --static-backup ......... Backup and restore static properties for each test  
   --strict-coverage ................... Be strict about code coverage metadata  
