@@ -12,8 +12,8 @@ it('can check if dataset is defined inside a Datasets directory', function (stri
     ['file' => '/var/www/project/tests/Features/Datasets.php', 'inside' => false],
 ]);
 
-it('can check if dataset is defined inside a Datasets.php file', function (string $path, bool $inside) {
-    expect(DatasetInfo::isADatasetsFile($path))->toBe($inside);
+it('can check if dataset is defined inside a Datasets.php file', function (string $file, bool $inside) {
+    expect(DatasetInfo::isADatasetsFile($file))->toBe($inside);
 })->with([
     ['file' => '/var/www/project/tests/Datasets/Numbers.php', 'inside' => false],
     ['file' => '/var/www/project/tests/Datasets.php', 'inside' => true],

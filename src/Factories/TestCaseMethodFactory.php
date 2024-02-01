@@ -100,7 +100,7 @@ final class TestCaseMethodFactory
 
         $method = $this;
 
-        return function () use ($testCase, $method, $closure): mixed { // @phpstan-ignore-line
+        return function (...$arguments) use ($testCase, $method, $closure): mixed { // @phpstan-ignore-line
             /* @var TestCase $this */
             $testCase->proxies->proxy($this);
             $method->proxies->proxy($this);
@@ -108,7 +108,7 @@ final class TestCaseMethodFactory
             $testCase->chains->chain($this);
             $method->chains->chain($this);
 
-            return \Pest\Support\Closure::bind($closure, $this, self::class)(...func_get_args());
+            return \Pest\Support\Closure::bind($closure, $this, self::class)(...$arguments);
         };
     }
 
@@ -168,13 +168,13 @@ final class TestCaseMethodFactory
 
         return <<<PHP
             $attributesCode
-                public function $methodName()
+                public function $methodName(...\$arguments)
                 {
                     \$test = \Pest\TestSuite::getInstance()->tests->get(self::\$__filename)->getMethod(\$this->name())->getClosure(\$this);
 
                     return \$this->__runTest(
                         \$test,
-                        ...func_get_args(),
+                        ...\$arguments,
                     );
                 }
             $datasetsCode

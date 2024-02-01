@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pest\Concerns;
 
 use Closure;
-use Pest\Exceptions\DatasetArgsCountMismatch;
+use Pest\Exceptions\DatasetArgumentsMismatch;
 use Pest\Support\ChainableClosure;
 use Pest\Support\ExceptionTrace;
 use Pest\Support\Reflection;
@@ -14,6 +14,7 @@ use PHPUnit\Framework\Attributes\PostCondition;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use ReflectionFunction;
+use ReflectionParameter;
 use Throwable;
 
 /**
@@ -187,7 +188,7 @@ trait Testable
     /**
      * Gets executed before the Test Case.
      */
-    protected function setUp(): void
+    protected function setUp(...$arguments): void
     {
         TestSuite::getInstance()->test = $this;
 
@@ -221,13 +222,13 @@ trait Testable
             $beforeEach = ChainableClosure::bound($this->__beforeEach, $beforeEach);
         }
 
-        $this->__callClosure($beforeEach, func_get_args());
+        $this->__callClosure($beforeEach, $arguments);
     }
 
     /**
      * Gets executed after the Test Case.
      */
-    protected function tearDown(): void
+    protected function tearDown(...$arguments): void
     {
         $afterEach = TestSuite::getInstance()->afterEach->get(self::$__filename);
 
@@ -235,7 +236,7 @@ trait Testable
             $afterEach = ChainableClosure::bound($this->__afterEach, $afterEach);
         }
 
-        $this->__callClosure($afterEach, func_get_args());
+        $this->__callClosure($afterEach, $arguments);
 
         parent::tearDown();
 
@@ -250,7 +251,7 @@ trait Testable
     private function __runTest(Closure $closure, ...$args): mixed
     {
         $arguments = $this->__resolveTestArguments($args);
-        $this->__ensureDatasetArgumentNumberMatches($arguments);
+        $this->__ensureDatasetArgumentNameAndNumberMatches($arguments);
 
         return $this->__callClosure($closure, $arguments);
     }
@@ -315,9 +316,9 @@ trait Testable
      * Ensures dataset items count matches underlying test case required parameters
      *
      * @throws ReflectionException
-     * @throws DatasetArgsCountMismatch
+     * @throws DatasetArgumentsMismatch
      */
-    private function __ensureDatasetArgumentNumberMatches(array $arguments): void
+    private function __ensureDatasetArgumentNameAndNumberMatches(array $arguments): void
     {
         if ($arguments === []) {
             return;
@@ -328,11 +329,19 @@ trait Testable
         $requiredParametersCount = $testReflection->getNumberOfRequiredParameters();
         $suppliedParametersCount = count($arguments);
 
-        if ($suppliedParametersCount >= $requiredParametersCount) {
+        $datasetParameterNames = array_keys($arguments);
+        $testParameterNames = array_map(
+            fn (ReflectionParameter $reflectionParameter): string => $reflectionParameter->getName(),
+            array_filter($testReflection->getParameters(), fn (ReflectionParameter $reflectionParameter): bool => ! $reflectionParameter->isOptional()),
+        );
+
+        if (
+            (count(array_diff($testParameterNames, $datasetParameterNames)) === 0) || isset($testParameterNames[0])
+            && $suppliedParametersCount >= $requiredParametersCount) {
             return;
         }
 
-        throw new DatasetArgsCountMismatch($requiredParametersCount, $suppliedParametersCount);
+        throw new DatasetArgumentsMismatch($requiredParametersCount, $suppliedParametersCount);
     }
 
     /**
