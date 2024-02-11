@@ -116,4 +116,12 @@ final class Str
     {
         return (bool) filter_var($value, FILTER_VALIDATE_URL);
     }
+
+    /**
+     * Determine if a given value is a valid EMAIL.
+     */
+    public static function isEmail(string $value): bool
+    {
+        return (bool) filter_var($value, FILTER_VALIDATE_EMAIL);
+    }
 }
