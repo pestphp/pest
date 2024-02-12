@@ -543,6 +543,12 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toBePowerOf
+  ✓ Check whether one number is a power of another → pass
+  ✓ Check whether one number is a power of another → failures
+  ✓ Check whether one number is a power of another → failures with custom message
+  ✓ Check whether one number is a power of another → not failures
+
    PASS  Tests\Features\Expect\toBeReadableDirectory
   ✓ pass
   ✓ failures
@@ -1418,4 +1424,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 20 skipped, 1009 passed (2395 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 20 skipped, 1013 passed (2404 assertions)
