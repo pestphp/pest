@@ -23,10 +23,10 @@
         "nunomaduro/termwind": "^1.15.1|^2.0.0",
         "pestphp/pest-plugin": "^2.1.1",
         "pestphp/pest-plugin-arch": "^2.7.0",
-        "phpunit/phpunit": "^10.5.10"
+        "phpunit/phpunit": "^10.5.11"
     },
     "conflict": {
-        "phpunit/phpunit": ">10.5.10",
+        "phpunit/phpunit": ">10.5.11",
         "sebastian/exporter": "<5.1.0",
         "webmozart/assert": "<1.11.0"
     },
@@ -53,7 +53,7 @@
     "require-dev": {
         "pestphp/pest-dev-tools": "^2.16.0",
         "pestphp/pest-plugin-type-coverage": "^2.8.0",
-        "symfony/process": "^6.4.0|^7.0.3"
+        "symfony/process": "^6.4.0|^7.0.4"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
