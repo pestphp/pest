@@ -84,7 +84,7 @@ final class OppositeExpectation
     {
         return Targeted::make(
             $this->original,
-            fn (ObjectDescription $object): bool => ! str_contains((string) file_get_contents($object->path), 'declare(strict_types=1);'),
+            fn (ObjectDescription $object): bool => ! (bool) preg_match('/^<\?php\s+declare\s*\(\s*strict_types\s*=\s*1\s*\);/', (string) file_get_contents($object->path)),
             'not to use strict types',
             FileLineFinder::where(fn (string $line): bool => str_contains($line, '<?php')),
         );
