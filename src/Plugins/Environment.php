@@ -39,6 +39,10 @@ final class Environment implements HandlesArguments
             }
         }
 
+        if (getenv('CI') === 'true') {
+            self::$name ??= self::CI;
+        }
+
         return array_values($arguments);
     }
 
