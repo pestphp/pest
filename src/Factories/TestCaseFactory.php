@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Factories;
 
+use Laravel\SerializableClosure\Support\ReflectionClosure;
 use ParseError;
 use Pest\Concerns;
 use Pest\Contracts\AddsAnnotations;
@@ -11,6 +12,7 @@ use Pest\Contracts\HasPrintableTestCaseName;
 use Pest\Exceptions\DatasetMissing;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Exceptions\TestAlreadyExist;
+use Pest\Exceptions\TestClosureMustNotBeStatic;
 use Pest\Exceptions\TestDescriptionMissing;
 use Pest\Factories\Concerns\HigherOrderable;
 use Pest\Support\Reflection;
@@ -214,6 +216,13 @@ final class TestCaseFactory
 
         if (array_key_exists($method->description, $this->methods)) {
             throw new TestAlreadyExist($method->filename, $method->description);
+        }
+
+        if (
+            $method->closure instanceof \Closure &&
+            (new ReflectionClosure($method->closure))->isStatic()
+        ) {
+            throw new TestClosureMustNotBeStatic("The test `$method->description` closure must not be static in $method->filename.");
         }
 
         if (! $method->receivesArguments()) {
