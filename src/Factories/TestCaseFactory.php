@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pest\Factories;
 
-use Laravel\SerializableClosure\Support\ReflectionClosure;
 use ParseError;
 use Pest\Concerns;
 use Pest\Contracts\AddsAnnotations;
@@ -220,7 +219,7 @@ final class TestCaseFactory
 
         if (
             $method->closure instanceof \Closure &&
-            (new ReflectionClosure($method->closure))->isStatic()
+            (new \ReflectionFunction($method->closure))->isStatic()
         ) {
             throw new TestClosureMustNotBeStatic("The test `$method->description` closure must not be static in $method->filename.");
         }

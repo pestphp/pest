@@ -22,7 +22,6 @@ arch('dependencies')
         'Whoops',
         'Symfony\Component\Console',
         'Symfony\Component\Process',
-        'Laravel\SerializableClosure\Support\ReflectionClosure',
     ])->ignoring(['Composer', 'PHPUnit', 'SebastianBergmann']);
 
 arch('contracts')
