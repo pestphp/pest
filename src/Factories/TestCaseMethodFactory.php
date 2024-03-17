@@ -90,6 +90,11 @@ final class TestCaseMethodFactory
             throw ShouldNotHappen::fromMessage('Description can not be empty.');
         }
 
+        if (($reflection = new ReflectionClosure($this->closure))->isStatic()) {
+            $fileAndLine = $reflection->getFileName() . ':' . $reflection->getStartLine();
+            throw ShouldNotHappen::fromMessage("The test `$this->description` closure must not be static in $fileAndLine.");
+        }
+
         $closure = $this->closure;
 
         $testCase = TestSuite::getInstance()->tests->get($this->filename);
