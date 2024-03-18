@@ -441,7 +441,7 @@ final class Expectation
     {
         return Targeted::make(
             $this,
-            fn (ObjectDescription $object): bool => str_contains((string) file_get_contents($object->path), 'declare(strict_types=1);'),
+            fn (ObjectDescription $object): bool => (bool) preg_match('/^<\?php\s+declare\(.*?strict_types\s?=\s?1.*?\);/', (string) file_get_contents($object->path)),
             'to use strict types',
             FileLineFinder::where(fn (string $line): bool => str_contains($line, '<?php')),
         );
