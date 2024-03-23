@@ -1177,4 +1177,25 @@ final class Expectation
 
         return $this;
     }
+
+    /**
+     * Asserts that the value is power of $expected.
+     *
+     * @return self<TValue>
+     */
+    public function toBePowerOf(int|float $expected, string $message = ''): self
+    {
+        $logarithme = log(
+            (float) $this->value,
+            (float) $expected
+        );
+
+        Assert::assertTrue(
+            $expected === 1
+            || floor($logarithme) === $logarithme,
+            $message
+        );
+
+        return $this;
+    }
 }
