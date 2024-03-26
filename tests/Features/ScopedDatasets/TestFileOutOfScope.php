@@ -25,7 +25,7 @@ it('can see datasets defined in Pest.php file 2', function (string $value) use (
     expect(true)->toBe(true);
 })->with('dataset_in_pest_file');
 
-test('Pest.php dataset is taken', function () use ($state) {
+test('Pest.php dataset is taken 2', function () use ($state) {
     expect($state->text)->toBe('12AB');
 });
 
