@@ -21,13 +21,11 @@ test('the right dataset is taken', function () use ($state) {
 // });
 
 
-$nestedDatasetState = new stdClass();
-$nestedDatasetState->text = '';
-test('uses datasets in nested directories', function($value) use ($nestedDatasetState){
-    $nestedDatasetState->text .= $value;
+test('uses datasets in nested directories', function($value) use ($state){
+    $state->text .= $value;
     expect(true)->toBe(true);
 })->with('nested.letters');
 
-test('nested dataset is taken', function () use ($nestedDatasetState) {
-    expect($nestedDatasetState->text)->toBe('ABC');
+test('nested dataset is taken', function () use ($state) {
+    expect($state->text)->toBe('12ABC');
 });
