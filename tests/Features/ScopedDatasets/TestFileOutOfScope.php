@@ -23,8 +23,8 @@ test('Pest.php dataset is taken', function () use ($state) {
 test('uses datasets in nested directories', function($value) use ($state){
     $state->text .= $value;
     expect(true)->toBe(true);
-})->with('animals.dogs');
+})->with('nested.letters');
 
 test('nested dataset is taken', function () use ($state) {
-    expect($state->text)->toBe('12ABBeagleBraccoDalmatianDobermann');
+    expect($state->text)->toBe('12ABABC');
 });
