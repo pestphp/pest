@@ -27,6 +27,75 @@ use PHPUnit\Framework\ExpectationFailedException;
  *
  * @template TValue
  *
+ * @method self<TValue> toBe(mixed $expected, string $message = '') Asserts that the given value is equal to the expected value.
+ * @method self<TValue> toBeArray(string $message = '') Asserts that the given value is an array.
+ * @method self<TValue> toBeBetween(mixed $start, mixed $end, string $message = '') Asserts that the given value is between the given start and end.
+ * @method self<TValue> toBeEmpty(string $message = '') Asserts that the given value is empty.
+ * @method self<TValue> toBeTrue(string $message = '') Asserts that the given value is true.
+ * @method self<TValue> toBeTruthy(string $message = '') Asserts that the given value is truthy.
+ * @method self<TValue> toBeFalse(string $message = '') Asserts that the given value is false.
+ * @method self<TValue> toBeFalsy(string $message = '') Asserts that the given value is falsy.
+ * @method self<TValue> toBeGreaterThan(mixed $expected, string $message = '') Asserts that the given value is greater than the expected value.
+ * @method self<TValue> toBeGreaterThanOrEqual(mixed $expected, string $message = '') Asserts that the given value is greater than or equal to the expected value.
+ * @method self<TValue> toBeLessThan(mixed $expected, string $message = '') Asserts that the given value is less than the expected value.
+ * @method self<TValue> toBeLessThanOrEqual(mixed $expected, string $message = '') Asserts that the given value is less than or equal to the expected value.
+ * @method self<TValue> toContain(mixed $expected, string $message = '') Asserts that the given value contains the expected value.
+ * @method self<TValue> toContainEqual(mixed $expected, string $message = '') Asserts that the given value contains the expected value.
+ * @method self<TValue> toContainOnlyInstancesOf(string $expected, string $message = '') Asserts that the given value contains only instances of the expected value.
+ * @method self<TValue> toHaveCount(int $expected, string $message = '') Asserts that the given value has the expected count.
+ * @method self<TValue> toHaveMethods(array<string> $methods, string $message = '') Asserts that the given value has the expected methods.
+ * @method self<TValue> toHaveProperty(string $property, string $message = '') Asserts that the given value has the expected property.
+ * @method self<TValue> toHaveProperties(array<string> $properties, string $message = '') Asserts that the given value has the expected properties.
+ * @method self<TValue> toMatchArray(array<mixed> $expected, string $message = '') Asserts that the given value matches the expected array.
+ * @method self<TValue> toMatchObject(object $expected, string $message = '') Asserts that the given value matches the expected object.
+ * @method self<TValue> toEqual(mixed $expected, string $message = '') Asserts that the given value is equal to the expected value.
+ * @method self<TValue> toEqualCanonicalizing(mixed $expected, string $message = '') Asserts that the given value is equal to the expected value.
+ * @method self<TValue> toEqualWithDelta(mixed $expected, float $delta, string $message = '') Asserts that the given value is equal to the expected value.
+ * @method self<TValue> toBeIn(mixed $expected, string $message = '') Asserts that the given value is in the expected value.
+ * @method self<TValue> toBeInfinite(string $message = '') Asserts that the given value is infinite.
+ * @method self<TValue> toBeInstanceOf(string $expected, string $message = '') Asserts that the given value is an instance of the expected value.
+ * @method self<TValue> toBeBool(string $message = '') Asserts that the given value is a boolean.
+ * @method self<TValue> toBeCallable(string $message = '') Asserts that the given value is callable.
+ * @method self<TValue> toBeFile(string $message = '') Asserts that the given value is a file.
+ * @method self<TValue> toBeFloat(string $message = '') Asserts that the given value is a float.
+ * @method self<TValue> toBeInt(string $message = '') Asserts that the given value is an integer.
+ * @method self<TValue> toBeIterable(string $message = '') Asserts that the given value is iterable.
+ * @method self<TValue> toBeNumeric(string $message = '') Asserts that the given value is numeric.
+ * @method self<TValue> toBeDigits(string $message = '') Asserts that the given value is digits.
+ * @method self<TValue> toBeObject(string $message = '') Asserts that the given value is an object.
+ * @method self<TValue> toBeResource(string $message = '') Asserts that the given value is a resource.
+ * @method self<TValue> toBeScalar(string $message = '') Asserts that the given value is a scalar.
+ * @method self<TValue> toBeString(string $message = '') Asserts that the given value is a string.
+ * @method self<TValue> toBeJson(string $message = '') Asserts that the given value is a valid JSON string.
+ * @method self<TValue> toBeNan(string $message = '') Asserts that the given value is NaN.
+ * @method self<TValue> toBeNull(string $message = '') Asserts that the given value is null.
+ * @method self<TValue> toHaveKey(mixed $key, string $message = '') Asserts that the given value has the expected key.
+ * @method self<TValue> toHaveLength(int $expected, string $message = '') Asserts that the given value has the expected length.
+ * @method self<TValue> toBeReadableDirectory(string $message = '') Asserts that the given value is a readable directory.
+ * @method self<TValue> toBeReadableFile(string $message = '') Asserts that the given value is a readable file.
+ * @method self<TValue> toBeWritableDirectory(string $message = '') Asserts that the given value is a writable directory.
+ * @method self<TValue> toBeWritableFile(string $message = '') Asserts that the given value is a writable file.
+ * @method self<TValue> toStartWith(mixed $expected, string $message = '') Asserts that the given value starts with the expected value.
+ * @method self<TValue> toThrow(string $message = '') Asserts that the given value throws an exception.
+ * @method self<TValue> toEndWith(mixed $expected, string $message = '') Asserts that the given value ends with the expected value.
+ * @method self<TValue> toMatch(string $expected, string $message = '') Asserts that the given value matches the expected value.
+ * @method self<TValue> toMatchConstraint(string $expected, string $message = '') Asserts that the given value matches the expected value.
+ * @method self<TValue> toBeUppercase(string $message = '') Asserts that the given value is uppercase.
+ * @method self<TValue> toBeLowercase(string $message = '') Asserts that the given value is lowercase.
+ * @method self<TValue> toBeAlpha(string $message = '') Asserts that the given value is alphabetic.
+ * @method self<TValue> toBeAlphaNumeric(string $message = '') Asserts that the given value is alphanumeric.
+ * @method self<TValue> toBeSnakeCase(string $message = '') Asserts that the given value is snake case.
+ * @method self<TValue> toBeKebabCase(string $message = '') Asserts that the given value is kebab case.
+ * @method self<TValue> toBeCamelCase(string $message = '') Asserts that the given value is camel case.
+ * @method self<TValue> toBeStudlyCase(string $message = '') Asserts that the given value is studly case.
+ * @method self<TValue> toHaveSameSize(mixed $expected, string $message = '') Asserts that the given value has the same size as the expected value.
+ * @method self<TValue> toHaveKebabCaseKeys(string $message = '') Asserts that the given value has kebab case keys.
+ * @method self<TValue> toHaveSnakeCaseKeys(string $message = '') Asserts that the given value has snake case keys.
+ * @method self<TValue> toHaveCamelCaseKeys(string $message = '') Asserts that the given value has camel case keys.
+ * @method self<TValue> toHaveStudlyCaseKeys(string $message = '') Asserts that the given value has studly case keys.
+ * @method self<TValue> toBeUrl(string $message = '') Asserts that the given value is a valid URL.
+ * @method self<TValue> toBeUuid(string $message = '') Asserts that the given value is a valid UUID.
+ *
  * @mixin Expectation<TValue>
  */
 final class OppositeExpectation
