@@ -21,6 +21,7 @@ test('Pest.php dataset is taken', function () use ($state) {
 });
 
 test('uses datasets in nested directories', function($value) use ($state){
+    dump('1');
     $state->text .= $value;
     expect(true)->toBe(true);
 })->with('nested.letters');
