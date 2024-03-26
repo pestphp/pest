@@ -35,5 +35,5 @@ test('uses datasets in nested directories', function ($value) use ($state) {
 })->with('nested.letters');
 
 test('nested dataset is taken', function () use ($state) {
-    expect($state->text)->toBe('12ABC');
+    expect($state->text)->toBe('12ABABABC');
 });
