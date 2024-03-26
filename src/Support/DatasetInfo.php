@@ -18,6 +18,11 @@ final class DatasetInfo
         return basename(dirname($file)) === self::DATASETS_DIR_NAME;
     }
 
+    public static function isInsideANestedDatasetsDirectory(string $file): bool
+    {
+        return str_contains($file, DIRECTORY_SEPARATOR . self::DATASETS_DIR_NAME . DIRECTORY_SEPARATOR);
+    }
+
     public static function isADatasetsFile(string $file): bool
     {
         return basename($file) === self::DATASETS_FILE_NAME;
@@ -27,6 +32,10 @@ final class DatasetInfo
     {
         if (self::isInsideADatasetsDirectory($file)) {
             return dirname($file, 2);
+        }
+
+        if (self::isInsideANestedDatasetsDirectory($file)) {
+            return strstr($file, DIRECTORY_SEPARATOR . self::DATASETS_DIR_NAME, true);
         }
 
         if (self::isADatasetsFile($file)) {
