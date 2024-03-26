@@ -16,7 +16,9 @@ use Pest\Support\Backtrace;
 use Pest\Support\Exporter;
 use Pest\Support\HigherOrderCallables;
 use Pest\Support\NullClosure;
+use Pest\Support\Str;
 use Pest\TestSuite;
+use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -44,8 +46,8 @@ final class TestCall
     public function __construct(
         private readonly TestSuite $testSuite,
         private readonly string $filename,
-        string $description = null,
-        Closure $closure = null
+        ?string $description = null,
+        ?Closure $closure = null
     ) {
         $this->testCaseMethod = new TestCaseMethodFactory($filename, $description, $closure);
 
@@ -57,9 +59,17 @@ final class TestCall
     }
 
     /**
+     * Asserts that the test fails with the given message.
+     */
+    public function fails(?string $message = null): self
+    {
+        return $this->throws(AssertionFailedError::class, $message);
+    }
+
+    /**
      * Asserts that the test throws the given `$exceptionClass` when called.
      */
-    public function throws(string|int $exception, string $exceptionMessage = null, int $exceptionCode = null): self
+    public function throws(string|int $exception, ?string $exceptionMessage = null, ?int $exceptionCode = null): self
     {
         if (is_int($exception)) {
             $exceptionCode = $exception;
@@ -91,13 +101,31 @@ final class TestCall
      *
      * @param  (callable(): bool)|bool  $condition
      */
-    public function throwsIf(callable|bool $condition, string|int $exception, string $exceptionMessage = null, int $exceptionCode = null): self
+    public function throwsIf(callable|bool $condition, string|int $exception, ?string $exceptionMessage = null, ?int $exceptionCode = null): self
     {
         $condition = is_callable($condition)
             ? $condition
             : static fn (): bool => $condition;
 
         if ($condition()) {
+            return $this->throws($exception, $exceptionMessage, $exceptionCode);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the test throws the given `$exceptionClass` when called if the given condition is false.
+     *
+     * @param  (callable(): bool)|bool  $condition
+     */
+    public function throwsUnless(callable|bool $condition, string|int $exception, ?string $exceptionMessage = null, ?int $exceptionCode = null): self
+    {
+        $condition = is_callable($condition)
+            ? $condition
+            : static fn (): bool => $condition;
+
+        if (! $condition()) {
             return $this->throws($exception, $exceptionMessage, $exceptionCode);
         }
 
@@ -181,11 +209,36 @@ final class TestCall
     }
 
     /**
+     * Skips the current test on the given PHP version.
+     */
+    public function skipOnPhp(string $version): self
+    {
+        if (mb_strlen($version) < 2) {
+            throw new InvalidArgumentException('The version must start with [<] or [>].');
+        }
+
+        if (str_starts_with($version, '>=') || str_starts_with($version, '<=')) {
+            $operator = substr($version, 0, 2);
+            $version = substr($version, 2);
+        } elseif (str_starts_with($version, '>') || str_starts_with($version, '<')) {
+            $operator = $version[0];
+            $version = substr($version, 1);
+            // ensure starts with number:
+        } elseif (is_numeric($version[0])) {
+            $operator = '==';
+        } else {
+            throw new InvalidArgumentException('The version must start with [<, >, <=, >=] or a number.');
+        }
+
+        return $this->skip(version_compare(PHP_VERSION, $version, $operator), sprintf('This test is skipped on PHP [%s%s].', $operator, $version));
+    }
+
+    /**
      * Skips the current test if the given test is running on Windows.
      */
     public function skipOnWindows(): self
     {
-        return $this->skipOn('Windows', 'This test is skipped on [Windows].');
+        return $this->skipOnOs('Windows', 'This test is skipped on [Windows].');
     }
 
     /**
@@ -193,7 +246,7 @@ final class TestCall
      */
     public function skipOnMac(): self
     {
-        return $this->skipOn('Darwin', 'This test is skipped on [Mac].');
+        return $this->skipOnOs('Darwin', 'This test is skipped on [Mac].');
     }
 
     /**
@@ -201,17 +254,41 @@ final class TestCall
      */
     public function skipOnLinux(): self
     {
-        return $this->skipOn('Linux', 'This test is skipped on [Linux].');
+        return $this->skipOnOs('Linux', 'This test is skipped on [Linux].');
     }
 
     /**
      * Skips the current test if the given test is running on the given operating systems.
      */
-    private function skipOn(string $osFamily, string $message): self
+    private function skipOnOs(string $osFamily, string $message): self
     {
-        return PHP_OS_FAMILY === $osFamily
+        return $osFamily === PHP_OS_FAMILY
             ? $this->skip($message)
             : $this;
+    }
+
+    /**
+     * Skips the current test unless the given test is running on Windows.
+     */
+    public function onlyOnWindows(): self
+    {
+        return $this->skipOnMac()->skipOnLinux();
+    }
+
+    /**
+     * Skips the current test unless the given test is running on Mac.
+     */
+    public function onlyOnMac(): self
+    {
+        return $this->skipOnWindows()->skipOnLinux();
+    }
+
+    /**
+     * Skips the current test unless the given test is running on Linux.
+     */
+    public function onlyOnLinux(): self
+    {
+        return $this->skipOnWindows()->skipOnMac();
     }
 
     /**
@@ -332,7 +409,7 @@ final class TestCall
      *
      * @param  array<int, mixed>|null  $arguments
      */
-    private function addChain(string $file, int $line, string $name, array $arguments = null): self
+    private function addChain(string $file, int $line, string $name, ?array $arguments = null): self
     {
         $exporter = Exporter::default();
 
@@ -361,7 +438,7 @@ final class TestCall
     {
         if (! is_null($this->describing)) {
             $this->testCaseMethod->describing = $this->describing;
-            $this->testCaseMethod->description = sprintf('`%s` → %s', $this->describing, $this->testCaseMethod->description);
+            $this->testCaseMethod->description = Str::describe($this->describing, $this->testCaseMethod->description); // @phpstan-ignore-line
         }
 
         $this->testSuite->tests->set($this->testCaseMethod);

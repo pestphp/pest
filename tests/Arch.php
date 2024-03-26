@@ -2,12 +2,12 @@
 
 use Pest\Expectation;
 
-test('globals')
+arch('globals')
     ->expect(['dd', 'dump', 'ray', 'die', 'var_dump', 'sleep'])
     ->not->toBeUsed()
     ->ignoring(Expectation::class);
 
-test('dependencies')
+arch('dependencies')
     ->expect('Pest')
     ->toOnlyUse([
         'dd',
@@ -24,7 +24,7 @@ test('dependencies')
         'Symfony\Component\Process',
     ])->ignoring(['Composer', 'PHPUnit', 'SebastianBergmann']);
 
-test('contracts')
+arch('contracts')
     ->expect('Pest\Contracts')
     ->toOnlyUse([
         'NunoMaduro\Collision\Contracts',

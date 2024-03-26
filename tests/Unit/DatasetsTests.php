@@ -99,3 +99,13 @@ it('shows the correct description for arrays with many elements', function () {
 
     expect($descriptions[0])->toBe('([1, 2, 3, …])');
 });
+
+it('shows the correct description of datasets with html', function () {
+    $descriptions = array_keys(DatasetsRepository::resolve([
+        [
+            '<div class="flex items-center"></div>',
+        ],
+    ], __FILE__));
+
+    expect($descriptions[0])->toBe('(\'<div class="flex items-center"></div>\')');
+});

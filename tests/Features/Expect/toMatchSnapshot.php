@@ -21,6 +21,23 @@ test('pass', function () {
     expect($this->snapshotable)->toMatchSnapshot();
 });
 
+expect()->pipe('toMatchSnapshot', function (Closure $next) {
+    if (is_string($this->value)) {
+        $this->value = preg_replace(
+            '/name="_token" value=".*"/',
+            'name="_token" value="1"',
+            $this->value
+        );
+    }
+
+    return $next();
+});
+
+test('pass using pipes', function () {
+    expect('<input type="hidden" name="_token" value="'.random_int(1, 999).'" />')
+        ->toMatchSnapshot();
+});
+
 test('pass with `__toString`', function () {
     TestSuite::getInstance()->snapshots->save($this->snapshotable);
 
@@ -101,6 +118,26 @@ test('pass with array', function () {
     expect([
         'key' => $this->snapshotable,
     ])->toMatchSnapshot();
+});
+
+test('pass with `toSnapshot`', function () {
+    TestSuite::getInstance()->snapshots->save(json_encode(['key' => $this->snapshotable], JSON_PRETTY_PRINT));
+
+    $object = new class($this->snapshotable)
+    {
+        public function __construct(protected string $snapshotable)
+        {
+        }
+
+        public function toSnapshot()
+        {
+            return json_encode([
+                'key' => $this->snapshotable,
+            ], JSON_PRETTY_PRINT);
+        }
+    };
+
+    expect($object)->toMatchSnapshot();
 });
 
 test('failures', function () {

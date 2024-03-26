@@ -73,7 +73,7 @@ final class TestCaseMethodFactory
         public ?Closure $closure,
     ) {
         $this->closure ??= function (): void {
-            Assert::getCount() > 0 ?: self::markTestIncomplete(); // @phpstan-ignore-line
+            (Assert::getCount() > 0 || $this->doesNotPerformAssertions()) ?: self::markTestIncomplete(); // @phpstan-ignore-line
         };
 
         $this->bootHigherOrderable();

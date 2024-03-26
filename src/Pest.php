@@ -6,10 +6,10 @@ namespace Pest;
 
 function version(): string
 {
-    return '2.16.0';
+    return '2.34.5';
 }
 
 function testDirectory(string $file = ''): string
 {
-    return TestSuite::getInstance()->testPath.'/'.$file;
+    return TestSuite::getInstance()->testPath.DIRECTORY_SEPARATOR.$file;
 }

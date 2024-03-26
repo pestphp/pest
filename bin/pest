@@ -13,39 +13,39 @@ use Symfony\Component\Console\Output\ConsoleOutput;
     // Ensures Collision's Printer is registered.
     $_SERVER['COLLISION_PRINTER'] = 'DefaultPrinter';
 
-    $args = $_SERVER['argv'];
+    $arguments = $originalArguments = $_SERVER['argv'];
 
     $dirty = false;
     $todo = false;
 
-    foreach ($args as $key => $value) {
+    foreach ($arguments as $key => $value) {
         if ($value === '--compact') {
             $_SERVER['COLLISION_PRINTER_COMPACT'] = 'true';
-            unset($args[$key]);
+            unset($arguments[$key]);
         }
 
         if ($value === '--profile') {
             $_SERVER['COLLISION_PRINTER_PROFILE'] = 'true';
-            unset($args[$key]);
+            unset($arguments[$key]);
         }
 
         if (str_contains($value, '--test-directory')) {
-            unset($args[$key]);
+            unset($arguments[$key]);
         }
 
         if ($value === '--dirty') {
             $dirty = true;
-            unset($args[$key]);
+            unset($arguments[$key]);
         }
 
-        if ($value === '--todos') {
+        if (in_array($value, ['--todo', '--todos'], true)) {
             $todo = true;
-            unset($args[$key]);
+            unset($arguments[$key]);
         }
 
         if (str_contains($value, '--teamcity')) {
-            unset($args[$key]);
-            $args[] = '--no-output';
+            unset($arguments[$key]);
+            $arguments[] = '--no-output';
             unset($_SERVER['COLLISION_PRINTER']);
         }
     }
@@ -88,9 +88,9 @@ use Symfony\Component\Console\Output\ConsoleOutput;
     try {
         $kernel = Kernel::boot($testSuite, $input, $output);
 
-        $result = $kernel->handle($args);
+        $result = $kernel->handle($originalArguments, $arguments);
 
-        $kernel->shutdown();
+        $kernel->terminate();
     } catch (Throwable|Error $e) {
         Panic::with($e);
     }

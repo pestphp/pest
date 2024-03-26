@@ -6,7 +6,7 @@ test('visual snapshot of help command output', function () {
 
         $process->run();
 
-        return preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $process->getOutput());
+        return removeAnsiEscapeSequences($process->getOutput());
     };
 
     expect($output())->toMatchSnapshot();

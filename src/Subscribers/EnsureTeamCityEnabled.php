@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Subscribers;
 
-use Pest\Logging\TeamCity\Converter;
+use Pest\Logging\Converter;
 use Pest\Logging\TeamCity\TeamCityLogger;
 use Pest\TestSuite;
 use PHPUnit\Event\TestRunner\Configured;

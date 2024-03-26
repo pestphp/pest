@@ -11,9 +11,7 @@ $run = function (string $target, bool $parallel) {
 
     expect($process->getExitCode())->toBe(0);
 
-    $outputContent = preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $process->getOutput());
-
-    return $outputContent;
+    return removeAnsiEscapeSequences($process->getOutput());
 };
 
 $snapshot = function ($name) {
@@ -26,10 +24,18 @@ $snapshot = function ($name) {
     ]));
 };
 
+test('todos', function () use ($run, $snapshot) {
+    expect($run('--todos', false))->toContain($snapshot('todos'));
+})->skipOnWindows();
+
+test('todos in parallel', function () use ($run, $snapshot) {
+    expect($run('--todos', true))->toContain($snapshot('todos'));
+})->skipOnWindows();
+
 test('todo', function () use ($run, $snapshot) {
-    expect($run('--todos', false))->toContain($snapshot('todo'));
+    expect($run('--todo', false))->toContain($snapshot('todo'));
 })->skipOnWindows();
 
 test('todo in parallel', function () use ($run, $snapshot) {
-    expect($run('--todos', true))->toContain($snapshot('todo'));
+    expect($run('--todo', true))->toContain($snapshot('todo'));
 })->skipOnWindows();

@@ -62,15 +62,15 @@ test('fails with wrong value and plain key with dots', function () use ($test_ar
 
 test('not failures', function () use ($test_array) {
     expect($test_array)->not->toHaveKey('c');
-})->throws(ExpectationFailedException::class, "Expecting Array (…) not to have key 'c'");
+})->throws(ExpectationFailedException::class, "Expecting […] not to have key 'c'");
 
 test('not failures with nested key', function () use ($test_array) {
     expect($test_array)->not->toHaveKey('d.e');
-})->throws(ExpectationFailedException::class, "Expecting Array (…) not to have key 'd.e'");
+})->throws(ExpectationFailedException::class, "Expecting […] not to have key 'd.e'");
 
 test('not failures with plain key with dots', function () use ($test_array) {
     expect($test_array)->not->toHaveKey('key.with.dots');
-})->throws(ExpectationFailedException::class, "Expecting Array (…) not to have key 'key.with.dots'");
+})->throws(ExpectationFailedException::class, "Expecting […] not to have key 'key.with.dots'");
 
 test('not failures with correct value', function () use ($test_array) {
     expect($test_array)->not->toHaveKey('c', 'world');

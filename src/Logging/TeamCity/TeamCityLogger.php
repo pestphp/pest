@@ -6,6 +6,7 @@ namespace Pest\Logging\TeamCity;
 
 use NunoMaduro\Collision\Adapters\Phpunit\Style;
 use Pest\Exceptions\ShouldNotHappen;
+use Pest\Logging\Converter;
 use Pest\Logging\TeamCity\Subscriber\TestConsideredRiskySubscriber;
 use Pest\Logging\TeamCity\Subscriber\TestErroredSubscriber;
 use Pest\Logging\TeamCity\Subscriber\TestExecutionFinishedSubscriber;

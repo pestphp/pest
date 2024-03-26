@@ -63,7 +63,7 @@ final class ServiceMessage
     }
 
     /**
-     * @param  int  $duration in milliseconds
+     * @param  int  $duration  in milliseconds
      */
     public static function testFinished(string $name, int $duration): self
     {
@@ -106,7 +106,7 @@ final class ServiceMessage
         ]);
     }
 
-    public static function testIgnored(string $name, string $message, string $details = null): self
+    public static function testIgnored(string $name, string $message, ?string $details = null): self
     {
         return new self('testIgnored', [
             'name' => $name,

@@ -6,6 +6,10 @@ namespace Pest\Plugins;
 
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Plugins\Concerns\HandleArguments;
+use PHPUnit\TextUI\CliArguments\Builder as CliConfigurationBuilder;
+use PHPUnit\TextUI\CliArguments\XmlConfigurationFileFinder;
+use PHPUnit\TextUI\XmlConfiguration\DefaultConfiguration;
+use PHPUnit\TextUI\XmlConfiguration\Loader;
 
 /**
  * @internal
@@ -30,10 +34,21 @@ final class Cache implements HandlesArguments
      */
     public function handleArguments(array $arguments): array
     {
-        $arguments = $this->pushArgument(
-            sprintf('--cache-directory=%s', realpath(self::TEMPORARY_FOLDER)),
-            $arguments
-        );
+        if (! $this->hasArgument('--cache-directory', $arguments)) {
+
+            $cliConfiguration = (new CliConfigurationBuilder)->fromParameters([]);
+            $configurationFile = (new XmlConfigurationFileFinder)->find($cliConfiguration);
+            $xmlConfiguration = DefaultConfiguration::create();
+
+            if (is_string($configurationFile)) {
+                $xmlConfiguration = (new Loader)->load($configurationFile);
+            }
+
+            if (! $xmlConfiguration->phpunit()->hasCacheDirectory()) {
+                $arguments = $this->pushArgument('--cache-directory', $arguments);
+                $arguments = $this->pushArgument((string) realpath(self::TEMPORARY_FOLDER), $arguments);
+            }
+        }
 
         if (! $this->hasArgument('--parallel', $arguments)) {
             return $this->pushArgument('--cache-result', $arguments);

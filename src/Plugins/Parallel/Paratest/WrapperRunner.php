@@ -254,11 +254,11 @@ final class WrapperRunner implements RunnerInterface
 
     private function destroyWorker(int $token): void
     {
-        // Mutation Testing tells us that the following `unset()` already destroys
-        // the `WrapperWorker`, which destroys the Symfony's `Process`, which
-        // automatically calls `Process::stop` within `Process::__destruct()`.
-        // But we prefer to have an explicit stops.
         $this->workers[$token]->stop();
+        // We need to wait for ApplicationForWrapperWorker::end to end
+        while ($this->workers[$token]->isRunning()) {
+            usleep(self::CYCLE_SLEEP);
+        }
 
         unset($this->workers[$token]);
     }
@@ -297,6 +297,7 @@ final class WrapperRunner implements RunnerInterface
                 array_merge_recursive($testResultSum->phpDeprecations(), $testResult->phpDeprecations()),
                 array_merge_recursive($testResultSum->phpNotices(), $testResult->phpNotices()),
                 array_merge_recursive($testResultSum->phpWarnings(), $testResult->phpWarnings()),
+                $testResultSum->numberOfIssuesIgnoredByBaseline() + $testResult->numberOfIssuesIgnoredByBaseline(),
             );
         }
 
@@ -325,6 +326,8 @@ final class WrapperRunner implements RunnerInterface
             $testResultSum->phpDeprecations(),
             $testResultSum->phpNotices(),
             $testResultSum->phpWarnings(),
+            $testResultSum->numberOfIssuesIgnoredByBaseline(),
+
         );
 
         $this->printer->printResults(
@@ -360,6 +363,15 @@ final class WrapperRunner implements RunnerInterface
             $this->codeCoverageFilterRegistry,
             false,
         );
+        if (! $coverageManager->isActive()) {
+            $this->output->writeln([
+                '',
+                '  <fg=black;bg=yellow;options=bold> WARN </> No code coverage driver is available.</>',
+                '',
+            ]);
+
+            return;
+        }
         $coverageMerger = new CoverageMerger($coverageManager->codeCoverage());
         foreach ($this->coverageFiles as $coverageFile) {
             $coverageMerger->addCoverageFromFile($coverageFile);
