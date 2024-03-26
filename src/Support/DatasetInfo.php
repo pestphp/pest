@@ -41,7 +41,13 @@ final class DatasetInfo
         }
 
         if (self::isInsideANestedDatasetsDirectory($file)) {
-            return strstr($file, DIRECTORY_SEPARATOR.self::DATASETS_DIR_NAME, true);
+            $scope = strstr($file, DIRECTORY_SEPARATOR.self::DATASETS_DIR_NAME, true);
+
+            if($scope === false){
+                return '';
+            }
+
+            return $scope;
         }
 
         if (self::isADatasetsFile($file)) {
