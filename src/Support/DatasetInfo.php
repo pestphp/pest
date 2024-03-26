@@ -22,7 +22,7 @@ final class DatasetInfo
 
     public static function isInsideANestedDatasetsDirectory(string $file): bool
     {
-        return str_contains($file, DIRECTORY_SEPARATOR . self::DATASETS_DIR_NAME . DIRECTORY_SEPARATOR);
+        return str_contains($file, DIRECTORY_SEPARATOR.self::DATASETS_DIR_NAME.DIRECTORY_SEPARATOR);
     }
 
     public static function isADatasetsFile(string $file): bool
@@ -41,7 +41,7 @@ final class DatasetInfo
         }
 
         if (self::isInsideANestedDatasetsDirectory($file)) {
-            return strstr($file, DIRECTORY_SEPARATOR . self::DATASETS_DIR_NAME, true);
+            return strstr($file, DIRECTORY_SEPARATOR.self::DATASETS_DIR_NAME, true);
         }
 
         if (self::isADatasetsFile($file)) {
