@@ -12,20 +12,23 @@ test('the right dataset is taken', function () use ($state) {
 });
 
 it('can see datasets defined in Pest.php file', function (string $value) use ($state) {
+    dump('1');
     $state->text .= $value;
     expect(true)->toBe(true);
 })->with('dataset_in_pest_file');
 
 test('Pest.php dataset is taken', function () use ($state) {
+    dump('2');
     expect($state->text)->toBe('12AB');
 });
 
 test('uses datasets in nested directories', function($value) use ($state){
-    dump('1');
+    dump('3');
     $state->text .= $value;
     expect(true)->toBe(true);
 })->with('nested.letters');
 
 test('nested dataset is taken', function () use ($state) {
+    dump('4');
     expect($state->text)->toBe('12ABABC');
 });
