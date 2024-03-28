@@ -69,9 +69,9 @@ if (! function_exists('dataset')) {
      *
      * @param  Closure|iterable<int|string, mixed>  $dataset
      */
-    function dataset(string $name, Closure|iterable $dataset): void
+    function dataset(string $name, Closure|iterable $dataset, ?string $scope = null): void
     {
-        $scope = DatasetInfo::scope(Backtrace::datasetsFile());
+        $scope ??= DatasetInfo::scope(Backtrace::datasetsFile());
 
         DatasetsRepository::set($name, $dataset, $scope);
     }
