@@ -23,10 +23,10 @@
         "nunomaduro/termwind": "^1.15.1|^2.0.1",
         "pestphp/pest-plugin": "^2.1.1",
         "pestphp/pest-plugin-arch": "^2.7.0",
-        "phpunit/phpunit": "^10.5.15"
+        "phpunit/phpunit": "^10.5.16"
     },
     "conflict": {
-        "phpunit/phpunit": ">10.5.15",
+        "phpunit/phpunit": ">10.5.16",
         "sebastian/exporter": "<5.1.0",
         "webmozart/assert": "<1.11.0"
     },
