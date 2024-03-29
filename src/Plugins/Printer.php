@@ -22,6 +22,10 @@ final class Printer implements HandlesArguments
             return $arguments;
         }
 
+        if (in_array('--no-output', $arguments, true)) {
+            return $arguments;
+        }
+
         return $this->pushArgument('--no-output', $arguments);
     }
 }
