@@ -1190,14 +1190,14 @@
    PASS  Tests\Hooks\BeforeEachTest
   ✓ global beforeEach execution order
 
-   FAIL  Tests\Overrides\VersionsTest
-  ⨯ versions with dataset "Runner/Filter/NameFilterIterator.php"
+   PASS  Tests\Overrides\VersionsTest
+  ✓ versions with dataset "Runner/Filter/NameFilterIterator.php"
   ✓ versions with dataset "Runner/ResultCache/DefaultResultCache.php"
   ✓ versions with dataset "Runner/TestSuiteLoader.php"
-  ⨯ versions with dataset "TextUI/Command/Commands/WarmCodeCoverageCacheCommand.php"
-  ⨯ versions with dataset "TextUI/Output/Default/ProgressPrinter/Subscriber/TestSkippedSubscriber.php"
-  ⨯ versions with dataset "TextUI/TestSuiteFilterProcessor.php"
-  ⨯ versions with dataset "Event/Value/ThrowableBuilder.php"
+  ✓ versions with dataset "TextUI/Command/Commands/WarmCodeCoverageCacheCommand.php"
+  ✓ versions with dataset "TextUI/Output/Default/ProgressPrinter/Subscriber/TestSkippedSubscriber.php"
+  ✓ versions with dataset "TextUI/TestSuiteFilterProcessor.php"
+  ✓ versions with dataset "Event/Value/ThrowableBuilder.php"
   ✓ versions with dataset "Logging/JUnit/JunitXmlLogger.php"
 
    PASS  Tests\PHPUnit\CustomAffixes\InvalidTestName
@@ -1304,17 +1304,17 @@
   ✓ it can resolve builtin value types
   ✓ it cannot resolve a parameter without type
 
-   FAIL  Tests\Unit\Support\DatasetInfo
+   PASS  Tests\Unit\Support\DatasetInfo
   ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Datase…rs.php', true)
   ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Datasets.php', false)
   ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur…rs.php', true)
   ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur…rs.php', false)
   ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur…ts.php', false)
-  ⨯ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Datase…rs.php', false)
-  ⨯ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Datasets.php', true)
-  ⨯ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur…rs.php', false) #1
-  ⨯ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur…rs.php', false) #2
-  ⨯ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur…ts.php', true)
+  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Datase…rs.php', false)
+  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Datasets.php', true)
+  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur…rs.php', false) #1
+  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur…rs.php', false) #2
+  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur…ts.php', true)
   ✓ it computes the dataset scope with ('/var/www/project/tests/Datase…rs.php', '/var/www/project/tests')
   ✓ it computes the dataset scope with ('/var/www/project/tests/Datasets.php', '/var/www/project/tests')
   ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Features')
@@ -1440,106 +1440,22 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
   ────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Overrides\VersionsTest > versions with dataset "Runner/Filt…   
-  Failed asserting that two strings are identical.
-  -'c7b9c8a96006dea314204a8f09a8764e51ce0b9b79aadd58da52e8c328db4870'
-  +'ec723a9efae521dd6576d2e7d746cc12d3e27f271c49c46420fba8a0e161a61f'
-  
+   FAILED  Tests\Visual\JUnit > junit with parallel                     Error   
+  Class "XmlParseException" not found
 
-  at tests/Overrides/VersionsTest.php:8
-      4▕ 
-      5▕ use Pest\Bootstrappers\BootOverrides;
-      6▕ 
-      7▕ test('versions', function (string $vendorPath, string $expectedHash) {
-  ➜   8▕     expect(hash_file('sha256', $vendorPath))->toBe($expectedHash);
-      9▕ })->with(function () {
-     10▕     foreach (BootOverrides::FILES as $hash => $file) {
-     11▕         $path = implode(DIRECTORY_SEPARATOR, [
-     12▕             dirname(__DIR__, 2),
+  at tests/Visual/JUnit.php:25
+     21▕         $xml = new SimpleXMLElement(preg_replace("/(<\/?)(\w+):([^>]*>)/", '$1$2$3', $rawXmlContent));
+     22▕ 
+     23▕         return json_decode(json_encode((array) $xml), true);
+     24▕     } catch (Exception $exception) {
+  ➜  25▕         throw new XmlParseException($exception->getMessage(), $exception->getCode(), $exception->getPrevious());
+     26▕     }
+     27▕ };
+     28▕ 
+     29▕ $normalizedPath = function (string $path) {
 
-  ────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Overrides\VersionsTest > versions with dataset "TextUI/Comm…   
-  Failed asserting that two strings are identical.
-  -'f41e48d6cb546772a7de4f8e66b6b7ce894a5318d063eb52e354d206e96c701c'
-  +'2ef8e21dbb27cf6597dd9bb0f941c063dcc98b5af2c35d10b1c2d77721582e8f'
-  
+  1   tests/Visual/JUnit.php:25
+  2   tests/Visual/JUnit.php:58
 
-  at tests/Overrides/VersionsTest.php:8
-      4▕ 
-      5▕ use Pest\Bootstrappers\BootOverrides;
-      6▕ 
-      7▕ test('versions', function (string $vendorPath, string $expectedHash) {
-  ➜   8▕     expect(hash_file('sha256', $vendorPath))->toBe($expectedHash);
-      9▕ })->with(function () {
-     10▕     foreach (BootOverrides::FILES as $hash => $file) {
-     11▕         $path = implode(DIRECTORY_SEPARATOR, [
-     12▕             dirname(__DIR__, 2),
 
-  ────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Overrides\VersionsTest > versions with dataset "TextUI/Outp…   
-  Failed asserting that two strings are identical.
-  -'cb7519f2d82893640b694492cf7ec9528da80773cc1d259634181b5d393528b5'
-  +'badc88c79c2a47d768be3925051999b158d08b64e57ccf4ce560f1610cbcc1e8'
-  
-
-  at tests/Overrides/VersionsTest.php:8
-      4▕ 
-      5▕ use Pest\Bootstrappers\BootOverrides;
-      6▕ 
-      7▕ test('versions', function (string $vendorPath, string $expectedHash) {
-  ➜   8▕     expect(hash_file('sha256', $vendorPath))->toBe($expectedHash);
-      9▕ })->with(function () {
-     10▕     foreach (BootOverrides::FILES as $hash => $file) {
-     11▕         $path = implode(DIRECTORY_SEPARATOR, [
-     12▕             dirname(__DIR__, 2),
-
-  ────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Overrides\VersionsTest > versions with dataset "TextUI/Test…   
-  Failed asserting that two strings are identical.
-  -'6db25ee539e9b12b1fb4e044a0a93410e015bc983ecdd3909cd394fe44ae8c95'
-  +'8607a62825a762735721c39e5d7d59f6efee1409d85cd3b1a976d0d83a308be0'
-  
-
-  at tests/Overrides/VersionsTest.php:8
-      4▕ 
-      5▕ use Pest\Bootstrappers\BootOverrides;
-      6▕ 
-      7▕ test('versions', function (string $vendorPath, string $expectedHash) {
-  ➜   8▕     expect(hash_file('sha256', $vendorPath))->toBe($expectedHash);
-      9▕ })->with(function () {
-     10▕     foreach (BootOverrides::FILES as $hash => $file) {
-     11▕         $path = implode(DIRECTORY_SEPARATOR, [
-     12▕             dirname(__DIR__, 2),
-
-  ────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Overrides\VersionsTest > versions with dataset "Event/Value…   
-  Failed asserting that two strings are identical.
-  -'ef64a657ed9c0067791483784944107827bf227c7e3200f212b6751876b99e25'
-  +'a01a02eadd18146f12731c7adb8cd56cf76f3f6bda2bae06ff4fd6573789b0f4'
-  
-
-  at tests/Overrides/VersionsTest.php:8
-      4▕ 
-      5▕ use Pest\Bootstrappers\BootOverrides;
-      6▕ 
-      7▕ test('versions', function (string $vendorPath, string $expectedHash) {
-  ➜   8▕     expect(hash_file('sha256', $vendorPath))->toBe($expectedHash);
-      9▕ })->with(function () {
-     10▕     foreach (BootOverrides::FILES as $hash => $file) {
-     11▕         $path = implode(DIRECTORY_SEPARATOR, [
-     12▕             dirname(__DIR__, 2),
-
-  ────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Unit\Support\DatasetInfo > it can check if dataset i…  Error   
-  Unknown named parameter $file
-  str_replace(): Argument #3 ($subject) must be of type array|string, null given
-
-  at vendor/filp/whoops/src/Whoops/Exception/FrameCollection.php:43
-     39▕      * @return FrameCollection
-     40▕      */
-     41▕     public function filter($callable)
-     42▕     {
-  ➜  43▕         $this->frames = array_values(array_filter($this->frames, $callable));
-     44▕         return $this;
-     45▕     }
-     46▕ 
+  Tests:    2 deprecated, 1 failed, 4 warnings, 5 incomplete, 2 notices, 13 todos, 24 skipped, 1026 passed (2508 assertions)
