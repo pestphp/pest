@@ -46,13 +46,15 @@ declare(strict_types=1);
 namespace PHPUnit\Runner\Filter;
 
 use PHPUnit\Framework\Test;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\TestSuite;
+use PHPUnit\Runner\PhptTestCase;
 use RecursiveFilterIterator;
 use RecursiveIterator;
 
 use function end;
 use function preg_match;
+use function sprintf;
+use function str_replace;
 
 /**
  * @internal This class is not covered by the backward compatibility promise for PHPUnit
@@ -64,14 +66,8 @@ abstract class NameFilterIterator extends RecursiveFilterIterator
      */
     private readonly string $regularExpression;
 
-    /**
-     * @psalm-var ?int
-     */
     private readonly ?int $dataSetMinimum;
 
-    /**
-     * @psalm-var ?int
-     */
     private readonly ?int $dataSetMaximum;
 
     /**
@@ -97,7 +93,7 @@ abstract class NameFilterIterator extends RecursiveFilterIterator
             return true;
         }
 
-        if (! $test instanceof TestCase) {
+        if ($test instanceof PhptTestCase) {
             return false;
         }
 
@@ -110,13 +106,68 @@ abstract class NameFilterIterator extends RecursiveFilterIterator
             $accepted = $set >= $this->dataSetMinimum && $set <= $this->dataSetMaximum;
         }
 
-        return $accepted;
+        return $this->doAccept($accepted);
     }
+
+    abstract protected function doAccept(bool $result): bool;
 
     /**
      * @psalm-param non-empty-string $filter
      *
      * @psalm-return array{regularExpression: non-empty-string, dataSetMinimum: ?int, dataSetMaximum: ?int}
      */
-    abstract protected function prepareFilter(string $filter): array;
+    private function prepareFilter(string $filter): array
+    {
+        $dataSetMinimum = null;
+        $dataSetMaximum = null;
+
+        if (@preg_match($filter, '') === false) {
+            // Handles:
+            //  * testAssertEqualsSucceeds#4
+            //  * testAssertEqualsSucceeds#4-8
+            if (preg_match('/^(.*?)#(\d+)(?:-(\d+))?$/', $filter, $matches)) {
+                if (isset($matches[3]) && $matches[2] < $matches[3]) {
+                    $filter = sprintf(
+                        '%s.*with data set #(\d+)$',
+                        $matches[1],
+                    );
+
+                    $dataSetMinimum = (int) $matches[2];
+                    $dataSetMaximum = (int) $matches[3];
+                } else {
+                    $filter = sprintf(
+                        '%s.*with data set #%s$',
+                        $matches[1],
+                        $matches[2],
+                    );
+                }
+            } // Handles:
+            //  * testDetermineJsonError@JSON_ERROR_NONE
+            //  * testDetermineJsonError@JSON.*
+            elseif (preg_match('/^(.*?)@(.+)$/', $filter, $matches)) {
+                $filter = sprintf(
+                    '%s.*with data set "%s"$',
+                    $matches[1],
+                    $matches[2],
+                );
+            }
+
+            // Escape delimiters in regular expression. Do NOT use preg_quote,
+            // to keep magic characters.
+            $filter = sprintf(
+                '/%s/i',
+                str_replace(
+                    '/',
+                    '\\/',
+                    $filter,
+                ),
+            );
+        }
+
+        return [
+            'regularExpression' => $filter,
+            'dataSetMinimum' => $dataSetMinimum,
+            'dataSetMaximum' => $dataSetMaximum,
+        ];
+    }
 }
