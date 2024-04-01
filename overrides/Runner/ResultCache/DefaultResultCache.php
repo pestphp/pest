@@ -125,8 +125,14 @@ final class DefaultResultCache implements ResultCache
             return;
         }
 
+        $contents = file_get_contents($this->cacheFilename);
+
+        if ($contents === false) {
+            return;
+        }
+
         $data = json_decode(
-            file_get_contents($this->cacheFilename),
+            $contents,
             true,
         );
 
