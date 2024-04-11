@@ -19,3 +19,8 @@ it('can see datasets defined in Pest.php file', function (string $value) use ($s
 test('Pest.php dataset is taken', function () use ($state) {
     expect($state->text)->toBe('12AB');
 });
+
+it('can see datasets in nested Dataset folders', function ($value) use ($state) {
+    $state->text .= $value;
+    expect(true)->toBeTrue();
+})->with('nested.letters');
