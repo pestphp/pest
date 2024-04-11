@@ -20,6 +20,11 @@ final class DatasetInfo
         return basename(dirname($file)) === self::DATASETS_DIR_NAME;
     }
 
+    public static function isNestedInsideADatasetsDirectory(string $file): bool
+    {
+        return str_contains($file, DIRECTORY_SEPARATOR.self::DATASETS_DIR_NAME.DIRECTORY_SEPARATOR);
+    }
+
     public static function isADatasetsFile(string $file): bool
     {
         return basename($file) === self::DATASETS_FILE_NAME;
@@ -33,6 +38,14 @@ final class DatasetInfo
 
         if (self::isInsideADatasetsDirectory($file)) {
             return dirname($file, 2);
+        }
+
+        if (self::isNestedInsideADatasetsDirectory($file)) {
+            $scope = strstr($file, DIRECTORY_SEPARATOR.self::DATASETS_DIR_NAME, true);
+
+            assert(is_string($scope));
+
+            return $scope;
         }
 
         if (self::isADatasetsFile($file)) {
