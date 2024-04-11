@@ -94,6 +94,14 @@ final class Str
     }
 
     /**
+     * Determine if a given value is a valid ULID.
+     */
+    public static function isUlid(string $value): bool
+    {
+        return preg_match('/^[0123456789ABCDEFGHJKMNPQRSTVWXYZ]{26}$/i', $value) > 0;
+    }
+
+    /**
      * Determine if a given value is a valid UUID.
      */
     public static function isUuid(string $value): bool
