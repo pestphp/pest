@@ -22,6 +22,7 @@ We cannot thank our sponsors enough for their incredible support in funding Pest
 ### Platinum Sponsors
 
 - **[LaraJobs](https://larajobs.com)**
+- **[Brokerchooser](https://brokerchooser.com)**
 - **[Forge](https://forge.laravel.com)**
 - **[Spatie](https://spatie.be)**
 - **[Worksome](https://www.worksome.com/)**
