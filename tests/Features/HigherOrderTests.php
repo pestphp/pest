@@ -73,4 +73,12 @@ it('can pass shared datasets into callables')
     })
     ->toBeInt();
 
+it('can pass datasets into the value callable')
+    ->with([[1, 2, 3]])
+    ->value(function (...$numbers) {
+        return $this->assertSame($numbers, [1, 2, 3]);
+    })
+    ->assertTrue(true)
+    ->assertFalse(false);
+
 afterEach()->assertTrue(true);

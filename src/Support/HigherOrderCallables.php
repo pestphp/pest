@@ -68,4 +68,17 @@ final class HigherOrderCallables
 
         return $this->target;
     }
+
+    /**
+     * @template TValue
+     *
+     * Execute the given callable and return its value.
+     *
+     * @param  callable():TValue  $value
+     * @return TValue
+     */
+    public function value(callable $value)
+    {
+        return Reflection::bindCallableWithData($value);
+    }
 }
