@@ -34,7 +34,7 @@ test('junit output', function () use ($normalizedPath, $run) {
     $result = $run('tests/.tests/SuccessOnly.php');
 
     expect($result['testsuite']['@attributes'])
-        ->name->toBe('Tests\tests\SuccessOnly')
+        ->name->toBe('P\Tests\tests\SuccessOnly')
         ->file->toBe($normalizedPath('tests/.tests/SuccessOnly.php'))
         ->tests->toBe('2')
         ->assertions->toBe('2')
@@ -46,10 +46,10 @@ test('junit output', function () use ($normalizedPath, $run) {
         ->toHaveCount(2);
 
     expect($result['testsuite']['testcase'][0]['@attributes'])
-        ->name->toBe('it can pass with comparison')
+        ->name->toBe('__pest_evaluable_it_can_pass_with_comparison')
         ->file->toBe($normalizedPath('tests/.tests/SuccessOnly.php::it can pass with comparison'))
-        ->class->toBe('Tests\tests\SuccessOnly')
-        ->classname->toBe('Tests.tests.SuccessOnly')
+        ->class->toBe('P\Tests\tests\SuccessOnly')
+        ->classname->toBe('P.Tests.tests.SuccessOnly')
         ->assertions->toBe('1')
         ->time->toStartWith('0.0');
 });
@@ -58,7 +58,7 @@ test('junit with parallel', function () use ($normalizedPath, $run) {
     $result = $run('tests/.tests/SuccessOnly.php', '--parallel', '--processes=1', '--filter', 'can pass with comparison');
 
     expect($result['testsuite']['@attributes'])
-        ->name->toBe('Tests\tests\SuccessOnly')
+        ->name->toBe('P\Tests\tests\SuccessOnly')
         ->file->toBe($normalizedPath('tests/.tests/SuccessOnly.php'))
         ->tests->toBe('1')
         ->assertions->toBe('1')
@@ -70,10 +70,10 @@ test('junit with parallel', function () use ($normalizedPath, $run) {
         ->toHaveCount(1);
 
     expect($result['testsuite']['testcase']['@attributes'])
-        ->name->toBe('it can pass with comparison')
+        ->name->toBe('__pest_evaluable_it_can_pass_with_comparison')
         ->file->toBe($normalizedPath('tests/.tests/SuccessOnly.php::it can pass with comparison'))
-        ->class->toBe('Tests\tests\SuccessOnly')
-        ->classname->toBe('Tests.tests.SuccessOnly')
+        ->class->toBe('P\Tests\tests\SuccessOnly')
+        ->classname->toBe('P.Tests.tests.SuccessOnly')
         ->assertions->toBe('1')
         ->time->toStartWith('0.0');
 });
