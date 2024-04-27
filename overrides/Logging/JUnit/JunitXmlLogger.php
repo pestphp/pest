@@ -121,7 +121,7 @@ final class JunitXmlLogger
     public function testSuiteStarted(Started $event): void
     {
         $testSuite = $this->document->createElement('testsuite');
-        $testSuite->setAttribute('name', $this->converter->getTestSuiteName($event->testSuite())); // pest-changed
+        $testSuite->setAttribute('name', $event->testSuite()->name());
 
         if ($event->testSuite()->isForTestClass()) {
             $testSuite->setAttribute('file', $this->converter->getTestSuiteLocation($event->testSuite()) ?? ''); // pest-changed
@@ -441,16 +441,15 @@ final class JunitXmlLogger
         $test = $event->test();
         $file = $this->converter->getTestCaseLocation($test); // pest-added
 
-        $testCase->setAttribute('name', $this->converter->getTestCaseMethodName($test)); // pest-changed
+        $testCase->setAttribute('name', $this->name($test));
         $testCase->setAttribute('file', $file); // pest-changed
 
         if ($test->isTestMethod()) {
             assert($test instanceof TestMethod);
 
             //$testCase->setAttribute('line', (string) $test->line()); // pest-removed
-            $className = $this->converter->getTrimmedTestClassName($test); // pest-added
-            $testCase->setAttribute('class', $className); // pest-changed
-            $testCase->setAttribute('classname', str_replace('\\', '.', $className)); // pest-changed
+            $testCase->setAttribute('class', $test->className());
+            $testCase->setAttribute('classname', str_replace('\\', '.', $test->className()));
         }
 
         $this->currentTestCase = $testCase;
