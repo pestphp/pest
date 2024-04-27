@@ -439,7 +439,9 @@ final class JunitXmlLogger
         $testCase = $this->document->createElement('testcase');
 
         $test = $event->test();
-        $file = $this->converter->getTestCaseLocation($test); // pest-added
+        $location = $this->converter->getTestCaseLocation($test); // pest-added
+        $file = strstr($location, '::', true); // pest-added
+        $file = $file === false ? $location : $file; // pest-added
 
         $testCase->setAttribute('name', $this->name($test));
         $testCase->setAttribute('file', $file); // pest-changed

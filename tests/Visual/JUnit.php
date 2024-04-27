@@ -47,7 +47,7 @@ test('junit output', function () use ($normalizedPath, $run) {
 
     expect($result['testsuite']['testcase'][0]['@attributes'])
         ->name->toBe('__pest_evaluable_it_can_pass_with_comparison')
-        ->file->toBe($normalizedPath('tests/.tests/SuccessOnly.php::it can pass with comparison'))
+        ->file->toBe($normalizedPath('tests/.tests/SuccessOnly.php'))
         ->class->toBe('P\Tests\tests\SuccessOnly')
         ->classname->toBe('P.Tests.tests.SuccessOnly')
         ->assertions->toBe('1')
@@ -71,7 +71,7 @@ test('junit with parallel', function () use ($normalizedPath, $run) {
 
     expect($result['testsuite']['testcase']['@attributes'])
         ->name->toBe('__pest_evaluable_it_can_pass_with_comparison')
-        ->file->toBe($normalizedPath('tests/.tests/SuccessOnly.php::it can pass with comparison'))
+        ->file->toBe($normalizedPath('tests/.tests/SuccessOnly.php'))
         ->class->toBe('P\Tests\tests\SuccessOnly')
         ->classname->toBe('P.Tests.tests.SuccessOnly')
         ->assertions->toBe('1')
