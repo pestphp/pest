@@ -75,7 +75,7 @@ it('can pass shared datasets into callables')
 
 it('can pass datasets into the value callable')
     ->with([[1, 2, 3]])
-    ->value(function (...$numbers) {
+    ->act(function (...$numbers) {
         return $this->assertSame($numbers, [1, 2, 3]);
     })
     ->assertTrue(true)

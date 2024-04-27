@@ -74,11 +74,11 @@ final class HigherOrderCallables
      *
      * Execute the given callable and return its value.
      *
-     * @param  callable():TValue  $value
+     * @param  callable():TValue  $callable
      * @return TValue
      */
-    public function value(callable $value)
+    public function act(callable $callable)
     {
-        return Reflection::bindCallableWithData($value);
+        return Reflection::bindCallableWithData($callable);
     }
 }
