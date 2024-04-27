@@ -334,10 +334,11 @@ trait Testable
             fn (ReflectionParameter $reflectionParameter): string => $reflectionParameter->getName(),
             array_filter($testReflection->getParameters(), fn (ReflectionParameter $reflectionParameter): bool => ! $reflectionParameter->isOptional()),
         );
-
-        if (
-            (count(array_diff($testParameterNames, $datasetParameterNames)) === 0) || isset($testParameterNames[0])
-            && $suppliedParametersCount >= $requiredParametersCount) {
+        if (array_diff($testParameterNames, $datasetParameterNames) === []) {
+            return;
+        }
+        if (isset($testParameterNames[0])
+        && $suppliedParametersCount >= $requiredParametersCount) {
             return;
         }
 

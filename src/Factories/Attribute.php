@@ -12,7 +12,7 @@ final class Attribute
     /**
      * @param  iterable<int, string>  $arguments
      */
-    public function __construct(public string $name, public iterable $arguments = [])
+    public function __construct(public string $name, public iterable $arguments)
     {
         //
     }

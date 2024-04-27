@@ -29,9 +29,9 @@ final class TestCaseFactory
     /**
      * The list of attributes.
      *
-     * @var iterable<int, Attribute>
+     * @var array<int, Attribute>
      */
-    public iterable $attributes = [];
+    public array $attributes = [];
 
     /**
      * The FQN of the Test Case class.

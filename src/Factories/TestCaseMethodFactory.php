@@ -25,7 +25,7 @@ final class TestCaseMethodFactory
     /**
      * The list of attributes.
      *
-     * @var array<int, class-string<Attribute>>
+     * @var array<int, Attribute>
      */
     public array $attributes = [];
 
@@ -95,6 +95,7 @@ final class TestCaseMethodFactory
 
         $testCase = TestSuite::getInstance()->tests->get($this->filename);
 
+        assert($testCase instanceof TestCaseFactory);
         $testCase->factoryProxies->proxy($concrete);
         $this->factoryProxies->proxy($concrete);
 

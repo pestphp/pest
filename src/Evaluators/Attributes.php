@@ -13,6 +13,8 @@ final class Attributes
 {
     /**
      * Evaluates the given attributes and returns the code.
+     *
+     * @param  iterable<int, Attribute>  $attributes
      */
     public static function code(iterable $attributes): string
     {
@@ -23,9 +25,9 @@ final class Attributes
                 return "    #[\\{$name}]";
             }
 
-            $arguments = array_map(fn (string $argument): string => var_export($argument, true), $attribute->arguments);
+            $arguments = array_map(fn (string $argument): string => var_export($argument, true), iterator_to_array($attribute->arguments));
 
             return sprintf('    #[\\%s(%s)]', $name, implode(', ', $arguments));
-        }, $attributes));
+        }, iterator_to_array($attributes)));
     }
 }
