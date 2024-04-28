@@ -40,7 +40,7 @@ final class Only implements Terminable
      */
     public static function enable(TestCall $testCall): void
     {
-        if (Environment::name() == Environment::CI) {
+        if (Environment::name() === Environment::CI) {
             return;
         }
 

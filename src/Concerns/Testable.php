@@ -195,7 +195,7 @@ trait Testable
         $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
 
         $description = $this->dataName() ? $method->description.' with '.$this->dataName() : $method->description;
-        $description = htmlspecialchars(html_entity_decode($description), ENT_NOQUOTES);
+        $description = htmlspecialchars(html_entity_decode((string) $description), ENT_NOQUOTES);
 
         if ($method->repetitions > 1) {
             $matches = [];

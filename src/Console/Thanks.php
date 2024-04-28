@@ -72,13 +72,13 @@ final class Thanks
         }
 
         if ($wantsToSupport === true) {
-            if (PHP_OS_FAMILY == 'Darwin') {
+            if (PHP_OS_FAMILY === 'Darwin') {
                 exec('open https://github.com/pestphp/pest');
             }
-            if (PHP_OS_FAMILY == 'Windows') {
+            if (PHP_OS_FAMILY === 'Windows') {
                 exec('start https://github.com/pestphp/pest');
             }
-            if (PHP_OS_FAMILY == 'Linux') {
+            if (PHP_OS_FAMILY === 'Linux') {
                 exec('xdg-open https://github.com/pestphp/pest');
             }
         }

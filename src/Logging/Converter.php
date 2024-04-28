@@ -129,7 +129,7 @@ final class Converter
 
         // Format stacktrace as `at <path>`
         $frames = array_map(
-            fn (string $frame) => "at $frame",
+            fn (string $frame): string => "at $frame",
             $frames
         );
 

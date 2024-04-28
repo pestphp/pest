@@ -26,7 +26,7 @@ final class Laravel implements HandlesArguments
      */
     public function handleArguments(array $arguments): array
     {
-        return self::whenUsingLaravel($arguments, function (array $arguments): array {
+        return $this->whenUsingLaravel($arguments, function (array $arguments): array {
             $this->ensureRunnerIsResolvable();
 
             $arguments = $this->ensureEnvironmentVariables($arguments);
@@ -42,7 +42,7 @@ final class Laravel implements HandlesArguments
      * @param  CLosure(array<int, string>): array<int, string>  $closure
      * @return array<int, string>
      */
-    private static function whenUsingLaravel(array $arguments, Closure $closure): array
+    private function whenUsingLaravel(array $arguments, Closure $closure): array
     {
         $isLaravelApplication = InstalledVersions::isInstalled('laravel/framework', false);
         $isLaravelPackage = class_exists(\Orchestra\Testbench\TestCase::class);
