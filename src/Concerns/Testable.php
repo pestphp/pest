@@ -293,7 +293,7 @@ trait Testable
             return $arguments;
         }
 
-        if (! $arguments[0] instanceof Closure) {
+        if (! isset($arguments[0]) || ! $arguments[0] instanceof Closure) {
             return $arguments;
         }
 
