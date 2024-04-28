@@ -54,7 +54,7 @@ final class AfterEachCall
         $proxies = $this->proxies;
 
         $afterEachTestCase = ChainableClosure::boundWhen(
-            fn (): bool => is_null($describing) || $this->__describing === $describing, // @phpstan-ignore-line
+            fn (): bool => is_null($describing) || $this->__describing === $describing,
             ChainableClosure::bound(fn () => $proxies->chain($this), $this->closure)->bindTo($this, self::class), // @phpstan-ignore-line
         )->bindTo($this, self::class);
 

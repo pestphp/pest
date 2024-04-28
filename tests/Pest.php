@@ -3,6 +3,8 @@
 use Tests\CustomTestCase\CustomTestCase;
 use Tests\CustomTestCaseInSubFolders\SubFolder\SubFolder\CustomTestCaseInSubFolder;
 
+error_reporting(E_ALL);
+
 $GLOBALS['__PEST_INTERNAL_TEST_SUITE'] = true;
 
 uses(CustomTestCaseInSubFolder::class)->in('PHPUnit/CustomTestCaseInSubFolders/SubFolder/SubFolder');

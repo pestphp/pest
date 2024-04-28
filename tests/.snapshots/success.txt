@@ -170,9 +170,9 @@
   ✓ it is a test
   ✓ it uses correct parent class
 
-   FAIL  Tests\Features\Deprecated
-  ! deprecated → str_contains(): Passing null to parameter #1 ($haystack) of type string is deprecated // tests/Features/Deprecated.php:6
-  ⨯ user deprecated
+   DEPR  Tests\Features\Deprecated
+  ! deprecated → str_contains(): Passing null to parameter #1 ($haystack) of type string is deprecated // tests/Features/Deprecated.php:4
+  ! user deprecated → Since foo 1.0: This is a deprecation description // tests/Features/Deprecated.php:10
 
    PASS  Tests\Features\Describe - 5 todos
   ✓ before each
@@ -1415,8 +1415,8 @@
   ✓ junit output
   - junit with parallel → Not working yet
 
-   FAIL  Tests\Visual\Parallel
-  ⨯ parallel
+   PASS  Tests\Visual\Parallel
+  ✓ parallel
   ✓ a parallel test can extend another test with same name
 
    PASS  Tests\Visual\SingleTestOrDirectory
@@ -1439,44 +1439,5 @@
 
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
-  ────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Features\Deprecated > user deprecated                  Error   
-  Call to undefined function trigger_deprecation()
 
-  at tests/Features/Deprecated.php:12
-      8▕     expect(true)->toBeTrue();
-      9▕ });
-     10▕ 
-     11▕ test('user deprecated', function () {
-  ➜  12▕     trigger_deprecation('foo', '1.0', 'This is a deprecation description');
-     13▕ 
-     14▕     expect(true)->toBeTrue();
-     15▕ });
-     16▕
-
-  1   tests/Features/Deprecated.php:12
-
-  ────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Visual\Parallel > parallel                                     
-  Expected: \n
-    ...............sssssss......................................................\n
-    ...............................................................s....!⨯......\n
-  ... (36 more lines)
-
-  To contain: Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 16 skipped, 1017 passed (2483 assertions)
-
-  at tests/Visual/Parallel.php:19
-     15▕ };
-     16▕ 
-     17▕ test('parallel', function () use ($run) {
-     18▕     expect($run('--exclude-group=integration'))
-  ➜  19▕         ->toContain('Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 16 skipped, 1017 passed (2483 assertions)')
-     20▕         ->toContain('Parallel: 3 processes');
-     21▕ })->skipOnWindows();
-     22▕ 
-     23▕ test('a parallel test can extend another test with same name', function () use ($run) {
-
-  1   tests/Visual/Parallel.php:19
-
-
-  Tests:    1 deprecated, 2 failed, 4 warnings, 5 incomplete, 2 notices, 13 todos, 20 skipped, 1030 passed (2518 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 20 skipped, 1031 passed (2520 assertions)

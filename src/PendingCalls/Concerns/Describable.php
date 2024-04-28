@@ -10,8 +10,7 @@ namespace Pest\PendingCalls\Concerns;
 trait Describable
 {
     /**
-     * Note: this is property is not used; however,
-     * it gets added automatically by rector php.
+     * Note: this is property is not used; however, it gets added automatically by rector php.
      */
     public string $__describing;
 
