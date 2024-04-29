@@ -63,6 +63,8 @@
   ✓ lazy datasets with (1)
   ✓ lazy datasets with (2)
   ✓ lazy datasets did the job right
+  ✓ interpolated (1) lazy datasets
+  ✓ interpolated (2) lazy datasets
   ✓ eager datasets with (1)
   ✓ eager datasets with (2)
   ✓ eager datasets did the job right
@@ -1442,4 +1444,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 21 skipped, 1032 passed (2517 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 21 skipped, 1034 passed (2519 assertions)

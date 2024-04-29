@@ -61,6 +61,10 @@ test('lazy datasets did the job right', function () use ($state) {
     expect($state->text)->toBe('12');
 });
 
+test('interpolated :dataset lazy datasets', function ($text) {
+    expect(true)->toBeTrue();
+})->with($datasets);
+
 $state->text = '';
 
 test('eager datasets', function ($text) use ($state, $datasets) {
