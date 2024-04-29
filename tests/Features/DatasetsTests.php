@@ -109,6 +109,13 @@ test('named datasets', function ($text) use ($state, $datasets) {
     'two' => [2],
 ]);
 
+test('interpolated :dataset named datasets', function ($text) {
+    expect(true)->toBeTrue();
+})->with([
+    'one' => [1],
+    'two' => [2],
+]);
+
 test('named datasets did the job right', function () use ($state) {
     expect($state->text)->toBe('121212121212');
 });
