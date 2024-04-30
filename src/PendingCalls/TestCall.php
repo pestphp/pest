@@ -450,7 +450,7 @@ final class TestCall
     }
 
     /**
-     * Enables mutation testing
+     * Mutates the test.
      */
     public function mutate(string $profile = 'default'): self|MutationTestCallDecorator
     {
