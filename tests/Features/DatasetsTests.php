@@ -61,6 +61,10 @@ test('lazy datasets did the job right', function () use ($state) {
     expect($state->text)->toBe('12');
 });
 
+test('interpolated :dataset lazy datasets', function ($text) {
+    expect(true)->toBeTrue();
+})->with($datasets);
+
 $state->text = '';
 
 test('eager datasets', function ($text) use ($state, $datasets) {
@@ -104,6 +108,13 @@ test('eager registered wrapped datasets did the job right', function () use ($st
 test('named datasets', function ($text) use ($state, $datasets) {
     $state->text .= $text;
     expect($datasets)->toContain([$text]);
+})->with([
+    'one' => [1],
+    'two' => [2],
+]);
+
+test('interpolated :dataset named datasets', function ($text) {
+    expect(true)->toBeTrue();
 })->with([
     'one' => [1],
     'two' => [2],
