@@ -65,7 +65,6 @@ final class AfterEachCall
             $this,
             $afterEachTestCase,
         );
-
     }
 
     /**

@@ -40,6 +40,11 @@ trait Testable
     public ?string $__describing = null;
 
     /**
+     * Whether the test has ran or not.
+     */
+    public bool $__ran = false;
+
+    /**
      * The test's test closure.
      */
     private Closure $__test;

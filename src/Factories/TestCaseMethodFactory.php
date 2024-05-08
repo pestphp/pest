@@ -35,6 +35,11 @@ final class TestCaseMethodFactory
     public ?string $describing = null;
 
     /**
+     * The test's description, if any.
+     */
+    public ?string $description = null;
+
+    /**
      * The test's number of repetitions.
      */
     public int $repetitions = 1;
@@ -66,11 +71,15 @@ final class TestCaseMethodFactory
     public array $groups = [];
 
     /**
+     * @see This property is not actually used in the codebase, it's only here to make Rector happy.
+     */
+    public bool $__ran = false;
+
+    /**
      * Creates a new test case method factory instance.
      */
     public function __construct(
         public string $filename,
-        public ?string $description,
         public ?Closure $closure,
     ) {
         $this->closure ??= function (): void {
@@ -108,6 +117,8 @@ final class TestCaseMethodFactory
 
             $testCase->chains->chain($this);
             $method->chains->chain($this);
+
+            $this->__ran = true;
 
             return \Pest\Support\Closure::bind($closure, $this, self::class)(...$arguments);
         };

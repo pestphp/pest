@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\PendingCalls;
 
 use Closure;
+use Pest\Exceptions\AfterBeforeTestFunction;
 use Pest\PendingCalls\Concerns\Describable;
 use Pest\Support\Backtrace;
 use Pest\Support\ChainableClosure;
@@ -84,6 +85,18 @@ final class BeforeEachCall
     }
 
     /**
+     * Runs the given closure after the test.
+     */
+    public function after(Closure $closure): self
+    {
+        if ($this->describing === null) {
+            throw new AfterBeforeTestFunction($this->filename);
+        }
+
+        return $this->__call('after', [$closure]);
+    }
+
+    /**
      * Saves the calls to be used on the target.
      *
      * @param  array<int, mixed>  $arguments
@@ -91,7 +104,8 @@ final class BeforeEachCall
     public function __call(string $name, array $arguments): self
     {
         if (method_exists(TestCall::class, $name)) {
-            $this->testCallProxies->add(Backtrace::file(), Backtrace::line(), $name, $arguments);
+            $this->testCallProxies
+                ->add(Backtrace::file(), Backtrace::line(), $name, $arguments);
 
             return $this;
         }

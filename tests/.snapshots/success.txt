@@ -7,6 +7,17 @@
    PASS  Tests\Environments\Windows
   ✓ global functions are loaded
 
+   WARN  Tests\Features\After
+  ✓ it can run after test
+  ✓ it can run after test twice
+  - it does not run when skipped
+  - something → it does not run when skipped
+  ✓ something → it can run after test
+  ✓ something 2 → it can run after test
+  ✓ high order test
+  - high order test with skip
+  ✓ post 'foo' → defer Closure → expect Closure → toBe 1
+
    PASS  Tests\Features\AfterAll
   ✓ deletes file after all
 
@@ -1444,4 +1455,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 21 skipped, 1034 passed (2519 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 24 skipped, 1040 passed (2561 assertions)

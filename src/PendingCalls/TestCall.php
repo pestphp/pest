@@ -6,6 +6,7 @@ namespace Pest\PendingCalls;
 
 use Closure;
 use Pest\Exceptions\InvalidArgumentException;
+use Pest\Exceptions\TestDescriptionMissing;
 use Pest\Factories\Attribute;
 use Pest\Factories\TestCaseMethodFactory;
 use Pest\Mutate\Decorators\TestCallDecorator as MutationTestCallDecorator;
@@ -52,16 +53,52 @@ final class TestCall
     public function __construct(
         private readonly TestSuite $testSuite,
         private readonly string $filename,
-        ?string $description = null,
+        private ?string $description = null,
         ?Closure $closure = null
     ) {
-        $this->testCaseMethod = new TestCaseMethodFactory($filename, $description, $closure);
+        $this->testCaseMethod = new TestCaseMethodFactory($filename, $closure);
 
         $this->descriptionLess = $description === null;
 
         $this->describing = DescribeCall::describing();
 
         $this->testSuite->beforeEach->get($this->filename)[0]($this);
+    }
+
+    /**
+     * Runs the given closure after the test.
+     */
+    public function after(Closure $closure): self
+    {
+        if ($this->description === null) {
+            throw new TestDescriptionMissing($this->filename);
+        }
+
+        $description = is_null($this->describing)
+            ? $this->description
+            : Str::describe($this->describing, $this->description);
+
+        $filename = $this->filename;
+
+        $when = function () use ($closure, $filename, $description): void {
+            if ($this::$__filename !== $filename) { // @phpstan-ignore-line
+                return;
+            }
+
+            if ($this->__description !== $description) { // @phpstan-ignore-line
+                return;
+            }
+
+            if ($this->__ran !== true) { // @phpstan-ignore-line
+                return;
+            }
+
+            $closure->call($this);
+        };
+
+        new AfterEachCall($this->testSuite, $this->filename, $when->bindTo(new \stdClass()));
+
+        return $this;
     }
 
     /**
@@ -438,10 +475,10 @@ final class TestCall
         if ($this->descriptionLess) {
             Exporter::default();
 
-            if ($this->testCaseMethod->description !== null) {
-                $this->testCaseMethod->description .= ' → ';
+            if ($this->description !== null) {
+                $this->description .= ' → ';
             }
-            $this->testCaseMethod->description .= $arguments === null
+            $this->description .= $arguments === null
                 ? $name
                 : sprintf('%s %s', $name, $exporter->shortenedRecursiveExport($arguments));
         }
@@ -452,7 +489,7 @@ final class TestCall
     /**
      * Mutates the test.
      */
-    public function mutate(string $profile = 'default'): self|MutationTestCallDecorator
+    public function mutate(string $profile = 'default'): self|MutationTestCallDecorator // @phpstan-ignore-line
     {
         if (class_exists(MutationTestCallDecorator::class)) {
             return (new MutationTestCallDecorator($this))
@@ -467,9 +504,15 @@ final class TestCall
      */
     public function __destruct()
     {
+        if ($this->description === null) {
+            throw new TestDescriptionMissing($this->filename);
+        }
+
         if (! is_null($this->describing)) {
             $this->testCaseMethod->describing = $this->describing;
-            $this->testCaseMethod->description = Str::describe($this->describing, $this->testCaseMethod->description); // @phpstan-ignore-line
+            $this->testCaseMethod->description = Str::describe($this->describing, $this->description);
+        } else {
+            $this->testCaseMethod->description = $this->description;
         }
 
         $this->testSuite->tests->set($this->testCaseMethod);

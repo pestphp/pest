@@ -7,7 +7,8 @@ use Pest\TestSuite;
 
 it('does not allow to add the same test description twice', function () {
     $testSuite = new TestSuite(getcwd(), 'tests');
-    $method = new TestCaseMethodFactory('foo', 'bar', null);
+    $method = new TestCaseMethodFactory('foo', null);
+    $method->description = 'bar';
 
     $testSuite->tests->set($method);
     $testSuite->tests->set($method);
@@ -19,8 +20,10 @@ it('does not allow to add the same test description twice', function () {
 it('alerts users about tests with arguments but no input', function () {
     $testSuite = new TestSuite(getcwd(), 'tests');
 
-    $method = new TestCaseMethodFactory('foo', 'bar', function (int $arg) {
+    $method = new TestCaseMethodFactory('foo', function (int $arg) {
     });
+
+    $method->description = 'bar';
 
     $testSuite->tests->set($method);
 })->throws(
@@ -31,8 +34,13 @@ it('alerts users about tests with arguments but no input', function () {
 it('can return an array of all test suite filenames', function () {
     $testSuite = new TestSuite(getcwd(), 'tests');
 
-    $testSuite->tests->set(new TestCaseMethodFactory('a', 'b', null));
-    $testSuite->tests->set(new TestCaseMethodFactory('c', 'd', null));
+    $method = new TestCaseMethodFactory('a', null);
+    $method->description = 'b';
+    $testSuite->tests->set($method);
+
+    $method = new TestCaseMethodFactory('c', null);
+    $method->description = 'd';
+    $testSuite->tests->set($method);
 
     expect($testSuite->tests->getFilenames())->toEqual([
         'a',
