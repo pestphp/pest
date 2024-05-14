@@ -91,6 +91,7 @@
     "extra": {
         "pest": {
             "plugins": [
+                "Pest\\Plugins\\Configuration",
                 "Pest\\Plugins\\Bail",
                 "Pest\\Plugins\\Cache",
                 "Pest\\Plugins\\Coverage",

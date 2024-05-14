@@ -7,20 +7,21 @@ error_reporting(E_ALL);
 
 $GLOBALS['__PEST_INTERNAL_TEST_SUITE'] = true;
 
-uses(CustomTestCaseInSubFolder::class)->in('PHPUnit/CustomTestCaseInSubFolders/SubFolder/SubFolder');
+pest()->in('PHPUnit/CustomTestCaseInSubFolders/SubFolder/SubFolder')->use(CustomTestCaseInSubFolder::class);
 
 // test case for all the directories inside PHPUnit/GlobPatternTests/SubFolder/
-uses(CustomTestCase::class)->in('PHPUnit/GlobPatternTests/SubFolder/*/');
+pest()->in('PHPUnit/GlobPatternTests/SubFolder/*')->extend(CustomTestCase::class);
 
 // test case for all the files that end with AsPattern.php inside PHPUnit/GlobPatternTests/SubFolder2/
-uses(CustomTestCase::class)->in('PHPUnit/GlobPatternTests/SubFolder2/*AsPattern.php');
+pest()->in('PHPUnit/GlobPatternTests/SubFolder2/*AsPattern.php')->use(CustomTestCase::class);
 
-uses()->group('integration')->in('Visual');
+pest()->in('Visual')->group('integration');
 
 // NOTE: global test value container to be mutated and checked across files, as needed
 $_SERVER['globalHook'] = (object) ['calls' => (object) ['beforeAll' => 0, 'afterAll' => 0]];
 
-uses()
+pest()
+    ->in('Hooks')
     ->beforeEach(function () {
         $this->baz = 0;
     })
@@ -34,10 +35,9 @@ uses()
     ->afterAll(function () {
         $_SERVER['globalHook']->afterAll = 0;
         $_SERVER['globalHook']->calls->afterAll++;
-    })
-    ->in('Hooks');
+    });
 
-uses()
+pest()->in('Hooks')
     ->beforeEach(function () {
         expect($this)
             ->toHaveProperty('baz')
@@ -69,8 +69,7 @@ uses()
             ->toBe(0);
 
         $_SERVER['globalHook']->afterAll = 1;
-    })
-    ->in('Hooks');
+    });
 
 function helper_returns_string()
 {

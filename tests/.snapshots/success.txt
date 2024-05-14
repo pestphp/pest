@@ -1272,6 +1272,12 @@
   ✓ it allows global uses
   ✓ it allows multiple global uses registered in the same path
 
+   PASS  Tests\Unit\Configuration\In
+  ✓ it proxies to uses call
+
+   PASS  Tests\Unit\Configuration\Theme
+  ✓ it creates a theme instance
+
    PASS  Tests\Unit\Console\Help
   ✓ it outputs the help information when --help is used
 
@@ -1455,4 +1461,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 24 skipped, 1040 passed (2561 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 24 skipped, 1042 passed (2563 assertions)

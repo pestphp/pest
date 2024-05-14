@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Pest\Concerns\Expectable;
+use Pest\Configuration;
 use Pest\Exceptions\AfterAllWithinDescribe;
 use Pest\Exceptions\BeforeAllWithinDescribe;
 use Pest\Expectation;
@@ -105,6 +106,16 @@ if (! function_exists('uses')) {
         $filename = Backtrace::file();
 
         return new UsesCall($filename, array_values($classAndTraits));
+    }
+}
+
+if (! function_exists('pest')) {
+    /**
+     * Creates a new Pest configuration instance.
+     */
+    function pest(): Configuration
+    {
+        return Configuration::getInstance();
     }
 }
 
