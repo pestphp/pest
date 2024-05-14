@@ -78,7 +78,7 @@ final class UsesCall
      */
     public function extend(string ...$classAndTraits): self
     {
-        $this->classAndTraits = array_values($classAndTraits);
+        $this->classAndTraits = array_merge($this->classAndTraits, array_values($classAndTraits));
 
         return $this;
     }
