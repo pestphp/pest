@@ -5,6 +5,7 @@ use PHPUnit\Framework\ExpectationFailedException;
 test('pass', function () {
     expect([1, 2, 3])->toBeList();
     expect(['a' => 1, 'b' => 2, 'c' => 3])->not->toBeList();
+    expect('1, 2, 3')->not->toBeList();
 });
 
 test('failures', function () {
