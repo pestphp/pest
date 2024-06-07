@@ -57,7 +57,7 @@ final class Expectation
      * value. Used on objects, it asserts that two
      * variables reference the same object.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBe(mixed $expected, string $message = ''): self
     {
@@ -69,7 +69,7 @@ final class Expectation
     /**
      * Asserts that the value is empty.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeEmpty(string $message = ''): self
     {
@@ -81,7 +81,7 @@ final class Expectation
     /**
      * Asserts that the value is true.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeTrue(string $message = ''): self
     {
@@ -93,7 +93,7 @@ final class Expectation
     /**
      * Asserts that the value is truthy.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeTruthy(string $message = ''): self
     {
@@ -105,7 +105,7 @@ final class Expectation
     /**
      * Asserts that the value is false.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeFalse(string $message = ''): self
     {
@@ -117,7 +117,7 @@ final class Expectation
     /**
      * Asserts that the value is falsy.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeFalsy(string $message = ''): self
     {
@@ -129,7 +129,7 @@ final class Expectation
     /**
      * Asserts that the value is greater than $expected.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeGreaterThan(int|float|string|DateTimeInterface $expected, string $message = ''): self
     {
@@ -141,7 +141,7 @@ final class Expectation
     /**
      * Asserts that the value is greater than or equal to $expected.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeGreaterThanOrEqual(int|float|string|DateTimeInterface $expected, string $message = ''): self
     {
@@ -153,7 +153,7 @@ final class Expectation
     /**
      * Asserts that the value is less than or equal to $expected.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeLessThan(int|float|string|DateTimeInterface $expected, string $message = ''): self
     {
@@ -165,7 +165,7 @@ final class Expectation
     /**
      * Asserts that the value is less than $expected.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeLessThanOrEqual(int|float|string|DateTimeInterface $expected, string $message = ''): self
     {
@@ -177,7 +177,7 @@ final class Expectation
     /**
      * Asserts that $needle is an element of the value.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toContain(mixed ...$needles): self
     {
@@ -199,7 +199,7 @@ final class Expectation
     /**
      * Asserts that $needle equal an element of the value.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toContainEqual(mixed ...$needles): self
     {
@@ -218,7 +218,7 @@ final class Expectation
      * Asserts that the value starts with $expected.
      *
      * @param  non-empty-string  $expected
-     * @return self<TValue>
+     * @return $this
      */
     public function toStartWith(string $expected, string $message = ''): self
     {
@@ -235,7 +235,7 @@ final class Expectation
      * Asserts that the value ends with $expected.
      *
      * @param  non-empty-string  $expected
-     * @return self<TValue>
+     * @return $this
      */
     public function toEndWith(string $expected, string $message = ''): self
     {
@@ -251,7 +251,7 @@ final class Expectation
     /**
      * Asserts that $number matches value's Length.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toHaveLength(int $number, string $message = ''): self
     {
@@ -279,7 +279,7 @@ final class Expectation
     /**
      * Asserts that $count matches the number of elements of the value.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toHaveCount(int $count, string $message = ''): self
     {
@@ -296,7 +296,7 @@ final class Expectation
      * Asserts that the size of the value and $expected are the same.
      *
      * @param  Countable|iterable<mixed>  $expected
-     * @return self<TValue>
+     * @return $this
      */
     public function toHaveSameSize(Countable|iterable $expected, string $message = ''): self
     {
@@ -312,7 +312,7 @@ final class Expectation
     /**
      * Asserts that the value contains the property $name.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toHaveProperty(string $name, mixed $value = new Any(), string $message = ''): self
     {
@@ -333,7 +333,7 @@ final class Expectation
      * Asserts that the value contains the provided properties $names.
      *
      * @param  iterable<string, mixed>|iterable<int, string>  $names
-     * @return self<TValue>
+     * @return $this
      */
     public function toHaveProperties(iterable $names, string $message = ''): self
     {
@@ -347,7 +347,7 @@ final class Expectation
     /**
      * Asserts that the value has the method $name.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toHaveMethod(string $name, string $message = ''): self
     {
@@ -363,7 +363,7 @@ final class Expectation
      * Asserts that the value has the provided methods $names.
      *
      * @param  iterable<array-key, string>  $names
-     * @return self<TValue>
+     * @return $this
      */
     public function toHaveMethods(iterable $names, string $message = ''): self
     {
@@ -377,7 +377,7 @@ final class Expectation
     /**
      * Asserts that two variables have the same value.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toEqual(mixed $expected, string $message = ''): self
     {
@@ -395,7 +395,7 @@ final class Expectation
      * are objects, each object is converted to an array containing all
      * private, protected and public attributes.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toEqualCanonicalizing(mixed $expected, string $message = ''): self
     {
@@ -408,7 +408,7 @@ final class Expectation
      * Asserts that the absolute difference between the value and $expected
      * is lower than $delta.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toEqualWithDelta(mixed $expected, float $delta, string $message = ''): self
     {
@@ -421,7 +421,7 @@ final class Expectation
      * Asserts that the value is one of the given values.
      *
      * @param  iterable<int|string, mixed>  $values
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeIn(iterable $values, string $message = ''): self
     {
@@ -433,7 +433,7 @@ final class Expectation
     /**
      * Asserts that the value is infinite.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeInfinite(string $message = ''): self
     {
@@ -446,7 +446,7 @@ final class Expectation
      * Asserts that the value is an instance of $class.
      *
      * @param  class-string  $class
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeInstanceOf(string $class, string $message = ''): self
     {
@@ -458,7 +458,7 @@ final class Expectation
     /**
      * Asserts that the value is an array.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeArray(string $message = ''): self
     {
@@ -470,7 +470,7 @@ final class Expectation
     /**
      * Asserts that the value is a list.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeList(string $message = ''): self
     {
@@ -482,7 +482,7 @@ final class Expectation
     /**
      * Asserts that the value is of type bool.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeBool(string $message = ''): self
     {
@@ -494,7 +494,7 @@ final class Expectation
     /**
      * Asserts that the value is of type callable.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeCallable(string $message = ''): self
     {
@@ -506,7 +506,7 @@ final class Expectation
     /**
      * Asserts that the value is of type float.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeFloat(string $message = ''): self
     {
@@ -518,7 +518,7 @@ final class Expectation
     /**
      * Asserts that the value is of type int.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeInt(string $message = ''): self
     {
@@ -530,7 +530,7 @@ final class Expectation
     /**
      * Asserts that the value is of type iterable.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeIterable(string $message = ''): self
     {
@@ -542,7 +542,7 @@ final class Expectation
     /**
      * Asserts that the value is of type numeric.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeNumeric(string $message = ''): self
     {
@@ -554,7 +554,7 @@ final class Expectation
     /**
      * Asserts that the value contains only digits.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeDigits(string $message = ''): self
     {
@@ -566,7 +566,7 @@ final class Expectation
     /**
      * Asserts that the value is of type object.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeObject(string $message = ''): self
     {
@@ -578,7 +578,7 @@ final class Expectation
     /**
      * Asserts that the value is of type resource.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeResource(string $message = ''): self
     {
@@ -590,7 +590,7 @@ final class Expectation
     /**
      * Asserts that the value is of type scalar.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeScalar(string $message = ''): self
     {
@@ -602,7 +602,7 @@ final class Expectation
     /**
      * Asserts that the value is of type string.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeString(string $message = ''): self
     {
@@ -614,7 +614,7 @@ final class Expectation
     /**
      * Asserts that the value is a JSON string.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeJson(string $message = ''): self
     {
@@ -628,7 +628,7 @@ final class Expectation
     /**
      * Asserts that the value is NAN.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeNan(string $message = ''): self
     {
@@ -640,7 +640,7 @@ final class Expectation
     /**
      * Asserts that the value is null.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeNull(string $message = ''): self
     {
@@ -652,7 +652,7 @@ final class Expectation
     /**
      * Asserts that the value array has the provided $key.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toHaveKey(string|int $key, mixed $value = new Any(), string $message = ''): self
     {
@@ -685,7 +685,7 @@ final class Expectation
      * Asserts that the value array has the provided $keys.
      *
      * @param  array<int, int|string|array<array-key, mixed>>  $keys
-     * @return self<TValue>
+     * @return $this
      */
     public function toHaveKeys(array $keys, string $message = ''): self
     {
@@ -703,7 +703,7 @@ final class Expectation
     /**
      * Asserts that the value is a directory.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeDirectory(string $message = ''): self
     {
@@ -719,7 +719,7 @@ final class Expectation
     /**
      * Asserts that the value is a directory and is readable.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeReadableDirectory(string $message = ''): self
     {
@@ -735,7 +735,7 @@ final class Expectation
     /**
      * Asserts that the value is a directory and is writable.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeWritableDirectory(string $message = ''): self
     {
@@ -751,7 +751,7 @@ final class Expectation
     /**
      * Asserts that the value is a file.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeFile(string $message = ''): self
     {
@@ -767,7 +767,7 @@ final class Expectation
     /**
      * Asserts that the value is a file and is readable.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeReadableFile(string $message = ''): self
     {
@@ -783,7 +783,7 @@ final class Expectation
     /**
      * Asserts that the value is a file and is writable.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeWritableFile(string $message = ''): self
     {
@@ -799,7 +799,7 @@ final class Expectation
      * Asserts that the value array matches the given array subset.
      *
      * @param  iterable<int|string, mixed>  $array
-     * @return self<TValue>
+     * @return $this
      */
     public function toMatchArray(iterable $array, string $message = ''): self
     {
@@ -831,7 +831,7 @@ final class Expectation
      * of the properties of an given object.
      *
      * @param  iterable<string, mixed>  $object
-     * @return self<TValue>
+     * @return $this
      */
     public function toMatchObject(iterable $object, string $message = ''): self
     {
@@ -862,7 +862,7 @@ final class Expectation
     /**
      * Asserts that the value "stringable" matches the given snapshot..
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toMatchSnapshot(string $message = ''): self
     {
@@ -905,7 +905,7 @@ final class Expectation
     /**
      * Asserts that the value matches a regular expression.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toMatch(string $expression, string $message = ''): self
     {
@@ -920,7 +920,7 @@ final class Expectation
     /**
      * Asserts that the value matches a constraint.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toMatchConstraint(Constraint $constraint, string $message = ''): self
     {
@@ -931,7 +931,7 @@ final class Expectation
 
     /**
      * @param  class-string  $class
-     * @return self<TValue>
+     * @return $this
      */
     public function toContainOnlyInstancesOf(string $class, string $message = ''): self
     {
@@ -948,7 +948,7 @@ final class Expectation
      * Asserts that executing value throws an exception.
      *
      * @param  (Closure(Throwable): mixed)|string  $exception
-     * @return self<TValue>
+     * @return $this
      */
     public function toThrow(callable|string|Throwable $exception, ?string $exceptionMessage = null, string $message = ''): self
     {
@@ -1028,7 +1028,7 @@ final class Expectation
     /**
      * Asserts that the value is uppercase.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeUppercase(string $message = ''): self
     {
@@ -1040,7 +1040,7 @@ final class Expectation
     /**
      * Asserts that the value is lowercase.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeLowercase(string $message = ''): self
     {
@@ -1052,7 +1052,7 @@ final class Expectation
     /**
      * Asserts that the value is alphanumeric.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeAlphaNumeric(string $message = ''): self
     {
@@ -1064,7 +1064,7 @@ final class Expectation
     /**
      * Asserts that the value is alpha.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeAlpha(string $message = ''): self
     {
@@ -1076,7 +1076,7 @@ final class Expectation
     /**
      * Asserts that the value is snake_case.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeSnakeCase(string $message = ''): self
     {
@@ -1094,7 +1094,7 @@ final class Expectation
     /**
      * Asserts that the value is kebab-case.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeKebabCase(string $message = ''): self
     {
@@ -1112,7 +1112,7 @@ final class Expectation
     /**
      * Asserts that the value is camelCase.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeCamelCase(string $message = ''): self
     {
@@ -1130,7 +1130,7 @@ final class Expectation
     /**
      * Asserts that the value is StudlyCase.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeStudlyCase(string $message = ''): self
     {
@@ -1148,7 +1148,7 @@ final class Expectation
     /**
      * Asserts that the value is UUID.
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeUuid(string $message = ''): self
     {
@@ -1164,7 +1164,7 @@ final class Expectation
     /**
      * Asserts that the value is between 2 specified values
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeBetween(int|float|DateTimeInterface $lowestValue, int|float|DateTimeInterface $highestValue, string $message = ''): self
     {
@@ -1177,7 +1177,7 @@ final class Expectation
     /**
      * Asserts that the value is a url
      *
-     * @return self<TValue>
+     * @return $this
      */
     public function toBeUrl(string $message = ''): self
     {
