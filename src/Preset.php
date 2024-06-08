@@ -15,6 +15,8 @@ final class Preset
 {
     /**
      * The application / package base namespaces.
+     *
+     * @var ?array<int, string>
      */
     private static ?array $baseNamespaces = null;
 
@@ -46,6 +48,8 @@ final class Preset
 
     /**
      * Get the base namespaces for the application / package.
+     *
+     * @return array<int, string>
      */
     private function baseNamespaces(): array
     {

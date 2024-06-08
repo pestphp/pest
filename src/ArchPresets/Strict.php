@@ -20,7 +20,7 @@ final class Strict implements ArchPreset
      */
     public function boot(TestCall $testCall, array $baseNamespaces): TestCall|ArchExpectation
     {
-        return $testCall
+        return $testCall // @phpstan-ignore-line
             ->expect($baseNamespaces)
             ->each
             ->toUseStrictTypes();
