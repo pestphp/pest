@@ -54,6 +54,14 @@ final class Configuration
     }
 
     /**
+     * Depending on where is called, it will add the given groups globally or locally.
+     */
+    public function group(string ...$groups): UsesCall
+    {
+        return (new UsesCall($this->filename, []))->group(...$groups);
+    }
+
+    /**
      * Depending on where is called, it will extend the given classes and traits globally or locally.
      */
     public function use(string ...$classAndTraits): UsesCall
