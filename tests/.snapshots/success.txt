@@ -1,5 +1,7 @@
 
    PASS  Tests\Arch
+  ✓ expect ['dd', 'dump', 'ray', …] → not → toBeUsed → ignoring 'Pest\Expectation'
+  ✓ expect ['Pest'] → each → toUseStrictTypes
   ✓ globals
   ✓ dependencies
   ✓ contracts
@@ -1266,7 +1268,7 @@
   ✓ closure was bound to CustomTestCase
 
    PASS  Tests\Playground
-  ✓ basic
+  ✓ expect ['Pest'] → each → toUseStrictTypes
 
    PASS  Tests\Plugins\Traits
   ✓ it allows global uses
@@ -1461,4 +1463,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 24 skipped, 1042 passed (2563 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 24 skipped, 1044 passed (2565 assertions)

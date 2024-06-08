@@ -12,6 +12,7 @@ use Pest\Factories\TestCaseMethodFactory;
 use Pest\Mutate\Decorators\TestCallDecorator as MutationTestCallDecorator;
 use Pest\PendingCalls\Concerns\Describable;
 use Pest\Plugins\Only;
+use Pest\Preset;
 use Pest\Support\Backtrace;
 use Pest\Support\Exporter;
 use Pest\Support\HigherOrderCallables;
@@ -520,5 +521,13 @@ final class TestCall
         if (! is_null($testCase = $this->testSuite->tests->get($this->filename))) {
             $testCase->attributes = array_merge($testCase->attributes, $this->testCaseFactoryAttributes);
         }
+    }
+
+    /**
+     * Uses the given preset on the test.
+     */
+    public function preset(): Preset
+    {
+        return new Preset($this);
     }
 }

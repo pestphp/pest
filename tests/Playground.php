@@ -1,5 +1,3 @@
 <?php
 
-test('basic', function () {
-    expect(true)->toBeTrue();
-});
+arch()->preset()->strict();
