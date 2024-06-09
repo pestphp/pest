@@ -24,6 +24,8 @@ final class Base extends AbstractPreset
             'usleep',
             'exit',
             'phpinfo',
+            'echo',
+            'print',
             'print_r',
             'var_export',
         ])->not->toBeUsed();
