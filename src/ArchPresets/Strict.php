@@ -4,25 +4,19 @@ declare(strict_types=1);
 
 namespace Pest\ArchPresets;
 
-use Pest\Arch\Contracts\ArchExpectation;
-use Pest\Contracts\ArchPreset;
-use Pest\PendingCalls\TestCall;
-
 /**
  * @internal
  */
-final class Strict implements ArchPreset
+final class Strict extends AbstractPreset
 {
     /**
-     * Boots the arch preset.
-     *
-     * @param  array<string>  $baseNamespaces
+     * Executes the arch preset.
      */
-    public function boot(TestCall $testCall, array $baseNamespaces): TestCall|ArchExpectation
+    public function execute(): void
     {
-        return $testCall // @phpstan-ignore-line
-            ->expect($baseNamespaces)
-            ->each
-            ->toUseStrictTypes();
+        foreach ($this->userNamespaces as $namespace) {
+            $this->expectations[] = expect($namespace)
+                ->toUseStrictTypes();
+        }
     }
 }

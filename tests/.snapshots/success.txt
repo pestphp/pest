@@ -1,7 +1,7 @@
 
    PASS  Tests\Arch
-  ✓ expect ['dd', 'dump', 'ray', …] → not → toBeUsed → ignoring 'Pest\Expectation'
-  ✓ expect ['Pest'] → each → toUseStrictTypes
+  ✓ arch "base" preset
+  ✓ arch "strict" preset
   ✓ globals
   ✓ dependencies
   ✓ contracts
@@ -1268,7 +1268,7 @@
   ✓ closure was bound to CustomTestCase
 
    PASS  Tests\Playground
-  ✓ expect ['Pest'] → each → toUseStrictTypes
+  ✓ basic
 
    PASS  Tests\Plugins\Traits
   ✓ it allows global uses

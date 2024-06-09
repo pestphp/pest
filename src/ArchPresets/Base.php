@@ -4,24 +4,17 @@ declare(strict_types=1);
 
 namespace Pest\ArchPresets;
 
-use Pest\Arch\Contracts\ArchExpectation;
-use Pest\Contracts\ArchPreset;
-use Pest\PendingCalls\TestCall;
-
 /**
  * @internal
  */
-final class Base implements ArchPreset
+final class Base extends AbstractPreset
 {
     /**
-     * Boots the arch preset.
-     *
-     * @param  array<string>  $baseNamespace
+     * Executes the arch preset.
      */
-    public function boot(TestCall $testCall, array $baseNamespace): TestCall|ArchExpectation
+    public function execute(): void
     {
-        return $testCall // @phpstan-ignore-line
-            ->expect(['dd', 'dump', 'ray', 'die', 'var_dump', 'sleep', 'eval', 'ini_set'])
+        $this->expectations[] = expect(['dd', 'dump', 'ray', 'die', 'var_dump', 'sleep', 'eval', 'ini_set'])
             ->not
             ->toBeUsed();
     }

@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Pest;
 
-use Pest\Arch\Contracts\ArchExpectation;
 use Pest\Arch\Support\Composer;
+use Pest\ArchPresets\AbstractPreset;
+use Pest\ArchPresets\Base;
+use Pest\ArchPresets\Strict;
 use Pest\PendingCalls\TestCall;
+use stdClass;
 
 /**
  * @internal
@@ -31,19 +34,44 @@ final class Preset
     /**
      * Uses the Pest base preset and returns the test call instance.
      */
-    public function base(): TestCall|ArchExpectation
+    public function base(): Base
     {
-        return (new ArchPresets\Base)->boot($this->testCall, $this->baseNamespaces());
+        return $this->executePreset(new Base($this->baseNamespaces()));
     }
 
     /**
      * Uses the Pest strict preset and returns the test call instance.
      */
-    public function strict(): TestCall
+    public function strict(): Strict
     {
-        (new ArchPresets\Strict)->boot($this->testCall, $this->baseNamespaces());
+        return $this->executePreset(new Strict($this->baseNamespaces()));
+    }
 
-        return $this->testCall;
+    /**
+     * Executes the given preset.
+     *
+     * @template TPreset of AbstractPreset
+     *
+     * @param  TPreset  $preset
+     * @return TPreset
+     */
+    private function executePreset(AbstractPreset $preset): AbstractPreset
+    {
+        if ((fn (): ?string => $this->description)->call($this->testCall) === null) {
+            $description = strtolower((new \ReflectionClass($preset))->getShortName());
+
+            (fn (): string => $this->description = sprintf('arch "%s" preset', $description))->call($this->testCall);
+        }
+
+        $this->baseNamespaces();
+
+        $preset->execute();
+
+        $this->testCall->testCaseMethod->closure = (function () use ($preset): void {
+            $preset->flush();
+        })->bindTo(new stdClass);
+
+        return $preset;
     }
 
     /**
