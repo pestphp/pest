@@ -16,6 +16,7 @@ final class Base extends AbstractPreset
     {
         $this->expectations[] = expect([
             'dd',
+            'ddd',
             'dump',
             'ray',
             'die',
