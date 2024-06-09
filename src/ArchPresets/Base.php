@@ -21,7 +21,7 @@ final class Base implements ArchPreset
     public function boot(TestCall $testCall, array $baseNamespace): TestCall|ArchExpectation
     {
         return $testCall // @phpstan-ignore-line
-            ->expect(['dd', 'dump', 'ray', 'die', 'var_dump', 'sleep'])
+            ->expect(['dd', 'dump', 'ray', 'die', 'var_dump', 'sleep', 'eval'])
             ->not
             ->toBeUsed();
     }
