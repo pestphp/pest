@@ -14,8 +14,18 @@ final class Base extends AbstractPreset
      */
     public function execute(): void
     {
-        $this->expectations[] = expect(['dd', 'dump', 'ray', 'die', 'var_dump', 'sleep', 'eval', 'ini_set'])
-            ->not
-            ->toBeUsed();
+        $this->expectations[] = expect([
+            'dd',
+            'dump',
+            'ray',
+            'die',
+            'var_dump',
+            'sleep',
+            'usleep',
+            'exit',
+            'phpinfo',
+            'print_r',
+            'var_export',
+        ])->not->toBeUsed();
     }
 }
