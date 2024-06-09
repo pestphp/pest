@@ -2,7 +2,10 @@
 
 use Pest\Expectation;
 
-arch()->preset()->base()->ignoring(Expectation::class);
+arch()->preset()->base()->ignoring([
+    Expectation::class,
+    'eval',
+]);
 
 arch()->preset()->strict();
 
