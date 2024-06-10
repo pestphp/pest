@@ -33,7 +33,7 @@ final class Base extends AbstractPreset
             'xdebug_break',
             'xdebug_call_class',
             'xdebug_call_file',
-            'xdebug_call_(int',
+            'xdebug_call_int',
             'xdebug_call_line',
             'xdebug_code_coverage_started',
             'xdebug_connect_to_client',
