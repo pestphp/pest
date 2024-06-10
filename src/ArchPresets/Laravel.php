@@ -36,5 +36,9 @@ final class Laravel extends AbstractPreset
 
         $this->expectations[] = expect('App\Exceptions')
             ->toImplement('Throwable');
+
+        $this->expectations[] = expect('App\Mail')
+            ->toHaveConstructor()
+            ->toExtend('Illuminate\Mail\Mailable');
     }
 }
