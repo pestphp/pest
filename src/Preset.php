@@ -7,6 +7,7 @@ namespace Pest;
 use Pest\Arch\Support\Composer;
 use Pest\ArchPresets\AbstractPreset;
 use Pest\ArchPresets\Base;
+use Pest\ArchPresets\Laravel;
 use Pest\ArchPresets\Strict;
 use Pest\ArchPresets\Security;
 use Pest\PendingCalls\TestCall;
@@ -38,6 +39,14 @@ final class Preset
     public function base(): Base
     {
         return $this->executePreset(new Base($this->baseNamespaces()));
+    }
+
+    /**
+     * Uses the Pest laravel preset and returns the test call instance.
+     */
+    public function laravel(): Strict
+    {
+        return $this->executePreset(new Laravel($this->baseNamespaces()));
     }
 
     /**
