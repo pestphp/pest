@@ -21,5 +21,8 @@ final class Laravel extends AbstractPreset
         $this->expectations[] = expect([
             'exit',
         ])->not->toBeUsed();
+
+        $this->expectations[] = expect('App\Http\Controllers')
+            ->toHaveSuffix('Controller');
     }
 }
