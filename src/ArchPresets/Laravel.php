@@ -16,9 +16,6 @@ final class Laravel extends AbstractPreset
     {
         $this->expectations[] = expect([
             'env',
-        ])->not->toBeUsed();
-
-        $this->expectations[] = expect([
             'exit',
         ])->not->toBeUsed();
 
@@ -39,28 +36,21 @@ final class Laravel extends AbstractPreset
         $this->expectations[] = expect('App\Console\Commands')
             ->toHaveSuffix('Command')
             ->toExtend('Illuminate\Console\Command')
-            ->toHaveMethod('handle')
-            ->toImplementNothing();
+            ->toHaveMethod('handle');
 
         $this->expectations[] = expect('App\Exceptions')
             ->toImplement('Throwable');
 
         $this->expectations[] = expect('App\Mail')
-            ->toHaveConstructor()
             ->toExtend('Illuminate\Mail\Mailable');
 
         $this->expectations[] = expect('App\Jobs')
-            ->toHaveMethod('handle')
-            ->toHaveConstructor();
+            ->toHaveMethod('handle');
 
         $this->expectations[] = expect('App\Listeners')
             ->toHaveMethod('handle');
 
-        $this->expectations[] = expect('App\Events')
-            ->toHaveConstructor();
-
         $this->expectations[] = expect('App\Notifications')
-            ->toHaveConstructor()
             ->toExtend('Illuminate\Notifications\Notification');
 
         $this->expectations[] = expect('App\Providers')
