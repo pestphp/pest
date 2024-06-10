@@ -71,6 +71,7 @@ final class Base extends AbstractPreset
             'xdebug_stop_trace',
             'xdebug_time_index',
             'xdebug_var_dump',
+            'trap',                               
         ])->not->toBeUsed();
     }
 }
