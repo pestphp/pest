@@ -44,7 +44,7 @@ final class Preset
     /**
      * Uses the Pest laravel preset and returns the test call instance.
      */
-    public function laravel(): Strict
+    public function laravel(): Laravel
     {
         return $this->executePreset(new Laravel($this->baseNamespaces()));
     }
