@@ -24,5 +24,8 @@ final class Laravel extends AbstractPreset
 
         $this->expectations[] = expect('App\Http\Controllers')
             ->toHaveSuffix('Controller');
+
+        $this->expectations[] = expect('App\Models')
+            ->not->toHaveSuffix('Model');
     }
 }
