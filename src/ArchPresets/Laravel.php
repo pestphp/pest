@@ -32,7 +32,9 @@ final class Laravel extends AbstractPreset
             ->not->toHaveSuffix('Model');
 
         $this->expectations[] = expect('App\Http\Requests')
-            ->toHaveSuffix('Request');
+            ->toHaveSuffix('Request')
+            ->toExtend('Illuminate\Foundation\Http\FormRequest')
+            ->toHaveMethod('rules');
 
         $this->expectations[] = expect('App\Console\Commands')
             ->toHaveSuffix('Command')
