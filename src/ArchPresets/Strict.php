@@ -15,6 +15,11 @@ final class Strict extends AbstractPreset
     public function execute(): void
     {
         foreach ($this->userNamespaces as $namespace) {
+            $this->expectations[] = expect([
+                'sleep',
+                'usleep',
+            ])->not->toBeUsed();
+
             $this->expectations[] = expect($namespace)
                 ->toUseStrictTypes();
         }
