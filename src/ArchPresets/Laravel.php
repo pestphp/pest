@@ -52,5 +52,9 @@ final class Laravel extends AbstractPreset
         $this->expectations[] = expect('App\Jobs')
             ->toHaveMethod('handle')
             ->toHaveConstructor();
+
+        $this->expectations[] = expect('App\Notifications')
+            ->toHaveConstructor()
+            ->toExtend('Illuminate\Notifications\Notification');
     }
 }
