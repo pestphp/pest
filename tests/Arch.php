@@ -5,6 +5,8 @@ use Pest\Expectation;
 arch()->preset()->base()->ignoring([
     Expectation::class,
     'eval',
+    'debug_backtrace',
+    'usleep',
 ]);
 
 arch()->preset()->strict();
