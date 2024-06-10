@@ -8,6 +8,7 @@ use Pest\Arch\Support\Composer;
 use Pest\ArchPresets\AbstractPreset;
 use Pest\ArchPresets\Base;
 use Pest\ArchPresets\Strict;
+use Pest\ArchPresets\Security;
 use Pest\PendingCalls\TestCall;
 use stdClass;
 
@@ -45,6 +46,14 @@ final class Preset
     public function strict(): Strict
     {
         return $this->executePreset(new Strict($this->baseNamespaces()));
+    }
+
+    /**
+     * Uses the Pest security preset and returns the test call instance.
+     */
+    public function security(): AbstractPreset
+    {
+        return $this->executePreset(new Security($this->baseNamespaces()));
     }
 
     /**
