@@ -11,6 +11,8 @@ arch()->preset()->base()->ignoring([
 
 arch()->preset()->strict();
 
+arch()->preset()->security();
+
 arch('globals')
     ->expect(['dd', 'dump', 'ray', 'die', 'var_dump', 'sleep'])
     ->not->toBeUsed()
