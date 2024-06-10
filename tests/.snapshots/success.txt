@@ -525,6 +525,12 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toBeList
+  ✓ pass
+  ✓ failures
+  ✓ failures with custom message
+  ✓ not failures
+
    PASS  Tests\Features\Expect\toBeLowercase
   ✓ pass
   ✓ failures

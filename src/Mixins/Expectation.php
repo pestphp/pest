@@ -468,6 +468,18 @@ final class Expectation
     }
 
     /**
+     * Asserts that the value is a list.
+     *
+     * @return self<TValue>
+     */
+    public function toBeList(string $message = ''): self
+    {
+        Assert::assertIsList($this->value, $message);
+
+        return $this;
+    }
+
+    /**
      * Asserts that the value is of type bool.
      *
      * @return self<TValue>
