@@ -14,16 +14,13 @@ final class Security extends AbstractPreset
      */
     public function execute(): void
     {
-        $this->expectations[] = expect([
-            'md5',
-            'sha1',
-            'uniqid',
-            'rand',
-            'mt_rand',
-            'tempnam',
-            'str_shuffle',
-            'shuffle',
-            'array_rand'
-        ])->not->toBeUsed();
+        $expectations = [
+            expect([
+                'md5', 'sha1', 'uniqid', 'rand', 'mt_rand',
+                'tempnam', 'str_shuffle', 'shuffle', 'array_rand'
+            ])->not->toBeUsed(),
+        ];
+
+        $this->updateExpectations($expectations);
     }
 }

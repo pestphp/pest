@@ -32,6 +32,19 @@ abstract class AbstractPreset
     abstract public function execute(): void;
 
     /**
+     * Updates expectations
+     * 
+     * @param array<ArchExpectation> $expectations
+     * 
+     * @internal
+     */
+    final protected function updateExpectations(array $expectations): void
+    {
+        print_r($expectations);
+        $this->expectations = array_merge($this->expectations, $expectations);
+    }
+
+    /**
      * Ignores the given "targets" or "dependencies".
      *
      * @param  array<int, string>|string  $targetsOrDependencies

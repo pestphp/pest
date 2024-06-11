@@ -14,48 +14,21 @@ final class Laravel extends AbstractPreset
      */
     public function execute(): void
     {
-        $this->expectations[] = expect([
-            'env',
-            'exit',
-        ])->not->toBeUsed();
+        $expectations = [
+            expect(['env', 'exit'])->not->toBeUsed(),
+            expect('App\Http\Controllers')->toHaveSuffix('Controller'),
+            expect('App\Http\Middleware')->toHaveMethod('handle'),
+            expect('App\Models')->not->toHaveSuffix('Model'),
+            expect('App\Exceptions')->toImplement('Throwable'),
+            expect('App\Mail')->toExtend('Illuminate\Mail\Mailable'),
+            expect('App\Jobs')->toHaveMethod('handle'),
+            expect('App\Listeners')->toHaveMethod('handle'),
+            expect('App\Notifications')->toExtend('Illuminate\Notifications\Notification'),
+            expect('App\Http\Requests')->toHaveSuffix('Request')->toExtend('Illuminate\Foundation\Http\FormRequest')->toHaveMethod('rules'),
+            expect('App\Console\Commands')->toHaveSuffix('Command')->toExtend('Illuminate\Console\Command')->toHaveMethod('handle'),
+            expect('App\Providers')->toHaveSuffix('ServiceProvider')->toExtend('Illuminate\Support\ServiceProvider')->not->toBeUsed(),
+        ];
 
-        $this->expectations[] = expect('App\Http\Controllers')
-            ->toHaveSuffix('Controller');
-
-        $this->expectations[] = expect('App\Http\Middleware')
-            ->toHaveMethod('handle');
-
-        $this->expectations[] = expect('App\Models')
-            ->not->toHaveSuffix('Model');
-
-        $this->expectations[] = expect('App\Http\Requests')
-            ->toHaveSuffix('Request')
-            ->toExtend('Illuminate\Foundation\Http\FormRequest')
-            ->toHaveMethod('rules');
-
-        $this->expectations[] = expect('App\Console\Commands')
-            ->toHaveSuffix('Command')
-            ->toExtend('Illuminate\Console\Command')
-            ->toHaveMethod('handle');
-
-        $this->expectations[] = expect('App\Exceptions')
-            ->toImplement('Throwable');
-
-        $this->expectations[] = expect('App\Mail')
-            ->toExtend('Illuminate\Mail\Mailable');
-
-        $this->expectations[] = expect('App\Jobs')
-            ->toHaveMethod('handle');
-
-        $this->expectations[] = expect('App\Listeners')
-            ->toHaveMethod('handle');
-
-        $this->expectations[] = expect('App\Notifications')
-            ->toExtend('Illuminate\Notifications\Notification');
-
-        $this->expectations[] = expect('App\Providers')
-            ->toHaveSuffix('ServiceProvider')
-            ->toExtend('Illuminate\Support\ServiceProvider')
-            ->not->toBeUsed();
+        $this->updateExpectations($expectations);
     }
 }
