@@ -2,16 +2,21 @@
 
 use Pest\Expectation;
 
+uses()->group('arch');
+
 arch()->preset()->base()->ignoring([
     Expectation::class,
-    'eval',
     'debug_backtrace',
+    'var_export',
+]);
+
+arch()->preset()->strict()->ignoring([
     'usleep',
 ]);
 
-arch()->preset()->strict();
-
-arch()->preset()->security();
+arch()->preset()->security()->ignoring([
+    'str_shuffle',
+]);
 
 arch('globals')
     ->expect(['dd', 'dump', 'ray', 'die', 'var_dump', 'sleep'])
