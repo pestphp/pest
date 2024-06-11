@@ -24,6 +24,7 @@ final class Base extends AbstractPreset
             'ray',
             'die',
             'goto',
+            'global',
             'var_dump',
             'phpinfo',
             'echo',
