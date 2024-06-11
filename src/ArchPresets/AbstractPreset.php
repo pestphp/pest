@@ -40,7 +40,6 @@ abstract class AbstractPreset
      */
     final protected function updateExpectations(array $expectations): void
     {
-        print_r($expectations);
         $this->expectations = array_merge($this->expectations, $expectations);
     }
 
