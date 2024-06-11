@@ -4,14 +4,23 @@ use Pest\Expectation;
 
 arch()->preset()->base()->ignoring([
     Expectation::class,
-    'eval',
     'debug_backtrace',
+    'var_export',
+    'xdebug_info',
+]);
+
+arch()->preset()->strict()->ignoring([
     'usleep',
 ]);
 
-arch()->preset()->strict();
-
-arch()->preset()->security();
+arch()->preset()->security()->ignoring([
+    'eval',
+    'str_shuffle',
+    'exec',
+    'unserialize',
+    'extract',
+    'assert',
+]);
 
 arch('globals')
     ->expect(['dd', 'dump', 'ray', 'die', 'var_dump', 'sleep'])

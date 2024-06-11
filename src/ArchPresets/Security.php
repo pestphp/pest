@@ -23,7 +23,19 @@ final class Security extends AbstractPreset
             'tempnam',
             'str_shuffle',
             'shuffle',
-            'array_rand'
+            'array_rand',
+            'eval',
+            'exec',
+            'shell_exec',
+            'system',
+            'passthru',
+            'create_function',
+            'unserialize',
+            'extract',
+            'parse_str',
+            'mb_parse_str',
+            'dl',
+            'assert',
         ])->not->toBeUsed();
     }
 }

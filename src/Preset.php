@@ -8,8 +8,8 @@ use Pest\Arch\Support\Composer;
 use Pest\ArchPresets\AbstractPreset;
 use Pest\ArchPresets\Base;
 use Pest\ArchPresets\Laravel;
-use Pest\ArchPresets\Strict;
 use Pest\ArchPresets\Security;
+use Pest\ArchPresets\Strict;
 use Pest\PendingCalls\TestCall;
 use stdClass;
 
