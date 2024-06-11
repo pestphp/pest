@@ -33,9 +33,9 @@ abstract class AbstractPreset
 
     /**
      * Updates expectations
-     * 
-     * @param array<ArchExpectation> $expectations
-     * 
+     *
+     * @param  array<ArchExpectation>  $expectations
+     *
      * @internal
      */
     final protected function updateExpectations(array $expectations): void

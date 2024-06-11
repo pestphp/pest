@@ -24,7 +24,7 @@ final class Base extends AbstractPreset
                 'dump',
                 'ray',
                 'die',
-                'goto',  
+                'goto',
                 'var_dump',
                 'phpinfo',
                 'echo',
@@ -72,7 +72,7 @@ final class Base extends AbstractPreset
                 'xdebug_stop_trace',
                 'xdebug_time_index',
                 'xdebug_var_dump',
-                'trap',                               
+                'trap',
             ])->not->toBeUsed(),
         ];
 

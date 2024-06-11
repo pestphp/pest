@@ -17,7 +17,7 @@ final class Security extends AbstractPreset
         $expectations = [
             expect([
                 'md5', 'sha1', 'uniqid', 'rand', 'mt_rand',
-                'tempnam', 'str_shuffle', 'shuffle', 'array_rand'
+                'tempnam', 'str_shuffle', 'shuffle', 'array_rand',
             ])->not->toBeUsed(),
         ];
 
