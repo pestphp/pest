@@ -2,6 +2,7 @@
    PASS  Tests\Arch
   ✓ arch "base" preset
   ✓ arch "strict" preset
+  ✓ arch "security" preset
   ✓ globals
   ✓ dependencies
   ✓ contracts
@@ -1463,4 +1464,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 24 skipped, 1044 passed (2565 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 24 skipped, 1045 passed (2567 assertions)
