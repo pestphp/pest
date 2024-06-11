@@ -1,5 +1,7 @@
 
    PASS  Tests\Arch
+  ✓ arch "base" preset
+  ✓ arch "strict" preset
   ✓ globals
   ✓ dependencies
   ✓ contracts

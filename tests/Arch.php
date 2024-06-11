@@ -2,6 +2,26 @@
 
 use Pest\Expectation;
 
+arch()->preset()->base()->ignoring([
+    Expectation::class,
+    'debug_backtrace',
+    'var_export',
+    'xdebug_info',
+]);
+
+arch()->preset()->strict()->ignoring([
+    'usleep',
+]);
+
+arch()->preset()->security()->ignoring([
+    'eval',
+    'str_shuffle',
+    'exec',
+    'unserialize',
+    'extract',
+    'assert',
+]);
+
 arch('globals')
     ->expect(['dd', 'dump', 'ray', 'die', 'var_dump', 'sleep'])
     ->not->toBeUsed()
@@ -30,4 +50,6 @@ arch('contracts')
         'NunoMaduro\Collision\Contracts',
         'Pest\Factories\TestCaseMethodFactory',
         'Symfony\Component\Console',
+        'Pest\Arch\Contracts',
+        'Pest\PendingCalls',
     ])->toBeInterfaces();
