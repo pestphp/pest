@@ -28,6 +28,8 @@ final class Base extends AbstractPreset
             'var_dump',
             'phpinfo',
             'echo',
+            'ereg',
+            'eregi',
             'mysql_connect',
             'mysql_pconnect',
             'mysql_query',
