@@ -5,13 +5,20 @@ use Pest\Expectation;
 arch()->preset()->base()->ignoring([
     Expectation::class,
     'debug_backtrace',
+    'var_export',
+    'xdebug_info',
+]);
+
+arch()->preset()->strict()->ignoring([
     'usleep',
 ]);
 
-arch()->preset()->strict();
-
 arch()->preset()->security()->ignoring([
     'eval',
+    'str_shuffle',
+    'exec',
+    'unserialize',
+    'extract',
 ]);
 
 arch('globals')
