@@ -19,6 +19,7 @@ arch()->preset()->security()->ignoring([
     'exec',
     'unserialize',
     'extract',
+    'assert',
 ]);
 
 arch('globals')
