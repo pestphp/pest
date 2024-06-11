@@ -4,14 +4,15 @@ use Pest\Expectation;
 
 arch()->preset()->base()->ignoring([
     Expectation::class,
-    'eval',
     'debug_backtrace',
     'usleep',
 ]);
 
 arch()->preset()->strict();
 
-arch()->preset()->security();
+arch()->preset()->security()->ignoring([
+    'eval',
+]);
 
 arch('globals')
     ->expect(['dd', 'dump', 'ray', 'die', 'var_dump', 'sleep'])
