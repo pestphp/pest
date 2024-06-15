@@ -54,6 +54,7 @@ if (! function_exists('beforeEach')) {
     /**
      * Runs the given closure before each test in the current file.
      *
+     * @param-closure-this TestCase  $closure
      * @return HigherOrderTapProxy<Expectable|TestCall|TestCase>|Expectable|TestCall|TestCase|mixed
      */
     function beforeEach(?Closure $closure = null): BeforeEachCall
@@ -125,6 +126,7 @@ if (! function_exists('test')) {
      * is the test description; the second argument is
      * a closure that contains the test expectations.
      *
+     * @param-closure-this TestCase  $closure
      * @return Expectable|TestCall|TestCase|mixed
      */
     function test(?string $description = null, ?Closure $closure = null): HigherOrderTapProxy|TestCall
@@ -145,6 +147,7 @@ if (! function_exists('it')) {
      * is the test description; the second argument is
      * a closure that contains the test expectations.
      *
+     * @param-closure-this TestCase  $closure
      * @return Expectable|TestCall|TestCase|mixed
      */
     function it(string $description, ?Closure $closure = null): TestCall
@@ -180,6 +183,7 @@ if (! function_exists('afterEach')) {
     /**
      * Runs the given closure after each test in the current file.
      *
+     * @param-closure-this TestCase  $closure
      * @return Expectable|HigherOrderTapProxy<Expectable|TestCall|TestCase>|TestCall|mixed
      */
     function afterEach(?Closure $closure = null): AfterEachCall
