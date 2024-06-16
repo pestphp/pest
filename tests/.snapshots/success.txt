@@ -549,6 +549,12 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toBePrintable
+  ✓ pass
+  ✓ failures
+  ✓ failures with custom message
+  ✓ not failures
+
    PASS  Tests\Features\Expect\toBeReadableDirectory
   ✓ pass
   ✓ failures
@@ -1388,9 +1394,9 @@
   ✓ description
   ✓ latest description
 
-   PASS  Tests\Visual\Collision
+   FAIL  Tests\Visual\Collision
   ✓ collision with ([''])
-  ✓ collision with (['--parallel'])
+  ⨯ collision with (['--parallel'])
 
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
@@ -1423,5 +1429,28 @@
 
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Visual\Collision > collision with (['--parallel'])             
+  Failed asserting that the string value matches its snapshot (tests/.pest/snapshots/Visual/Collision/collision_with_data_set_______parallel__________parallel___.snap).
+Failed asserting that two strings are identical.
+   '
+  -  .⨯.
+  +  ⨯..
+     ────────────────────────────────────────────────────────────────────────────  
+      FAILED  Tests\Fixtures\CollisionTest > error                     Exception   
+     error
+  
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 20 skipped, 1013 passed (2405 assertions)
+  at tests/Visual/Collision.php:26
+     22▕         array_pop($outputContent);
+     23▕         array_pop($outputContent);
+     24▕     }
+     25▕ 
+  ➜  26▕     expect(implode("\n", $outputContent))->toMatchSnapshot();
+     27▕ })->with([
+     28▕     [['']],
+     29▕     [['--parallel']],
+     30▕ ])->skipOnWindows();
+
+
+  Tests:    2 deprecated, 1 failed, 4 warnings, 5 incomplete, 2 notices, 13 todos, 20 skipped, 1016 passed (2414 assertions)

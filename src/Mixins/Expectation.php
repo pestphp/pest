@@ -1074,6 +1074,18 @@ final class Expectation
     }
 
     /**
+     * Asserts that the value is printable.
+     *
+     * @return self<TValue>
+     */
+    public function toBePrintable(string $message = ''): self
+    {
+        Assert::assertTrue(ctype_print((string) $this->value), $message);
+
+        return $this;
+    }
+
+    /**
      * Asserts that the value is snake_case.
      *
      * @return self<TValue>
