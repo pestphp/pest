@@ -33,7 +33,7 @@ final class Coverage
     }
 
     /**
-     * Runs true there is any code coverage driver available.
+     * Returns true there is any code coverage driver available.
      */
     public static function isAvailable(): bool
     {
