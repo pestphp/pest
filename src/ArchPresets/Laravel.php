@@ -97,15 +97,6 @@ final class Laravel extends AbstractPreset
                 'Illuminate\Queue\SerializesModels',
             ])->toHaveMethod('handle');
 
-        $this->expectations[] = expect('App')
-            ->not->toImplement('Illuminate\Contracts\Queue\ShouldQueue')
-            ->not->toUseTraits([
-                'Illuminate\Bus\Queueable',
-                'Illuminate\Foundation\Bus\Dispatchable',
-                'Illuminate\Queue\InteractsWithQueue',
-                'Illuminate\Queue\SerializesModels',
-            ])->ignoring('App\Jobs');
-
         $this->expectations[] = expect('App\Listeners')
             ->toHaveMethod('handle');
 
