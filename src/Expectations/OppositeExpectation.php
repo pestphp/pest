@@ -292,10 +292,8 @@ final class OppositeExpectation
 
     /**
      * Not supported.
-     *
-     * @param  array<int, class-string>|string  $interfaces
      */
-    public function toOnlyImplement(array|string $interfaces): never
+    public function toOnlyImplement(): never
     {
         throw InvalidExpectation::fromMethods(['not', 'toOnlyImplement']);
     }
@@ -328,10 +326,8 @@ final class OppositeExpectation
 
     /**
      * Not supported.
-     *
-     * @param  array<int, string>|string  $targets
      */
-    public function toOnlyUse(array|string $targets): never
+    public function toOnlyUse(): never
     {
         throw InvalidExpectation::fromMethods(['not', 'toOnlyUse']);
     }

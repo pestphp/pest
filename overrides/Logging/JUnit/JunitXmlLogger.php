@@ -308,7 +308,6 @@ final class JunitXmlLogger
             new TestFinishedSubscriber($this),
             new TestErroredSubscriber($this),
             new TestFailedSubscriber($this),
-            new TestMarkedIncompleteSubscriber($this),
             new TestSkippedSubscriber($this),
             new TestRunnerExecutionFinishedSubscriber($this),
         );

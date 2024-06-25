@@ -12,7 +12,6 @@ use Pest\Logging\TeamCity\Subscriber\TestErroredSubscriber;
 use Pest\Logging\TeamCity\Subscriber\TestExecutionFinishedSubscriber;
 use Pest\Logging\TeamCity\Subscriber\TestFailedSubscriber;
 use Pest\Logging\TeamCity\Subscriber\TestFinishedSubscriber;
-use Pest\Logging\TeamCity\Subscriber\TestMarkedIncompleteSubscriber;
 use Pest\Logging\TeamCity\Subscriber\TestPreparedSubscriber;
 use Pest\Logging\TeamCity\Subscriber\TestSkippedSubscriber;
 use Pest\Logging\TeamCity\Subscriber\TestSuiteFinishedSubscriber;
@@ -28,7 +27,6 @@ use PHPUnit\Event\Test\ConsideredRisky;
 use PHPUnit\Event\Test\Errored;
 use PHPUnit\Event\Test\Failed;
 use PHPUnit\Event\Test\Finished;
-use PHPUnit\Event\Test\MarkedIncomplete;
 use PHPUnit\Event\Test\Prepared;
 use PHPUnit\Event\Test\Skipped;
 use PHPUnit\Event\TestRunner\ExecutionFinished;
@@ -108,7 +106,7 @@ final class TeamCityLogger
         $this->time = $event->telemetryInfo()->time();
     }
 
-    public function testMarkedIncomplete(MarkedIncomplete $event): never
+    public function testMarkedIncomplete(): never
     {
         throw ShouldNotHappen::fromMessage('testMarkedIncomplete not implemented.');
     }
@@ -262,7 +260,6 @@ final class TeamCityLogger
             new TestFinishedSubscriber($this),
             new TestErroredSubscriber($this),
             new TestFailedSubscriber($this),
-            new TestMarkedIncompleteSubscriber($this),
             new TestSkippedSubscriber($this),
             new TestConsideredRiskySubscriber($this),
             new TestExecutionFinishedSubscriber($this),

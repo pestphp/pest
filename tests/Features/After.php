@@ -14,7 +14,7 @@ afterEach(function () {
         '__pest_evaluable__something_2__→_it_can_run_after_test' => expect($this->count)->toBe(1),
         '__pest_evaluable_high_order_test' => expect($this->count)->toBe(1),
         '__pest_evaluable_high_order_test_with_skip' => expect($this->count)->toBe(0),
-        '__pest_evaluable_post__foo__→_defer_Closure_→_expect_Closure_→_toBe_1' => expect($this->count)->toBe(1),
+        '__pest_evaluable_post__foo__→_defer_Closure_Object____→_expect_Closure_Object____→_toBe_1' => expect($this->count)->toBe(1),
         default => $this->fail('Unexpected test name: '.$this->name()),
     };
 
@@ -61,7 +61,7 @@ afterEach(function () {
         '__pest_evaluable__something_2__→_it_can_run_after_test' => expect($this->count)->toBe(2),
         '__pest_evaluable_high_order_test' => expect($this->count)->toBe(2),
         '__pest_evaluable_high_order_test_with_skip' => expect($this->count)->toBe(1),
-        '__pest_evaluable_post__foo__→_defer_Closure_→_expect_Closure_→_toBe_1' => expect($this->count)->toBe(2),
+        '__pest_evaluable_post__foo__→_defer_Closure_Object____→_expect_Closure_Object____→_toBe_1' => expect($this->count)->toBe(2),
 
         default => $this->fail('Unexpected test name: '.$this->name()),
 
@@ -80,7 +80,7 @@ afterEach(function () {
         '__pest_evaluable__something_2__→_it_can_run_after_test' => expect($this->count)->toBe(3),
         '__pest_evaluable_high_order_test' => expect($this->count)->toBe(3),
         '__pest_evaluable_high_order_test_with_skip' => expect($this->count)->toBe(2),
-        '__pest_evaluable_post__foo__→_defer_Closure_→_expect_Closure_→_toBe_1' => expect($this->count)->toBe(3),
+        '__pest_evaluable_post__foo__→_defer_Closure_Object____→_expect_Closure_Object____→_toBe_1' => expect($this->count)->toBe(3),
         default => $this->fail('Unexpected test name: '.$this->name()),
     };
 

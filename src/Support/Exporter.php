@@ -64,8 +64,6 @@ final class Exporter
                 continue;
             }
 
-            assert(is_array($data));
-
             $result[] = $context->contains($data[$key]) !== false
                 ? '*RECURSION*'
                 : sprintf('[%s]', $this->shortenedRecursiveExport($data[$key], $context));
