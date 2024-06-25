@@ -18,8 +18,6 @@ final class Base extends AbstractPreset
             'debug_zval_dump',
             'debug_backtrace',
             'debug_print_backtrace',
-            'dd',
-            'ddd',
             'dump',
             'ray',
             'die',
