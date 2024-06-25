@@ -7,6 +7,4 @@ namespace Tests\Fixtures\Arch\ToHaveAttribute\Attributes;
 use Attribute;
 
 #[Attribute()]
-class AsAttribute
-{
-}
+class AsAttribute {}

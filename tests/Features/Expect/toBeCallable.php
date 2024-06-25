@@ -3,8 +3,7 @@
 use PHPUnit\Framework\ExpectationFailedException;
 
 test('pass', function () {
-    expect(function () {
-    })->toBeCallable();
+    expect(function () {})->toBeCallable();
     expect(null)->not->toBeCallable();
 });
 

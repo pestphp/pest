@@ -32,8 +32,7 @@ final class Configuration
      */
     private function __construct(
         private readonly string $filename,
-    ) {
-    }
+    ) {}
 
     /**
      * Gets the configuration of a certain folder.

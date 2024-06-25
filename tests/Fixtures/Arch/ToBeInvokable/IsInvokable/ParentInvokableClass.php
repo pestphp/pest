@@ -6,8 +6,5 @@ namespace Tests\Fixtures\Arch\ToBeInvokable\IsInvokable;
 
 class ParentInvokableClass
 {
-    public function __invoke(): void
-    {
-
-    }
+    public function __invoke(): void {}
 }

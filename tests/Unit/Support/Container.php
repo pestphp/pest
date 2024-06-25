@@ -50,21 +50,15 @@ it('cannot resolve a parameter without type', function () {
 
 class ClassWithDependency
 {
-    public function __construct(Container $container)
-    {
-    }
+    public function __construct(Container $container) {}
 }
 
 class ClassWithSubDependency
 {
-    public function __construct(ClassWithDependency $param)
-    {
-    }
+    public function __construct(ClassWithDependency $param) {}
 }
 
 class ClassWithoutTypeParameter
 {
-    public function __construct($param)
-    {
-    }
+    public function __construct($param) {}
 }

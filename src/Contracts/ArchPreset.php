@@ -7,6 +7,4 @@ namespace Pest\Contracts;
 /**
  * @internal
  */
-interface ArchPreset
-{
-}
+interface ArchPreset {}

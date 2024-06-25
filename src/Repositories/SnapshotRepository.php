@@ -21,8 +21,7 @@ final class SnapshotRepository
     public function __construct(
         readonly private string $testsPath,
         readonly private string $snapshotsPath,
-    ) {
-    }
+    ) {}
 
     /**
      * Checks if the snapshot exists.
