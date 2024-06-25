@@ -19,7 +19,7 @@
   ✓ something 2 → it can run after test
   ✓ high order test
   - high order test with skip
-  ✓ post 'foo' → defer Closure → expect Closure → toBe 1
+  ✓ post 'foo' → defer Closure Object () → expect Closure Object () → toBe 1
 
    PASS  Tests\Features\AfterAll
   ✓ deletes file after all
@@ -97,12 +97,12 @@
   ✓ interpolated "two" named datasets
   ✓ named datasets did the job right
   ✓ lazy named datasets with (Bar)
-  ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #1
-  ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #2
-  ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), false)
-  ✓ it creates unique test case names with ('Name 2', Pest\Plugin Object (), false)
-  ✓ it creates unique test case names with ('Name 2', Pest\Plugin Object (), true)
-  ✓ it creates unique test case names with ('Name 1', Pest\Plugin Object (), true) #3
+  ✓ it creates unique test case names with ('Name 1', Pest\Plugin, true) #1
+  ✓ it creates unique test case names with ('Name 1', Pest\Plugin, true) #2
+  ✓ it creates unique test case names with ('Name 1', Pest\Plugin, false)
+  ✓ it creates unique test case names with ('Name 2', Pest\Plugin, false)
+  ✓ it creates unique test case names with ('Name 2', Pest\Plugin, true)
+  ✓ it creates unique test case names with ('Name 1', Pest\Plugin, true) #3
   ✓ it creates unique test case names - count
   ✓ lazy multiple datasets with (1) / (3)
   ✓ lazy multiple datasets with (1) / (4)
@@ -150,24 +150,24 @@
   ✓ eager registered wrapped datasets with Generator functions did the job right
   ✓ eager registered wrapped datasets with Generator functions display description with dataset "taylor"
   ✓ eager registered wrapped datasets with Generator functions display description with dataset "james"
-  ✓ it can resolve a dataset after the test case is available with (Closure) #1
-  ✓ it can resolve a dataset after the test case is available with (Closure) #2
-  ✓ it can resolve a dataset after the test case is available with multiple datasets with (Closure) / (Closure) #1
-  ✓ it can resolve a dataset after the test case is available with multiple datasets with (Closure) / (Closure) #2
-  ✓ it can resolve a dataset after the test case is available with multiple datasets with (Closure) / (Closure) #3
-  ✓ it can resolve a dataset after the test case is available with multiple datasets with (Closure) / (Closure) #4
-  ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure) #1
-  ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure) #2
-  ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure) #1
-  ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure) #2
-  ✓ it resolves a potential bound dataset logically with ('foo', Closure)
-  ✓ it resolves a potential bound dataset logically even when the closure comes first with (Closure, 'bar')
-  ✓ it will not resolve a closure if it is type hinted as a closure with (Closure) #1
-  ✓ it will not resolve a closure if it is type hinted as a closure with (Closure) #2
-  ✓ it will not resolve a closure if it is type hinted as a callable with (Closure) #1
-  ✓ it will not resolve a closure if it is type hinted as a callable with (Closure) #2
-  ✓ it can correctly resolve a bound dataset that returns an array with (Closure)
-  ✓ it can correctly resolve a bound dataset that returns an array but wants to be spread with (Closure)
+  ✓ it can resolve a dataset after the test case is available with (Closure Object ()) #1
+  ✓ it can resolve a dataset after the test case is available with (Closure Object ()) #2
+  ✓ it can resolve a dataset after the test case is available with multiple datasets with (Closure Object ()) / (Closure Object ()) #1
+  ✓ it can resolve a dataset after the test case is available with multiple datasets with (Closure Object ()) / (Closure Object ()) #2
+  ✓ it can resolve a dataset after the test case is available with multiple datasets with (Closure Object ()) / (Closure Object ()) #3
+  ✓ it can resolve a dataset after the test case is available with multiple datasets with (Closure Object ()) / (Closure Object ()) #4
+  ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object ()) #1
+  ✓ it can resolve a dataset after the test case is available with shared yield sets with (Closure Object ()) #2
+  ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object ()) #1
+  ✓ it can resolve a dataset after the test case is available with shared array sets with (Closure Object ()) #2
+  ✓ it resolves a potential bound dataset logically with ('foo', Closure Object ())
+  ✓ it resolves a potential bound dataset logically even when the closure comes first with (Closure Object (), 'bar')
+  ✓ it will not resolve a closure if it is type hinted as a closure with (Closure Object ()) #1
+  ✓ it will not resolve a closure if it is type hinted as a closure with (Closure Object ()) #2
+  ✓ it will not resolve a closure if it is type hinted as a callable with (Closure Object ()) #1
+  ✓ it will not resolve a closure if it is type hinted as a callable with (Closure Object ()) #2
+  ✓ it can correctly resolve a bound dataset that returns an array with (Closure Object ())
+  ✓ it can correctly resolve a bound dataset that returns an array but wants to be spread with (Closure Object ())
   ↓ forbids to define tests in Datasets dirs and Datasets.php files
   ✓ it may be used with high order with dataset "formal"
   ✓ it may be used with high order with dataset "informal"
