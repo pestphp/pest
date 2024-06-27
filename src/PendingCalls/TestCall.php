@@ -371,9 +371,7 @@ final class TestCall
      */
     public function note(array|string $note): self
     {
-        $notes = is_array($note) ? $note : [$note];
-
-        $this->testCaseMethod->notes = array_merge($this->testCaseMethod->notes, $notes);
+        $this->testCaseMethod->notes = array_merge($this->testCaseMethod->notes, (array) $note);
 
         return $this;
     }

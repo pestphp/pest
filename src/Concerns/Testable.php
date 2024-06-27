@@ -84,9 +84,7 @@ trait Testable
      */
     public function note(array|string $note): self
     {
-        $note = is_array($note) ? $note : [$note];
-
-        self::$__latestNotes = array_merge(self::$__latestNotes, $note);
+        self::$__latestNotes = array_merge(self::$__latestNotes, (array) $note);
 
         return $this;
     }
