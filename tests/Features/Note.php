@@ -29,6 +29,8 @@ describe('nested', function () {
 })->note('This is describe static note');
 
 test('multiple notes', function () {
+    expect(true)->toBeTrue(true);
+
     $this->note([
         'This is a runtime note',
         'This is another runtime note',

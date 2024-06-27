@@ -613,8 +613,6 @@ final class Expectation
 
     /**
      * Asserts that the given expectation target to use the given trait.
-     *
-     * @param  string $trait
      */
     public function toUseTrait(string $trait): ArchExpectation
     {
@@ -702,8 +700,6 @@ final class Expectation
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
-
-
 
     /**
      * Asserts that the given expectation target to implement the given interfaces.

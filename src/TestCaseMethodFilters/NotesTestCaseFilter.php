@@ -11,6 +11,6 @@ final class NotesTestCaseFilter implements TestCaseMethodFilter
 {
     public function accept(TestCaseMethodFactory $factory): bool
     {
-        return count($factory->notes) > 0;
+        return $factory->notes !== [];
     }
 }

@@ -254,8 +254,6 @@ final class OppositeExpectation
 
     /**
      * Asserts that the given expectation target not to use the given trait.
-     *
-     * @param  string $trait
      */
     public function toUseTrait(string $trait): ArchExpectation
     {
@@ -282,8 +280,8 @@ final class OppositeExpectation
 
                 return true;
             },
-            "not to use traits '" . implode("', '", $traits) . "'",
-            FileLineFinder::where(fn(string $line): bool => str_contains($line, 'class')),
+            "not to use traits '".implode("', '", $traits)."'",
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
 

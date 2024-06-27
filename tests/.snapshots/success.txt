@@ -928,6 +928,11 @@
   ✓ it can handle a non-defined exception
   ✓ it can handle a class not found Error
 
+   PASS  Tests\Features\Expect\toUseTrait
+  ✓ pass
+  ✓ failures
+  ✓ not failures
+
    PASS  Tests\Features\Expect\unless
   ✓ it pass
   ✓ it failures
@@ -991,6 +996,31 @@
   ✓ it is a higher order message test
   ✓ a "describe" group of tests → it is a test
   ✓ a "describe" group of tests → it is a higher order message test
+
+   PASS  Tests\Features\Note
+  ✓ it may have a static note
+  // This is before each static note
+  // This is a note
+  // This is before each runtime note
+  ✓ it may have a runtime note
+  // This is before each static note
+  // This is before each runtime note
+  // This is a runtime note
+  ✓ it may have static note and runtime note
+  // This is before each static note
+  // This is a static note
+  // This is before each runtime note
+  // This is a runtime note
+  ✓ nested → it may have static note and runtime note
+  // This is describe static note
+  // This is a static note within describe
+  // This is before each runtime note
+  // This is a runtime note within describe
+  ✓ multiple notes
+  // This is before each static note
+  // This is before each runtime note
+  // This is a runtime note
+  // This is another runtime note
 
    NOTI  Tests\Features\Notices
   ! notice → This is a notice description // tests/Features/Notices.php:4
@@ -1470,4 +1500,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 24 skipped, 1049 passed (2577 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 24 skipped, 1057 passed (2588 assertions, 18 notes)
