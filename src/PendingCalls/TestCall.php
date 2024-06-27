@@ -365,6 +365,20 @@ final class TestCall
     }
 
     /**
+     * Adds a note to the test.
+     *
+     * @param  array<int, string>|string  $note
+     */
+    public function note(array|string $note): self
+    {
+        $notes = is_array($note) ? $note : [$note];
+
+        $this->testCaseMethod->notes = array_merge($this->testCaseMethod->notes, $notes);
+
+        return $this;
+    }
+
+    /**
      * Sets the covered classes or methods.
      */
     public function covers(string ...$classesOrFunctions): self

@@ -118,7 +118,7 @@ final class TestRepository
      */
     public function get(string $filename): ?TestCaseFactory
     {
-        return $this->testCases[$filename];
+        return $this->testCases[$filename] ?? null;
     }
 
     /**

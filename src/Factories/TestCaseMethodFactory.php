@@ -50,6 +50,13 @@ final class TestCaseMethodFactory
     public bool $todo = false;
 
     /**
+     * The test's notes.
+     *
+     * @var array<int, string>
+     */
+    public array $notes = [];
+
+    /**
      * The test's datasets.
      *
      * @var array<Closure|iterable<int|string, mixed>|string>

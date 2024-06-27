@@ -124,6 +124,9 @@ final class Help implements HandlesArguments
             'arg' => '--todos',
             'desc' => 'Output to standard output the list of todos',
         ], [
+            'arg' => '--notes',
+            'desc' => 'Output to standard output tests with notes',
+        ], [
             'arg' => '--retry',
             'desc' => 'Run non-passing tests first and stop execution upon first error or failure',
         ], ...$content['Selection']];

@@ -30,6 +30,11 @@ trait Testable
     private string $__description;
 
     /**
+     * The test's notes.
+     */
+    private static array $__latestNotes = [];
+
+    /**
      * The test's latest description.
      */
     private static string $__latestDescription;
@@ -75,6 +80,18 @@ trait Testable
     private array $__snapshotChanges = [];
 
     /**
+     * Adds a new "note" to the Test Case.
+     */
+    public function note(array|string $note): self
+    {
+        $note = is_array($note) ? $note : [$note];
+
+        self::$__latestNotes = array_merge(self::$__latestNotes, $note);
+
+        return $this;
+    }
+
+    /**
      * Resets the test case static properties.
      */
     public static function flush(): void
@@ -95,6 +112,7 @@ trait Testable
         if ($test->hasMethod($name)) {
             $method = $test->getMethod($name);
             $this->__description = self::$__latestDescription = $method->description;
+            self::$__latestNotes = $method->notes;
             $this->__describing = $method->describing;
             $this->__test = $method->getClosure($this);
         }
@@ -224,6 +242,7 @@ trait Testable
         }
 
         $this->__description = self::$__latestDescription = $description;
+        self::$__latestNotes = $method->notes;
 
         parent::setUp();
 
@@ -404,5 +423,13 @@ trait Testable
     public static function getLatestPrintableTestCaseMethodName(): string
     {
         return self::$__latestDescription;
+    }
+
+    /**
+     * The latest printable test case notes.
+     */
+    public static function getPrintableTestCaseMethodNotes(): array
+    {
+        return self::$__latestNotes;
     }
 }

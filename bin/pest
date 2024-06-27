@@ -4,6 +4,7 @@
 use Pest\Kernel;
 use Pest\Panic;
 use Pest\TestCaseFilters\GitDirtyTestCaseFilter;
+use Pest\TestCaseMethodFilters\NotesTestCaseFilter;
 use Pest\TestCaseMethodFilters\TodoTestCaseFilter;
 use Pest\TestSuite;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -17,6 +18,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
     $dirty = false;
     $todo = false;
+    $notes = false;
 
     foreach ($arguments as $key => $value) {
         if ($value === '--compact') {
@@ -40,6 +42,11 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
         if (in_array($value, ['--todo', '--todos'], true)) {
             $todo = true;
+            unset($arguments[$key]);
+        }
+
+        if ($value === '--notes') {
+            $notes = true;
             unset($arguments[$key]);
         }
 
@@ -79,6 +86,10 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
     if ($todo) {
         $testSuite->tests->addTestCaseMethodFilter(new TodoTestCaseFilter());
+    }
+
+    if ($notes) {
+        $testSuite->tests->addTestCaseMethodFilter(new NotesTestCaseFilter());
     }
 
     $isDecorated = $input->getParameterOption('--colors', 'always') !== 'never';

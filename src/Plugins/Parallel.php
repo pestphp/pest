@@ -34,7 +34,7 @@ final class Parallel implements HandlesArguments
     /**
      * @var string[]
      */
-    private const UNSUPPORTED_ARGUMENTS = ['--todo', '--todos', '--retry'];
+    private const UNSUPPORTED_ARGUMENTS = ['--todo', '--todos', '--retry', '--notes'];
 
     /**
      * Whether the given command line arguments indicate that the test suite should be run in parallel.
@@ -42,6 +42,7 @@ final class Parallel implements HandlesArguments
     public static function isEnabled(): bool
     {
         $argv = new ArgvInput();
+
         if ($argv->hasParameterOption('--parallel')) {
             return true;
         }
