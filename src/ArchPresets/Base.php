@@ -20,6 +20,7 @@ final class Base extends AbstractPreset
             'debug_print_backtrace',
             'dump',
             'ray',
+            'ds',                           
             'die',
             'goto',
             'global',
