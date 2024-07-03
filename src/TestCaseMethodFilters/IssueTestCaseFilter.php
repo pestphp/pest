@@ -7,13 +7,21 @@ namespace Pest\TestCaseMethodFilters;
 use Pest\Contracts\TestCaseMethodFilter;
 use Pest\Factories\TestCaseMethodFactory;
 
-final readonly class TodoTestCaseFilter implements TestCaseMethodFilter
+final readonly class IssueTestCaseFilter implements TestCaseMethodFilter
 {
+    /**
+     * Create a new filter instance.
+     */
+    public function __construct(private int $number)
+    {
+        //
+    }
+
     /**
      * Filter the test case methods.
      */
     public function accept(TestCaseMethodFactory $factory): bool
     {
-        return $factory->todo;
+        return in_array($this->number, $factory->issues, true);
     }
 }

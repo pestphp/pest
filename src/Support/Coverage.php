@@ -198,6 +198,8 @@ final class Coverage
 
         $array = [];
         foreach (array_filter($file->lineCoverageData(), is_array(...)) as $line => $tests) {
+            assert(is_array($tests));
+
             $array = $eachLine($array, $tests, $line);
         }
 

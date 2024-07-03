@@ -991,6 +991,11 @@
   ✓ it is not incompleted because of test with assertions
   … a "describe" group of tests → it is incompleted
 
+   PASS  Tests\Features\Issue
+  ✓ it may be associated with an issue #1, #2
+  ✓ nested → it may be associated with an issue #1, #4, #5, #6, #3
+  // an note between an the issue
+
    PASS  Tests\Features\It
   ✓ it is a test
   ✓ it is a higher order message test
@@ -1026,6 +1031,11 @@
    NOTI  Tests\Features\Notices
   ! notice → This is a notice description // tests/Features/Notices.php:4
   ! a "describe" group of tests → notice → This is a notice description // tests/Features/Notices.php:11
+
+   PASS  Tests\Features\Pr
+  ✓ it may be associated with an pr #2
+  ✓ nested → it may be associated with an pr #3
+  // an note between an the pr
 
    PASS  Tests\Features\Repeat
   ✓ once
@@ -1211,6 +1221,11 @@
   ✓ it allows access to the underlying expectNotToPerformAssertions method
   ✓ it allows performing no expectations without being risky
   ✓ a "describe" group of tests → it allows performing no expectations without being risky
+
+   PASS  Tests\Features\Ticket
+  ✓ it may be associated with an ticket #1, #2
+  ✓ nested → it may be associated with an ticket #1, #4, #5, #6, #3
+  // an note between an the ticket
 
    PASS  Tests\Features\Todo - 3 todos
   ↓ something todo later
@@ -1501,4 +1516,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 24 skipped, 1057 passed (2588 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 24 skipped, 1063 passed (2602 assertions)

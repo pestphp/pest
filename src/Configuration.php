@@ -75,4 +75,12 @@ final class Configuration
     {
         return new Configuration\Theme();
     }
+
+    /**
+     * Gets the context configuration.
+     */
+    public function context(): Configuration\Context
+    {
+        return new Configuration\Context();
+    }
 }

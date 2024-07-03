@@ -585,8 +585,6 @@ final class Expectation
 
     /**
      * Asserts that the given expectation target to be subclass of the given class.
-     *
-     * @param  class-string  $class
      */
     public function toExtend(string $class): ArchExpectation
     {
@@ -660,7 +658,7 @@ final class Expectation
     /**
      * Asserts that the given expectation target to only implement the given interfaces.
      *
-     * @param  array<int, class-string>|class-string  $interfaces
+     * @param  array<int, string>|string  $interfaces
      */
     public function toOnlyImplement(array|string $interfaces): ArchExpectation
     {
@@ -704,7 +702,7 @@ final class Expectation
     /**
      * Asserts that the given expectation target to implement the given interfaces.
      *
-     * @param  array<int, class-string>|class-string  $interfaces
+     * @param  array<int, string>|string  $interfaces
      */
     public function toImplement(array|string $interfaces): ArchExpectation
     {
@@ -888,8 +886,6 @@ final class Expectation
 
     /**
      * Asserts that the given expectation target to have the given attribute.
-     *
-     * @param  class-string<Attribute>  $attribute
      */
     public function toHaveAttribute(string $attribute): ArchExpectation
     {

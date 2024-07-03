@@ -7,7 +7,7 @@ namespace Pest\TestCaseMethodFilters;
 use Pest\Contracts\TestCaseMethodFilter;
 use Pest\Factories\TestCaseMethodFactory;
 
-final class NotesTestCaseFilter implements TestCaseMethodFilter
+final readonly class NotesTestCaseFilter implements TestCaseMethodFilter
 {
     public function accept(TestCaseMethodFactory $factory): bool
     {

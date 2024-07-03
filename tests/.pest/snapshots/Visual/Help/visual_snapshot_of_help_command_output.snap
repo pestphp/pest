@@ -22,6 +22,9 @@
   --bail ........................... Stop execution upon first not-passed test  
   --todos ........................ Output to standard output the list of todos  
   --notes ......................... Output to standard output tests with notes  
+  --issue ........ Output to standard output tests with the given issue number  
+  --pr .... Output to standard output tests with the given pull request number  
+  --pull-request  Output to standard output tests with the given pull request number (alias for --pr)  
   --retry  Run non-passing tests first and stop execution upon first error or failure  
   --list-suites ................................... List available test suites  
   --testsuite [name] ......... Only run tests from the specified test suite(s)  

@@ -127,6 +127,18 @@ final class Help implements HandlesArguments
             'arg' => '--notes',
             'desc' => 'Output to standard output tests with notes',
         ], [
+        ], [
+            'arg' => '--issue',
+            'desc' => 'Output to standard output tests with the given issue number',
+        ], [
+        ], [
+            'arg' => '--pr',
+            'desc' => 'Output to standard output tests with the given pull request number',
+        ], [
+        ], [
+            'arg' => '--pull-request',
+            'desc' => 'Output to standard output tests with the given pull request number (alias for --pr)',
+        ], [
             'arg' => '--retry',
             'desc' => 'Run non-passing tests first and stop execution upon first error or failure',
         ], ...$content['Selection']];

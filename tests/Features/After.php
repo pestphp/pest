@@ -119,7 +119,7 @@ describe('something 2', function () {
 
         $this->count++;
     })->after(function () {
-        expect($this->count)->toBe(4);
+        expect($this->count)->toBe(6);
 
         $this->count++;
     });

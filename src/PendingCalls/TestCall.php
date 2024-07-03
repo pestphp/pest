@@ -365,6 +365,48 @@ final class TestCall
     }
 
     /**
+     * Associates the test with the given issue(s).
+     *
+     * @param  array<int, string|int>|string|int  $number
+     */
+    public function issue(array|string|int $number): self
+    {
+        $number = is_array($number) ? $number : [$number];
+
+        $number = array_map(fn (string|int $number): int => (int) ltrim((string) $number, '#'), $number);
+
+        $this->testCaseMethod->issues = array_merge($this->testCaseMethod->issues, $number);
+
+        return $this;
+    }
+
+    /**
+     * Associates the test with the given ticket(s). (Alias for `issue`)
+     *
+     * @param  array<int, string|int>|string|int  $number
+     */
+    public function ticket(array|string|int $number): self
+    {
+        return $this->issue($number);
+    }
+
+    /**
+     * Associates the test with the given pull request(s).
+     *
+     * @param  array<int, string|int>|string|int  $number
+     */
+    public function pr(array|string|int $number): self
+    {
+        $number = is_array($number) ? $number : [$number];
+
+        $number = array_map(fn (string|int $number): int => (int) ltrim((string) $number, '#'), $number);
+
+        $this->testCaseMethod->prs = array_merge($this->testCaseMethod->issues, $number);
+
+        return $this;
+    }
+
+    /**
      * Adds a note to the test.
      *
      * @param  array<int, string>|string  $note

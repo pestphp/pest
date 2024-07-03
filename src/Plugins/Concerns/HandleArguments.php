@@ -21,7 +21,7 @@ trait HandleArguments
                 return true;
             }
 
-            if (str_starts_with((string) $arg, "$argument=")) {
+            if (str_starts_with((string) $arg, "$argument=")) { // @phpstan-ignore-line
                 return true;
             }
         }

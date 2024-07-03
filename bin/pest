@@ -4,7 +4,9 @@
 use Pest\Kernel;
 use Pest\Panic;
 use Pest\TestCaseFilters\GitDirtyTestCaseFilter;
+use Pest\TestCaseMethodFilters\IssueTestCaseFilter;
 use Pest\TestCaseMethodFilters\NotesTestCaseFilter;
+use Pest\TestCaseMethodFilters\PrTestCaseFilter;
 use Pest\TestCaseMethodFilters\TodoTestCaseFilter;
 use Pest\TestSuite;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -21,6 +23,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
     $notes = false;
 
     foreach ($arguments as $key => $value) {
+
         if ($value === '--compact') {
             $_SERVER['COLLISION_PRINTER_COMPACT'] = 'true';
             unset($arguments[$key]);
@@ -31,8 +34,14 @@ use Symfony\Component\Console\Output\ConsoleOutput;
             unset($arguments[$key]);
         }
 
-        if (str_contains($value, '--test-directory')) {
+        if (str_contains($value, '--test-directory=')) {
             unset($arguments[$key]);
+        } else if ($value === '--test-directory') {
+            unset($arguments[$key]);
+
+            if (isset($arguments[$key + 1])) {
+                unset($arguments[$key + 1]);
+            }
         }
 
         if ($value === '--dirty') {
@@ -50,12 +59,53 @@ use Symfony\Component\Console\Output\ConsoleOutput;
             unset($arguments[$key]);
         }
 
+        if (str_contains($value, '--issue=')) {
+            unset($arguments[$key]);
+        } else if ($value === '--issue') {
+            unset($arguments[$key]);
+
+            if (isset($arguments[$key + 1])) {
+                unset($arguments[$key + 1]);
+            }
+        }
+
+        if (str_contains($value, '--ticket=')) {
+            unset($arguments[$key]);
+        } else if ($value === '--ticket') {
+            unset($arguments[$key]);
+
+            if (isset($arguments[$key + 1])) {
+                unset($arguments[$key + 1]);
+            }
+        }
+
+        if (str_contains($value, '--pr=')) {
+            unset($arguments[$key]);
+        } else if ($value === '--pr') {
+            unset($arguments[$key]);
+
+            if (isset($arguments[$key + 1])) {
+                unset($arguments[$key + 1]);
+            }
+        }
+
+        if (str_contains($value, '--pull-request=')) {
+            unset($arguments[$key]);
+        } else if ($value === '--pull-request') {
+            unset($arguments[$key]);
+
+            if (isset($arguments[$key + 1])) {
+                unset($arguments[$key + 1]);
+            }
+        }
+
         if (str_contains($value, '--teamcity')) {
             unset($arguments[$key]);
             $arguments[] = '--no-output';
             unset($_SERVER['COLLISION_PRINTER']);
         }
     }
+
 
     // Used when Pest is required using composer.
     $vendorPath = dirname(__DIR__, 4).'/vendor/autoload.php';
@@ -90,6 +140,22 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
     if ($notes) {
         $testSuite->tests->addTestCaseMethodFilter(new NotesTestCaseFilter());
+    }
+
+    if ($issue = $input->getParameterOption('--issue')) {
+        $testSuite->tests->addTestCaseMethodFilter(new IssueTestCaseFilter((int) $issue));
+    }
+
+    if ($issue = $input->getParameterOption('--ticket')) {
+        $testSuite->tests->addTestCaseMethodFilter(new IssueTestCaseFilter((int) $issue));
+    }
+
+    if ($pr = $input->getParameterOption('--pr')) {
+        $testSuite->tests->addTestCaseMethodFilter(new PrTestCaseFilter((int) $pr));
+    }
+
+    if ($pr = $input->getParameterOption('--pull-request')) {
+        $testSuite->tests->addTestCaseMethodFilter(new PrTestCaseFilter((int) $pr));
     }
 
     $isDecorated = $input->getParameterOption('--colors', 'always') !== 'never';

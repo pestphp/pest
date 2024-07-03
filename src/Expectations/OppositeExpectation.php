@@ -226,8 +226,6 @@ final class OppositeExpectation
 
     /**
      * Asserts that the given expectation target to be not subclass of the given class.
-     *
-     * @param  class-string  $class
      */
     public function toExtend(string $class): ArchExpectation
     {
@@ -288,7 +286,7 @@ final class OppositeExpectation
     /**
      * Asserts that the given expectation target not to implement the given interfaces.
      *
-     * @param  array<int, class-string>|string  $interfaces
+     * @param  array<int, string>|string  $interfaces
      */
     public function toImplement(array|string $interfaces): ArchExpectation
     {
@@ -421,8 +419,6 @@ final class OppositeExpectation
 
     /**
      * Asserts that the given expectation target not to have the given attribute.
-     *
-     * @param  class-string<Attribute>  $attribute
      */
     public function toHaveAttribute(string $attribute): ArchExpectation
     {

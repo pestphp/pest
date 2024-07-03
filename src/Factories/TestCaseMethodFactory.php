@@ -50,6 +50,20 @@ final class TestCaseMethodFactory
     public bool $todo = false;
 
     /**
+     * The associated issue numbers.
+     *
+     * @var array<int, int>
+     */
+    public array $issues = [];
+
+    /**
+     * The associated PRs numbers.
+     *
+     * @var array<int, int>
+     */
+    public array $prs = [];
+
+    /**
      * The test's notes.
      *
      * @var array<int, string>

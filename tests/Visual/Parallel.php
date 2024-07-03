@@ -16,7 +16,7 @@ $run = function () {
 
 test('parallel', function () use ($run) {
     expect($run('--exclude-group=integration'))
-        ->toContain('Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 1043 passed (2556 assertions)')
+        ->toContain('Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 19 skipped, 1049 passed (2570 assertions)')
         ->toContain('Parallel: 3 processes');
 })->skipOnWindows();
 

@@ -30,14 +30,28 @@ trait Testable
     private string $__description;
 
     /**
+     * The test's latest description.
+     */
+    private static string $__latestDescription;
+
+    /**
      * The test's notes.
      */
     private static array $__latestNotes = [];
 
     /**
-     * The test's latest description.
+     * The test's issues.
+     *
+     * @var array<int, int>
      */
-    private static string $__latestDescription;
+    private static array $__latestIssues = [];
+
+    /**
+     * The test's PRs.
+     *
+     * @var array<int, int>
+     */
+    private static array $__latestPrs = [];
 
     /**
      * The test's describing, if any.
@@ -80,27 +94,6 @@ trait Testable
     private array $__snapshotChanges = [];
 
     /**
-     * Adds a new "note" to the Test Case.
-     */
-    public function note(array|string $note): self
-    {
-        $note = is_array($note) ? $note : [$note];
-
-        self::$__latestNotes = array_merge(self::$__latestNotes, $note);
-
-        return $this;
-    }
-
-    /**
-     * Resets the test case static properties.
-     */
-    public static function flush(): void
-    {
-        self::$__beforeAll = null;
-        self::$__afterAll = null;
-    }
-
-    /**
      * Creates a new Test Case instance.
      */
     public function __construct(string $name)
@@ -113,9 +106,32 @@ trait Testable
             $method = $test->getMethod($name);
             $this->__description = self::$__latestDescription = $method->description;
             self::$__latestNotes = $method->notes;
+            self::$__latestIssues = $method->issues;
+            self::$__latestPrs = $method->prs;
             $this->__describing = $method->describing;
             $this->__test = $method->getClosure($this);
         }
+    }
+
+    /**
+     * Resets the test case static properties.
+     */
+    public static function flush(): void
+    {
+        self::$__beforeAll = null;
+        self::$__afterAll = null;
+    }
+
+    /**
+     * Adds a new "note" to the Test Case.
+     */
+    public function note(array|string $note): self
+    {
+        $note = is_array($note) ? $note : [$note];
+
+        self::$__latestNotes = array_merge(self::$__latestNotes, $note);
+
+        return $this;
     }
 
     /**
@@ -243,6 +259,8 @@ trait Testable
 
         $this->__description = self::$__latestDescription = $description;
         self::$__latestNotes = $method->notes;
+        self::$__latestIssues = $method->issues;
+        self::$__latestPrs = $method->prs;
 
         parent::setUp();
 
@@ -431,5 +449,21 @@ trait Testable
     public static function getPrintableTestCaseMethodNotes(): array
     {
         return self::$__latestNotes;
+    }
+
+    /**
+     * The latest printable test case issues.
+     */
+    public static function getPrintableTestCaseMethodIssues(): array
+    {
+        return self::$__latestIssues;
+    }
+
+    /**
+     * The latest printable test case PRs.
+     */
+    public static function getPrintableTestCaseMethodPrs(): array
+    {
+        return self::$__latestPrs;
     }
 }
