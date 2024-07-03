@@ -21,7 +21,7 @@ trait HandleArguments
                 return true;
             }
 
-            if (str_starts_with($arg, "$argument=")) {
+            if (str_starts_with((string) $arg, "$argument=")) {
                 return true;
             }
         }
