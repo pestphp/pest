@@ -62,12 +62,17 @@ final class BeforeEachCall
         $testCaseProxies = $this->testCaseProxies;
 
         $beforeEachTestCall = function (TestCall $testCall) use ($describing): void {
-            if ($describing !== $this->describing) {
-                return;
+
+            if ($this->describing !== null) {
+                if ($describing !== $this->describing) {
+                    return;
+                }
+
+                if ($describing !== $testCall->describing) {
+                    return;
+                }
             }
-            if ($describing !== $testCall->describing) {
-                return;
-            }
+
             $this->testCallProxies->chain($testCall);
         };
 
