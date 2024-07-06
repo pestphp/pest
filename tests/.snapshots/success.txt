@@ -1402,7 +1402,7 @@
 
    PASS  Tests\Unit\Support\ExceptionTrace
   ✓ it ensures the given closures reports the correct class name
-  ✓ it ensures the given closures reports the correct class name and suggests the [uses()] function
+  ✓ it ensures the given closures reports the correct class name and suggests the [pest()] function
 
    PASS  Tests\Unit\Support\HigherOrderMessage
   ✓ undefined method exceptions

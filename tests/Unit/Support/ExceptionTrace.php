@@ -13,7 +13,7 @@ it('ensures the given closures reports the correct class name', function () {
     'Call to undefined method Tests\IntentionallyNotExisting::testBasic().',
 );
 
-it('ensures the given closures reports the correct class name and suggests the [uses()] function', function () {
+it('ensures the given closures reports the correct class name and suggests the [pest()] function', function () {
     $this->get();
 })->throws(
     Error::class,
