@@ -16,13 +16,6 @@ final class Laravel extends AbstractPreset
      */
     public function execute(): void
     {
-        $this->expectations[] = expect([
-            'dd',
-            'ddd',
-            'env',
-            'exit',
-        ])->not->toBeUsed();
-
         $this->expectations[] = expect('App')
             ->not->toBeEnums()
             ->ignoring('App\Enums');
@@ -81,7 +74,8 @@ final class Laravel extends AbstractPreset
 
         $this->expectations[] = expect('App\Mail')
             ->classes()
-            ->toExtend('Illuminate\Mail\Mailable');
+            ->toExtend('Illuminate\Mail\Mailable')
+            ->toImplement('Illuminate\Contracts\Queue\ShouldQueue');
 
         $this->expectations[] = expect('App')
             ->not->toExtend('Illuminate\Mail\Mailable')
@@ -91,10 +85,7 @@ final class Laravel extends AbstractPreset
             ->classes()
             ->toImplement('Illuminate\Contracts\Queue\ShouldQueue')
             ->toUseTraits([
-                'Illuminate\Bus\Queueable',
-                'Illuminate\Foundation\Bus\Dispatchable',
-                'Illuminate\Queue\InteractsWithQueue',
-                'Illuminate\Queue\SerializesModels',
+                'Illuminate\Foundation\Queue\Queueable',
             ])->toHaveMethod('handle');
 
         $this->expectations[] = expect('App\Listeners')
@@ -116,5 +107,13 @@ final class Laravel extends AbstractPreset
             ->not->toExtend('Illuminate\Support\ServiceProvider')
             ->not->toHaveSuffix('ServiceProvider')
             ->ignoring('App\Providers');
+
+        $this->expectations[] = expect([
+            'dd',
+            'ddd',
+            'env',
+            'exit',
+            'ray',
+        ])->not->toBeUsed();
     }
 }
