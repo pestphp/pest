@@ -101,7 +101,7 @@ final class UsesCall
             return str_starts_with($path, $startChar)
                 ? $path
                 : implode(DIRECTORY_SEPARATOR, [
-                    dirname($this->filename),
+                    is_dir($this->filename) ? $this->filename : dirname($this->filename),
                     $path,
                 ]);
         }, $targets);

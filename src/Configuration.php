@@ -5,37 +5,25 @@ declare(strict_types=1);
 namespace Pest;
 
 use Pest\PendingCalls\UsesCall;
-use Pest\Support\Backtrace;
 
 /**
  * @internal
  */
 final class Configuration
 {
-    /**
-     * The instance of the configuration.
-     */
-    private static ?Configuration $instance = null;
-
-    /**
-     * Gets the instance of the configuration.
-     */
-    public static function getInstance(): Configuration
-    {
-        return self::$instance ??= new Configuration(
-            Backtrace::file(),
-        );
-    }
+    private readonly string $filename;
 
     /**
      * Creates a new configuration instance.
      */
-    private function __construct(
-        private readonly string $filename,
-    ) {}
+    public function __construct(
+        string $filename,
+    ) {
+        $this->filename = str_ends_with($filename, '/Pest.php') ? dirname($filename) : $filename;
+    }
 
     /**
-     * Gets the configuration of a certain folder.
+     * Use the given classes and traits in the given targets.
      */
     public function in(string ...$targets): UsesCall
     {
@@ -47,9 +35,10 @@ final class Configuration
      */
     public function extend(string ...$classAndTraits): UsesCall
     {
-        return (new UsesCall($this->filename, array_values($classAndTraits)))
-            ->in($this->filename)
-            ->extend(...$classAndTraits);
+        return new UsesCall(
+            $this->filename,
+            array_values($classAndTraits)
+        );
     }
 
     /**

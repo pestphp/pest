@@ -117,7 +117,7 @@ if (! function_exists('pest')) {
      */
     function pest(): Configuration
     {
-        return Configuration::getInstance();
+        return new Configuration(Backtrace::file());
     }
 }
 
