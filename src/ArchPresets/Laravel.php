@@ -45,7 +45,10 @@ final class Laravel extends AbstractPreset
 
         $this->expectations[] = expect('App\Models') // @phpstan-ignore-line
             ->classes()
-            ->toExtend('Illuminate\Database\Eloquent\Model')
+            ->toExtend('Illuminate\Database\Eloquent\Model');
+
+        $this->expectations[] = expect('App\Models') // @phpstan-ignore-line
+            ->classes()
             ->not->toHaveSuffix('Model');
 
         $this->expectations[] = expect('App')
@@ -54,8 +57,12 @@ final class Laravel extends AbstractPreset
 
         $this->expectations[] = expect('App\Http\Requests')
             ->classes()
-            ->toHaveSuffix('Request')
-            ->toExtend('Illuminate\Foundation\Http\FormRequest')
+            ->toHaveSuffix('Request');
+
+        $this->expectations[] = expect('App\Http\Requests')
+            ->toExtend('Illuminate\Foundation\Http\FormRequest');
+
+        $this->expectations[] = expect('App\Http\Requests')
             ->toHaveMethod('rules');
 
         $this->expectations[] = expect('App')
@@ -64,8 +71,14 @@ final class Laravel extends AbstractPreset
 
         $this->expectations[] = expect('App\Console\Commands')
             ->classes()
-            ->toHaveSuffix('Command')
-            ->toExtend('Illuminate\Console\Command')
+            ->toHaveSuffix('Command');
+
+        $this->expectations[] = expect('App\Console\Commands')
+            ->classes()
+            ->toExtend('Illuminate\Console\Command');
+
+        $this->expectations[] = expect('App\Console\Commands')
+            ->classes()
             ->toHaveMethod('handle');
 
         $this->expectations[] = expect('App')
@@ -74,7 +87,10 @@ final class Laravel extends AbstractPreset
 
         $this->expectations[] = expect('App\Mail')
             ->classes()
-            ->toExtend('Illuminate\Mail\Mailable')
+            ->toExtend('Illuminate\Mail\Mailable');
+
+        $this->expectations[] = expect('App\Mail')
+            ->classes()
             ->toImplement('Illuminate\Contracts\Queue\ShouldQueue');
 
         $this->expectations[] = expect('App')
@@ -83,10 +99,11 @@ final class Laravel extends AbstractPreset
 
         $this->expectations[] = expect('App\Jobs')
             ->classes()
-            ->toImplement('Illuminate\Contracts\Queue\ShouldQueue')
-            ->toUseTraits([
-                'Illuminate\Foundation\Queue\Queueable',
-            ])->toHaveMethod('handle');
+            ->toImplement('Illuminate\Contracts\Queue\ShouldQueue');
+
+        $this->expectations[] = expect('App\Jobs')
+            ->classes()
+            ->toHaveMethod('handle');
 
         $this->expectations[] = expect('App\Listeners')
             ->toHaveMethod('handle');
@@ -99,12 +116,19 @@ final class Laravel extends AbstractPreset
             ->ignoring('App\Notifications');
 
         $this->expectations[] = expect('App\Providers') // @phpstan-ignore-line
-            ->toHaveSuffix('ServiceProvider')
-            ->toExtend('Illuminate\Support\ServiceProvider')
+            ->toHaveSuffix('ServiceProvider');
+
+        $this->expectations[] = expect('App\Providers') // @phpstan-ignore-line
+            ->toExtend('Illuminate\Support\ServiceProvider');
+
+        $this->expectations[] = expect('App\Providers') // @phpstan-ignore-line
             ->not->toBeUsed();
 
         $this->expectations[] = expect('App') // @phpstan-ignore-line
             ->not->toExtend('Illuminate\Support\ServiceProvider')
+            ->ignoring('App\Providers');
+
+        $this->expectations[] = expect('App')
             ->not->toHaveSuffix('ServiceProvider')
             ->ignoring('App\Providers');
 
