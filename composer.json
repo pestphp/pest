@@ -73,7 +73,7 @@
         "test:refacto": "rector --dry-run",
         "test:lint": "pint --test",
         "test:type:check": "phpstan analyse --ansi --memory-limit=-1 --debug",
-        "test:type:coverage": "php bin/pest --type-coverage --min=100",
+        "test:type:coverage": "php -d memory_limit=-1  bin/pest --type-coverage --min=100",
         "test:unit": "php bin/pest --colors=always --exclude-group=integration --compact",
         "test:inline": "php bin/pest --colors=always --configuration=phpunit.inline.xml",
         "test:parallel": "php bin/pest --colors=always --exclude-group=integration --parallel --processes=3",
