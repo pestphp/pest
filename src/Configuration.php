@@ -19,7 +19,7 @@ final class Configuration
     public function __construct(
         string $filename,
     ) {
-        $this->filename = str_ends_with($filename, '/Pest.php') ? dirname($filename) : $filename;
+        $this->filename = str_ends_with($filename, DIRECTORY_SEPARATOR.'Pest.php') ? dirname($filename) : $filename;
     }
 
     /**
