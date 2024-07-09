@@ -40,13 +40,14 @@ final class Result
      */
     public static function exitCode(Configuration $configuration, TestResult $result): int
     {
+        $returnCode = self::FAILURE_EXIT;
         if ($result->wasSuccessfulIgnoringPhpunitWarnings()
             && ! $result->hasTestTriggeredPhpunitWarningEvents()) {
-            return self::SUCCESS_EXIT;
+            $returnCode = self::SUCCESS_EXIT;
         }
 
         if ($configuration->failOnEmptyTestSuite() && ResultReflection::numberOfTests($result) === 0) {
-            return self::FAILURE_EXIT;
+            $returnCode = self::FAILURE_EXIT;
         }
 
         if ($result->wasSuccessfulIgnoringPhpunitWarnings()) {
@@ -69,12 +70,16 @@ final class Result
             if ($configuration->failOnSkipped() && $result->hasTestSkippedEvents()) {
                 $returnCode = self::FAILURE_EXIT;
             }
+
+            if ($configuration->failOnNotice() && $result->hasNotices()) {
+                $returnCode = self::FAILURE_EXIT;
+            }
         }
 
         if ($result->hasTestErroredEvents()) {
-            return self::EXCEPTION_EXIT;
+            $returnCode = self::EXCEPTION_EXIT;
         }
 
-        return self::FAILURE_EXIT;
+        return $returnCode;
     }
 }
