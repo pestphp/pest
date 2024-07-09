@@ -49,11 +49,11 @@ final class GitDirtyTestCaseFilter implements TestCaseFilter
         $process = new Process(['git', 'status', '--short', '--', '*.php']);
         $process->run();
 
-        if ($process->getExitCode() === self::EXIT_CODE_GIT_DUBIOUS_OWNERSHIP) {
-            throw new InvalidArgumentException('Dubiuous folder ownership');
-        }
-
         if (!$process->isSuccessful()) {
+            if ($process->getExitCode() === self::EXIT_CODE_GIT_DUBIOUS_OWNERSHIP) {
+                throw new InvalidArgumentException('Dubiuous folder ownership');
+            }
+
             throw new MissingDependency('Filter by dirty files', 'git');
         }
 
