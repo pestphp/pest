@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\TestCaseFilters;
 
 use Pest\Contracts\TestCaseFilter;
+use Pest\Exceptions\InvalidArgumentException;
 use Pest\Exceptions\MissingDependency;
 use Pest\Exceptions\NoDirtyTestsFound;
 use Pest\Panic;
@@ -13,6 +14,8 @@ use Symfony\Component\Process\Process;
 
 final class GitDirtyTestCaseFilter implements TestCaseFilter
 {
+    private const EXIT_CODE_GIT_DUBIOUS_OWNERSHIP = 128;
+
     /**
      * @var string[]|null
      */
@@ -46,7 +49,11 @@ final class GitDirtyTestCaseFilter implements TestCaseFilter
         $process = new Process(['git', 'status', '--short', '--', '*.php']);
         $process->run();
 
-        if (! $process->isSuccessful()) {
+        if ($process->getExitCode() === self::EXIT_CODE_GIT_DUBIOUS_OWNERSHIP) {
+            throw new InvalidArgumentException('Dubiuous folder ownership');
+        }
+
+        if (!$process->isSuccessful()) {
             throw new MissingDependency('Filter by dirty files', 'git');
         }
 
@@ -64,12 +71,14 @@ final class GitDirtyTestCaseFilter implements TestCaseFilter
         $dirtyFiles = array_map(
             fn (string $file, string $status): string => in_array($status, ['R', 'RM'], true)
                 ? explode(' -> ', $file)[1]
-                : $file, array_keys($dirtyFiles), $dirtyFiles,
+                : $file,
+            array_keys($dirtyFiles),
+            $dirtyFiles,
         );
 
         $dirtyFiles = array_filter(
             $dirtyFiles,
-            fn (string $file): bool => str_starts_with('.'.DIRECTORY_SEPARATOR.$file, TestSuite::getInstance()->testPath)
+            fn (string $file): bool => str_starts_with('.' . DIRECTORY_SEPARATOR . $file, TestSuite::getInstance()->testPath)
                 || str_starts_with($file, TestSuite::getInstance()->testPath)
         );
 
