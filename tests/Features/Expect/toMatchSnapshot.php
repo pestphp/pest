@@ -43,9 +43,7 @@ test('pass with `__toString`', function () {
 
     $object = new class($this->snapshotable)
     {
-        public function __construct(protected string $snapshotable)
-        {
-        }
+        public function __construct(protected string $snapshotable) {}
 
         public function __toString()
         {
@@ -61,9 +59,7 @@ test('pass with `toString`', function () {
 
     $object = new class($this->snapshotable)
     {
-        public function __construct(protected string $snapshotable)
-        {
-        }
+        public function __construct(protected string $snapshotable) {}
 
         public function toString()
         {
@@ -97,9 +93,7 @@ test('pass with `toArray`', function () {
 
     $object = new class($this->snapshotable)
     {
-        public function __construct(protected string $snapshotable)
-        {
-        }
+        public function __construct(protected string $snapshotable) {}
 
         public function toArray()
         {
@@ -125,9 +119,7 @@ test('pass with `toSnapshot`', function () {
 
     $object = new class($this->snapshotable)
     {
-        public function __construct(protected string $snapshotable)
-        {
-        }
+        public function __construct(protected string $snapshotable) {}
 
         public function toSnapshot()
         {

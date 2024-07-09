@@ -6,8 +6,5 @@ namespace Tests\Fixtures\Arch\ToHaveMethod\HasNoMethod;
 
 class HasNoMethodClass
 {
-    public function bar(): void
-    {
-
-    }
+    public function bar(): void {}
 }

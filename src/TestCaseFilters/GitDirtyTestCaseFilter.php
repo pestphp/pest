@@ -49,7 +49,7 @@ final class GitDirtyTestCaseFilter implements TestCaseFilter
         $process = new Process(['git', 'status', '--short', '--', '*.php']);
         $process->run();
 
-        if (!$process->isSuccessful()) {
+        if (! $process->isSuccessful()) {
             if ($process->getExitCode() === self::EXIT_CODE_GIT_DUBIOUS_OWNERSHIP) {
                 throw new InvalidArgumentException('Dubiuous folder ownership');
             }
@@ -78,7 +78,7 @@ final class GitDirtyTestCaseFilter implements TestCaseFilter
 
         $dirtyFiles = array_filter(
             $dirtyFiles,
-            fn (string $file): bool => str_starts_with('.' . DIRECTORY_SEPARATOR . $file, TestSuite::getInstance()->testPath)
+            fn (string $file): bool => str_starts_with('.'.DIRECTORY_SEPARATOR.$file, TestSuite::getInstance()->testPath)
                 || str_starts_with($file, TestSuite::getInstance()->testPath)
         );
 
