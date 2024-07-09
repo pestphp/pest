@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pest\TestCaseFilters;
 
 use Pest\Contracts\TestCaseFilter;
-use Pest\Exceptions\InvalidArgumentException;
+use Pest\Exceptions\DubiousFolderOwnership;
 use Pest\Exceptions\MissingDependency;
 use Pest\Exceptions\NoDirtyTestsFound;
 use Pest\Panic;
@@ -14,7 +14,7 @@ use Symfony\Component\Process\Process;
 
 final class GitDirtyTestCaseFilter implements TestCaseFilter
 {
-    private const EXIT_CODE_GIT_DUBIOUS_OWNERSHIP = 128;
+    private const EXIT_CODE_FATAL_ERROR = 128;
 
     /**
      * @var string[]|null
@@ -50,8 +50,11 @@ final class GitDirtyTestCaseFilter implements TestCaseFilter
         $process->run();
 
         if (!$process->isSuccessful()) {
-            if ($process->getExitCode() === self::EXIT_CODE_GIT_DUBIOUS_OWNERSHIP) {
-                throw new InvalidArgumentException('Dubious folder ownership');
+            if (
+                $process->getExitCode() === self::EXIT_CODE_FATAL_ERROR &&
+                str_contains($process->getErrorOutput(), 'fatal: detected dubious ownership')
+            ) {
+                throw new DubiousFolderOwnership();
             }
 
             throw new MissingDependency('Filter by dirty files', 'git');
