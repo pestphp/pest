@@ -7,6 +7,4 @@ namespace Pest\Factories\Covers;
 /**
  * @internal
  */
-final class CoversNothing
-{
-}
+final class CoversNothing {}

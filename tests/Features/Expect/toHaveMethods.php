@@ -4,13 +4,9 @@ use PHPUnit\Framework\ExpectationFailedException;
 
 $object = new class
 {
-    public function foo(): void
-    {
-    }
+    public function foo(): void {}
 
-    public function bar(): void
-    {
-    }
+    public function bar(): void {}
 };
 
 test('pass', function () use ($object) {

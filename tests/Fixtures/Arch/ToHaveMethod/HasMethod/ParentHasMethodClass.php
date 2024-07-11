@@ -6,8 +6,5 @@ namespace Tests\Fixtures\Arch\ToHaveMethod\HasMethod;
 
 class ParentHasMethodClass
 {
-    public function foo(): void
-    {
-
-    }
+    public function foo(): void {}
 }

@@ -19,8 +19,7 @@ it('does not allow to add the same test description twice', function () {
 it('alerts users about tests with arguments but no input', function () {
     $testSuite = new TestSuite(getcwd(), 'tests');
 
-    $method = new TestCaseMethodFactory('foo', 'bar', function (int $arg) {
-    });
+    $method = new TestCaseMethodFactory('foo', 'bar', function (int $arg) {});
 
     $testSuite->tests->set($method);
 })->throws(

@@ -6,8 +6,5 @@ namespace Tests\Fixtures\Arch\ToHaveConstructor\HasConstructor;
 
 class HasConstructor
 {
-    public function __construct()
-    {
-
-    }
+    public function __construct() {}
 }

@@ -36,9 +36,7 @@ final class OppositeExpectation
      *
      * @param  Expectation<TValue>  $original
      */
-    public function __construct(private readonly Expectation $original)
-    {
-    }
+    public function __construct(private readonly Expectation $original) {}
 
     /**
      * Asserts that the value array not has the provided $keys.

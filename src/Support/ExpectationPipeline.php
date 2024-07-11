@@ -30,8 +30,7 @@ final class ExpectationPipeline
      */
     public function __construct(
         private readonly Closure $closure
-    ) {
-    }
+    ) {}
 
     /**
      * Creates a new instance of Expectation Pipeline with given closure.
