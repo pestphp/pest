@@ -76,6 +76,19 @@ final class OppositeExpectation
     }
 
     /**
+     * Asserts that the given expectation target does not have the given permissions
+     */
+    public function toHaveFileSystemPermissions(string $permissions): ArchExpectation
+    {
+        return Targeted::make(
+            $this->original,
+            fn (ObjectDescription $object): bool => substr(sprintf('%o', fileperms($object->path)), -4) !== $permissions,
+            sprintf('permissions not to be [%s]', $permissions),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, '<?php')),
+        );
+    }
+
+    /**
      * Asserts that the given expectation target does not use the "declare(strict_types=1)" declaration.
      */
     public function toUseStrictTypes(): ArchExpectation

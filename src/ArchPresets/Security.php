@@ -37,5 +37,11 @@ final class Security extends AbstractPreset
             'dl',
             'assert',
         ])->not->toBeUsed();
+
+        foreach ($this->userNamespaces as $namespace) {
+            $this->expectations[] = expect($namespace)
+                ->not
+                ->toHaveFileSystemPermissions('0777');
+        }
     }
 }
