@@ -4,4 +4,4 @@
 4. `->notes()`, `->issue`, `->pr`, etc
 5. `arch()->preset`
 6. `toHaveFileSystemPermissions`
-
+7. `toHaveLineCountLessThan`
