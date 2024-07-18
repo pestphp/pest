@@ -448,6 +448,19 @@ final class Expectation
     }
 
     /**
+     * Asserts that the given expectation target to have line count less than the given number.
+     */
+    public function toHaveLineCountLessThan(int $lines): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => count(file($object->path)) < $lines,
+            sprintf('to have less than %d lines of code', $lines),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, '<?php')),
+        );
+    }
+
+    /**
      * Asserts that the given expectation target use the "declare(strict_types=1)" declaration.
      */
     public function toUseStrictTypes(): ArchExpectation

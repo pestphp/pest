@@ -797,6 +797,10 @@
   ✓ it fails
   ✓ it fails with message
 
+   PASS  Tests\Features\Expect\toHaveLineCountLessThan
+  ✓ it passes
+  ✓ it fails
+
    PASS  Tests\Features\Expect\toHaveMethod
   ✓ class has method
   ✓ opposite class has method
@@ -1521,4 +1525,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 24 skipped, 1066 passed (2611 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 24 skipped, 1068 passed (2614 assertions)

@@ -89,6 +89,14 @@ final class OppositeExpectation
     }
 
     /**
+     * Not supported.
+     */
+    public function toHaveLineCountLessThan(): ArchExpectation
+    {
+        throw InvalidExpectation::fromMethods(['not', 'toHaveLineCountLessThan']);
+    }
+
+    /**
      * Asserts that the given expectation target does not use the "declare(strict_types=1)" declaration.
      */
     public function toUseStrictTypes(): ArchExpectation
