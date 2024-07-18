@@ -454,7 +454,7 @@ final class Expectation
     {
         return Targeted::make(
             $this,
-            fn (ObjectDescription $object): bool => count(file($object->path)) < $lines,
+            fn (ObjectDescription $object): bool => count(file($object->path)) < $lines, // @phpstan-ignore-line
             sprintf('to have less than %d lines of code', $lines),
             FileLineFinder::where(fn (string $line): bool => str_contains($line, '<?php')),
         );
