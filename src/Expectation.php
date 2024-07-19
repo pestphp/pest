@@ -472,7 +472,9 @@ final class Expectation
             fn (ObjectDescription $object): bool => isset($object->reflectionClass) === false
                 || array_filter(
                     $object->reflectionClass->getMethods(),
-                    fn (ReflectionMethod $method): bool => $method->class === $object->name
+                    fn (ReflectionMethod $method): bool =>
+                        (enum_exists($object->name) === false || in_array($method->name, ['from', 'tryFrom', 'cases'], true) === false)
+                        && realpath($method->getFileName() ?: '/') === realpath($object->path)
                         && $method->getDocComment() === false,
                 ) === [],
             'to have all methods documented',
@@ -490,7 +492,9 @@ final class Expectation
             fn (ObjectDescription $object): bool => isset($object->reflectionClass) === false
                 || array_filter(
                     $object->reflectionClass->getProperties(),
-                    fn (ReflectionProperty $property): bool => $property->class === $object->name
+                    fn (ReflectionProperty $property): bool =>
+                        (enum_exists($object->name) === false || in_array($property->name, ['value', 'name'], true) === false)
+                        && realpath($property->getDeclaringClass()->getFileName() ?: '/') === realpath($object->path)
                         && $property->isPromoted() === false
                         && $property->getDocComment() === false,
                 ) === [],
