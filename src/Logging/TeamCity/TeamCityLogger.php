@@ -43,8 +43,14 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class TeamCityLogger
 {
+    /**
+     * The current time.
+     */
     private ?HRTime $time = null;
 
+    /**
+     * Indicates if the summary test count has been printed.
+     */
     private bool $isSummaryTestCountPrinted = false;
 
     /**

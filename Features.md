@@ -5,3 +5,5 @@
 5. `arch()->preset`
 6. `toHaveFileSystemPermissions`
 7. `toHaveLineCountLessThan`
+8. `toHaveAllMethodsDocumented`
+9. `toHaveAllPropertiesDocumented`

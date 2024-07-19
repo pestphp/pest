@@ -33,6 +33,8 @@ use Pest\Support\ExpectationPipeline;
 use PHPUnit\Architecture\Elements\ObjectDescription;
 use PHPUnit\Framework\ExpectationFailedException;
 use ReflectionEnum;
+use ReflectionMethod;
+use ReflectionProperty;
 
 /**
  * @template TValue
@@ -461,6 +463,43 @@ final class Expectation
     }
 
     /**
+     * Asserts that the given expectation target have all methods documented.
+     */
+    public function toHaveAllMethodsDocumented(): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => isset($object->reflectionClass) === false
+                || array_filter(
+                    $object->reflectionClass->getMethods(),
+                    fn (ReflectionMethod $method): bool => $method->class === $object->name
+                        && $method->getDocComment() === false,
+                ) === [],
+            'to have all methods documented',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class'))
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target have all properties documented.
+     */
+    public function toHaveAllPropertiesDocumented(): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => isset($object->reflectionClass) === false
+                || array_filter(
+                    $object->reflectionClass->getProperties(),
+                    fn (ReflectionProperty $property): bool => $property->class === $object->name
+                        && $property->isPromoted() === false
+                        && $property->getDocComment() === false,
+                ) === [],
+            'to have all properties documented',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class'))
+        );
+    }
+
+    /**
      * Asserts that the given expectation target use the "declare(strict_types=1)" declaration.
      */
     public function toUseStrictTypes(): ArchExpectation
@@ -768,6 +807,9 @@ final class Expectation
         return ToUseNothing::make($this);
     }
 
+    /**
+     * Not supported.
+     */
     public function toBeUsed(): never
     {
         throw InvalidExpectation::fromMethods(['toBeUsed']);

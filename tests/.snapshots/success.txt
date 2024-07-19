@@ -715,6 +715,14 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toHaveAllMethodsDocumented
+  ✓ it passes
+  ✓ it fails
+
+   PASS  Tests\Features\Expect\toHaveAllPropertiesDocumented
+  ✓ it passes
+  ✓ it fails
+
    PASS  Tests\Features\Expect\toHaveAttribute
   ✓ class has attribute
   ✓ opposite class has attribute
@@ -1525,4 +1533,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 24 skipped, 1068 passed (2614 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 24 skipped, 1072 passed (2620 assertions)

@@ -11,6 +11,9 @@ use Pest\PendingCalls\UsesCall;
  */
 final class Configuration
 {
+    /**
+     * The filename of the configuration.
+     */
     private readonly string $filename;
 
     /**

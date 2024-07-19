@@ -9,6 +9,9 @@ namespace Pest\Logging\TeamCity;
  */
 final class ServiceMessage
 {
+    /**
+     * The flow ID.
+     */
     private static ?int $flowId = null;
 
     /**

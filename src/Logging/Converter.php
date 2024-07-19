@@ -26,8 +26,14 @@ use PHPUnit\TestRunner\TestResult\TestResult as PhpUnitTestResult;
  */
 final class Converter
 {
+    /**
+     * The prefix for the test suite name.
+     */
     private const PREFIX = 'P\\';
 
+    /**
+     *  The state generator.
+     */
     private readonly StateGenerator $stateGenerator;
 
     /**

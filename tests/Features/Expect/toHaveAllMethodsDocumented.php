@@ -2,11 +2,12 @@
 
 use Pest\Arch\Exceptions\ArchExpectationFailedException;
 use Pest\Expectation;
+use Tests\Fixtures\Inheritance\ExampleTest;
 
 it('passes', function () {
-    expect(Expectation::class)->toHaveLineCountLessThan(2000);
+    expect(Expectation::class)->toHaveAllMethodsDocumented();
 });
 
 it('fails', function () {
-    expect(Expectation::class)->toHaveLineCountLessThan(10);
+    expect(ExampleTest::class)->toHaveAllMethodsDocumented();
 })->throws(ArchExpectationFailedException::class);

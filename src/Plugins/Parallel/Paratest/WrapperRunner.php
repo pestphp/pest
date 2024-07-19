@@ -46,15 +46,27 @@ use function usleep;
  */
 final class WrapperRunner implements RunnerInterface
 {
+    /**
+     * The time to sleep between cycles.
+     */
     private const CYCLE_SLEEP = 10000;
 
+    /**
+     * The result printer.
+     */
     private readonly ResultPrinter $printer;
 
+    /**
+     * The timer.
+     */
     private readonly Timer $timer;
 
     /** @var list<non-empty-string> */
     private array $pending = [];
 
+    /**
+     * The exit code.
+     */
     private int $exitcode = -1;
 
     /** @var array<positive-int,WrapperWorker> */
@@ -84,6 +96,9 @@ final class WrapperRunner implements RunnerInterface
     /** @var non-empty-string[] */
     private readonly array $parameters;
 
+    /**
+     * The code coverage filter registry.
+     */
     private CodeCoverageFilterRegistry $codeCoverageFilterRegistry;
 
     public function __construct(

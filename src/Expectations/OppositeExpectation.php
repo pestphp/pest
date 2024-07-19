@@ -97,6 +97,22 @@ final class OppositeExpectation
     }
 
     /**
+     * Not supported.
+     */
+    public function toHaveAllMethodsDocumented(): ArchExpectation
+    {
+        throw InvalidExpectation::fromMethods(['not', 'toHaveAllMethodsDocumented']);
+    }
+
+    /**
+     * Not supported.
+     */
+    public function toHaveAllPropertiesDocumented(): ArchExpectation
+    {
+        throw InvalidExpectation::fromMethods(['not', 'toHaveAllPropertiesDocumented']);
+    }
+
+    /**
      * Asserts that the given expectation target does not use the "declare(strict_types=1)" declaration.
      */
     public function toUseStrictTypes(): ArchExpectation

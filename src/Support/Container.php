@@ -13,6 +13,9 @@ use ReflectionParameter;
  */
 final class Container
 {
+    /**
+     * The instance of the container.
+     */
     private static ?Container $instance = null;
 
     /**
