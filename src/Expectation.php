@@ -515,7 +515,7 @@ final class Expectation
         return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => $object->reflectionClass->hasMethod($method),
-            'to have method',
+            sprintf("to have method '%s'", $method),
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
