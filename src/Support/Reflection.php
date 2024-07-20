@@ -11,6 +11,7 @@ use Pest\TestSuite;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionFunction;
+use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionParameter;
 use ReflectionProperty;
@@ -212,5 +213,75 @@ final class Reflection
     public static function getFunctionVariable(Closure $function, string $key): mixed
     {
         return (new ReflectionFunction($function))->getStaticVariables()[$key] ?? null;
+    }
+
+    /**
+     * Get the properties from the given reflection class.
+     *
+     * Used by `expect()->toHavePropertiesDocumented()`.
+     *
+     * @param  ReflectionClass<object>  $reflectionClass
+     * @return array<int, ReflectionProperty>
+     */
+    public static function getPropertiesFromReflectionClass(ReflectionClass $reflectionClass): array
+    {
+        $getProperties = fn (ReflectionClass $reflectionClass): array => array_filter(
+            array_map(
+                fn (ReflectionProperty $property): \ReflectionProperty => $property,
+                $reflectionClass->getProperties(),
+            ), fn (ReflectionProperty $property): bool => $property->getDeclaringClass()->getName() === $reflectionClass->getName(),
+        );
+
+        $propertiesFromTraits = [];
+        foreach ($reflectionClass->getTraits() as $trait) {
+            $propertiesFromTraits = array_merge($propertiesFromTraits, $getProperties($trait));
+        }
+
+        $propertiesFromTraits = array_map(
+            fn (ReflectionProperty $property): string => $property->getName(),
+            $propertiesFromTraits,
+        );
+
+        return array_values(
+            array_filter(
+                $getProperties($reflectionClass),
+                fn (ReflectionProperty $property): bool => ! in_array($property->getName(), $propertiesFromTraits, true),
+            ),
+        );
+    }
+
+    /**
+     * Get the methods from the given reflection class.
+     *
+     * Used by `expect()->toHaveMethodsDocumented()`.
+     *
+     * @param  ReflectionClass<object>  $reflectionClass
+     * @return array<int, ReflectionMethod>
+     */
+    public static function getMethodsFromReflectionClass(ReflectionClass $reflectionClass): array
+    {
+        $getMethods = fn (ReflectionClass $reflectionClass): array => array_filter(
+            array_map(
+                fn (ReflectionMethod $method): \ReflectionMethod => $method,
+                $reflectionClass->getMethods(),
+            ), fn (ReflectionMethod $method): bool => $method->getDeclaringClass()->getName() === $reflectionClass->getName(),
+        );
+
+        $methodsFromTraits = [];
+        foreach ($reflectionClass->getTraits() as $trait) {
+            $methodsFromTraits = array_merge($methodsFromTraits, $getMethods($trait));
+        }
+
+        $methodsFromTraits = array_map(
+            fn (ReflectionMethod $method): string => $method->getName(),
+            $methodsFromTraits,
+        );
+
+        return array_values(
+            array_filter(
+                $getMethods($reflectionClass),
+                fn (ReflectionMethod $method): bool => ! in_array($method->getName(), $methodsFromTraits, true),
+            ),
+        );
     }
 }

@@ -30,6 +30,7 @@ use Pest\Expectations\HigherOrderExpectation;
 use Pest\Expectations\OppositeExpectation;
 use Pest\Matchers\Any;
 use Pest\Support\ExpectationPipeline;
+use Pest\Support\Reflection;
 use PHPUnit\Architecture\Elements\ObjectDescription;
 use PHPUnit\Framework\ExpectationFailedException;
 use ReflectionEnum;
@@ -471,7 +472,7 @@ final class Expectation
             $this,
             fn (ObjectDescription $object): bool => isset($object->reflectionClass) === false
                 || array_filter(
-                    $object->reflectionClass->getMethods(),
+                    Reflection::getMethodsFromReflectionClass($object->reflectionClass),
                     fn (ReflectionMethod $method): bool => (enum_exists($object->name) === false || in_array($method->name, ['from', 'tryFrom', 'cases'], true) === false)
                         && realpath($method->getFileName() ?: '/') === realpath($object->path) // @phpstan-ignore-line
                         && $method->getDocComment() === false,
@@ -490,7 +491,7 @@ final class Expectation
             $this,
             fn (ObjectDescription $object): bool => isset($object->reflectionClass) === false
                 || array_filter(
-                    $object->reflectionClass->getProperties(),
+                    Reflection::getPropertiesFromReflectionClass($object->reflectionClass),
                     fn (ReflectionProperty $property): bool => (enum_exists($object->name) === false || in_array($property->name, ['value', 'name'], true) === false)
                         && realpath($property->getDeclaringClass()->getFileName() ?: '/') === realpath($object->path) // @phpstan-ignore-line
                         && $property->isPromoted() === false

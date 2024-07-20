@@ -1429,6 +1429,8 @@
    PASS  Tests\Unit\Support\Reflection
   ✓ it gets file name from closure
   ✓ it gets property values
+  ✓ it gets properties from classes
+  ✓ it gets methods from classes
 
    PASS  Tests\Unit\Support\Str
   ✓ it evaluates the code with ('version()', '__pest_evaluable_version__')
@@ -1535,4 +1537,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 24 skipped, 1074 passed (2626 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 24 skipped, 1076 passed (2628 assertions)
