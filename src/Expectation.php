@@ -465,19 +465,18 @@ final class Expectation
     /**
      * Asserts that the given expectation target have all methods documented.
      */
-    public function toHaveAllMethodsDocumented(): ArchExpectation
+    public function toHaveMethodsDocumented(): ArchExpectation
     {
         return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => isset($object->reflectionClass) === false
                 || array_filter(
                     $object->reflectionClass->getMethods(),
-                    fn (ReflectionMethod $method): bool =>
-                        (enum_exists($object->name) === false || in_array($method->name, ['from', 'tryFrom', 'cases'], true) === false)
-                        && realpath($method->getFileName() ?: '/') === realpath($object->path)
+                    fn (ReflectionMethod $method): bool => (enum_exists($object->name) === false || in_array($method->name, ['from', 'tryFrom', 'cases'], true) === false)
+                        && realpath($method->getFileName() ?: '/') === realpath($object->path) // @phpstan-ignore-line
                         && $method->getDocComment() === false,
                 ) === [],
-            'to have all methods documented',
+            'to have methods with documentation / annotations',
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class'))
         );
     }
@@ -485,20 +484,19 @@ final class Expectation
     /**
      * Asserts that the given expectation target have all properties documented.
      */
-    public function toHaveAllPropertiesDocumented(): ArchExpectation
+    public function toHavePropertiesDocumented(): ArchExpectation
     {
         return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => isset($object->reflectionClass) === false
                 || array_filter(
                     $object->reflectionClass->getProperties(),
-                    fn (ReflectionProperty $property): bool =>
-                        (enum_exists($object->name) === false || in_array($property->name, ['value', 'name'], true) === false)
-                        && realpath($property->getDeclaringClass()->getFileName() ?: '/') === realpath($object->path)
+                    fn (ReflectionProperty $property): bool => (enum_exists($object->name) === false || in_array($property->name, ['value', 'name'], true) === false)
+                        && realpath($property->getDeclaringClass()->getFileName() ?: '/') === realpath($object->path) // @phpstan-ignore-line
                         && $property->isPromoted() === false
                         && $property->getDocComment() === false,
                 ) === [],
-            'to have all properties documented',
+            'to have properties with documentation / annotations',
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class'))
         );
     }

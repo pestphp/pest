@@ -715,14 +715,6 @@
   ✓ failures with custom message
   ✓ not failures
 
-   PASS  Tests\Features\Expect\toHaveAllMethodsDocumented
-  ✓ it passes
-  ✓ it fails
-
-   PASS  Tests\Features\Expect\toHaveAllPropertiesDocumented
-  ✓ it passes
-  ✓ it fails
-
    PASS  Tests\Features\Expect\toHaveAttribute
   ✓ class has attribute
   ✓ opposite class has attribute
@@ -823,6 +815,11 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toHaveMethodsDocumented
+  ✓ it passes
+  ✓ it fails 1
+  ✓ it fails 2
+
    PASS  Tests\Features\Expect\toHavePrefix
   ✓ missing prefix
   ✓ has prefix
@@ -834,6 +831,11 @@
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
+
+   PASS  Tests\Features\Expect\toHavePropertiesDocumented
+  ✓ it passes
+  ✓ it fails 1
+  ✓ it fails 2
 
    PASS  Tests\Features\Expect\toHaveProperty
   ✓ pass
@@ -1533,4 +1535,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 24 skipped, 1072 passed (2620 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 24 skipped, 1074 passed (2626 assertions)

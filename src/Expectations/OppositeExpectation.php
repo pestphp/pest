@@ -21,6 +21,8 @@ use Pest\Support\Exporter;
 use PHPUnit\Architecture\Elements\ObjectDescription;
 use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\ExpectationFailedException;
+use ReflectionMethod;
+use ReflectionProperty;
 
 /**
  * @internal
@@ -99,17 +101,40 @@ final class OppositeExpectation
     /**
      * Not supported.
      */
-    public function toHaveAllMethodsDocumented(): ArchExpectation
+    public function toHaveMethodsDocumented(): ArchExpectation
     {
-        throw InvalidExpectation::fromMethods(['not', 'toHaveAllMethodsDocumented']);
+        return Targeted::make(
+            $this->original,
+            fn (ObjectDescription $object): bool => isset($object->reflectionClass) === false
+                || array_filter(
+                    $object->reflectionClass->getMethods(),
+                    fn (ReflectionMethod $method): bool => (enum_exists($object->name) === false || in_array($method->name, ['from', 'tryFrom', 'cases'], true) === false)
+                        && realpath($method->getFileName() ?: '/') === realpath($object->path) // @phpstan-ignore-line
+                        && $method->getDocComment() !== false,
+                ) === [],
+            'to have methods without documentation / annotations',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class'))
+        );
     }
 
     /**
      * Not supported.
      */
-    public function toHaveAllPropertiesDocumented(): ArchExpectation
+    public function toHavePropertiesDocumented(): ArchExpectation
     {
-        throw InvalidExpectation::fromMethods(['not', 'toHaveAllPropertiesDocumented']);
+        return Targeted::make(
+            $this->original,
+            fn (ObjectDescription $object): bool => isset($object->reflectionClass) === false
+                || array_filter(
+                    $object->reflectionClass->getProperties(),
+                    fn (ReflectionProperty $property): bool => (enum_exists($object->name) === false || in_array($property->name, ['value', 'name'], true) === false)
+                        && realpath($property->getDeclaringClass()->getFileName() ?: '/') === realpath($object->path) // @phpstan-ignore-line
+                        && $property->isPromoted() === false
+                        && $property->getDocComment() !== false,
+                ) === [],
+            'to have properties without documentation / annotations',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class'))
+        );
     }
 
     /**
