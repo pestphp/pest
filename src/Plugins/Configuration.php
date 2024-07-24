@@ -53,7 +53,7 @@ final class Configuration implements HandlesArguments, Terminable
             unlink($path);
         }
 
-        $doc = new DOMDocument();
+        $doc = new DOMDocument;
         $doc->load(self::BASE_PHPUNIT_FILE);
 
         $contents = $doc->saveXML();

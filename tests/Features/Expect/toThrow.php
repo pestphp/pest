@@ -6,13 +6,13 @@ class CustomException extends Exception {}
 
 test('passes', function () {
     expect(function () {
-        throw new RuntimeException();
+        throw new RuntimeException;
     })->toThrow(RuntimeException::class);
     expect(function () {
-        throw new RuntimeException();
+        throw new RuntimeException;
     })->toThrow(Exception::class);
     expect(function () {
-        throw new RuntimeException();
+        throw new RuntimeException;
     })->toThrow(function (RuntimeException $e) {});
     expect(function () {
         throw new RuntimeException('actual message');
@@ -24,7 +24,7 @@ test('passes', function () {
         throw new RuntimeException('actual message');
     })->toThrow('actual message');
     expect(function () {
-        throw new Exception();
+        throw new Exception;
     })->not->toThrow(RuntimeException::class);
     expect(function () {
         throw new RuntimeException('actual message');
@@ -47,7 +47,7 @@ test('failures 2', function () {
 
 test('failures 3', function () {
     expect(function () {
-        throw new Exception();
+        throw new Exception;
     })->toThrow(function (RuntimeException $e) {
         //
     });
@@ -92,7 +92,7 @@ test('failures with custom message', function () {
 
 test('not failures', function () {
     expect(function () {
-        throw new RuntimeException();
+        throw new RuntimeException;
     })->not->toThrow(RuntimeException::class);
 })->throws(ExpectationFailedException::class);
 
@@ -106,16 +106,16 @@ test('closure missing type-hint', function () {
 
 it('can handle a non-defined exception', function () {
     expect(function () {
-        throw new NonExistingException();
+        throw new NonExistingException;
     })->toThrow(NonExistingException::class);
 })->throws(Error::class, 'Class "NonExistingException" not found');
 
 it('can handle a class not found Error', function () {
     expect(function () {
-        throw new NonExistingException();
+        throw new NonExistingException;
     })->toThrow('Class "NonExistingException" not found');
 
     expect(function () {
-        throw new NonExistingException();
+        throw new NonExistingException;
     })->toThrow(Error::class, 'Class "NonExistingException" not found');
 });

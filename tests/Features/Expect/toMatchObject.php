@@ -18,7 +18,7 @@ test('pass', function () {
 });
 
 test('pass with class', function () {
-    expect(new class()
+    expect(new class
     {
         public $name = 'Nuno';
 

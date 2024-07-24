@@ -169,7 +169,7 @@ final class ResultPrinter
             return;
         }
 
-        $state = (new StateGenerator())->fromPhpUnitTestResult($this->passedTests, $testResult);
+        $state = (new StateGenerator)->fromPhpUnitTestResult($this->passedTests, $testResult);
 
         $this->compactPrinter->errors($state);
         $this->compactPrinter->recap($state, $testResult, $duration, $this->options);

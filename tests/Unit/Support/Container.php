@@ -7,7 +7,7 @@ use Pest\TestSuite;
 uses()->group('container');
 
 beforeEach(function () {
-    $this->container = new Container();
+    $this->container = new Container;
 });
 
 it('exists')

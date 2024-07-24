@@ -97,7 +97,7 @@ final class TestCall
             $closure->call($this);
         };
 
-        new AfterEachCall($this->testSuite, $this->filename, $when->bindTo(new \stdClass()));
+        new AfterEachCall($this->testSuite, $this->filename, $when->bindTo(new \stdClass));
 
         return $this;
     }

@@ -8,8 +8,8 @@ test('passes', function () {
 });
 
 test('passes with DateTime and DateTimeImmutable', function () {
-    $now = new DateTime();
-    $past = (new DateTimeImmutable())->modify('-1 day');
+    $now = new DateTime;
+    $past = (new DateTimeImmutable)->modify('-1 day');
 
     expect($now)->toBeGreaterThan($past);
 

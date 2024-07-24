@@ -1,6 +1,6 @@
 <?php
 
-$state = new stdClass();
+$state = new stdClass;
 
 beforeEach(function () use ($state) {
     $this->state = $state;

@@ -28,8 +28,8 @@ trait HigherOrderable
      */
     private function bootHigherOrderable(): void
     {
-        $this->chains = new HigherOrderMessageCollection();
-        $this->factoryProxies = new HigherOrderMessageCollection();
-        $this->proxies = new HigherOrderMessageCollection();
+        $this->chains = new HigherOrderMessageCollection;
+        $this->factoryProxies = new HigherOrderMessageCollection;
+        $this->proxies = new HigherOrderMessageCollection;
     }
 }

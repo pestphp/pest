@@ -42,7 +42,7 @@ final class Panic
         try {
             $output = Container::getInstance()->get(OutputInterface::class);
         } catch (Throwable) { // @phpstan-ignore-line
-            $output = new ConsoleOutput();
+            $output = new ConsoleOutput;
         }
 
         assert($output instanceof OutputInterface);

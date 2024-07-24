@@ -4,7 +4,7 @@ dataset('numbers.array', [
     1, 2, 3, 4, 5, 'ScopedDatasets/ScopedDatasets.php',
 ]);
 
-$state = new stdClass();
+$state = new stdClass;
 $state->text = '';
 test('uses dataset', function ($value) use ($state) {
     $state->text .= $value;

@@ -56,7 +56,7 @@ class State
     }
 }
 
-$state = new State();
+$state = new State;
 
 /*
  * Overrides toBe to assert two Characters are the same

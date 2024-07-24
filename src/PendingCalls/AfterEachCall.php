@@ -39,7 +39,7 @@ final class AfterEachCall
     ) {
         $this->closure = $closure instanceof Closure ? $closure : NullClosure::create();
 
-        $this->proxies = new HigherOrderMessageCollection();
+        $this->proxies = new HigherOrderMessageCollection;
 
         $this->describing = DescribeCall::describing();
     }

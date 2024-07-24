@@ -65,7 +65,7 @@ final class Configuration
      */
     public function theme(): Configuration\Theme
     {
-        return new Configuration\Theme();
+        return new Configuration\Theme;
     }
 
     /**
@@ -73,6 +73,6 @@ final class Configuration
      */
     public function context(): Configuration\Context
     {
-        return new Configuration\Context();
+        return new Configuration\Context;
     }
 }

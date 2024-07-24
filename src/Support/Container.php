@@ -29,7 +29,7 @@ final class Container
     public static function getInstance(): self
     {
         if (! self::$instance instanceof \Pest\Support\Container) {
-            self::$instance = new self();
+            self::$instance = new self;
         }
 
         return self::$instance;

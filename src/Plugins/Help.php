@@ -97,7 +97,7 @@ final class Help implements HandlesArguments
      */
     private function getContent(): array
     {
-        $helpReflection = new PHPUnitHelp();
+        $helpReflection = new PHPUnitHelp;
 
         $content = (fn (): array => $this->elements())->call($helpReflection);
 
