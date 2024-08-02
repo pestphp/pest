@@ -1,5 +1,9 @@
 
+<<<<<<< HEAD
   Pest Testing Framework 3.0.0-dev-0008.  
+=======
+  Pest Testing Framework 2.35.0.  
+>>>>>>> 2.x
 
   USAGE: pest <file> [options]  
 
