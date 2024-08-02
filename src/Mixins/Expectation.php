@@ -314,7 +314,7 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toHaveProperty(string $name, mixed $value = new Any(), string $message = ''): self
+    public function toHaveProperty(string $name, mixed $value = new Any, string $message = ''): self
     {
         $this->toBeObject();
 
@@ -654,7 +654,7 @@ final class Expectation
      *
      * @return self<TValue>
      */
-    public function toHaveKey(string|int $key, mixed $value = new Any(), string $message = ''): self
+    public function toHaveKey(string|int $key, mixed $value = new Any, string $message = ''): self
     {
         if (is_object($this->value) && method_exists($this->value, 'toArray')) {
             $array = $this->value->toArray();

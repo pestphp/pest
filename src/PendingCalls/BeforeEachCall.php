@@ -44,8 +44,8 @@ final class BeforeEachCall
     ) {
         $this->closure = $closure instanceof Closure ? $closure : NullClosure::create();
 
-        $this->testCallProxies = new HigherOrderMessageCollection();
-        $this->testCaseProxies = new HigherOrderMessageCollection();
+        $this->testCallProxies = new HigherOrderMessageCollection;
+        $this->testCaseProxies = new HigherOrderMessageCollection;
 
         $this->describing = DescribeCall::describing();
     }

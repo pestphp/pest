@@ -421,7 +421,7 @@ final class Expectation
      */
     public function any(): Any
     {
-        return new Any();
+        return new Any;
     }
 
     /**

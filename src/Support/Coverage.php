@@ -37,7 +37,7 @@ final class Coverage
      */
     public static function isAvailable(): bool
     {
-        $runtime = new Runtime();
+        $runtime = new Runtime;
 
         if (! $runtime->canCollectCodeCoverage()) {
             return false;
@@ -67,7 +67,7 @@ final class Coverage
      */
     public static function usingXdebug(): bool
     {
-        return (new Runtime())->hasXdebug();
+        return (new Runtime)->hasXdebug();
     }
 
     /**

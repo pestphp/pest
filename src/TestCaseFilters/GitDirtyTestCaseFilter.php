@@ -76,7 +76,7 @@ final class GitDirtyTestCaseFilter implements TestCaseFilter
         $dirtyFiles = array_values($dirtyFiles);
 
         if ($dirtyFiles === []) {
-            Panic::with(new NoDirtyTestsFound());
+            Panic::with(new NoDirtyTestsFound);
         }
 
         $this->changedFiles = $dirtyFiles;

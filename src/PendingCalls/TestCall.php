@@ -369,7 +369,7 @@ final class TestCall
      */
     public function coversNothing(): self
     {
-        $this->testCaseMethod->covers = [new CoversNothing()];
+        $this->testCaseMethod->covers = [new CoversNothing];
 
         return $this;
     }

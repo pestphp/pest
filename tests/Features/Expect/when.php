@@ -3,7 +3,7 @@
 use PHPUnit\Framework\ExpectationFailedException;
 
 beforeEach(function () {
-    $this->whenObject = new stdClass();
+    $this->whenObject = new stdClass;
     $this->whenObject->trueValue = true;
     $this->whenObject->foo = 'foo';
 });

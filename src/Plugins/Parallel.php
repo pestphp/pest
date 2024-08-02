@@ -41,7 +41,7 @@ final class Parallel implements HandlesArguments
      */
     public static function isEnabled(): bool
     {
-        $argv = new ArgvInput();
+        $argv = new ArgvInput;
         if ($argv->hasParameterOption('--parallel')) {
             return true;
         }
@@ -126,7 +126,7 @@ final class Parallel implements HandlesArguments
             $arguments
         );
 
-        $exitCode = $this->paratestCommand()->run(new ArgvInput($filteredArguments), new CleanConsoleOutput());
+        $exitCode = $this->paratestCommand()->run(new ArgvInput($filteredArguments), new CleanConsoleOutput);
 
         return CallsAddsOutput::execute($exitCode);
     }
@@ -173,7 +173,7 @@ final class Parallel implements HandlesArguments
      */
     private function hasArgumentsThatWouldBeFasterWithoutParallel(): bool
     {
-        $arguments = new ArgvInput();
+        $arguments = new ArgvInput;
 
         foreach (self::UNSUPPORTED_ARGUMENTS as $unsupportedArgument) {
             if ($arguments->hasParameterOption($unsupportedArgument)) {

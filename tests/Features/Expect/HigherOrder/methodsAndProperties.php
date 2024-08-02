@@ -1,7 +1,7 @@
 <?php
 
 it('can access methods and properties', function () {
-    expect(new HasMethodsAndProperties())
+    expect(new HasMethodsAndProperties)
         ->name->toEqual('Has Methods and Properties')->not()->toEqual('bar')
         ->multiply(3, 4)->not->toBeString->toEqual(12)
         ->posts->each(function ($post) {
@@ -19,7 +19,7 @@ it('can access methods and properties', function () {
 });
 
 it('can handle nested methods and properties', function () {
-    expect(new HasMethodsAndProperties())
+    expect(new HasMethodsAndProperties)
         ->meta->foo->bar->toBeString()->toEqual('baz')->not->toBeInt
         ->newInstance()->meta->foo->toBeArray()
         ->newInstance()->multiply(2, 2)->toEqual(4)->not->toEqual(5)
@@ -27,14 +27,14 @@ it('can handle nested methods and properties', function () {
 });
 
 it('works with higher order tests')
-    ->expect(new HasMethodsAndProperties())
+    ->expect(new HasMethodsAndProperties)
     ->meta->foo->bar->toBeString()->toEqual('baz')->not->toBeInt
     ->newInstance()->meta->foo->toBeArray
     ->newInstance()->multiply(2, 2)->toEqual(4)->not->toEqual(5)
     ->newInstance()->books()->toBeArray();
 
 it('can start a new higher order expectation using the and syntax', function () {
-    expect(new HasMethodsAndProperties())
+    expect(new HasMethodsAndProperties)
         ->toBeInstanceOf(HasMethodsAndProperties::class)
         ->meta->toBeArray
         ->and(['foo' => 'bar'])
@@ -45,7 +45,7 @@ it('can start a new higher order expectation using the and syntax', function () 
 });
 
 it('can start a new higher order expectation using the and syntax in higher order tests')
-    ->expect(new HasMethodsAndProperties())
+    ->expect(new HasMethodsAndProperties)
     ->toBeInstanceOf(HasMethodsAndProperties::class)
     ->meta->toBeArray
     ->and(['foo' => 'bar'])
@@ -53,7 +53,7 @@ it('can start a new higher order expectation using the and syntax in higher orde
     ->foo->toEqual('bar');
 
 it('can start a new higher order expectation using the and syntax without nesting expectations', function () {
-    expect(new HasMethodsAndProperties())
+    expect(new HasMethodsAndProperties)
         ->toBeInstanceOf(HasMethodsAndProperties::class)
         ->meta
         ->sequence(
@@ -101,6 +101,6 @@ class HasMethodsAndProperties
 
     public function newInstance()
     {
-        return new static();
+        return new static;
     }
 }

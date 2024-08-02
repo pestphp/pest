@@ -3,7 +3,7 @@
 use PHPUnit\Framework\ExpectationFailedException;
 
 beforeEach(function () {
-    $this->times = [new DateTimeImmutable(), new DateTimeImmutable()];
+    $this->times = [new DateTimeImmutable, new DateTimeImmutable];
 });
 
 test('pass', function () {

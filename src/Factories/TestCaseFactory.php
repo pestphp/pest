@@ -154,7 +154,7 @@ final class TestCaseFactory
         foreach ($classAvailableAttributes as $attribute) {
             $classAttributes = array_reduce(
                 $methods,
-                fn (array $carry, TestCaseMethodFactory $methodFactory): array => (new $attribute())->__invoke($methodFactory, $carry),
+                fn (array $carry, TestCaseMethodFactory $methodFactory): array => (new $attribute)->__invoke($methodFactory, $carry),
                 $classAttributes
             );
         }

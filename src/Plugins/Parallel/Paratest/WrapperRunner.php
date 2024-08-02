@@ -91,13 +91,13 @@ final class WrapperRunner implements RunnerInterface
         private readonly OutputInterface $output
     ) {
         $this->printer = new ResultPrinter($output, $options);
-        $this->timer = new Timer();
+        $this->timer = new Timer;
 
         $wrapper = realpath(
             dirname(__DIR__, 4).DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'worker.php',
         );
         assert($wrapper !== false);
-        $phpFinder = new PhpExecutableFinder();
+        $phpFinder = new PhpExecutableFinder;
         $phpBin = $phpFinder->find(false);
         assert($phpBin !== false);
         $parameters = [$phpBin];
@@ -110,7 +110,7 @@ final class WrapperRunner implements RunnerInterface
         $parameters[] = $wrapper;
 
         $this->parameters = $parameters;
-        $this->codeCoverageFilterRegistry = new CodeCoverageFilterRegistry();
+        $this->codeCoverageFilterRegistry = new CodeCoverageFilterRegistry;
     }
 
     public function run(): int
@@ -357,7 +357,7 @@ final class WrapperRunner implements RunnerInterface
             return;
         }
 
-        $coverageManager = new CodeCoverage();
+        $coverageManager = new CodeCoverage;
         $coverageManager->init(
             $this->options->configuration,
             $this->codeCoverageFilterRegistry,
@@ -389,8 +389,8 @@ final class WrapperRunner implements RunnerInterface
             return;
         }
 
-        $testSuite = (new LogMerger())->merge($this->junitFiles);
-        (new Writer())->write(
+        $testSuite = (new LogMerger)->merge($this->junitFiles);
+        (new Writer)->write(
             $testSuite,
             $this->options->configuration->logfileJunit(),
         );

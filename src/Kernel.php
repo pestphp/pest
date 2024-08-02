@@ -67,7 +67,7 @@ final class Kernel
             ->add(Container::class, $container);
 
         $kernel = new self(
-            new Application(),
+            new Application,
             $output,
         );
 

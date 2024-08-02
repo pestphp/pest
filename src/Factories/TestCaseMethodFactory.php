@@ -138,11 +138,11 @@ final class TestCaseMethodFactory
         $attributes = [];
 
         foreach ($annotationsToUse as $annotation) {
-            $annotations = (new $annotation())->__invoke($this, $annotations);
+            $annotations = (new $annotation)->__invoke($this, $annotations);
         }
 
         foreach ($attributesToUse as $attribute) {
-            $attributes = (new $attribute())->__invoke($this, $attributes);
+            $attributes = (new $attribute)->__invoke($this, $attributes);
         }
 
         if ($this->datasets !== [] || $this->repetitions > 1) {

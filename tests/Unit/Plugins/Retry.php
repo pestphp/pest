@@ -3,7 +3,7 @@
 use Pest\Plugins\Retry;
 
 it('orders by defects and stop on defects if when --retry is used ', function () {
-    $retry = new Retry();
+    $retry = new Retry;
 
     $arguments = $retry->handleArguments(['--retry']);
 

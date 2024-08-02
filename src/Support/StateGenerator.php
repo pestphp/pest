@@ -20,7 +20,7 @@ final class StateGenerator
 {
     public function fromPhpUnitTestResult(int $passedTests, PHPUnitTestResult $testResult): State
     {
-        $state = new State();
+        $state = new State;
 
         foreach ($testResult->testErroredEvents() as $testResultEvent) {
             if ($testResultEvent instanceof Errored) {
