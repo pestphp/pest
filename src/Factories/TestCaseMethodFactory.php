@@ -166,7 +166,7 @@ final class TestCaseMethodFactory
 
         $datasetsCode = '';
 
-=        $this->attributes = [
+        $this->attributes = [
             new Attribute(
                 \PHPUnit\Framework\Attributes\Test::class,
                 [],

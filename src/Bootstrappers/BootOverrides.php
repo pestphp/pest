@@ -18,14 +18,14 @@ final class BootOverrides implements Bootstrapper
      * @var array<string, string>
      */
     public const FILES = [
-        '4f57b79c6ca77cab241cef879ea98bc743d2cd1fbe4586ab652608bf29aa4176' => 'Runner/Filter/NameFilterIterator.php',
-        '288a312ae73fa1cea0325e5862f76e5641f1f3f132cf6e3d5df4811c57571c41' => 'Runner/ResultCache/DefaultResultCache.php',
-        'a3daa830857b9fb8fe78606dc07d93dcedb30cf0bddf1829812143541b1ad39f' => 'Runner/TestSuiteLoader.php',
-        '9e8806c684a23d14a9ed2d6fb3102c7be9a438e7e2b96ecfe3b634817e285104' => 'TextUI/Command/Commands/WarmCodeCoverageCacheCommand.php',
-        'badc88c79c2a47d768be3925051999b158d08b64e57ccf4ce560f1610cbcc1e8' => 'TextUI/Output/Default/ProgressPrinter/Subscriber/TestSkippedSubscriber.php',
-        '5ff38e143e244c4d80e767447e5a045891cc6518f008f24f2bb945289b83a07f' => 'TextUI/TestSuiteFilterProcessor.php',
-        'a01a02eadd18146f12731c7adb8cd56cf76f3f6bda2bae06ff4fd6573789b0f4' => 'Event/Value/ThrowableBuilder.php',
-        '354137e9f9489633cab805c1f1de4023f84c90e4cdfb36ac9bdc0c321dd7078d' => 'Logging/JUnit/JunitXmlLogger.php',
+        'c96b1cb57d7fc8e649f4c13a8abe418c2541bcfab194fb6702b99f777f52ee84' => 'Runner/Filter/NameFilterIterator.php',
+        'a4a43de01f641c6944ee83d963795a46d32b5206b5ab3bbc6cce76e67190acbf' => 'Runner/ResultCache/DefaultResultCache.php',
+        'd0e81317889ad88c707db4b08a94cadee4c9010d05ff0a759f04e71af5efed89' => 'Runner/TestSuiteLoader.php',
+        '3bb609b0d3bf6dee8df8d6cd62a3c8ece823c4bb941eaaae39e3cb267171b9d2' => 'TextUI/Command/Commands/WarmCodeCoverageCacheCommand.php',
+        '8abdad6413329c6fe0d7d44a8b9926e390af32c0b3123f3720bb9c5bbc6fbb7e' => 'TextUI/Output/Default/ProgressPrinter/Subscriber/TestSkippedSubscriber.php',
+        '43883b7e5811886cf3731c8ed6304d5a77078d9731e1e505abc2da36bde19f3e' => 'TextUI/TestSuiteFilterProcessor.php',
+        '357d5cd7007f8559b26e1b8cdf43bb6fb15b51b79db981779da6f31b7ec39dad' => 'Event/Value/ThrowableBuilder.php',
+        '676273f1fe483877cf2d95c5aedbf9ae5d6a8e2f4c12d6ce716df6591e6db023' => 'Logging/JUnit/JunitXmlLogger.php',
     ];
 
     /**
