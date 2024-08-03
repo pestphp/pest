@@ -356,10 +356,10 @@ final class TestCall
      * Sets the test as "todo".
      */
     public function todo(
-        array|string $issue = null,
-        array|string $pr = null,
-        array|string $assignee = null,
         array|string $note = null,
+        array|string $issue = null,
+        array|string $assignee = null,
+        array|string $pr = null,
     ): self {
         $this->skip('__TODO__');
 
