@@ -1251,11 +1251,16 @@
   ✓ nested → it may be associated with an ticket #1, #4, #5, #6, #3
   // an note between an the ticket
 
-   PASS  Tests\Features\Todo - 3 todos
+   PASS  Tests\Features\Todo - 7 todos
   ↓ something todo later
   ↓ something todo later chained
   ↓ something todo later chained and with function body
   ✓ it does something within a file with a todo
+  ↓ it may have an associated assignee [@nunomaduro]
+  ↓ it may have an associated issue #1
+  ↓ it may have an associated PR #1
+  ↓ it may have an associated note
+  // a note
 
    WARN  Tests\Features\Warnings
   ! warning → Undefined property: P\Tests\Features\Warnings::$fooqwdfwqdfqw
@@ -1542,4 +1547,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 24 skipped, 1078 passed (2632 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 24 skipped, 1078 passed (2632 assertions)

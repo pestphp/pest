@@ -1,3 +1,4 @@
+
    TODO  Tests\Features\BeforeEachProxiesToTestCallWithTodo - 4 todos
   ↓ is marked as todo 1
   ↓ is marked as todo 2
@@ -14,10 +15,15 @@
   ↓ todo on describe → should not fail
   ↓ todo on describe → should run
 
-   TODO  Tests\Features\Todo - 3 todos
+   TODO  Tests\Features\Todo - 7 todos
   ↓ something todo later
   ↓ something todo later chained
   ↓ something todo later chained and with function body
+  ↓ it may have an associated assignee [@nunomaduro]
+  ↓ it may have an associated issue #1
+  ↓ it may have an associated PR #1
+  ↓ it may have an associated note
+  // a note
 
    PASS  Tests\CustomTestCase\ChildTest
   ✓ override method
@@ -28,4 +34,4 @@
    PASS  Tests\CustomTestCase\ParentTest
   ✓ override method
 
-  Tests:    13 todos, 3 passed (3 assertions)
+  Tests:    17 todos, 3 passed (3 assertions)

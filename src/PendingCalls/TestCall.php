@@ -355,11 +355,31 @@ final class TestCall
     /**
      * Sets the test as "todo".
      */
-    public function todo(): self
-    {
+    public function todo(
+        array|string $issue = null,
+        array|string $pr = null,
+        array|string $assignee = null,
+        array|string $note = null,
+    ): self {
         $this->skip('__TODO__');
 
         $this->testCaseMethod->todo = true;
+
+        if ($issue !== null) {
+            $this->issue($issue);
+        }
+
+        if ($pr !== null) {
+            $this->pr($pr);
+        }
+
+        if ($assignee !== null) {
+            $this->assignee($assignee);
+        }
+
+        if ($note !== null) {
+            $this->note($note);
+        }
 
         return $this;
     }
