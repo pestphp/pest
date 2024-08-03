@@ -73,6 +73,6 @@ final class Configuration
      */
     public function context(): Configuration\Context
     {
-        return new Configuration\Context;
+        return Configuration\Context::getInstance();
     }
 }

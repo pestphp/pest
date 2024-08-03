@@ -444,26 +444,14 @@ trait Testable
     }
 
     /**
-     * The latest printable test case notes.
+     * The printable test case method context.
      */
-    public static function getPrintableTestCaseMethodNotes(): array
+    public static function getPrintableContext(): array
     {
-        return self::$__latestNotes;
-    }
-
-    /**
-     * The latest printable test case issues.
-     */
-    public static function getPrintableTestCaseMethodIssues(): array
-    {
-        return self::$__latestIssues;
-    }
-
-    /**
-     * The latest printable test case PRs.
-     */
-    public static function getPrintableTestCaseMethodPrs(): array
-    {
-        return self::$__latestPrs;
+        return [
+            'issues' => self::$__latestIssues,
+            'prs' => self::$__latestPrs,
+            'notes' => self::$__latestNotes,
+        ];
     }
 }
