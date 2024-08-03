@@ -10,6 +10,13 @@ namespace Pest\Configuration;
 final class Context
 {
     /**
+     * The assignees link.
+     *
+     * @internal
+     */
+    public string $assignees = '';
+
+    /**
      * The issues link.
      *
      * @internal
@@ -44,6 +51,8 @@ final class Context
         $this->issues = "https://github.com/{$project}/issues/%s";
         $this->prs = "https://github.com/{$project}/pull/%s";
 
+        $this->assignees = 'https://github.com/%s';
+
         return $this;
     }
 
@@ -54,6 +63,8 @@ final class Context
     {
         $this->issues = "https://gitlab.com/{$project}/issues/%s";
         $this->prs = "https://gitlab.com/{$project}/merge_requests/%s";
+
+        $this->assignees = 'https://gitlab.com/%s';
 
         return $this;
     }
@@ -66,6 +77,8 @@ final class Context
         $this->issues = 'https://bitbucket.org/{$project}/issues/%s';
         $this->prs = "https://bitbucket.org/{$project}/pull-requests/%s";
 
+        $this->assignees = 'https://bitbucket.org/%s';
+
         return $this;
     }
 
@@ -76,16 +89,20 @@ final class Context
     {
         $this->issues = "https://{$namespace}.atlassian.net/browse/{$project}-%s";
 
+        $this->assignees = "https://{$namespace}.atlassian.net/secure/ViewProfile?name=%s";
+
         return $this;
     }
 
     /**
      * Sets the test context to custom.
      */
-    public function using(string $issues, string $prs): self
+    public function using(string $issues, string $prs, string $assignees): self
     {
         $this->issues = $issues;
         $this->prs = $prs;
+
+        $this->assignees = $assignees;
 
         return $this;
     }

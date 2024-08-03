@@ -35,6 +35,11 @@ trait Testable
     private static string $__latestDescription;
 
     /**
+     * The test's assignees.
+     */
+    private static array $__latestAssignees = [];
+
+    /**
      * The test's notes.
      */
     private static array $__latestNotes = [];
@@ -105,6 +110,7 @@ trait Testable
         if ($test->hasMethod($name)) {
             $method = $test->getMethod($name);
             $this->__description = self::$__latestDescription = $method->description;
+            self::$__latestAssignees = $method->assignees;
             self::$__latestNotes = $method->notes;
             self::$__latestIssues = $method->issues;
             self::$__latestPrs = $method->prs;
@@ -258,6 +264,7 @@ trait Testable
         }
 
         $this->__description = self::$__latestDescription = $description;
+        self::$__latestAssignees = $method->assignees;
         self::$__latestNotes = $method->notes;
         self::$__latestIssues = $method->issues;
         self::$__latestPrs = $method->prs;
@@ -449,6 +456,7 @@ trait Testable
     public static function getPrintableContext(): array
     {
         return [
+            'assignees' => self::$__latestAssignees,
             'issues' => self::$__latestIssues,
             'prs' => self::$__latestPrs,
             'notes' => self::$__latestNotes,

@@ -57,6 +57,13 @@ final class TestCaseMethodFactory
     public array $issues = [];
 
     /**
+     * The test assignees.
+     *
+     * @var array<int, string>
+     */
+    public array $assignees = [];
+
+    /**
      * The associated PRs numbers.
      *
      * @var array<int, int>

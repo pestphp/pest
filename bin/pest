@@ -4,6 +4,7 @@
 use Pest\Kernel;
 use Pest\Panic;
 use Pest\TestCaseFilters\GitDirtyTestCaseFilter;
+use Pest\TestCaseMethodFilters\AssigneeTestCaseFilter;
 use Pest\TestCaseMethodFilters\IssueTestCaseFilter;
 use Pest\TestCaseMethodFilters\NotesTestCaseFilter;
 use Pest\TestCaseMethodFilters\PrTestCaseFilter;
@@ -57,6 +58,16 @@ use Symfony\Component\Console\Output\ConsoleOutput;
         if ($value === '--notes') {
             $notes = true;
             unset($arguments[$key]);
+        }
+
+        if (str_contains($value, '--assignee=')) {
+            unset($arguments[$key]);
+        } else if ($value === '--assignee') {
+            unset($arguments[$key]);
+
+            if (isset($arguments[$key + 1])) {
+                unset($arguments[$key + 1]);
+            }
         }
 
         if (str_contains($value, '--issue=')) {
@@ -140,6 +151,10 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
     if ($notes) {
         $testSuite->tests->addTestCaseMethodFilter(new NotesTestCaseFilter());
+    }
+
+    if ($assignee = $input->getParameterOption('--assignee')) {
+        $testSuite->tests->addTestCaseMethodFilter(new AssigneeTestCaseFilter((string) $assignee));
     }
 
     if ($issue = $input->getParameterOption('--issue')) {

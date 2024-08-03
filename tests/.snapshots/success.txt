@@ -28,6 +28,11 @@
   ✓ it does not get executed before the test
   ✓ it gets executed after the test
 
+   PASS  Tests\Features\Assignee
+  ✓ it may be associated with an assignee [@nunomaduro, @taylorotwell]
+  ✓ nested → it may be associated with an assignee [@nunomaduro, @jamesbrooks, @joedixon, @taylorotwell]
+  // an note between an the assignee
+
    PASS  Tests\Features\BeforeAll
   ✓ it gets executed before tests
   ✓ it do not get executed before each test
@@ -1537,4 +1542,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 24 skipped, 1076 passed (2628 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 24 skipped, 1078 passed (2632 assertions)

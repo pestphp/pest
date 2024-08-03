@@ -391,6 +391,18 @@ final class TestCall
     }
 
     /**
+     * Sets the test assignee(s).
+     */
+    public function assignee(array|string $assignee): self
+    {
+        $assignees = is_array($assignee) ? $assignee : [$assignee];
+
+        $this->testCaseMethod->assignees = array_unique(array_merge($this->testCaseMethod->assignees, $assignees));
+
+        return $this;
+    }
+
+    /**
      * Associates the test with the given pull request(s).
      *
      * @param  array<int, string|int>|string|int  $number
@@ -401,7 +413,7 @@ final class TestCall
 
         $number = array_map(fn (string|int $number): int => (int) ltrim((string) $number, '#'), $number);
 
-        $this->testCaseMethod->prs = array_merge($this->testCaseMethod->issues, $number);
+        $this->testCaseMethod->prs = array_unique(array_merge($this->testCaseMethod->issues, $number));
 
         return $this;
     }
@@ -415,7 +427,7 @@ final class TestCall
     {
         $notes = is_array($note) ? $note : [$note];
 
-        $this->testCaseMethod->notes = array_merge($this->testCaseMethod->notes, $notes);
+        $this->testCaseMethod->notes = array_unique(array_merge($this->testCaseMethod->notes, $notes));
 
         return $this;
     }

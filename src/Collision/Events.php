@@ -41,22 +41,32 @@ final class Events
         renderUsing(self::$output);
 
         [
+            'assignees' => $assignees,
             'issues' => $issues,
             'prs' => $prs,
         ] = $context;
 
-        if ((($link = Context::getInstance()->issues) !== '' && ($link = Context::getInstance()->issues) !== '0')) {
+        if (($link = Context::getInstance()->issues) !== '') {
             $issuesDescription = array_map(fn (int $issue): string => sprintf('<a href="%s">#%s</a>', sprintf($link, $issue), $issue), $issues);
         }
 
-        if ((($link = Context::getInstance()->prs) !== '' && ($link = Context::getInstance()->prs) !== '0')) {
+        if (($link = Context::getInstance()->prs) !== '') {
             $prsDescription = array_map(fn (int $pr): string => sprintf('<a href="%s">#%s</a>', sprintf($link, $pr), $pr), $prs);
         }
 
-        if (count($issues) > 0 || count($prs) > 0) {
+        if (($link = Context::getInstance()->assignees) !== '' && count($assignees) > 0) {
+            $assigneesDescription = array_map(fn (string $assignee): string => sprintf(
+                '<a href="%s">@%s</a>',
+                sprintf($link, $assignee),
+                $assignee,
+            ), $assignees);
+        }
+
+        if (count($assignees) > 0 || count($issues) > 0 || count($prs) > 0) {
             $description .= ' '.implode(', ', array_merge(
                 $issuesDescription ?? [],
                 $prsDescription ?? [],
+                isset($assigneesDescription) ? ['['.implode(', ', $assigneesDescription).']'] : [],
             ));
         }
 
