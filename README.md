@@ -31,8 +31,10 @@ We cannot thank our sponsors enough for their incredible support in funding Pest
 
 - [Akaunting](https://akaunting.com/?ref=pestphp)
 - [Codecourse](https://codecourse.com/?ref=pestphp)
+- [DocuWriter.ai](https://www.docuwriter.ai/?ref=pestphp)
 - [Laracasts](https://laracasts.com/?ref=pestphp)
 - [Localazy](https://localazy.com/?ref=pestphp)
+- [Route4Me](https://www.route4me.com/?ref=pestphp)
 - [Zapiet](https://www.zapiet.com/?ref=pestphp)
 
 Pest is an open-sourced software licensed under the **[MIT license](https://opensource.org/licenses/MIT)**.
