@@ -7,3 +7,4 @@
 7. `toHaveLineCountLessThan`
 8. `toHaveAllMethodsDocumented`
 9. `toHaveAllPropertiesDocumented`
+10. `@pest-arch-ignore-line` and `@pest-arch-ignore-next-line`

@@ -10,7 +10,7 @@ use Pest\Expectation;
 /**
  * @internal
  */
-abstract class AbstractPreset
+abstract class AbstractPreset // @pest-arch-ignore-line
 {
     /**
      * The expectations.

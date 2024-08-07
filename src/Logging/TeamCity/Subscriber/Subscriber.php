@@ -9,7 +9,7 @@ use Pest\Logging\TeamCity\TeamCityLogger;
 /**
  * @internal
  */
-abstract class Subscriber
+abstract class Subscriber // @pest-arch-ignore-line
 {
     /**
      * Creates a new Subscriber instance.
