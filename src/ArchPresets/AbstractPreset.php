@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\ArchPresets;
 
 use Pest\Arch\Contracts\ArchExpectation;
+use Pest\Expectation;
 
 /**
  * @internal
@@ -12,14 +13,19 @@ use Pest\Arch\Contracts\ArchExpectation;
 abstract class AbstractPreset
 {
     /**
+     * The expectations.
+     *
+     * @var array<int, ArchExpectation>
+     */
+    protected array $expectations = [];
+
+    /**
      * Creates a new preset instance.
      *
      * @param  array<int, string>  $userNamespaces
-     * @param  array<int, ArchExpectation>  $expectations
      */
-    final public function __construct(// @phpstan-ignore-line
-        protected array $userNamespaces,
-        protected array $expectations = [],
+    final public function __construct(
+        private readonly array $userNamespaces,
     ) {
         //
     }
@@ -42,6 +48,20 @@ abstract class AbstractPreset
             fn (ArchExpectation $expectation): \Pest\Arch\Contracts\ArchExpectation => $expectation->ignoring($targetsOrDependencies),
             $this->expectations,
         );
+    }
+
+    /**
+     * Runs the given callback for each namespace.
+     *
+     * @param  callable(Expectation<string|null>): ArchExpectation  ...$callbacks
+     */
+    final public function eachUserNamespace(callable ...$callbacks): void
+    {
+        foreach ($this->userNamespaces as $namespace) {
+            foreach ($callbacks as $callback) {
+                $this->expectations[] = $callback(expect($namespace));
+            }
+        }
     }
 
     /**

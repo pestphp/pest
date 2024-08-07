@@ -2,7 +2,7 @@
 
 use Pest\Expectation;
 
-arch()->preset()->base()->ignoring([
+arch()->preset()->php()->ignoring([
     Expectation::class,
     'debug_backtrace',
     'var_export',

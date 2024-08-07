@@ -355,11 +355,11 @@ final class TestCall
     /**
      * Sets the test as "todo".
      */
-    public function todo(
-        array|string $note = null,
-        array|string $issue = null,
-        array|string $assignee = null,
-        array|string $pr = null,
+    public function todo(// @phpstan-ignore-line
+        array|string|null $note = null,
+        array|string|null $assignee = null,
+        array|string|null $issue = null,
+        array|string|null $pr = null,
     ): self {
         $this->skip('__TODO__');
 
@@ -412,6 +412,8 @@ final class TestCall
 
     /**
      * Sets the test assignee(s).
+     *
+     * @param  array<int, string>|string  $assignee
      */
     public function assignee(array|string $assignee): self
     {

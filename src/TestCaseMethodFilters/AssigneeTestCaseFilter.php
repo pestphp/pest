@@ -22,6 +22,6 @@ final readonly class AssigneeTestCaseFilter implements TestCaseMethodFilter
      */
     public function accept(TestCaseMethodFactory $factory): bool
     {
-        return array_filter($factory->assignees, fn ($assignee): bool => str_starts_with($assignee, $this->assignee)) !== [];
+        return array_filter($factory->assignees, fn (string $assignee): bool => str_starts_with($assignee, $this->assignee)) !== [];
     }
 }

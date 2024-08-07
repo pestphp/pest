@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Pest\ArchPresets;
 
+use Pest\Arch\Contracts\ArchExpectation;
+use Pest\Expectation;
+
 /**
  * @internal
  */
@@ -14,6 +17,10 @@ final class Security extends AbstractPreset
      */
     public function execute(): void
     {
+        $this->eachUserNamespace(
+            fn (Expectation $namespace): ArchExpectation => $namespace->not->toHaveFileSystemPermissions('0777'),
+        );
+
         $this->expectations[] = expect([
             'md5',
             'sha1',
@@ -37,11 +44,5 @@ final class Security extends AbstractPreset
             'dl',
             'assert',
         ])->not->toBeUsed();
-
-        foreach ($this->userNamespaces as $namespace) {
-            $this->expectations[] = expect($namespace)
-                ->not
-                ->toHaveFileSystemPermissions('0777');
-        }
     }
 }

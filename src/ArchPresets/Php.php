@@ -7,7 +7,7 @@ namespace Pest\ArchPresets;
 /**
  * @internal
  */
-final class Base extends AbstractPreset
+final class Php extends AbstractPreset
 {
     /**
      * Executes the arch preset.

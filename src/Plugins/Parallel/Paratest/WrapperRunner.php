@@ -405,6 +405,7 @@ final class WrapperRunner implements RunnerInterface
         }
 
         $testSuite = (new LogMerger)->merge($this->junitFiles);
+        assert($testSuite instanceof \ParaTest\JUnit\TestSuite);
         (new Writer)->write(
             $testSuite,
             $this->options->configuration->logfileJunit(),
