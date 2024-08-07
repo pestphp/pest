@@ -8,6 +8,7 @@ use Pest\Arch\Support\Composer;
 use Pest\ArchPresets\AbstractPreset;
 use Pest\ArchPresets\Laravel;
 use Pest\ArchPresets\Php;
+use Pest\ArchPresets\Relaxed;
 use Pest\ArchPresets\Security;
 use Pest\ArchPresets\Strict;
 use Pest\PendingCalls\TestCall;
@@ -63,6 +64,14 @@ final class Preset
     public function security(): AbstractPreset
     {
         return $this->executePreset(new Security($this->baseNamespaces()));
+    }
+
+    /**
+     * Uses the Pest relaxed preset and returns the test call instance.
+     */
+    public function relaxed(): AbstractPreset
+    {
+        return $this->executePreset(new Relaxed($this->baseNamespaces()));
     }
 
     /**
