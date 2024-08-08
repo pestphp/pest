@@ -258,12 +258,12 @@ final class Reflection
      * @param  ReflectionClass<object>  $reflectionClass
      * @return array<int, ReflectionMethod>
      */
-    public static function getMethodsFromReflectionClass(ReflectionClass $reflectionClass): array
+    public static function getMethodsFromReflectionClass(ReflectionClass $reflectionClass, int $filter = ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_PROTECTED | ReflectionMethod::IS_PRIVATE): array
     {
         $getMethods = fn (ReflectionClass $reflectionClass): array => array_filter(
             array_map(
                 fn (ReflectionMethod $method): \ReflectionMethod => $method,
-                $reflectionClass->getMethods(),
+                $reflectionClass->getMethods($filter),
             ), fn (ReflectionMethod $method): bool => $method->getDeclaringClass()->getName() === $reflectionClass->getName(),
         );
 

@@ -225,6 +225,93 @@ final class OppositeExpectation
     }
 
     /**
+     * Asserts that the given expectation target not to have the public methods besides the given methods.
+     */
+    public function toHavePublicMethodsBesides(array|string $methods): ArchExpectation
+    {
+        $methods = is_array($methods) ? $methods : [$methods];
+
+        return Targeted::make(
+            $this->original,
+            function (ObjectDescription $object) use ($methods): bool {
+                $reflectionMethods = isset($object->reflectionClass)
+                    ? Reflection::getMethodsFromReflectionClass($object->reflectionClass, ReflectionMethod::IS_PUBLIC)
+                    : [];
+
+                foreach ($reflectionMethods as $reflectionMethod) {
+                    if (! in_array($reflectionMethod->name, $methods, true)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            },
+            count($methods) === 0
+                ? 'not to have public methods'
+                : sprintf("not to have public methods besides '%s'", implode("', '", $methods)),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'public function')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target not to have the protected methods besides the given methods.
+     */
+    public function toHaveProtectedMethodsBesides(array|string $methods): ArchExpectation
+    {
+        $methods = is_array($methods) ? $methods : [$methods];
+
+        return Targeted::make(
+            $this->original,
+            function (ObjectDescription $object) use ($methods): bool {
+                $reflectionMethods = isset($object->reflectionClass)
+                    ? Reflection::getMethodsFromReflectionClass($object->reflectionClass, ReflectionMethod::IS_PROTECTED)
+                    : [];
+
+                foreach ($reflectionMethods as $reflectionMethod) {
+                    if (! in_array($reflectionMethod->name, $methods, true)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            },
+            count($methods) === 0
+                ? 'not to have protected methods'
+                : sprintf("not to have protected methods besides '%s'", implode("', '", $methods)),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'protected function')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target not to have the private methods besides the given methods.
+     */
+    public function toHavePrivateMethodsBesides(array|string $methods): ArchExpectation
+    {
+        $methods = is_array($methods) ? $methods : [$methods];
+
+        return Targeted::make(
+            $this->original,
+            function (ObjectDescription $object) use ($methods): bool {
+                $reflectionMethods = isset($object->reflectionClass)
+                    ? Reflection::getMethodsFromReflectionClass($object->reflectionClass, ReflectionMethod::IS_PRIVATE)
+                    : [];
+
+                foreach ($reflectionMethods as $reflectionMethod) {
+                    if (! in_array($reflectionMethod->name, $methods, true)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            },
+            count($methods) === 0
+                ? 'not to have private methods'
+                : sprintf("not to have private methods besides '%s'", implode("', '", $methods)),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'private function')),
+        );
+    }
+
+    /**
      * Asserts that the given expectation target is not enum.
      */
     public function toBeEnum(): ArchExpectation

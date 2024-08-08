@@ -1,6 +1,6 @@
 
    PASS  Tests\Arch
-  ✓ arch "base" preset
+  ✓ arch "php" preset
   ✓ arch "strict" preset
   ✓ arch "security" preset
   ✓ globals
@@ -831,6 +831,10 @@
   ✓ opposite missing prefix
   ✓ opposite has prefix
 
+   PASS  Tests\Features\Expect\toHavePrivateMethodsBesides
+  ✓ pass
+  ✓ failures
+
    PASS  Tests\Features\Expect\toHaveProperties
   ✓ pass
   ✓ failures
@@ -848,6 +852,14 @@
   ✓ failures with message
   ✓ failures with message and Any matcher
   ✓ not failures
+
+   PASS  Tests\Features\Expect\toHaveProtectedMethodsBesides
+  ✓ pass
+  ✓ failures
+
+   PASS  Tests\Features\Expect\toHavePublicMethodsBesides
+  ✓ pass
+  ✓ failures
 
    PASS  Tests\Features\Expect\toHaveSameSize
   ✓ failures with wrong type
@@ -1547,4 +1559,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 24 skipped, 1078 passed (2632 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 24 skipped, 1084 passed (2644 assertions)

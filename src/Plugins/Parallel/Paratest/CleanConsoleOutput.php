@@ -11,7 +11,7 @@ final class CleanConsoleOutput extends ConsoleOutput
     /**
      * {@inheritdoc}
      */
-    protected function doWrite(string $message, bool $newline): void
+    protected function doWrite(string $message, bool $newline): void // @pest-arch-ignore-line
     {
         if ($this->isOpeningHeadline($message)) {
             return;

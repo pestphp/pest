@@ -31,13 +31,14 @@ final class Laravel extends AbstractPreset
             ->not->toImplement(Throwable::class)
             ->ignoring('App\Exceptions');
 
-        $this->expectations[] = expect('App\Http\Controllers')
-            ->classes()
-            ->toHaveSuffix('Controller');
-
         $this->expectations[] = expect('App')
             ->not->toHaveSuffix('Controller')
             ->ignoring('App\Http\Controllers');
+
+        $this->expectations[] = expect('App\Http\Controllers')
+            ->classes()
+            ->toHaveSuffix('Controller')
+            ->not->toHavePublicMethodsBesides(['__construct', '__invoke', 'index', 'show', 'create', 'store', 'edit', 'update', 'destroy']);
 
         $this->expectations[] = expect('App\Http\Middleware')
             ->classes()

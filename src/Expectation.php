@@ -589,6 +589,30 @@ final class Expectation
     }
 
     /**
+     * Not supported.
+     */
+    public function toHavePublicMethodsBesides(): never
+    {
+        throw InvalidExpectation::fromMethods(['toHavePublicMethodsBesides']);
+    }
+
+    /**
+     * Not supported.
+     */
+    public function toHaveProtectedMethodsBesides(): never
+    {
+        throw InvalidExpectation::fromMethods(['toHaveProtectedMethodsBesides']);
+    }
+
+    /**
+     * Not supported.
+     */
+    public function toHavePrivateMethodsBesides(): never
+    {
+        throw InvalidExpectation::fromMethods(['toHavePrivateMethodsBesides']);
+    }
+
+    /**
      * Asserts that the given expectation target is enum.
      */
     public function toBeEnum(): ArchExpectation
