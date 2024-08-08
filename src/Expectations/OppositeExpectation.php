@@ -24,6 +24,7 @@ use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\ExpectationFailedException;
 use ReflectionMethod;
 use ReflectionProperty;
+use stdClass;
 
 /**
  * @internal
@@ -233,15 +234,19 @@ final class OppositeExpectation
     {
         $methods = is_array($methods) ? $methods : [$methods];
 
+        $state = new stdClass();
+
         return Targeted::make(
             $this->original,
-            function (ObjectDescription $object) use ($methods): bool {
+            function (ObjectDescription $object) use ($methods, &$state): bool {
                 $reflectionMethods = isset($object->reflectionClass)
                     ? Reflection::getMethodsFromReflectionClass($object->reflectionClass, ReflectionMethod::IS_PUBLIC)
                     : [];
 
                 foreach ($reflectionMethods as $reflectionMethod) {
                     if (! in_array($reflectionMethod->name, $methods, true)) {
+                        $state->contains = 'public function '.$reflectionMethod->name;
+
                         return false;
                     }
                 }
@@ -251,7 +256,7 @@ final class OppositeExpectation
             $methods === []
                 ? 'not to have public methods'
                 : sprintf("not to have public methods besides '%s'", implode("', '", $methods)),
-            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'public function')),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, $state->contains)),
         );
     }
 
@@ -264,15 +269,19 @@ final class OppositeExpectation
     {
         $methods = is_array($methods) ? $methods : [$methods];
 
+        $state = new stdClass();
+
         return Targeted::make(
             $this->original,
-            function (ObjectDescription $object) use ($methods): bool {
+            function (ObjectDescription $object) use ($methods, &$state): bool {
                 $reflectionMethods = isset($object->reflectionClass)
                     ? Reflection::getMethodsFromReflectionClass($object->reflectionClass, ReflectionMethod::IS_PROTECTED)
                     : [];
 
                 foreach ($reflectionMethods as $reflectionMethod) {
                     if (! in_array($reflectionMethod->name, $methods, true)) {
+                        $state->contains = 'protected function '.$reflectionMethod->name;
+
                         return false;
                     }
                 }
@@ -282,7 +291,7 @@ final class OppositeExpectation
             $methods === []
                 ? 'not to have protected methods'
                 : sprintf("not to have protected methods besides '%s'", implode("', '", $methods)),
-            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'protected function')),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, $state->contains)),
         );
     }
 
@@ -295,15 +304,19 @@ final class OppositeExpectation
     {
         $methods = is_array($methods) ? $methods : [$methods];
 
+        $state = new stdClass();
+
         return Targeted::make(
             $this->original,
-            function (ObjectDescription $object) use ($methods): bool {
+            function (ObjectDescription $object) use ($methods, &$state): bool {
                 $reflectionMethods = isset($object->reflectionClass)
                     ? Reflection::getMethodsFromReflectionClass($object->reflectionClass, ReflectionMethod::IS_PRIVATE)
                     : [];
 
                 foreach ($reflectionMethods as $reflectionMethod) {
                     if (! in_array($reflectionMethod->name, $methods, true)) {
+                        $state->contains = 'private function '.$reflectionMethod->name;
+
                         return false;
                     }
                 }
@@ -313,7 +326,7 @@ final class OppositeExpectation
             $methods === []
                 ? 'not to have private methods'
                 : sprintf("not to have private methods besides '%s'", implode("', '", $methods)),
-            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'private function')),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, $state->contains)),
         );
     }
 
