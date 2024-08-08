@@ -226,6 +226,8 @@ final class OppositeExpectation
 
     /**
      * Asserts that the given expectation target not to have the public methods besides the given methods.
+     *
+     * @param  array<int, string>|string  $methods
      */
     public function toHavePublicMethodsBesides(array|string $methods): ArchExpectation
     {
@@ -246,7 +248,7 @@ final class OppositeExpectation
 
                 return true;
             },
-            count($methods) === 0
+            $methods === []
                 ? 'not to have public methods'
                 : sprintf("not to have public methods besides '%s'", implode("', '", $methods)),
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'public function')),
@@ -255,6 +257,8 @@ final class OppositeExpectation
 
     /**
      * Asserts that the given expectation target not to have the protected methods besides the given methods.
+     *
+     * @param  array<int, string>|string  $methods
      */
     public function toHaveProtectedMethodsBesides(array|string $methods): ArchExpectation
     {
@@ -275,7 +279,7 @@ final class OppositeExpectation
 
                 return true;
             },
-            count($methods) === 0
+            $methods === []
                 ? 'not to have protected methods'
                 : sprintf("not to have protected methods besides '%s'", implode("', '", $methods)),
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'protected function')),
@@ -284,6 +288,8 @@ final class OppositeExpectation
 
     /**
      * Asserts that the given expectation target not to have the private methods besides the given methods.
+     *
+     * @param  array<int, string>|string  $methods
      */
     public function toHavePrivateMethodsBesides(array|string $methods): ArchExpectation
     {
@@ -304,7 +310,7 @@ final class OppositeExpectation
 
                 return true;
             },
-            count($methods) === 0
+            $methods === []
                 ? 'not to have private methods'
                 : sprintf("not to have private methods besides '%s'", implode("', '", $methods)),
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'private function')),

@@ -37,7 +37,9 @@ final class Laravel extends AbstractPreset
 
         $this->expectations[] = expect('App\Http\Controllers')
             ->classes()
-            ->toHaveSuffix('Controller')
+            ->toHaveSuffix('Controller');
+
+        $this->expectations[] = expect('App\Http\Controllers')
             ->not->toHavePublicMethodsBesides(['__construct', '__invoke', 'index', 'show', 'create', 'store', 'edit', 'update', 'destroy']);
 
         $this->expectations[] = expect('App\Http\Middleware')
