@@ -385,6 +385,34 @@ final class TestCall
     }
 
     /**
+     * Sets the test as "done".
+     */
+    public function done(// @phpstan-ignore-line
+        array|string|null $note = null,
+        array|string|null $assignee = null,
+        array|string|null $issue = null,
+        array|string|null $pr = null,
+    ): self {
+        if ($issue !== null) {
+            $this->issue($issue);
+        }
+
+        if ($pr !== null) {
+            $this->pr($pr);
+        }
+
+        if ($assignee !== null) {
+            $this->assignee($assignee);
+        }
+
+        if ($note !== null) {
+            $this->note($note);
+        }
+
+        return $this;
+    }
+
+    /**
      * Associates the test with the given issue(s).
      *
      * @param  array<int, string|int>|string|int  $number

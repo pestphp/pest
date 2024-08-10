@@ -224,6 +224,13 @@
   ✓ a "describe" group of tests → get 'foo' → get 'bar' → expect true → toBeTrue
   ✓ a "describe" group of tests → get 'foo' → expect true → toBeTrue
 
+   PASS  Tests\Features\Done
+  ✓ it may have an associated assignee [@nunomaduro]
+  ✓ it may have an associated issue #1
+  ✓ it may have an associated PR #1
+  ✓ it may have an associated note
+  // a note
+
    PASS  Tests\Features\Exceptions
   ✓ it gives access the the underlying expectException
   ✓ it catch exceptions
@@ -1559,4 +1566,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 24 skipped, 1084 passed (2644 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 24 skipped, 1088 passed (2648 assertions)
