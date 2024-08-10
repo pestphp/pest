@@ -234,7 +234,7 @@ final class OppositeExpectation
     {
         $methods = is_array($methods) ? $methods : [$methods];
 
-        $state = new stdClass();
+        $state = new stdClass;
 
         return Targeted::make(
             $this->original,
@@ -269,7 +269,7 @@ final class OppositeExpectation
     {
         $methods = is_array($methods) ? $methods : [$methods];
 
-        $state = new stdClass();
+        $state = new stdClass;
 
         return Targeted::make(
             $this->original,
@@ -304,7 +304,7 @@ final class OppositeExpectation
     {
         $methods = is_array($methods) ? $methods : [$methods];
 
-        $state = new stdClass();
+        $state = new stdClass;
 
         return Targeted::make(
             $this->original,
