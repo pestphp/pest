@@ -45,6 +45,14 @@ final class Configuration
     }
 
     /**
+     * Depending on where is called, it will extend the given classes and traits globally or locally.
+     */
+    public function extends(string ...$classAndTraits): UsesCall
+    {
+        return $this->extend(...$classAndTraits);
+    }
+
+    /**
      * Depending on where is called, it will add the given groups globally or locally.
      */
     public function group(string ...$groups): UsesCall
@@ -58,6 +66,14 @@ final class Configuration
     public function use(string ...$classAndTraits): UsesCall
     {
         return $this->extend(...$classAndTraits);
+    }
+
+    /**
+     * Depending on where is called, it will extend the given classes and traits globally or locally.
+     */
+    public function uses(string ...$classAndTraits): UsesCall
+    {
+        return $this->extends(...$classAndTraits);
     }
 
     /**
