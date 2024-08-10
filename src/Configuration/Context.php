@@ -74,7 +74,7 @@ final class Context
      */
     public function bitbucket(string $project): self
     {
-        $this->issues = 'https://bitbucket.org/{$project}/issues/%s';
+        $this->issues = "https://bitbucket.org/{$project}/issues/%s";
         $this->prs = "https://bitbucket.org/{$project}/pull-requests/%s";
 
         $this->assignees = 'https://bitbucket.org/%s';
