@@ -463,7 +463,7 @@ final class TestCall
 
         $number = array_map(fn (string|int $number): int => (int) ltrim((string) $number, '#'), $number);
 
-        $this->testCaseMethod->prs = array_unique(array_merge($this->testCaseMethod->issues, $number));
+        $this->testCaseMethod->prs = array_unique(array_merge($this->testCaseMethod->prs, $number));
 
         return $this;
     }
