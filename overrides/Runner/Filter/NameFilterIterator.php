@@ -45,6 +45,7 @@ declare(strict_types=1);
 
 namespace PHPUnit\Runner\Filter;
 
+use Pest\Contracts\HasPrintableTestCaseName;
 use PHPUnit\Framework\Test;
 use PHPUnit\Framework\TestSuite;
 use PHPUnit\Runner\PhptTestCase;
@@ -97,7 +98,11 @@ abstract class NameFilterIterator extends RecursiveFilterIterator
             return false;
         }
 
-        $name = $test::class.'::'.$test->nameWithDataSet();
+        if ($test instanceof HasPrintableTestCaseName) {
+            $name = $test::getPrintableTestCaseName().'::'.$test->getPrintableTestCaseMethodName();
+        } else {
+            $name = $test::class.'::'.$test->nameWithDataSet();
+        }
 
         $accepted = @preg_match($this->regularExpression, $name, $matches) === 1;
 

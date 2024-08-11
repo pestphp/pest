@@ -1076,8 +1076,8 @@
   ! a "describe" group of tests → notice → This is a notice description // tests/Features/Notices.php:11
 
    PASS  Tests\Features\Pr
-  ✓ it may be associated with an pr #2
-  ✓ nested → it may be associated with an pr #3
+  ✓ it may be associated with an pr #1, #2
+  ✓ nested → it may be associated with an pr #1, #4, #5, #6, #3
   // an note between an the pr
 
    PASS  Tests\Features\Repeat
