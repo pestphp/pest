@@ -17,6 +17,20 @@ final class Laravel extends AbstractPreset
     public function execute(): void
     {
         $this->expectations[] = expect('App')
+            ->not->toHaveSuffix('Controller')
+            ->ignoring('App\Http\Controllers');
+
+        $this->expectations[] = expect('App\Http\Controllers')
+            ->classes()
+            ->toHaveSuffix('Controller');
+
+        $this->expectations[] = expect('App\Http')
+            ->toOnlyBeUsedIn('App\Http');
+
+        $this->expectations[] = expect('App\Http\Controllers')
+            ->not->toHavePublicMethodsBesides(['__construct', '__invoke', 'index', 'show', 'create', 'store', 'edit', 'update', 'destroy']);
+
+        $this->expectations[] = expect('App')
             ->not->toBeEnums()
             ->ignoring('App\Enums');
 
@@ -30,20 +44,6 @@ final class Laravel extends AbstractPreset
         $this->expectations[] = expect('App')
             ->not->toImplement(Throwable::class)
             ->ignoring('App\Exceptions');
-
-        $this->expectations[] = expect('App')
-            ->not->toHaveSuffix('Controller')
-            ->ignoring('App\Http\Controllers');
-
-        $this->expectations[] = expect('App\Http\Controllers')
-            ->classes()
-            ->toHaveSuffix('Controller');
-
-        $this->expectations[] = expect('App\Http')
-            ->toOnlyBeUsedIn('App\Http');
-
-        $this->expectations[] = expect('App\Http\Controllers')
-            ->not->toHavePublicMethodsBesides(['__construct', '__invoke', 'index', 'show', 'create', 'store', 'edit', 'update', 'destroy']);
 
         $this->expectations[] = expect('App\Http\Middleware')
             ->classes()
