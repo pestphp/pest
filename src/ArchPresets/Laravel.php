@@ -39,6 +39,9 @@ final class Laravel extends AbstractPreset
             ->classes()
             ->toHaveSuffix('Controller');
 
+        $this->expectations[] = expect('App\Http')
+            ->toOnlyBeUsedIn('App\Http');
+
         $this->expectations[] = expect('App\Http\Controllers')
             ->not->toHavePublicMethodsBesides(['__construct', '__invoke', 'index', 'show', 'create', 'store', 'edit', 'update', 'destroy']);
 
