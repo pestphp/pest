@@ -20,8 +20,8 @@ final class Strict extends AbstractPreset
         $this->eachUserNamespace(
             fn (Expectation $namespace): ArchExpectation => $namespace->classes()->not->toHaveProtectedMethodsBesides([]),
             fn (Expectation $namespace): ArchExpectation => $namespace->classes()->not->toBeAbstract(),
-            fn (Expectation $namespace): ArchExpectation => $namespace->classes()->toBeFinal(),
             fn (Expectation $namespace): ArchExpectation => $namespace->toUseStrictTypes(),
+            fn (Expectation $namespace): ArchExpectation => $namespace->classes()->toBeFinal(),
         );
 
         $this->expectations[] = expect([
