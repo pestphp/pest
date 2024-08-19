@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest;
 
 use NunoMaduro\Collision\Writer;
+use Pest\Exceptions\TestDescriptionMissing;
 use Pest\Support\Container;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -27,6 +28,10 @@ final class Panic
      */
     public static function with(Throwable $throwable): never
     {
+        if ($throwable instanceof TestDescriptionMissing && ! is_null($previous = $throwable->getPrevious())) {
+            $throwable = $previous;
+        }
+
         $panic = new self($throwable);
 
         $panic->handle();
