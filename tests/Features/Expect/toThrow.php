@@ -51,7 +51,7 @@ test('failures 3', function () {
     })->toThrow(function (RuntimeException $e) {
         //
     });
-})->throws(ExpectationFailedException::class, 'Failed asserting that an object is an instance of class RuntimeException.');
+})->throws(ExpectationFailedException::class, 'Failed asserting that an instance of class Exception is an instance of class RuntimeException.');
 
 test('failures 4', function () {
     expect(function () {
