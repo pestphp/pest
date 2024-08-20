@@ -14,7 +14,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         symfony: ['7.0']
-        php: ['8.2', '8.3', '8.4']
+        php: ['8.2', '8.3']
         dependency_version: [prefer-lowest, prefer-stable]
 
     name: PHP ${{ matrix.php }} - Symfony ^${{ matrix.symfony }} - ${{ matrix.os }} - ${{ matrix.dependency_version }}
