@@ -221,7 +221,8 @@ final class TestCaseFactory
             $method->closure instanceof \Closure &&
             (new \ReflectionFunction($method->closure))->isStatic()
         ) {
-            throw new TestClosureMustNotBeStatic("The test `$method->description` closure must not be static in $method->filename.");
+
+            throw new TestClosureMustNotBeStatic($method);
         }
 
         if (! $method->receivesArguments()) {
