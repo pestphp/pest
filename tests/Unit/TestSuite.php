@@ -24,11 +24,7 @@ it('does not allow static closures', function () {
     $testSuite->tests->set($method);
 })->throws(
     TestClosureMustNotBeStatic::class,
-    sprintf(
-        'The test `%s` closure must not be static in %s.',
-        'bar',
-        'foo',
-    )
+    'Test closure must not be static. Please remove the `static` keyword from the `bar` method in `foo`.',
 );
 
 it('alerts users about tests with arguments but no input', function () {
