@@ -20,7 +20,9 @@ it('does not allow to add the same test description twice', function () {
 
 it('does not allow static closures', function () {
     $testSuite = new TestSuite(getcwd(), 'tests');
-    $method = new TestCaseMethodFactory('foo', 'bar', static function () {});
+
+    $method = new TestCaseMethodFactory('foo', static function () {});
+    $method->description = 'bar';
 
     $testSuite->tests->set($method);
 })->throws(
