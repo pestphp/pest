@@ -2,6 +2,7 @@
 
 use Pest\Exceptions\DatasetMissing;
 use Pest\Exceptions\TestAlreadyExist;
+use Pest\Exceptions\TestClosureMustNotBeStatic;
 use Pest\Factories\TestCaseMethodFactory;
 use Pest\TestSuite;
 
@@ -15,6 +16,16 @@ it('does not allow to add the same test description twice', function () {
 })->throws(
     TestAlreadyExist::class,
     sprintf('A test with the description `%s` already exists in the filename `%s`.', 'bar', 'foo'),
+);
+
+it('does not allow static closures', function () {
+    $testSuite = new TestSuite(getcwd(), 'tests');
+    $method = new TestCaseMethodFactory('foo', 'bar', static function () {});
+
+    $testSuite->tests->set($method);
+})->throws(
+    TestClosureMustNotBeStatic::class,
+    'Test closure must not be static. Please remove the `static` keyword from the `bar` method in `foo`.',
 );
 
 it('alerts users about tests with arguments but no input', function () {

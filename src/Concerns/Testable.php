@@ -291,11 +291,13 @@ trait Testable
             $afterEach = ChainableClosure::bound($this->__afterEach, $afterEach);
         }
 
-        $this->__callClosure($afterEach, $arguments);
+        try {
+            $this->__callClosure($afterEach, func_get_args());
+        } finally {
+            parent::tearDown();
 
-        parent::tearDown();
-
-        TestSuite::getInstance()->test = null;
+            TestSuite::getInstance()->test = null;
+        }
     }
 
     /**

@@ -11,6 +11,7 @@ use Pest\Evaluators\Attributes;
 use Pest\Exceptions\DatasetMissing;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Exceptions\TestAlreadyExist;
+use Pest\Exceptions\TestClosureMustNotBeStatic;
 use Pest\Exceptions\TestDescriptionMissing;
 use Pest\Factories\Concerns\HigherOrderable;
 use Pest\Support\Reflection;
@@ -186,6 +187,14 @@ final class TestCaseFactory
 
         if (array_key_exists($method->description, $this->methods)) {
             throw new TestAlreadyExist($method->filename, $method->description);
+        }
+
+        if (
+            $method->closure instanceof \Closure &&
+            (new \ReflectionFunction($method->closure))->isStatic()
+        ) {
+
+            throw new TestClosureMustNotBeStatic($method);
         }
 
         if (! $method->receivesArguments()) {
