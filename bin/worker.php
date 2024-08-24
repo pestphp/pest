@@ -40,9 +40,9 @@ $bootPest = (static function (): void {
     ]);
 
     $composerAutoloadFiles = [
-        dirname(__DIR__, 3).DIRECTORY_SEPARATOR.'autoload.php',
-        dirname(__DIR__, 2).DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'autoload.php',
-        dirname(__DIR__).DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'autoload.php',
+        dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'autoload.php',
+        dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php',
+        dirname(__DIR__) . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php',
     ];
 
     foreach ($composerAutoloadFiles as $file) {
@@ -57,6 +57,9 @@ $bootPest = (static function (): void {
 
     assert(isset($getopt['status-file']) && is_string($getopt['status-file']));
     $statusFile = fopen($getopt['status-file'], 'wb');
+    if (!$statusFile) {
+        throw new \RuntimeException('Failed to open status file');
+    }
     assert(is_resource($statusFile));
 
     assert(isset($getopt['progress-file']) && is_string($getopt['progress-file']));
