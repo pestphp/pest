@@ -60,6 +60,9 @@ final class EachExpectation
     public function __call(string $name, array $arguments): self
     {
         foreach ($this->original->value as $item) {
+            if (!method_exists($item, $name)) {
+                throw new \BadMethodCallException("Method $name does not exist on the item.");
+            }
             /* @phpstan-ignore-next-line */
             $this->opposite ? expect($item)->not()->$name(...$arguments) : expect($item)->$name(...$arguments);
         }
@@ -76,6 +79,9 @@ final class EachExpectation
      */
     public function __get(string $name): self
     {
+        if (!method_exists($this, $name)) {
+            throw new \BadMethodCallException("Method $name does not exist.");
+        }
         /* @phpstan-ignore-next-line */
         return $this->$name();
     }
