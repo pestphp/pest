@@ -821,12 +821,6 @@
   ✓ failure when the class has no method
   ✓ class has no method
 
-   PASS  Tests\Features\Expect\toHaveMethods
-  ✓ pass
-  ✓ failures
-  ✓ failures with custom message
-  ✓ not failures
-
    PASS  Tests\Features\Expect\toHaveMethodsDocumented
   ✓ it passes
   ✓ it fails 1
@@ -1017,10 +1011,8 @@
   ✓ it resolves expect callables correctly
   ✓ does not treat method names as callables
   ✓ it can defer a method until after test setup
-  ✓ it can tap a method until after test setup
   ✓ it can pass datasets into the expect callables with (1, 2, 3)
   ✓ it can pass datasets into the defer callable with (1, 2, 3)
-  ✓ it can pass datasets into the tap callable with (1, 2, 3)
   ✓ it can pass shared datasets into callables with (1)
   ✓ it can pass shared datasets into callables with (2)
 
@@ -1558,13 +1550,13 @@
   - visual snapshot of team city with ('Failure.php')
   - visual snapshot of team city with ('SuccessOnly.php')
 
-   PASS  Tests\Visual\Todo
-  ✓ todos
-  ✓ todos in parallel
-  ✓ todo
-  ✓ todo in parallel
+   WARN  Tests\Visual\Todo
+  … todos → Snapshot created at [tests/.pest/snapshots/Visual/Todo/todos.snap]
+  … todos in parallel → Snapshot created at [tests/.pest/snapshots/Visual/Todo/todos_in_parallel.snap]
+  … todo → Snapshot created at [tests/.pest/snapshots/Visual/Todo/todo.snap]
+  … todo in parallel → Snapshot created at [tests/.pest/snapshots/Visual/Todo/todo_in_parallel.snap]
 
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 24 skipped, 1089 passed (2650 assertions)
+  Tests:    2 deprecated, 4 warnings, 9 incomplete, 2 notices, 17 todos, 24 skipped, 1079 passed (2613 assertions)

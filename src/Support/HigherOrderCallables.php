@@ -51,16 +51,6 @@ final class HigherOrderCallables
 
     /**
      * Execute the given callable after the test has executed the setup method.
-     *
-     * @deprecated This method is deprecated. Please use `defer` instead.
-     */
-    public function tap(callable $callable): object
-    {
-        return $this->defer($callable);
-    }
-
-    /**
-     * Execute the given callable after the test has executed the setup method.
      */
     public function defer(callable $callable): object
     {

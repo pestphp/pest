@@ -19,9 +19,9 @@
   ↓ something todo later
   ↓ something todo later chained
   ↓ something todo later chained and with function body
-  ↓ it may have an associated assignee [@nunomaduro]
-  ↓ it may have an associated issue #1
-  ↓ it may have an associated PR #1
+  ↓ it may have an associated assignee []8;;https://github.com/nunomaduro\@nunomaduro]8;;\]
+  ↓ it may have an associated issue ]8;;https://github.com/pestphp/pest/issues/1\#1]8;;\
+  ↓ it may have an associated PR ]8;;https://github.com/pestphp/pest/pull/1\#1]8;;\
   ↓ it may have an associated note
   // a note
 
@@ -35,3 +35,5 @@
   ✓ override method
 
   Tests:    17 todos, 3 passed (3 assertions)
+  Duration: x.xxs
+

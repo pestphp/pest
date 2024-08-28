@@ -11,31 +11,23 @@ $run = function (string $target, bool $parallel) {
 
     expect($process->getExitCode())->toBe(0);
 
-    return removeAnsiEscapeSequences($process->getOutput());
+    $output = $process->getOutput();
+
+    return preg_replace('/Duration: \d+\.\d+s/', 'Duration: x.xxs', removeAnsiEscapeSequences($output));
 };
 
-$snapshot = function ($name) {
-    $testsPath = dirname(__DIR__);
-
-    return file_get_contents(implode(DIRECTORY_SEPARATOR, [
-        $testsPath,
-        '.snapshots',
-        "$name.txt",
-    ]));
-};
-
-test('todos', function () use ($run, $snapshot) {
-    expect($run('--todos', false))->toContain($snapshot('todos'));
+test('todos', function () use ($run) {
+    expect($run('--todos', false))->toMatchSnapshot();
 })->skipOnWindows();
 
-test('todos in parallel', function () use ($run, $snapshot) {
-    expect($run('--todos', true))->toContain($snapshot('todos'));
+test('todos in parallel', function () use ($run) {
+    expect($run('--todos', true))->toMatchSnapshot();
 })->skipOnWindows();
 
-test('todo', function () use ($run, $snapshot) {
-    expect($run('--todo', false))->toContain($snapshot('todo'));
+test('todo', function () use ($run) {
+    expect($run('--todo', false))->toMatchSnapshot();
 })->skipOnWindows();
 
-test('todo in parallel', function () use ($run, $snapshot) {
-    expect($run('--todo', true))->toContain($snapshot('todo'));
+test('todo in parallel', function () use ($run) {
+    expect($run('--todo', true))->toMatchSnapshot();
 })->skipOnWindows();
