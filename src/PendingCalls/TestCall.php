@@ -488,15 +488,18 @@ final class TestCall
     public function covers(string ...$classesOrFunctions): self
     {
         foreach ($classesOrFunctions as $classOrFunction) {
-            $isClass = class_exists($classOrFunction) || trait_exists($classOrFunction);
+            $isClass = class_exists($classOrFunction);
+            $isTrait = trait_exists($classOrFunction);
             $isMethod = function_exists($classOrFunction);
 
-            if (! $isClass && ! $isMethod) {
+            if (! $isClass && ! $isTrait && ! $isMethod) {
                 throw new InvalidArgumentException(sprintf('No class or method named "%s" has been found.', $classOrFunction));
             }
 
             if ($isClass) {
                 $this->coversClass($classOrFunction);
+            } elseif ($isTrait) {
+                $this->coversTrait($classOrFunction);
             } else {
                 $this->coversFunction($classOrFunction);
             }
@@ -514,6 +517,21 @@ final class TestCall
             $this->testCaseFactoryAttributes[] = new Attribute(
                 \PHPUnit\Framework\Attributes\CoversClass::class,
                 [$class],
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * Sets the covered traits.
+     */
+    public function coversTrait(string ...$traits): self
+    {
+        foreach ($traits as $trait) {
+            $this->testCaseFactoryAttributes[] = new Attribute(
+                \PHPUnit\Framework\Attributes\CoversTrait::class,
+                [$trait],
             );
         }
 
@@ -544,6 +562,77 @@ final class TestCall
             \PHPUnit\Framework\Attributes\CoversNothing::class,
             [],
         );
+
+        return $this;
+    }
+
+    /**
+     * Sets the used classes or methods.
+     */
+    public function uses(string ...$classesOrFunctions): self
+    {
+        foreach ($classesOrFunctions as $classOrFunction) {
+            $isClass = class_exists($classOrFunction);
+            $isTrait = trait_exists($classOrFunction);
+            $isMethod = function_exists($classOrFunction);
+
+            if (! $isClass && ! $isTrait && ! $isMethod) {
+                throw new InvalidArgumentException(sprintf('No class or method named "%s" has been found.', $classOrFunction));
+            }
+
+            if ($isClass) {
+                $this->usesClass($classOrFunction);
+            } elseif ($isTrait) {
+                $this->usesTrait($classOrFunction);
+            } else {
+                $this->usesFunction($classOrFunction);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Sets the used classes.
+     */
+    public function usesClass(string ...$classes): self
+    {
+        foreach ($classes as $class) {
+            $this->testCaseFactoryAttributes[] = new Attribute(
+                \PHPUnit\Framework\Attributes\UsesClass::class,
+                [$class],
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * Sets the uses traits.
+     */
+    public function usesTrait(string ...$traits): self
+    {
+        foreach ($traits as $trait) {
+            $this->testCaseFactoryAttributes[] = new Attribute(
+                \PHPUnit\Framework\Attributes\UsesTrait::class,
+                [$trait],
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * Sets the uses functions.
+     */
+    public function usesFunction(string ...$functions): self
+    {
+        foreach ($functions as $function) {
+            $this->testCaseFactoryAttributes[] = new Attribute(
+                \PHPUnit\Framework\Attributes\UsesFunction::class,
+                [$function],
+            );
+        }
 
         return $this;
     }

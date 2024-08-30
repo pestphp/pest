@@ -65,11 +65,11 @@
 
    PASS  Tests\Features\Covers
   ✓ it uses the correct PHPUnit attribute for class
-  ✓ it uses the correct PHPUnit attribute for function
-  ✓ it guesses if the given argument is a class or function
   ✓ it uses the correct PHPUnit attribute for trait
+  ✓ it uses the correct PHPUnit attribute for function
+  ✓ it guesses if the given argument is a class, trait, or function
   ✓ it uses the correct PHPUnit attribute for covers nothing
-  ✓ it throws exception if no class nor method has been found
+  ✓ it throws exception if no class, trait, nor method has been found
 
    PASS  Tests\Features\DatasetsTests - 1 todo
   ✓ it throws exception if dataset does not exist
@@ -1273,6 +1273,13 @@
   ↓ it may have an associated note
   // a note
 
+   PASS  Tests\Features\Uses
+  ✓ it uses the correct PHPUnit attribute for class
+  ✓ it uses the correct PHPUnit attribute for trait
+  ✓ it uses the correct PHPUnit attribute for function
+  ✓ it guesses if the given argument is a class, trait, or function
+  ✓ it throws exception if no class, trait, nor method has been found
+
    WARN  Tests\Features\Warnings
   ! warning → Undefined property: P\Tests\Features\Warnings::$fooqwdfwqdfqw
   ! user warning → This is a warning description
@@ -1559,4 +1566,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 9 incomplete, 2 notices, 17 todos, 24 skipped, 1079 passed (2613 assertions)
+  Tests:    2 deprecated, 4 warnings, 9 incomplete, 2 notices, 17 todos, 24 skipped, 1084 passed (2629 assertions)
