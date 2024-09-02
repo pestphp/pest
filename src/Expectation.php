@@ -577,15 +577,29 @@ final class Expectation
 
     /**
      * Asserts that the given expectation target has a specific method.
+     *
+     * @param  array<int, string>|string  $method
      */
-    public function toHaveMethod(string $method): ArchExpectation
+    public function toHaveMethod(array|string $method): ArchExpectation
     {
+        $methods = is_array($method) ? $method : [$method];
+
         return Targeted::make(
             $this,
-            fn (ObjectDescription $object): bool => $object->reflectionClass->hasMethod($method),
-            sprintf("to have method '%s'", $method),
+            fn (ObjectDescription $object): bool => count(array_filter($methods, fn (string $method): bool => $object->reflectionClass->hasMethod($method))) === count($methods),
+            sprintf("to have method '%s'", implode("', '", $methods)),
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
+    }
+
+    /**
+     * Asserts that the given expectation target has a specific methods.
+     *
+     * @param  array<int, string>  $methods
+     */
+    public function toHaveMethods(array $methods): ArchExpectation
+    {
+        return $this->toHaveMethod($methods);
     }
 
     /**

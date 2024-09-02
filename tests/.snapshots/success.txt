@@ -821,6 +821,14 @@
   ✓ failure when the class has no method
   ✓ class has no method
 
+   PASS  Tests\Features\Expect\toHaveMethods
+  ✓ class has method
+  ✓ opposite class has method
+  ✓ class has method via a parent class
+  ✓ class has method via a trait
+  ✓ failure when the class has no method
+  ✓ class has no method
+
    PASS  Tests\Features\Expect\toHaveMethodsDocumented
   ✓ it passes
   ✓ it fails 1
@@ -1559,4 +1567,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 28 skipped, 1079 passed (2609 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 28 skipped, 1085 passed (2617 assertions)

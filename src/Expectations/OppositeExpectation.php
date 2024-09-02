@@ -214,15 +214,32 @@ final class OppositeExpectation
 
     /**
      * Asserts that the given expectation target does not have a specific method.
+     *
+     * @param  array<int, string>|string  $method
      */
-    public function toHaveMethod(string $method): ArchExpectation
+    public function toHaveMethod(array|string $method): ArchExpectation
     {
+        $methods = is_array($method) ? $method : [$method];
+
         return Targeted::make(
             $this->original,
-            fn (ObjectDescription $object): bool => ! $object->reflectionClass->hasMethod($method),
-            'to not have method',
+            fn (ObjectDescription $object): bool => array_filter(
+                $methods,
+                fn (string $method): bool => $object->reflectionClass->hasMethod($method),
+            ) === [],
+            'to not have methods: '.implode(', ', $methods),
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
+    }
+
+    /**
+     * Asserts that the given expectation target does not have the given methods.
+     *
+     * @param  array<int, string>  $methods
+     */
+    public function toHaveMethods(array $methods): ArchExpectation
+    {
+        return $this->toHaveMethod($methods);
     }
 
     /**
