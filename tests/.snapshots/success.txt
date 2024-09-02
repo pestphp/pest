@@ -1551,12 +1551,12 @@
   - visual snapshot of team city with ('SuccessOnly.php')
 
    WARN  Tests\Visual\Todo
-  … todos → Snapshot created at [tests/.pest/snapshots/Visual/Todo/todos.snap]
-  … todos in parallel → Snapshot created at [tests/.pest/snapshots/Visual/Todo/todos_in_parallel.snap]
-  … todo → Snapshot created at [tests/.pest/snapshots/Visual/Todo/todo.snap]
-  … todo in parallel → Snapshot created at [tests/.pest/snapshots/Visual/Todo/todo_in_parallel.snap]
+  - todos
+  - todos in parallel
+  - todo
+  - todo in parallel
 
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 9 incomplete, 2 notices, 17 todos, 24 skipped, 1079 passed (2613 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 28 skipped, 1079 passed (2609 assertions)
