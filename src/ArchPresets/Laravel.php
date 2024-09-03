@@ -23,6 +23,12 @@ final class Laravel extends AbstractPreset
         $this->expectations[] = expect('App\Enums')
             ->toBeEnums();
 
+        $this->expectations[] = expect('App\Features')
+            ->toBeClasses();
+
+        $this->expectations[] = expect('App\Features')
+            ->toHaveMethod('resolve');
+
         $this->expectations[] = expect('App\Exceptions')
             ->classes()
             ->toImplement('Throwable');
