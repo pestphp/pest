@@ -141,6 +141,7 @@ final class Laravel extends AbstractPreset
         $this->expectations[] = expect([
             'dd',
             'ddd',
+            'dump',
             'env',
             'exit',
             'ray',
