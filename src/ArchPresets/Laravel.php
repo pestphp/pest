@@ -37,7 +37,8 @@ final class Laravel extends AbstractPreset
 
         $this->expectations[] = expect('App\Models')
             ->classes()
-            ->toExtend('Illuminate\Database\Eloquent\Model');
+            ->toExtend('Illuminate\Database\Eloquent\Model')
+            ->ignoring('App\Models\Scopes');
 
         $this->expectations[] = expect('App\Models')
             ->classes()
