@@ -24,7 +24,7 @@ use PHPUnit\TestRunner\TestResult\TestResult as PhpUnitTestResult;
 /**
  * @internal
  */
-final class Converter
+final readonly class Converter
 {
     /**
      * The prefix for the test suite name.
@@ -34,13 +34,13 @@ final class Converter
     /**
      *  The state generator.
      */
-    private readonly StateGenerator $stateGenerator;
+    private StateGenerator $stateGenerator;
 
     /**
      * Creates a new instance of the Converter.
      */
     public function __construct(
-        private readonly string $rootPath,
+        private string $rootPath,
     ) {
         $this->stateGenerator = new StateGenerator;
     }

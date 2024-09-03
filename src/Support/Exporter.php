@@ -10,7 +10,7 @@ use SebastianBergmann\RecursionContext\Context;
 /**
  * @internal
  */
-final class Exporter
+final readonly class Exporter
 {
     /**
      * The maximum number of items in an array to export.
@@ -21,7 +21,7 @@ final class Exporter
      * Creates a new Exporter instance.
      */
     public function __construct(
-        private readonly BaseExporter $exporter,
+        private BaseExporter $exporter,
     ) {
         // ...
     }

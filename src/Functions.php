@@ -166,9 +166,7 @@ if (! function_exists('it')) {
 
 if (! function_exists('todo')) {
     /**
-     * Adds the given todo test. Internally, this test
-     * is marked as incomplete. Yet, Collision, Pest's
-     * printer, will display it as a "todo" test.
+     * Creates a new test that is marked as "todo".
      *
      * @return Expectable|TestCall|TestCase|mixed
      */

@@ -605,7 +605,7 @@ final class Expectation
     /**
      * Not supported.
      */
-    public function toHavePublicMethodsBesides(): never
+    public function toHavePublicMethodsBesides(): void
     {
         throw InvalidExpectation::fromMethods(['toHavePublicMethodsBesides']);
     }
@@ -613,7 +613,7 @@ final class Expectation
     /**
      * Not supported.
      */
-    public function toHaveProtectedMethodsBesides(): never
+    public function toHaveProtectedMethodsBesides(): void
     {
         throw InvalidExpectation::fromMethods(['toHaveProtectedMethodsBesides']);
     }
@@ -621,7 +621,7 @@ final class Expectation
     /**
      * Not supported.
      */
-    public function toHavePrivateMethodsBesides(): never
+    public function toHavePrivateMethodsBesides(): void
     {
         throw InvalidExpectation::fromMethods(['toHavePrivateMethodsBesides']);
     }
@@ -851,7 +851,7 @@ final class Expectation
     /**
      * Not supported.
      */
-    public function toBeUsed(): never
+    public function toBeUsed(): void
     {
         throw InvalidExpectation::fromMethods(['toBeUsed']);
     }

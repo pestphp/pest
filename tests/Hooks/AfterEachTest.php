@@ -1,6 +1,6 @@
 <?php
 
-uses()->afterEach(function () {
+pest()->afterEach(function () {
     expect($this)
         ->toHaveProperty('ith')
         ->and($this->ith)

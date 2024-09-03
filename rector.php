@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
+use Rector\TypeDeclaration\Rector\ClassMethod\ReturnNeverTypeRector;
 
 return RectorConfig::configure()
     ->withPaths([
@@ -10,6 +11,7 @@ return RectorConfig::configure()
     ])
     ->withSkip([
         __DIR__.'/src/Plugins/Parallel/Paratest/WrapperRunner.php',
+        ReturnNeverTypeRector::class,
     ])
     ->withPreparedSets(
         deadCode: true,

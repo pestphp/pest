@@ -16,7 +16,7 @@ abstract class MyCustomClass extends PHPUnit\Framework\TestCase
     }
 }
 
-uses(MyCustomClass::class, MyCustomTrait::class);
+pest()->extend(MyCustomClass::class)->use(MyCustomTrait::class);
 
 test('custom traits can be used', function () {
     $this->assertTrueIsTrue();

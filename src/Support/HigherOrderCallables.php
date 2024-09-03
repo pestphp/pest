@@ -10,12 +10,12 @@ use Pest\Expectation;
 /**
  * @internal
  */
-final class HigherOrderCallables
+final readonly class HigherOrderCallables
 {
     /**
      * Creates a new Higher Order Callables instances.
      */
-    public function __construct(private readonly object $target)
+    public function __construct(private object $target)
     {
         // ..
     }

@@ -3,7 +3,7 @@
 use Pest\PendingCalls\TestCall;
 use PHPUnit\Framework\TestCase;
 
-uses(Gettable::class);
+pest()->use(Gettable::class);
 
 /**
  * @return TestCase|TestCall|Gettable

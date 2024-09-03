@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pest\Collision;
 
 use NunoMaduro\Collision\Adapters\Phpunit\TestResult;
-use Pest\Configuration\Context;
+use Pest\Configuration\Project;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use function Termwind\render;
@@ -46,15 +46,15 @@ final class Events
             'prs' => $prs,
         ] = $context;
 
-        if (($link = Context::getInstance()->issues) !== '') {
+        if (($link = Project::getInstance()->issues) !== '') {
             $issuesDescription = array_map(fn (int $issue): string => sprintf('<a href="%s">#%s</a>', sprintf($link, $issue), $issue), $issues);
         }
 
-        if (($link = Context::getInstance()->prs) !== '') {
+        if (($link = Project::getInstance()->prs) !== '') {
             $prsDescription = array_map(fn (int $pr): string => sprintf('<a href="%s">#%s</a>', sprintf($link, $pr), $pr), $prs);
         }
 
-        if (($link = Context::getInstance()->assignees) !== '' && count($assignees) > 0) {
+        if (($link = Project::getInstance()->assignees) !== '' && count($assignees) > 0) {
             $assigneesDescription = array_map(fn (string $assignee): string => sprintf(
                 '<a href="%s">@%s</a>',
                 sprintf($link, $assignee),

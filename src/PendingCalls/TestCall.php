@@ -353,7 +353,7 @@ final class TestCall
     }
 
     /**
-     * Sets the test as "todo".
+     * Marks the test as "todo".
      */
     public function todo(// @phpstan-ignore-line
         array|string|null $note = null,
@@ -365,6 +365,34 @@ final class TestCall
 
         $this->testCaseMethod->todo = true;
 
+        if ($issue !== null) {
+            $this->issue($issue);
+        }
+
+        if ($pr !== null) {
+            $this->pr($pr);
+        }
+
+        if ($assignee !== null) {
+            $this->assignee($assignee);
+        }
+
+        if ($note !== null) {
+            $this->note($note);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Sets the test as "work in progress".
+     */
+    public function wip(// @phpstan-ignore-line
+        array|string|null $note = null,
+        array|string|null $assignee = null,
+        array|string|null $issue = null,
+        array|string|null $pr = null,
+    ): self {
         if ($issue !== null) {
             $this->issue($issue);
         }

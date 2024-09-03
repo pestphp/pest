@@ -12,13 +12,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @internal
  */
-final class BootKernelDump implements Bootstrapper
+final readonly class BootKernelDump implements Bootstrapper
 {
     /**
      * Creates a new Boot Kernel Dump instance.
      */
     public function __construct(
-        private readonly OutputInterface $output,
+        private OutputInterface $output,
     ) {
         // ...
     }

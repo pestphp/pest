@@ -1,6 +1,6 @@
 <?php
 
-uses()->beforeEach(function () {
+pest()->beforeEach(function () {
     expect($this)
         ->toHaveProperty('baz')
         ->and($this->baz)

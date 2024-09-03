@@ -4,7 +4,7 @@ use Pest\Exceptions\ShouldNotHappen;
 use Pest\Support\Container;
 use Pest\TestSuite;
 
-uses()->group('container');
+pest()->group('container');
 
 beforeEach(function () {
     $this->container = new Container;

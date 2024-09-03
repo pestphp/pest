@@ -33,14 +33,14 @@ use stdClass;
  *
  * @mixin Expectation<TValue>
  */
-final class OppositeExpectation
+final readonly class OppositeExpectation
 {
     /**
      * Creates a new opposite expectation.
      *
      * @param  Expectation<TValue>  $original
      */
-    public function __construct(private readonly Expectation $original) {}
+    public function __construct(private Expectation $original) {}
 
     /**
      * Asserts that the value array not has the provided $keys.
@@ -510,7 +510,7 @@ final class OppositeExpectation
     /**
      * Not supported.
      */
-    public function toOnlyImplement(): never
+    public function toOnlyImplement(): void
     {
         throw InvalidExpectation::fromMethods(['not', 'toOnlyImplement']);
     }
@@ -544,7 +544,7 @@ final class OppositeExpectation
     /**
      * Not supported.
      */
-    public function toOnlyUse(): never
+    public function toOnlyUse(): void
     {
         throw InvalidExpectation::fromMethods(['not', 'toOnlyUse']);
     }
@@ -552,7 +552,7 @@ final class OppositeExpectation
     /**
      * Not supported.
      */
-    public function toUseNothing(): never
+    public function toUseNothing(): void
     {
         throw InvalidExpectation::fromMethods(['not', 'toUseNothing']);
     }
@@ -577,7 +577,7 @@ final class OppositeExpectation
         ), is_string($targets) ? [$targets] : $targets));
     }
 
-    public function toOnlyBeUsedIn(): never
+    public function toOnlyBeUsedIn(): void
     {
         throw InvalidExpectation::fromMethods(['not', 'toOnlyBeUsedIn']);
     }
@@ -585,7 +585,7 @@ final class OppositeExpectation
     /**
      * Asserts that the given expectation dependency is not used.
      */
-    public function toBeUsedInNothing(): never
+    public function toBeUsedInNothing(): void
     {
         throw InvalidExpectation::fromMethods(['not', 'toBeUsedInNothing']);
     }

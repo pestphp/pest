@@ -8,13 +8,15 @@ use Pest\PendingCalls\UsesCall;
 
 /**
  * @internal
+ *
+ * @mixin UsesCall
  */
-final class Configuration
+final readonly class Configuration
 {
     /**
      * The filename of the configuration.
      */
-    private readonly string $filename;
+    private string $filename;
 
     /**
      * Creates a new configuration instance.
@@ -85,10 +87,20 @@ final class Configuration
     }
 
     /**
-     * Gets the context configuration.
+     * Gets the project configuration.
      */
-    public function context(): Configuration\Context
+    public function project(): Configuration\Project
     {
-        return Configuration\Context::getInstance();
+        return Configuration\Project::getInstance();
+    }
+
+    /**
+     * Proxies calls to the uses method.
+     *
+     * @param  array<array-key, mixed>  $arguments
+     */
+    public function __call(string $name, array $arguments): mixed
+    {
+        return $this->uses()->$name(...$arguments); // @phpstan-ignore-line
     }
 }

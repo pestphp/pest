@@ -10,7 +10,7 @@ class InheritanceTest extends TestCase
     }
 }
 
-uses(InheritanceTest::class);
+pest()->extend(InheritanceTest::class);
 
 it('is a test', function () {
     expect(true)->toBeTrue();

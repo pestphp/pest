@@ -10,7 +10,7 @@ class MyCustomClassTest extends PHPUnit\Framework\TestCase
     }
 }
 
-uses(MyCustomClassTest::class);
+pest()->extend(MyCustomClassTest::class);
 
 test('custom traits can be used', function () {
     $this->assertTrueIsTrue();

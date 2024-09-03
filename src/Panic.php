@@ -12,13 +12,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 use Whoops\Exception\Inspector;
 
-final class Panic
+final readonly class Panic
 {
     /**
      * Creates a new Panic instance.
      */
     private function __construct(
-        private readonly Throwable $throwable
+        private Throwable $throwable
     ) {
         // ...
     }

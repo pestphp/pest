@@ -9,7 +9,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @internal
  */
-final class Help
+final readonly class Help
 {
     /**
      * The Command messages.
@@ -27,7 +27,7 @@ final class Help
     /**
      * Creates a new Console Command instance.
      */
-    public function __construct(private readonly OutputInterface $output)
+    public function __construct(private OutputInterface $output)
     {
         // ..
     }

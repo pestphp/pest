@@ -14,7 +14,7 @@ use function Pest\version;
 /**
  * @internal
  */
-final class Help implements HandlesArguments
+final readonly class Help implements HandlesArguments
 {
     use Concerns\HandleArguments;
 
@@ -22,7 +22,7 @@ final class Help implements HandlesArguments
      * Creates a new Plugin instance.
      */
     public function __construct(
-        private readonly OutputInterface $output
+        private OutputInterface $output
     ) {
         // ..
     }

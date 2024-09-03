@@ -15,7 +15,7 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 /**
  * @internal
  */
-final class Thanks
+final readonly class Thanks
 {
     /**
      * The support options.
@@ -33,8 +33,8 @@ final class Thanks
      * Creates a new Console Command instance.
      */
     public function __construct(
-        private readonly InputInterface $input,
-        private readonly OutputInterface $output
+        private InputInterface $input,
+        private OutputInterface $output
     ) {
         // ..
     }

@@ -150,7 +150,7 @@ test('high order test with skip')
         dd('This should not run 5');
     });
 
-uses(Postable::class);
+pest()->use(Postable::class);
 
 /**
  * @return TestCase|TestCall|Gettable

@@ -7,7 +7,7 @@ error_reporting(E_ALL);
 
 $GLOBALS['__PEST_INTERNAL_TEST_SUITE'] = true;
 
-pest()->context()->github('pestphp/pest');
+pest()->project()->github('pestphp/pest');
 
 pest()->in('PHPUnit/CustomTestCaseInSubFolders/SubFolder/SubFolder')->use(CustomTestCaseInSubFolder::class);
 

@@ -7,7 +7,7 @@ namespace Pest\Configuration;
 /**
  * @internal
  */
-final class Context
+final class Project
 {
     /**
      * The assignees link.
@@ -36,7 +36,7 @@ final class Context
     private static ?self $instance = null;
 
     /**
-     * Creates a new instance of the context.
+     * Creates a new instance of the project.
      */
     public static function getInstance(): self
     {
@@ -44,7 +44,7 @@ final class Context
     }
 
     /**
-     * Sets the test context to GitHub.
+     * Sets the test project to GitHub.
      */
     public function github(string $project): self
     {
@@ -57,7 +57,7 @@ final class Context
     }
 
     /**
-     * Sets the test context to GitLab.
+     * Sets the test project to GitLab.
      */
     public function gitlab(string $project): self
     {
@@ -70,7 +70,7 @@ final class Context
     }
 
     /**
-     * Sets the test context to Bitbucket.
+     * Sets the test project to Bitbucket.
      */
     public function bitbucket(string $project): self
     {
@@ -83,7 +83,7 @@ final class Context
     }
 
     /**
-     * Sets the test context to Jira.
+     * Sets the test project to Jira.
      */
     public function jira(string $namespace, string $project): self
     {
@@ -95,9 +95,9 @@ final class Context
     }
 
     /**
-     * Sets the test context to custom.
+     * Sets the test project to custom.
      */
-    public function using(string $issues, string $prs, string $assignees): self
+    public function custom(string $issues, string $prs, string $assignees): self
     {
         $this->issues = $issues;
         $this->prs = $prs;
