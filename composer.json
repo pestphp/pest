@@ -18,12 +18,12 @@
     ],
     "require": {
         "php": "^8.2.0",
-        "brianium/paratest": "^7.5.2",
+        "brianium/paratest": "^7.5.3",
         "nunomaduro/collision": "^8.4.0",
         "nunomaduro/termwind": "^2.0.1",
         "pestphp/pest-plugin": "^3.0.0",
         "pestphp/pest-plugin-arch": "^3.0.0",
-        "phpunit/phpunit": "^11.3.1"
+        "phpunit/phpunit": "^11.3.2"
     },
     "conflict": {
         "sebastian/exporter": "<6.0.0",
