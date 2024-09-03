@@ -138,7 +138,7 @@ final class Coverage
 
         $totalCoverageAsString = $totalCoverage->asFloat() === 0.0
             ? '0.0'
-            : number_format($totalCoverage->asFloat(), 1, '.', '');
+            : number_format(floor($totalCoverage->asFloat() * 10) / 10, 1, '.', '');
 
         renderUsing($output);
         render(<<<HTML
