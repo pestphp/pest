@@ -1315,7 +1315,7 @@
    PASS  Tests\Hooks\BeforeEachTest
   ✓ global beforeEach execution order
 
-   FAIL  Tests\Overrides\VersionsTest
+   PASS  Tests\Overrides\VersionsTest
   ✓ versions with dataset "Runner/Filter/NameFilterIterator.php"
   ✓ versions with dataset "Runner/ResultCache/DefaultResultCache.php"
   ✓ versions with dataset "Runner/TestSuiteLoader.php"
@@ -1323,7 +1323,7 @@
   ✓ versions with dataset "TextUI/Output/Default/ProgressPrinter/Subscriber/TestSkippedSubscriber.php"
   ✓ versions with dataset "TextUI/TestSuiteFilterProcessor.php"
   ✓ versions with dataset "Event/Value/ThrowableBuilder.php"
-  ⨯ versions with dataset "Logging/JUnit/JunitXmlLogger.php"
+  ✓ versions with dataset "Logging/JUnit/JunitXmlLogger.php"
 
    PASS  Tests\PHPUnit\CustomAffixes\InvalidTestName
   ✓ it runs file names like @#$%^&()-_=+.php
@@ -1549,8 +1549,8 @@
   ✓ junit output
   - junit with parallel → Not working yet
 
-   FAIL  Tests\Visual\Parallel
-  ⨯ parallel
+   PASS  Tests\Visual\Parallel
+  ✓ parallel
   ✓ a parallel test can extend another test with same name
 
    PASS  Tests\Visual\SingleTestOrDirectory
@@ -1573,45 +1573,5 @@
 
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
-  ────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Overrides\VersionsTest > versions with dataset "Logging/JUn…   
-  Failed asserting that two strings are identical.
-  -'676273f1fe483877cf2d95c5aedbf9ae5d6a8e2f4c12d6ce716df6591e6db023'
-  +'01974a686eba69b5fbb87a904d936eae2176e39567616898c5b758db71d87a22'
-  
 
-  at tests/Overrides/VersionsTest.php:8
-      4▕ 
-      5▕ use Pest\Bootstrappers\BootOverrides;
-      6▕ 
-      7▕ test('versions', function (string $vendorPath, string $expectedHash) {
-  ➜   8▕     expect(hash_file('sha256', $vendorPath))->toBe($expectedHash);
-      9▕ })->with(function () {
-     10▕     foreach (BootOverrides::FILES as $hash => $file) {
-     11▕         $path = implode(DIRECTORY_SEPARATOR, [
-     12▕             dirname(__DIR__, 2),
-
-  ────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Visual\Parallel > parallel                                     
-  Expected: \n
-    ........ss...s............sssssss.s.........................................\n
-    ............................................................................\n
-  ... (40 more lines)
-
-  To contain: Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 19 skipped, 1079 passed (2597 assertions)
-
-  at tests/Visual/Parallel.php:19
-     15▕ };
-     16▕ 
-     17▕ test('parallel', function () use ($run) {
-     18▕     expect($run('--exclude-group=integration'))
-  ➜  19▕         ->toContain('Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 19 skipped, 1079 passed (2597 assertions)')
-     20▕         ->toContain('Parallel: 3 processes');
-     21▕ })->skipOnWindows();
-     22▕ 
-     23▕ test('a parallel test can extend another test with same name', function () use ($run) {
-
-  1   tests/Visual/Parallel.php:19
-
-
-  Tests:    2 deprecated, 2 failed, 4 warnings, 5 incomplete, 2 notices, 17 todos, 28 skipped, 1087 passed (2620 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 28 skipped, 1089 passed (2621 assertions)
