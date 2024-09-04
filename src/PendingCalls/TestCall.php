@@ -9,10 +9,13 @@ use Pest\Exceptions\InvalidArgumentException;
 use Pest\Exceptions\TestDescriptionMissing;
 use Pest\Factories\Attribute;
 use Pest\Factories\TestCaseMethodFactory;
+use Pest\Mutate\Contracts\Configuration;
 use Pest\Mutate\Decorators\TestCallDecorator as MutationTestCallDecorator;
+use Pest\Mutate\Repositories\ConfigurationRepository;
 use Pest\PendingCalls\Concerns\Describable;
 use Pest\Plugins\Only;
 use Pest\Support\Backtrace;
+use Pest\Support\Container;
 use Pest\Support\Exporter;
 use Pest\Support\HigherOrderCallables;
 use Pest\Support\NullClosure;
@@ -543,6 +546,10 @@ final class TestCall
                 [$class],
             );
         }
+
+        /** @var Configuration $configuration */
+        $configuration = Container::getInstance()->get(ConfigurationRepository::class)->globalConfiguration('default');
+        $configuration->class(...$classes);
 
         return $this;
     }
