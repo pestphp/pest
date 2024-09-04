@@ -16,10 +16,10 @@ final class Laravel extends AbstractPreset
      */
     public function execute(): void
     {
-        $this->expectations[] = expect('App/Traits')
+        $this->expectations[] = expect('App\Traits')
             ->toBeTraits();
 
-        $this->expectations[] = expect('App/Concerns')
+        $this->expectations[] = expect('App\Concerns')
             ->toBeTraits();
 
         $this->expectations[] = expect('App')
