@@ -211,3 +211,16 @@ if (! function_exists('afterAll')) {
         TestSuite::getInstance()->afterAll->set($closure);
     }
 }
+
+if (! function_exists('covers')) {
+    /**
+     * Specifies which classes, or functions, a test method covers.
+     */
+    function covers(string ...$classesOrFunctions): void
+    {
+        $filename = Backtrace::file();
+
+        (new BeforeEachCall(TestSuite::getInstance(), $filename))
+            ->covers(...$classesOrFunctions);
+    }
+}
