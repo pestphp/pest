@@ -548,8 +548,8 @@ final class TestCall
         }
 
         /** @var Configuration $configuration */
-        $configuration = Container::getInstance()->get(ConfigurationRepository::class)->globalConfiguration('default');
-        $configuration->class(...$classes);
+        $configuration = Container::getInstance()->get(ConfigurationRepository::class)->globalConfiguration('default'); // @phpstan-ignore-line
+        $configuration->class(...$classes); // @phpstan-ignore-line
 
         return $this;
     }
