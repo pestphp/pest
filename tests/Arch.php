@@ -37,6 +37,7 @@ arch('dependencies')
         'Termwind',
         'ParaTest',
         'Pest\Arch',
+        'Pest\Mutate\Decorators\TestCallDecorator',
         'Pest\Plugin',
         'NunoMaduro\Collision',
         'Whoops',

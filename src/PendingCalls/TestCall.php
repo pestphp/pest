@@ -636,14 +636,9 @@ final class TestCall
     /**
      * Mutates the test.
      */
-    public function mutate(string $profile = 'default'): self|MutationTestCallDecorator // @phpstan-ignore-line
+    public function mutate(string $profile = 'default'): self|MutationTestCallDecorator
     {
-        if (class_exists(MutationTestCallDecorator::class)) {
-            return (new MutationTestCallDecorator($this))
-                ->mutate($profile);
-        }
-
-        return $this->__call('mutate', [$profile]);
+        return (new MutationTestCallDecorator($this))->mutate($profile);
     }
 
     /**
