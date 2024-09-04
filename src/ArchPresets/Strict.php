@@ -18,7 +18,7 @@ final class Strict extends AbstractPreset
     public function execute(): void
     {
         $this->eachUserNamespace(
-            fn (Expectation $namespace): ArchExpectation => $namespace->classes()->not->toHaveProtectedMethodsBesides([]),
+            fn (Expectation $namespace): ArchExpectation => $namespace->classes()->not->toHaveProtectedMethods(),
             fn (Expectation $namespace): ArchExpectation => $namespace->classes()->not->toBeAbstract(),
             fn (Expectation $namespace): ArchExpectation => $namespace->toUseStrictTypes(),
             fn (Expectation $namespace): ArchExpectation => $namespace->classes()->toBeFinal(),

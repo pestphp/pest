@@ -8,5 +8,5 @@ test('pass', function () {
 });
 
 test('failures', function () {
-    expect(UserController::class)->not->toHavePublicMethodsBesides([]);
+    expect(UserController::class)->not->toHavePublicMethods();
 })->throws(ArchExpectationFailedException::class);

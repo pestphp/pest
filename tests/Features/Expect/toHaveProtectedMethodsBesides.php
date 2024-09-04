@@ -8,5 +8,5 @@ test('pass', function () {
 });
 
 test('failures', function () {
-    expect(UserController::class)->not->toHaveProtectedMethodsBesides([]);
+    expect(UserController::class)->not->toHaveProtectedMethods();
 })->throws(ArchExpectationFailedException::class);

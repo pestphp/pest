@@ -8,5 +8,5 @@ test('pass', function () {
 });
 
 test('failures', function () {
-    expect(UserController::class)->not->toHavePrivateMethodsBesides([]);
+    expect(UserController::class)->not->toHavePrivateMethods();
 })->throws(ArchExpectationFailedException::class);

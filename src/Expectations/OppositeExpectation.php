@@ -278,6 +278,14 @@ final readonly class OppositeExpectation
     }
 
     /**
+     * Asserts that the given expectation target not to have the public methods.
+     */
+    public function toHavePublicMethods(): ArchExpectation
+    {
+        return $this->toHavePublicMethodsBesides([]);
+    }
+
+    /**
      * Asserts that the given expectation target not to have the protected methods besides the given methods.
      *
      * @param  array<int, string>|string  $methods
@@ -313,6 +321,14 @@ final readonly class OppositeExpectation
     }
 
     /**
+     * Asserts that the given expectation target not to have the protected methods.
+     */
+    public function toHaveProtectedMethods(): ArchExpectation
+    {
+        return $this->toHaveProtectedMethodsBesides([]);
+    }
+
+    /**
      * Asserts that the given expectation target not to have the private methods besides the given methods.
      *
      * @param  array<int, string>|string  $methods
@@ -345,6 +361,14 @@ final readonly class OppositeExpectation
                 : sprintf("not to have private methods besides '%s'", implode("', '", $methods)),
             FileLineFinder::where(fn (string $line): bool => str_contains($line, $state->contains)),
         );
+    }
+
+    /**
+     * Asserts that the given expectation target not to have the private methods.
+     */
+    public function toHavePrivateMethods(): ArchExpectation
+    {
+        return $this->toHavePrivateMethodsBesides([]);
     }
 
     /**
