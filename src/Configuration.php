@@ -87,6 +87,14 @@ final readonly class Configuration
     }
 
     /**
+     * Gets the presets configuration.
+     */
+    public function presets(): Configuration\Presets
+    {
+        return new Configuration\Presets;
+    }
+
+    /**
      * Gets the project configuration.
      */
     public function project(): Configuration\Project

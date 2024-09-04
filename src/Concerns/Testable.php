@@ -6,6 +6,7 @@ namespace Pest\Concerns;
 
 use Closure;
 use Pest\Exceptions\DatasetArgumentsMismatch;
+use Pest\Preset;
 use Pest\Support\ChainableClosure;
 use Pest\Support\ExceptionTrace;
 use Pest\Support\Reflection;
@@ -408,6 +409,14 @@ trait Testable
     private function __callClosure(Closure $closure, array $arguments): mixed
     {
         return ExceptionTrace::ensure(fn (): mixed => call_user_func_array(Closure::bind($closure, $this, $this::class), $arguments));
+    }
+
+    /**
+     * Uses the given preset on the test.
+     */
+    public function preset(): Preset
+    {
+        return new Preset;
     }
 
     #[PostCondition]

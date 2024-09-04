@@ -15,7 +15,7 @@ abstract class AbstractPreset // @pest-arch-ignore-line
     /**
      * The expectations.
      *
-     * @var array<int, ArchExpectation>
+     * @var array<int, Expectation<mixed>|ArchExpectation>
      */
     protected array $expectations = [];
 
@@ -24,7 +24,7 @@ abstract class AbstractPreset // @pest-arch-ignore-line
      *
      * @param  array<int, string>  $userNamespaces
      */
-    final public function __construct(
+    public function __construct(
         private readonly array $userNamespaces,
     ) {
         //
@@ -45,7 +45,7 @@ abstract class AbstractPreset // @pest-arch-ignore-line
     final public function ignoring(array|string $targetsOrDependencies): void
     {
         $this->expectations = array_map(
-            fn (ArchExpectation $expectation): \Pest\Arch\Contracts\ArchExpectation => $expectation->ignoring($targetsOrDependencies),
+            fn (ArchExpectation|Expectation $expectation): Expectation|ArchExpectation => $expectation instanceof ArchExpectation ? $expectation->ignoring($targetsOrDependencies) : $expectation,
             $this->expectations,
         );
     }

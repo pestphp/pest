@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace Pest;
 
+use Closure;
 use Pest\Arch\Support\Composer;
 use Pest\ArchPresets\AbstractPreset;
+use Pest\ArchPresets\Custom;
 use Pest\ArchPresets\Laravel;
 use Pest\ArchPresets\Php;
 use Pest\ArchPresets\Relaxed;
 use Pest\ArchPresets\Security;
 use Pest\ArchPresets\Strict;
+use Pest\Exceptions\InvalidArgumentException;
 use Pest\PendingCalls\TestCall;
 use stdClass;
 
@@ -27,9 +30,16 @@ final class Preset
     private static ?array $baseNamespaces = null;
 
     /**
+     * The custom presets.
+     *
+     * @var array<string, Closure>
+     */
+    private static array $customPresets = [];
+
+    /**
      * Creates a new preset instance.
      */
-    public function __construct(private readonly TestCall $testCall)
+    public function __construct()
     {
         //
     }
@@ -75,6 +85,41 @@ final class Preset
     }
 
     /**
+     * Uses the Pest custom preset and returns the test call instance.
+     *
+     * @internal
+     */
+    public static function custom(string $name, Closure $execute): void
+    {
+        if (preg_match('/^[a-zA-Z]+$/', $name) === false) {
+            throw new InvalidArgumentException('The preset name must only contain words from a-z or A-Z.');
+        }
+
+        self::$customPresets[$name] = $execute;
+    }
+
+    /**
+     * Dynamically handle calls to the class.
+     *
+     * @param  array<int, mixed>  $arguments
+     *
+     * @throws InvalidArgumentException
+     */
+    public function __call(string $name, array $arguments): AbstractPreset
+    {
+        if (! array_key_exists($name, self::$customPresets)) {
+            $availablePresets = [
+                ...['php', 'laravel', 'strict', 'security', 'relaxed'],
+                ...array_keys(self::$customPresets),
+            ];
+
+            throw new InvalidArgumentException(sprintf('The preset [%s] does not exist. The available presets are [%s].', $name, implode(', ', $availablePresets)));
+        }
+
+        return $this->executePreset(new Custom($this->baseNamespaces(), $name, self::$customPresets[$name]));
+    }
+
+    /**
      * Executes the given preset.
      *
      * @template TPreset of AbstractPreset
@@ -84,19 +129,13 @@ final class Preset
      */
     private function executePreset(AbstractPreset $preset): AbstractPreset
     {
-        if ((fn (): ?string => $this->description)->call($this->testCall) === null) {
-            $description = strtolower((new \ReflectionClass($preset))->getShortName());
-
-            (fn (): string => $this->description = sprintf('arch "%s" preset', $description))->call($this->testCall);
-        }
-
         $this->baseNamespaces();
 
         $preset->execute();
 
-        $this->testCall->testCaseMethod->closure = (function () use ($preset): void {
-            $preset->flush();
-        })->bindTo(new stdClass);
+        // $this->testCall->testCaseMethod->closure = (function () use ($preset): void {
+        //    $preset->flush();
+        // })->bindTo(new stdClass);
 
         return $preset;
     }

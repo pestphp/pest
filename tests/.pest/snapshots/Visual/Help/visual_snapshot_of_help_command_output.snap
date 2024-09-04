@@ -66,6 +66,7 @@
   --fail-on-warning  Signal failure using shell exit code when a warning was triggered  
   --fail-on-risky  Signal failure using shell exit code when a test was considered risky  
   --fail-on-deprecation  Signal failure using shell exit code when a deprecation was triggered  
+  --fail-on-phpunit-deprecation  Signal failure using shell exit code when a PHPUnit deprecation was triggered  
   --fail-on-notice  Signal failure using shell exit code when a notice was triggered  
   --fail-on-skipped  Signal failure using shell exit code when a test was skipped  
   --fail-on-incomplete  Signal failure using shell exit code when a test was marked incomplete  
@@ -85,6 +86,7 @@
   --display-incomplete .................. Display details for incomplete tests  
   --display-skipped ........................ Display details for skipped tests  
   --display-deprecations . Display details for deprecations triggered by tests  
+  --display-phpunit-deprecations .... Display details for PHPUnit deprecations  
   --display-errors ............. Display details for errors triggered by tests  
   --display-notices ........... Display details for notices triggered by tests  
   --display-warnings ......... Display details for warnings triggered by tests  

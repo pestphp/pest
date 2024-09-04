@@ -1,8 +1,8 @@
 
    PASS  Tests\Arch
-  ✓ arch "php" preset
-  ✓ arch "strict" preset
-  ✓ arch "security" preset
+  ✓ preset → php → ignoring ['Pest\Expectation', 'debug_backtrace', 'var_export', …]
+  ✓ preset → strict → ignoring ['usleep']
+  ✓ preset → security → ignoring ['eval', 'str_shuffle', 'exec', …]
   ✓ globals
   ✓ dependencies
   ✓ contracts
@@ -1423,6 +1423,10 @@
    PASS  Tests\Unit\Plugins\Retry
   ✓ it orders by defects and stop on defects if when --retry is used
 
+   PASS  Tests\Unit\Preset
+  ✓ preset invalid name
+  ✓ preset → myFramework
+
    PASS  Tests\Unit\Support\Backtrace
   ✓ it gets file name from called file
 
@@ -1574,4 +1578,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 28 skipped, 1089 passed (2621 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 28 skipped, 1091 passed (2624 assertions)
