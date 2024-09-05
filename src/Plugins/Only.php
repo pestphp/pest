@@ -28,6 +28,10 @@ final class Only implements Terminable
      */
     public function terminate(): void
     {
+        if (Parallel::isWorker()) {
+            return;
+        }
+
         $lockFile = self::TEMPORARY_FOLDER.DIRECTORY_SEPARATOR.'only.lock';
 
         if (file_exists($lockFile)) {
