@@ -234,9 +234,9 @@ if (! function_exists('covers')) {
         $runner = Container::getInstance()->get(MutationTestRunner::class);
         /** @var \Pest\Mutate\Repositories\ConfigurationRepository $configurationRepository */
         $configurationRepository = Container::getInstance()->get(ConfigurationRepository::class);
-        $configuration = $configurationRepository->mergedConfiguration();
+        $everything = $configurationRepository->cliConfiguration->toArray()['everything'] ?? false;
 
-        if ($runner->isEnabled() && ! $configuration->everything) {
+        if ($runner->isEnabled() && ! $everything) {
             $beforeEachCall->only('__pest_mutate_only');
         }
     }
