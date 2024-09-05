@@ -520,7 +520,7 @@ final class TestCall
     public function covers(array|string ...$classesOrFunctions): self
     {
         /** @var array<int, string> $classesOrFunctions */
-        $classesOrFunctions = array_reduce($classesOrFunctions, fn ($carry, $item): array => is_array($item) ? array_merge($carry, $item) : array_merge($carry, [$item]), []);
+        $classesOrFunctions = array_reduce($classesOrFunctions, fn ($carry, $item): array => is_array($item) ? array_merge($carry, $item) : array_merge($carry, [$item]), []); // @pest-ignore-type
 
         foreach ($classesOrFunctions as $classOrFunction) {
             $isClass = class_exists($classOrFunction) || trait_exists($classOrFunction) || interface_exists($classOrFunction) || enum_exists($classOrFunction);
