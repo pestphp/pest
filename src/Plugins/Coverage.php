@@ -114,6 +114,10 @@ final class Coverage implements AddsOutput, HandlesArguments
      */
     public function addOutput(int $exitCode): int
     {
+        if (Parallel::isWorker()) {
+            return $exitCode;
+        }
+
         if ($exitCode === 0 && $this->coverage) {
             if (! \Pest\Support\Coverage::isAvailable()) {
                 $this->output->writeln(
