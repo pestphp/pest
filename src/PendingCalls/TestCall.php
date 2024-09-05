@@ -10,7 +10,6 @@ use Pest\Exceptions\TestDescriptionMissing;
 use Pest\Factories\Attribute;
 use Pest\Factories\TestCaseMethodFactory;
 use Pest\Mutate\Contracts\Configuration;
-use Pest\Mutate\Decorators\TestCallDecorator as MutationTestCallDecorator;
 use Pest\Mutate\Repositories\ConfigurationRepository;
 use Pest\PendingCalls\Concerns\Describable;
 use Pest\Plugins\Only;
@@ -664,14 +663,6 @@ final class TestCall
         }
 
         return $this;
-    }
-
-    /**
-     * Mutates the test.
-     */
-    public function mutate(string $profile = 'default'): self|MutationTestCallDecorator
-    {
-        return (new MutationTestCallDecorator($this))->mutate($profile);
     }
 
     /**
