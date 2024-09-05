@@ -83,7 +83,7 @@ final readonly class TestSuiteFilterProcessor
         }
 
         if (Only::isEnabled()) {
-            $factory->addIncludeGroupFilter(['__pest_only']);
+            $factory->addIncludeGroupFilter([Only::group()]);
         } elseif ($configuration->hasGroups()) {
             $factory->addIncludeGroupFilter(
                 $configuration->groups(),

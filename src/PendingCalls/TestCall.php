@@ -225,7 +225,7 @@ final class TestCall
      */
     public function only(): self
     {
-        Only::enable($this);
+        Only::enable($this, ...func_get_args()); // @phpstan-ignore-line
 
         return $this;
     }
@@ -523,7 +523,8 @@ final class TestCall
         $classesOrFunctions = array_reduce($classesOrFunctions, fn ($carry, $item): array => is_array($item) ? array_merge($carry, $item) : array_merge($carry, [$item]), []); // @pest-ignore-type
 
         foreach ($classesOrFunctions as $classOrFunction) {
-            $isClass = class_exists($classOrFunction) || trait_exists($classOrFunction) || interface_exists($classOrFunction) || enum_exists($classOrFunction);
+            $isClass = class_exists($classOrFunction) || interface_exists($classOrFunction) || enum_exists($classOrFunction);
+            $isTrait = trait_exists($classOrFunction);
             $isFunction = function_exists($classOrFunction);
 
             if (! $isClass && ! $isFunction) {
@@ -532,6 +533,8 @@ final class TestCall
 
             if ($isClass) {
                 $this->coversClass($classOrFunction);
+            } elseif ($isTrait) {
+                $this->coversTrait($classOrFunction);
             } else {
                 $this->coversFunction($classOrFunction);
             }
@@ -555,6 +558,25 @@ final class TestCall
         /** @var Configuration $configuration */
         $configuration = Container::getInstance()->get(ConfigurationRepository::class)->globalConfiguration('default'); // @phpstan-ignore-line
         $configuration->class(...$classes); // @phpstan-ignore-line
+
+        return $this;
+    }
+
+    /**
+     * Sets the covered classes.
+     */
+    public function coversTrait(string ...$traits): self
+    {
+        foreach ($traits as $trait) {
+            $this->testCaseFactoryAttributes[] = new Attribute(
+                \PHPUnit\Framework\Attributes\CoversTrait::class,
+                [$trait],
+            );
+        }
+
+        /** @var Configuration $configuration */
+        $configuration = Container::getInstance()->get(ConfigurationRepository::class)->globalConfiguration('default'); // @phpstan-ignore-line
+        $configuration->class(...$traits); // @phpstan-ignore-line
 
         return $this;
     }

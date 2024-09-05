@@ -41,9 +41,9 @@ it('guesses if the given argument is a class or function', function () {
 it('uses the correct PHPUnit attribute for trait', function () {
     $attributes = (new ReflectionClass($this))->getAttributes();
 
-    expect($attributes[8]->getName())->toBe('PHPUnit\Framework\Attributes\CoversClass');
+    expect($attributes[8]->getName())->toBe('PHPUnit\Framework\Attributes\CoversTrait');
     expect($attributes[8]->getArguments()[0])->toBe('Tests\Fixtures\Covers\CoversTrait');
-})->coversClass(CoversTrait::class);
+})->coversTrait(CoversTrait::class);
 
 it('uses the correct PHPUnit attribute for covers nothing', function () {
     $attributes = (new ReflectionMethod($this, $this->name()))->getAttributes();

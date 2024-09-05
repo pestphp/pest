@@ -38,18 +38,26 @@ final class Only implements Terminable
     /**
      * Creates the lock file.
      */
-    public static function enable(TestCall $testCall): void
+    public static function enable(TestCall $testCall, string $group = '__pest_only'): void
     {
         if (Environment::name() === Environment::CI) {
             return;
         }
 
-        $testCall->group('__pest_only');
+        $testCall->group($group);
 
         $lockFile = self::TEMPORARY_FOLDER.DIRECTORY_SEPARATOR.'only.lock';
 
+        if (file_exists($lockFile) && $group === '__pest_only') {
+            file_put_contents($lockFile, $group);
+
+            return;
+        }
+
         if (! file_exists($lockFile)) {
             touch($lockFile);
+
+            file_put_contents($lockFile, $group);
         }
     }
 
@@ -61,5 +69,19 @@ final class Only implements Terminable
         $lockFile = self::TEMPORARY_FOLDER.DIRECTORY_SEPARATOR.'only.lock';
 
         return file_exists($lockFile);
+    }
+
+    /**
+     * Returns the group name.
+     */
+    public static function group(): string
+    {
+        $lockFile = self::TEMPORARY_FOLDER.DIRECTORY_SEPARATOR.'only.lock';
+
+        if (! file_exists($lockFile)) {
+            return '__pest_only';
+        }
+
+        return file_get_contents($lockFile) ?: '__pest_only'; // @phpstan-ignore-line
     }
 }

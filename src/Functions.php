@@ -7,6 +7,7 @@ use Pest\Configuration;
 use Pest\Exceptions\AfterAllWithinDescribe;
 use Pest\Exceptions\BeforeAllWithinDescribe;
 use Pest\Expectation;
+use Pest\Mutate\Contracts\MutationTestRunner;
 use Pest\PendingCalls\AfterEachCall;
 use Pest\PendingCalls\BeforeEachCall;
 use Pest\PendingCalls\DescribeCall;
@@ -14,6 +15,7 @@ use Pest\PendingCalls\TestCall;
 use Pest\PendingCalls\UsesCall;
 use Pest\Repositories\DatasetsRepository;
 use Pest\Support\Backtrace;
+use Pest\Support\Container;
 use Pest\Support\DatasetInfo;
 use Pest\Support\HigherOrderTapProxy;
 use Pest\TestSuite;
@@ -222,7 +224,15 @@ if (! function_exists('covers')) {
     {
         $filename = Backtrace::file();
 
-        (new BeforeEachCall(TestSuite::getInstance(), $filename))
-            ->covers(...$classesOrFunctions);
+        $beforeEachCall = (new BeforeEachCall(TestSuite::getInstance(), $filename));
+
+        $beforeEachCall->covers(...$classesOrFunctions);
+
+        /** @var MutationTestRunner $runner */
+        $runner = Container::getInstance()->get(MutationTestRunner::class);
+
+        if ($runner->isEnabled()) {
+            $beforeEachCall->only('__pest_mutate_only');
+        }
     }
 }
