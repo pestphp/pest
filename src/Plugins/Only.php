@@ -40,7 +40,7 @@ final class Only implements Terminable
      */
     public static function enable(TestCall $testCall, string $group = '__pest_only'): void
     {
-        if (Environment::name() === Environment::CI) {
+        if (Environment::name() === Environment::CI || Parallel::isWorker()) {
             return;
         }
 
