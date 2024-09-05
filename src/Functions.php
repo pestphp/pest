@@ -8,6 +8,7 @@ use Pest\Exceptions\AfterAllWithinDescribe;
 use Pest\Exceptions\BeforeAllWithinDescribe;
 use Pest\Expectation;
 use Pest\Mutate\Contracts\MutationTestRunner;
+use Pest\Mutate\Repositories\ConfigurationRepository;
 use Pest\PendingCalls\AfterEachCall;
 use Pest\PendingCalls\BeforeEachCall;
 use Pest\PendingCalls\DescribeCall;
@@ -231,8 +232,11 @@ if (! function_exists('covers')) {
 
         /** @var MutationTestRunner $runner */
         $runner = Container::getInstance()->get(MutationTestRunner::class);
+        /** @var \Pest\Mutate\Repositories\ConfigurationRepository $configurationRepository */
+        $configurationRepository = Container::getInstance()->get(ConfigurationRepository::class);
+        $configuration = $configurationRepository->mergedConfiguration();
 
-        if ($runner->isEnabled()) {
+        if ($runner->isEnabled() && ! $configuration->everything) {
             $beforeEachCall->only('__pest_mutate_only');
         }
     }
