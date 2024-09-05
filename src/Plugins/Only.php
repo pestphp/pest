@@ -44,11 +44,11 @@ final class Only implements Terminable
      */
     public static function enable(TestCall $testCall, string $group = '__pest_only'): void
     {
+        $testCall->group($group);
+
         if (Environment::name() === Environment::CI || Parallel::isWorker()) {
             return;
         }
-
-        $testCall->group($group);
 
         $lockFile = self::TEMPORARY_FOLDER.DIRECTORY_SEPARATOR.'only.lock';
 
