@@ -227,6 +227,7 @@ if (! function_exists('covers')) {
         $beforeEachCall = (new BeforeEachCall(TestSuite::getInstance(), $filename));
 
         $beforeEachCall->covers(...$classesOrFunctions);
+        $beforeEachCall->group('__pest_mutate_only');
 
         /** @var MutationTestRunner $runner */
         $runner = Container::getInstance()->get(MutationTestRunner::class);
