@@ -514,14 +514,19 @@ final class TestCall
 
     /**
      * Sets the covered classes or methods.
+     *
+     * @param  array<int, string>|string  $classesOrFunctions
      */
-    public function covers(string ...$classesOrFunctions): self
+    public function covers(array|string ...$classesOrFunctions): self
     {
-        foreach ($classesOrFunctions as $classOrFunction) {
-            $isClass = class_exists($classOrFunction) || trait_exists($classOrFunction);
-            $isMethod = function_exists($classOrFunction);
+        /** @var array<int, string> $classesOrFunctions */
+        $classesOrFunctions = array_reduce($classesOrFunctions, fn ($carry, $item): array => is_array($item) ? array_merge($carry, $item) : array_merge($carry, [$item]), []);
 
-            if (! $isClass && ! $isMethod) {
+        foreach ($classesOrFunctions as $classOrFunction) {
+            $isClass = class_exists($classOrFunction) || trait_exists($classOrFunction) || interface_exists($classOrFunction) || enum_exists($classOrFunction);
+            $isFunction = function_exists($classOrFunction);
+
+            if (! $isClass && ! $isFunction) {
                 throw new InvalidArgumentException(sprintf('No class or method named "%s" has been found.', $classOrFunction));
             }
 

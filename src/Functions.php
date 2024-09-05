@@ -215,8 +215,10 @@ if (! function_exists('afterAll')) {
 if (! function_exists('covers')) {
     /**
      * Specifies which classes, or functions, a test method covers.
+     *
+     * @param  array<int, string>|string  $classesOrFunctions
      */
-    function covers(string ...$classesOrFunctions): void
+    function covers(array|string ...$classesOrFunctions): void
     {
         $filename = Backtrace::file();
 

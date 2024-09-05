@@ -12,35 +12,37 @@ $runCounter = 0;
 
 function testCoversFunction() {}
 
+covers([CoversClass1::class]);
+
 it('uses the correct PHPUnit attribute for class', function () {
     $attributes = (new ReflectionClass($this))->getAttributes();
 
     expect($attributes[1]->getName())->toBe('PHPUnit\Framework\Attributes\CoversClass');
     expect($attributes[1]->getArguments()[0])->toBe('Tests\Fixtures\Covers\CoversClass1');
-})->coversClass(CoversClass1::class);
+});
 
 it('uses the correct PHPUnit attribute for function', function () {
     $attributes = (new ReflectionClass($this))->getAttributes();
 
-    expect($attributes[2]->getName())->toBe('PHPUnit\Framework\Attributes\CoversFunction');
-    expect($attributes[2]->getArguments()[0])->toBe('testCoversFunction');
+    expect($attributes[3]->getName())->toBe('PHPUnit\Framework\Attributes\CoversFunction');
+    expect($attributes[3]->getArguments()[0])->toBe('testCoversFunction');
 })->coversFunction('testCoversFunction');
 
 it('guesses if the given argument is a class or function', function () {
     $attributes = (new ReflectionClass($this))->getAttributes();
 
-    expect($attributes[3]->getName())->toBe(CoversClass::class);
-    expect($attributes[3]->getArguments()[0])->toBe(CoversClass3::class);
+    expect($attributes[5]->getName())->toBe(CoversClass::class);
+    expect($attributes[5]->getArguments()[0])->toBe(CoversClass3::class);
 
-    expect($attributes[4]->getName())->toBe(CoversFunction::class);
-    expect($attributes[4]->getArguments()[0])->toBe('testCoversFunction');
+    expect($attributes[6]->getName())->toBe(CoversFunction::class);
+    expect($attributes[6]->getArguments()[0])->toBe('testCoversFunction');
 })->covers(CoversClass3::class, 'testCoversFunction');
 
 it('uses the correct PHPUnit attribute for trait', function () {
     $attributes = (new ReflectionClass($this))->getAttributes();
 
-    expect($attributes[5]->getName())->toBe('PHPUnit\Framework\Attributes\CoversClass');
-    expect($attributes[5]->getArguments()[0])->toBe('Tests\Fixtures\Covers\CoversTrait');
+    expect($attributes[8]->getName())->toBe('PHPUnit\Framework\Attributes\CoversClass');
+    expect($attributes[8]->getArguments()[0])->toBe('Tests\Fixtures\Covers\CoversTrait');
 })->coversClass(CoversTrait::class);
 
 it('uses the correct PHPUnit attribute for covers nothing', function () {
