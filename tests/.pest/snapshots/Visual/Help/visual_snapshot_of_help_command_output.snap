@@ -124,6 +124,26 @@
   --disable-coverage-ignore ...... Disable metadata for ignoring code coverage  
   --no-coverage  Ignore code coverage reporting configured in the XML configuration file  
 
+  MUTATION TESTING OPTIONS:
+  --mutate .... Runs mutation testing, to understand the quality of your tests  
+  --mutate --parallel ...................... Runs mutation testing in parallel  
+  --mutate --min  Set the minimum required mutation score, and fail if not met  
+  --mutate --id  Run only the mutation with the given ID. But E.g. --id=ecb35ab30ffd3491. Note, you need to provide the same options as the original run  
+  --mutate --covered-only  Only generate mutations for classes that are covered by tests  
+  --mutate --bail  Stop mutation testing execution upon first untested or uncovered mutation  
+  --mutate --class  Generate mutations for the given class(es). E.g. --class=App\\Models  
+  --mutate --ignore  Ignore the given class(es) when generating mutations. E.g. --ignore=App\\Http\\Requests  
+  --mutate --clear-cache ............................ Clear the mutation cache  
+  --mutate --no-cache ............................... Clear the mutation cache  
+  --mutate --ignore-min-score-on-zero-mutations  Ignore the minimum score requirement when there are no mutations  
+  --mutate --ignore-min-score-on-zero-mutations  Ignore the minimum score requirement when there are no mutations  
+  --mutate --covered-only  Only generate mutations for classes that are covered by tests  
+  --mutate --everything  Generate mutations for all classes, even if they are not covered by tests  
+  --mutate --profile . Output to standard output the top ten slowest mutations  
+  --mutate --retry  Run untested or uncovered mutations first and stop execution upon first error or failure  
+  --mutate --stop-on-uncovered  Stop mutation testing execution upon first untested mutation  
+  --mutate --stop-on-untested  Stop mutation testing execution upon first untested mutation  
+
   PROFILING OPTIONS:
   --profile .............. Output to standard output the top ten slowest tests  
 

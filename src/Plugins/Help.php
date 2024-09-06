@@ -158,6 +158,62 @@ final readonly class Help implements HandlesArguments
             'desc' => 'Set the minimum required coverage percentage, and fail if not met',
         ], ...$content['Code Coverage']];
 
+        $content['Mutation Testing'] = [[
+            'arg' => '--mutate ',
+            'desc' => 'Runs mutation testing, to understand the quality of your tests',
+        ], [
+            'arg' => '--mutate --parallel',
+            'desc' => 'Runs mutation testing in parallel',
+        ], [
+            'arg' => '--mutate --min',
+            'desc' => 'Set the minimum required mutation score, and fail if not met',
+        ], [
+            'arg' => '--mutate --id',
+            'desc' => 'Run only the mutation with the given ID. But E.g. --id=ecb35ab30ffd3491. Note, you need to provide the same options as the original run',
+        ], [
+            'arg' => '--mutate --covered-only',
+            'desc' => 'Only generate mutations for classes that are covered by tests',
+        ], [
+            'arg' => '--mutate --bail',
+            'desc' => 'Stop mutation testing execution upon first untested or uncovered mutation',
+        ], [
+            'arg' => '--mutate --class',
+            'desc' => 'Generate mutations for the given class(es). E.g. --class=App\\\\Models',
+        ], [
+            'arg' => '--mutate --ignore',
+            'desc' => 'Ignore the given class(es) when generating mutations. E.g. --ignore=App\\\\Http\\\\Requests',
+        ], [
+            'arg' => '--mutate --clear-cache',
+            'desc' => 'Clear the mutation cache',
+        ], [
+            'arg' => '--mutate --no-cache',
+            'desc' => 'Clear the mutation cache',
+        ], [
+            'arg' => '--mutate --ignore-min-score-on-zero-mutations',
+            'desc' => 'Ignore the minimum score requirement when there are no mutations',
+        ], [
+            'arg' => '--mutate --ignore-min-score-on-zero-mutations',
+            'desc' => 'Ignore the minimum score requirement when there are no mutations',
+        ], [
+            'arg' => '--mutate --covered-only',
+            'desc' => 'Only generate mutations for classes that are covered by tests',
+        ], [
+            'arg' => '--mutate --everything',
+            'desc' => 'Generate mutations for all classes, even if they are not covered by tests',
+        ], [
+            'arg' => '--mutate --profile',
+            'desc' => 'Output to standard output the top ten slowest mutations',
+        ], [
+            'arg' => '--mutate --retry',
+            'desc' => 'Run untested or uncovered mutations first and stop execution upon first error or failure',
+        ], [
+            'arg' => '--mutate --stop-on-uncovered',
+            'desc' => 'Stop mutation testing execution upon first untested mutation',
+        ], [
+            'arg' => '--mutate --stop-on-untested',
+            'desc' => 'Stop mutation testing execution upon first untested mutation',
+        ]];
+
         $content['Profiling'] = [
             [
                 'arg' => '--profile ',

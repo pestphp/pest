@@ -48,12 +48,12 @@ it('uses the correct PHPUnit attribute for trait', function () {
 it('uses the correct PHPUnit attribute for covers nothing', function () {
     $attributes = (new ReflectionMethod($this, $this->name()))->getAttributes();
 
-    expect($attributes[2]->getName())->toBe('PHPUnit\Framework\Attributes\CoversNothing');
-    expect($attributes[2]->getArguments())->toHaveCount(0);
+    expect($attributes[3]->getName())->toBe('PHPUnit\Framework\Attributes\CoversNothing');
+    expect($attributes[3]->getArguments())->toHaveCount(0);
 })->coversNothing();
 
 it('throws exception if no class nor method has been found', function () {
     $testCall = new TestCall(TestSuite::getInstance(), 'filename', 'description', fn () => 'closure');
 
     $testCall->covers('fakeName');
-})->throws(InvalidArgumentException::class, 'No class or method named "fakeName" has been found.');
+})->throws(InvalidArgumentException::class, 'No class, trait or method named "fakeName" has been found.');

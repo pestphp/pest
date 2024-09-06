@@ -9,7 +9,6 @@ use Pest\Exceptions\InvalidArgumentException;
 use Pest\Exceptions\TestDescriptionMissing;
 use Pest\Factories\Attribute;
 use Pest\Factories\TestCaseMethodFactory;
-use Pest\Mutate\Contracts\Configuration;
 use Pest\Mutate\Repositories\ConfigurationRepository;
 use Pest\PendingCalls\Concerns\Describable;
 use Pest\Plugins\Only;
@@ -554,9 +553,13 @@ final class TestCall
             );
         }
 
-        /** @var Configuration $configuration */
-        $configuration = Container::getInstance()->get(ConfigurationRepository::class)->globalConfiguration('default'); // @phpstan-ignore-line
-        $configuration->class(...$classes); // @phpstan-ignore-line
+        /** @var ConfigurationRepository $configurationRepository */
+        $configurationRepository = Container::getInstance()->get(ConfigurationRepository::class);
+        $paths = $configurationRepository->cliConfiguration->toArray()['paths'] ?? false;
+
+        if (! is_array($paths)) {
+            $configurationRepository->globalConfiguration('default')->class(...$classes); // @phpstan-ignore-line
+        }
 
         return $this;
     }
@@ -573,9 +576,13 @@ final class TestCall
             );
         }
 
-        /** @var Configuration $configuration */
-        $configuration = Container::getInstance()->get(ConfigurationRepository::class)->globalConfiguration('default'); // @phpstan-ignore-line
-        $configuration->class(...$traits); // @phpstan-ignore-line
+        /** @var ConfigurationRepository $configurationRepository */
+        $configurationRepository = Container::getInstance()->get(ConfigurationRepository::class);
+        $paths = $configurationRepository->cliConfiguration->toArray()['paths'] ?? false;
+
+        if (! is_array($paths)) {
+            $configurationRepository->globalConfiguration('default')->class(...$traits); // @phpstan-ignore-line
+        }
 
         return $this;
     }
@@ -657,6 +664,7 @@ final class TestCall
             if ($this->description !== null) {
                 $this->description .= ' → ';
             }
+
             $this->description .= $arguments === null
                 ? $name
                 : sprintf('%s %s', $name, $exporter->shortenedRecursiveExport($arguments));

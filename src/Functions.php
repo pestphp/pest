@@ -235,8 +235,10 @@ if (! function_exists('covers')) {
         /** @var \Pest\Mutate\Repositories\ConfigurationRepository $configurationRepository */
         $configurationRepository = Container::getInstance()->get(ConfigurationRepository::class);
         $everything = $configurationRepository->cliConfiguration->toArray()['everything'] ?? false;
+        $classes = $configurationRepository->cliConfiguration->toArray()['classes'] ?? false;
+        $paths = $configurationRepository->cliConfiguration->toArray()['paths'] ?? false;
 
-        if ($runner->isEnabled() && ! $everything) {
+        if ($runner->isEnabled() && ! $everything && ! is_array($classes) && ! is_array($paths)) {
             $beforeEachCall->only('__pest_mutate_only');
         }
     }
