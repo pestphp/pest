@@ -192,9 +192,6 @@ final readonly class Help implements HandlesArguments
             'arg' => '--mutate --ignore-min-score-on-zero-mutations',
             'desc' => 'Ignore the minimum score requirement when there are no mutations',
         ], [
-            'arg' => '--mutate --ignore-min-score-on-zero-mutations',
-            'desc' => 'Ignore the minimum score requirement when there are no mutations',
-        ], [
             'arg' => '--mutate --covered-only',
             'desc' => 'Only generate mutations for classes that are covered by tests',
         ], [
