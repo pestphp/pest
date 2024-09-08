@@ -68,9 +68,9 @@
         "bin/pest"
     ],
     "scripts": {
-        "refacto": "rector",
+        "refactor": "rector",
         "lint": "pint",
-        "test:refacto": "rector --dry-run",
+        "test:refactor": "rector --dry-run",
         "test:lint": "pint --test",
         "test:type:check": "phpstan analyse --ansi --memory-limit=-1 --debug",
         "test:type:coverage": "php -d memory_limit=-1  bin/pest --type-coverage --min=100",
@@ -80,7 +80,7 @@
         "test:integration": "php bin/pest --colors=always --group=integration",
         "update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --colors=always --update-snapshots",
         "test": [
-            "@test:refacto",
+            "@test:refactor",
             "@test:lint",
             "@test:type:check",
             "@test:type:coverage",
