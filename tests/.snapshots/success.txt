@@ -753,11 +753,6 @@
   ✓ class has destructor
   ✓ class has no destructor
 
-   PASS  Tests\Features\Expect\toHaveFileSystemPermissions
-  ✓ pass
-  ✓ failures
-  ✓ not failures
-
    PASS  Tests\Features\Expect\toHaveKebabCaseKeys
   ✓ pass
   ✓ failures
@@ -1578,4 +1573,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 28 skipped, 1091 passed (2623 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 28 skipped, 1088 passed (2615 assertions)
