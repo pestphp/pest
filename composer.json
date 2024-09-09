@@ -24,10 +24,10 @@
         "pestphp/pest-plugin": "^3.0.0",
         "pestphp/pest-plugin-arch": "^3.0.0",
         "pestphp/pest-plugin-mutate": "^3.0.1",
-        "phpunit/phpunit": "^11.3.3"
+        "phpunit/phpunit": "^11.3.4"
     },
     "conflict": {
-        "phpunit/phpunit": ">11.3.3",
+        "phpunit/phpunit": ">11.3.4",
         "sebastian/exporter": "<6.0.0",
         "webmozart/assert": "<1.11.0"
     },
