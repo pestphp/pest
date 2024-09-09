@@ -17,10 +17,6 @@ final class Security extends AbstractPreset
      */
     public function execute(): void
     {
-        $this->eachUserNamespace(
-            fn (Expectation $namespace): ArchExpectation => $namespace->not->toHaveFileSystemPermissions('0777'),
-        );
-
         $this->expectations[] = expect([
             'md5',
             'sha1',
