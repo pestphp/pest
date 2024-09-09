@@ -9,6 +9,9 @@
 </p>
 
 ------
+
+> Pest v3 Now Available: **[Read the announcement »](https://pestphp.com/docs/pest3-now-available)**.
+
 **Pest** is an elegant PHP testing Framework with a focus on simplicity, meticulously designed to bring back the joy of testing in PHP.
 
 - Explore our docs at **[pestphp.com »](https://pestphp.com)**

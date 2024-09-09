@@ -69,7 +69,7 @@ If you want to check things work against a specific version of PHP, you may incl
 the `PHP` build argument when building the image:
 
 ```bash
-make build ARGS="--build-arg PHP=8.2"
+make build ARGS="--build-arg PHP=8.3"
 ```
 
 The default PHP version will always be the lowest version of PHP supported by Pest.
