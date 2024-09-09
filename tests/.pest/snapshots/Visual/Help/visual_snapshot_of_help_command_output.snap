@@ -1,5 +1,5 @@
 
-  Pest Testing Framework 3.0.0-rc.2.  
+  Pest Testing Framework 3.0.0.  
 
   USAGE: pest <file> [options]  
 
@@ -135,7 +135,6 @@
   --mutate --ignore  Ignore the given class(es) when generating mutations. E.g. --ignore=App\\Http\\Requests  
   --mutate --clear-cache ............................ Clear the mutation cache  
   --mutate --no-cache ............................... Clear the mutation cache  
-  --mutate --ignore-min-score-on-zero-mutations  Ignore the minimum score requirement when there are no mutations  
   --mutate --ignore-min-score-on-zero-mutations  Ignore the minimum score requirement when there are no mutations  
   --mutate --covered-only  Only generate mutations for classes that are covered by tests  
   --mutate --everything  Generate mutations for all classes, even if they are not covered by tests  
