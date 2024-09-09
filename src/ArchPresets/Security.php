@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Pest\ArchPresets;
 
-use Pest\Arch\Contracts\ArchExpectation;
-use Pest\Expectation;
-
 /**
  * @internal
  */
