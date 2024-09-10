@@ -32,7 +32,12 @@ pest()
         $_SERVER['globalHook']->calls->beforeAll++;
     })
     ->afterEach(function () {
-        $this->ith = 0;
+        if (! isset($this->ith)) {
+            return;
+        }
+
+        assert($this->ith === 1, 'Expected $this->ith to be 1, but got '.$this->ith);
+        $this->ith++;
     })
     ->afterAll(function () {
         $_SERVER['globalHook']->afterAll = 0;
@@ -57,12 +62,12 @@ pest()->in('Hooks')
         $_SERVER['globalHook']->beforeAll = 1;
     })
     ->afterEach(function () {
-        expect($this)
-            ->toHaveProperty('ith')
-            ->and($this->ith)
-            ->toBe(0);
+        if (! isset($this->ith)) {
+            return;
+        }
 
-        $this->ith = 1;
+        assert($this->ith === 2, 'Expected $this->ith to be 1, but got '.$this->ith);
+        $this->ith++;
     })
     ->afterAll(function () {
         expect($_SERVER['globalHook'])

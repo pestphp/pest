@@ -116,7 +116,7 @@ trait Testable
             self::$__latestIssues = $method->issues;
             self::$__latestPrs = $method->prs;
             $this->__describing = $method->describing;
-            $this->__test = $method->getClosure($this);
+            $this->__test = $method->getClosure();
         }
     }
 
@@ -240,6 +240,8 @@ trait Testable
 
         $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
 
+        $method->setUp($this);
+
         $description = $method->description;
         if ($this->dataName()) {
             $description = str_contains((string) $description, ':dataset')
@@ -298,6 +300,9 @@ trait Testable
             parent::tearDown();
 
             TestSuite::getInstance()->test = null;
+
+            $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
+            $method->tearDown($this);
         }
     }
 
@@ -392,11 +397,12 @@ trait Testable
             fn (ReflectionParameter $reflectionParameter): string => $reflectionParameter->getName(),
             array_filter($testReflection->getParameters(), fn (ReflectionParameter $reflectionParameter): bool => ! $reflectionParameter->isOptional()),
         );
+
         if (array_diff($testParameterNames, $datasetParameterNames) === []) {
             return;
         }
-        if (isset($testParameterNames[0])
-        && $suppliedParametersCount >= $requiredParametersCount) {
+
+        if (isset($testParameterNames[0]) && $suppliedParametersCount >= $requiredParametersCount) {
             return;
         }
 

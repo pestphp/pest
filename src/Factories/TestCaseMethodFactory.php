@@ -118,9 +118,9 @@ final class TestCaseMethodFactory
     }
 
     /**
-     * Creates the test's closure.
+     * Sets the test's hooks, and runs any proxy to the test case.
      */
-    public function getClosure(TestCase $concrete): Closure
+    public function setUp(TestCase $concrete): void
     {
         $concrete::flush(); // @phpstan-ignore-line
 
@@ -128,14 +128,29 @@ final class TestCaseMethodFactory
             throw ShouldNotHappen::fromMessage('Description can not be empty.');
         }
 
-        $closure = $this->closure;
-
         $testCase = TestSuite::getInstance()->tests->get($this->filename);
 
         assert($testCase instanceof TestCaseFactory);
         $testCase->factoryProxies->proxy($concrete);
         $this->factoryProxies->proxy($concrete);
+    }
 
+    /**
+     * Flushes the test case.
+     */
+    public function tearDown(TestCase $concrete): void
+    {
+        $concrete::flush(); // @phpstan-ignore-line
+    }
+
+    /**
+     * Creates the test's closure.
+     */
+    public function getClosure(): Closure
+    {
+        $closure = $this->closure;
+        $testCase = TestSuite::getInstance()->tests->get($this->filename);
+        assert($testCase instanceof TestCaseFactory);
         $method = $this;
 
         return function (...$arguments) use ($testCase, $method, $closure): mixed { // @phpstan-ignore-line
@@ -209,10 +224,8 @@ final class TestCaseMethodFactory
             $attributesCode
                 public function $methodName(...\$arguments)
                 {
-                    \$test = \Pest\TestSuite::getInstance()->tests->get(self::\$__filename)->getMethod(\$this->name())->getClosure(\$this);
-
                     return \$this->__runTest(
-                        \$test,
+                        \$this->__test,
                         ...\$arguments,
                     );
                 }

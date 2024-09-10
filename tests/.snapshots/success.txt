@@ -1305,6 +1305,7 @@
   ✓ it executes tests in the Helpers directory
 
    PASS  Tests\Hooks\AfterEachTest
+  ✓ nested → nested afterEach execution order
   ✓ global afterEach execution order
 
    PASS  Tests\Hooks\BeforeEachTest
@@ -1573,4 +1574,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 28 skipped, 1088 passed (2615 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 28 skipped, 1089 passed (2637 assertions)
