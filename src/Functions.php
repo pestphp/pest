@@ -243,3 +243,19 @@ if (! function_exists('covers')) {
         }
     }
 }
+
+if (! function_exists('doesntCover')) {
+    /**
+     * Specifies which classes, or functions, a test method doesnt covers.
+     *
+     * @param  array<int, string>|string  $classesOrFunctions
+     */
+    function doesntCover(array|string ...$classesOrFunctions): void
+    {
+        $filename = Backtrace::file();
+
+        $beforeEachCall = (new BeforeEachCall(TestSuite::getInstance(), $filename));
+
+        $beforeEachCall->doesntCover(...$classesOrFunctions);
+    }
+}

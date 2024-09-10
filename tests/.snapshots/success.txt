@@ -65,11 +65,11 @@
 
    PASS  Tests\Features\Covers
   ✓ it uses the correct PHPUnit attribute for class
-  ✓ it uses the correct PHPUnit attribute for function
-  ✓ it guesses if the given argument is a class or function
   ✓ it uses the correct PHPUnit attribute for trait
+  ✓ it uses the correct PHPUnit attribute for function
+  ✓ it guesses if the given argument is a class, trait, or function
   ✓ it uses the correct PHPUnit attribute for covers nothing
-  ✓ it throws exception if no class nor method has been found
+  ✓ it throws exception if no class, trait, nor method has been found
 
    PASS  Tests\Features\DatasetsTests - 1 todo
   ✓ it throws exception if dataset does not exist
@@ -223,6 +223,13 @@
   ✓ a "describe" group of tests → get 'foo'
   ✓ a "describe" group of tests → get 'foo' → get 'bar' → expect true → toBeTrue
   ✓ a "describe" group of tests → get 'foo' → expect true → toBeTrue
+
+   PASS  Tests\Features\DoesntCover
+  ✓ it uses the correct PHPUnit attribute for class
+  ✓ it uses the correct PHPUnit attribute for trait
+  ✓ it uses the correct PHPUnit attribute for function
+  ✓ it guesses if the given argument is a class, trait, or function
+  ✓ it throws exception if no class, trait, nor method has been found
 
    PASS  Tests\Features\Done
   ✓ it may have an associated assignee [@nunomaduro]
@@ -1573,4 +1580,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 28 skipped, 1088 passed (2615 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 28 skipped, 1093 passed (2631 assertions)

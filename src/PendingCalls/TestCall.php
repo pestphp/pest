@@ -616,6 +616,82 @@ final class TestCall
     }
 
     /**
+     * Sets the classes or methods that are not covered.
+     *
+     * @param  array<int, string>|string  $classesOrFunctions
+     */
+    public function doesntCover(array|string ...$classesOrFunctions): self
+    {
+        /** @var array<int, string> $classesOrFunctions */
+        $classesOrFunctions = array_reduce($classesOrFunctions, fn ($carry, $item): array => is_array($item) ? array_merge($carry, $item) : array_merge($carry, [$item]), []); // @pest-ignore-type
+
+        foreach ($classesOrFunctions as $classOrFunction) {
+            $isClass = class_exists($classOrFunction) || interface_exists($classOrFunction) || enum_exists($classOrFunction);
+            $isTrait = trait_exists($classOrFunction);
+            $isFunction = function_exists($classOrFunction);
+
+            if (! $isClass && ! $isTrait && ! $isFunction) {
+                throw new InvalidArgumentException(sprintf('No class, trait or method named "%s" has been found.', $classOrFunction));
+            }
+
+            if ($isClass) {
+                $this->doesntCoverClass($classOrFunction);
+            } elseif ($isTrait) {
+                $this->doesntCoverTrait($classOrFunction);
+            } else {
+                $this->doesntCoverFunction($classOrFunction);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Sets the classes that are not covered.
+     */
+    public function doesntCoverClass(string ...$classes): self
+    {
+        foreach ($classes as $class) {
+            $this->testCaseFactoryAttributes[] = new Attribute(
+                \PHPUnit\Framework\Attributes\UsesClass::class,
+                [$class],
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * Sets the traits that are not covered.
+     */
+    public function doesntCoverTrait(string ...$traits): self
+    {
+        foreach ($traits as $trait) {
+            $this->testCaseFactoryAttributes[] = new Attribute(
+                \PHPUnit\Framework\Attributes\UsesTrait::class,
+                [$trait],
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * Sets the functions that are not covered.
+     */
+    public function doesntCoverFunction(string ...$functions): self
+    {
+        foreach ($functions as $function) {
+            $this->testCaseFactoryAttributes[] = new Attribute(
+                \PHPUnit\Framework\Attributes\UsesFunction::class,
+                [$function],
+            );
+        }
+
+        return $this;
+    }
+
+    /**
      * Informs the test runner that no expectations happen in this test,
      * and its purpose is simply to check whether the given code can
      * be executed without throwing exceptions.

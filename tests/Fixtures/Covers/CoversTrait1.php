@@ -2,4 +2,4 @@
 
 namespace Tests\Fixtures\Covers;
 
-trait CoversTrait {}
+trait CoversTrait1 {}
