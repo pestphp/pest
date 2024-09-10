@@ -54,7 +54,7 @@ final class UsesCall
     }
 
     /**
-     * @deprecated Use `pest()->theme()->compact()` instead.
+     * @deprecated Use `pest()->printer()->compact()` instead.
      */
     public function compact(): self
     {

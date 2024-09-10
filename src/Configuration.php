@@ -79,11 +79,11 @@ final readonly class Configuration
     }
 
     /**
-     * Gets the theme configuration.
+     * Gets the printer configuration.
      */
-    public function theme(): Configuration\Theme
+    public function printer(): Configuration\Printer
     {
-        return new Configuration\Theme;
+        return new Configuration\Printer;
     }
 
     /**

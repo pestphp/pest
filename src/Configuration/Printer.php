@@ -9,7 +9,7 @@ use NunoMaduro\Collision\Adapters\Phpunit\Printers\DefaultPrinter;
 /**
  * @internal
  */
-final readonly class Theme
+final readonly class Printer
 {
     /**
      * Sets the theme to compact.
