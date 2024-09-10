@@ -1381,7 +1381,7 @@
   ✓ it proxies to uses call
 
    PASS  Tests\Unit\Configuration\Theme
-  ✓ it creates a theme instance
+  ✓ it creates a printer instance
 
    PASS  Tests\Unit\Console\Help
   ✓ it outputs the help information when --help is used
