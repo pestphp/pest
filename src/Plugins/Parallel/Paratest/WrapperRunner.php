@@ -158,7 +158,7 @@ final class WrapperRunner implements RunnerInterface
     /**
      * Handles Laravel Herd's debug and coverage modes.
      *
-     * @param array<string> $parameters
+     * @param  array<string>  $parameters
      * @return array<string>
      */
     private function handleLaravelHerd(array $parameters): array
