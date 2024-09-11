@@ -38,7 +38,7 @@ final class ServiceMessage
     {
         return new self('testSuiteStarted', [
             'name' => $name,
-            'locationHint' => $location === null ? null : "file://$location",
+            'locationHint' => $location === null ? null : "pest_qn://$location",
         ]);
     }
 
