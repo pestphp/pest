@@ -18,6 +18,7 @@ use PHPUnit\Event\Test\Failed;
 use PHPUnit\Event\Test\MarkedIncomplete;
 use PHPUnit\Event\Test\Skipped;
 use PHPUnit\Event\TestSuite\TestSuite;
+use PHPUnit\Event\TestSuite\TestSuiteForTestMethodWithDataProvider;
 use PHPUnit\Framework\Exception as FrameworkException;
 use PHPUnit\TestRunner\TestResult\TestResult as PhpUnitTestResult;
 
@@ -147,6 +148,13 @@ final readonly class Converter
      */
     public function getTestSuiteName(TestSuite $testSuite): string
     {
+        if ($testSuite instanceof TestSuiteForTestMethodWithDataProvider) {
+            $firstTest = $this->getFirstTest($testSuite);
+            if ($firstTest != null) {
+                return $this->getTestMethodNameWithoutDatasetSuffix($firstTest);
+            }
+        }
+
         $name = $testSuite->name();
 
         if (! str_starts_with($name, self::PREFIX)) {
@@ -169,6 +177,35 @@ final readonly class Converter
      */
     public function getTestSuiteLocation(TestSuite $testSuite): ?string
     {
+        $firstTest = $this->getFirstTest($testSuite);
+        if ($firstTest == null) {
+            return null;
+        }
+        $path = $firstTest->testDox()->prettifiedClassName();
+        $classRelativePath = $this->toRelativePath($path);
+
+        if ($testSuite instanceof TestSuiteForTestMethodWithDataProvider) {
+            $methodName = $this->getTestMethodNameWithoutDatasetSuffix($firstTest);
+
+            return "$classRelativePath::$methodName";
+        }
+
+        return $classRelativePath;
+    }
+
+    /**
+     * Gets the prettified test method name without dataset-related suffix.
+     */
+    private function getTestMethodNameWithoutDatasetSuffix(TestMethod $testMethod): string
+    {
+        return Str::beforeLast($testMethod->testDox()->prettifiedMethodName(), ' with data set ');
+    }
+
+    /**
+     * Gets the first test from the test suite.
+     */
+    private function getFirstTest(TestSuite $testSuite): ?TestMethod
+    {
         $tests = $testSuite->tests()->asArray();
 
         // TODO: figure out how to get the file path without a test being there.
@@ -181,9 +218,7 @@ final readonly class Converter
             throw ShouldNotHappen::fromMessage('Not an instance of TestMethod');
         }
 
-        $path = $firstTest->testDox()->prettifiedClassName();
-
-        return $this->toRelativePath($path);
+        return $firstTest;
     }
 
     /**

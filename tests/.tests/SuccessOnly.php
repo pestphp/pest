@@ -9,3 +9,7 @@ it('can pass with comparison', function () {
 test('can also pass', function () {
     expect("string")->toBeString();
 });
+
+test('can pass with dataset', function ($value) {
+    expect($value)->toEqual(true);
+})->with([true]);

@@ -1,4 +1,4 @@
-##teamcity[testSuiteStarted name='Tests/tests/Failure' locationHint='file://tests/.tests/Failure.php' flowId='1234']
+##teamcity[testSuiteStarted name='Tests/tests/Failure' locationHint='pest_qn://tests/.tests/Failure.php' flowId='1234']
 ##teamcity[testCount count='8' flowId='1234']
 ##teamcity[testStarted name='it can fail with comparison' locationHint='pest_qn://tests/.tests/Failure.php::it can fail with comparison' flowId='1234']
 ##teamcity[testFailed name='it can fail with comparison' message='Failed asserting that true matches expected false.' details='at tests/.tests/Failure.php:6' type='comparisonFailure' actual='true' expected='false' flowId='1234']
