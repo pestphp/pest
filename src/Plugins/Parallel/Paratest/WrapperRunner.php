@@ -122,6 +122,8 @@ final class WrapperRunner implements RunnerInterface
             $parameters = array_merge($parameters, $options->passthruPhp);
         }
 
+        $parameters = $this->handleLaravelHerd($parameters);
+
         $parameters[] = $wrapper;
 
         $this->parameters = $parameters;
@@ -151,6 +153,21 @@ final class WrapperRunner implements RunnerInterface
         $this->waitForAllToFinish();
 
         return $this->complete($result);
+    }
+
+    /**
+     * Handles Laravel Herd's debug and coverage modes.
+     *
+     * @param  array<string>  $parameters
+     * @return array<string>
+     */
+    private function handleLaravelHerd(array $parameters): array
+    {
+        if (isset($_ENV['HERD_DEBUG_INI'])) {
+            return array_merge($parameters, ['-c', $_ENV['HERD_DEBUG_INI']]);
+        }
+
+        return $parameters;
     }
 
     private function startWorkers(): void
