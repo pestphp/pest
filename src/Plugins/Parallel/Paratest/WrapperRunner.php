@@ -122,6 +122,7 @@ final class WrapperRunner implements RunnerInterface
             $parameters = array_merge($parameters, $options->passthruPhp);
         }
 
+        /** @var array<int, non-empty-string> $parameters */
         $parameters = $this->handleLaravelHerd($parameters);
 
         $parameters[] = $wrapper;
