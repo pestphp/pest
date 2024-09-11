@@ -49,6 +49,13 @@ final class TestCall
     private readonly bool $descriptionLess;
 
     /**
+     * This property is not actually used in the codebase, it's only here to make Rector happy.
+     *
+     * @var string|array<class-string|string>
+     */
+    public array|string $references;
+
+    /**
      * Creates a new Pending Call.
      */
     public function __construct(
@@ -611,6 +618,21 @@ final class TestCall
             \PHPUnit\Framework\Attributes\CoversNothing::class,
             [],
         );
+
+        return $this;
+    }
+
+    /**
+     * Adds a reference to the tested method or class.
+     * This helps to link test cases to the source code
+     * for easier navigation during development.
+     *
+     * @param  string|array<class-string|string>  $classes
+     */
+    public function reference(string|array ...$classes): self
+    {
+        // For rector
+        $this->references = $classes; // @phpstan-ignore-line
 
         return $this;
     }
