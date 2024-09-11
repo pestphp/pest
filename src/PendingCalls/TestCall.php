@@ -513,28 +513,51 @@ final class TestCall
     /**
      * Sets the covered classes or methods.
      *
-     * @param  array<int, string>|string  $classesOrFunctions
+     * @param  array<int, string|array<class-string, string>>|string|array<class-string, string>  ...$classesOrFunctions
      */
     public function covers(array|string ...$classesOrFunctions): self
     {
-        /** @var array<int, string> $classesOrFunctions */
-        $classesOrFunctions = array_reduce($classesOrFunctions, fn ($carry, $item): array => is_array($item) ? array_merge($carry, $item) : array_merge($carry, [$item]), []); // @pest-ignore-type
+        /** @var array<int, string|array<int, string>>|array<class-string, string> $classesOrFunctions */
+        $classesOrFunctions = array_reduce($classesOrFunctions, function (array $carry, string|array $item): array {
+            if (is_array($item) && (count($item) !== 2 || ! is_string($item[0]) || ! is_string($item[1]) || ! \method_exists($item[0], $item[1]))) {
+                return array_merge($carry, $item);
+            }
+
+            return array_merge($carry, [$item]);
+        }, []);
+
+        if (count($classesOrFunctions) === 2 && is_string($classesOrFunctions[0]) && is_string($classesOrFunctions[1]) && \method_exists($classesOrFunctions[0], $classesOrFunctions[1])) {
+            $classesOrFunctions = [$classesOrFunctions];
+        }
 
         foreach ($classesOrFunctions as $classOrFunction) {
-            $isClass = class_exists($classOrFunction) || interface_exists($classOrFunction) || enum_exists($classOrFunction);
-            $isTrait = trait_exists($classOrFunction);
-            $isFunction = function_exists($classOrFunction);
+            /** @var string|array<string> $classOrFunction */
+            $isClassMethod = is_array($classOrFunction) && method_exists($classOrFunction[0], $classOrFunction[1]) && class_exists($classOrFunction[0]);
+            $isClass = ! is_array($classOrFunction) && (class_exists($classOrFunction) || interface_exists($classOrFunction) || enum_exists($classOrFunction));
+            $isTrait = ! is_array($classOrFunction) && trait_exists($classOrFunction);
+            $isFunction = ! is_array($classOrFunction) && function_exists($classOrFunction);
 
-            if (! $isClass && ! $isTrait && ! $isFunction) {
-                throw new InvalidArgumentException(sprintf('No class, trait or method named "%s" has been found.', $classOrFunction));
+            if (! $isClass && ! $isTrait && ! $isFunction && ! $isClassMethod) {
+                throw new InvalidArgumentException(
+                    sprintf(
+                        'No class, method, trait or function named "%s" has been found.',
+                        is_array($classOrFunction) ? $classOrFunction[0].'::'.$classOrFunction[1] : $classOrFunction
+                    )
+                );
             }
 
             if ($isClass) {
+                /** @var string $classOrFunction */
                 $this->coversClass($classOrFunction);
             } elseif ($isTrait) {
+                /** @var string $classOrFunction */
                 $this->coversTrait($classOrFunction);
-            } else {
+            } elseif ($isFunction) {
+                /** @var string $classOrFunction */
                 $this->coversFunction($classOrFunction);
+            } elseif ($isClassMethod) {
+                /** @var array<class-string, string> $classOrFunction */
+                $this->coversMethod($classOrFunction);
             }
         }
 
@@ -582,6 +605,23 @@ final class TestCall
 
         if (! is_array($paths)) {
             $configurationRepository->globalConfiguration('default')->class(...$traits); // @phpstan-ignore-line
+        }
+
+        return $this;
+    }
+
+    /**
+     * Sets the covered methods.
+     *
+     * @param  array<class-string, string>  ...$methods
+     */
+    public function coversMethod(array ...$methods): self
+    {
+        foreach ($methods as $method) {
+            $this->testCaseFactoryAttributes[] = new Attribute(
+                \PHPUnit\Framework\Attributes\CoversMethod::class,
+                $method,
+            );
         }
 
         return $this;

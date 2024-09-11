@@ -10,7 +10,7 @@ namespace Pest\Factories;
 final class Attribute
 {
     /**
-     * @param  iterable<int, string>  $arguments
+     * @param  iterable<int|class-string, string>  $arguments
      */
     public function __construct(public string $name, public iterable $arguments)
     {
