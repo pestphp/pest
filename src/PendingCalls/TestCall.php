@@ -628,7 +628,7 @@ final class TestCall
      *
      * @param  array<class-string|string>|class-string  ...$classes
      */
-    public function reference(string|array ...$classes): self
+    public function references(string|array ...$classes): self
     {
         // For rector
         $this->references = $classes;
