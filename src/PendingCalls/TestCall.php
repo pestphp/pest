@@ -51,9 +51,9 @@ final class TestCall
     /**
      * This property is not actually used in the codebase, it's only here to make Rector happy.
      *
-     * @var string|array<class-string|string>
+     * @var array<class-string|string>
      */
-    public array|string $references;
+    public array $references;
 
     /**
      * Creates a new Pending Call.
@@ -632,7 +632,7 @@ final class TestCall
     public function reference(string|array ...$classes): self
     {
         // For rector
-        $this->references = $classes; // @phpstan-ignore-line
+        $this->references = $classes;
 
         return $this;
     }
