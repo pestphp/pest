@@ -51,7 +51,7 @@ final class TestCall
     /**
      * This property is not actually used in the codebase, it's only here to make Rector happy.
      *
-     * @var array<class-string|string>
+     * @var array<int|string, class-string|array<class-string|string>>
      */
     public array $references;
 
@@ -623,11 +623,10 @@ final class TestCall
     }
 
     /**
-     * Adds a reference to the tested method or class.
-     * This helps to link test cases to the source code
-     * for easier navigation during development.
+     * Adds a reference to the tested method or class. This helps to link test
+     * cases to the source code for easier navigation.
      *
-     * @param  string|array<class-string|string>  $classes
+     * @param  array<class-string|string>|class-string  ...$classes
      */
     public function reference(string|array ...$classes): self
     {
