@@ -630,8 +630,7 @@ final class TestCall
      */
     public function references(string|array ...$classes): self
     {
-        // For rector
-        $this->references = $classes;
+        assert($classes !== []);
 
         return $this;
     }
