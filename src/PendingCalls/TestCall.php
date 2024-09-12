@@ -623,8 +623,8 @@ final class TestCall
     }
 
     /**
-     * Adds a reference to the tested method or class. This helps to link test
-     * cases to the source code for easier navigation.
+     * Adds one or more references to the tested method or class. This helps
+     * to link test cases to the source code for easier navigation.
      *
      * @param  array<class-string|string>|class-string  ...$classes
      */
