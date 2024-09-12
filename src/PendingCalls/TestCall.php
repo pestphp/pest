@@ -49,13 +49,6 @@ final class TestCall
     private readonly bool $descriptionLess;
 
     /**
-     * This property is not actually used in the codebase, it's only here to make Rector happy.
-     *
-     * @var array<int|string, class-string|array<class-string|string>>
-     */
-    public array $references;
-
-    /**
      * Creates a new Pending Call.
      */
     public function __construct(
