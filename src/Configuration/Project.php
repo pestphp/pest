@@ -89,7 +89,7 @@ final class Project
     {
         $this->issues = "https://{$namespace}.atlassian.net/browse/{$project}-%s";
 
-        $this->assignees = "https://{$namespace}.atlassian.net/secure/ViewProfile?name=%s";
+        $this->assignees = "https://{$namespace}.atlassian.net/secure/ViewProfile.jspa?name=%s";
 
         return $this;
     }
