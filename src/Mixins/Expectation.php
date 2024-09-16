@@ -661,7 +661,7 @@ final class Expectation
     {
         foreach ($keys as $k => $key) {
             if (is_array($key)) {
-                $this->toHaveKeys(array_keys(Arr::dot($key, $k.'.')), $message);
+                $this->toHaveKeys(array_keys(Arr::dot($key, $k . '.')), $message);
             } else {
                 $this->toHaveKey($key, message: $message);
             }
@@ -1156,6 +1156,23 @@ final class Expectation
         }
 
         Assert::assertTrue(Str::isUrl((string) $this->value), $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value can be converted to a slug
+     *
+     * @return self<TValue>
+     */
+    public function toBeSlug(string $message = ''): self
+    {
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} can be converted to a slug.";
+        }
+
+        $slug = Str::slugify((string) $this->value);
+        Assert::assertNotEmpty($slug, $message);
 
         return $this;
     }
