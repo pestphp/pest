@@ -217,7 +217,7 @@ if (! function_exists('afterAll')) {
 
 if (! function_exists('covers')) {
     /**
-     * Specifies which classes, or functions, a test method covers.
+     * Specifies which classes, or functions, a test case covers.
      *
      * @param  array<int, string>|string  $classesOrFunctions
      */
@@ -240,6 +240,41 @@ if (! function_exists('covers')) {
 
         if ($runner->isEnabled() && ! $everything && ! is_array($classes) && ! is_array($paths)) {
             $beforeEachCall->only('__pest_mutate_only');
+        }
+    }
+}
+
+if (! function_exists('mutates')) {
+    /**
+     * Specifies which classes, enums, or traits a test case mutates.
+     *
+     * @param  array<int, string>|string  $targets
+     */
+    function mutates(array|string ...$targets): void
+    {
+        $filename = Backtrace::file();
+
+        $beforeEachCall = (new BeforeEachCall(TestSuite::getInstance(), $filename));
+        $beforeEachCall->group('__pest_mutate_only');
+
+        /** @var MutationTestRunner $runner */
+        $runner = Container::getInstance()->get(MutationTestRunner::class);
+        /** @var \Pest\Mutate\Repositories\ConfigurationRepository $configurationRepository */
+        $configurationRepository = Container::getInstance()->get(ConfigurationRepository::class);
+        $everything = $configurationRepository->cliConfiguration->toArray()['everything'] ?? false;
+        $classes = $configurationRepository->cliConfiguration->toArray()['classes'] ?? false;
+        $paths = $configurationRepository->cliConfiguration->toArray()['paths'] ?? false;
+
+        if ($runner->isEnabled() && ! $everything && ! is_array($classes) && ! is_array($paths)) {
+            $beforeEachCall->only('__pest_mutate_only');
+        }
+
+        /** @var ConfigurationRepository $configurationRepository */
+        $configurationRepository = Container::getInstance()->get(ConfigurationRepository::class);
+        $paths = $configurationRepository->cliConfiguration->toArray()['paths'] ?? false;
+
+        if (! is_array($paths)) {
+            $configurationRepository->globalConfiguration('default')->class(...$targets); // @phpstan-ignore-line
         }
     }
 }
