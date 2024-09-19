@@ -358,8 +358,8 @@ final class TestCall
     public function todo(// @phpstan-ignore-line
         array|string|null $note = null,
         array|string|null $assignee = null,
-        array|string|null $issue = null,
-        array|string|null $pr = null,
+        array|string|int|null $issue = null,
+        array|string|int|null $pr = null,
     ): self {
         $this->skip('__TODO__');
 
@@ -390,8 +390,8 @@ final class TestCall
     public function wip(// @phpstan-ignore-line
         array|string|null $note = null,
         array|string|null $assignee = null,
-        array|string|null $issue = null,
-        array|string|null $pr = null,
+        array|string|int|null $issue = null,
+        array|string|int|null $pr = null,
     ): self {
         if ($issue !== null) {
             $this->issue($issue);
@@ -418,8 +418,8 @@ final class TestCall
     public function done(// @phpstan-ignore-line
         array|string|null $note = null,
         array|string|null $assignee = null,
-        array|string|null $issue = null,
-        array|string|null $pr = null,
+        array|string|int|null $issue = null,
+        array|string|int|null $pr = null,
     ): self {
         if ($issue !== null) {
             $this->issue($issue);
