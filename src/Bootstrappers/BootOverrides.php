@@ -25,7 +25,7 @@ final class BootOverrides implements Bootstrapper
         '8abdad6413329c6fe0d7d44a8b9926e390af32c0b3123f3720bb9c5bbc6fbb7e' => 'TextUI/Output/Default/ProgressPrinter/Subscriber/TestSkippedSubscriber.php',
         '43883b7e5811886cf3731c8ed6304d5a77078d9731e1e505abc2da36bde19f3e' => 'TextUI/TestSuiteFilterProcessor.php',
         '357d5cd7007f8559b26e1b8cdf43bb6fb15b51b79db981779da6f31b7ec39dad' => 'Event/Value/ThrowableBuilder.php',
-        '01974a686eba69b5fbb87a904d936eae2176e39567616898c5b758db71d87a22' => 'Logging/JUnit/JunitXmlLogger.php',
+        '676273f1fe483877cf2d95c5aedbf9ae5d6a8e2f4c12d6ce716df6591e6db023' => 'Logging/JUnit/JunitXmlLogger.php',
     ];
 
     /**
