@@ -223,7 +223,7 @@ final class Expectation
             throw new BadMethodCallException('Expectation value is not iterable.');
         }
 
-        if (count($callbacks) == 0) {
+        if ($callbacks === []) {
             throw new InvalidArgumentException('No sequence expectations defined.');
         }
 
@@ -512,6 +512,19 @@ final class Expectation
             fn (ObjectDescription $object): bool => (bool) preg_match('/^<\?php\s+declare\(.*?strict_types\s?=\s?1.*?\);/', (string) file_get_contents($object->path)),
             'to use strict types',
             FileLineFinder::where(fn (string $line): bool => str_contains($line, '<?php')),
+        );
+    }
+
+    /**
+     * Asserts that the given expectation target uses strict equality.
+     */
+    public function toUseStrictEquality(): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object): bool => ! str_contains((string) file_get_contents($object->path), ' == '), // @pest-arch-ignore-line
+            'to use strict equality',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, ' == ')),
         );
     }
 

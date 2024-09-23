@@ -21,6 +21,7 @@ final class Strict extends AbstractPreset
             fn (Expectation $namespace): ArchExpectation => $namespace->classes()->not->toHaveProtectedMethods(),
             fn (Expectation $namespace): ArchExpectation => $namespace->classes()->not->toBeAbstract(),
             fn (Expectation $namespace): ArchExpectation => $namespace->toUseStrictTypes(),
+            fn (Expectation $namespace): ArchExpectation => $namespace->toUseStrictEquality(),
             fn (Expectation $namespace): ArchExpectation => $namespace->classes()->toBeFinal(),
         );
 

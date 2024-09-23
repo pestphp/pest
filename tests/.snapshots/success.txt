@@ -968,6 +968,12 @@
   ✓ it can handle a non-defined exception
   ✓ it can handle a class not found Error
 
+   PASS  Tests\Features\Expect\toUseStrictEquality
+  ✓ missing strict equality
+  ✓ has strict equality
+  ✓ opposite missing strict equality
+  ✓ opposite has strict equality
+
    PASS  Tests\Features\Expect\toUseTrait
   ✓ pass
   ✓ failures
@@ -1574,4 +1580,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 28 skipped, 1089 passed (2637 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 28 skipped, 1093 passed (2644 assertions)

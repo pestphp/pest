@@ -153,6 +153,19 @@ final readonly class OppositeExpectation
     }
 
     /**
+     * Asserts that the given expectation target does not use the strict equality operator.
+     */
+    public function toUseStrictEquality(): ArchExpectation
+    {
+        return Targeted::make(
+            $this->original,
+            fn (ObjectDescription $object): bool => ! str_contains((string) file_get_contents($object->path), ' === '),
+            'to use strict equality',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, ' === ')),
+        );
+    }
+
+    /**
      * Asserts that the given expectation target is not final.
      */
     public function toBeFinal(): ArchExpectation

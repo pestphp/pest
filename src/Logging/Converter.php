@@ -178,7 +178,7 @@ final readonly class Converter
     public function getTestSuiteLocation(TestSuite $testSuite): ?string
     {
         $firstTest = $this->getFirstTest($testSuite);
-        if ($firstTest == null) {
+        if (! $firstTest instanceof \PHPUnit\Event\Code\TestMethod) {
             return null;
         }
         $path = $firstTest->testDox()->prettifiedClassName();
