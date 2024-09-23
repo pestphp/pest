@@ -264,7 +264,7 @@ final class Expectation
         $matched = false;
 
         foreach ($expressions as $key => $callback) {
-            if ($subject != $key) {
+            if ($subject != $key) { // @pest-arch-ignore-line
                 continue;
             }
 
