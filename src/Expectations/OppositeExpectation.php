@@ -159,9 +159,9 @@ final readonly class OppositeExpectation
     {
         return Targeted::make(
             $this->original,
-            fn (ObjectDescription $object): bool => ! str_contains((string) file_get_contents($object->path), ' === '),
+            fn (ObjectDescription $object): bool => ! str_contains((string) file_get_contents($object->path), ' === ') && ! str_contains((string) file_get_contents($object->path), ' !== '),
             'to use strict equality',
-            FileLineFinder::where(fn (string $line): bool => str_contains($line, ' === ')),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, ' === ') || str_contains($line, ' !== ')),
         );
     }
 

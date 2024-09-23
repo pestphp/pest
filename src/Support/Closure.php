@@ -26,7 +26,7 @@ final class Closure
 
         $closure = BaseClosure::bind($closure, $newThis, $newScope);
 
-        if ($closure === null) {
+        if (! $closure instanceof \Closure) {
             throw ShouldNotHappen::fromMessage('Could not bind closure.');
         }
 

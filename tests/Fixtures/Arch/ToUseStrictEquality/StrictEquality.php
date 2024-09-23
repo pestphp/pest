@@ -14,5 +14,9 @@ class StrictEquality
         if ($a === $b) {
             echo 'Equal';
         }
+
+        if ($a !== $b) {
+            echo 'Equal';
+        }
     }
 }

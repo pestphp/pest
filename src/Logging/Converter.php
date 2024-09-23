@@ -150,7 +150,7 @@ final readonly class Converter
     {
         if ($testSuite instanceof TestSuiteForTestMethodWithDataProvider) {
             $firstTest = $this->getFirstTest($testSuite);
-            if ($firstTest != null) {
+            if ($firstTest instanceof \PHPUnit\Event\Code\TestMethod) {
                 return $this->getTestMethodNameWithoutDatasetSuffix($firstTest);
             }
         }
