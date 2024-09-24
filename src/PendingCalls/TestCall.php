@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\PendingCalls;
 
 use Closure;
+use Pest\Concerns\Testable;
 use Pest\Exceptions\InvalidArgumentException;
 use Pest\Exceptions\TestDescriptionMissing;
 use Pest\Factories\Attribute;
@@ -25,9 +26,9 @@ use PHPUnit\Framework\TestCase;
 /**
  * @internal
  *
- * @mixin HigherOrderCallables|TestCase
+ * @mixin HigherOrderCallables|TestCase|Testable
  */
-final class TestCall
+final class TestCall // @phpstan-ignore-line
 {
     use Describable;
 
