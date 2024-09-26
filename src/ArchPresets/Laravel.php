@@ -31,7 +31,7 @@ final class Laravel extends AbstractPreset
             ->ignoring('App\Enums\Concerns');
 
         $this->expectations[] = expect('App\Features')
-            ->toBeClasses()->
+            ->toBeClasses()
             ->ignoring('App\Features\Concerns');
 
         $this->expectations[] = expect('App\Features')
