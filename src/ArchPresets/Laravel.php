@@ -31,7 +31,7 @@ final class Laravel extends AbstractPreset
             ->ignoring('App\Enums\Concerns');
 
         $this->expectations[] = expect('App\Features')
-            ->toBeClasses()
+            ->toBeClasses()->
             ->ignoring('App\Features\Concerns');
 
         $this->expectations[] = expect('App\Features')
@@ -39,7 +39,8 @@ final class Laravel extends AbstractPreset
 
         $this->expectations[] = expect('App\Exceptions')
             ->classes()
-            ->toImplement('Throwable');
+            ->toImplement('Throwable')
+            ->ignoring('App\Exceptions\Handler');
 
         $this->expectations[] = expect('App')
             ->not->toImplement(Throwable::class)
