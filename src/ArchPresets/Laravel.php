@@ -152,7 +152,7 @@ final class Laravel extends AbstractPreset
             ->toOnlyBeUsedIn('App\Http');
 
         $this->expectations[] = expect('App\Http\Controllers')
-            ->not->toHavePublicMethodsBesides(['__construct', '__invoke', 'index', 'show', 'create', 'store', 'edit', 'update', 'destroy']);
+            ->not->toHavePublicMethodsBesides(['__construct', '__invoke', 'index', 'show', 'create', 'store', 'edit', 'update', 'destroy', 'middleware']);
 
         $this->expectations[] = expect([
             'dd',
