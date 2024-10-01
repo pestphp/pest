@@ -2,7 +2,4 @@
 
 namespace Tests\Fixtures\Arch\ToUseStrictTypes;
 
-class HasNoStrictType
-{
-
-}
+class HasNoStrictType {}

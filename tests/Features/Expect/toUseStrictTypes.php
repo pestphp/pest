@@ -15,4 +15,3 @@ test('pass', function () {
 test('failures', function () {
     expect(HasNoStrictType::class)->toUseStrictTypes();
 })->throws(ArchExpectationFailedException::class);
-
