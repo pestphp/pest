@@ -1,5 +1,7 @@
 #!/usr/bin/env php
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 use Pest\Kernel;
 use Pest\Panic;
@@ -37,7 +39,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
         if (str_contains($value, '--test-directory=')) {
             unset($arguments[$key]);
-        } else if ($value === '--test-directory') {
+        } elseif ($value === '--test-directory') {
             unset($arguments[$key]);
 
             if (isset($arguments[$key + 1])) {
@@ -62,7 +64,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
         if (str_contains($value, '--assignee=')) {
             unset($arguments[$key]);
-        } else if ($value === '--assignee') {
+        } elseif ($value === '--assignee') {
             unset($arguments[$key]);
 
             if (isset($arguments[$key + 1])) {
@@ -72,7 +74,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
         if (str_contains($value, '--issue=')) {
             unset($arguments[$key]);
-        } else if ($value === '--issue') {
+        } elseif ($value === '--issue') {
             unset($arguments[$key]);
 
             if (isset($arguments[$key + 1])) {
@@ -82,7 +84,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
         if (str_contains($value, '--ticket=')) {
             unset($arguments[$key]);
-        } else if ($value === '--ticket') {
+        } elseif ($value === '--ticket') {
             unset($arguments[$key]);
 
             if (isset($arguments[$key + 1])) {
@@ -92,7 +94,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
         if (str_contains($value, '--pr=')) {
             unset($arguments[$key]);
-        } else if ($value === '--pr') {
+        } elseif ($value === '--pr') {
             unset($arguments[$key]);
 
             if (isset($arguments[$key + 1])) {
@@ -102,7 +104,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
         if (str_contains($value, '--pull-request=')) {
             unset($arguments[$key]);
-        } else if ($value === '--pull-request') {
+        } elseif ($value === '--pull-request') {
             unset($arguments[$key]);
 
             if (isset($arguments[$key + 1])) {
@@ -116,7 +118,6 @@ use Symfony\Component\Console\Output\ConsoleOutput;
             unset($_SERVER['COLLISION_PRINTER']);
         }
     }
-
 
     // Used when Pest is required using composer.
     $vendorPath = dirname(__DIR__, 4).'/vendor/autoload.php';
@@ -134,7 +135,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
     // Get $rootPath based on $autoloadPath
     $rootPath = dirname($autoloadPath, 2);
-    $input = new ArgvInput();
+    $input = new ArgvInput;
 
     $testSuite = TestSuite::getInstance(
         $rootPath,
@@ -146,11 +147,11 @@ use Symfony\Component\Console\Output\ConsoleOutput;
     }
 
     if ($todo) {
-        $testSuite->tests->addTestCaseMethodFilter(new TodoTestCaseFilter());
+        $testSuite->tests->addTestCaseMethodFilter(new TodoTestCaseFilter);
     }
 
     if ($notes) {
-        $testSuite->tests->addTestCaseMethodFilter(new NotesTestCaseFilter());
+        $testSuite->tests->addTestCaseMethodFilter(new NotesTestCaseFilter);
     }
 
     if ($assignee = $input->getParameterOption('--assignee')) {
