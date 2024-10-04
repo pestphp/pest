@@ -886,6 +886,21 @@ final class Expectation
     }
 
     /**
+     * Asserts that the source code of the given expectation target does not include suspicious characters.
+     */
+    public function toNotIncludeSuspiciousCharacters(): ArchExpectation
+    {
+        $checker = new Spoofchecker();
+
+        return Targeted::make(
+            $this,
+            fn (ObjectDescription $object) => ! $checker->isSuspicious(file_get_contents($object->path)),
+            'to not include suspicious characters',
+            FileLineFinder::where(fn (string $line) => $checker->isSuspicious($line)),
+        );
+    }
+
+    /**
      * Not supported.
      */
     public function toBeUsed(): void
