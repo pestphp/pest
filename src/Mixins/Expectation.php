@@ -1159,4 +1159,21 @@ final class Expectation
 
         return $this;
     }
+
+    /**
+     * Asserts that the value is within a specified range.
+     *
+     * @return self<TValue>
+     */
+    public function toBeWithin(int|float $min, int|float $max, string $message = ''): self
+    {
+        if (! is_numeric($this->value)) {
+            InvalidExpectationValue::expected('numeric');
+        }
+
+        Assert::assertGreaterThanOrEqual($min, $this->value, $message);
+        Assert::assertLessThanOrEqual($max, $this->value, $message);
+
+        return $this;
+    }
 }
