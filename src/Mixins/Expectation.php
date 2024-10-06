@@ -1171,9 +1171,6 @@ final class Expectation
             InvalidExpectationValue::expected('numeric');
         }
 
-        Assert::assertGreaterThanOrEqual($min, $this->value, $message);
-        Assert::assertLessThanOrEqual($max, $this->value, $message);
-
-        return $this;
+        return $this->toBeBetween($min, $max, $message);
     }
 }

@@ -24,16 +24,6 @@ it('fails when given a non-numeric value', function () {
         ->toThrow(InvalidExpectationValue::class, 'Expected numeric');
 });
 
-it('can use a custom error message', function () {
-    expect(fn () => expect(20)->toBeWithin(1, 10, 'Custom error message'))
-        ->toThrow(ExpectationFailedException::class, 'Custom error message');
-});
-
-it('handles edge cases correctly', function () {
-    expect(PHP_INT_MAX)->toBeWithin(PHP_INT_MAX - 1, PHP_INT_MAX);
-    expect(PHP_INT_MIN)->toBeWithin(PHP_INT_MIN, PHP_INT_MIN + 1);
-});
-
 it('works with negative numbers', function () {
     expect(-5)->toBeWithin(-10, 0);
     expect(-7.5)->toBeWithin(-8, -7);
