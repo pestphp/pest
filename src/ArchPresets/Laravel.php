@@ -162,5 +162,9 @@ final class Laravel extends AbstractPreset
             'exit',
             'ray',
         ])->not->toBeUsed();
+
+        $this->expectations[] = expect('App\Policies')
+            ->classes()
+            ->toHaveSuffix('Policy');
     }
 }
