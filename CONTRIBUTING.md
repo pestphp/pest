@@ -42,7 +42,7 @@ composer test
 
 Check types:
 ```bash
-composer test:types
+composer test:type:check
 ```
 
 Unit tests:
