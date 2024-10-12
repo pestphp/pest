@@ -32,7 +32,7 @@ final class TestCaseMethodFactory
     /**
      * The test's describing, if any.
      *
-     * @var array<int, string>
+     * @var array<int, \Pest\Support\Description>
      */
     public array $describing = [];
 

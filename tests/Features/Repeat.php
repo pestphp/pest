@@ -79,3 +79,17 @@ describe('describe blocks', function () {
         })->repeat(times: 2);
     })->repeat(times: 3);
 });
+
+describe('matching describe blocks', function () {
+    describe('describe block', function () {
+        it('should repeat the number of times specified in the parent describe block', function () {
+            expect(true)->toBeTrue();
+        });
+    })->repeat(times: 3);
+
+    describe('describe block', function () {
+        test('should not repeat the number of times of the describe block with the same name', function () {
+            expect(true)->toBeTrue();
+        });
+    });
+});

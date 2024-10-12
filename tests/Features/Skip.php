@@ -125,6 +125,74 @@ describe('skip on beforeEach', function () {
     });
 });
 
+describe('matching describe with skip', function () {
+    beforeEach(function () {
+        $this->ran = false;
+    });
+
+    afterEach(function () {
+        match ($this->name()) {
+            '__pest_evaluable__matching_describe_with_skip__→__describe_block__→_it_should_not_execute' => expect($this->ran)->toBe(false),
+            '__pest_evaluable__matching_describe_with_skip__→__describe_block__→_it_should_execute_a_test_in_a_describe_block_with_the_same_name_as_a_skipped_describe_block' => expect($this->ran)->toBe(true),
+            '__pest_evaluable__matching_describe_with_skip__→_it_should_execute' => expect($this->ran)->toBe(true),
+            default => $this->fail('Unexpected test name: '.$this->name()),
+        };
+    });
+
+    describe('describe block', function () {
+        it('should not execute', function () {
+            $this->ran = true;
+            $this->fail();
+        });
+    })->skip();
+
+    describe('describe block', function () {
+        it('should execute a test in a describe block with the same name as a skipped describe block', function () {
+            $this->ran = true;
+        });
+    });
+
+    it('should execute', function () {
+        $this->ran = true;
+        expect($this->ran)->toBe(true);
+    });
+});
+
+describe('matching describe with skip on beforeEach', function () {
+    beforeEach(function () {
+        $this->ran = false;
+    });
+
+    afterEach(function () {
+        match ($this->name()) {
+            '__pest_evaluable__matching_describe_with_skip_on_beforeEach__→__describe_block__→_it_should_not_execute' => expect($this->ran)->toBe(false),
+            '__pest_evaluable__matching_describe_with_skip_on_beforeEach__→__describe_block__→_it_should_execute_a_test_in_a_describe_block_with_the_same_name_as_a_skipped_describe_block' => expect($this->ran)->toBe(true),
+            '__pest_evaluable__matching_describe_with_skip_on_beforeEach__→_it_should_execute' => expect($this->ran)->toBe(true),
+            default => $this->fail('Unexpected test name: '.$this->name()),
+        };
+    });
+
+    describe('describe block', function () {
+        beforeEach()->skip();
+
+        it('should not execute', function () {
+            $this->ran = true;
+            $this->fail();
+        });
+    });
+
+    describe('describe block', function () {
+        it('should execute a test in a describe block with the same name as a skipped describe block', function () {
+            $this->ran = true;
+        });
+    });
+
+    it('should execute', function () {
+        $this->ran = true;
+        expect($this->ran)->toBe(true);
+    });
+});
+
 it('does not skip after the describe block', function () {
     expect(true)->toBeTrue();
 });
