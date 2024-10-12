@@ -27,6 +27,8 @@
    PASS  Tests\Features\AfterEach
   ✓ it does not get executed before the test
   ✓ it gets executed after the test
+  ✓ outer → inner → it does not get executed before the test
+  ✓ outer → inner → it should call all parent afterEach functions
 
    PASS  Tests\Features\Assignee
   ✓ it may be associated with an assignee [@nunomaduro, @taylorotwell]
@@ -40,6 +42,7 @@
    PASS  Tests\Features\BeforeEach
   ✓ it gets executed before each test
   ✓ it gets executed before each test once again
+  ✓ outer → inner → it should call all parent beforeEach functions
 
    PASS  Tests\Features\BeforeEachProxiesToTestCallWithExpectations
   ✓ runs 1
@@ -1585,4 +1588,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 28 skipped, 1096 passed (2649 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 28 skipped, 1099 passed (2656 assertions)

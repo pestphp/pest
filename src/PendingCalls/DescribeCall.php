@@ -39,10 +39,12 @@ final class DescribeCall
 
     /**
      * What is the current describing.
+     *
+     * @return string[]
      */
-    public static function describing(): ?string
+    public static function describing(): array
     {
-        return self::$describing[count(self::$describing) - 1] ?? null;
+        return self::$describing;
     }
 
     /**
@@ -73,7 +75,7 @@ final class DescribeCall
         if (! $this->currentBeforeEachCall instanceof \Pest\PendingCalls\BeforeEachCall) {
             $this->currentBeforeEachCall = new BeforeEachCall(TestSuite::getInstance(), $filename);
 
-            $this->currentBeforeEachCall->describing = $this->description;
+            $this->currentBeforeEachCall->describing[] = $this->description;
         }
 
         $this->currentBeforeEachCall->{$name}(...$arguments); // @phpstan-ignore-line

@@ -25,3 +25,19 @@ it('gets executed before each test once again', function () {
 beforeEach(function () {
     $this->bar++;
 });
+
+describe('outer', function () {
+    beforeEach(function () {
+        $this->bar++;
+    });
+
+    describe('inner', function () {
+        beforeEach(function () {
+            $this->bar++;
+        });
+
+        it('should call all parent beforeEach functions', function () {
+            expect($this->bar)->toBe(3);
+        });
+    });
+});

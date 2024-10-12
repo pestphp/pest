@@ -11,11 +11,15 @@ trait Describable
 {
     /**
      * Note: this is property is not used; however, it gets added automatically by rector php.
+     *
+     * @var string[]
      */
-    public string $__describing;
+    public array $__describing;
 
     /**
      * The describing of the test case.
+     *
+     * @var string[]
      */
-    public ?string $describing = null;
+    public array $describing = [];
 }

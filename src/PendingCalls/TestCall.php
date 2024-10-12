@@ -76,7 +76,7 @@ final class TestCall // @phpstan-ignore-line
             throw new TestDescriptionMissing($this->filename);
         }
 
-        $description = is_null($this->describing)
+        $description = $this->describing === []
             ? $this->description
             : Str::describe($this->describing, $this->description);
 
@@ -683,7 +683,7 @@ final class TestCall // @phpstan-ignore-line
             throw new TestDescriptionMissing($this->filename);
         }
 
-        if (! is_null($this->describing)) {
+        if ($this->describing !== []) {
             $this->testCaseMethod->describing = $this->describing;
             $this->testCaseMethod->description = Str::describe($this->describing, $this->description);
         } else {
