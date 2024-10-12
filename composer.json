@@ -52,7 +52,7 @@
         ]
     },
     "require-dev": {
-        "pestphp/pest-dev-tools": "^3.0.0",
+        "pestphp/pest-dev-tools": "^3.2.0",
         "pestphp/pest-plugin-type-coverage": "^3.1.0",
         "symfony/process": "^7.1.5"
     },
