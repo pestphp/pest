@@ -15,7 +15,7 @@
   ↓ todo on describe → should not fail
   ↓ todo on describe → should run
 
-   TODO  Tests\Features\Todo - 7 todos
+   TODO  Tests\Features\Todo - 11 todos
   ↓ something todo later
   ↓ something todo later chained
   ↓ something todo later chained and with function body
@@ -24,6 +24,10 @@
   ↓ it may have an associated PR #1
   ↓ it may have an associated note
   // a note
+  ↓ todo on describe → todo block → nested inside todo block → it should not execute
+  ↓ todo on describe → todo block → it should not execute
+  ↓ todo on beforeEach → todo block → nested inside todo block → it should not execute
+  ↓ todo on beforeEach → todo block → it should not execute
 
    PASS  Tests\CustomTestCase\ChildTest
   ✓ override method
@@ -34,6 +38,6 @@
    PASS  Tests\CustomTestCase\ParentTest
   ✓ override method
 
-  Tests:    17 todos, 3 passed (3 assertions)
+  Tests:    21 todos, 3 passed (7 assertions)
   Duration: x.xxs
 

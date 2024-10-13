@@ -41,3 +41,13 @@ describe('outer', function () {
         });
     });
 });
+
+describe('with expectations', function () {
+    beforeEach()->expect(true)->toBeTrue();
+
+    describe('nested block', function () {
+        test('test', function () {});
+    });
+
+    test('test', function () {});
+});

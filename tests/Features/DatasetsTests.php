@@ -392,3 +392,25 @@ it('may be used with high order even when bound')
     ->with('greeting-bound')
     ->expect(fn (string $greeting) => $greeting)
     ->throws(InvalidArgumentException::class);
+
+describe('with on nested describe', function () {
+    describe('nested', function () {
+        test('before inner describe block', function (...$args) {
+            expect($args)->toBe([1]);
+        });
+
+        describe('describe', function () {
+            it('should include the with value from all parent describe blocks', function (...$args) {
+                expect($args)->toBe([1, 2]);
+            });
+
+            test('should include the with value from all parent describe blocks and the test', function (...$args) {
+                expect($args)->toBe([1, 2, 3]);
+            })->with([3]);
+        })->with([2]);
+
+        test('after inner describe block', function (...$args) {
+            expect($args)->toBe([1]);
+        });
+    })->with([1]);
+});

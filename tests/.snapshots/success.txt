@@ -43,6 +43,8 @@
   ✓ it gets executed before each test
   ✓ it gets executed before each test once again
   ✓ outer → inner → it should call all parent beforeEach functions
+  ✓ with expectations → nested block → test
+  ✓ with expectations → test
 
    PASS  Tests\Features\BeforeEachProxiesToTestCallWithExpectations
   ✓ runs 1
@@ -181,6 +183,10 @@
   ✓ it may be used with high order with dataset "informal"
   ✓ it may be used with high order even when bound with dataset "formal"
   ✓ it may be used with high order even when bound with dataset "informal"
+  ✓ with on nested describe → nested → before inner describe block with (1)
+  ✓ with on nested describe → nested → describe → it should include the with value from all parent describe blocks with (1) / (2)
+  ✓ with on nested describe → nested → describe → should include the with value from all parent describe blocks and the test with (1) / (2) / (3)
+  ✓ with on nested describe → nested → after inner describe block with (1)
 
    PASS  Tests\Features\Depends
   ✓ first
@@ -191,6 +197,12 @@
   ✓ depends run test only once
   ✓ it asserts true is true
   ✓ depends works with the correct test name
+  ✓ describe block → first in describe
+  ✓ describe block → second in describe
+  ✓ describe block → third in describe
+  ✓ describe block → nested describe → first in nested describe
+  ✓ describe block → nested describe → second in nested describe
+  ✓ describe block → nested describe → third in nested describe
 
    PASS  Tests\Features\DependsInheritance
   ✓ it is a test
@@ -1071,9 +1083,22 @@
   ✓ nested → it may have static note and runtime note
   // This is before each static note
   // This is describe static note
+  // This is before each describe static note
   // This is a static note within describe
   // This is before each runtime note
+  // This is before each describe runtime note
   // This is a runtime note within describe
+  ✓ nested → describe nested within describe → it may have a static note and runtime note
+  // This is before each static note
+  // This is describe static note
+  // This is before each describe static note
+  // This is a nested describe static note
+  // This is before each nested describe static note
+  // This is a static note within a nested describe
+  // This is before each runtime note
+  // This is before each describe runtime note
+  // This is before each nested describe runtime note
+  // This is a runtime note within a nested describe
   ✓ multiple notes
   // This is before each static note
   // This is before each runtime note
@@ -1203,6 +1228,23 @@
   ✓ multiple times with repeat iterator with multiple dataset ('c') / ('d') @ repetition 2 of 2
   ✓ multiple times with repeat iterator with multiple dataset ('c') / ('e') @ repetition 2 of 2
   ✓ multiple times with repeat iterator with multiple dataset ('c') / ('f') @ repetition 2 of 2
+  ✓ describe blocks → multiple times @ repetition 1 of 3
+  ✓ describe blocks → multiple times @ repetition 2 of 3
+  ✓ describe blocks → multiple times @ repetition 3 of 3
+  ✓ describe blocks → describe with repeat → test with no repeat should repeat the number of times specified in the parent describe block @ repetition 1 of 3
+  ✓ describe blocks → describe with repeat → test with no repeat should repeat the number of times specified in the parent describe block @ repetition 2 of 3
+  ✓ describe blocks → describe with repeat → test with no repeat should repeat the number of times specified in the parent describe block @ repetition 3 of 3
+  ✓ describe blocks → describe with repeat → test with repeat should repeat the number of times specified in the test @ repetition 1 of 2
+  ✓ describe blocks → describe with repeat → test with repeat should repeat the number of times specified in the test @ repetition 2 of 2
+  ✓ describe blocks → describe with repeat → nested describe without repeat → test with no repeat should repeat the number of times specified in the parent's parent describe block @ repetition 1 of 3
+  ✓ describe blocks → describe with repeat → nested describe without repeat → test with no repeat should repeat the number of times specified in the parent's parent describe block @ repetition 2 of 3
+  ✓ describe blocks → describe with repeat → nested describe without repeat → test with no repeat should repeat the number of times specified in the parent's parent describe block @ repetition 3 of 3
+  ✓ describe blocks → describe with repeat → nested describe without repeat → test with repeat should repeat the number of times specified in the test @ repetition 1 of 2
+  ✓ describe blocks → describe with repeat → nested describe without repeat → test with repeat should repeat the number of times specified in the test @ repetition 2 of 2
+  ✓ describe blocks → describe with repeat → nested describe with repeat → test with no repeat should repeat the number of times specified in the parent describe block @ repetition 1 of 2
+  ✓ describe blocks → describe with repeat → nested describe with repeat → test with no repeat should repeat the number of times specified in the parent describe block @ repetition 2 of 2
+  ✓ describe blocks → describe with repeat → nested describe with repeat → test with repeat should repeat the number of times specified in the test @ repetition 1 of 2
+  ✓ describe blocks → describe with repeat → nested describe with repeat → test with repeat should repeat the number of times specified in the test @ repetition 2 of 2
 
    PASS  Tests\Features\ScopedDatasets\Directory\NestedDirectory1\TestFileInNestedDirectoryWithDatasetsFile
   ✓ uses dataset with (1)
@@ -1259,6 +1301,12 @@
   - it skips when skip after assertion
   - it can use something in the test case as a condition → This test was skipped
   - it can user higher order callables and skip
+  - skip on describe → skipped tests → nested inside skipped block → it should not execute
+  - skip on describe → skipped tests → it should not execute
+  ✓ skip on describe → it should execute
+  - skip on beforeEach → skipped tests → nested inside skipped block → it should not execute
+  - skip on beforeEach → skipped tests → it should not execute
+  ✓ skip on beforeEach → it should execute
 
    WARN  Tests\Features\SkipOnPhp
   ✓ it can run on php version
@@ -1279,7 +1327,7 @@
   ✓ nested → it may be associated with an ticket #1, #4, #5, #6, #3
   // an note between an the ticket
 
-   PASS  Tests\Features\Todo - 7 todos
+   PASS  Tests\Features\Todo - 11 todos
   ↓ something todo later
   ↓ something todo later chained
   ↓ something todo later chained and with function body
@@ -1289,6 +1337,12 @@
   ↓ it may have an associated PR #1
   ↓ it may have an associated note
   // a note
+  ↓ todo on describe → todo block → nested inside todo block → it should not execute
+  ↓ todo on describe → todo block → it should not execute
+  ✓ todo on describe → it should execute
+  ↓ todo on beforeEach → todo block → nested inside todo block → it should not execute
+  ↓ todo on beforeEach → todo block → it should not execute
+  ✓ todo on beforeEach → it should execute
 
    WARN  Tests\Features\Warnings
   ! warning → Undefined property: P\Tests\Features\Warnings::$fooqwdfwqdfqw
@@ -1588,4 +1642,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 28 skipped, 1099 passed (2656 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 21 todos, 32 skipped, 1133 passed (2702 assertions)
