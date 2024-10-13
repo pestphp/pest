@@ -6,6 +6,7 @@ namespace Pest\PendingCalls;
 
 use Closure;
 use Pest\PendingCalls\Concerns\Describable;
+use Pest\Support\Arr;
 use Pest\Support\Backtrace;
 use Pest\Support\ChainableClosure;
 use Pest\Support\HigherOrderMessageCollection;
@@ -54,7 +55,7 @@ final class AfterEachCall
         $proxies = $this->proxies;
 
         $afterEachTestCase = ChainableClosure::boundWhen(
-            fn (): bool => $describing === [] || in_array(end($describing), $this->__describing, true),
+            fn (): bool => $describing === [] || in_array(Arr::last($describing), $this->__describing, true),
             ChainableClosure::bound(fn () => $proxies->chain($this), $this->closure)->bindTo($this, self::class), // @phpstan-ignore-line
         )->bindTo($this, self::class);
 

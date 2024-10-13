@@ -1491,6 +1491,13 @@
   ✓ preset invalid name
   ✓ preset → myFramework
 
+   PASS  Tests\Unit\Support\Arr
+  ✓ last → it should return false for an empty arary
+  ✓ last → it should return the last element for an array with a single element
+  ✓ last → it should return the last element for an array without changing the internal pointer
+  ✓ last → it should return the last element for an associative array without changing the internal pointer
+  ✓ last → it should return the last element for an mixed key array without changing the internal pointer
+
    PASS  Tests\Unit\Support\Backtrace
   ✓ it gets file name from called file
 
@@ -1642,4 +1649,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 21 todos, 32 skipped, 1133 passed (2702 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 21 todos, 32 skipped, 1138 passed (2719 assertions)
