@@ -104,7 +104,7 @@ final class Str
     /**
      * Creates a describe block as `$describeDescription` → `$testDescription` format.
      *
-     * @param  string[]  $describeDescriptions
+     * @param  array<int, string>  $describeDescriptions
      */
     public static function describe(array $describeDescriptions, string $testDescription): string
     {

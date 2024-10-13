@@ -16,7 +16,7 @@ final class DescribeCall
     /**
      * The current describe call.
      *
-     * @var string[]
+     * @var array<int, string>
      */
     private static array $describing = [];
 
@@ -40,7 +40,7 @@ final class DescribeCall
     /**
      * What is the current describing.
      *
-     * @return string[]
+     * @return array<int, string>
      */
     public static function describing(): array
     {

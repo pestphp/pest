@@ -62,7 +62,7 @@ trait Testable
     /**
      * The test's describing, if any.
      *
-     * @var string[]
+     * @var array<int, string>
      */
     public array $__describing = [];
 
