@@ -187,6 +187,10 @@
   ✓ with on nested describe → nested → describe → it should include the with value from all parent describe blocks with (1) / (2)
   ✓ with on nested describe → nested → describe → should include the with value from all parent describe blocks and the test with (1) / (2) / (3)
   ✓ with on nested describe → nested → after inner describe block with (1)
+  ✓ after describe block with (5)
+  ✓ it may be used with high order after describe block with dataset "formal"
+  ✓ it may be used with high order after describe block with dataset "informal"
+  ✓ after describe block with named dataset with ('after')
 
    PASS  Tests\Features\Depends
   ✓ first
@@ -203,6 +207,7 @@
   ✓ describe block → nested describe → first in nested describe
   ✓ describe block → nested describe → second in nested describe
   ✓ describe block → nested describe → third in nested describe
+  ✓ depends on test after describe block
 
    PASS  Tests\Features\DependsInheritance
   ✓ it is a test
@@ -1307,6 +1312,8 @@
   - skip on beforeEach → skipped tests → nested inside skipped block → it should not execute
   - skip on beforeEach → skipped tests → it should not execute
   ✓ skip on beforeEach → it should execute
+  ✓ it does not skip after the describe block
+  - it can skip after the describe block
 
    WARN  Tests\Features\SkipOnPhp
   ✓ it can run on php version
@@ -1327,7 +1334,7 @@
   ✓ nested → it may be associated with an ticket #1, #4, #5, #6, #3
   // an note between an the ticket
 
-   PASS  Tests\Features\Todo - 11 todos
+   PASS  Tests\Features\Todo - 28 todos
   ↓ something todo later
   ↓ something todo later chained
   ↓ something todo later chained and with function body
@@ -1338,11 +1345,53 @@
   ↓ it may have an associated note
   // a note
   ↓ todo on describe → todo block → nested inside todo block → it should not execute
+  ↓ todo on describe → todo block → nested inside todo block → it should set the note
+  // hi
+  ↓ todo on describe → todo block → describe with note → it should apply the note to a test without a todo
+  // describe note
+  ↓ todo on describe → todo block → describe with note → it should apply the note to a test with a todo
+  // describe note
+  ↓ todo on describe → todo block → describe with note → it should apply the note as well as the note from the test
+  // describe note
+  // test note
+  ↓ todo on describe → todo block → describe with note → nested describe with note → it should apply all parent notes to a test without a todo
+  // describe note
+  // nested describe note
+  ↓ todo on describe → todo block → describe with note → nested describe with note → it should apply all parent notes to a test with a todo
+  // describe note
+  // nested describe note
+  ↓ todo on describe → todo block → describe with note → nested describe with note → it should apply all parent notes as well as the note from the test
+  // describe note
+  // nested describe note
+  // test note
   ↓ todo on describe → todo block → it should not execute
   ✓ todo on describe → it should execute
+  ↓ todo on test after describe block
+  ↓ todo with note on test after describe block
+  // test note
   ↓ todo on beforeEach → todo block → nested inside todo block → it should not execute
+  ↓ todo on beforeEach → todo block → describe with note → it should apply the note to a test without a todo
+  // describe note
+  ↓ todo on beforeEach → todo block → describe with note → it should apply the note to a test with a todo
+  // describe note
+  ↓ todo on beforeEach → todo block → describe with note → it should apply the note as well as the note from the test
+  // describe note
+  // test note
+  ↓ todo on beforeEach → todo block → describe with note → nested describe with note → it should apply all parent notes to a test without a todo
+  // describe note
+  // nested describe note
+  ↓ todo on beforeEach → todo block → describe with note → nested describe with note → it should apply all parent notes to a test with a todo
+  // describe note
+  // nested describe note
+  ↓ todo on beforeEach → todo block → describe with note → nested describe with note → it should apply all parent notes as well as the note from the test
+  // describe note
+  // nested describe note
+  // test note
   ↓ todo on beforeEach → todo block → it should not execute
   ✓ todo on beforeEach → it should execute
+  ↓ todo on test after describe block with beforeEach
+  ↓ todo with note on test after describe block with beforeEach
+  // test note
 
    WARN  Tests\Features\Warnings
   ! warning → Undefined property: P\Tests\Features\Warnings::$fooqwdfwqdfqw
@@ -1649,4 +1698,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 21 todos, 32 skipped, 1138 passed (2719 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 38 todos, 33 skipped, 1144 passed (2736 assertions)

@@ -414,3 +414,18 @@ describe('with on nested describe', function () {
         });
     })->with([1]);
 });
+
+test('after describe block', function (...$args) {
+    expect($args)->toBe([5]);
+})->with([5]);
+
+it('may be used with high order after describe block')
+    ->with('greeting-string')
+    ->expect(fn (string $greeting) => $greeting)
+    ->throwsNoExceptions();
+
+dataset('after-describe', ['after']);
+
+test('after describe block with named dataset', function (...$args) {
+    expect($args)->toBe(['after']);
+})->with('after-describe');

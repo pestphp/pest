@@ -124,3 +124,11 @@ describe('skip on beforeEach', function () {
         expect($this->ran)->toBe(true);
     });
 });
+
+it('does not skip after the describe block', function () {
+    expect(true)->toBeTrue();
+});
+
+it('can skip after the describe block', function () {
+    expect(true)->toBeTrue();
+})->skip();

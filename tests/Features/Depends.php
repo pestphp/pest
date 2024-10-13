@@ -72,3 +72,7 @@ describe('describe block', function () {
         })->depends('second in nested describe');
     });
 });
+
+test('depends on test after describe block', function () use (&$runCounter) {
+    expect($runCounter)->toBe(2);
+})->depends('first', 'second');
