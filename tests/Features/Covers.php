@@ -5,6 +5,7 @@ use Pest\TestSuite;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversFunction;
 use Tests\Fixtures\Covers\CoversClass1;
+use Tests\Fixtures\Covers\CoversClass2;
 use Tests\Fixtures\Covers\CoversClass3;
 use Tests\Fixtures\Covers\CoversTrait;
 
@@ -53,7 +54,51 @@ it('uses the correct PHPUnit attribute for covers nothing', function () {
 })->coversNothing();
 
 it('throws exception if no class nor method has been found', function () {
-    $testCall = new TestCall(TestSuite::getInstance(), 'filename', 'description', fn () => 'closure');
+    $testCall = new TestCall(TestSuite::getInstance(), 'filename', 'no class nor method has been found', fn () => 'closure');
 
     $testCall->covers('fakeName');
-})->throws(InvalidArgumentException::class, 'No class, trait or method named "fakeName" has been found.');
+})->throws(InvalidArgumentException::class, 'No class, method, trait or function named "fakeName" has been found.');
+
+it('uses the correct PHPUnit attribute for covers with single class method as array', function () {
+    $attributes = (new ReflectionClass($this))->getAttributes();
+
+    expect($attributes[12]->getName())->toBe('PHPUnit\Framework\Attributes\CoversMethod');
+    expect($attributes[12]->getArguments()[0])->toBe('Tests\Fixtures\Covers\CoversClass1');
+    expect($attributes[12]->getArguments()[1])->toBe('foo');
+})->covers([[CoversClass1::class, 'foo']]);
+
+it('uses the correct PHPUnit attribute for covers with single class method', function () {
+    $attributes = (new ReflectionClass($this))->getAttributes();
+
+    expect($attributes[14]->getName())->toBe('PHPUnit\Framework\Attributes\CoversMethod');
+    expect($attributes[14]->getArguments()[0])->toBe('Tests\Fixtures\Covers\CoversClass1');
+    expect($attributes[14]->getArguments()[1])->toBe('foo');
+})->covers([CoversClass1::class, 'foo']);
+
+it('uses the correct PHPUnit attribute for mixed covers with class method', function () {
+    $attributes = (new ReflectionClass($this))->getAttributes();
+
+    expect($attributes[16]->getName())->toBe('PHPUnit\Framework\Attributes\CoversClass');
+    expect($attributes[16]->getArguments()[0])->toBe('Tests\Fixtures\Covers\CoversClass2');
+
+    expect($attributes[17]->getName())->toBe('PHPUnit\Framework\Attributes\CoversMethod');
+    expect($attributes[17]->getArguments()[0])->toBe('Tests\Fixtures\Covers\CoversClass1');
+    expect($attributes[17]->getArguments()[1])->toBe('foo');
+})->covers(CoversClass2::class, [CoversClass1::class, 'foo']);
+
+it('uses the correct PHPUnit attribute for mixed covers with class method as array', function () {
+    $attributes = (new ReflectionClass($this))->getAttributes();
+
+    expect($attributes[19]->getName())->toBe('PHPUnit\Framework\Attributes\CoversClass');
+    expect($attributes[19]->getArguments()[0])->toBe('Tests\Fixtures\Covers\CoversClass2');
+
+    expect($attributes[20]->getName())->toBe('PHPUnit\Framework\Attributes\CoversMethod');
+    expect($attributes[20]->getArguments()[0])->toBe('Tests\Fixtures\Covers\CoversClass1');
+    expect($attributes[20]->getArguments()[1])->toBe('foo');
+})->covers([CoversClass2::class, [CoversClass1::class, 'foo']]);
+
+it('throws exception if no class method has been found', function () {
+    $testCall = new TestCall(TestSuite::getInstance(), 'filename', 'no class method has been found', fn () => 'closure');
+
+    $testCall->covers([['fakeClass', 'fakeMethod']]);
+})->throws(InvalidArgumentException::class, 'No class, method, trait or function named "fakeClass::fakeMethod" has been found.');
