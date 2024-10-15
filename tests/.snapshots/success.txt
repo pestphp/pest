@@ -215,6 +215,7 @@
   ✓ depends on describe → bar
   ✓ depends on describe using with → foo with (3)
   ✓ depends on describe using with → bar with (3)
+  ✓ with test after describe → it should run the before each
 
    PASS  Tests\Features\DescriptionLess
   ✓ get 'foo'
@@ -1584,4 +1585,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 28 skipped, 1095 passed (2648 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 28 skipped, 1096 passed (2649 assertions)
