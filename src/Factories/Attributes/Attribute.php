@@ -20,7 +20,7 @@ abstract class Attribute
      * @param  array<int, string>  $attributes
      * @return array<int, string>
      */
-    public function __invoke(TestCaseMethodFactory $method, array $attributes): array  // @phpstan-ignore-line
+    public function __invoke(TestCaseMethodFactory $method, array $attributes): array
     {
         return $attributes;
     }

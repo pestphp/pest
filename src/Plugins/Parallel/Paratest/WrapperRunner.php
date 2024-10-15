@@ -391,7 +391,7 @@ final class WrapperRunner implements RunnerInterface
 
         $testSuite = (new LogMerger)->merge($this->junitFiles);
         (new Writer)->write(
-            $testSuite,
+            $testSuite, // @phpstan-ignore-line
             $this->options->configuration->logfileJunit(),
         );
     }

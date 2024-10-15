@@ -1173,16 +1173,6 @@
    PASS  Tests\Hooks\BeforeEachTest
   ✓ global beforeEach execution order
 
-   PASS  Tests\Overrides\VersionsTest
-  ✓ versions with dataset "Runner/Filter/NameFilterIterator.php"
-  ✓ versions with dataset "Runner/ResultCache/DefaultResultCache.php"
-  ✓ versions with dataset "Runner/TestSuiteLoader.php"
-  ✓ versions with dataset "TextUI/Command/Commands/WarmCodeCoverageCacheCommand.php"
-  ✓ versions with dataset "TextUI/Output/Default/ProgressPrinter/Subscriber/TestSkippedSubscriber.php"
-  ✓ versions with dataset "TextUI/TestSuiteFilterProcessor.php"
-  ✓ versions with dataset "Event/Value/ThrowableBuilder.php"
-  ✓ versions with dataset "Logging/JUnit/JunitXmlLogger.php"
-
    PASS  Tests\PHPUnit\CustomAffixes\InvalidTestName
   ✓ it runs file names like @#$%^&()-_=+.php
 
@@ -1286,26 +1276,6 @@
   ✓ it creates an instance and resolves also sub parameters
   ✓ it can resolve builtin value types
   ✓ it cannot resolve a parameter without type
-
-   PASS  Tests\Unit\Support\DatasetInfo
-  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Datase…rs.php', true)
-  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Datasets.php', false)
-  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur…rs.php', true)
-  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur…rs.php', false)
-  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur…ts.php', false)
-  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Datase…rs.php', false)
-  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Datasets.php', true)
-  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur…rs.php', false) #1
-  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur…rs.php', false) #2
-  ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur…ts.php', true)
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Datase…rs.php', '/var/www/project/tests')
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Datasets.php', '/var/www/project/tests')
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Features')
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Featur…rs.php') #1
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…ts.php', '/var/www/project/tests/Features')
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Featur…ollers')
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Featur…rs.php') #2
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…ts.php', '/var/www/project/tests/Featur…ollers')
 
    PASS  Tests\Unit\Support\ExceptionTrace
   ✓ it ensures the given closures reports the correct class name
@@ -1425,4 +1395,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 20 skipped, 1014 passed (2407 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 13 todos, 20 skipped, 988 passed (2381 assertions)
