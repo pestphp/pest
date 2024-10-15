@@ -27,6 +27,7 @@
         "phpunit/phpunit": "^11.4.1"
     },
     "conflict": {
+        "filp/whoops": "<2.16.0",
         "phpunit/phpunit": ">11.4.1",
         "sebastian/exporter": "<6.0.0",
         "webmozart/assert": "<1.11.0"
