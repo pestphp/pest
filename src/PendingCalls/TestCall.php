@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\PendingCalls;
 
 use Closure;
+use Pest\Concerns\Extendable;
 use Pest\Concerns\Testable;
 use Pest\Exceptions\InvalidArgumentException;
 use Pest\Exceptions\TestDescriptionMissing;
@@ -31,6 +32,9 @@ use PHPUnit\Framework\TestCase;
 final class TestCall // @phpstan-ignore-line
 {
     use Describable;
+    use Extendable {
+        extend as traitExtend;
+    }
 
     /**
      * The list of test case factory attributes.
@@ -643,7 +647,23 @@ final class TestCall // @phpstan-ignore-line
      */
     public function __call(string $name, array $arguments): self
     {
+        if (self::hasExtend($name)) {
+            $extend = self::$extends[$name]->bindTo($this, TestCall::class);
+
+            if ($extend != false) { // @pest-arch-ignore-line
+                return $extend(...$arguments);
+            }
+        }
+
         return $this->addChain(Backtrace::file(), Backtrace::line(), $name, $arguments);
+    }
+
+    public function extend(string $name, Closure $extend): void
+    {
+        $this->traitExtend($name, $extend);
+
+        $this->description = "extend: $name";
+        $this->testCaseMethod->closure = fn (): null => null;
     }
 
     /**
