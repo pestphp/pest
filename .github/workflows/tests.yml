@@ -37,12 +37,7 @@ jobs:
 
     - name: Install PHP dependencies
       shell: bash
-      run: |
-        if [[ "${{ matrix.php }}" == "8.4" ]]; then
-          composer update --${{ matrix.dependency_version }} --no-interaction --no-progress --ansi --with="symfony/console:^${{ matrix.symfony }}" --ignore-platform-req=php
-        else
-          composer update --${{ matrix.dependency_version }} --no-interaction --no-progress --ansi --with="symfony/console:^${{ matrix.symfony }}"
-        fi
+      run: composer update --${{ matrix.dependency_version }} --no-interaction --no-progress --ansi --with="symfony/console:^${{ matrix.symfony }}"
 
     - name: Unit Tests
       run: composer test:unit
@@ -51,5 +46,4 @@ jobs:
       run: composer test:parallel
 
     - name: Integration Tests
-      if: ${{ matrix.php != '8.4' }}
       run: composer test:integration

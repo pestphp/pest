@@ -1,6 +1,5 @@
 includes:
     - vendor/phpstan/phpstan-strict-rules/rules.neon
-    - vendor/ergebnis/phpstan-rules/rules.neon
     - vendor/thecodingmachine/phpstan-strict-rules/phpstan-strict-rules.neon
 
 parameters:
@@ -12,12 +11,4 @@ parameters:
     reportUnmatchedIgnoredErrors: true
 
     ignoreErrors:
-        - "#has a nullable return type declaration.#"
-        - "#Language construct isset\\(\\) should not be used.#"
-        - "#is not allowed to extend#"
-        - "#is concrete, but does not have a Test suffix#"
-        - "#with a nullable type declaration#"
         - "#type mixed is not subtype of native#"
-        - "# with null as default value#"
-        - "#has parameter \\$closure with default value.#"
-        - "#has parameter \\$description with default value.#"
