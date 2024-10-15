@@ -54,3 +54,81 @@ it('can user higher order callables and skip')
         return $this->shouldSkip;
     })
     ->toBeFalse();
+
+describe('skip on describe', function () {
+    beforeEach(function () {
+        $this->ran = false;
+    });
+
+    afterEach(function () {
+        match ($this->name()) {
+            '__pest_evaluable__skip_on_describe__→__skipped_tests__→__nested_inside_skipped_block__→_it_should_not_execute' => expect($this->ran)->toBe(false),
+            '__pest_evaluable__skip_on_describe__→__skipped_tests__→_it_should_not_execute' => expect($this->ran)->toBe(false),
+            '__pest_evaluable__skip_on_describe__→_it_should_execute' => expect($this->ran)->toBe(true),
+            default => $this->fail('Unexpected test name: '.$this->name()),
+        };
+    });
+
+    describe('skipped tests', function () {
+        describe('nested inside skipped block', function () {
+            it('should not execute', function () {
+                $this->ran = true;
+                $this->fail();
+            });
+        });
+
+        it('should not execute', function () {
+            $this->ran = true;
+            $this->fail();
+        });
+    })->skip();
+
+    it('should execute', function () {
+        $this->ran = true;
+        expect($this->ran)->toBe(true);
+    });
+});
+
+describe('skip on beforeEach', function () {
+    beforeEach(function () {
+        $this->ran = false;
+    });
+
+    afterEach(function () {
+        match ($this->name()) {
+            '__pest_evaluable__skip_on_beforeEach__→__skipped_tests__→__nested_inside_skipped_block__→_it_should_not_execute' => expect($this->ran)->toBe(false),
+            '__pest_evaluable__skip_on_beforeEach__→__skipped_tests__→_it_should_not_execute' => expect($this->ran)->toBe(false),
+            '__pest_evaluable__skip_on_beforeEach__→_it_should_execute' => expect($this->ran)->toBe(true),
+            default => $this->fail('Unexpected test name: '.$this->name()),
+        };
+    });
+
+    describe('skipped tests', function () {
+        beforeEach()->skip();
+
+        describe('nested inside skipped block', function () {
+            it('should not execute', function () {
+                $this->ran = true;
+                $this->fail();
+            });
+        });
+
+        it('should not execute', function () {
+            $this->ran = true;
+            $this->fail();
+        });
+    });
+
+    it('should execute', function () {
+        $this->ran = true;
+        expect($this->ran)->toBe(true);
+    });
+});
+
+it('does not skip after the describe block', function () {
+    expect(true)->toBeTrue();
+});
+
+it('can skip after the describe block', function () {
+    expect(true)->toBeTrue();
+})->skip();
