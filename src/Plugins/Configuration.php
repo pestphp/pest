@@ -34,7 +34,7 @@ final class Configuration implements HandlesArguments, Terminable
      */
     public function handleArguments(array $arguments): array
     {
-        if ($this->hasArgument('--configuration', $arguments) || $this->hasCustomConfigurationFile()) {
+        if ($this->hasArgument('--configuration', $arguments) || $this->hasArgument('-c', $arguments) || $this->hasCustomConfigurationFile()) {
             return $arguments;
         }
 
