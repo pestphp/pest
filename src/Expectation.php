@@ -32,6 +32,7 @@ use Pest\Matchers\Any;
 use Pest\Support\ExpectationPipeline;
 use Pest\Support\Reflection;
 use PHPUnit\Architecture\Elements\ObjectDescription;
+use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\ExpectationFailedException;
 use ReflectionEnum;
 use ReflectionMethod;
@@ -322,6 +323,39 @@ final class Expectation
         }
 
         return $this;
+    }
+
+    /**
+     * Asserts that any one of the given tests pass with the given expectation target.
+     *
+     * @param  (\Closure(self<TValue>): (mixed|void))  ...$tests
+     * @return self<TValue>
+     *
+     * @throws AssertionFailedError Rethrows first caught exception on failure
+     */
+    public function toPassAny(\Closure ...$tests): Expectation
+    {
+        $firstException = null;
+
+        // Ignore calls that include no tests
+        if ($tests === []) {
+            return $this;
+        }
+
+        foreach ($tests as $test) {
+            try {
+                $test(new Expectation($this->value));
+            } catch (AssertionFailedError $e) {
+                $firstException ??= $e;
+
+                continue;
+            }
+
+            return $this;
+        }
+
+        /** @var AssertionFailedError $firstException */
+        throw $firstException;
     }
 
     /**
