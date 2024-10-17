@@ -27,6 +27,8 @@ use ReflectionNamedType;
 use Throwable;
 use Traversable;
 
+use function Pest\getArrayDepth;
+
 /**
  * @internal
  *
@@ -433,6 +435,20 @@ final class Expectation
     public function toBeArray(string $message = ''): self
     {
         Assert::assertIsArray($this->value, $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is an array of depth = $depth.
+     *
+     * @return self<TValue>
+     */
+    public function toBeDeepOf(int $depth, string $message = ''): self
+    {
+        Assert::assertIsArray($this->value, $message);
+
+        Assert::assertEquals(getArrayDepth($this->value), $depth, $message);
 
         return $this;
     }

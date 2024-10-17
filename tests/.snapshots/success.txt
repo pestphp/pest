@@ -403,6 +403,13 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toBeDeepOf
+  ✓ pass
+  ✓ failures
+  ✓ failures when not array passed
+  ✓ failures with custom message
+  ✓ not failures
+
    PASS  Tests\Features\Expect\toBeDigits
   ✓ pass
   ✓ failures
@@ -1584,4 +1591,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 28 skipped, 1095 passed (2648 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 28 skipped, 1100 passed (2669 assertions)
