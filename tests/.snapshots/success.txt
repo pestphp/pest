@@ -407,6 +407,7 @@
   ✓ pass
   ✓ failures
   ✓ failures when not array passed
+  ✓ failures when depth is negative
   ✓ failures with custom message
   ✓ not failures
 
@@ -1591,4 +1592,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 28 skipped, 1100 passed (2669 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 17 todos, 28 skipped, 1101 passed (2687 assertions)

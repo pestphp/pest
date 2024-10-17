@@ -2,8 +2,6 @@
 
 use PHPUnit\Framework\ExpectationFailedException;
 
-uses()->group('deep');
-
 test('pass', function () {
     expect([])->toBeDeepOf(0);
     expect([1, 2, 3])->toBeDeepOf(0);
@@ -18,6 +16,10 @@ test('failures', function () {
 
 test('failures when not array passed', function () {
     expect('not array')->toBeDeepOf(1);
+})->throws(ExpectationFailedException::class);
+
+test('failures when depth is negative', function () {
+    expect([])->toBeDeepOf(-1);
 })->throws(ExpectationFailedException::class);
 
 test('failures with custom message', function () {

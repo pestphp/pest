@@ -447,6 +447,7 @@ final class Expectation
     public function toBeDeepOf(int $depth, string $message = ''): self
     {
         Assert::assertIsArray($this->value, $message);
+        Assert::assertGreaterThanOrEqual(0, $depth, $message);
 
         Assert::assertEquals(getArrayDepth($this->value), $depth, $message);
 
