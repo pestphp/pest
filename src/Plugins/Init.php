@@ -119,6 +119,6 @@ final class Init implements HandlesArguments
      */
     private function isLaravelInstalled(): bool
     {
-        return InstalledVersions::isInstalled('laravel/laravel');
+        return InstalledVersions::isInstalled('laravel/laravel') || InstalledVersions::isInstalled('laravel/framework');
     }
 }
