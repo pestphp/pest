@@ -43,3 +43,39 @@ test('multiple times with repeat iterator with multiple dataset', function (stri
         ->toBeNumeric()
         ->toBeGreaterThan(0);
 })->repeat(times: 2)->with(['a', 'b', 'c'], ['d', 'e', 'f']);
+
+describe('describe blocks', function () {
+    test('multiple times', function () {
+        expect(true)->toBeTrue();
+    })->repeat(times: 3);
+
+    describe('describe with repeat', function () {
+        test('test with no repeat should repeat the number of times specified in the parent describe block', function () {
+            expect(true)->toBeTrue();
+        });
+
+        test('test with repeat should repeat the number of times specified in the test', function () {
+            expect(true)->toBeTrue();
+        })->repeat(times: 2);
+
+        describe('nested describe without repeat', function () {
+            test("test with no repeat should repeat the number of times specified in the parent's parent describe block", function () {
+                expect(true)->toBeTrue();
+            });
+
+            test('test with repeat should repeat the number of times specified in the test', function () {
+                expect(true)->toBeTrue();
+            })->repeat(times: 2);
+        });
+
+        describe('nested describe with repeat', function () {
+            test('test with no repeat should repeat the number of times specified in the parent describe block', function () {
+                expect(true)->toBeTrue();
+            });
+
+            test('test with repeat should repeat the number of times specified in the test', function () {
+                expect(true)->toBeTrue();
+            })->repeat(times: 2);
+        })->repeat(times: 2);
+    })->repeat(times: 3);
+});

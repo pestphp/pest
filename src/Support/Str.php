@@ -103,10 +103,14 @@ final class Str
 
     /**
      * Creates a describe block as `$describeDescription` → `$testDescription` format.
+     *
+     * @param  array<int, string>  $describeDescriptions
      */
-    public static function describe(string $describeDescription, string $testDescription): string
+    public static function describe(array $describeDescriptions, string $testDescription): string
     {
-        return sprintf('`%s` → %s', $describeDescription, $testDescription);
+        $descriptionComponents = [...$describeDescriptions, $testDescription];
+
+        return sprintf(str_repeat('`%s` → ', count($describeDescriptions)).'%s', ...$descriptionComponents);
     }
 
     /**

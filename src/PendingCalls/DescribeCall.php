@@ -15,8 +15,10 @@ final class DescribeCall
 {
     /**
      * The current describe call.
+     *
+     * @var array<int, string>
      */
-    private static ?string $describing = null;
+    private static array $describing = [];
 
     /**
      * The describe "before each" call.
@@ -37,8 +39,10 @@ final class DescribeCall
 
     /**
      * What is the current describing.
+     *
+     * @return array<int, string>
      */
-    public static function describing(): ?string
+    public static function describing(): array
     {
         return self::$describing;
     }
@@ -50,12 +54,12 @@ final class DescribeCall
     {
         unset($this->currentBeforeEachCall);
 
-        self::$describing = $this->description;
+        self::$describing[] = $this->description;
 
         try {
             ($this->tests)();
         } finally {
-            self::$describing = null;
+            array_pop(self::$describing);
         }
     }
 
@@ -71,7 +75,7 @@ final class DescribeCall
         if (! $this->currentBeforeEachCall instanceof \Pest\PendingCalls\BeforeEachCall) {
             $this->currentBeforeEachCall = new BeforeEachCall(TestSuite::getInstance(), $filename);
 
-            $this->currentBeforeEachCall->describing = $this->description;
+            $this->currentBeforeEachCall->describing[] = $this->description;
         }
 
         $this->currentBeforeEachCall->{$name}(...$arguments); // @phpstan-ignore-line
