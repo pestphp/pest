@@ -15,8 +15,10 @@ final class DescribeCall
 {
     /**
      * The current describe call.
+     *
+     * @var string[]
      */
-    private static ?string $describing = null;
+    private static array $describing = [];
 
     /**
      * The describe "before each" call.
@@ -40,7 +42,7 @@ final class DescribeCall
      */
     public static function describing(): ?string
     {
-        return self::$describing;
+        return self::$describing[count(self::$describing) - 1] ?? null;
     }
 
     /**
@@ -50,12 +52,12 @@ final class DescribeCall
     {
         unset($this->currentBeforeEachCall);
 
-        self::$describing = $this->description;
+        self::$describing[] = $this->description;
 
         try {
             ($this->tests)();
         } finally {
-            self::$describing = null;
+            array_pop(self::$describing);
         }
     }
 

@@ -96,3 +96,15 @@ describe('depends on describe using with', function () {
         expect($foo + $foo)->toBe(6);
     })->depends('foo');
 })->with([3]);
+
+describe('with test after describe', function () {
+    beforeEach(function () {
+        $this->count++;
+    });
+
+    describe('foo', function () {});
+
+    it('should run the before each', function () {
+        expect($this->count)->toBe(2);
+    });
+});
