@@ -22,6 +22,7 @@ use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Constraint\Constraint;
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 use ReflectionFunction;
 use ReflectionNamedType;
 use Throwable;
@@ -1156,6 +1157,35 @@ final class Expectation
         }
 
         Assert::assertTrue(Str::isUrl((string) $this->value), $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is anonymous
+     *
+     * @return self<TValue>
+     */
+    public function toBeAnonymous(string $message = ''): self
+    {
+        $value = $this->value;
+
+        if ($message === '') {
+            $message = 'Failed asserting that a given value is anonymous.';
+        }
+
+        if (! is_object($value) && ! is_string($value)) {
+            throw new ExpectationFailedException($message);
+        }
+
+        try {
+            $name = is_object($value) ? $value::class : $value;
+
+            /* @phpstan-ignore-next-line */
+            Assert::assertTrue((new ReflectionClass($name))->isAnonymous(), $message);
+        } catch (Throwable) {
+            throw new ExpectationFailedException($message);
+        }
 
         return $this;
     }
