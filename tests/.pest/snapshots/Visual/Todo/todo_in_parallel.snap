@@ -15,7 +15,7 @@
   ↓ todo on describe → should not fail
   ↓ todo on describe → should run
 
-   TODO  Tests\Features\Todo - 7 todos
+   TODO  Tests\Features\Todo - 28 todos
   ↓ something todo later
   ↓ something todo later chained
   ↓ something todo later chained and with function body
@@ -24,6 +24,52 @@
   ↓ it may have an associated PR #1
   ↓ it may have an associated note
   // a note
+  ↓ todo on describe → todo block → nested inside todo block → it should not execute
+  ↓ todo on describe → todo block → nested inside todo block → it should set the note
+  // hi
+  ↓ todo on describe → todo block → describe with note → it should apply the note to a test without a todo
+  // describe note
+  ↓ todo on describe → todo block → describe with note → it should apply the note to a test with a todo
+  // describe note
+  ↓ todo on describe → todo block → describe with note → it should apply the note as well as the note from the test
+  // describe note
+  // test note
+  ↓ todo on describe → todo block → describe with note → nested describe with note → it should apply all parent notes to a test without a todo
+  // describe note
+  // nested describe note
+  ↓ todo on describe → todo block → describe with note → nested describe with note → it should apply all parent notes to a test with a todo
+  // describe note
+  // nested describe note
+  ↓ todo on describe → todo block → describe with note → nested describe with note → it should apply all parent notes as well as the note from the test
+  // describe note
+  // nested describe note
+  // test note
+  ↓ todo on describe → todo block → it should not execute
+  ↓ todo on test after describe block
+  ↓ todo with note on test after describe block
+  // test note
+  ↓ todo on beforeEach → todo block → nested inside todo block → it should not execute
+  ↓ todo on beforeEach → todo block → describe with note → it should apply the note to a test without a todo
+  // describe note
+  ↓ todo on beforeEach → todo block → describe with note → it should apply the note to a test with a todo
+  // describe note
+  ↓ todo on beforeEach → todo block → describe with note → it should apply the note as well as the note from the test
+  // describe note
+  // test note
+  ↓ todo on beforeEach → todo block → describe with note → nested describe with note → it should apply all parent notes to a test without a todo
+  // describe note
+  // nested describe note
+  ↓ todo on beforeEach → todo block → describe with note → nested describe with note → it should apply all parent notes to a test with a todo
+  // describe note
+  // nested describe note
+  ↓ todo on beforeEach → todo block → describe with note → nested describe with note → it should apply all parent notes as well as the note from the test
+  // describe note
+  // nested describe note
+  // test note
+  ↓ todo on beforeEach → todo block → it should not execute
+  ↓ todo on test after describe block with beforeEach
+  ↓ todo with note on test after describe block with beforeEach
+  // test note
 
    PASS  Tests\CustomTestCase\ChildTest
   ✓ override method
@@ -34,6 +80,6 @@
    PASS  Tests\CustomTestCase\ParentTest
   ✓ override method
 
-  Tests:    17 todos, 3 passed (3 assertions)
+  Tests:    38 todos, 3 passed (20 assertions)
   Duration: x.xxs
 

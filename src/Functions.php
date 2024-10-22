@@ -43,7 +43,7 @@ if (! function_exists('beforeAll')) {
      */
     function beforeAll(Closure $closure): void
     {
-        if (! is_null(DescribeCall::describing())) {
+        if (DescribeCall::describing() !== []) {
             $filename = Backtrace::file();
 
             throw new BeforeAllWithinDescribe($filename);
@@ -205,7 +205,7 @@ if (! function_exists('afterAll')) {
      */
     function afterAll(Closure $closure): void
     {
-        if (! is_null(DescribeCall::describing())) {
+        if (DescribeCall::describing() !== []) {
             $filename = Backtrace::file();
 
             throw new AfterAllWithinDescribe($filename);

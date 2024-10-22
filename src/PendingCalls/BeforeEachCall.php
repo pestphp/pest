@@ -7,6 +7,7 @@ namespace Pest\PendingCalls;
 use Closure;
 use Pest\Exceptions\AfterBeforeTestFunction;
 use Pest\PendingCalls\Concerns\Describable;
+use Pest\Support\Arr;
 use Pest\Support\Backtrace;
 use Pest\Support\ChainableClosure;
 use Pest\Support\HigherOrderMessageCollection;
@@ -63,12 +64,12 @@ final class BeforeEachCall
 
         $beforeEachTestCall = function (TestCall $testCall) use ($describing): void {
 
-            if ($this->describing !== null) {
-                if ($describing !== $this->describing) {
+            if ($this->describing !== []) {
+                if (Arr::last($describing) !== Arr::last($this->describing)) {
                     return;
                 }
 
-                if ($describing !== $testCall->describing) {
+                if (! in_array(Arr::last($describing), $testCall->describing, true)) {
                     return;
                 }
             }
@@ -77,7 +78,7 @@ final class BeforeEachCall
         };
 
         $beforeEachTestCase = ChainableClosure::boundWhen(
-            fn (): bool => is_null($describing) || $this->__describing === $describing,
+            fn (): bool => $describing === [] || in_array(Arr::last($describing), $this->__describing, true),
             ChainableClosure::bound(fn () => $testCaseProxies->chain($this), $this->closure)->bindTo($this, self::class), // @phpstan-ignore-line
         )->bindTo($this, self::class);
 
@@ -96,7 +97,7 @@ final class BeforeEachCall
      */
     public function after(Closure $closure): self
     {
-        if ($this->describing === null) {
+        if ($this->describing === []) {
             throw new AfterBeforeTestFunction($this->filename);
         }
 

@@ -81,4 +81,14 @@ final class Arr
 
         return $results;
     }
+
+    /**
+     * Returns the value of the last element or false for empty array
+     *
+     * @param  array<array-key, mixed>  $array
+     */
+    public static function last(array $array): mixed
+    {
+        return end($array);
+    }
 }

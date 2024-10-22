@@ -61,8 +61,10 @@ trait Testable
 
     /**
      * The test's describing, if any.
+     *
+     * @var array<int, string>
      */
-    public ?string $__describing = null;
+    public array $__describing = [];
 
     /**
      * Whether the test has ran or not.

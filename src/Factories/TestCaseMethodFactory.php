@@ -31,8 +31,10 @@ final class TestCaseMethodFactory
 
     /**
      * The test's describing, if any.
+     *
+     * @var array<int, string>
      */
-    public ?string $describing = null;
+    public array $describing = [];
 
     /**
      * The test's description, if any.
@@ -201,7 +203,7 @@ final class TestCaseMethodFactory
         ];
 
         foreach ($this->depends as $depend) {
-            $depend = Str::evaluable($this->describing !== null ? Str::describe($this->describing, $depend) : $depend);
+            $depend = Str::evaluable($this->describing === [] ? $depend : Str::describe($this->describing, $depend));
 
             $this->attributes[] = new Attribute(
                 \PHPUnit\Framework\Attributes\Depends::class,
