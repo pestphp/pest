@@ -29,6 +29,12 @@
   ✓ it gets executed after the test
   ✓ outer → inner → it does not get executed before the test
   ✓ outer → inner → it should call all parent afterEach functions
+  ✓ matching describe block names → outer → middle → inner → it does not get executed before the test
+  ✓ matching describe block names → outer → middle → inner → it should call all parent afterEach functions
+  ✓ matching describe block names → outer → middle → it does not get executed before the test
+  ✓ matching describe block names → outer → middle → it should not call afterEach functions for sibling describe blocks with the same name
+  ✓ matching describe block names → outer → inner → it does not get executed before the test
+  ✓ matching describe block names → outer → inner → it should not call afterEach functions for descendent of sibling describe blocks with the same name
 
    PASS  Tests\Features\Assignee
   ✓ it may be associated with an assignee [@nunomaduro, @taylorotwell]
@@ -45,6 +51,13 @@
   ✓ outer → inner → it should call all parent beforeEach functions
   ✓ with expectations → nested block → test
   ✓ with expectations → test
+  ✓ matching describe block names → outer → middle → inner → it should call all parent beforeEach functions
+  ✓ matching describe block names → outer → middle → it should not call beforeEach functions for sibling describe blocks with the same name
+  ✓ matching describe block names → outer → inner → it should not call beforeEach functions for descendent of sibling describe blocks with the same name
+  ✓ matching name → it should call the before each
+  ✓ matching name → it should not call the before each on the describe block with the same name
+  ✓ called on all tests → beforeEach should be called
+  ✓ called on all tests → beforeEach should be called for all tests
 
    PASS  Tests\Features\BeforeEachProxiesToTestCallWithExpectations
   ✓ runs 1
@@ -187,6 +200,11 @@
   ✓ with on nested describe → nested → describe → it should include the with value from all parent describe blocks with (1) / (2)
   ✓ with on nested describe → nested → describe → should include the with value from all parent describe blocks and the test with (1) / (2) / (3)
   ✓ with on nested describe → nested → after inner describe block with (1)
+  ✓ matching describe block names → outer → before inner describe block with (1)
+  ✓ matching describe block names → outer → inner → it should include the with value from all parent describe blocks with (1) / (2)
+  ✓ matching describe block names → outer → inner → should include the with value from all parent describe blocks and the test with (1) / (2) / (3)
+  ✓ matching describe block names → outer → inner → it should not include the value from the other describe block with the same name with (1)
+  ✓ matching describe block names → outer → after inner describe block with (1)
   ✓ after describe block with (5)
   ✓ it may be used with high order after describe block with dataset "formal"
   ✓ it may be used with high order after describe block with dataset "informal"
@@ -1104,6 +1122,25 @@
   // This is before each describe runtime note
   // This is before each nested describe runtime note
   // This is a runtime note within a nested describe
+  ✓ matching describe names → describe block → it may have a static note and runtime note
+  // This is before each static note
+  // This is before each matching describe static note
+  // This is a nested matching static note
+  // This is a static note within a matching describe
+  // This is before each runtime note
+  // This is before each matching describe runtime note
+  // This is before each matching describe runtime note
+  // This is a runtime note within a matching describe
+  ✓ matching describe names → describe block → it may have a static note and runtime note, that are different than the matching describe block
+  // This is before each static note
+  // This is before each matching describe static note
+  // This is a nested matching static note, and should not contain the matching describe notes
+  // This is before each matching describe static note, and should not contain the matching describe notes
+  // This is a static note within a matching describe, and should not contain the matching describe notes
+  // This is before each runtime note
+  // This is before each matching describe runtime note
+  // This is before each matching describe runtime note, and should not contain the matching describe notes
+  // This is a runtime note within a matching describe, and should not contain the matching describe notes
   ✓ multiple notes
   // This is before each static note
   // This is before each runtime note
@@ -1250,6 +1287,10 @@
   ✓ describe blocks → describe with repeat → nested describe with repeat → test with no repeat should repeat the number of times specified in the parent describe block @ repetition 2 of 2
   ✓ describe blocks → describe with repeat → nested describe with repeat → test with repeat should repeat the number of times specified in the test @ repetition 1 of 2
   ✓ describe blocks → describe with repeat → nested describe with repeat → test with repeat should repeat the number of times specified in the test @ repetition 2 of 2
+  ✓ matching describe blocks → describe block → it should repeat the number of times specified in the parent describe block @ repetition 1 of 3
+  ✓ matching describe blocks → describe block → it should repeat the number of times specified in the parent describe block @ repetition 2 of 3
+  ✓ matching describe blocks → describe block → it should repeat the number of times specified in the parent describe block @ repetition 3 of 3
+  ✓ matching describe blocks → describe block → should not repeat the number of times of the describe block with the same name
 
    PASS  Tests\Features\ScopedDatasets\Directory\NestedDirectory1\TestFileInNestedDirectoryWithDatasetsFile
   ✓ uses dataset with (1)
@@ -1312,6 +1353,12 @@
   - skip on beforeEach → skipped tests → nested inside skipped block → it should not execute
   - skip on beforeEach → skipped tests → it should not execute
   ✓ skip on beforeEach → it should execute
+  - matching describe with skip → describe block → it should not execute
+  ✓ matching describe with skip → describe block → it should execute a test in a describe block with the same name as a skipped describe block
+  ✓ matching describe with skip → it should execute
+  - matching describe with skip on beforeEach → describe block → it should not execute
+  ✓ matching describe with skip on beforeEach → describe block → it should execute a test in a describe block with the same name as a skipped describe block
+  ✓ matching describe with skip on beforeEach → it should execute
   ✓ it does not skip after the describe block
   - it can skip after the describe block
 
@@ -1334,7 +1381,7 @@
   ✓ nested → it may be associated with an ticket #1, #4, #5, #6, #3
   // an note between an the ticket
 
-   PASS  Tests\Features\Todo - 28 todos
+   PASS  Tests\Features\Todo - 29 todos
   ↓ something todo later
   ↓ something todo later chained
   ↓ something todo later chained and with function body
@@ -1366,6 +1413,9 @@
   // test note
   ↓ todo on describe → todo block → it should not execute
   ✓ todo on describe → it should execute
+  ↓ todo on describe with matching name → describe block → it should not execute
+  ✓ todo on describe with matching name → describe block → it should execute a test in a describe block with the same name as a todo describe block
+  ✓ todo on describe with matching name → it should execute
   ↓ todo on test after describe block
   ↓ todo with note on test after describe block
   // test note
@@ -1698,4 +1748,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 38 todos, 33 skipped, 1144 passed (2736 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 39 todos, 35 skipped, 1174 passed (2777 assertions)

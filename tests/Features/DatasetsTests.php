@@ -415,6 +415,34 @@ describe('with on nested describe', function () {
     })->with([1]);
 });
 
+describe('matching describe block names', function () {
+    describe('outer', function () {
+        test('before inner describe block', function (...$args) {
+            expect($args)->toBe([1]);
+        });
+
+        describe('inner', function () {
+            it('should include the with value from all parent describe blocks', function (...$args) {
+                expect($args)->toBe([1, 2]);
+            });
+
+            test('should include the with value from all parent describe blocks and the test', function (...$args) {
+                expect($args)->toBe([1, 2, 3]);
+            })->with([3]);
+        })->with([2]);
+
+        describe('inner', function () {
+            it('should not include the value from the other describe block with the same name', function (...$args) {
+                expect($args)->toBe([1]);
+            });
+        });
+
+        test('after inner describe block', function (...$args) {
+            expect($args)->toBe([1]);
+        });
+    })->with([1]);
+});
+
 test('after describe block', function (...$args) {
     expect($args)->toBe([5]);
 })->with([5]);

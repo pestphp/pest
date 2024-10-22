@@ -108,6 +108,40 @@ describe('todo on describe', function () {
     });
 });
 
+describe('todo on describe with matching name', function () {
+    beforeEach(function () {
+        $this->ran = false;
+    });
+
+    afterEach(function () {
+        match ($this->name()) {
+            '__pest_evaluable__todo_on_describe_with_matching_name__→__describe_block__→_it_should_not_execute' => expect($this->ran)->toBe(false),
+            '__pest_evaluable__todo_on_describe_with_matching_name__→__describe_block__→_it_should_execute_a_test_in_a_describe_block_with_the_same_name_as_a_todo_describe_block' => expect($this->ran)->toBe(true),
+            '__pest_evaluable__todo_on_describe_with_matching_name__→_it_should_execute' => expect($this->ran)->toBe(true),
+
+            default => $this->fail('Unexpected test name: '.$this->name()),
+        };
+    });
+
+    describe('describe block', function () {
+        it('should not execute', function () {
+            $this->ran = true;
+            $this->fail();
+        });
+    })->todo();
+
+    describe('describe block', function () {
+        it('should execute a test in a describe block with the same name as a todo describe block', function () {
+            $this->ran = true;
+        });
+    });
+
+    it('should execute', function () {
+        $this->ran = true;
+        expect($this->ran)->toBe(true);
+    });
+});
+
 test('todo on test after describe block', function () {
     $this->fail();
 })->todo();
