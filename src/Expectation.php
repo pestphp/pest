@@ -32,6 +32,7 @@ use Pest\Matchers\Any;
 use Pest\Support\ExpectationPipeline;
 use Pest\Support\Reflection;
 use PHPUnit\Architecture\Elements\ObjectDescription;
+use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\ExpectationFailedException;
 use ReflectionEnum;
 use ReflectionMethod;
@@ -322,6 +323,41 @@ final class Expectation
         }
 
         return $this;
+    }
+
+    /**
+     * Asserts that only one of the given tests pass with the given expectation target.
+     *
+     * @param  (\Closure(self<TValue>): (mixed|void))  ...$tests
+     * @return self<TValue>
+     */
+    public function toBeOneOf(Closure ...$tests): self
+    {
+        if ($tests === []) {
+            return $this;
+        }
+
+        $matches = [];
+        $exceptions = [];
+
+        foreach ($tests as $key => $test) {
+            try {
+                $test(new Expectation($this->value));
+                $matches[] = $key;
+            } catch (AssertionFailedError) {
+                $exceptions[] = $key;
+            }
+        }
+
+        if (count($matches) === 1) {
+            return $this;
+        }
+
+        if (count($matches) > 1) {
+            throw new ExpectationFailedException('Failed asserting value matches exactly one expectation (matches: '.implode(', ', $matches).').');
+        }
+
+        throw new ExpectationFailedException('Failed asserting value matches any expectations.');
     }
 
     /**
