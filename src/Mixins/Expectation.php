@@ -783,14 +783,16 @@ final class Expectation
             Assert::assertArrayHasKey($key, $valueAsArray, $message);
 
             if ($message === '') {
-                $message = sprintf(
+                $defaultMessage = sprintf(
                     'Failed asserting that an array has a key %s with the value %s.',
                     $this->export($key),
                     $this->export($valueAsArray[$key]),
                 );
+            } else {
+                $defaultMessage = $message;
             }
 
-            Assert::assertEquals($value, $valueAsArray[$key], $message);
+            Assert::assertEquals($value, $valueAsArray[$key], $message !== '' ? $message : $defaultMessage);
         }
 
         return $this;
