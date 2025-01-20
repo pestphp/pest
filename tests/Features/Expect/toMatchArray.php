@@ -36,3 +36,10 @@ test('not failures', function () {
         'id' => 1,
     ]);
 })->throws(ExpectationFailedException::class);
+
+test('failures with default message', function () {
+    expect($this->user)->toMatchArray([
+        'id' => 1,
+        'email' => 'enunomaduro@gmall.com',
+    ]);
+})->throws(ExpectationFailedException::class, 'Failed asserting that an array has a key \'email\' with the value \'enunomaduro@gmail.com\'');
