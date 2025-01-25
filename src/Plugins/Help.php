@@ -156,7 +156,10 @@ final readonly class Help implements HandlesArguments
         ], [
             'arg' => '--coverage --min',
             'desc' => 'Set the minimum required coverage percentage, and fail if not met',
-        ], ...$content['Code Coverage']];
+        ], ...$content['Code Coverage'], [
+            'arg' => '--quiet-coverage ',
+            'desc' => 'Do not report any files where code coverage is 100%',
+        ]];
 
         $content['Mutation Testing'] = [[
             'arg' => '--mutate ',

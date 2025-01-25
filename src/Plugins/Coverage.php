@@ -33,6 +33,11 @@ final class Coverage implements AddsOutput, HandlesArguments
     private const EXACTLY_OPTION = 'exactly';
 
     /**
+     * @var string
+     */
+    private const QUIET_COVERAGE_OPTION = 'quiet-coverage';
+
+    /**
      * Whether it should show the coverage or not.
      */
     public bool $coverage = false;
@@ -53,6 +58,11 @@ final class Coverage implements AddsOutput, HandlesArguments
     public ?float $coverageExactly = null;
 
     /**
+     * Whether it should hide files where coverage is 100% or not
+     */
+    public bool $quietCoverage = false;
+
+    /**
      * Creates a new Plugin instance.
      */
     public function __construct(private readonly OutputInterface $output)
@@ -66,7 +76,12 @@ final class Coverage implements AddsOutput, HandlesArguments
     public function handleArguments(array $originals): array
     {
         $arguments = [...[''], ...array_values(array_filter($originals, function (string $original): bool {
-            foreach ([self::COVERAGE_OPTION, self::MIN_OPTION, self::EXACTLY_OPTION] as $option) {
+            foreach ([
+                self::COVERAGE_OPTION,
+                self::MIN_OPTION,
+                self::EXACTLY_OPTION,
+                self::QUIET_COVERAGE_OPTION
+             ] as $option) {
                 if ($original === sprintf('--%s', $option)) {
                     return true;
                 }
@@ -89,6 +104,7 @@ final class Coverage implements AddsOutput, HandlesArguments
         $inputs[] = new InputOption(self::COVERAGE_OPTION, null, InputOption::VALUE_NONE);
         $inputs[] = new InputOption(self::MIN_OPTION, null, InputOption::VALUE_REQUIRED);
         $inputs[] = new InputOption(self::EXACTLY_OPTION, null, InputOption::VALUE_REQUIRED);
+        $inputs[] = new InputOption(self::QUIET_COVERAGE_OPTION, null, InputOption::VALUE_NONE);
 
         $input = new ArgvInput($arguments, new InputDefinition($inputs));
         if ((bool) $input->getOption(self::COVERAGE_OPTION)) {
@@ -129,6 +145,10 @@ final class Coverage implements AddsOutput, HandlesArguments
             $this->coverageExactly = (float) $exactlyOption;
         }
 
+        if ((bool) $input->getOption(self::COVERAGE_OPTION)) {
+            $this->quietCoverage = true;
+        }
+
         if ($_SERVER['COLLISION_PRINTER_COMPACT'] ?? false) {
             $this->compact = true;
         }
@@ -153,7 +173,7 @@ final class Coverage implements AddsOutput, HandlesArguments
                 exit(1);
             }
 
-            $coverage = \Pest\Support\Coverage::report($this->output, $this->compact);
+            $coverage = \Pest\Support\Coverage::report($this->output, $this->compact, $this->quietCoverage);
             $exitCode = (int) ($coverage < $this->coverageMin);
 
             if ($exitCode === 0 && $this->coverageExactly !== null) {

@@ -74,8 +74,11 @@ final class Coverage
      * Reports the code coverage report to the
      * console and returns the result in float.
      */
-    public static function report(OutputInterface $output, bool $compact = false): float
-    {
+    public static function report(
+        OutputInterface $output,
+        bool $compact = false,
+        bool $quietCoverage = false,
+    ): float {
         if (! file_exists($reportPath = self::getPath())) {
             if (self::usingXdebug()) {
                 $output->writeln(
@@ -113,7 +116,7 @@ final class Coverage
                 ? '100.0'
                 : number_format($file->percentageOfExecutedLines()->asFloat(), 1, '.', '');
 
-            if ($percentage === '100.0' && $compact) {
+            if ($percentage === '100.0' && ($compact || $quietCoverage)) {
                 continue;
             }
 
