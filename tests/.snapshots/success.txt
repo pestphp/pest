@@ -1679,6 +1679,10 @@
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
 
+   WARN  Tests\Visual\Incompleted
+  - incompleted test with fail-on-incomplete returns non-zero exit code
+  - incompleted test with fail-on-incomplete returns non-zero exit code parallel
+
    WARN  Tests\Visual\JUnit
   ✓ junit output
   - junit with parallel → Not working yet
@@ -1708,4 +1712,4 @@
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 38 todos, 33 skipped, 1152 passed (2744 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 38 todos, 35 skipped, 1152 passed (2744 assertions)

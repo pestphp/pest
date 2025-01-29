@@ -40,44 +40,36 @@ final class Result
      */
     public static function exitCode(Configuration $configuration, TestResult $result): int
     {
-        if ($result->wasSuccessfulIgnoringPhpunitWarnings()) {
-            if ($configuration->failOnWarning()) {
-                $warnings = $result->numberOfTestsWithTestTriggeredPhpunitWarningEvents()
-                    + count($result->warnings())
-                    + count($result->phpWarnings());
-
-                if ($warnings > 0) {
-                    return self::FAILURE_EXIT;
-                }
-            }
-
-            if (! $result->hasTestTriggeredPhpunitWarningEvents()) {
-                return self::SUCCESS_EXIT;
-            }
+        if ($result->hasTestErroredEvents()) {
+            return self::EXCEPTION_EXIT;
         }
 
         if ($configuration->failOnEmptyTestSuite() && ResultReflection::numberOfTests($result) === 0) {
             return self::FAILURE_EXIT;
         }
 
-        if ($result->wasSuccessfulIgnoringPhpunitWarnings()) {
-            if ($configuration->failOnRisky() && $result->hasTestConsideredRiskyEvents()) {
-                $returnCode = self::FAILURE_EXIT;
-            }
+        if ($configuration->failOnWarning()) {
+            $warnings = $result->numberOfTestsWithTestTriggeredPhpunitWarningEvents()
+                + count($result->warnings())
+                + count($result->phpWarnings());
 
-            if ($configuration->failOnIncomplete() && $result->hasTestMarkedIncompleteEvents()) {
-                $returnCode = self::FAILURE_EXIT;
-            }
-
-            if ($configuration->failOnSkipped() && $result->hasTestSkippedEvents()) {
-                $returnCode = self::FAILURE_EXIT;
+            if ($warnings > 0) {
+                return self::FAILURE_EXIT;
             }
         }
 
-        if ($result->hasTestErroredEvents()) {
-            return self::EXCEPTION_EXIT;
+        if ($configuration->failOnRisky() && $result->hasTestConsideredRiskyEvents()) {
+            return self::FAILURE_EXIT;
         }
 
-        return self::FAILURE_EXIT;
+        if ($configuration->failOnIncomplete() && $result->hasTestMarkedIncompleteEvents()) {
+            return self::FAILURE_EXIT;
+        }
+
+        if ($configuration->failOnSkipped() && $result->hasTestSkippedEvents()) {
+            return self::FAILURE_EXIT;
+        }
+
+        return self::SUCCESS_EXIT;
     }
 }
