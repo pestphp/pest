@@ -12,6 +12,7 @@ use Pest\Factories\Attribute;
 use Pest\Factories\TestCaseMethodFactory;
 use Pest\Mutate\Repositories\ConfigurationRepository;
 use Pest\PendingCalls\Concerns\Describable;
+use Pest\Plugins\Environment;
 use Pest\Plugins\Only;
 use Pest\Support\Backtrace;
 use Pest\Support\Container;
@@ -337,6 +338,50 @@ final class TestCall // @phpstan-ignore-line
     public function onlyOnLinux(): self
     {
         return $this->skipOnWindows()->skipOnMac();
+    }
+
+    /**
+     * Skips the current test if the given test is running on CI.
+     */
+    public function skipOnCi(): self
+    {
+        return $this->skipOnEnvironment(Environment::CI);
+    }
+
+    /**
+     * Skips the current test if the given test is running on Local.
+     */
+    public function skipOnLocal(): self
+    {
+        return $this->skipOnEnvironment(Environment::LOCAL);
+    }
+
+    /**
+     * Skips the current test if the given test is running on the given environment.
+     */
+    private function skipOnEnvironment(string $environment): self
+    {
+        if(Environment::name() === $environment) {
+            return $this->skip(sprintf('This test is skipped on %s.', $environment));
+        }
+
+        return $this;
+    }
+
+    /**
+     * Skips the current test unless the given test is running on CI.
+     */
+    public function onlyOnCi(): self
+    {
+        return $this->skipOnLocal();
+    }
+
+    /**
+     * Skips the current test unless the given test is running on Local.
+     */
+    public function onlyOnLocal(): self
+    {
+        return $this->skipOnCi();
     }
 
     /**
