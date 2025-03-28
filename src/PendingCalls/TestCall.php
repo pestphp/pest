@@ -361,7 +361,7 @@ final class TestCall // @phpstan-ignore-line
      */
     private function skipOnEnvironment(string $environment): self
     {
-        if(Environment::name() === $environment) {
+        if (Environment::name() === $environment) {
             return $this->skip(sprintf('This test is skipped on %s.', $environment));
         }
 
