@@ -88,7 +88,7 @@ final class Coverage
             throw ShouldNotHappen::fromMessage(sprintf('Coverage not found in path: %s.', $reportPath));
         }
 
-        /** @var CodeCoverage $codeCoverage */
+        /** @var resource $handle */
         $handle = fopen($reportPath, 'r');
         $code = '';
         while (! feof($handle)) {
@@ -96,7 +96,8 @@ final class Coverage
         }
         fclose($handle);
         unlink($reportPath);
-
+        
+        /** @var CodeCoverage $codeCoverage */
         $codeCoverage = eval(substr($code, 5));
 
         $totalCoverage = $codeCoverage->getReport()->percentageOfExecutedLines();
