@@ -15,7 +15,7 @@ final class BootOverrides implements Bootstrapper
     /**
      * The list of files to be overridden.
      *
-     * @var array<string, string>
+     * @var array<string>
      */
     public const array FILES = [
         'Runner/Filter/NameFilterIterator.php',
