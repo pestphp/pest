@@ -96,7 +96,7 @@ final class Coverage
         }
         fclose($handle);
         unlink($reportPath);
-        
+
         /** @var CodeCoverage $codeCoverage */
         $codeCoverage = eval(substr($code, 5));
 
