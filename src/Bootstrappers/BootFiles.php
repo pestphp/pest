@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Bootstrappers;
 
 use Pest\Contracts\Bootstrapper;
+use Pest\Exceptions\FatalException;
 use Pest\Support\DatasetInfo;
 use Pest\Support\Str;
 use Pest\TestSuite;
@@ -39,6 +40,10 @@ final class BootFiles implements Bootstrapper
     {
         $rootPath = TestSuite::getInstance()->rootPath;
         $testsPath = $rootPath.DIRECTORY_SEPARATOR.testDirectory();
+
+        if (! is_dir($testsPath)) {
+            throw new FatalException(sprintf('The test directory [%s] does not exist.', $testsPath));
+        }
 
         foreach (self::STRUCTURE as $filename) {
             $filename = sprintf('%s%s%s', $testsPath, DIRECTORY_SEPARATOR, $filename);
