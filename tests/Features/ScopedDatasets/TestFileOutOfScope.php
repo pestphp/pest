@@ -20,12 +20,15 @@ test('Pest.php dataset is taken', function () use ($state) {
     expect($state->text)->toBe('12AB');
 });
 
-it('can see datasets in nested Dataset folders', function ($value) use ($state) {
-    $state->text .= $value;
+
+$nestedState = new stdClass;
+$nestedState->text = '';
+
+it('can see datasets in nested Dataset folders', function ($value) use ($nestedState) {
+    $nestedState->text .= $value;
     expect(true)->toBeTrue();
 })->with('nested.letters');
 
-
-test('Nested dataset is taken', function () use ($state) {
-    expect($state->text)->toBe('12ABAB');
+test('Nested dataset is taken', function () use ($nestedState) {
+    expect($nestedState->text)->toBe('AB');
 });
