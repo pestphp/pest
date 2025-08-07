@@ -60,16 +60,24 @@ final class CompactPrinter
     }
 
     /**
+     * Creates a new instance of the Compact Printer with decoration setting.
+     */
+    public static function create(bool $decorated): self
+    {
+        return new self(
+            terminal(),
+            new ConsoleOutput(decorated: $decorated),
+            new Style(new ConsoleOutput(decorated: $decorated)),
+            terminal()->width() - 4,
+        );
+    }
+
+    /**
      * Creates a new instance of the Compact Printer.
      */
     public static function default(): self
     {
-        return new self(
-            terminal(),
-            new ConsoleOutput(decorated: true),
-            new Style(new ConsoleOutput(decorated: true)),
-            terminal()->width() - 4,
-        );
+        return self::create(true);
     }
 
     /**

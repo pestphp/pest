@@ -16,6 +16,7 @@ use Pest\TestSuite;
 use Stringable;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Output\ConsoleOutput;
 
 use function Pest\version;
 
@@ -127,7 +128,11 @@ final class Parallel implements HandlesArguments
             $arguments
         );
 
-        $exitCode = $this->paratestCommand()->run(new ArgvInput($filteredArguments), new CleanConsoleOutput);
+        $input = new ArgvInput($filteredArguments);
+        $isDecorated = $input->getParameterOption('--colors', 'always') !== 'never';
+        $output = new CleanConsoleOutput(ConsoleOutput::VERBOSITY_NORMAL, $isDecorated);
+
+        $exitCode = $this->paratestCommand()->run($input, $output);
 
         return CallsAddsOutput::execute($exitCode);
     }
