@@ -33,6 +33,7 @@ arch('dependencies')
         'dd',
         'dump',
         'expect',
+        'ray',
         'uses',
         'Termwind',
         'ParaTest',
