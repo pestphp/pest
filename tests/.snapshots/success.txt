@@ -1,10 +1,10 @@
 
-   FAIL  Tests\Arch
+   PASS  Tests\Arch
   ✓ preset → php → ignoring ['Pest\Expectation', 'debug_backtrace', 'var_export', …]
   ✓ preset → strict → ignoring ['usleep']
   ✓ preset → security → ignoring ['eval', 'str_shuffle', 'exec', …]
   ✓ globals
-  ⨯ dependencies
+  ✓ dependencies
   ✓ contracts
 
    PASS  Tests\Environments\Windows
@@ -1673,8 +1673,8 @@
   ✓ junit output
   - junit with parallel → Not working yet
 
-   FAIL  Tests\Visual\Parallel
-  ⨯ parallel
+   PASS  Tests\Visual\Parallel
+  ✓ parallel
   ✓ a parallel test can extend another test with same name
   ✓ parallel mode respects --colors=never option
 
@@ -1698,31 +1698,5 @@
 
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
-  ────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Arch > dependencies                                            
-  Expecting 'Pest' to only use 'dd, dump, expect, uses, Termwind, ParaTest, Pest\Arch, Pest\Mutate\Contracts\Configuration, Pest\Mutate\Decorators\TestCallDecorator, Pest\Mutate\Repositories\ConfigurationRepository, Pest\Plugin, NunoMaduro\Collision, Whoops, Symfony\Component\Console, Symfony\Component\Process'. However, it also uses 'ray'.
 
-  ────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Visual\Parallel > parallel                                     
-  Expected: \n
-    .......ss...s..................sssssss.s....................................\n
-    .........................................................................s..\n
-  ... (25 more lines)
-
-  To contain: Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 38 todos, 24 skipped, 1134 passed (2712 assertions)
-
-  at tests/Visual/Parallel.php:19
-     15▕ };
-     16▕ 
-     17▕ test('parallel', function () use ($run) {
-     18▕     expect($run('--exclude-group=integration'))
-  ➜  19▕         ->toContain('Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 38 todos, 24 skipped, 1134 passed (2712 assertions)')
-     20▕         ->toContain('Parallel: 3 processes');
-     21▕ })->skipOnWindows();
-     22▕ 
-     23▕ test('a parallel test can extend another test with same name', function () use ($run) {
-
-  1   tests/Visual/Parallel.php:19
-
-
-  Tests:    2 deprecated, 2 failed, 4 warnings, 5 incomplete, 2 notices, 38 todos, 33 skipped, 1143 passed (2738 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 38 todos, 33 skipped, 1145 passed (2739 assertions)
