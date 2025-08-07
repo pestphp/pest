@@ -35,7 +35,7 @@ test('parallel mode respects --colors=never option', function () {
     ], dirname(__DIR__, 2), ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true']);
     $process->run();
     $output = $process->getOutput();
-    
+
     // Output should not contain ANSI color codes when --colors=never is used
     expect($output)
         ->not->toMatch('/\x1b\[[0-9;]*m/')  // ANSI color codes pattern
