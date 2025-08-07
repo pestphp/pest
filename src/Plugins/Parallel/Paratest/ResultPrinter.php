@@ -81,7 +81,7 @@ final class ResultPrinter
             public function flush(): void {}
         };
 
-        $this->compactPrinter = CompactPrinter::default();
+        $this->compactPrinter = CompactPrinter::create($this->output->isDecorated());
 
         if (! $this->options->configuration->hasLogfileTeamcity()) {
             return;

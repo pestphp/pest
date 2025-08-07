@@ -22,7 +22,8 @@ $bootPest = (static function (): void {
 
     $input = new ArgvInput;
 
-    $output = new ConsoleOutput(OutputInterface::VERBOSITY_NORMAL, true);
+    $isDecorated = $workerArgv->getParameterOption('--colors', 'always') !== 'never';
+    $output = new ConsoleOutput(OutputInterface::VERBOSITY_NORMAL, $isDecorated);
 
     Kernel::boot($testSuite, $input, $output);
 });
