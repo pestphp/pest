@@ -16,9 +16,17 @@ $run = function () {
 
 test('parallel', function () use ($run) {
     expect($run('--exclude-group=integration'))
-        ->toContain('Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 39 todos, 26 skipped, 1178 passed (2790 assertions)')
+        ->toContain('Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 39 todos, 26 skipped, 1180 passed (2792 assertions)')
         ->toContain('Parallel: 3 processes');
 })->skipOnWindows();
+
+ test('parallel can have multiple exclude-groups', function () use ($run) {
+    $args = ['--exclude-group=integration', '--exclude-group=container'];
+
+    expect($run(...$args))
+        ->toContain('Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 39 todos, 26 skipped, 1175 passed (2787 assertions)')
+        ->toContain('Parallel: 3 processes');
+ })->skipOnWindows();
 
 test('a parallel test can extend another test with same name', function () use ($run) {
     expect($run('tests/Fixtures/Inheritance'))->toContain('Tests:    1 skipped, 2 passed (2 assertions)');
