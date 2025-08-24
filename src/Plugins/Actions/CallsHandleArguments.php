@@ -26,24 +26,7 @@ final class CallsHandleArguments
 
         /** @var Plugins\HandlesArguments $plugin */
         foreach ($plugins as $plugin) {
-            //            $argvBackup = $argv;
-            //            $before = array_filter($argv, fn($t) => $t === '--exclude-group' || $t === '--exclude-group=integration'|| $t === '--exclude-group=container');
-            //            if (count($before) !== 2) {
-            //                echo "You need to specify --exclude-group=groupname";
-            //                echo $plugin::class;
-            // //                var_dump($argv);
-            //                exit('ASDFasdfasdfasfd');
-            //            }
             $argv = $plugin->handleArguments($argv);
-            //            $after = array_filter($argv, fn($t) => $t === '--exclude-group' || $t === '--exclude-group=integration'|| $t === '--exclude-group=container');
-            //            if (count($before) !== count($after)) {
-            //                echo sprintf("Plugin %s removed an argument illegally \r\n", $plugin::class) . PHP_EOL;
-            //                echo $plugin::class;
-            // //                var_dump($argv);
-            // //                dd($argvBackup, $argv, $before, $after);
-            // //                $argv = $argvBackup;
-            //            }
-
         }
 
         return $argv;
