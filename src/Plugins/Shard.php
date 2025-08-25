@@ -100,7 +100,33 @@ final class Shard implements AddsOutput, HandlesArguments
      */
     private function removeParallelArguments(array $arguments): array
     {
-        return array_filter($arguments, fn (string $argument): bool => ! in_array($argument, ['--parallel', '-p'], strict: true));
+        $filtered = [];
+        $skipNext = false;
+
+        foreach ($arguments as $argument) {
+            if ($skipNext) {
+                $skipNext = false;
+
+                continue;
+            }
+
+            if (in_array($argument, ['--parallel', '-p'], strict: true)) {
+                continue;
+            }
+
+            if (str_starts_with($argument, '--processes')) {
+                if (str_contains($argument, '=')) {
+                    continue;
+                }
+                $skipNext = true;
+
+                continue;
+            }
+
+            $filtered[] = $argument;
+        }
+
+        return $filtered;
     }
 
     /**
