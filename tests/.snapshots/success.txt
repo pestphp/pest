@@ -1608,6 +1608,8 @@
   ✓ method hasArgument with ('someValue', true)
   ✓ method hasArgument with ('--a', false)
   ✓ method hasArgument with ('--undefined-argument', false)
+  ✓ popArgument keeps non-unique array item when called with missing argument
+  ✓ popArgument keeps non-unique array item when called with existing argument
 
    PASS  Tests\Unit\Plugins\Environment
   ✓ environment is set to CI when --ci option is used
@@ -1755,6 +1757,7 @@
 
    PASS  Tests\Visual\Parallel
   ✓ parallel
+  ✓ parallel can have multiple exclude-groups
   ✓ a parallel test can extend another test with same name
 
    PASS  Tests\Visual\SingleTestOrDirectory
@@ -1782,4 +1785,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 39 todos, 35 skipped, 1188 passed (2814 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 39 todos, 35 skipped, 1191 passed (2818 assertions)
