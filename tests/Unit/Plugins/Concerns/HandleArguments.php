@@ -2,12 +2,12 @@
 
 use Pest\Plugins\Concerns\HandleArguments;
 
- beforeEach(function () {
+beforeEach(function () {
     $this->handler = new class
     {
         use HandleArguments;
     };
- });
+});
 
 test('method hasArgument', function (string $argument, bool $expectedResult) {
     $obj = new class
@@ -32,16 +32,16 @@ test('method hasArgument', function (string $argument, bool $expectedResult) {
     ['--undefined-argument', false],
 ]);
 
- test('popArgument keeps non-unique array item when called with missing argument', function () {
+test('popArgument keeps non-unique array item when called with missing argument', function () {
     $arguments = ['--verbose', '--exclude-group', 'firstGroup', '--exclude-group', 'secondGroup',  '--filter=MyTest'];
     $result = $this->handler->popArgument('--missingitem', $arguments);
 
     expect($result)->toBe($arguments);
- });
+});
 
- test('popArgument keeps non-unique array item when called with existing argument', function () {
+test('popArgument keeps non-unique array item when called with existing argument', function () {
     $arguments = ['--verbose', '--exclude-group', 'firstGroup', '--exclude-group', 'secondGroup',  '--filter=MyTest'];
     $result = $this->handler->popArgument('--verbose', $arguments);
 
     expect($result)->toBe(['--exclude-group', 'firstGroup', '--exclude-group', 'secondGroup',  '--filter=MyTest']);
- });
+});
