@@ -16,8 +16,8 @@
 
 - Explore our docs at **[pestphp.com »](https://pestphp.com)**
 - Follow the creator Nuno Maduro:
-    - YouTube: **[youtube.com/@nunomaduro](https://www.youtube.com/@nunomaduro)** — Videos every weekday
-    - Twitch: **[twitch.tv/enunomaduro](https://www.twitch.tv/enunomaduro)** — Streams (almost) every weekday
+    - YouTube: **[youtube.com/@nunomaduro](https://youtube.com/@nunomaduro)** — Videos every week
+    - Twitch: **[twitch.tv/nunomaduro](https://twitch.tv/nunomaduro)** — Live coding on Mondays, Wednesdays, and Fridays at 9PM UTC
     - Twitter / X: **[x.com/enunomaduro](https://x.com/enunomaduro)**
     - LinkedIn: **[linkedin.com/in/nunomaduro](https://www.linkedin.com/in/nunomaduro)**
     - Instagram: **[instagram.com/enunomaduro](https://www.instagram.com/enunomaduro)**
