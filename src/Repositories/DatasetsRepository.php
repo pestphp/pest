@@ -67,11 +67,11 @@ final class DatasetsRepository
     }
 
     /**
-     * @return Closure|array<int|string, mixed>
+     * @return array<int|string, mixed>
      *
      * @throws ShouldNotHappen
      */
-    public static function get(string $filename, string $description): Closure|array // @phpstan-ignore-line
+    public static function get(string $filename, string $description): array // @phpstan-ignore-line
     {
         $dataset = self::$withs[$filename.self::SEPARATOR.$description];
 
