@@ -312,13 +312,13 @@ if (! function_exists('visit')) {
     /**
      * Browse to the given URL.
      *
-     * @template TUrl of array<int, string>|string
+     * @template TUrl of array<int, string|object>|string|object
      *
      * @param  TUrl  $url
      * @param  array<string, mixed>  $options
-     * @return (TUrl is array<int, string> ? ArrayablePendingAwaitablePage : PendingAwaitablePage)
+     * @return (TUrl is array<int, string|object> ? ArrayablePendingAwaitablePage : PendingAwaitablePage)
      */
-    function visit(array|string $url, array $options = []): ArrayablePendingAwaitablePage|PendingAwaitablePage
+    function visit(array|string|object $url, array $options = []): ArrayablePendingAwaitablePage|PendingAwaitablePage
     {
         if (! class_exists(\Pest\Browser\Configuration::class)) {
             PluginBrowser::install();
