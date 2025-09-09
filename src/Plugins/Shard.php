@@ -85,7 +85,7 @@ final class Shard implements AddsOutput, HandlesArguments
     {
         $output = (new Process([
             'php',
-            ...$this->removeParallelArguments($arguments),
+            ...$this->removeParallelizationArguments($arguments),
             '--list-tests',
         ]))->mustRun()->getOutput();
 
@@ -95,38 +95,52 @@ final class Shard implements AddsOutput, HandlesArguments
     }
 
     /**
+     * Removes both parallel and processes arguments from the arguments array.
+     * This is useful when running commands that don't support parallel execution.
+     *
+     * @param  array<int, string>  $arguments
+     * @return array<int, string>
+     */
+    private function removeParallelizationArguments(array $arguments): array
+    {
+        return $this->removeProcessesArguments($this->removeParallelArguments($arguments));
+    }
+
+    /**
      * @param  array<int, string>  $arguments
      * @return array<int, string>
      */
     private function removeParallelArguments(array $arguments): array
     {
-        $filtered = [];
-        $skipNext = false;
+        return array_filter($arguments, fn (string $argument): bool => ! in_array($argument, ['--parallel', '-p'], strict: true));
+    }
 
-        foreach ($arguments as $argument) {
+    /**
+     * @param  array<int, string>  $arguments
+     * @return array<int, string>
+     */
+    private function removeProcessesArguments(array $arguments): array
+    {
+        return array_values(array_filter($arguments, function (string $argument) {
+            if (str_starts_with($argument, '--processes') && str_contains($argument, '=')) {
+                return false;
+            }
+
+            static $skipNext = false;
             if ($skipNext) {
                 $skipNext = false;
 
-                continue;
+                return false;
             }
 
-            if (in_array($argument, ['--parallel', '-p'], strict: true)) {
-                continue;
-            }
-
-            if (str_starts_with($argument, '--processes')) {
-                if (str_contains($argument, '=')) {
-                    continue;
-                }
+            if ($argument === '--processes') {
                 $skipNext = true;
 
-                continue;
+                return false;
             }
 
-            $filtered[] = $argument;
-        }
-
-        return $filtered;
+            return true;
+        }));
     }
 
     /**

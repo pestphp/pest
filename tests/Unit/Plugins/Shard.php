@@ -7,9 +7,9 @@ it('processes arguments with sharding and removes parallel options from subproce
     $output = new BufferedOutput;
     $shard = new Shard($output);
 
-    // Use reflection to test the private removeParallelArguments method
+    // Use reflection to test the private removeParallelizationArguments method
     $reflection = new ReflectionClass($shard);
-    $method = $reflection->getMethod('removeParallelArguments');
+    $method = $reflection->getMethod('removeParallelizationArguments');
     $method->setAccessible(true);
 
     $arguments = [
@@ -33,7 +33,7 @@ it('removes space-separated processes arguments', function () {
     $shard = new Shard($output);
 
     $reflection = new ReflectionClass($shard);
-    $method = $reflection->getMethod('removeParallelArguments');
+    $method = $reflection->getMethod('removeParallelizationArguments');
     $method->setAccessible(true);
 
     $arguments = [
@@ -58,7 +58,7 @@ it('preserves non-parallel arguments when filtering', function () {
     $shard = new Shard($output);
 
     $reflection = new ReflectionClass($shard);
-    $method = $reflection->getMethod('removeParallelArguments');
+    $method = $reflection->getMethod('removeParallelizationArguments');
     $method->setAccessible(true);
 
     $arguments = [
