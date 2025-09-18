@@ -31,22 +31,24 @@ We cannot thank our sponsors enough for their incredible support in funding Pest
 ### Platinum Sponsors
 
 - **[Laracasts](https://laracasts.com/?ref=pestphp)**
+- **[NativePHP](https://nativephp.com/mobile?ref=pestphp.com)**
 
 ### Gold Sponsors
 
 - **[CodeRabbit](https://coderabbit.ai/?ref=pestphp)**
-- **[NativePHP](https://nativephp.com/mobile?ref=pestphp.com)**
 - **[CMS Max](https://cmsmax.com/?ref=pestphp)**
 
 ### Premium Sponsors
 
-- [Akaunting](https://akaunting.com/?ref=pestphp)
-- [DocuWriter.ai](https://www.docuwriter.ai/?ref=pestphp)
-- [Localazy](https://localazy.com/?ref=pestphp)
 - [Forge](https://forge.laravel.com/?ref=pestphp)
-- [Route4Me](https://www.route4me.com/?ref=pestphp)
-- [Spatie](https://spatie.be/?ref=pestphp)
-- [Worksome](https://www.worksome.com/?ref=pestphp)
 - [Zapiet](https://www.zapiet.com/?ref=pestphp)
+- [Localazy](https://localazy.com/?ref=pestphp)
+- [Load Forge](https://loadforge.com/?ref=pestphp)
+- [DocuWriter.ai](https://www.docuwriter.ai/?ref=pestphp)
+- [Route4Me](https://www.route4me.com/?ref=pestphp)
+- [Devtools for Livewire](https://devtools-for-livewire.com/?ref=pestphp)
+- [Nerdify](https://www.getnerdify.com/?ref=pestphp)
+- [Akaunting](https://akaunting.com/?ref=pestphp)
+- [LambdaTest](https://lambdatest.com/?ref=pestphp)
 
 Pest is an open-sourced software licensed under the **[MIT license](https://opensource.org/licenses/MIT)**.
