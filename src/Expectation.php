@@ -781,7 +781,22 @@ final class Expectation
                         return false;
                     }
 
-                    if (! in_array($trait, $object->reflectionClass->getTraitNames(), true)) {
+                    $currentClass = $object->reflectionClass;
+                    $usedTraits = [];
+
+                    do {
+                        $classTraits = $currentClass->getTraits();
+                        foreach ($classTraits as $traitReflection) {
+                            $usedTraits[$traitReflection->getName()] = $traitReflection->getName();
+
+                            $nestedTraits = $traitReflection->getTraits();
+                            foreach ($nestedTraits as $nestedTrait) {
+                                $usedTraits[$nestedTrait->getName()] = $nestedTrait->getName();
+                            }
+                        }
+                    } while ($currentClass = $currentClass->getParentClass());
+
+                    if (! array_key_exists($trait, $usedTraits)) {
                         return false;
                     }
                 }
