@@ -1792,24 +1792,24 @@
    PASS  Testsexternal\Features\Expect\toMatchSnapshot
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
-  ────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Visual\Parallel > parallel                                     
+  ────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Visual\Parallel > parallel
   Expected: \n
     .......ss...s...............................sssssss.s.......................\n
     ............................................................................\n
   ... (22 more lines)
 
-  To contain: Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 39 todos, 26 skipped, 1178 passed (2790 assertions)
+  To contain: Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 39 todos, 27 skipped, 1179 passed (2800 assertions)
 
   at tests/Visual/Parallel.php:19
      15▕ };
-     16▕ 
+     16▕
      17▕ test('parallel', function () use ($run) {
      18▕     expect($run('--exclude-group=integration'))
-  ➜  19▕         ->toContain('Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 39 todos, 26 skipped, 1178 passed (2790 assertions)')
+  ➜  19▕         ->toContain('Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 39 todos, 27 skipped, 1177 passed (2800 assertions)')
      20▕         ->toContain('Parallel: 3 processes');
      21▕ })->skipOnWindows();
-     22▕ 
+     22▕
      23▕ test('a parallel test can extend another test with same name', function () use ($run) {
 
   1   tests/Visual/Parallel.php:19
