@@ -13,7 +13,7 @@ it('works with repeat and expectation debug on failure', function () {
     } catch (PHPUnit\Framework\ExpectationFailedException $e) {
         expect($debugCalled)->toBeTrue('Debug callback should be called on expectation failure');
     }
-})->repeat(3); // This test will run 3 times, debug should work each time
+})->repeat(3);
 
 it('works with repeat and expectation debug on success', function () {
     $debugCalled = false;
