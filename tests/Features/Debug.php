@@ -3,13 +3,12 @@
 it('works with repeat and expectation debug on failure', function () {
     $debugCalled = false;
 
-    // Test that debug works properly with expectations inside repeated tests
     try {
         expect(true)
             ->debug(function () use (&$debugCalled) {
                 $debugCalled = true;
             })
-            ->toBe(false); // This will fail
+            ->toBe(false);
     } catch (PHPUnit\Framework\ExpectationFailedException $e) {
         expect($debugCalled)->toBeTrue('Debug callback should be called on expectation failure');
     }
@@ -18,12 +17,11 @@ it('works with repeat and expectation debug on failure', function () {
 it('works with repeat and expectation debug on success', function () {
     $debugCalled = false;
 
-    // Test that debug doesn't execute on successful expectations in repeated tests
     expect(true)
         ->debug(function () use (&$debugCalled) {
             $debugCalled = true;
         })
-        ->toBe(true); // This will pass
+        ->toBe(true);
 
     expect($debugCalled)->toBeFalse('Debug callback should NOT be called on expectation success');
 })->repeat(2);
@@ -68,7 +66,7 @@ it('debug works properly for expectations', function () {
         ->debug(function () use (&$debugCalled) {
             $debugCalled = true;
         })
-        ->toBe(4); // This will pass
+        ->toBe(4);
 
     expect($debugCalled)->toBeFalse('Debug callback should NOT be called on success');
 });
