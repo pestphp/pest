@@ -57,6 +57,11 @@ final class Expectation
     use Retrievable;
 
     /**
+     * The debug callback to execute on failure.
+     */
+    private ?Closure $debugCallback = null;
+
+    /**
      * Creates a new expectation.
      *
      * @param  TValue  $value
@@ -175,6 +180,18 @@ final class Expectation
         if (function_exists('ray')) {
             ray($this->value, ...$arguments);
         }
+
+        return $this;
+    }
+
+    /**
+     * Execute the given callback when an expectation fails.
+     *
+     * @return self<TValue>
+     */
+    public function debug(Closure $callback): self
+    {
+        $this->debugCallback = $callback;
 
         return $this;
     }
@@ -361,10 +378,18 @@ final class Expectation
 
         assert(is_object($expectation));
 
-        ExpectationPipeline::for($closure)
-            ->send(...$parameters)
-            ->through($this->pipes($method, $expectation, Expectation::class))
-            ->run();
+        try {
+            ExpectationPipeline::for($closure)
+                ->send(...$parameters)
+                ->through($this->pipes($method, $expectation, Expectation::class))
+                ->run();
+        } catch (ExpectationFailedException $e) {
+            // Trigger debug callback if one was set
+            if ($this->debugCallback) {
+                ($this->debugCallback)();
+            }
+            throw $e;
+        }
 
         return $this;
     }
