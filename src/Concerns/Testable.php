@@ -328,7 +328,58 @@ trait Testable
         $arguments = $this->__resolveTestArguments($args);
         $this->__ensureDatasetArgumentNameAndNumberMatches($arguments);
 
-        return $this->__callClosure($closure, $arguments);
+        return $this->__attemptTestRun(fn () => $this->__callClosure($closure, $arguments));
+    }
+
+    private function __attemptTestRun(Closure $closure)
+    {
+        $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
+        $maxAttempts = max(1, max($method->attempts, TestSuite::getInstance()->attempts));
+
+        $lastException = null;
+        $attemptNumber = 1;
+
+        while ($attemptNumber <= $maxAttempts) {
+            try {
+                $result = $closure();
+
+                // If we succeeded on a retry attempt, track it as flaky
+                if ($attemptNumber > 1) {
+                    \Pest\Support\FlakyTestTracker::getInstance()->track(
+                        $this->name(),
+                        $attemptNumber,
+                        true
+                    );
+                }
+
+                return $result;
+            } catch (Throwable $e) {
+                $lastException = $e;
+                $attemptNumber++;
+
+                // If we've exhausted all attempts, track and re-throw
+                if ($attemptNumber > $maxAttempts) {
+                    if ($maxAttempts > 1) {
+                        \Pest\Support\FlakyTestTracker::getInstance()->track(
+                            $this->name(),
+                            $maxAttempts,
+                            false
+                        );
+                    }
+
+                    throw $e;
+                }
+
+                // Otherwise, continue to next attempt
+            }
+        }
+
+        // This should never be reached, but satisfies the return type
+        if ($lastException !== null) {
+            throw $lastException;
+        }
+
+        return null;
     }
 
     /**

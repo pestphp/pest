@@ -60,6 +60,11 @@ final class TestSuite
     public string $rootPath;
 
     /**
+     * Holds the global maximum attempts for tests.
+     */
+    public int $attempts = 1;
+
+    /**
      * Holds an instance of the test suite.
      */
     private static ?TestSuite $instance = null;

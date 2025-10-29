@@ -409,6 +409,20 @@ final class TestCall // @phpstan-ignore-line
     }
 
     /**
+     * Sets the maximum number of retry attempts for this test.
+     */
+    public function attempts(int $times): self
+    {
+        if ($times < 1) {
+            throw new InvalidArgumentException('The number of attempts must be greater than 0.');
+        }
+
+        $this->testCaseMethod->attempts = $times;
+
+        return $this;
+    }
+
+    /**
      * Marks the test as "todo".
      */
     public function todo(// @phpstan-ignore-line

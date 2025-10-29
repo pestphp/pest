@@ -117,6 +117,16 @@ use Symfony\Component\Console\Output\ConsoleOutput;
             $arguments[] = '--no-output';
             unset($_SERVER['COLLISION_PRINTER']);
         }
+
+        if (str_contains($value, '--attempts=')) {
+            unset($arguments[$key]);
+        } elseif ($value === '--attempts') {
+            unset($arguments[$key]);
+
+            if (isset($arguments[$key + 1])) {
+                unset($arguments[$key + 1]);
+            }
+        }
     }
 
     // Used when Pest is required using composer.
@@ -172,6 +182,10 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
     if ($pr = $input->getParameterOption('--pull-request')) {
         $testSuite->tests->addTestCaseMethodFilter(new PrTestCaseFilter((int) $pr));
+    }
+
+    if ($attempts = $input->getParameterOption('--attempts')) {
+        $testSuite->attempts = max(1, (int) $attempts);
     }
 
     $isDecorated = $input->getParameterOption('--colors', 'always') !== 'never';

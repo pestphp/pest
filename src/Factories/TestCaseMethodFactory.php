@@ -47,6 +47,11 @@ final class TestCaseMethodFactory
     public int $repetitions = 1;
 
     /**
+     * The test's maximum number of retry attempts.
+     */
+    public int $attempts = 1;
+
+    /**
      * Determines if the test is a "todo".
      */
     public bool $todo = false;
