@@ -25,12 +25,12 @@
         "pestphp/pest-plugin-arch": "^4.0.0",
         "pestphp/pest-plugin-mutate": "^4.0.1",
         "pestphp/pest-plugin-profanity": "^4.1.0",
-        "phpunit/phpunit": "^12.4.0",
+        "phpunit/phpunit": "^12.4.1",
         "symfony/process": "^7.3.4"
     },
     "conflict": {
         "filp/whoops": "<2.18.3",
-        "phpunit/phpunit": ">12.4.0",
+        "phpunit/phpunit": ">12.4.1",
         "sebastian/exporter": "<7.0.0",
         "webmozart/assert": "<1.11.0"
     },

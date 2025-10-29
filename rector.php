@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Rector\CodingStyle\Rector\FunctionLike\FunctionLikeToFirstClassCallableRector;
 use Rector\Config\RectorConfig;
 use Rector\TypeDeclaration\Rector\ClassMethod\ReturnNeverTypeRector;
 
@@ -12,6 +13,7 @@ return RectorConfig::configure()
     ->withSkip([
         __DIR__.'/src/Plugins/Parallel/Paratest/WrapperRunner.php',
         ReturnNeverTypeRector::class,
+        FunctionLikeToFirstClassCallableRector::class,
     ])
     ->withPreparedSets(
         deadCode: true,

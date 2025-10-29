@@ -83,7 +83,7 @@ final class BootFiles implements Bootstrapper
 
     private function bootDatasets(string $testsPath): void
     {
-        assert(strlen($testsPath) > 0);
+        assert($testsPath !== '');
 
         $files = (new PhpUnitFileIterator)->getFilesAsArray($testsPath, '.php');
 
