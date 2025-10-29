@@ -52,7 +52,9 @@ use ReflectionProperty;
  */
 final class Expectation
 {
+    /** @use Extendable<self<TValue>> */
     use Extendable;
+
     use Pipeable;
     use Retrievable;
 
