@@ -48,7 +48,7 @@ if (! function_exists('beforeAll')) {
     function beforeAll(Closure $closure): void
     {
         if (DescribeCall::describing() !== []) {
-            $filename = Backtrace::file();
+            $filename = Backtrace::testFile();
 
             throw new BeforeAllWithinDescribe($filename);
         }
@@ -67,7 +67,7 @@ if (! function_exists('beforeEach')) {
      */
     function beforeEach(?Closure $closure = null): BeforeEachCall
     {
-        $filename = Backtrace::file();
+        $filename = Backtrace::testFile();
 
         return new BeforeEachCall(TestSuite::getInstance(), $filename, $closure);
     }
@@ -112,7 +112,7 @@ if (! function_exists('uses')) {
      */
     function uses(string ...$classAndTraits): UsesCall
     {
-        $filename = Backtrace::file();
+        $filename = Backtrace::testFile();
 
         return new UsesCall($filename, array_values($classAndTraits));
     }
@@ -124,7 +124,7 @@ if (! function_exists('pest')) {
      */
     function pest(): Configuration
     {
-        return new Configuration(Backtrace::file());
+        return new Configuration(Backtrace::testFile());
     }
 }
 
@@ -197,7 +197,7 @@ if (! function_exists('afterEach')) {
      */
     function afterEach(?Closure $closure = null): AfterEachCall
     {
-        $filename = Backtrace::file();
+        $filename = Backtrace::testFile();
 
         return new AfterEachCall(TestSuite::getInstance(), $filename, $closure);
     }
@@ -210,7 +210,7 @@ if (! function_exists('afterAll')) {
     function afterAll(Closure $closure): void
     {
         if (DescribeCall::describing() !== []) {
-            $filename = Backtrace::file();
+            $filename = Backtrace::testFile();
 
             throw new AfterAllWithinDescribe($filename);
         }
@@ -227,7 +227,7 @@ if (! function_exists('covers')) {
      */
     function covers(array|string ...$classesOrFunctions): void
     {
-        $filename = Backtrace::file();
+        $filename = Backtrace::testFile();
 
         $beforeEachCall = (new BeforeEachCall(TestSuite::getInstance(), $filename));
 
@@ -256,7 +256,7 @@ if (! function_exists('mutates')) {
      */
     function mutates(array|string ...$targets): void
     {
-        $filename = Backtrace::file();
+        $filename = Backtrace::testFile();
 
         $beforeEachCall = (new BeforeEachCall(TestSuite::getInstance(), $filename));
         $beforeEachCall->group('__pest_mutate_only');
