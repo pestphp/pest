@@ -173,5 +173,9 @@ final class Laravel extends AbstractPreset
             ->toImplement('Illuminate\Contracts\Container\ContextualAttribute')
             ->toHaveAttribute('Attribute')
             ->toHaveMethod('resolve');
+
+        $this->expectations[] = expect('App\Rules')
+            ->classes()
+            ->toImplement('Illuminate\Contracts\Validation\ValidationRule');
     }
 }
