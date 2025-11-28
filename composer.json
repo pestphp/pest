@@ -26,7 +26,7 @@
         "pestphp/pest-plugin-mutate": "^4.0.1",
         "pestphp/pest-plugin-profanity": "^4.2.0",
         "phpunit/phpunit": "^12.4.4",
-        "symfony/process": "^7.3.4"
+        "symfony/process": "^7.4.0|^8.0.0"
     },
     "conflict": {
         "filp/whoops": "<2.18.3",
@@ -58,7 +58,7 @@
         "pestphp/pest-dev-tools": "^4.0.0",
         "pestphp/pest-plugin-browser": "^4.1.1",
         "pestphp/pest-plugin-type-coverage": "^4.0.3",
-        "psy/psysh": "^0.12.14"
+        "psy/psysh": "^0.12.15"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
