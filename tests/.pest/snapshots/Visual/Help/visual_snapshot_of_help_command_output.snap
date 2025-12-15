@@ -1,5 +1,5 @@
 
-  Pest Testing Framework 4.1.6.  
+  Pest Testing Framework 4.2.0.  
 
   USAGE: pest <file> [options]  
 
@@ -27,6 +27,7 @@
   --pr .... Output to standard output tests with the given pull request number  
   --pull-request  Output to standard output tests with the given pull request number (alias for --pr)  
   --retry  Run non-passing tests first and stop execution upon first error or failure  
+  --all .................... Ignore test selection from XML configuration file  
   --list-suites ................................... List available test suites  
   --testsuite [name] ......... Only run tests from the specified test suite(s)  
   --exclude-testsuite [name] .. Exclude tests from the specified test suite(s)  
@@ -138,6 +139,7 @@
   --only-summary-for-coverage-text  Option for code coverage report in text format: only show summary  
   --show-uncovered-for-coverage-text  Option for code coverage report in text format: show uncovered files  
   --coverage-xml [dir] . Write code coverage report in XML format to directory  
+  --exclude-source-from-xml-coverage  Exclude [source] element from code coverage report in XML format  
   --warm-coverage-cache ........................... Warm static analysis cache  
   --coverage-filter [dir] ........... Include [dir] in code coverage reporting  
   --path-coverage .......... Report path coverage in addition to line coverage  

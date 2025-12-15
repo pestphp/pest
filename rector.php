@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use Rector\CodingStyle\Rector\FunctionLike\FunctionLikeToFirstClassCallableRector;
 use Rector\Config\RectorConfig;
 use Rector\TypeDeclaration\Rector\ClassMethod\NarrowObjectReturnTypeRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\ReturnNeverTypeRector;
+use Rector\CodingStyle\Rector\ArrowFunction\ArrowFunctionDelegatingCallToFirstClassCallableRector;
 
 return RectorConfig::configure()
     ->withPaths([
@@ -14,7 +14,7 @@ return RectorConfig::configure()
     ->withSkip([
         __DIR__.'/src/Plugins/Parallel/Paratest/WrapperRunner.php',
         ReturnNeverTypeRector::class,
-        FunctionLikeToFirstClassCallableRector::class,
+        ArrowFunctionDelegatingCallToFirstClassCallableRector::class,
         NarrowObjectReturnTypeRector::class,
     ])
     ->withPreparedSets(
