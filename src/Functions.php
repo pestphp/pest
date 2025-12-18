@@ -314,7 +314,7 @@ if (! function_exists('fixture')) {
 
         if ($fileRealPath === false) {
             throw new InvalidArgumentException(
-                'The fixture file [' . $file . '] does not exist.',
+                'The fixture file ['.$file.'] does not exist.',
             );
         }
 
