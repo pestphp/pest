@@ -219,6 +219,20 @@ if (! function_exists('afterAll')) {
     }
 }
 
+if (! function_exists('only')) {
+    /**
+     * Marks all tests in the current file to be run exclusively.
+     */
+    function only(): void
+    {
+        $filename = Backtrace::file();
+
+        $beforeEachCall = (new BeforeEachCall(TestSuite::getInstance(), $filename));
+
+        $beforeEachCall->only();
+    }
+}
+
 if (! function_exists('covers')) {
     /**
      * Specifies which classes, or functions, a test case covers.
@@ -300,7 +314,7 @@ if (! function_exists('fixture')) {
 
         if ($fileRealPath === false) {
             throw new InvalidArgumentException(
-                'The fixture file ['.$file.'] does not exist.',
+                'The fixture file [' . $file . '] does not exist.',
             );
         }
 
