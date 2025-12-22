@@ -31,10 +31,8 @@ final class HigherOrderTapProxy
 
     /**
      * Dynamically pass properties gets to the target.
-     *
-     * @return mixed
      */
-    public function __get(string $property)
+    public function __get(string $property): mixed
     {
         if (property_exists($this->target, $property)) {
             return $this->target->{$property};

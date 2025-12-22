@@ -25,8 +25,8 @@ final readonly class Thanks
     private const array FUNDING_MESSAGES = [
         'Star' => 'https://github.com/pestphp/pest',
         'YouTube' => 'https://youtube.com/@nunomaduro',
-        'TikTok' => 'https://tiktok.com/@nunomaduro',
-        'Twitch' => 'https://twitch.tv/enunomaduro',
+        'TikTok' => 'https://tiktok.com/@enunomaduro',
+        'Twitch' => 'https://twitch.tv/nunomaduro',
         'LinkedIn' => 'https://linkedin.com/in/nunomaduro',
         'Instagram' => 'https://instagram.com/enunomaduro',
         'X' => 'https://x.com/enunomaduro',

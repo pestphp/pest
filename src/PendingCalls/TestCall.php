@@ -759,7 +759,12 @@ final class TestCall // @phpstan-ignore-line
         $this->testSuite->tests->set($this->testCaseMethod);
 
         if (! is_null($testCase = $this->testSuite->tests->get($this->filename))) {
-            $testCase->attributes = array_merge($testCase->attributes, $this->testCaseFactoryAttributes);
+            $attributesToMerge = array_filter(
+                $this->testCaseFactoryAttributes,
+                fn (Attribute $attributeToMerge): bool => array_filter($testCase->attributes, fn (Attribute $attribute): bool => serialize($attributeToMerge) === serialize($attribute)) === []
+            );
+
+            $testCase->attributes = array_merge($testCase->attributes, $attributesToMerge);
         }
     }
 }

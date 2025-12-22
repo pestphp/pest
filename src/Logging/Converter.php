@@ -131,7 +131,7 @@ final readonly class Converter
 
         // clean the paths of each frame.
         $frames = array_map(
-            fn (string $frame): string => $this->toRelativePath($frame),
+            $this->toRelativePath(...),
             $frames
         );
 

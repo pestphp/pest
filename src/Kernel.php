@@ -71,7 +71,7 @@ final readonly class Kernel
             $output,
         );
 
-        register_shutdown_function(fn () => $kernel->shutdown());
+        register_shutdown_function($kernel->shutdown(...));
 
         foreach (self::BOOTSTRAPPERS as $bootstrapper) {
             $bootstrapper = Container::getInstance()->get($bootstrapper);

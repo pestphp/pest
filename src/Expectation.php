@@ -397,7 +397,7 @@ final class Expectation
      *
      * @return Expectation<TValue>|OppositeExpectation<TValue>|EachExpectation<TValue>|HigherOrderExpectation<Expectation<TValue>, TValue|null>|TValue
      */
-    public function __get(string $name)
+    public function __get(string $name): mixed
     {
         if (! self::hasMethod($name)) {
             if (! is_object($this->value) && method_exists(PendingArchExpectation::class, $name)) {

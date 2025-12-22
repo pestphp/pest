@@ -99,6 +99,7 @@ final readonly class Help implements HandlesArguments
     {
         $helpReflection = new PHPUnitHelp;
 
+        // @phpstan-ignore-next-line
         $content = (fn (): array => $this->elements())->call($helpReflection);
 
         $content['Configuration'] = [...[[
