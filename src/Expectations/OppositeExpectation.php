@@ -15,6 +15,7 @@ use Pest\Arch\PendingArchExpectation;
 use Pest\Arch\SingleArchExpectation;
 use Pest\Arch\Support\FileLineFinder;
 use Pest\Exceptions\InvalidExpectation;
+use Pest\Exceptions\MissingDependency;
 use Pest\Expectation;
 use Pest\Support\Arr;
 use Pest\Support\Exporter;
@@ -284,6 +285,10 @@ final readonly class OppositeExpectation
      */
     public function toHaveSuspiciousCharacters(): ArchExpectation
     {
+        if (! class_exists(Spoofchecker::class)) {
+            throw new MissingDependency(__FUNCTION__, 'ext-intl >= 2.0');
+        }
+
         $checker = new Spoofchecker;
 
         /** @var Expectation<array<int, string>|string> $original */
