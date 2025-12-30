@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest;
 
+use Pest\PendingCalls\BeforeEachCall;
 use Pest\PendingCalls\UsesCall;
 
 /**
@@ -60,6 +61,14 @@ final readonly class Configuration
     public function group(string ...$groups): UsesCall
     {
         return (new UsesCall($this->filename, []))->group(...$groups);
+    }
+
+    /**
+     * Marks all tests in the current file to be run exclusively.
+     */
+    public function only(): void
+    {
+        (new BeforeEachCall(TestSuite::getInstance(), $this->filename))->only();
     }
 
     /**
