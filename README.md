@@ -30,24 +30,22 @@ We cannot thank our sponsors enough for their incredible support in funding Pest
 
 ### Platinum Sponsors
 
-- **[Laracasts](https://laracasts.com/?ref=pestphp)**
-- **[NativePHP](https://nativephp.com/mobile?ref=pestphp.com)**
+- **[CodeRabbit](https://coderabbit.ai/?ref=pestphp)**
+- **[Devin](https://devin.ai/?ref=nunomaduro)**
+- **[Mailtrap](https://l.rw.rw/pestphp)**
+- **[Tighten](https://tighten.com/?ref=nunomaduro)**
+- **[Redberry](https://redberry.international/laravel-development/?utm_source=pest&utm_medium=banner&utm_campaign=pest_sponsorship)**
 
 ### Gold Sponsors
 
-- **[CodeRabbit](https://coderabbit.ai/?ref=pestphp)**
 - **[CMS Max](https://cmsmax.com/?ref=pestphp)**
 
 ### Premium Sponsors
 
-- [Forge](https://forge.laravel.com/?ref=pestphp)
-- [Zapiet](https://www.zapiet.com/?ref=pestphp)
-- [Localazy](https://localazy.com/?ref=pestphp)
+- [Zapiet](https://zapiet.com/?ref=pestphp)
 - [Load Forge](https://loadforge.com/?ref=pestphp)
-- [DocuWriter.ai](https://www.docuwriter.ai/?ref=pestphp)
-- [Route4Me](https://www.route4me.com/?ref=pestphp)
-- [Devtools for Livewire](https://devtools-for-livewire.com/?ref=pestphp)
-- [Nerdify](https://www.getnerdify.com/?ref=pestphp)
+- [Route4Me](https://route4me.com/pt?ref=pestphp)
+- [Nerdify](https://getnerdify.com/?ref=pestphp)
 - [Akaunting](https://akaunting.com/?ref=pestphp)
 - [LambdaTest](https://lambdatest.com/?ref=pestphp)
 
