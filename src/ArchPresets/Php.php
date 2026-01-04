@@ -92,9 +92,5 @@ final class Php extends AbstractPreset
             'xdebug_var_dump',
             'trap',
         ])->not->toBeUsed();
-
-        $this->eachUserNamespace(
-            fn (Expectation $namespace): ArchExpectation => $namespace->not->toHaveSuspiciousCharacters(),
-        );
     }
 }
