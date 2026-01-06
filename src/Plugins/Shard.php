@@ -121,10 +121,11 @@ final class Shard implements AddsOutput, HandlesArguments
      */
     private function buildFilterArgument(array $testsToRun): string
     {
-        if (empty($testsToRun)) {
+        if ($testsToRun === []) {
             return '';
         }
 
+        /** @var array<string, mixed> $tree */
         $tree = [];
         foreach ($testsToRun as $class) {
             $parts = explode('\\', $class);
