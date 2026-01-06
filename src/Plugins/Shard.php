@@ -105,10 +105,42 @@ final class Shard implements AddsOutput, HandlesArguments
 
     /**
      * Builds the filter argument for the given tests to run.
+     *
+     * @param  array<int, string>  $testsToRun
      */
-    private function buildFilterArgument(mixed $testsToRun): string
+    private function buildFilterArgument(array $testsToRun): string
     {
-        return addslashes(implode('|', $testsToRun));
+        if (empty($testsToRun)) {
+            return '';
+        }
+
+        $tree = [];
+        foreach ($testsToRun as $class) {
+            $parts = explode('\\', $class);
+            $current = &$tree;
+            foreach ($parts as $part) {
+                if (! isset($current[$part])) {
+                    $current[$part] = [];
+                }
+                $current = &$current[$part];
+            }
+        }
+
+        $buildRegex = function (array $tree) use (&$buildRegex): string {
+            $parts = [];
+            foreach ($tree as $key => $sub) {
+                $subRegex = $buildRegex($sub);
+                if ($subRegex === '') {
+                    $parts[] = preg_quote($key, '/');
+                } else {
+                    $parts[] = preg_quote($key, '/').'\\\\'.(count($sub) > 1 ? '('.$subRegex.')' : $subRegex);
+                }
+            }
+
+            return implode('|', $parts);
+        };
+
+        return $buildRegex($tree);
     }
 
     /**
