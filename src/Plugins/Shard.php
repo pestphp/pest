@@ -22,6 +22,13 @@ final class Shard implements AddsOutput, HandlesArguments
     private const string SHARD_OPTION = 'shard';
 
     /**
+     * The maximum length allowed for the filter argument.
+     * While ARG_MAX can be 2MB, individual arguments are often limited to 128KB (MAX_ARG_STRLEN).
+     * Practical limits in CI environments (like Docker or pipeline runners) can be even lower.
+     */
+    private const int MAX_FILTER_LENGTH = 32768;
+
+    /**
      * The shard index and total number of shards.
      *
      * @var array{
@@ -72,7 +79,11 @@ final class Shard implements AddsOutput, HandlesArguments
             'testsCount' => count($tests),
         ];
 
-        return [...$arguments, '--filter', $this->buildFilterArgument($testsToRun)];
+        $filter = $this->buildFilterArgument($testsToRun);
+
+        $this->ensureFilterLengthIsSafe($filter);
+
+        return [...$arguments, '--filter', $filter];
     }
 
     /**
@@ -140,7 +151,31 @@ final class Shard implements AddsOutput, HandlesArguments
             return implode('|', $parts);
         };
 
-        return $buildRegex($tree);
+        $filter = $buildRegex($tree);
+
+        $this->ensureFilterLengthIsSafe($filter);
+
+        return $filter;
+    }
+
+    /**
+     * Ensures that the filter length is safe for the current environment.
+     *
+     * @throws InvalidOption
+     */
+    private function ensureFilterLengthIsSafe(string $filter): void
+    {
+        $maxLength = (int) (getenv('PEST_SHARD_MAX_FILTER_LENGTH') ?: self::MAX_FILTER_LENGTH);
+
+        if (strlen($filter) > $maxLength) {
+            throw new InvalidOption(sprintf(
+                'The generated filter for this shard is too long (%d characters). '.
+                'This can cause issues with some environments (limit is %d characters). '.
+                'Please increase the number of shards (e.g., use 1/4 instead of 1/2) to reduce the filter length.',
+                strlen($filter),
+                $maxLength
+            ));
+        }
     }
 
     /**
