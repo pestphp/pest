@@ -152,11 +152,7 @@ final class Shard implements AddsOutput, HandlesArguments
             return implode('|', $parts);
         };
 
-        $filter = $buildRegex($tree);
-
-        $this->ensureFilterLengthIsSafe($filter);
-
-        return $filter;
+        return $buildRegex($tree);
     }
 
     /**
