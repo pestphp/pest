@@ -36,8 +36,8 @@ test('junit output', function () use ($normalizedPath, $run) {
     expect($result['testsuite']['@attributes'])
         ->name->toBe('Tests\tests\SuccessOnly')
         ->file->toBe($normalizedPath('tests/.tests/SuccessOnly.php'))
-        ->tests->toBe('3')
-        ->assertions->toBe('3')
+        ->tests->toBe('4')
+        ->assertions->toBe('4')
         ->errors->toBe('0')
         ->failures->toBe('0')
         ->skipped->toBe('0');
