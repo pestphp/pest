@@ -79,7 +79,7 @@ final class Str
             return $subject;
         }
 
-        return substr($subject, 0, $pos);
+        return mb_substr($subject, 0, $pos);
     }
 
     /**
