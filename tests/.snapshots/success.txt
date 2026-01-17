@@ -1558,6 +1558,12 @@
    PASS  Tests\PHPUnit\GlobPatternTests\SubFolder2\UsesPerFileAsPattern
   ✓ closure was bound to CustomTestCase
 
+   PASS  Tests\PHPUnit\SuffixPatternTests\Deep\Nested\ShouldNotUseCustomTestCase
+  ✓ this file should NOT use CustomTestCase
+
+   PASS  Tests\PHPUnit\SuffixPatternTests\Deep\Nested\UsesPerFileSuffixPattern
+  ✓ closure was bound to SuffixedTest
+
    PASS  Tests\Playground
   ✓ basic
 
@@ -1782,4 +1788,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 39 todos, 35 skipped, 1188 passed (2813 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 39 todos, 35 skipped, 1190 passed (2815 assertions)
