@@ -119,19 +119,18 @@ use Symfony\Component\Console\Output\ConsoleOutput;
         }
     }
 
-    // Used when Pest is required using composer.
-    $vendorPath = dirname(__DIR__, 4).'/vendor/autoload.php';
+    $autoloadPath = match(true) {
+        // Used when Pest is required using composer.
+        file_exists($vendorPath = dirname(__DIR__, 4).'/vendor/autoload.php') => $vendorPath,
 
-    // Used when Pest maintainers are running Pest tests.
-    $localPath = dirname(__DIR__).'/vendor/autoload.php';
+        // Used when Pest maintainers are running Pest tests as a dependency (E2E).
+        file_exists($localSymlinkPath = getcwd() . '/vendor/autoload.php') => $localSymlinkPath,
 
-    if (file_exists($vendorPath)) {
-        include_once $vendorPath;
-        $autoloadPath = $vendorPath;
-    } else {
-        include_once $localPath;
-        $autoloadPath = $localPath;
-    }
+        // Used when Pest maintainers are running Pest locally (Pest Repo).
+        default => dirname(__DIR__) . '/vendor/autoload.php',
+    };
+
+    include_once $autoloadPath;
 
     // Get $rootPath based on $autoloadPath
     $rootPath = dirname($autoloadPath, 2);
