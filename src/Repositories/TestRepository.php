@@ -27,7 +27,7 @@ final class TestRepository
     private array $testCases = [];
 
     /**
-     * @var array<string, array{0: array<int, string>, 1: array<int, string>, 2: array<int, array<int, string|Closure>>}>
+     * @var array<string, array{0: array<int, string>, 1: array<int, string>, 2: array<int, array<int, string|Closure>>, 3: string, 4: string}>
      */
     private array $uses = [];
 
@@ -67,7 +67,7 @@ final class TestRepository
      * @param  array<int, string>  $paths
      * @param  array<int, Closure>  $hooks
      */
-    public function use(array $classOrTraits, array $groups, array $paths, array $hooks): void
+    public function use(array $classOrTraits, array $groups, array $paths, array $hooks, string $suffix): void
     {
         foreach ($classOrTraits as $classOrTrait) {
             if (class_exists($classOrTrait)) {
@@ -82,17 +82,25 @@ final class TestRepository
         $hooks = array_map(fn (Closure $hook): array => [$hook], $hooks);
 
         foreach ($paths as $path) {
-            if (array_key_exists($path, $this->uses)) {
-                $this->uses[$path] = [
-                    [...$this->uses[$path][0], ...$classOrTraits],
-                    [...$this->uses[$path][1], ...$groups],
+            // Using a composite key (path + suffix) allows for specialized configurations such as distinguishing
+            // between UnitTest and FunctionalTest even when tests are within the same directory.
+            $key = $path.':::'.$suffix;
+
+            // If the configuration for this path and suffix already exists, we merge the
+            // incoming settings to ensure that previous configurations are preserved.
+            if (array_key_exists($key, $this->uses)) {
+                $this->uses[$key] = [
+                    [...$this->uses[$key][0], ...$classOrTraits],
+                    [...$this->uses[$key][1], ...$groups],
                     array_map(
-                        fn (int $index): array => [...$this->uses[$path][2][$index] ?? [], ...($hooks[$index] ?? [])],
+                        fn (int $index): array => [...$this->uses[$key][2][$index] ?? [], ...($hooks[$index] ?? [])],
                         range(0, 3),
                     ),
+                    $path,
+                    $suffix,
                 ];
             } else {
-                $this->uses[$path] = [$classOrTraits, $groups, $hooks];
+                $this->uses[$key] = [$classOrTraits, $groups, $hooks, $path, $suffix];
             }
         }
     }
@@ -170,8 +178,12 @@ final class TestRepository
     {
         $startsWith = static fn (string $target, string $directory): bool => Str::startsWith($target, $directory.DIRECTORY_SEPARATOR);
 
-        foreach ($this->uses as $path => $uses) {
-            [$classOrTraits, $groups, $hooks] = $uses;
+        foreach ($this->uses as $uses) {
+            [$classOrTraits, $groups, $hooks, $path, $suffix] = $uses;
+
+            if ($suffix !== '' && ! Str::endsWith($testCase->filename, $suffix)) {
+                continue;
+            }
 
             if ((! is_dir($path) && $testCase->filename === $path) || (is_dir($path) && $startsWith($testCase->filename, $path))) {
                 foreach ($classOrTraits as $class) {

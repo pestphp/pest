@@ -1,6 +1,7 @@
 <?php
 
 use Tests\CustomTestCase\CustomTestCase;
+use Tests\CustomTestCase\SuffixedTest;
 use Tests\CustomTestCaseInSubFolders\SubFolder\SubFolder\CustomTestCaseInSubFolder;
 
 error_reporting(E_ALL);
@@ -16,6 +17,9 @@ pest()->in('PHPUnit/GlobPatternTests/SubFolder/*')->extend(CustomTestCase::class
 
 // test case for all the files that end with AsPattern.php inside PHPUnit/GlobPatternTests/SubFolder2/
 pest()->in('PHPUnit/GlobPatternTests/SubFolder2/*AsPattern.php')->use(CustomTestCase::class);
+
+// test case for all the files that end with SuffixPattern.php inside PHPUnit/GlobPatternTests/
+pest()->in('PHPUnit/SuffixPatternTests')->suffix('SuffixPattern.php')->use(SuffixedTest::class);
 
 pest()->in('Visual')->group('integration');
 

@@ -35,6 +35,11 @@ final class UsesCall
     private array $targets;
 
     /**
+     * Holds the suffix of the uses.
+     */
+    private string $suffix = '';
+
+    /**
      * Holds the groups of the uses.
      *
      * @var array<int, string>
@@ -129,6 +134,16 @@ final class UsesCall
     }
 
     /**
+     * Sets the test suffix.
+     */
+    public function suffix(string $suffix): self
+    {
+        $this->suffix = $suffix;
+
+        return $this;
+    }
+
+    /**
      * Sets the global beforeAll test hook.
      */
     public function beforeAll(Closure $hook): self
@@ -178,6 +193,7 @@ final class UsesCall
             $this->groups,
             $this->targets,
             $this->hooks,
+            $this->suffix,
         );
     }
 }
