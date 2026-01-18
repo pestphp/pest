@@ -44,16 +44,20 @@ trait HandleArguments
 
     /**
      * Pops the given argument from the arguments.
+     * Pops the given argument from the arguments and returns a re-indexed array.
      *
      * @param  array<int, string>  $arguments
      * @return array<int, string>
      */
     public function popArgument(string $argument, array $arguments): array
     {
-        $arguments = array_flip($arguments);
+        $key = array_search($argument, $arguments, true);
 
-        unset($arguments[$argument]);
+        if ($key !== false) {
+            unset($arguments[$key]);
+        }
 
-        return array_values(array_flip($arguments));
+        return array_values($arguments);
+
     }
 }
