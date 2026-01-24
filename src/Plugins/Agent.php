@@ -64,7 +64,7 @@ final class Agent implements AddsOutput, HandlesArguments
         }
 
         if (! in_array('--no-output', $arguments, true)) {
-            $arguments = $this->pushArgument('--no-output', $arguments);
+            return $this->pushArgument('--no-output', $arguments);
         }
 
         return $arguments;
@@ -90,7 +90,7 @@ final class Agent implements AddsOutput, HandlesArguments
 
         $output = AgentOutput::buildTestResults($result, $testSuite->rootPath);
 
-        if (self::$coverage !== null) {
+        if (self::$coverage instanceof \SebastianBergmann\CodeCoverage\CodeCoverage) {
             $output['coverage'] = AgentOutput::buildCoverage(self::$coverage, self::$coverageMin);
         }
 

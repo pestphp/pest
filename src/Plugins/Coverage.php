@@ -148,7 +148,7 @@ final class Coverage implements AddsOutput, HandlesArguments
 
             if (AgentOutput::isActive()) {
                 $codeCoverage = $this->loadCoverage();
-                if ($codeCoverage !== null) {
+                if ($codeCoverage instanceof \SebastianBergmann\CodeCoverage\CodeCoverage) {
                     $coverage = $codeCoverage->getReport()->percentageOfExecutedLines()->asFloat();
 
                     Agent::setCoverage($codeCoverage, $this->coverageMin > 0.0 ? $this->coverageMin : null);
