@@ -103,10 +103,12 @@
                 "Pest\\Plugins\\Bail",
                 "Pest\\Plugins\\Cache",
                 "Pest\\Plugins\\Coverage",
+                "Pest\\Plugins\\Memory",
+                "Pest\\Plugins\\Shard",
+                "Pest\\Plugins\\Agent",
                 "Pest\\Plugins\\Init",
                 "Pest\\Plugins\\Environment",
                 "Pest\\Plugins\\Help",
-                "Pest\\Plugins\\Memory",
                 "Pest\\Plugins\\Only",
                 "Pest\\Plugins\\Printer",
                 "Pest\\Plugins\\ProcessIsolation",
@@ -115,7 +117,6 @@
                 "Pest\\Plugins\\Snapshot",
                 "Pest\\Plugins\\Verbose",
                 "Pest\\Plugins\\Version",
-                "Pest\\Plugins\\Shard",
                 "Pest\\Plugins\\Parallel"
             ]
         },

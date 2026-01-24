@@ -7,6 +7,7 @@ namespace Pest\Plugins;
 use Pest\Contracts\Plugins\AddsOutput;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Exceptions\InvalidOption;
+use Pest\Support\AgentOutput;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -120,21 +121,25 @@ final class Shard implements AddsOutput, HandlesArguments
             return $exitCode;
         }
 
-        [
-            'index' => $index,
-            'total' => $total,
-            'testsRan' => $testsRan,
-            'testsCount' => $testsCount,
-        ] = self::$shard;
+        if (AgentOutput::isActive()) {
+            Agent::setShard(self::$shard);
+        } else {
+            [
+                'index' => $index,
+                'total' => $total,
+                'testsRan' => $testsRan,
+                'testsCount' => $testsCount,
+            ] = self::$shard;
 
-        $this->output->writeln(sprintf(
-            '  <fg=gray>Shard:</>    <fg=default>%d of %d</> — %d file%s ran, out of %d.',
-            $index,
-            $total,
-            $testsRan,
-            $testsRan === 1 ? '' : 's',
-            $testsCount,
-        ));
+            $this->output->writeln(sprintf(
+                '  <fg=gray>Shard:</>    <fg=default>%d of %d</> — %d file%s ran, out of %d.',
+                $index,
+                $total,
+                $testsRan,
+                $testsRan === 1 ? '' : 's',
+                $testsCount,
+            ));
+        }
 
         return $exitCode;
     }

@@ -6,7 +6,9 @@ namespace Pest\Plugins;
 
 use Pest\Contracts\Plugins\AddsOutput;
 use Pest\Contracts\Plugins\HandlesArguments;
+use Pest\Support\AgentOutput;
 use Pest\Support\Str;
+use SebastianBergmann\CodeCoverage\CodeCoverage;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
@@ -144,6 +146,26 @@ final class Coverage implements AddsOutput, HandlesArguments
                 exit(1);
             }
 
+            if (AgentOutput::isActive()) {
+                $codeCoverage = $this->loadCoverage();
+                if ($codeCoverage !== null) {
+                    $coverage = $codeCoverage->getReport()->percentageOfExecutedLines()->asFloat();
+
+                    Agent::setCoverage($codeCoverage, $this->coverageMin > 0.0 ? $this->coverageMin : null);
+
+                    $exitCode = (int) ($coverage < $this->coverageMin);
+
+                    if ($exitCode === 0 && $this->coverageExactly !== null) {
+                        $comparableCoverage = $this->computeComparableCoverage($coverage);
+                        $comparableCoverageExactly = $this->computeComparableCoverage($this->coverageExactly);
+
+                        $exitCode = $comparableCoverage === $comparableCoverageExactly ? 0 : 1;
+                    }
+                }
+
+                return $exitCode;
+            }
+
             $coverage = \Pest\Support\Coverage::report($this->output, $this->compact);
             $exitCode = (int) ($coverage < $this->coverageMin);
 
@@ -172,6 +194,23 @@ final class Coverage implements AddsOutput, HandlesArguments
         }
 
         return $exitCode;
+    }
+
+    /**
+     * Loads the coverage data from the coverage file.
+     */
+    private function loadCoverage(): ?CodeCoverage
+    {
+        $reportPath = \Pest\Support\Coverage::getPath();
+        if (! file_exists($reportPath)) {
+            return null;
+        }
+
+        /** @var CodeCoverage $codeCoverage */
+        $codeCoverage = require $reportPath;
+        unlink($reportPath);
+
+        return $codeCoverage;
     }
 
     /**

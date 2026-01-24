@@ -6,6 +6,7 @@ namespace Pest\Plugins;
 
 use Pest\Contracts\Plugins\AddsOutput;
 use Pest\Contracts\Plugins\HandlesArguments;
+use Pest\Support\AgentOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -44,10 +45,18 @@ final class Memory implements AddsOutput, HandlesArguments
      */
     public function addOutput(int $exitCode): int
     {
-        if ($this->enabled) {
+        if (! $this->enabled) {
+            return $exitCode;
+        }
+
+        $memory = round(memory_get_usage(true) / 1000 ** 2, 3);
+
+        if (AgentOutput::isActive()) {
+            Agent::setMemory($memory);
+        } else {
             $this->output->writeln(sprintf(
                 '  <fg=gray>Memory:</>   <fg=default>%s MB</>',
-                round(memory_get_usage(true) / 1000 ** 2, 3)
+                $memory
             ));
         }
 

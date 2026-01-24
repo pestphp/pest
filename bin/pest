@@ -19,6 +19,11 @@ use Symfony\Component\Console\Output\ConsoleOutput;
     // Ensures Collision's Printer is registered.
     $_SERVER['COLLISION_PRINTER'] = 'DefaultPrinter';
 
+    if (isset($_SERVER['CLAUDECODE']) || isset($_SERVER['OPENCODE'])) {
+        $_SERVER['PEST_AGENT_OUTPUT'] = 'true';
+        unset($_SERVER['COLLISION_PRINTER']);
+    }
+
     $arguments = $originalArguments = $_SERVER['argv'];
 
     $dirty = false;
@@ -26,6 +31,12 @@ use Symfony\Component\Console\Output\ConsoleOutput;
     $notes = false;
 
     foreach ($arguments as $key => $value) {
+
+        if ($value === '--agent') {
+            $_SERVER['PEST_AGENT_OUTPUT'] = 'true';
+            unset($arguments[$key]);
+            unset($_SERVER['COLLISION_PRINTER']);
+        }
 
         if ($value === '--compact') {
             $_SERVER['COLLISION_PRINTER_COMPACT'] = 'true';
