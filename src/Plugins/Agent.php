@@ -50,9 +50,9 @@ final class Agent implements AddsOutput, HandlesArguments
     /**
      * Creates a new Plugin instance.
      */
-    public function __construct(
-        private readonly OutputInterface $output,
-    ) {}
+    public function __construct(private readonly OutputInterface $output) {
+        //
+    }
 
     /**
      * {@inheritDoc}
