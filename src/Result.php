@@ -40,7 +40,7 @@ final class Result
      */
     public static function exitCode(Configuration $configuration, TestResult $result): int
     {
-        if ($result->wasSuccessfulIgnoringPhpunitWarnings()) {
+        if ($result->wasSuccessful()) {
             if ($configuration->failOnWarning()) {
                 $warnings = $result->numberOfTestsWithTestTriggeredPhpunitWarningEvents()
                     + count($result->warnings())
@@ -60,7 +60,7 @@ final class Result
             return self::FAILURE_EXIT;
         }
 
-        if ($result->wasSuccessfulIgnoringPhpunitWarnings()) {
+        if ($result->wasSuccessful()) {
             if ($configuration->failOnRisky() && $result->hasTestConsideredRiskyEvents()) {
                 $returnCode = self::FAILURE_EXIT;
             }
