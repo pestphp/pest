@@ -1,5 +1,5 @@
 
-  Pest Testing Framework 2.36.0.  
+  Pest Testing Framework 2.36.1.  
 
   USAGE: pest <file> [options]  
 
@@ -45,7 +45,7 @@
   --disallow-test-output ................. Be strict about output during tests  
   --enforce-time-limit ................. Enforce time limit based on test size  
   --default-time-limit [sec]  Timeout in seconds for tests that have no declared size  
-  --dont-report-useless-tests .. Do not report tests that do not test anything  
+  --do-not-report-useless-tests  Do not report tests that do not test anything  
   --stop-on-defect ... Stop after first error, failure, warning, or risky test  
   --stop-on-error ..................................... Stop after first error  
   --stop-on-failure ................................. Stop after first failure  
@@ -60,9 +60,20 @@
   --fail-on-risky  Signal failure using shell exit code when a test was considered risky  
   --fail-on-deprecation  Signal failure using shell exit code when a deprecation was triggered  
   --fail-on-phpunit-deprecation  Signal failure using shell exit code when a PHPUnit deprecation was triggered  
+  --fail-on-phpunit-warning  Signal failure using shell exit code when a PHPUnit warning was triggered  
   --fail-on-notice  Signal failure using shell exit code when a notice was triggered  
   --fail-on-skipped  Signal failure using shell exit code when a test was skipped  
   --fail-on-incomplete  Signal failure using shell exit code when a test was marked incomplete  
+  --fail-on-all-issues  Signal failure using shell exit code when an issue is triggered  
+  --do-not-fail-on-empty-test-suite  Do not signal failure using shell exit code when no tests were run  
+  --do-not-fail-on-warning  Do not signal failure using shell exit code when a warning was triggered  
+  --do-not-fail-on-risky  Do not signal failure using shell exit code when a test was considered risky  
+  --do-not-fail-on-deprecation  Do not signal failure using shell exit code when a deprecation was triggered  
+  --do-not-fail-on-phpunit-deprecation  Do not signal failure using shell exit code when a PHPUnit deprecation was triggered  
+  --do-not-fail-on-phpunit-warning  Do not signal failure using shell exit code when a PHPUnit warning was triggered  
+  --do-not-fail-on-notice  Do not signal failure using shell exit code when a notice was triggered  
+  --do-not-fail-on-skipped  Do not signal failure using shell exit code when a test was skipped  
+  --do-not-fail-on-incomplete  Do not signal failure using shell exit code when a test was marked incomplete  
   --cache-result ............................ Write test results to cache file  
   --do-not-cache-result .............. Do not write test results to cache file  
   --order-by [order]  Run tests in order: default|defects|depends|duration|no-depends|random|reverse|size  
@@ -83,6 +94,7 @@
   --display-errors ............. Display details for errors triggered by tests  
   --display-notices ........... Display details for notices triggered by tests  
   --display-warnings ......... Display details for warnings triggered by tests  
+  --display-all-issues ..... Display details for all issues that are triggered  
   --reverse-list .............................. Print defects in reverse order  
   --teamcity . Replace default progress and result output with TeamCity format  
   --testdox ................ Replace default result output with TestDox format  
