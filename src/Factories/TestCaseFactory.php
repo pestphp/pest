@@ -110,8 +110,8 @@ final class TestCaseFactory
         $relativePath = (string) preg_replace('|%[a-fA-F0-9][a-fA-F0-9]|', '', $relativePath);
         // Remove escaped quote sequences (maintain namespace)
         $relativePath = str_replace(array_map(fn (string $quote): string => sprintf('\\%s', $quote), ['\'', '"']), '', $relativePath);
-        // Limit to A-Z, a-z, 0-9, '_', '-'.
-        $relativePath = (string) preg_replace('/[^A-Za-z0-9\\\\]/', '', $relativePath);
+        // Limit to A-Z, a-z, 0-9, and Unicode letters.
+        $relativePath = (string) preg_replace('/[^A-Za-z0-9\\\\\\p{L}]/u', '', $relativePath);
 
         $classFQN = 'P\\'.$relativePath;
 
