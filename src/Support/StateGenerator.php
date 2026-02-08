@@ -10,6 +10,8 @@ use NunoMaduro\Collision\Exceptions\TestOutcome;
 use PHPUnit\Event\Code\TestDoxBuilder;
 use PHPUnit\Event\Code\TestMethod;
 use PHPUnit\Event\Code\ThrowableBuilder;
+use PHPUnit\Event\Test\AfterLastTestMethodErrored;
+use PHPUnit\Event\Test\BeforeFirstTestMethodErrored;
 use PHPUnit\Event\Test\Errored;
 use PHPUnit\Event\TestData\TestDataCollection;
 use PHPUnit\Framework\SkippedWithMessageException;
@@ -29,9 +31,17 @@ final class StateGenerator
                     TestResult::FAIL,
                     $testResultEvent->throwable()
                 ));
-            } else {
-                // @phpstan-ignore-next-line
+            } elseif ($testResultEvent instanceof BeforeFirstTestMethodErrored) {
                 $state->add(TestResult::fromBeforeFirstTestMethodErrored($testResultEvent));
+            } elseif ($testResultEvent instanceof AfterLastTestMethodErrored) {
+                $state->add(TestResult::fromBeforeFirstTestMethodErrored(
+                    new BeforeFirstTestMethodErrored(
+                        $testResultEvent->telemetryInfo(),
+                        $testResultEvent->testClassName(),
+                        $testResultEvent->calledMethod(),
+                        $testResultEvent->throwable(),
+                    )
+                ));
             }
         }
 
