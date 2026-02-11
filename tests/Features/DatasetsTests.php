@@ -533,3 +533,12 @@ test('named parameters work with bound closure returning associative array', fun
         return ['name' => $this->foo, 'email' => 'test@example.com'];
     },
 ]);
+
+test('dataset items can mix named and sequential styles', function (string $name, string $email) {
+    expect($name)->toBeString();
+    expect($email)->toContain('@');
+})->with([
+    ['name' => 'Taylor', 'email' => 'taylor@laravel.com'],
+    ['James', 'james@laravel.com'],
+    ['James', 'email' => 'james@laravel.com'],
+]);
