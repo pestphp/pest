@@ -458,7 +458,6 @@ test('after describe block with named dataset', function (...$args) {
     expect($args)->toBe(['after']);
 })->with('after-describe');
 
-// Named parameters on datasets
 test('named parameters match by parameter name', function (string $email, string $name) {
     expect($name)->toBe('Taylor');
     expect($email)->toBe('taylor@laravel.com');

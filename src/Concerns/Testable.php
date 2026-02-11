@@ -361,7 +361,7 @@ trait Testable
 
                 $parameterType = is_string($argumentIndex)
                     ? ($testParameterTypesByName[$argumentIndex] ?? 'mixed')
-                    : ($testParameterTypes[$argumentIndex] ?? 'mixed');
+                    : $testParameterTypes[$argumentIndex];
 
                 if (in_array($parameterType, [Closure::class, 'callable', 'mixed'])) {
                     continue;
