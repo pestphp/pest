@@ -146,9 +146,11 @@ final class Shard implements AddsOutput, HandlesArguments
      */
     public static function getShard(InputInterface $input): array
     {
-        $shard = $input->hasParameterOption('--'.self::SHARD_OPTION)
-            ? $input->getParameterOption('--'.self::SHARD_OPTION)
-            : null;
+        if ($input->hasParameterOption('--'.self::SHARD_OPTION)) {
+            $shard = $input->getParameterOption('--'.self::SHARD_OPTION);
+        } else {
+            $shard = null;
+        }
 
         if (! is_string($shard) || ! preg_match('/^\d+\/\d+$/', $shard)) {
             throw new InvalidOption('The [--shard] option must be in the format "index/total".');

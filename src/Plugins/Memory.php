@@ -44,16 +44,12 @@ final class Memory implements AddsOutput, HandlesArguments
      */
     public function addOutput(int $exitCode): int
     {
-        if (! $this->enabled) {
-            return $exitCode;
+        if ($this->enabled) {
+            $this->output->writeln(sprintf(
+                '  <fg=gray>Memory:</>   <fg=default>%s MB</>',
+                round(memory_get_usage(true) / 1000 ** 2, 3)
+            ));
         }
-
-        $memory = round(memory_get_usage(true) / 1000 ** 2, 3);
-
-        $this->output->writeln(sprintf(
-            '  <fg=gray>Memory:</>   <fg=default>%s MB</>',
-            $memory
-        ));
 
         return $exitCode;
     }
