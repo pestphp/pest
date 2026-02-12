@@ -9,10 +9,13 @@ use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Support\Container;
 use Pest\Support\JsonOutput;
 use Pest\TestSuite;
+use PHPUnit\Event\Code\Test;
 use PHPUnit\Event\Code\TestMethod;
+use PHPUnit\Event\Code\Throwable;
 use PHPUnit\Event\Test\BeforeFirstTestMethodErrored;
 use PHPUnit\Event\Test\Errored;
 use PHPUnit\TestRunner\TestResult\Facade;
+use PHPUnit\TestRunner\TestResult\TestResult;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -78,7 +81,7 @@ final class Json implements AddsOutput, HandlesArguments
      *
      * @return list<array{test: string, message: string, location: string, trace: string}>
      */
-    private function buildFailures(\PHPUnit\TestRunner\TestResult\TestResult $result, string $rootPath): array
+    private function buildFailures(TestResult $result, string $rootPath): array
     {
         $failures = [];
 
@@ -107,7 +110,7 @@ final class Json implements AddsOutput, HandlesArguments
      *
      * @return array{test: string, message: string, location: string, trace: string}
      */
-    private function buildFailureFromEvent(\PHPUnit\Event\Code\Test $test, \PHPUnit\Event\Code\Throwable $throwable, string $rootPath): array
+    private function buildFailureFromEvent(Test $test, Throwable $throwable, string $rootPath): array
     {
         $testName = 'Unknown test';
         $location = 'unknown';

@@ -14,11 +14,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 final class JsonOutput implements OutputInterface
 {
     /**
-     * Whether JSON has been emitted.
-     */
-    private bool $jsonEmitted = false;
-
-    /**
      * The buffered output text.
      *
      * @var list<string>
@@ -46,7 +41,7 @@ final class JsonOutput implements OutputInterface
      */
     public function writeJson(string $json): void
     {
-        $this->jsonEmitted = true;
+        $this->buffer = [];
         $this->decorated->writeln($json);
     }
 
@@ -167,14 +162,10 @@ final class JsonOutput implements OutputInterface
     }
 
     /**
-     * Shutdown handler that emits error JSON if no JSON was written.
+     * Shutdown handler that emits error JSON if no output was buffered after the last emission.
      */
     private function shutdownHandler(): void
     {
-        if ($this->jsonEmitted) {
-            return;
-        }
-
         $buffered = implode("\n", array_filter($this->buffer));
         $message = preg_replace('/\x1b\[[0-9;]*m/', '', $buffered) ?? $buffered;
         $message = trim($message);

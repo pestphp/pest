@@ -2,8 +2,8 @@
 
 test('json mode outputs JSON for passing tests', function () {
     $output = function () {
-        $env = array_filter(getenv(), fn ($key) => ! in_array($key, ['PEST_JSON_OUTPUT'], true), ARRAY_FILTER_USE_KEY);
-        $env['COLLISION_PRINTER'] = 'DefaultPrinter';
+        $env = array_filter(getenv(), fn ($key) => ! in_array($key, ['PEST_JSON_OUTPUT', 'CLAUDECODE', 'CLAUDE_CODE_ENTRYPOINT'], true), ARRAY_FILTER_USE_KEY);
+        unset($env['COLLISION_PRINTER']);
 
         $process = (new Symfony\Component\Process\Process(
             ['php', 'bin/pest', 'tests/Features/Json.php', '--json', '--filter=has plugin'],
@@ -40,8 +40,8 @@ test('failing test', function () {
 PHP);
 
     $output = function () use ($testFile) {
-        $env = array_filter(getenv(), fn ($key) => ! in_array($key, ['PEST_JSON_OUTPUT'], true), ARRAY_FILTER_USE_KEY);
-        $env['COLLISION_PRINTER'] = 'DefaultPrinter';
+        $env = array_filter(getenv(), fn ($key) => ! in_array($key, ['PEST_JSON_OUTPUT', 'CLAUDECODE', 'CLAUDE_CODE_ENTRYPOINT'], true), ARRAY_FILTER_USE_KEY);
+        unset($env['COLLISION_PRINTER']);
 
         $process = (new Symfony\Component\Process\Process(
             ['php', 'bin/pest', $testFile, '--json'],

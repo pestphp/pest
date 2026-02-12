@@ -17,14 +17,15 @@ use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
 (static function () {
+    // Ensures Collision's Printer is registered.
+    $_SERVER['COLLISION_PRINTER'] = 'DefaultPrinter';
+
     $arguments = $originalArguments = $_SERVER['argv'];
 
     $dirty = false;
     $todo = false;
     $notes = false;
     $json = false;
-    $compact = false;
-    $profile = false;
 
     foreach ($arguments as $key => $value) {
 
@@ -34,12 +35,12 @@ use Symfony\Component\Console\Output\ConsoleOutput;
         }
 
         if ($value === '--compact') {
-            $compact = true;
+            $_SERVER['COLLISION_PRINTER_COMPACT'] = 'true';
             unset($arguments[$key]);
         }
 
         if ($value === '--profile') {
-            $profile = true;
+            $_SERVER['COLLISION_PRINTER_PROFILE'] = 'true';
             unset($arguments[$key]);
         }
 
@@ -121,6 +122,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
         if (str_contains($value, '--teamcity')) {
             unset($arguments[$key]);
             $arguments[] = '--no-output';
+            unset($_SERVER['COLLISION_PRINTER']);
         }
     }
 
@@ -130,9 +132,9 @@ use Symfony\Component\Console\Output\ConsoleOutput;
     // Used when Pest maintainers are running Pest tests.
     $localPath = dirname(__DIR__).'/vendor/autoload.php';
 
-    // Auto-detect agent environments before autoloader to enable JSON output
-    // before Collision's Autoload.php registers its printer subscriber.
-    if (! $json && ! class_exists(\AgentDetector\AgentDetector::class, false)) {
+    // Auto-detect AI agent environments before autoloader runs,
+    // so Collision's printer subscriber is not registered.
+    if (! $json) {
         $vendorDir = dirname(file_exists($vendorPath) ? $vendorPath : $localPath);
         $agentDetectorPath = $vendorDir.'/shipfastlabs/agent-detector/src/AgentDetector.php';
 
@@ -147,21 +149,9 @@ use Symfony\Component\Console\Output\ConsoleOutput;
         }
     }
 
-    // Register Collision's Printer only when not in JSON or TeamCity mode.
-    if (! $json && ! in_array('--no-output', $arguments, true)) {
-        $_SERVER['COLLISION_PRINTER'] = 'DefaultPrinter';
-    }
-
-    if ($compact) {
-        $_SERVER['COLLISION_PRINTER_COMPACT'] = 'true';
-    }
-
-    if ($profile) {
-        $_SERVER['COLLISION_PRINTER_PROFILE'] = 'true';
-    }
-
     if ($json) {
         $_SERVER['PEST_JSON_OUTPUT'] = 'true';
+        unset($_SERVER['COLLISION_PRINTER']);
     }
 
     if (file_exists($vendorPath)) {
@@ -214,8 +204,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
     }
 
     if ($json) {
-        $consoleOutput = new ConsoleOutput(ConsoleOutput::VERBOSITY_NORMAL, false);
-        $output = new JsonOutput($consoleOutput);
+        $output = new JsonOutput(new ConsoleOutput(ConsoleOutput::VERBOSITY_NORMAL, false));
     } else {
         $isDecorated = $input->getParameterOption('--colors', 'always') !== 'never';
         $output = new ConsoleOutput(ConsoleOutput::VERBOSITY_NORMAL, $isDecorated);
