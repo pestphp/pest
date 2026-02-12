@@ -25,6 +25,7 @@ final class JsonOutput implements OutputInterface
      */
     public function __construct(private readonly ConsoleOutput $decorated)
     {
+        ob_start();
         register_shutdown_function($this->shutdownHandler(...));
     }
 
@@ -41,6 +42,10 @@ final class JsonOutput implements OutputInterface
      */
     public function writeJson(string $json): void
     {
+        if (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
         $this->buffer = [];
         $this->decorated->writeln($json);
     }
@@ -166,6 +171,10 @@ final class JsonOutput implements OutputInterface
      */
     private function shutdownHandler(): void
     {
+        if (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
         $buffered = implode("\n", array_filter($this->buffer));
         $message = preg_replace('/\x1b\[[0-9;]*m/', '', $buffered) ?? $buffered;
         $message = trim($message);
