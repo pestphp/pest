@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 use Pest\Kernel;
 use Pest\Panic;
+use Pest\Support\JsonOutput;
 use Pest\TestCaseFilters\GitDirtyTestCaseFilter;
 use Pest\TestCaseMethodFilters\AssigneeTestCaseFilter;
 use Pest\TestCaseMethodFilters\IssueTestCaseFilter;
@@ -16,35 +17,29 @@ use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
 (static function () {
-    // Ensures Collision's Printer is registered.
-    $_SERVER['COLLISION_PRINTER'] = 'DefaultPrinter';
-
-    if (isset($_SERVER['CLAUDECODE']) || isset($_SERVER['OPENCODE'])) {
-        $_SERVER['PEST_AGENT_OUTPUT'] = 'true';
-        unset($_SERVER['COLLISION_PRINTER']);
-    }
-
     $arguments = $originalArguments = $_SERVER['argv'];
 
     $dirty = false;
     $todo = false;
     $notes = false;
+    $json = false;
+    $compact = false;
+    $profile = false;
 
     foreach ($arguments as $key => $value) {
 
-        if ($value === '--agent') {
-            $_SERVER['PEST_AGENT_OUTPUT'] = 'true';
+        if ($value === '--json') {
+            $json = true;
             unset($arguments[$key]);
-            unset($_SERVER['COLLISION_PRINTER']);
         }
 
         if ($value === '--compact') {
-            $_SERVER['COLLISION_PRINTER_COMPACT'] = 'true';
+            $compact = true;
             unset($arguments[$key]);
         }
 
         if ($value === '--profile') {
-            $_SERVER['COLLISION_PRINTER_PROFILE'] = 'true';
+            $profile = true;
             unset($arguments[$key]);
         }
 
@@ -126,7 +121,6 @@ use Symfony\Component\Console\Output\ConsoleOutput;
         if (str_contains($value, '--teamcity')) {
             unset($arguments[$key]);
             $arguments[] = '--no-output';
-            unset($_SERVER['COLLISION_PRINTER']);
         }
     }
 
@@ -135,6 +129,40 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
     // Used when Pest maintainers are running Pest tests.
     $localPath = dirname(__DIR__).'/vendor/autoload.php';
+
+    // Auto-detect agent environments before autoloader to enable JSON output
+    // before Collision's Autoload.php registers its printer subscriber.
+    if (! $json && ! class_exists(\AgentDetector\AgentDetector::class, false)) {
+        $vendorDir = dirname(file_exists($vendorPath) ? $vendorPath : $localPath);
+        $agentDetectorPath = $vendorDir.'/shipfastlabs/agent-detector/src/AgentDetector.php';
+
+        if (is_file($agentDetectorPath)) {
+            require_once $vendorDir.'/shipfastlabs/agent-detector/src/KnownAgent.php';
+            require_once $vendorDir.'/shipfastlabs/agent-detector/src/AgentResult.php';
+            require_once $agentDetectorPath;
+
+            if (\AgentDetector\AgentDetector::detect()->isAgent) {
+                $json = true;
+            }
+        }
+    }
+
+    // Register Collision's Printer only when not in JSON or TeamCity mode.
+    if (! $json && ! in_array('--no-output', $arguments, true)) {
+        $_SERVER['COLLISION_PRINTER'] = 'DefaultPrinter';
+    }
+
+    if ($compact) {
+        $_SERVER['COLLISION_PRINTER_COMPACT'] = 'true';
+    }
+
+    if ($profile) {
+        $_SERVER['COLLISION_PRINTER_PROFILE'] = 'true';
+    }
+
+    if ($json) {
+        $_SERVER['PEST_JSON_OUTPUT'] = 'true';
+    }
 
     if (file_exists($vendorPath)) {
         include_once $vendorPath;
@@ -185,9 +213,13 @@ use Symfony\Component\Console\Output\ConsoleOutput;
         $testSuite->tests->addTestCaseMethodFilter(new PrTestCaseFilter((int) $pr));
     }
 
-    $isDecorated = $input->getParameterOption('--colors', 'always') !== 'never';
-
-    $output = new ConsoleOutput(ConsoleOutput::VERBOSITY_NORMAL, $isDecorated);
+    if ($json) {
+        $consoleOutput = new ConsoleOutput(ConsoleOutput::VERBOSITY_NORMAL, false);
+        $output = new JsonOutput($consoleOutput);
+    } else {
+        $isDecorated = $input->getParameterOption('--colors', 'always') !== 'never';
+        $output = new ConsoleOutput(ConsoleOutput::VERBOSITY_NORMAL, $isDecorated);
+    }
 
     try {
         $kernel = Kernel::boot($testSuite, $input, $output);

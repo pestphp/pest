@@ -7,7 +7,6 @@ namespace Pest\Plugins;
 use Pest\Contracts\Plugins\AddsOutput;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Exceptions\InvalidOption;
-use Pest\Support\AgentOutput;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -121,25 +120,21 @@ final class Shard implements AddsOutput, HandlesArguments
             return $exitCode;
         }
 
-        if (AgentOutput::isActive()) {
-            Agent::setShard(self::$shard);
-        } else {
-            [
-                'index' => $index,
-                'total' => $total,
-                'testsRan' => $testsRan,
-                'testsCount' => $testsCount,
-            ] = self::$shard;
+        [
+            'index' => $index,
+            'total' => $total,
+            'testsRan' => $testsRan,
+            'testsCount' => $testsCount,
+        ] = self::$shard;
 
-            $this->output->writeln(sprintf(
-                '  <fg=gray>Shard:</>    <fg=default>%d of %d</> — %d file%s ran, out of %d.',
-                $index,
-                $total,
-                $testsRan,
-                $testsRan === 1 ? '' : 's',
-                $testsCount,
-            ));
-        }
+        $this->output->writeln(sprintf(
+            '  <fg=gray>Shard:</>    <fg=default>%d of %d</> — %d file%s ran, out of %d.',
+            $index,
+            $total,
+            $testsRan,
+            $testsRan === 1 ? '' : 's',
+            $testsCount,
+        ));
 
         return $exitCode;
     }
@@ -151,11 +146,9 @@ final class Shard implements AddsOutput, HandlesArguments
      */
     public static function getShard(InputInterface $input): array
     {
-        if ($input->hasParameterOption('--'.self::SHARD_OPTION)) {
-            $shard = $input->getParameterOption('--'.self::SHARD_OPTION);
-        } else {
-            $shard = null;
-        }
+        $shard = $input->hasParameterOption('--'.self::SHARD_OPTION)
+            ? $input->getParameterOption('--'.self::SHARD_OPTION)
+            : null;
 
         if (! is_string($shard) || ! preg_match('/^\d+\/\d+$/', $shard)) {
             throw new InvalidOption('The [--shard] option must be in the format "index/total".');

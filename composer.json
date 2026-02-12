@@ -26,6 +26,7 @@
         "pestphp/pest-plugin-mutate": "^4.0.1",
         "pestphp/pest-plugin-profanity": "^4.2.1",
         "phpunit/phpunit": "^12.5.8",
+        "shipfastlabs/agent-detector": "^1.0",
         "symfony/process": "^7.4.4|^8.0.0"
     },
     "conflict": {
@@ -105,7 +106,7 @@
                 "Pest\\Plugins\\Coverage",
                 "Pest\\Plugins\\Memory",
                 "Pest\\Plugins\\Shard",
-                "Pest\\Plugins\\Agent",
+                "Pest\\Plugins\\Json",
                 "Pest\\Plugins\\Init",
                 "Pest\\Plugins\\Environment",
                 "Pest\\Plugins\\Help",
