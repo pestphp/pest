@@ -48,6 +48,6 @@ We cannot thank our sponsors enough for their incredible support in funding Pest
 - [Route4Me](https://route4me.com/pt?ref=pestphp)
 - [Nerdify](https://getnerdify.com/?ref=pestphp)
 - [Akaunting](https://akaunting.com/?ref=pestphp)
-- [LambdaTest](https://lambdatest.com/?ref=pestphp)
+- [TestMu AI](https://www.testmuai.com/?utm_medium=sponsor&utm_source=pest)
 
 Pest is an open-sourced software licensed under the **[MIT license](https://opensource.org/licenses/MIT)**.
