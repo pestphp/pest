@@ -29,6 +29,20 @@ jobs:
         coverage: none
         extensions: sockets
 
+    - name: Get Composer cache directory
+      id: composer-cache
+      shell: bash
+      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+    - name: Cache Composer dependencies
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: static-php-8.3-${{ matrix.dependency-version }}-composer-${{ hashFiles('**/composer.json') }}
+        restore-keys: |
+          static-php-8.3-${{ matrix.dependency-version }}-composer-
+          static-php-8.3-composer-
+
     - name: Install Dependencies
       run: composer update --prefer-stable --no-interaction --no-progress --ansi
 
