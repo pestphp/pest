@@ -175,7 +175,8 @@ final class Parallel implements HandlesArguments
     private function hasArgumentsThatWouldBeFasterWithoutParallel(): bool
     {
         $arguments = new ArgvInput;
-        return array_any(self::UNSUPPORTED_ARGUMENTS, fn(string|array $unsupportedArgument): bool => $arguments->hasParameterOption($unsupportedArgument));
+
+        return array_any(self::UNSUPPORTED_ARGUMENTS, fn (string|array $unsupportedArgument): bool => $arguments->hasParameterOption($unsupportedArgument));
     }
 
     /**

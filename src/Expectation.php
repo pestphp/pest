@@ -864,7 +864,7 @@ final class Expectation
 
         return Targeted::make(
             $this,
-            fn(ObjectDescription $object): bool => array_all($interfaces, fn($interface): bool => isset($object->reflectionClass) && $object->reflectionClass->implementsInterface($interface)),
+            fn (ObjectDescription $object): bool => array_all($interfaces, fn ($interface): bool => isset($object->reflectionClass) && $object->reflectionClass->implementsInterface($interface)),
             "to implement '".implode("', '", $interfaces)."'",
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );

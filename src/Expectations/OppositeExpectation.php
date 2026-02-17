@@ -576,7 +576,7 @@ final readonly class OppositeExpectation
 
         return Targeted::make(
             $original,
-            fn(ObjectDescription $object): bool => array_all($traits, fn($trait): bool => !(isset($object->reflectionClass) && in_array($trait, $object->reflectionClass->getTraitNames(), true))),
+            fn (ObjectDescription $object): bool => array_all($traits, fn ($trait): bool => ! (isset($object->reflectionClass) && in_array($trait, $object->reflectionClass->getTraitNames(), true))),
             "not to use traits '".implode("', '", $traits)."'",
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
@@ -596,7 +596,7 @@ final readonly class OppositeExpectation
 
         return Targeted::make(
             $original,
-            fn(ObjectDescription $object): bool => array_all($interfaces, fn($interface): bool => !(isset($object->reflectionClass) && $object->reflectionClass->implementsInterface($interface))),
+            fn (ObjectDescription $object): bool => array_all($interfaces, fn ($interface): bool => ! (isset($object->reflectionClass) && $object->reflectionClass->implementsInterface($interface))),
             "not to implement '".implode("', '", $interfaces)."'",
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
