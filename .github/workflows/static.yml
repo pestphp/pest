@@ -2,7 +2,7 @@ name: Static Analysis
 
 on:
   push:
-    branches: [4.x]
+    branches: [5.x]
   pull_request:
   schedule:
     - cron: '0 0 * * *'
@@ -29,7 +29,7 @@ jobs:
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: 8.3
+        php-version: 8.4
         tools: composer:v2
         coverage: none
         extensions: sockets
@@ -43,10 +43,10 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ steps.composer-cache.outputs.dir }}
-        key: static-php-8.3-${{ matrix.dependency-version }}-composer-${{ hashFiles('**/composer.json') }}
+        key: static-php-8.4-${{ matrix.dependency-version }}-composer-${{ hashFiles('**/composer.json') }}
         restore-keys: |
-          static-php-8.3-${{ matrix.dependency-version }}-composer-
-          static-php-8.3-composer-
+          static-php-8.4-${{ matrix.dependency-version }}-composer-
+          static-php-8.4-composer-
 
     - name: Install Dependencies
       run: composer update --${{ matrix.dependency-version }} --no-interaction --no-progress --ansi
