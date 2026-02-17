@@ -191,7 +191,7 @@ final class TestCaseFactory
 
         if (
             $method->closure instanceof \Closure &&
-            (new \ReflectionFunction($method->closure))->isStatic()
+            new \ReflectionFunction($method->closure)->isStatic()
         ) {
 
             throw new TestClosureMustNotBeStatic($method);

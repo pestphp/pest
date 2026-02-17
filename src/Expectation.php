@@ -237,7 +237,7 @@ final class Expectation
             if ($callbacks[$index] instanceof Closure) {
                 $callbacks[$index](new self($value), new self($key));
             } else {
-                (new self($value))->toEqual($callbacks[$index]);
+                new self($value)->toEqual($callbacks[$index]);
             }
 
             $index = isset($callbacks[$index + 1]) ? $index + 1 : 0;
@@ -864,15 +864,7 @@ final class Expectation
 
         return Targeted::make(
             $this,
-            function (ObjectDescription $object) use ($interfaces): bool {
-                foreach ($interfaces as $interface) {
-                    if (! isset($object->reflectionClass) || ! $object->reflectionClass->implementsInterface($interface)) {
-                        return false;
-                    }
-                }
-
-                return true;
-            },
+            fn(ObjectDescription $object): bool => array_all($interfaces, fn($interface): bool => isset($object->reflectionClass) && $object->reflectionClass->implementsInterface($interface)),
             "to implement '".implode("', '", $interfaces)."'",
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
@@ -1087,8 +1079,8 @@ final class Expectation
             $this,
             fn (ObjectDescription $object): bool => isset($object->reflectionClass)
                 && $object->reflectionClass->isEnum()
-                && (new ReflectionEnum($object->name))->isBacked() // @phpstan-ignore-line
-                && (string) (new ReflectionEnum($object->name))->getBackingType() === $backingType, // @phpstan-ignore-line
+                && new ReflectionEnum($object->name)->isBacked() // @phpstan-ignore-line
+                && (string) new ReflectionEnum($object->name)->getBackingType() === $backingType, // @phpstan-ignore-line
             'to be '.$backingType.' backed enum',
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );

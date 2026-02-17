@@ -38,7 +38,7 @@ final class HigherOrderTapProxy
             return $this->target->{$property};
         }
 
-        $className = (new ReflectionClass($this->target))->getName();
+        $className = new ReflectionClass($this->target)->getName();
 
         if (str_starts_with($className, 'P\\')) {
             $className = substr($className, 2);
@@ -60,7 +60,7 @@ final class HigherOrderTapProxy
         $filename = Backtrace::file();
         $line = Backtrace::line();
 
-        return (new HigherOrderMessage($filename, $line, $methodName, $arguments))
+        return new HigherOrderMessage($filename, $line, $methodName, $arguments)
             ->call($this->target);
     }
 }

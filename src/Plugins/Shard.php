@@ -83,11 +83,11 @@ final class Shard implements AddsOutput, HandlesArguments
      */
     private function allTests(array $arguments): array
     {
-        $output = (new Process([
+        $output = new Process([
             'php',
             ...$this->removeParallelArguments($arguments),
             '--list-tests',
-        ]))->mustRun()->getOutput();
+        ])->mustRun()->getOutput();
 
         preg_match_all('/ - (?:P\\\\)?(Tests\\\\[^:]+)::/', $output, $matches);
 
