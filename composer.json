@@ -55,8 +55,8 @@
         ]
     },
     "require-dev": {
-        "pestphp/pest-dev-tools": "^4.0.0",
-        "pestphp/pest-plugin-browser": "^4.2.1",
+        "pestphp/pest-dev-tools": "^4.1.0",
+        "pestphp/pest-plugin-browser": "^4.3.0",
         "pestphp/pest-plugin-type-coverage": "^4.0.3",
         "psy/psysh": "^0.12.20"
     },
