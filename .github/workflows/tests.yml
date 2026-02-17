@@ -2,7 +2,12 @@ name: Tests
 
 on:
   push:
+    branches: [4.x]
   pull_request:
+
+concurrency:
+  group: tests-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   tests:

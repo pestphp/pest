@@ -2,9 +2,14 @@ name: Static Analysis
 
 on:
   push:
+    branches: [4.x]
   pull_request:
   schedule:
     - cron: '0 0 * * *'
+
+concurrency:
+  group: static-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   static:
@@ -44,7 +49,7 @@ jobs:
           static-php-8.3-composer-
 
     - name: Install Dependencies
-      run: composer update --prefer-stable --no-interaction --no-progress --ansi
+      run: composer update --${{ matrix.dependency-version }} --no-interaction --no-progress --ansi
 
     - name: Profanity Check
       run: composer test:profanity
