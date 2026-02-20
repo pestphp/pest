@@ -36,6 +36,7 @@ We cannot thank our sponsors enough for their incredible support in funding Pest
 - **[Mailtrap](https://l.rw.rw/pestphp)**
 - **[Tighten](https://tighten.com/?ref=nunomaduro)**
 - **[Redberry](https://redberry.international/laravel-development/?utm_source=pest&utm_medium=banner&utm_campaign=pest_sponsorship)**
+- **[SerpApi](https://serpapi.com/?ref=nunomaduro)**
 
 ### Gold Sponsors
 
