@@ -131,6 +131,7 @@ final class WrapperRunner implements RunnerInterface
         $parameters = $this->handleLaravelHerd($parameters);
 
         $parameters[] = $wrapper;
+        $parameters[] = '--test-directory='.TestSuite::getInstance()->testPath;
 
         $this->parameters = $parameters;
         $this->codeCoverageFilterRegistry = new CodeCoverageFilterRegistry;

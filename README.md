@@ -36,6 +36,7 @@ We cannot thank our sponsors enough for their incredible support in funding Pest
 - **[Mailtrap](https://l.rw.rw/pestphp)**
 - **[Tighten](https://tighten.com/?ref=nunomaduro)**
 - **[Redberry](https://redberry.international/laravel-development/?utm_source=pest&utm_medium=banner&utm_campaign=pest_sponsorship)**
+- **[SerpApi](https://serpapi.com/?ref=nunomaduro)**
 
 ### Gold Sponsors
 
@@ -48,6 +49,6 @@ We cannot thank our sponsors enough for their incredible support in funding Pest
 - [Route4Me](https://route4me.com/pt?ref=pestphp)
 - [Nerdify](https://getnerdify.com/?ref=pestphp)
 - [Akaunting](https://akaunting.com/?ref=pestphp)
-- [LambdaTest](https://lambdatest.com/?ref=pestphp)
+- [TestMu AI](https://www.testmuai.com/?utm_medium=sponsor&utm_source=pest)
 
 Pest is an open-sourced software licensed under the **[MIT license](https://opensource.org/licenses/MIT)**.
