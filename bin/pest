@@ -112,6 +112,17 @@ use Symfony\Component\Console\Output\ConsoleOutput;
             }
         }
 
+        if (str_contains($value, '--shard-timing=')) {
+            $_SERVER['PEST_SHARD_TIMING'] = substr($value, strlen('--shard-timing='));
+            unset($arguments[$key]);
+        } elseif ($value === '--shard-timing') {
+            if (isset($arguments[$key + 1])) {
+                $_SERVER['PEST_SHARD_TIMING'] = $arguments[$key + 1];
+                unset($arguments[$key + 1]);
+            }
+            unset($arguments[$key]);
+        }
+
         if (str_contains($value, '--teamcity')) {
             unset($arguments[$key]);
             $arguments[] = '--no-output';
