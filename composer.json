@@ -113,6 +113,7 @@
                 "Pest\\Plugins\\Profile",
                 "Pest\\Plugins\\Retry",
                 "Pest\\Plugins\\Snapshot",
+                "Pest\\Plugins\\Compact",
                 "Pest\\Plugins\\Verbose",
                 "Pest\\Plugins\\Version",
                 "Pest\\Plugins\\Shard",
