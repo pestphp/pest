@@ -148,7 +148,7 @@ trait Testable
      */
     public function __addBeforeAll(?Closure $hook): void
     {
-        if (! $hook instanceof \Closure) {
+        if (! $hook instanceof Closure) {
             return;
         }
 
@@ -162,7 +162,7 @@ trait Testable
      */
     public function __addAfterAll(?Closure $hook): void
     {
-        if (! $hook instanceof \Closure) {
+        if (! $hook instanceof Closure) {
             return;
         }
 
@@ -192,7 +192,7 @@ trait Testable
      */
     private function __addHook(string $property, ?Closure $hook): void
     {
-        if (! $hook instanceof \Closure) {
+        if (! $hook instanceof Closure) {
             return;
         }
 

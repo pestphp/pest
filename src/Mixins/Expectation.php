@@ -9,6 +9,7 @@ use Closure;
 use Countable;
 use DateTimeInterface;
 use Error;
+use Illuminate\Testing\TestResponse;
 use InvalidArgumentException;
 use JsonSerializable;
 use Pest\Exceptions\InvalidExpectationValue;
@@ -846,7 +847,7 @@ final class Expectation
             is_object($this->value) && method_exists($this->value, 'toSnapshot') => $this->value->toSnapshot(),
             is_object($this->value) && method_exists($this->value, '__toString') => $this->value->__toString(),
             is_object($this->value) && method_exists($this->value, 'toString') => $this->value->toString(),
-            $this->value instanceof \Illuminate\Testing\TestResponse => $this->value->getContent(), // @phpstan-ignore-line
+            $this->value instanceof TestResponse => $this->value->getContent(), // @phpstan-ignore-line
             is_array($this->value) => json_encode($this->value, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT),
             $this->value instanceof Traversable => json_encode(iterator_to_array($this->value), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT),
             $this->value instanceof JsonSerializable => json_encode($this->value->jsonSerialize(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT),
@@ -987,7 +988,7 @@ final class Expectation
      */
     private function export(mixed $value): string
     {
-        if (! $this->exporter instanceof \Pest\Support\Exporter) {
+        if (! $this->exporter instanceof Exporter) {
             $this->exporter = Exporter::default();
         }
 

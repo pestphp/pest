@@ -200,6 +200,7 @@ final class DatasetsRepository
             throw new DatasetDoesNotExist($name);
         }
 
+        // @phpstan-ignore-next-line
         return $matchingDatasets[$closestScopeDatasetKey];
     }
 
