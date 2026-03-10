@@ -1,5 +1,7 @@
 <?php
 
+use Symfony\Component\Process\Process;
+
 test('visual snapshot of test suite on success', function () {
     $testsPath = dirname(__DIR__);
     $snapshot = implode(DIRECTORY_SEPARATOR, [
@@ -9,7 +11,7 @@ test('visual snapshot of test suite on success', function () {
     ]);
 
     $output = function () use ($testsPath) {
-        $process = (new Symfony\Component\Process\Process(
+        $process = (new Process(
             ['php', 'bin/pest'],
             dirname($testsPath),
             ['EXCLUDE' => 'integration', '--exclude-group' => 'integration', 'REBUILD_SNAPSHOTS' => false, 'PARATEST' => 0, 'COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true'],
