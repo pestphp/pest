@@ -58,7 +58,7 @@
         "pestphp/pest-dev-tools": "^5.0.0",
         "pestphp/pest-plugin-browser": "^5.0.0",
         "pestphp/pest-plugin-type-coverage": "^5.0.0",
-        "psy/psysh": "^0.12.20"
+        "psy/psysh": "^0.12.21"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,

@@ -1,8 +1,10 @@
 <?php
 
+use Symfony\Component\Process\Process;
+
 test('collision', function (array $arguments) {
     $output = function () use ($arguments) {
-        $process = (new Symfony\Component\Process\Process(
+        $process = (new Process(
             array_merge(['php', 'bin/pest', 'tests/Fixtures/CollisionTest.php'], $arguments),
             null,
             ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'COLLISION_TEST' => true]

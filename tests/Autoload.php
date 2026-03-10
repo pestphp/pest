@@ -1,5 +1,7 @@
 <?php
 
+use Pest\Plugin;
+
 trait PluginTrait
 {
     public function assertPluginTraitGotRegistered(): void
@@ -16,8 +18,8 @@ trait SecondPluginTrait
     }
 }
 
-Pest\Plugin::uses(PluginTrait::class);
-Pest\Plugin::uses(SecondPluginTrait::class);
+Plugin::uses(PluginTrait::class);
+Plugin::uses(SecondPluginTrait::class);
 
 function _assertThat()
 {

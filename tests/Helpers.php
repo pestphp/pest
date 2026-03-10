@@ -1,7 +1,9 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
+
 /**
- * @return \PHPUnit\Framework\TestCase
+ * @return TestCase
  */
 function myAssertTrue($value)
 {

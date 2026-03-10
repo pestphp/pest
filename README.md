@@ -32,8 +32,8 @@ We cannot thank our sponsors enough for their incredible support in funding Pest
 ### Platinum Sponsors
 
 - **[CodeRabbit](https://coderabbit.ai/?ref=pestphp)**
-- **[Devin](https://devin.ai/?ref=nunomaduro)**
 - **[Mailtrap](https://l.rw.rw/pestphp)**
+- **[SerpApi](https://serpapi.com/?ref=nunomaduro)**
 - **[Tighten](https://tighten.com/?ref=nunomaduro)**
 - **[Redberry](https://redberry.international/laravel-development/?utm_source=pest&utm_medium=banner&utm_campaign=pest_sponsorship)**
 

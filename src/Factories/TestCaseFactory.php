@@ -17,6 +17,7 @@ use Pest\Factories\Concerns\HigherOrderable;
 use Pest\Support\Reflection;
 use Pest\Support\Str;
 use Pest\TestSuite;
+use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
@@ -135,7 +136,7 @@ final class TestCaseFactory
 
         $this->attributes = [
             new Attribute(
-                \PHPUnit\Framework\Attributes\TestDox::class,
+                TestDox::class,
                 [$this->filename],
             ),
             ...$this->attributes,
