@@ -18,19 +18,19 @@
     ],
     "require": {
         "php": "^8.3.0",
-        "brianium/paratest": "^7.19.0",
+        "brianium/paratest": "^7.19.2",
         "nunomaduro/collision": "^8.9.1",
         "nunomaduro/termwind": "^2.4.0",
         "pestphp/pest-plugin": "^4.0.0",
         "pestphp/pest-plugin-arch": "^4.0.0",
         "pestphp/pest-plugin-mutate": "^4.0.1",
         "pestphp/pest-plugin-profanity": "^4.2.1",
-        "phpunit/phpunit": "^12.5.12",
+        "phpunit/phpunit": "^12.5.14",
         "symfony/process": "^7.4.5|^8.0.5"
     },
     "conflict": {
         "filp/whoops": "<2.18.3",
-        "phpunit/phpunit": ">12.5.12",
+        "phpunit/phpunit": ">12.5.14",
         "sebastian/exporter": "<7.0.0",
         "webmozart/assert": "<1.11.0"
     },
