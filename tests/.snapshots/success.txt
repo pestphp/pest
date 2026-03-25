@@ -1754,8 +1754,51 @@
   ✓ it alerts users about tests with arguments but no input
   ✓ it can return an array of all test suite filenames
 
+   PASS  Tests\Visual\BeforeEachTestName
+  ✓ description
+  ✓ latest description
+
+   PASS  Tests\Visual\Collision
+  ✓ collision with ([''])
+
+   PASS  Tests\Visual\Help
+  ✓ visual snapshot of help command output
+
+   WARN  Tests\Visual\JUnit
+  ✓ junit output
+  - junit with parallel → Not working yet
+
+   PASS  Tests\Visual\Parallel
+  ✓ parallel
+  ✓ a parallel test can extend another test with same name
+  ✓ parallel reports invalid datasets as failures
+
+   PASS  Tests\Visual\ParallelNestedDatasets
+  ✓ parallel loads nested datasets from nested directories
+
+   PASS  Tests\Visual\SingleTestOrDirectory
+  ✓ allows to run a single test
+  ✓ allows to run a directory
+  ✓ it disable decorating printer when colors is set to never
+
+   WARN  Tests\Visual\Success
+  - visual snapshot of test suite on success
+
+   WARN  Tests\Visual\TeamCity
+  - visual snapshot of team city with ('Failure.php')
+  - visual snapshot of team city with ('SuccessOnly.php')
+
+   WARN  Tests\Visual\Todo
+  - todos
+  - todos in parallel
+  - todo
+  - todo in parallel
+
+   WARN  Tests\Visual\Version
+  - visual snapshot of help command output
+
    PASS  Testsexternal\Features\Expect\toMatchSnapshot
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 39 todos, 26 skipped, 1191 passed (2802 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 39 todos, 35 skipped, 1203 passed (2835 assertions)
