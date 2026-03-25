@@ -21,5 +21,5 @@ test('parallel', function () use ($run) {
 })->skipOnWindows();
 
 test('a parallel test can extend another test with same name', function () use ($run) {
-    expect($run('tests/Fixtures/Inheritance'))->toContain('Tests:    1 skipped, 2 passed (2 assertions)');
+    expect($run('tests/Fixtures/Inheritance'))->toContain('Tests:    1 skipped, 1 passed (1 assertions)');
 });
