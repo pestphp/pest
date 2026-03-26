@@ -136,7 +136,7 @@ final class Expectation
     /**
      * Dump the expectation value when the result of the condition is truthy.
      *
-     * @param  (\Closure(TValue): bool)|bool  $condition
+     * @param  (Closure(TValue): bool)|bool  $condition
      * @return self<TValue>
      */
     public function ddWhen(Closure|bool $condition, mixed ...$arguments): Expectation
@@ -153,7 +153,7 @@ final class Expectation
     /**
      * Dump the expectation value when the result of the condition is falsy.
      *
-     * @param  (\Closure(TValue): bool)|bool  $condition
+     * @param  (Closure(TValue): bool)|bool  $condition
      * @return self<TValue>
      */
     public function ddUnless(Closure|bool $condition, mixed ...$arguments): Expectation

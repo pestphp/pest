@@ -22,6 +22,10 @@ use Pest\Support\NullClosure;
 use Pest\Support\Str;
 use Pest\TestSuite;
 use PHPUnit\Framework\AssertionFailedError;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversFunction;
+use PHPUnit\Framework\Attributes\CoversTrait;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -211,7 +215,7 @@ final class TestCall // @phpstan-ignore-line
     {
         foreach ($groups as $group) {
             $this->testCaseMethod->attributes[] = new Attribute(
-                \PHPUnit\Framework\Attributes\Group::class,
+                Group::class,
                 [$group],
             );
         }
@@ -604,7 +608,7 @@ final class TestCall // @phpstan-ignore-line
     {
         foreach ($classes as $class) {
             $this->testCaseFactoryAttributes[] = new Attribute(
-                \PHPUnit\Framework\Attributes\CoversClass::class,
+                CoversClass::class,
                 [$class],
             );
         }
@@ -627,7 +631,7 @@ final class TestCall // @phpstan-ignore-line
     {
         foreach ($traits as $trait) {
             $this->testCaseFactoryAttributes[] = new Attribute(
-                \PHPUnit\Framework\Attributes\CoversTrait::class,
+                CoversTrait::class,
                 [$trait],
             );
         }
@@ -650,7 +654,7 @@ final class TestCall // @phpstan-ignore-line
     {
         foreach ($functions as $function) {
             $this->testCaseFactoryAttributes[] = new Attribute(
-                \PHPUnit\Framework\Attributes\CoversFunction::class,
+                CoversFunction::class,
                 [$function],
             );
         }

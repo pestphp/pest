@@ -18,19 +18,19 @@
     ],
     "require": {
         "php": "^8.3.0",
-        "brianium/paratest": "^7.16.1",
-        "nunomaduro/collision": "^8.8.3",
-        "nunomaduro/termwind": "^2.3.3",
+        "brianium/paratest": "^7.19.2",
+        "nunomaduro/collision": "^8.9.1",
+        "nunomaduro/termwind": "^2.4.0",
         "pestphp/pest-plugin": "^4.0.0",
         "pestphp/pest-plugin-arch": "^4.0.0",
         "pestphp/pest-plugin-mutate": "^4.0.1",
         "pestphp/pest-plugin-profanity": "^4.2.1",
-        "phpunit/phpunit": "^12.5.8",
-        "symfony/process": "^7.4.4|^8.0.0"
+        "phpunit/phpunit": "^12.5.14",
+        "symfony/process": "^7.4.5|^8.0.5"
     },
     "conflict": {
         "filp/whoops": "<2.18.3",
-        "phpunit/phpunit": ">12.5.8",
+        "phpunit/phpunit": ">12.5.14",
         "sebastian/exporter": "<7.0.0",
         "webmozart/assert": "<1.11.0"
     },
@@ -55,10 +55,10 @@
         ]
     },
     "require-dev": {
-        "pestphp/pest-dev-tools": "^4.0.0",
-        "pestphp/pest-plugin-browser": "^4.2.1",
+        "pestphp/pest-dev-tools": "^4.1.0",
+        "pestphp/pest-plugin-browser": "^4.3.0",
         "pestphp/pest-plugin-type-coverage": "^4.0.3",
-        "psy/psysh": "^0.12.18"
+        "psy/psysh": "^0.12.22"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,

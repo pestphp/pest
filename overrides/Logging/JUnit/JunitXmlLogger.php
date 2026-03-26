@@ -14,6 +14,9 @@ namespace PHPUnit\Logging\JUnit;
 
 use DOMDocument;
 use DOMElement;
+use Pest\Logging\Converter;
+use Pest\Support\Container;
+use Pest\TestSuite;
 use PHPUnit\Event\Code\Test;
 use PHPUnit\Event\Code\TestMethod;
 use PHPUnit\Event\EventFacadeIsSealedException;
@@ -50,7 +53,7 @@ final class JunitXmlLogger
 {
     private readonly Printer $printer;
 
-    private readonly \Pest\Logging\Converter $converter; // pest-added
+    private readonly Converter $converter; // pest-added
 
     private DOMDocument $document;
 
@@ -108,7 +111,7 @@ final class JunitXmlLogger
     public function __construct(Printer $printer, Facade $facade)
     {
         $this->printer = $printer;
-        $this->converter = new \Pest\Logging\Converter(\Pest\Support\Container::getInstance()->get(\Pest\TestSuite::class)->rootPath); // pest-added
+        $this->converter = new Converter(Container::getInstance()->get(TestSuite::class)->rootPath); // pest-added
 
         $this->registerSubscribers($facade);
         $this->createDocument();

@@ -1,5 +1,7 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
+
 trait MyCustomTrait
 {
     public function assertFalseIsFalse()
@@ -8,7 +10,7 @@ trait MyCustomTrait
     }
 }
 
-abstract class MyCustomClass extends PHPUnit\Framework\TestCase
+abstract class MyCustomClass extends TestCase
 {
     public function assertTrueIsTrue()
     {

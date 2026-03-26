@@ -2,7 +2,12 @@ name: Tests
 
 on:
   push:
+    branches: [4.x]
   pull_request:
+
+concurrency:
+  group: tests-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   tests:
@@ -13,9 +18,12 @@ jobs:
       fail-fast: true
       matrix:
         os: [ubuntu-latest, macos-latest] # windows-latest
-        symfony: ['7.3']
+        symfony: ['7.4', '8.0']
         php: ['8.3', '8.4', '8.5']
         dependency_version: [prefer-stable]
+        exclude:
+          - php: '8.3'
+            symfony: '8.0'
 
     name: PHP ${{ matrix.php }} - Symfony ^${{ matrix.symfony }} - ${{ matrix.os }} - ${{ matrix.dependency_version }}
 
@@ -30,6 +38,20 @@ jobs:
         tools: composer:v2
         coverage: none
         extensions: sockets
+
+    - name: Get Composer cache directory
+      id: composer-cache
+      shell: bash
+      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+    - name: Cache Composer dependencies
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ matrix.os }}-php-${{ matrix.php }}-symfony-${{ matrix.symfony }}-composer-${{ hashFiles('**/composer.json') }}
+        restore-keys: |
+          ${{ matrix.os }}-php-${{ matrix.php }}-symfony-${{ matrix.symfony }}-composer-
+          ${{ matrix.os }}-php-${{ matrix.php }}-composer-
 
     - name: Setup Problem Matches
       run: |
