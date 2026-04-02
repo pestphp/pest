@@ -55,6 +55,7 @@
         ]
     },
     "require-dev": {
+        "nunomaduro/pao": "0.x-dev",
         "pestphp/pest-dev-tools": "^5.0.0",
         "pestphp/pest-plugin-browser": "^5.0.0",
         "pestphp/pest-plugin-type-coverage": "^5.0.0",
