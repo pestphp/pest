@@ -1,5 +1,5 @@
 
-  Pest Testing Framework 4.4.3.  
+  Pest Testing Framework 4.4.4.  
 
   USAGE: pest <file> [options]  
 
@@ -92,7 +92,7 @@
   --random-order-seed [N]  Use the specified random seed when running tests in random order  
 
   REPORTING OPTIONS:
-  --colors [flag] ......... Use colors in output ("never", "auto" or "always")  
+  --colors=[flag] ......... Use colors in output ("never", "auto" or "always")  
   --columns [n] ................. Number of columns to use for progress output  
   --columns max ............ Use maximum number of columns for progress output  
   --stderr ................................. Write to STDERR instead of STDOUT  
