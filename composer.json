@@ -26,7 +26,7 @@
         "pestphp/pest-plugin-mutate": "^4.0.1",
         "pestphp/pest-plugin-profanity": "^4.2.1",
         "phpunit/phpunit": "^12.5.16",
-        "symfony/process": "^7.4.5|^8.0.8"
+        "symfony/process": "^7.4.8|^8.0.8"
     },
     "conflict": {
         "filp/whoops": "<2.18.3",
