@@ -148,6 +148,9 @@
   --disable-coverage-ignore ...... Disable metadata for ignoring code coverage  
   --no-coverage  Ignore code coverage reporting configured in the XML configuration file  
 
+  AI OPTIONS:
+  --ai ..... Run a code snippet as a fully scaffolded test for AI verification  
+
   MUTATION TESTING OPTIONS:
   --mutate .... Runs mutation testing, to understand the quality of your tests  
   --mutate --parallel ...................... Runs mutation testing in parallel  

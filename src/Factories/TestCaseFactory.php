@@ -60,6 +60,11 @@ final class TestCaseFactory
     ];
 
     /**
+     * The namespace for the test case, overrides the path-based namespace when set.
+     */
+    public ?string $namespace = null;
+
+    /**
      * Creates a new Factory instance.
      */
     public function __construct(
@@ -127,7 +132,7 @@ final class TestCaseFactory
 
         $partsFQN = explode('\\', $classFQN);
         $className = array_pop($partsFQN);
-        $namespace = implode('\\', $partsFQN);
+        $namespace = $this->namespace ?? implode('\\', $partsFQN);
         $baseClass = sprintf('\%s', $this->class);
 
         if (trim($className) === '') {
