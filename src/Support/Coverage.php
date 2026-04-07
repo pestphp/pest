@@ -8,6 +8,7 @@ use Pest\Exceptions\ShouldNotHappen;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\Node\Directory;
 use SebastianBergmann\CodeCoverage\Node\File;
+use SebastianBergmann\CodeCoverage\Report\Facade;
 use SebastianBergmann\Environment\Runtime;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -92,10 +93,10 @@ final class Coverage
         $codeCoverage = require $reportPath;
         unlink($reportPath);
 
-        $totalCoverage = $codeCoverage->getReport()->percentageOfExecutedLines();
+        $facade = Facade::fromSerializedData($codeCoverage);
+        $report = (fn (): Directory => $this->report)->call($facade);
 
-        /** @var Directory<File|Directory> $report */
-        $report = $codeCoverage->getReport();
+        $totalCoverage = $report->percentageOfExecutedLines();
 
         foreach ($report->getIterator() as $file) {
             if (! $file instanceof File) {
