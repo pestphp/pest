@@ -798,13 +798,11 @@ final readonly class OppositeExpectation
 
         $exporter = Exporter::default();
 
-        $toString = fn (mixed $argument): string => $exporter->shortenedExport($argument);
-
         throw new ExpectationFailedException(sprintf(
             'Expecting %s not %s %s.',
-            $toString($this->original->value),
+            $exporter->shortenedExport($this->original->value),
             strtolower((string) preg_replace('/(?<!\ )[A-Z]/', ' $0', $name)),
-            implode(' ', array_map(fn (mixed $argument): string => $toString($argument), $arguments)),
+            implode(' ', array_map(fn (mixed $argument): string => $exporter->export($argument), $arguments)),
         ));
     }
 
