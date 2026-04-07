@@ -93,8 +93,16 @@ final class Coverage
         $codeCoverage = require $reportPath;
         unlink($reportPath);
 
-        $facade = Facade::fromSerializedData($codeCoverage);
-        $report = (fn (): Directory => $this->report)->call($facade);
+        if (is_array($codeCoverage)) {
+            /** @var Facade $test */
+            $facade = Facade::fromSerializedData($codeCoverage);
+
+            /** @var Directory<File|Directory> $report */
+            $report = (fn () => $this->report)->call($facade);
+        } else {
+            /** @var Directory<File|Directory> $report */
+            $report = $codeCoverage->getReport();
+        }
 
         $totalCoverage = $report->percentageOfExecutedLines();
 
