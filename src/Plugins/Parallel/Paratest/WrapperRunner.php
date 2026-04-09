@@ -51,6 +51,11 @@ final class WrapperRunner implements RunnerInterface
     /**
      * The time to sleep between cycles.
      */
+    /**
+     * The merged test result from the parallel run.
+     */
+    public static ?TestResult $result = null;
+
     private const int CYCLE_SLEEP = 10000;
 
     /**
@@ -385,6 +390,8 @@ final class WrapperRunner implements RunnerInterface
             $testResultSum->phpWarnings(),
             $testResultSum->numberOfIssuesIgnoredByBaseline(),
         );
+
+        self::$result = $testResultSum;
 
         if ($this->options->configuration->cacheResult()) {
             $resultCacheSum = new DefaultResultCache($this->options->configuration->testResultCacheFile());
