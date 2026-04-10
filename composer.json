@@ -55,6 +55,7 @@
         ]
     },
     "require-dev": {
+        "mrpunyapal/peststan": "^0.2.5",
         "pestphp/pest-dev-tools": "^4.1.0",
         "pestphp/pest-plugin-browser": "^4.3.1",
         "pestphp/pest-plugin-type-coverage": "^4.0.4",
