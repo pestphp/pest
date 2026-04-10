@@ -95,6 +95,48 @@
    PASS  Tests\Features\Covers\TraitCoverage
   ✓ it uses the correct PHPUnit attribute for trait
 
+   PASS  Tests\Features\DatasetMethodChaining
+  ✓ beforeEach()->with() applies dataset to tests → receives the dataset value with (10)
+  ✓ beforeEach()->with() applies dataset to tests → it also receives the dataset value in it() with (10)
+  ✓ beforeEach()->with() with multiple dataset values → receives each value from the dataset with (1)
+  ✓ beforeEach()->with() with multiple dataset values → receives each value from the dataset with (2)
+  ✓ beforeEach()->with() with multiple dataset values → receives each value from the dataset with (3)
+  ✓ beforeEach()->with() with keyed dataset → receives keyed dataset values with dataset "first"
+  ✓ beforeEach()->with() with keyed dataset → receives keyed dataset values with dataset "second"
+  ✓ beforeEach()->with() with closure dataset → receives values from closure dataset with (100)
+  ✓ beforeEach()->with() with closure dataset → receives values from closure dataset with (200)
+  ✓ describe()->with() passes dataset to tests → receives the dataset value with (42)
+  ✓ describe()->with() passes dataset to tests → it also receives it in it() with (42)
+  ✓ describe()->with() with multiple values → receives each value with (5)
+  ✓ describe()->with() with multiple values → receives each value with (10)
+  ✓ describe()->with() with multiple values → receives each value with (15)
+  ✓ describe()->with() with keyed dataset → receives keyed values with dataset "alpha"
+  ✓ describe()->with() with keyed dataset → receives keyed values with dataset "beta"
+  ✓ describe()->with() with closure dataset → receives closure dataset values with (7)
+  ✓ describe()->with() with closure dataset → receives closure dataset values with (14)
+  ✓ outer with dataset → inner without dataset → inherits outer dataset with (1)
+  ✓ nested describe blocks with datasets at multiple levels → level 1 → receives level 1 dataset with (10)
+  ✓ nested describe blocks with datasets at multiple levels → level 1 → level 2 → receives datasets from all ancestor levels with (10) / (20)
+  ✓ deeply nested describe with datasets → a → b → c → receives all ancestor datasets with (1) / (2) / (3)
+  ✓ beforeEach()->with() combined with test->with() → receives both datasets as cross product with (10) / (1)
+  ✓ beforeEach()->with() combined with test->with() → receives both datasets as cross product with (10) / (2)
+  ✓ describe()->with() combined with test->with() → receives both datasets with (5) / (50)
+  ✓ describe()->with() combined with test->with() → receives both datasets with (5) / (60)
+  ✓ beforeEach closure and beforeEach()->with() coexist → has both the closure state and dataset with (99)
+  ✓ beforeEach()->with() does not interfere with closure hooks → closures run in order and dataset is applied with (42)
+  ✓ first describe with dataset → gets its own dataset with (111)
+  ✓ second describe with different dataset → gets its own dataset, not the sibling with (222)
+  ✓ third describe without dataset → has no dataset leaking from siblings
+  ✓ describe()->with() with beforeEach closure → both hook and dataset work with (77)
+  ✓ describe()->with() with afterEach closure → dataset is available and afterEach runs with (88)
+  ✓ multiple tests share the same beforeEach dataset → first test gets the dataset with (33)
+  ✓ multiple tests share the same beforeEach dataset → second test also gets the dataset with (33)
+  ✓ multiple tests share the same beforeEach dataset → it third test with it() also gets the dataset with (33)
+  ✓ outer describe → inner describe with dataset on hook → inherits outer beforeEach and has inner dataset with (55)
+  ✓ outer describe → outer test is unaffected by inner dataset
+  ✓ describe()->with() preserves depends → first with (9)
+  ✓ describe()->with() preserves depends → second with (9)
+
    PASS  Tests\Features\DatasetsTests - 1 todo
   ✓ it throws exception if dataset does not exist
   ✓ it throws exception if dataset already exist
@@ -215,6 +257,20 @@
   ✓ it may be used with high order after describe block with dataset "formal"
   ✓ it may be used with high order after describe block with dataset "informal"
   ✓ after describe block with named dataset with ('after')
+  ✓ named parameters match by parameter name with ('Taylor', 'taylor@laravel.com')
+  ✓ named parameters work with multiple dataset items with ('Taylor', 'taylor@laravel.com')
+  ✓ named parameters work with multiple dataset items with ('James', 'james@laravel.com')
+  ✓ named parameters work in different order than closure params with ('a', 'b', 'c')
+  ✓ named parameters work with named dataset keys with dataset "taylor"
+  ✓ named parameters work with named dataset keys with dataset "james"
+  ✓ named parameters work with closures that should be resolved with (Closure Object (), Closure Object ())
+  ✓ named parameters work with closure type hints with ('Taylor', Closure Object ())
+  ✓ named parameters work with registered datasets with ('Taylor', 'taylor@laravel.com')
+  ✓ named parameters work with registered datasets with ('James', 'james@laravel.com')
+  ✓ named parameters work with bound closure returning associative array with (Closure Object ())
+  ✓ dataset items can mix named and sequential styles with ('Taylor', 'taylor@laravel.com')
+  ✓ dataset items can mix named and sequential styles with ('James', 'james@laravel.com') #1
+  ✓ dataset items can mix named and sequential styles with ('James', 'james@laravel.com') #2
 
    PASS  Tests\Features\Depends
   ✓ first
@@ -1813,4 +1869,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 39 todos, 35 skipped, 1211 passed (2847 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 39 todos, 35 skipped, 1265 passed (2925 assertions)

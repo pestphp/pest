@@ -74,7 +74,7 @@ final class DescribeCall
      */
     public function __call(string $name, array $arguments): self
     {
-        if (! $this->currentBeforeEachCall instanceof \Pest\PendingCalls\BeforeEachCall) {
+        if (! $this->currentBeforeEachCall instanceof BeforeEachCall) {
             $this->currentBeforeEachCall = new BeforeEachCall(TestSuite::getInstance(), $this->filename);
 
             $this->currentBeforeEachCall->describing = array_merge(
