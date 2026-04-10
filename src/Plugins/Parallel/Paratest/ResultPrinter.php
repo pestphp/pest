@@ -92,14 +92,13 @@ final class ResultPrinter
         $this->teamcityLogFileHandle = $teamcityLogFileHandle;
     }
 
-    /** @param  list<SplFileInfo>  $teamcityFiles */
     public function printFeedback(
         SplFileInfo $progressFile,
         SplFileInfo $outputFile,
-        array $teamcityFiles
+        ?SplFileInfo $teamcityFile,
     ): void {
-        if ($this->options->needsTeamcity) {
-            $teamcityProgress = $this->tailMultiple($teamcityFiles);
+        if ($this->options->needsTeamcity && $teamcityFile instanceof SplFileInfo) {
+            $teamcityProgress = $this->tailMultiple([$teamcityFile]);
 
             if ($this->teamcityLogFileHandle !== null) {
                 fwrite($this->teamcityLogFileHandle, $teamcityProgress);

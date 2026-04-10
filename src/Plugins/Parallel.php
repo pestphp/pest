@@ -127,7 +127,9 @@ final class Parallel implements HandlesArguments
             $arguments
         );
 
-        $exitCode = $this->paratestCommand()->run(new ArgvInput($filteredArguments), new CleanConsoleOutput);
+        $filteredArguments = $this->processTeamcityArguments($filteredArguments);
+
+        $exitCode = $this->paratestCommand()->run(new ArgvInput(array_values($filteredArguments)), new CleanConsoleOutput);
 
         return CallsAddsOutput::execute($exitCode);
     }
@@ -196,5 +198,19 @@ final class Parallel implements HandlesArguments
         $arguments = $this->popArgument('--parallel', $arguments);
 
         return $this->popArgument('-p', $arguments);
+    }
+
+    /**
+     * @param  string[]  $arguments
+     * @return string[]
+     */
+    public function processTeamcityArguments(array $arguments): array
+    {
+        $argv = new ArgvInput;
+        if ($argv->hasParameterOption('--teamcity')) {
+            $arguments[] = '--teamcity';
+        }
+
+        return $arguments;
     }
 }
