@@ -448,6 +448,10 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toBeCasedCorrectly
+  ✓ pass
+  ✓ failure
+
    PASS  Tests\Features\Expect\toBeDigits
   ✓ pass
   ✓ failures
@@ -1034,6 +1038,10 @@
   ✓ pass
   ✓ failures
   ✓ not failures
+  ✓ trait inheritance - direct usage
+  ✓ trait inheritance - inherited usage
+  ✓ trait inheritance - negative case
+  ✓ nested trait inheritance
 
    PASS  Tests\Features\Expect\unless
   ✓ it pass
@@ -1801,4 +1809,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 39 todos, 35 skipped, 1203 passed (2835 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 39 todos, 35 skipped, 1209 passed (2842 assertions)

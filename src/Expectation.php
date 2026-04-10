@@ -684,23 +684,19 @@ final class Expectation
 
                 $realPath = realpath($object->path);
 
-                foreach (Composer::userNamespaces() as $directory => $namespace) {
+                foreach (Composer::userNamespacesWithDirectories() as $directory => $namespace) {
                     if (str_starts_with($realPath, $directory)) {
                         $relativePath = substr($realPath, strlen($directory) + 1);
                         $relativePath = explode('.', $relativePath)[0];
-                        $classFromPath = $namespace . '\\' . str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath);
+                        $classFromPath = $namespace.'\\'.str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath);
 
-                        if ($classFromPath === $object->reflectionClass->getName()) {
-                            return true;
-                        }
-
-                        return false;
+                        return $classFromPath === $object->reflectionClass->getName();
                     }
                 }
 
                 return false;
             },
-            "to be cased correctly",
+            'to be cased correctly',
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
