@@ -684,6 +684,10 @@ final class Expectation
 
                 $realPath = realpath($object->path);
 
+                if ($realPath === false) {
+                    return false;
+                }
+
                 foreach (Composer::userNamespacesWithDirectories() as $directory => $namespace) {
                     if (str_starts_with($realPath, $directory)) {
                         $relativePath = substr($realPath, strlen($directory) + 1);

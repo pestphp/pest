@@ -61,8 +61,5 @@ jobs:
     - name: Type Coverage
       run: composer test:type:coverage
 
-    - name: Refacto
-      run: composer test:refacto
-
     - name: Style
       run: composer test:lint

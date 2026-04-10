@@ -73,10 +73,14 @@
         "bin/pest"
     ],
     "scripts": {
-        "refacto": "rector",
-        "lint": "pint --parallel",
-        "test:refacto": "rector --dry-run",
-        "test:lint": "pint --parallel --test",
+        "lint": [
+            "rector",
+            "pint --parallel"
+        ],
+        "test:lint": [
+            "rector --dry-run",
+            "pint --parallel --test"
+        ],
         "test:profanity": "php bin/pest --profanity --compact",
         "test:type:check": "phpstan analyse --ansi --memory-limit=-1 --debug",
         "test:type:coverage": "php -d memory_limit=-1  bin/pest --type-coverage --min=100",
@@ -86,7 +90,6 @@
         "test:integration": "php bin/pest --group=integration -v",
         "update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --update-snapshots",
         "test": [
-            "@test:refacto",
             "@test:lint",
             "@test:type:check",
             "@test:type:coverage",
