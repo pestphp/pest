@@ -13,3 +13,9 @@ test('can also pass', function () {
 test('can pass with dataset', function ($value) {
     expect($value)->toEqual(true);
 })->with([true]);
+
+describe('block', function () {
+    test('can pass with dataset in describe block', function ($number) {
+        expect($number)->toBeInt();
+    })->with([1]);
+});

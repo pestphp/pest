@@ -39,7 +39,7 @@ it('allows to call underlying protected/private methods', function () {
 
 it('throws error if method do not exist', function () {
     test()->foo();
-})->throws(\ReflectionException::class, 'Call to undefined method PHPUnit\Framework\TestCase::foo()');
+})->throws(ReflectionException::class, 'Call to undefined method PHPUnit\Framework\TestCase::foo()');
 
 it('can forward unexpected calls to any global function')->_assertThat();
 

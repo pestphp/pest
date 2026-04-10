@@ -140,7 +140,7 @@ if (! function_exists('test')) {
      */
     function test(?string $description = null, ?Closure $closure = null): HigherOrderTapProxy|TestCall
     {
-        if ($description === null && TestSuite::getInstance()->test instanceof \PHPUnit\Framework\TestCase) {
+        if ($description === null && TestSuite::getInstance()->test instanceof TestCase) {
             return new HigherOrderTapProxy(TestSuite::getInstance()->test);
         }
 
@@ -236,7 +236,7 @@ if (! function_exists('covers')) {
 
         /** @var MutationTestRunner $runner */
         $runner = Container::getInstance()->get(MutationTestRunner::class);
-        /** @var \Pest\Mutate\Repositories\ConfigurationRepository $configurationRepository */
+        /** @var ConfigurationRepository $configurationRepository */
         $configurationRepository = Container::getInstance()->get(ConfigurationRepository::class);
         $everything = $configurationRepository->cliConfiguration->toArray()['everything'] ?? false;
         $classes = $configurationRepository->cliConfiguration->toArray()['classes'] ?? false;
@@ -263,7 +263,7 @@ if (! function_exists('mutates')) {
 
         /** @var MutationTestRunner $runner */
         $runner = Container::getInstance()->get(MutationTestRunner::class);
-        /** @var \Pest\Mutate\Repositories\ConfigurationRepository $configurationRepository */
+        /** @var ConfigurationRepository $configurationRepository */
         $configurationRepository = Container::getInstance()->get(ConfigurationRepository::class);
         $everything = $configurationRepository->cliConfiguration->toArray()['everything'] ?? false;
         $classes = $configurationRepository->cliConfiguration->toArray()['classes'] ?? false;
@@ -320,7 +320,7 @@ if (! function_exists('visit')) {
      */
     function visit(array|string $url, array $options = []): ArrayablePendingAwaitablePage|PendingAwaitablePage
     {
-        if (! class_exists(\Pest\Browser\Configuration::class)) {
+        if (! class_exists(Pest\Browser\Configuration::class)) {
             PluginBrowser::install();
 
             exit(0);

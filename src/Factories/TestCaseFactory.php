@@ -17,6 +17,7 @@ use Pest\Factories\Concerns\HigherOrderable;
 use Pest\Support\Reflection;
 use Pest\Support\Str;
 use Pest\TestSuite;
+use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
@@ -57,6 +58,11 @@ final class TestCaseFactory
         Concerns\Testable::class,
         Concerns\Expectable::class,
     ];
+
+    /**
+     * The namespace for the test case, overrides the path-based namespace when set.
+     */
+    public ?string $namespace = null;
 
     /**
      * Creates a new Factory instance.
@@ -126,7 +132,7 @@ final class TestCaseFactory
 
         $partsFQN = explode('\\', $classFQN);
         $className = array_pop($partsFQN);
-        $namespace = implode('\\', $partsFQN);
+        $namespace = $this->namespace ?? implode('\\', $partsFQN);
         $baseClass = sprintf('\%s', $this->class);
 
         if (trim($className) === '') {
@@ -135,7 +141,7 @@ final class TestCaseFactory
 
         $this->attributes = [
             new Attribute(
-                \PHPUnit\Framework\Attributes\TestDox::class,
+                TestDox::class,
                 [$this->filename],
             ),
             ...$this->attributes,

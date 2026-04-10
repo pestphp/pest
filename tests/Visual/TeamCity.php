@@ -1,5 +1,7 @@
 <?php
 
+use Symfony\Component\Process\Process;
+
 function normalize_windows_os_output(string $text): string
 {
     $text = str_replace('\r', '', $text);
@@ -17,7 +19,7 @@ test('visual snapshot of team city', function (string $testFile) {
     ]);
 
     $output = function () use ($testsPath) {
-        $process = (new Symfony\Component\Process\Process(
+        $process = (new Process(
             ['php', 'bin/pest', '--teamcity', $testsPath],
             dirname(__DIR__, levels: 2),
             [
