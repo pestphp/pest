@@ -688,7 +688,7 @@ final class Expectation
                     return false;
                 }
 
-                foreach (Composer::userNamespacesWithDirectories() as $directory => $namespace) {
+                foreach (Composer::allNamespacesWithDirectories() as $directory => $namespace) {
                     if (str_starts_with($realPath, $directory)) {
                         $relativePath = substr($realPath, strlen($directory) + 1);
                         $relativePath = explode('.', $relativePath)[0];
