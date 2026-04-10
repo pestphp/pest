@@ -34,7 +34,7 @@ final class Parallel implements HandlesArguments
     /**
      * @var string[]
      */
-    private const array UNSUPPORTED_ARGUMENTS = ['--todo', '--todos', '--retry', '--notes', '--issue', '--pr', '--pull-request'];
+    private const array UNSUPPORTED_ARGUMENTS = ['--todo', '--todos', '--retry', '--notes', '--issue', '--pr', '--pull-request', '--flaky'];
 
     /**
      * Whether the given command line arguments indicate that the test suite should be run in parallel.

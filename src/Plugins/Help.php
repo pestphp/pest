@@ -152,6 +152,9 @@ final readonly class Help implements HandlesArguments
         ], [
             'arg' => '--dirty',
             'desc' => 'Only run tests that have uncommitted changes according to Git',
+        ], [
+            'arg' => '--flaky',
+            'desc' => 'Output to standard output tests marked as flaky',
         ], ...$content['Selection']];
 
         $content['Reporting'] = [...$content['Reporting'], ...[

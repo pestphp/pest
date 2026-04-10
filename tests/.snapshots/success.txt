@@ -1862,9 +1862,9 @@
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
 
-   WARN  Tests\Visual\JUnit
+   PASS  Tests\Visual\JUnit
   ✓ junit output
-  - junit with parallel → Not working yet
+  ✓ junit with parallel
 
    PASS  Tests\Visual\Parallel
   ✓ parallel
@@ -1903,4 +1903,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 36 skipped, 1295 passed (2964 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1296 passed (2977 assertions)
