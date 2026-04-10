@@ -4,6 +4,8 @@ on:
   push:
     branches: [4.x]
   pull_request:
+  schedule:
+    - cron: '0 9 * * *'
 
 concurrency:
   group: tests-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -14,6 +16,7 @@ jobs:
     if: github.event_name != 'schedule' || github.repository == 'pestphp/pest'
 
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
     strategy:
       fail-fast: true
       matrix:

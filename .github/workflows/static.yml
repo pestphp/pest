@@ -5,7 +5,7 @@ on:
     branches: [4.x]
   pull_request:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 9 * * *'
 
 concurrency:
   group: static-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -17,6 +17,7 @@ jobs:
     name: Static Tests
 
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
       fail-fast: true
       matrix:
