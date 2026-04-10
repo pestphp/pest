@@ -178,8 +178,10 @@ final class ResultPrinter
             ]);
         }
 
-        $this->compactPrinter->errors($state);
-        $this->compactPrinter->recap($state, $testResult, $duration, $this->options);
+        if (! isset($_SERVER['PEST_PARALLEL_NO_OUTPUT'])) {
+            $this->compactPrinter->errors($state);
+            $this->compactPrinter->recap($state, $testResult, $duration, $this->options);
+        }
     }
 
     private function printFeedbackItem(string $item): void
