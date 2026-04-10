@@ -92,14 +92,13 @@ final class ResultPrinter
         $this->teamcityLogFileHandle = $teamcityLogFileHandle;
     }
 
-    /** @param  list<SplFileInfo>  $teamcityFiles */
     public function printFeedback(
         SplFileInfo $progressFile,
         SplFileInfo $outputFile,
-        array $teamcityFiles
+        ?SplFileInfo $teamcityFile,
     ): void {
-        if ($this->options->needsTeamcity) {
-            $teamcityProgress = $this->tailMultiple($teamcityFiles);
+        if ($this->options->needsTeamcity && $teamcityFile instanceof SplFileInfo) {
+            $teamcityProgress = $this->tailMultiple([$teamcityFile]);
 
             if ($this->teamcityLogFileHandle !== null) {
                 fwrite($this->teamcityLogFileHandle, $teamcityProgress);
@@ -170,6 +169,14 @@ final class ResultPrinter
         }
 
         $state = (new StateGenerator)->fromPhpUnitTestResult($this->passedTests, $testResult);
+
+        if ($testResult->numberOfTestsRun() === 0 && $state->testSuiteTestsCount() === 0) {
+            $this->output->writeln([
+                '',
+                '  <fg=white;options=bold;bg=blue> INFO </> No tests found.',
+                '',
+            ]);
+        }
 
         $this->compactPrinter->errors($state);
         $this->compactPrinter->recap($state, $testResult, $duration, $this->options);

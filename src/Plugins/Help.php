@@ -107,6 +107,13 @@ final readonly class Help implements HandlesArguments
             'desc' => 'Initialise a standard Pest configuration',
         ]], ...$content['Configuration']];
 
+        $content['AI'] = [
+            [
+                'arg' => '--ai',
+                'desc' => 'Run a code snippet as a fully scaffolded test for AI verification',
+            ],
+        ];
+
         $content['Execution'] = [...[
             [
                 'arg' => '--parallel',

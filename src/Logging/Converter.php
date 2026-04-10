@@ -151,7 +151,7 @@ final readonly class Converter
     {
         if ($testSuite instanceof TestSuiteForTestMethodWithDataProvider) {
             $firstTest = $this->getFirstTest($testSuite);
-            if ($firstTest instanceof \PHPUnit\Event\Code\TestMethod) {
+            if ($firstTest instanceof TestMethod) {
                 return $this->getTestMethodNameWithoutDatasetSuffix($firstTest);
             }
         }
@@ -179,7 +179,7 @@ final readonly class Converter
     public function getTestSuiteLocation(TestSuite $testSuite): ?string
     {
         $firstTest = $this->getFirstTest($testSuite);
-        if (! $firstTest instanceof \PHPUnit\Event\Code\TestMethod) {
+        if (! $firstTest instanceof TestMethod) {
             return null;
         }
         $path = $firstTest->testDox()->prettifiedClassName();
