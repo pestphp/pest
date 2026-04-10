@@ -50,6 +50,9 @@
             "Tests\\Fixtures\\Arch\\": "tests/Fixtures/Arch",
             "Tests\\": "tests/PHPUnit/"
         },
+        "classmap": [
+            "tests/Fixtures/Arch/ToBeCasedCorrectly/IncorrectCasing/incorrectCasing.php"
+        ],
         "files": [
             "tests/Autoload.php"
         ]
