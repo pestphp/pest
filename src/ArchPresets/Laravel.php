@@ -69,6 +69,7 @@ final class Laravel extends AbstractPreset
             ->toHaveSuffix('Request');
 
         $this->expectations[] = expect('App\Http\Requests')
+            ->classes()
             ->toExtend('Illuminate\Foundation\Http\FormRequest');
 
         $this->expectations[] = expect('App\Http\Requests')
@@ -118,6 +119,7 @@ final class Laravel extends AbstractPreset
             ->toHaveMethod('handle');
 
         $this->expectations[] = expect('App\Notifications')
+            ->classes()
             ->toExtend('Illuminate\Notifications\Notification');
 
         $this->expectations[] = expect('App')
@@ -128,6 +130,7 @@ final class Laravel extends AbstractPreset
             ->toHaveSuffix('ServiceProvider');
 
         $this->expectations[] = expect('App\Providers')
+            ->classes()
             ->toExtend('Illuminate\Support\ServiceProvider');
 
         $this->expectations[] = expect('App\Providers')
