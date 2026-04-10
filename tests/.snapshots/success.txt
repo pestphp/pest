@@ -1129,6 +1129,40 @@
   ✓ it may return a file path
   ✓ it may throw an exception if the file does not exist
 
+   WARN  Tests\Features\Flaky - 1 todo
+  ✓ it passes on first try
+  ✓ it passes on a subsequent try
+  ✓ it has a default of 3 tries
+  ✓ it succeeds on the last possible try
+  ✓ it works with tries of 1
+  ✓ it retries assertion failures
+  ✓ it works with a dataset with (1)
+  ✓ it works with a dataset with (2)
+  ✓ it works with a dataset with (3)
+  ✓ it retries each dataset independently with ('alpha')
+  ✓ it retries each dataset independently with ('beta')
+  ✓ within a describe block → it retries inside describe
+  ✓ lifecycle hooks with flaky → it re-runs beforeEach on each retry
+  ✓ afterEach with flaky → it runs afterEach between retries
+  - it does not retry skipped tests → intentionally skipped
+  ✓ it works with repeat and flaky @ repetition 1 of 2
+  ✓ it works with repeat and flaky @ repetition 2 of 2
+  ✓ it works as higher order test
+  ✓ it fails after exhausting all retries
+  ✓ it throws when tries is less than 1
+  ✓ it throws when tries is negative
+  ↓ it does not retry todo tests
+  ✓ it retries php errors
+  ✓ it works with throws and flaky
+  ✓ it does not retry expected exceptions
+  ✓ it does not retry fails()
+  ✓ it retries unexpected exceptions even with throws set
+  ✓ it does not leak mock objects between retries
+  ✓ it does not stop retrying when snapshot changes are absent
+  ✓ it does not leak dynamic properties between retries
+  ✓ it clears output buffer between retries when expectOutputString is used
+  ✓ it preserves output between retries when no output expectation is set
+
    WARN  Tests\Features\Helpers
   ✓ it can set/get properties on $this
   ! it gets null if property do not exist → Undefined property Tests\Features\Helpers::$wqdwqdqw
@@ -1869,4 +1903,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 39 todos, 35 skipped, 1265 passed (2925 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 36 skipped, 1295 passed (2964 assertions)

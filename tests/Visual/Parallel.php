@@ -15,8 +15,24 @@ $run = function () {
 };
 
 test('parallel', function () use ($run) {
-    expect($run('--exclude-group=integration'))
-        ->toContain('Tests:    2 deprecated, 4 warnings, 5 incomplete, 3 notices, 39 todos, 26 skipped, 1250 passed (2887 assertions)')
+    $output = $run('--exclude-group=integration');
+
+    if (getenv('REBUILD_SNAPSHOTS')) {
+        preg_match('/Tests:\s+(.+\(\d+ assertions\))/', $output, $matches);
+
+        $file = file_get_contents(__FILE__);
+        $file = preg_replace(
+            '/\$expected = \'.*?\';/',
+            "\$expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1280 passed (2926 assertions)';",
+            $file,
+        );
+        file_put_contents(__FILE__, $file);
+    }
+
+    $expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1280 passed (2926 assertions)';
+
+    expect($output)
+        ->toContain("Tests:    {$expected}")
         ->toContain('Parallel: 3 processes');
 })->skipOnWindows();
 

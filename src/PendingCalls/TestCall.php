@@ -413,6 +413,20 @@ final class TestCall // @phpstan-ignore-line
     }
 
     /**
+     * Marks the test as flaky, retrying it up to the given number of times.
+     */
+    public function flaky(int $tries = 3): self
+    {
+        if ($tries < 1) {
+            throw new InvalidArgumentException('The number of tries must be greater than 0.');
+        }
+
+        $this->testCaseMethod->flakyTries = $tries;
+
+        return $this;
+    }
+
+    /**
      * Marks the test as "todo".
      */
     public function todo(// @phpstan-ignore-line
