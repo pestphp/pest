@@ -18,6 +18,7 @@ use Pest\Arch\Expectations\ToOnlyUse;
 use Pest\Arch\Expectations\ToUse;
 use Pest\Arch\Expectations\ToUseNothing;
 use Pest\Arch\PendingArchExpectation;
+use Pest\Arch\Support\Composer;
 use Pest\Arch\Support\FileLineFinder;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\Pipeable;
@@ -667,6 +668,41 @@ final class Expectation
     public function toHavePrivateMethods(): void
     {
         throw InvalidExpectation::fromMethods(['toHavePrivateMethods']);
+    }
+
+    /**
+     * Asserts that the given expectation target is cased correctly.
+     */
+    public function toBeCasedCorrectly(): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            function (ObjectDescription $object): bool {
+                if (! isset($object->reflectionClass)) {
+                    return false;
+                }
+
+                $realPath = realpath($object->path);
+
+                foreach (Composer::userNamespaces() as $directory => $namespace) {
+                    if (str_starts_with($realPath, $directory)) {
+                        $relativePath = substr($realPath, strlen($directory) + 1);
+                        $relativePath = explode('.', $relativePath)[0];
+                        $classFromPath = $namespace . '\\' . str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath);
+
+                        if ($classFromPath === $object->reflectionClass->getName()) {
+                            return true;
+                        }
+
+                        return false;
+                    }
+                }
+
+                return false;
+            },
+            "to be cased correctly",
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
     }
 
     /**
