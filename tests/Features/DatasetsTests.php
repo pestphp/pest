@@ -457,3 +457,88 @@ dataset('after-describe', ['after']);
 test('after describe block with named dataset', function (...$args) {
     expect($args)->toBe(['after']);
 })->with('after-describe');
+
+test('named parameters match by parameter name', function (string $email, string $name) {
+    expect($name)->toBe('Taylor');
+    expect($email)->toBe('taylor@laravel.com');
+})->with([
+    ['name' => 'Taylor', 'email' => 'taylor@laravel.com'],
+]);
+
+test('named parameters work with multiple dataset items', function (string $email, string $name) {
+    expect($name)->toBeString();
+    expect($email)->toContain('@');
+})->with([
+    ['name' => 'Taylor', 'email' => 'taylor@laravel.com'],
+    ['name' => 'James', 'email' => 'james@laravel.com'],
+]);
+
+test('named parameters work in different order than closure params', function (string $third, string $first, string $second) {
+    expect($first)->toBe('a');
+    expect($second)->toBe('b');
+    expect($third)->toBe('c');
+})->with([
+    ['first' => 'a', 'second' => 'b', 'third' => 'c'],
+]);
+
+test('named parameters work with named dataset keys', function (string $email, string $name) {
+    expect($name)->toBeString();
+    expect($email)->toContain('@');
+})->with([
+    'taylor' => ['name' => 'Taylor', 'email' => 'taylor@laravel.com'],
+    'james' => ['name' => 'James', 'email' => 'james@laravel.com'],
+]);
+
+test('named parameters work with closures that should be resolved', function (string $email, string $name) {
+    expect($name)->toBe('bar');
+    expect($email)->toBe('bar@example.com');
+})->with([
+    [
+        'name' => function () {
+            return $this->foo;
+        },
+        'email' => function () {
+            return $this->foo.'@example.com';
+        },
+    ],
+]);
+
+test('named parameters work with closure type hints', function (Closure $callback, string $name) {
+    expect($name)->toBe('Taylor');
+    expect($callback())->toBe('resolved');
+})->with([
+    [
+        'name' => 'Taylor',
+        'callback' => function () {
+            return 'resolved';
+        },
+    ],
+]);
+
+dataset('named-params-dataset', [
+    ['name' => 'Taylor', 'email' => 'taylor@laravel.com'],
+    ['name' => 'James', 'email' => 'james@laravel.com'],
+]);
+
+test('named parameters work with registered datasets', function (string $email, string $name) {
+    expect($name)->toBeString();
+    expect($email)->toContain('@');
+})->with('named-params-dataset');
+
+test('named parameters work with bound closure returning associative array', function (string $email, string $name) {
+    expect($name)->toBe('bar');
+    expect($email)->toBe('test@example.com');
+})->with([
+    function () {
+        return ['name' => $this->foo, 'email' => 'test@example.com'];
+    },
+]);
+
+test('dataset items can mix named and sequential styles', function (string $name, string $email) {
+    expect($name)->toBeString();
+    expect($email)->toContain('@');
+})->with([
+    ['name' => 'Taylor', 'email' => 'taylor@laravel.com'],
+    ['James', 'james@laravel.com'],
+    ['James', 'email' => 'james@laravel.com'],
+]);

@@ -51,6 +51,11 @@ final class TestCaseMethodFactory
     public int $repetitions = 1;
 
     /**
+     * The test's number of flaky retry tries.
+     */
+    public ?int $flakyTries = null;
+
+    /**
      * Determines if the test is a "todo".
      */
     public bool $todo = false;

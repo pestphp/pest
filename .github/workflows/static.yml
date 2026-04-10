@@ -5,7 +5,7 @@ on:
     branches: [5.x]
   pull_request:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 9 * * *'
 
 concurrency:
   group: static-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -17,6 +17,7 @@ jobs:
     name: Static Tests
 
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
       fail-fast: true
       matrix:
@@ -40,7 +41,7 @@ jobs:
       run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
     - name: Cache Composer dependencies
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ${{ steps.composer-cache.outputs.dir }}
         key: static-php-8.4-${{ matrix.dependency-version }}-composer-${{ hashFiles('**/composer.json') }}
@@ -59,9 +60,6 @@ jobs:
 
     - name: Type Coverage
       run: composer test:type:coverage
-
-    - name: Refacto
-      run: composer test:refacto
 
     - name: Style
       run: composer test:lint

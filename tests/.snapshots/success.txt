@@ -95,6 +95,48 @@
    PASS  Tests\Features\Covers\TraitCoverage
   ✓ it uses the correct PHPUnit attribute for trait
 
+   PASS  Tests\Features\DatasetMethodChaining
+  ✓ beforeEach()->with() applies dataset to tests → receives the dataset value with (10)
+  ✓ beforeEach()->with() applies dataset to tests → it also receives the dataset value in it() with (10)
+  ✓ beforeEach()->with() with multiple dataset values → receives each value from the dataset with (1)
+  ✓ beforeEach()->with() with multiple dataset values → receives each value from the dataset with (2)
+  ✓ beforeEach()->with() with multiple dataset values → receives each value from the dataset with (3)
+  ✓ beforeEach()->with() with keyed dataset → receives keyed dataset values with dataset "first"
+  ✓ beforeEach()->with() with keyed dataset → receives keyed dataset values with dataset "second"
+  ✓ beforeEach()->with() with closure dataset → receives values from closure dataset with (100)
+  ✓ beforeEach()->with() with closure dataset → receives values from closure dataset with (200)
+  ✓ describe()->with() passes dataset to tests → receives the dataset value with (42)
+  ✓ describe()->with() passes dataset to tests → it also receives it in it() with (42)
+  ✓ describe()->with() with multiple values → receives each value with (5)
+  ✓ describe()->with() with multiple values → receives each value with (10)
+  ✓ describe()->with() with multiple values → receives each value with (15)
+  ✓ describe()->with() with keyed dataset → receives keyed values with dataset "alpha"
+  ✓ describe()->with() with keyed dataset → receives keyed values with dataset "beta"
+  ✓ describe()->with() with closure dataset → receives closure dataset values with (7)
+  ✓ describe()->with() with closure dataset → receives closure dataset values with (14)
+  ✓ outer with dataset → inner without dataset → inherits outer dataset with (1)
+  ✓ nested describe blocks with datasets at multiple levels → level 1 → receives level 1 dataset with (10)
+  ✓ nested describe blocks with datasets at multiple levels → level 1 → level 2 → receives datasets from all ancestor levels with (10) / (20)
+  ✓ deeply nested describe with datasets → a → b → c → receives all ancestor datasets with (1) / (2) / (3)
+  ✓ beforeEach()->with() combined with test->with() → receives both datasets as cross product with (10) / (1)
+  ✓ beforeEach()->with() combined with test->with() → receives both datasets as cross product with (10) / (2)
+  ✓ describe()->with() combined with test->with() → receives both datasets with (5) / (50)
+  ✓ describe()->with() combined with test->with() → receives both datasets with (5) / (60)
+  ✓ beforeEach closure and beforeEach()->with() coexist → has both the closure state and dataset with (99)
+  ✓ beforeEach()->with() does not interfere with closure hooks → closures run in order and dataset is applied with (42)
+  ✓ first describe with dataset → gets its own dataset with (111)
+  ✓ second describe with different dataset → gets its own dataset, not the sibling with (222)
+  ✓ third describe without dataset → has no dataset leaking from siblings
+  ✓ describe()->with() with beforeEach closure → both hook and dataset work with (77)
+  ✓ describe()->with() with afterEach closure → dataset is available and afterEach runs with (88)
+  ✓ multiple tests share the same beforeEach dataset → first test gets the dataset with (33)
+  ✓ multiple tests share the same beforeEach dataset → second test also gets the dataset with (33)
+  ✓ multiple tests share the same beforeEach dataset → it third test with it() also gets the dataset with (33)
+  ✓ outer describe → inner describe with dataset on hook → inherits outer beforeEach and has inner dataset with (55)
+  ✓ outer describe → outer test is unaffected by inner dataset
+  ✓ describe()->with() preserves depends → first with (9)
+  ✓ describe()->with() preserves depends → second with (9)
+
    PASS  Tests\Features\DatasetsTests - 1 todo
   ✓ it throws exception if dataset does not exist
   ✓ it throws exception if dataset already exist
@@ -215,6 +257,20 @@
   ✓ it may be used with high order after describe block with dataset "formal"
   ✓ it may be used with high order after describe block with dataset "informal"
   ✓ after describe block with named dataset with ('after')
+  ✓ named parameters match by parameter name with ('Taylor', 'taylor@laravel.com')
+  ✓ named parameters work with multiple dataset items with ('Taylor', 'taylor@laravel.com')
+  ✓ named parameters work with multiple dataset items with ('James', 'james@laravel.com')
+  ✓ named parameters work in different order than closure params with ('a', 'b', 'c')
+  ✓ named parameters work with named dataset keys with dataset "taylor"
+  ✓ named parameters work with named dataset keys with dataset "james"
+  ✓ named parameters work with closures that should be resolved with (Closure Object (), Closure Object ())
+  ✓ named parameters work with closure type hints with ('Taylor', Closure Object ())
+  ✓ named parameters work with registered datasets with ('Taylor', 'taylor@laravel.com')
+  ✓ named parameters work with registered datasets with ('James', 'james@laravel.com')
+  ✓ named parameters work with bound closure returning associative array with (Closure Object ())
+  ✓ dataset items can mix named and sequential styles with ('Taylor', 'taylor@laravel.com')
+  ✓ dataset items can mix named and sequential styles with ('James', 'james@laravel.com') #1
+  ✓ dataset items can mix named and sequential styles with ('James', 'james@laravel.com') #2
 
    PASS  Tests\Features\Depends
   ✓ first
@@ -447,6 +503,10 @@
   ✓ failures
   ✓ failures with custom message
   ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeCasedCorrectly
+  ✓ pass
+  ✓ failure
 
    PASS  Tests\Features\Expect\toBeDigits
   ✓ pass
@@ -1034,6 +1094,10 @@
   ✓ pass
   ✓ failures
   ✓ not failures
+  ✓ trait inheritance - direct usage
+  ✓ trait inheritance - inherited usage
+  ✓ trait inheritance - negative case
+  ✓ nested trait inheritance
 
    PASS  Tests\Features\Expect\unless
   ✓ it pass
@@ -1064,6 +1128,40 @@
    PASS  Tests\Features\Fixture
   ✓ it may return a file path
   ✓ it may throw an exception if the file does not exist
+
+   WARN  Tests\Features\Flaky - 1 todo
+  ✓ it passes on first try
+  ✓ it passes on a subsequent try
+  ✓ it has a default of 3 tries
+  ✓ it succeeds on the last possible try
+  ✓ it works with tries of 1
+  ✓ it retries assertion failures
+  ✓ it works with a dataset with (1)
+  ✓ it works with a dataset with (2)
+  ✓ it works with a dataset with (3)
+  ✓ it retries each dataset independently with ('alpha')
+  ✓ it retries each dataset independently with ('beta')
+  ✓ within a describe block → it retries inside describe
+  ✓ lifecycle hooks with flaky → it re-runs beforeEach on each retry
+  ✓ afterEach with flaky → it runs afterEach between retries
+  - it does not retry skipped tests → intentionally skipped
+  ✓ it works with repeat and flaky @ repetition 1 of 2
+  ✓ it works with repeat and flaky @ repetition 2 of 2
+  ✓ it works as higher order test
+  ✓ it fails after exhausting all retries
+  ✓ it throws when tries is less than 1
+  ✓ it throws when tries is negative
+  ↓ it does not retry todo tests
+  ✓ it retries php errors
+  ✓ it works with throws and flaky
+  ✓ it does not retry expected exceptions
+  ✓ it does not retry fails()
+  ✓ it retries unexpected exceptions even with throws set
+  ✓ it does not leak mock objects between retries
+  ✓ it does not stop retrying when snapshot changes are absent
+  ✓ it does not leak dynamic properties between retries
+  ✓ it clears output buffer between retries when expectOutputString is used
+  ✓ it preserves output between retries when no output expectation is set
 
    WARN  Tests\Features\Helpers
   ✓ it can set/get properties on $this
@@ -1490,6 +1588,10 @@
    PASS  Tests\Fixtures\ExampleTest
   ✓ it example 2
 
+   PASS  Tests\Fixtures\ParallelNestedDatasets\TestFileWithNestedDataset
+  ✓ loads nested dataset with ('alice')
+  ✓ loads nested dataset with ('bob')
+
    WARN  Tests\Fixtures\UnexpectedOutput
   - output
 
@@ -1640,9 +1742,14 @@
   ✓ it cannot resolve a parameter without type
 
    PASS  Tests\Unit\Support\DatasetInfo
-  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Datase…rs.php', true)
+  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/Datasets/project/tes…rs.php', true) #1
+  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/Datasets/project/tes…rs.php', true) #2
+  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Datase…rs.php', true) #1
+  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Datase…rs.php', true) #2
   ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Datasets.php', false)
-  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur…rs.php', true)
+  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur…rs.php', true) #1
+  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur…rs.php', true) #2
+  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur…rs.php', true) #3
   ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur…rs.php', false)
   ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur…ts.php', false)
   ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Datase…rs.php', false)
@@ -1650,12 +1757,18 @@
   ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur…rs.php', false) #1
   ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur…rs.php', false) #2
   ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur…ts.php', true)
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Datase…rs.php', '/var/www/project/tests')
+  ✓ it computes the dataset scope with ('/var/www/Datasets/project/tes…rs.php', '/var/www/Datasets/project/tests')
+  ✓ it computes the dataset scope with ('/var/www/Datasets/project/tes…rs.php', '/var/www/Datasets/project/tes…atures')
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Datase…rs.php', '/var/www/project/tests') #1
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Datase…rs.php', '/var/www/project/tests') #2
   ✓ it computes the dataset scope with ('/var/www/project/tests/Datasets.php', '/var/www/project/tests')
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Features')
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Features') #1
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Features') #2
   ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Featur…rs.php') #1
   ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…ts.php', '/var/www/project/tests/Features')
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Featur…ollers')
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Featur…ollers') #1
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Featur…ollers') #2
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Features') #3
   ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Featur…rs.php') #2
   ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…ts.php', '/var/www/project/tests/Featur…ollers')
 
@@ -1749,13 +1862,17 @@
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
 
-   WARN  Tests\Visual\JUnit
+   PASS  Tests\Visual\JUnit
   ✓ junit output
-  - junit with parallel → Not working yet
+  ✓ junit with parallel
 
    PASS  Tests\Visual\Parallel
   ✓ parallel
   ✓ a parallel test can extend another test with same name
+  ✓ parallel reports invalid datasets as failures
+
+   PASS  Tests\Visual\ParallelNestedDatasets
+  ✓ parallel loads nested datasets from nested directories
 
    PASS  Tests\Visual\SingleTestOrDirectory
   ✓ allows to run a single test
@@ -1775,6 +1892,10 @@
   - todo
   - todo in parallel
 
+   PASS  Tests\Visual\UnicodeFilename
+  ✓ filter works with unicode characters in filename
+  ✓ filter with unicode regex matches unicode filename
+
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
@@ -1782,4 +1903,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 39 todos, 35 skipped, 1188 passed (2813 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1296 passed (2977 assertions)

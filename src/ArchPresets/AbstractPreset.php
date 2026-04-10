@@ -53,7 +53,7 @@ abstract class AbstractPreset // @pest-arch-ignore-line
     /**
      * Runs the given callback for each namespace.
      *
-     * @param  callable(Expectation<string|null>): ArchExpectation  ...$callbacks
+     * @param  callable(Expectation<string>): ArchExpectation  ...$callbacks
      */
     final public function eachUserNamespace(callable ...$callbacks): void
     {

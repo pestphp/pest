@@ -1,5 +1,7 @@
 includes:
     - phpstan-baseline.neon
+    - phpstan-pest-extension.neon
+    - vendor/mrpunyapal/peststan/extension.neon
 
 parameters:
     level: 7
@@ -7,6 +9,3 @@ parameters:
         - src
 
     reportUnmatchedIgnoredErrors: false
-
-    ignoreErrors:
-        - "#type mixed is not subtype of native#"

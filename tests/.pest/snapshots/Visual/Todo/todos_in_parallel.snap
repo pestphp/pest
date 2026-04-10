@@ -15,6 +15,9 @@
   ↓ todo on describe → should not fail
   ↓ todo on describe → should run
 
+   TODO  Tests\Features\Flaky - 1 todo
+  ↓ it does not retry todo tests
+
    TODO  Tests\Features\Todo - 29 todos
   ↓ something todo later
   ↓ something todo later chained
@@ -81,6 +84,6 @@
    PASS  Tests\CustomTestCase\ParentTest
   ✓ override method
 
-  Tests:    39 todos, 3 passed (21 assertions)
+  Tests:    40 todos, 3 passed (21 assertions)
   Duration: x.xxs
 

@@ -152,6 +152,9 @@ final readonly class Help implements HandlesArguments
         ], [
             'arg' => '--dirty',
             'desc' => 'Only run tests that have uncommitted changes according to Git',
+        ], [
+            'arg' => '--flaky',
+            'desc' => 'Output to standard output tests marked as flaky',
         ], ...$content['Selection']];
 
         $content['Reporting'] = [...$content['Reporting'], ...[
@@ -167,6 +170,12 @@ final readonly class Help implements HandlesArguments
         ], [
             'arg' => '--coverage --min',
             'desc' => 'Set the minimum required coverage percentage, and fail if not met',
+        ], [
+            'arg' => '--coverage --exactly',
+            'desc' => 'Set the exact required coverage percentage, and fail if not met',
+        ], [
+            'arg' => '--coverage --only-covered',
+            'desc' => 'Hide files with 0% coverage from the code coverage report',
         ], ...$content['Code Coverage']];
 
         $content['Mutation Testing'] = [[

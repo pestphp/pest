@@ -23,7 +23,9 @@ final class Backtrace
         $current = null;
 
         foreach (debug_backtrace(self::BACKTRACE_OPTIONS) as $trace) {
-            assert(array_key_exists(self::FILE, $trace));
+            if (array_key_exists(self::FILE, $trace) === false) {
+                break;
+            }
 
             $traceFile = str_replace(DIRECTORY_SEPARATOR, '/', $trace[self::FILE]);
 

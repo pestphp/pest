@@ -44,6 +44,7 @@ use function dirname;
 use function file_get_contents;
 use function max;
 use function realpath;
+use function str_starts_with;
 use function unlink;
 use function unserialize;
 use function usleep;
@@ -236,7 +237,7 @@ final class WrapperRunner implements RunnerInterface
         $this->printer->printFeedback(
             $worker->progressFile,
             $worker->unexpectedOutputFile,
-            $this->teamcityFiles,
+            $worker->teamcityFile ?? null,
         );
         $worker->reset();
     }
@@ -509,15 +510,61 @@ final class WrapperRunner implements RunnerInterface
      */
     private function getTestFiles(SuiteLoader $suiteLoader): array
     {
-        /** @var array<string, non-empty-string> $files */
-        $files = [
-            ...array_values(array_filter(
-                $suiteLoader->tests,
-                fn (string $filename): bool => ! str_ends_with($filename, "eval()'d code")
-            )),
-            ...TestSuite::getInstance()->tests->getFilenames(),
-        ];
+        /** @var array<string, null> $files */
+        $files = [];
 
-        return $files; // @phpstan-ignore-line
+        foreach (array_filter(
+            $suiteLoader->tests,
+            fn (string $filename): bool => ! str_ends_with($filename, "eval()'d code")
+        ) as $filename) {
+            $resolved = realpath($filename) ?: $filename;
+            $files[$resolved] = null;
+        }
+
+        foreach (TestSuite::getInstance()->tests->getFilenames() as $filename) {
+            if ($this->shouldIncludeBootstrappedTestFile($filename)) {
+                $resolved = realpath($filename)
+                    ?: realpath($this->options->cwd.DIRECTORY_SEPARATOR.$filename)
+                    ?: $filename;
+                $files[$resolved] = null;
+            }
+        }
+
+        return array_keys($files); // @phpstan-ignore-line
+    }
+
+    private function shouldIncludeBootstrappedTestFile(string $filename): bool
+    {
+        if (! $this->options->configuration->hasCliArguments()) {
+            return true;
+        }
+
+        $resolvedFilename = realpath($filename);
+
+        if ($resolvedFilename === false) {
+            $resolvedFilename = realpath($this->options->cwd.DIRECTORY_SEPARATOR.$filename);
+        }
+
+        if ($resolvedFilename === false) {
+            return false;
+        }
+
+        foreach ($this->options->configuration->cliArguments() as $path) {
+            $resolvedPath = realpath($path);
+
+            if ($resolvedPath === false) {
+                continue;
+            }
+
+            if ($resolvedFilename === $resolvedPath) {
+                return true;
+            }
+
+            if (is_dir($resolvedPath) && str_starts_with($resolvedFilename, $resolvedPath.DIRECTORY_SEPARATOR)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

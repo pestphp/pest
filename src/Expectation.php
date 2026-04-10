@@ -18,6 +18,7 @@ use Pest\Arch\Expectations\ToOnlyUse;
 use Pest\Arch\Expectations\ToUse;
 use Pest\Arch\Expectations\ToUseNothing;
 use Pest\Arch\PendingArchExpectation;
+use Pest\Arch\Support\Composer;
 use Pest\Arch\Support\FileLineFinder;
 use Pest\Concerns\Extendable;
 use Pest\Concerns\Pipeable;
@@ -670,6 +671,41 @@ final class Expectation
     }
 
     /**
+     * Asserts that the given expectation target is cased correctly.
+     */
+    public function toBeCasedCorrectly(): ArchExpectation
+    {
+        return Targeted::make(
+            $this,
+            function (ObjectDescription $object): bool {
+                if (! isset($object->reflectionClass)) {
+                    return false;
+                }
+
+                $realPath = realpath($object->path);
+
+                if ($realPath === false) {
+                    return false;
+                }
+
+                foreach (Composer::allNamespacesWithDirectories() as $directory => $namespace) {
+                    if (str_starts_with($realPath, $directory)) {
+                        $relativePath = substr($realPath, strlen($directory) + 1);
+                        $relativePath = explode('.', $relativePath)[0];
+                        $classFromPath = $namespace.'\\'.str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath);
+
+                        return $classFromPath === $object->reflectionClass->getName();
+                    }
+                }
+
+                return false;
+            },
+            'to be cased correctly',
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
      * Asserts that the given expectation target is enum.
      */
     public function toBeEnum(): ArchExpectation
@@ -783,7 +819,22 @@ final class Expectation
                         return false;
                     }
 
-                    if (! in_array($trait, $object->reflectionClass->getTraitNames(), true)) {
+                    $currentClass = $object->reflectionClass;
+                    $usedTraits = [];
+
+                    do {
+                        $classTraits = $currentClass->getTraits();
+                        foreach ($classTraits as $traitReflection) {
+                            $usedTraits[$traitReflection->getName()] = $traitReflection->getName();
+
+                            $nestedTraits = $traitReflection->getTraits();
+                            foreach ($nestedTraits as $nestedTrait) {
+                                $usedTraits[$nestedTrait->getName()] = $nestedTrait->getName();
+                            }
+                        }
+                    } while ($currentClass = $currentClass->getParentClass());
+
+                    if (! array_key_exists($trait, $usedTraits)) {
                         return false;
                     }
                 }

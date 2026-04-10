@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pest\PendingCalls;
 
 use Closure;
-use Pest\Support\Backtrace;
 use Pest\Support\Description;
 use Pest\TestSuite;
 
@@ -53,7 +52,11 @@ final class DescribeCall
      */
     public function __destruct()
     {
-        unset($this->currentBeforeEachCall);
+        // Ensure BeforeEachCall destructs before creating tests
+        // by moving to local scope and clearing the reference
+        $beforeEach = $this->currentBeforeEachCall;
+        $this->currentBeforeEachCall = null;
+        unset($beforeEach);  // Trigger destructor immediately
 
         self::$describing[] = $this->description;
 
@@ -71,12 +74,13 @@ final class DescribeCall
      */
     public function __call(string $name, array $arguments): self
     {
-        $filename = Backtrace::file();
-
         if (! $this->currentBeforeEachCall instanceof BeforeEachCall) {
-            $this->currentBeforeEachCall = new BeforeEachCall(TestSuite::getInstance(), $filename);
+            $this->currentBeforeEachCall = new BeforeEachCall(TestSuite::getInstance(), $this->filename);
 
-            $this->currentBeforeEachCall->describing[] = $this->description;
+            $this->currentBeforeEachCall->describing = array_merge(
+                DescribeCall::describing(),
+                [$this->description]
+            );
         }
 
         $this->currentBeforeEachCall->{$name}(...$arguments);
