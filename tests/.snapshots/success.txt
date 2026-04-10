@@ -1490,6 +1490,10 @@
    PASS  Tests\Fixtures\ExampleTest
   ✓ it example 2
 
+   PASS  Tests\Fixtures\ParallelNestedDatasets\TestFileWithNestedDataset
+  ✓ loads nested dataset with ('alice')
+  ✓ loads nested dataset with ('bob')
+
    WARN  Tests\Fixtures\UnexpectedOutput
   - output
 
@@ -1640,9 +1644,14 @@
   ✓ it cannot resolve a parameter without type
 
    PASS  Tests\Unit\Support\DatasetInfo
-  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Datase…rs.php', true)
+  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/Datasets/project/tes…rs.php', true) #1
+  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/Datasets/project/tes…rs.php', true) #2
+  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Datase…rs.php', true) #1
+  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Datase…rs.php', true) #2
   ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Datasets.php', false)
-  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur…rs.php', true)
+  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur…rs.php', true) #1
+  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur…rs.php', true) #2
+  ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur…rs.php', true) #3
   ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur…rs.php', false)
   ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/project/tests/Featur…ts.php', false)
   ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Datase…rs.php', false)
@@ -1650,12 +1659,18 @@
   ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur…rs.php', false) #1
   ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur…rs.php', false) #2
   ✓ it can check if dataset is defined inside a Datasets.php file with ('/var/www/project/tests/Featur…ts.php', true)
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Datase…rs.php', '/var/www/project/tests')
+  ✓ it computes the dataset scope with ('/var/www/Datasets/project/tes…rs.php', '/var/www/Datasets/project/tests')
+  ✓ it computes the dataset scope with ('/var/www/Datasets/project/tes…rs.php', '/var/www/Datasets/project/tes…atures')
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Datase…rs.php', '/var/www/project/tests') #1
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Datase…rs.php', '/var/www/project/tests') #2
   ✓ it computes the dataset scope with ('/var/www/project/tests/Datasets.php', '/var/www/project/tests')
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Features')
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Features') #1
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Features') #2
   ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Featur…rs.php') #1
   ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…ts.php', '/var/www/project/tests/Features')
-  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Featur…ollers')
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Featur…ollers') #1
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Featur…ollers') #2
+  ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Features') #3
   ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…rs.php', '/var/www/project/tests/Featur…rs.php') #2
   ✓ it computes the dataset scope with ('/var/www/project/tests/Featur…ts.php', '/var/www/project/tests/Featur…ollers')
 
@@ -1756,6 +1771,10 @@
    PASS  Tests\Visual\Parallel
   ✓ parallel
   ✓ a parallel test can extend another test with same name
+  ✓ parallel reports invalid datasets as failures
+
+   PASS  Tests\Visual\ParallelNestedDatasets
+  ✓ parallel loads nested datasets from nested directories
 
    PASS  Tests\Visual\SingleTestOrDirectory
   ✓ allows to run a single test
@@ -1782,4 +1801,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 39 todos, 35 skipped, 1188 passed (2813 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 39 todos, 35 skipped, 1203 passed (2835 assertions)

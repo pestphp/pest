@@ -170,6 +170,14 @@ final class ResultPrinter
 
         $state = (new StateGenerator)->fromPhpUnitTestResult($this->passedTests, $testResult);
 
+        if ($testResult->numberOfTestsRun() === 0 && $state->testSuiteTestsCount() === 0) {
+            $this->output->writeln([
+                '',
+                '  <fg=white;options=bold;bg=blue> INFO </> No tests found.',
+                '',
+            ]);
+        }
+
         $this->compactPrinter->errors($state);
         $this->compactPrinter->recap($state, $testResult, $duration, $this->options);
     }

@@ -12,7 +12,7 @@ test('visual snapshot of test suite on success', function () {
 
     $output = function () use ($testsPath) {
         $process = (new Process(
-            ['php', 'bin/pest'],
+            ['php', '-d', 'memory_limit=256M', 'bin/pest'],
             dirname($testsPath),
             ['EXCLUDE' => 'integration', '--exclude-group' => 'integration', 'REBUILD_SNAPSHOTS' => false, 'PARATEST' => 0, 'COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true'],
         ));
