@@ -185,6 +185,10 @@ final class StateGenerator
     {
         foreach ($testResultEvents as $events) {
             foreach ($events as $event) {
+                if (! $event->test()->isTestMethod()) {
+                    continue;
+                }
+
                 $state->add(TestResult::fromPestParallelTestCase(
                     $event->test(),
                     $type,

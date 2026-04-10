@@ -492,15 +492,23 @@ final class WrapperRunner implements RunnerInterface
      */
     private function getTestFiles(SuiteLoader $suiteLoader): array
     {
-        /** @var array<string, non-empty-string> $files */
-        $files = array_fill_keys(array_values(array_filter(
+        /** @var array<string, null> $files */
+        $files = [];
+
+        foreach (array_filter(
             $suiteLoader->tests,
             fn (string $filename): bool => ! str_ends_with($filename, "eval()'d code")
-        )), null);
+        ) as $filename) {
+            $resolved = realpath($filename) ?: $filename;
+            $files[$resolved] = null;
+        }
 
         foreach (TestSuite::getInstance()->tests->getFilenames() as $filename) {
             if ($this->shouldIncludeBootstrappedTestFile($filename)) {
-                $files[$filename] = null;
+                $resolved = realpath($filename)
+                    ?: realpath($this->options->cwd.DIRECTORY_SEPARATOR.$filename)
+                    ?: $filename;
+                $files[$resolved] = null;
             }
         }
 
