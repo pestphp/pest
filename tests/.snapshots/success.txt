@@ -1802,6 +1802,10 @@
   - todo
   - todo in parallel
 
+   PASS  Tests\Visual\UnicodeFilename
+  ✓ filter works with unicode characters in filename
+  ✓ filter with unicode regex matches unicode filename
+
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
 
@@ -1810,3 +1814,4 @@
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
   Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 39 todos, 35 skipped, 1209 passed (2842 assertions)
+
