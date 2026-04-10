@@ -81,7 +81,9 @@ final class ResultPrinter
             public function flush(): void {}
         };
 
-        $this->compactPrinter = CompactPrinter::default();
+        $this->compactPrinter = CompactPrinter::default(
+            decorated: ! in_array('--colors=never', $_SERVER['argv'] ?? [], true),
+        );
 
         if (! $this->options->configuration->hasLogfileTeamcity()) {
             return;
