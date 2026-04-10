@@ -22,7 +22,7 @@
         "nunomaduro/collision": "^8.9.3",
         "nunomaduro/termwind": "^2.4.0",
         "pestphp/pest-plugin": "^4.0.0",
-        "pestphp/pest-plugin-arch": "^4.0.0",
+        "pestphp/pest-plugin-arch": "^4.0.2",
         "pestphp/pest-plugin-mutate": "^4.0.1",
         "pestphp/pest-plugin-profanity": "^4.2.1",
         "phpunit/phpunit": "^12.5.16",
