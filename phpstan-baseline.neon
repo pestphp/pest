@@ -1,12 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Parameter \#1 of callable callable\(Pest\\Expectation\<string\|null\>\)\: Pest\\Arch\\Contracts\\ArchExpectation expects Pest\\Expectation\<string\|null\>, Pest\\Expectation\<string\|null\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/ArchPresets/AbstractPreset.php
-
-		-
 			message: '#^Trait Pest\\Concerns\\Expectable is used zero times and is not analysed\.$#'
 			identifier: trait.unused
 			count: 1
@@ -23,12 +17,6 @@ parameters:
 			identifier: trait.unused
 			count: 1
 			path: src/Concerns/Testable.php
-
-		-
-			message: '#^Loose comparison using \!\= between \(Closure\|null\) and false will always evaluate to false\.$#'
-			identifier: notEqual.alwaysFalse
-			count: 1
-			path: src/Expectation.php
 
 		-
 			message: '#^Method Pest\\Expectation\:\:and\(\) should return Pest\\Expectation\<TAndValue\> but returns \(Pest\\Expectation&TAndValue\)\|Pest\\Expectation\<TAndValue of mixed\>\.$#'
@@ -103,73 +91,7 @@ parameters:
 			path: src/PendingCalls/TestCall.php
 
 		-
-			message: '#^Parameter \#1 \$argv of class Symfony\\Component\\Console\\Input\\ArgvInput constructor expects list\<string\>\|null, array\<int, string\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Plugins/Parallel.php
-
-		-
-			message: '#^Parameter \#13 \$testRunnerTriggeredDeprecationEvents of class PHPUnit\\TestRunner\\TestResult\\TestResult constructor expects list\<PHPUnit\\Event\\TestRunner\\DeprecationTriggered\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Plugins/Parallel/Paratest/WrapperRunner.php
-
-		-
-			message: '#^Parameter \#14 \$testRunnerTriggeredWarningEvents of class PHPUnit\\TestRunner\\TestResult\\TestResult constructor expects list\<PHPUnit\\Event\\TestRunner\\WarningTriggered\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Plugins/Parallel/Paratest/WrapperRunner.php
-
-		-
-			message: '#^Parameter \#15 \$errors of class PHPUnit\\TestRunner\\TestResult\\TestResult constructor expects list\<PHPUnit\\TestRunner\\TestResult\\Issues\\Issue\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Plugins/Parallel/Paratest/WrapperRunner.php
-
-		-
-			message: '#^Parameter \#16 \$deprecations of class PHPUnit\\TestRunner\\TestResult\\TestResult constructor expects list\<PHPUnit\\TestRunner\\TestResult\\Issues\\Issue\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Plugins/Parallel/Paratest/WrapperRunner.php
-
-		-
-			message: '#^Parameter \#17 \$notices of class PHPUnit\\TestRunner\\TestResult\\TestResult constructor expects list\<PHPUnit\\TestRunner\\TestResult\\Issues\\Issue\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Plugins/Parallel/Paratest/WrapperRunner.php
-
-		-
-			message: '#^Parameter \#18 \$warnings of class PHPUnit\\TestRunner\\TestResult\\TestResult constructor expects list\<PHPUnit\\TestRunner\\TestResult\\Issues\\Issue\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Plugins/Parallel/Paratest/WrapperRunner.php
-
-		-
-			message: '#^Parameter \#19 \$phpDeprecations of class PHPUnit\\TestRunner\\TestResult\\TestResult constructor expects list\<PHPUnit\\TestRunner\\TestResult\\Issues\\Issue\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Plugins/Parallel/Paratest/WrapperRunner.php
-
-		-
-			message: '#^Parameter \#20 \$phpNotices of class PHPUnit\\TestRunner\\TestResult\\TestResult constructor expects list\<PHPUnit\\TestRunner\\TestResult\\Issues\\Issue\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Plugins/Parallel/Paratest/WrapperRunner.php
-
-		-
-			message: '#^Parameter \#21 \$phpWarnings of class PHPUnit\\TestRunner\\TestResult\\TestResult constructor expects list\<PHPUnit\\TestRunner\\TestResult\\Issues\\Issue\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Plugins/Parallel/Paratest/WrapperRunner.php
-
-		-
 			message: '#^Parameter \#4 \$testErroredEvents of class PHPUnit\\TestRunner\\TestResult\\TestResult constructor expects list\<PHPUnit\\Event\\Test\\AfterLastTestMethodErrored\|PHPUnit\\Event\\Test\\BeforeFirstTestMethodErrored\|PHPUnit\\Event\\Test\\Errored\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Plugins/Parallel/Paratest/WrapperRunner.php
-
-		-
-			message: '#^Parameter \#5 \$testFailedEvents of class PHPUnit\\TestRunner\\TestResult\\TestResult constructor expects list\<PHPUnit\\Event\\Test\\Failed\>, array given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Plugins/Parallel/Paratest/WrapperRunner.php

@@ -129,7 +129,7 @@ trait Testable
      */
     public function __addBeforeAll(?Closure $hook): void
     {
-        if (! $hook instanceof \Closure) {
+        if (! $hook instanceof Closure) {
             return;
         }
 
@@ -143,7 +143,7 @@ trait Testable
      */
     public function __addAfterAll(?Closure $hook): void
     {
-        if (! $hook instanceof \Closure) {
+        if (! $hook instanceof Closure) {
             return;
         }
 
@@ -173,7 +173,7 @@ trait Testable
      */
     private function __addHook(string $property, ?Closure $hook): void
     {
-        if (! $hook instanceof \Closure) {
+        if (! $hook instanceof Closure) {
             return;
         }
 
@@ -350,7 +350,8 @@ trait Testable
         }
 
         $underlyingTest = Reflection::getFunctionVariable($this->__test, 'closure');
-        $testParameterTypes = array_values(Reflection::getFunctionArguments($underlyingTest));
+        $testParameterTypesByName = Reflection::getFunctionArguments($underlyingTest);
+        $testParameterTypes = array_values($testParameterTypesByName);
 
         if (count($arguments) !== 1) {
             foreach ($arguments as $argumentIndex => $argumentValue) {
@@ -358,7 +359,11 @@ trait Testable
                     continue;
                 }
 
-                if (in_array($testParameterTypes[$argumentIndex], [Closure::class, 'callable', 'mixed'])) {
+                $parameterType = is_string($argumentIndex)
+                    ? $testParameterTypesByName[$argumentIndex]
+                    : $testParameterTypes[$argumentIndex];
+
+                if (in_array($parameterType, [Closure::class, 'callable', 'mixed'])) {
                     continue;
                 }
 
@@ -384,7 +389,7 @@ trait Testable
             return [$boundDatasetResult];
         }
 
-        return array_values($boundDatasetResult);
+        return $boundDatasetResult;
     }
 
     /**

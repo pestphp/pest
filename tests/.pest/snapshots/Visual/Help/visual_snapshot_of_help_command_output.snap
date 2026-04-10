@@ -1,5 +1,5 @@
 
-  Pest Testing Framework 4.3.2.  
+  Pest Testing Framework 4.4.4.  
 
   USAGE: pest <file> [options]  
 
@@ -92,7 +92,7 @@
   --random-order-seed [N]  Use the specified random seed when running tests in random order  
 
   REPORTING OPTIONS:
-  --colors [flag] ......... Use colors in output ("never", "auto" or "always")  
+  --colors=[flag] ......... Use colors in output ("never", "auto" or "always")  
   --columns [n] ................. Number of columns to use for progress output  
   --columns max ............ Use maximum number of columns for progress output  
   --stderr ................................. Write to STDERR instead of STDOUT  
@@ -130,6 +130,8 @@
   CODE COVERAGE OPTIONS:
   --coverage ..... Generate code coverage report and output to standard output  
   --coverage --min  Set the minimum required coverage percentage, and fail if not met  
+  --coverage --exactly  Set the exact required coverage percentage, and fail if not met  
+  --coverage --only-covered  Hide files with 0% coverage from the code coverage report  
   --coverage-clover [file]  Write code coverage report in Clover XML format to file  
   --coverage-openclover [file]  Write code coverage report in OpenClover XML format to file  
   --coverage-cobertura [file]  Write code coverage report in Cobertura XML format to file  
@@ -146,6 +148,9 @@
   --path-coverage .......... Report path coverage in addition to line coverage  
   --disable-coverage-ignore ...... Disable metadata for ignoring code coverage  
   --no-coverage  Ignore code coverage reporting configured in the XML configuration file  
+
+  AI OPTIONS:
+  --ai ..... Run a code snippet as a fully scaffolded test for AI verification  
 
   MUTATION TESTING OPTIONS:
   --mutate .... Runs mutation testing, to understand the quality of your tests  

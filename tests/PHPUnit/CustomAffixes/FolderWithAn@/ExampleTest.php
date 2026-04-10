@@ -1,8 +1,9 @@
 <?php
 
 declare(strict_types=1);
+use PHPUnit\Framework\TestCase;
 
-class MyCustomClassTest extends PHPUnit\Framework\TestCase
+class MyCustomClassTest extends TestCase
 {
     public function assertTrueIsTrue()
     {

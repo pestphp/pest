@@ -114,6 +114,16 @@ final class TestRepository
     }
 
     /**
+     * Gets the class and traits configured for the given directory path.
+     *
+     * @return array<int, string>
+     */
+    public function getUsesForPath(string $path): array
+    {
+        return $this->uses[$path][0] ?? [];
+    }
+
+    /**
      * Gets the test case factory from the given filename.
      */
     public function get(string $filename): ?TestCaseFactory

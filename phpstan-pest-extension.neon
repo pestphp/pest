@@ -1,0 +1,5 @@
+services:
+    -
+        class: Pest\PHPStan\HigherOrderExpectationTypeExtension
+        tags:
+            - phpstan.broker.expressionTypeResolverExtension

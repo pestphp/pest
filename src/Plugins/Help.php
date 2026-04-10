@@ -107,6 +107,13 @@ final readonly class Help implements HandlesArguments
             'desc' => 'Initialise a standard Pest configuration',
         ]], ...$content['Configuration']];
 
+        $content['AI'] = [
+            [
+                'arg' => '--ai',
+                'desc' => 'Run a code snippet as a fully scaffolded test for AI verification',
+            ],
+        ];
+
         $content['Execution'] = [...[
             [
                 'arg' => '--parallel',
@@ -160,6 +167,12 @@ final readonly class Help implements HandlesArguments
         ], [
             'arg' => '--coverage --min',
             'desc' => 'Set the minimum required coverage percentage, and fail if not met',
+        ], [
+            'arg' => '--coverage --exactly',
+            'desc' => 'Set the exact required coverage percentage, and fail if not met',
+        ], [
+            'arg' => '--coverage --only-covered',
+            'desc' => 'Hide files with 0% coverage from the code coverage report',
         ], ...$content['Code Coverage']];
 
         $content['Mutation Testing'] = [[
