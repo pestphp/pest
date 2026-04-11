@@ -37,7 +37,7 @@ final readonly class HigherOrderExpectationTypeExtension implements ExpressionTy
 
         $varType = $scope->getType($expr->var);
 
-        if (! (new ObjectType(HigherOrderExpectation::class))->isSuperTypeOf($varType)->yes()) {
+        if (! new ObjectType(HigherOrderExpectation::class)->isSuperTypeOf($varType)->yes()) {
             return null;
         }
 

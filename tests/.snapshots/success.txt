@@ -1699,6 +1699,8 @@
    PASS  Tests\Unit\Expectations\OppositeExpectation
   ✓ it throw expectation failed exception with string argument
   ✓ it throw expectation failed exception with array argument
+  ✓ it does not truncate long string arguments in error message
+  ✓ it does not truncate custom error message when using not()
 
    PASS  Tests\Unit\Overrides\ThrowableBuilder
   ✓ collision editor can be added to the stack trace
@@ -1903,4 +1905,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1296 passed (2977 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1298 passed (2982 assertions)
