@@ -17,6 +17,7 @@ arch()->preset()->security()->ignoring([
     'eval',
     'str_shuffle',
     'exec',
+    'md5',
     'unserialize',
     'extract',
     'assert',

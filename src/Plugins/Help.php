@@ -123,6 +123,10 @@ final readonly class Help implements HandlesArguments
                 'arg' => '--update-snapshots',
                 'desc' => 'Update snapshots for tests using the "toMatchSnapshot" expectation',
             ],
+            [
+                'arg' => '--update-shards',
+                'desc' => 'Update shards.json with test timing data for time-balanced sharding',
+            ],
         ], ...$content['Execution']];
 
         $content['Selection'] = [[

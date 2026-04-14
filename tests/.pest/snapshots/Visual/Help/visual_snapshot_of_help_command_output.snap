@@ -49,6 +49,7 @@
   EXECUTION OPTIONS:
   --parallel ........................................... Run tests in parallel  
   --update-snapshots  Update snapshots for tests using the "toMatchSnapshot" expectation  
+  --update-shards  Update shards.json with test timing data for time-balanced sharding  
   --globals-backup ................. Backup and restore $GLOBALS for each test  
   --static-backup ......... Backup and restore static properties for each test  
   --strict-coverage ................... Be strict about code coverage metadata  
