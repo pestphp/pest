@@ -310,7 +310,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             return;
         }
 
-        $path = sys_get_temp_dir().DIRECTORY_SEPARATOR.$runId.'-'.getmypid().'.json';
+        $path = sys_get_temp_dir().DIRECTORY_SEPARATOR.'__pest_sharding_'.$runId.'-'.getmypid().'.json';
 
         file_put_contents($path, json_encode($timings, JSON_THROW_ON_ERROR));
     }
@@ -322,7 +322,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      */
     private static function readWorkerTimings(string $runId): array
     {
-        $pattern = sys_get_temp_dir().DIRECTORY_SEPARATOR.$runId.'-*.json';
+        $pattern = sys_get_temp_dir().DIRECTORY_SEPARATOR.'__pest_sharding_'.$runId.'-*.json';
         $files = glob($pattern);
 
         if ($files === false || $files === []) {
