@@ -17,6 +17,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class Coverage implements AddsOutput, HandlesArguments
 {
+    use Concerns\HandleArguments;
+
     private const string COVERAGE_OPTION = 'coverage';
 
     private const string MIN_OPTION = 'min';
@@ -77,11 +79,9 @@ final class Coverage implements AddsOutput, HandlesArguments
             return false;
         }))];
 
-        $originals = array_flip($originals);
         foreach ($arguments as $argument) {
-            unset($originals[$argument]);
+            $originals = $this->popArgument($argument, $originals);
         }
-        $originals = array_flip($originals);
 
         $inputs = [];
         $inputs[] = new InputOption(self::COVERAGE_OPTION, null, InputOption::VALUE_NONE);

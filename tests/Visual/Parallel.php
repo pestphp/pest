@@ -47,3 +47,14 @@ test('parallel reports invalid datasets as failures', function () use ($run) {
         ->toContain('Tests:    1 failed, 1 passed (1 assertions)')
         ->toContain('Parallel: 3 processes');
 })->skipOnWindows();
+
+test('parallel can have multiple exclude-groups', function () use ($run) {
+    $singleExclude = $run('--exclude-group=integration');
+    $doubleExclude = $run('--exclude-group=integration', '--exclude-group=container');
+
+    preg_match('/(\d+) passed/', $singleExclude, $singleMatch);
+    preg_match('/(\d+) passed/', $doubleExclude, $doubleMatch);
+
+    expect((int) $doubleMatch[1])->toBeLessThan((int) $singleMatch[1]);
+    expect($doubleExclude)->toContain('Parallel: 3 processes');
+})->skipOnWindows();
