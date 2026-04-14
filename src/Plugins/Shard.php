@@ -56,6 +56,11 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     private static bool $shardsOutdated = false;
 
     /**
+     * Whether the test suite passed.
+     */
+    private static bool $passed = false;
+
+    /**
      * Collected timings from workers or subscribers.
      *
      * @var array<string, float>|null
@@ -217,7 +222,9 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      */
     public function addOutput(int $exitCode): int
     {
-        if (self::$updateShards && ! Parallel::isWorker()) {
+        self::$passed = $exitCode === 0;
+
+        if (self::$updateShards && self::$passed && ! Parallel::isWorker()) {
             self::$collectedTimings = $this->collectTimings();
 
             $count = self::$knownTests !== null
@@ -277,6 +284,10 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
         if (Parallel::isWorker()) {
             $this->writeWorkerTimings();
 
+            return;
+        }
+
+        if (! self::$passed) {
             return;
         }
 
