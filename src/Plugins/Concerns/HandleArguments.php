@@ -52,8 +52,9 @@ trait HandleArguments
     {
         $key = array_search($argument, $arguments, true);
 
-        if ($key !== false) {
+        while ($key !== false) {
             unset($arguments[$key]);
+            $key = array_search($argument, $arguments, true);
         }
 
         return array_values($arguments);
