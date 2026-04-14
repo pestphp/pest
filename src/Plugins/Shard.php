@@ -142,6 +142,10 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             'testsCount' => count($tests),
         ];
 
+        if ($testsToRun === []) {
+            return $arguments;
+        }
+
         return [...$arguments, '--filter', $this->buildFilterArgument($testsToRun)];
     }
 
