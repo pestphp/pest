@@ -34,8 +34,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      *     index: int,
      *     total: int,
      *     testsRan: int,
-     *     testsCount: int,
-     *     estimatedTime: float|null
+     *     testsCount: int
      * }|null
      */
     private static ?array $shard = null;
@@ -136,16 +135,11 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             $testsToRun = (array_chunk($tests, max(1, (int) ceil(count($tests) / $total))))[$index - 1] ?? [];
         }
 
-        $estimatedTime = self::$timeBalanced && $timings !== null
-            ? array_sum(array_map(fn (string $test): float => $timings[$test] ?? 0.0, $testsToRun))
-            : null;
-
         self::$shard = [
             'index' => $index,
             'total' => $total,
             'testsRan' => count($testsToRun),
             'testsCount' => count($tests),
-            'estimatedTime' => $estimatedTime,
         ];
 
         return [...$arguments, '--filter', $this->buildFilterArgument($testsToRun)];
@@ -247,13 +241,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             'total' => $total,
             'testsRan' => $testsRan,
             'testsCount' => $testsCount,
-            'estimatedTime' => $estimatedTime,
         ] = self::$shard;
-
-        $suffix = '';
-        if (self::$timeBalanced && is_float($estimatedTime)) {
-            $suffix = sprintf(' <fg=gray>(time-balanced, ~%.1fs)</>', $estimatedTime);
-        }
 
         $this->output->writeln(sprintf(
             '  <fg=gray>Shard:</>    <fg=default>%d of %d</> — %d file%s ran, out of %d%s.',
@@ -262,7 +250,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             $testsRan,
             $testsRan === 1 ? '' : 's',
             $testsCount,
-            $suffix,
+            self::$timeBalanced ? ' <fg=gray>(time-balanced)</>' : '',
         ));
 
         if (self::$shardsOutdated) {
