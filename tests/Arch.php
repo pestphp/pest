@@ -19,6 +19,7 @@ arch()->preset()->security()->ignoring([
     'exec',
     'md5',
     'unserialize',
+    'uniqid',
     'extract',
     'assert',
 ]);

@@ -51,6 +51,11 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     private static bool $timeBalanced = false;
 
     /**
+     * Whether the shards.json file is outdated.
+     */
+    private static bool $shardsOutdated = false;
+
+    /**
      * Collected timings from workers or subscribers.
      *
      * @var array<string, float>|null
@@ -110,15 +115,18 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
 
         $timings = $this->loadShardsFile();
         if ($timings !== null) {
-            $missingTests = array_diff($tests, array_keys($timings));
+            $knownTests = array_values(array_filter($tests, fn (string $test): bool => isset($timings[$test])));
+            $newTests = array_values(array_diff($tests, $knownTests));
 
-            if ($missingTests !== []) {
-                throw new InvalidOption('The [tests/.pest/shards.json] file is out of date. Run [--update-shards] to update it.');
+            $partitions = $this->partitionByTime($knownTests, $timings, $total);
+
+            foreach ($newTests as $i => $test) {
+                $partitions[$i % $total][] = $test;
             }
 
-            $partitions = $this->partitionByTime($tests, $timings, $total);
             $testsToRun = $partitions[$index - 1] ?? [];
             self::$timeBalanced = true;
+            self::$shardsOutdated = $newTests !== [];
         } else {
             $testsToRun = (array_chunk($tests, max(1, (int) ceil(count($tests) / $total))))[$index - 1] ?? [];
         }
@@ -249,6 +257,10 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             $testsCount,
             $suffix,
         ));
+
+        if (self::$shardsOutdated) {
+            $this->output->writeln('  <fg=yellow;options=bold>WARN</>  <fg=default>The [tests/.pest/shards.json] file is out of date. Run [--update-shards] to update it.</>');
+        }
 
         return $exitCode;
     }
