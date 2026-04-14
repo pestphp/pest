@@ -9,8 +9,8 @@ use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Contracts\Plugins\Terminable;
 use Pest\Exceptions\InvalidOption;
 use Pest\Subscribers\EnsureShardTimingFinished;
-use Pest\Subscribers\EnsureShardTimingStarted;
 use Pest\Subscribers\EnsureShardTimingsAreCollected;
+use Pest\Subscribers\EnsureShardTimingStarted;
 use Pest\TestSuite;
 use PHPUnit\Event;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -108,7 +108,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
         /** @phpstan-ignore-next-line */
         $tests = $this->allTests($arguments);
 
-        $timings = self::loadShardsFile();
+        $timings = $this->loadShardsFile();
         if ($timings !== null) {
             $missingTests = array_diff($tests, array_keys($timings));
 
@@ -116,7 +116,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
                 throw new InvalidOption('The [tests/.pest/shards.json] file is out of date. Run [--update-shards] to update it.');
             }
 
-            $partitions = self::partitionByTime($tests, $timings, $total);
+            $partitions = $this->partitionByTime($tests, $timings, $total);
             $testsToRun = $partitions[$index - 1] ?? [];
             self::$timeBalanced = true;
         } else {
@@ -210,7 +210,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     public function addOutput(int $exitCode): int
     {
         if (self::$updateShards && ! Parallel::isWorker()) {
-            self::$collectedTimings = self::collectTimings();
+            self::$collectedTimings = $this->collectTimings();
 
             $count = self::$knownTests !== null
                 ? count(array_intersect_key(self::$collectedTimings, array_flip(self::$knownTests)))
@@ -263,18 +263,18 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
         }
 
         if (Parallel::isWorker()) {
-            self::writeWorkerTimings();
+            $this->writeWorkerTimings();
 
             return;
         }
 
-        $timings = self::$collectedTimings ?? self::collectTimings();
+        $timings = self::$collectedTimings ?? $this->collectTimings();
 
         if ($timings === []) {
             return;
         }
 
-        self::writeTimings($timings);
+        $this->writeTimings($timings);
     }
 
     /**
@@ -282,12 +282,12 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      *
      * @return array<string, float>
      */
-    private static function collectTimings(): array
+    private function collectTimings(): array
     {
         $runId = Parallel::getGlobal('SHARD_RUN_ID');
 
         if (is_string($runId)) {
-            return self::readWorkerTimings($runId);
+            return $this->readWorkerTimings($runId);
         }
 
         return EnsureShardTimingsAreCollected::timings();
@@ -296,7 +296,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     /**
      * Writes the current worker's timing data to a temp file.
      */
-    private static function writeWorkerTimings(): void
+    private function writeWorkerTimings(): void
     {
         $timings = EnsureShardTimingsAreCollected::timings();
 
@@ -320,7 +320,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      *
      * @return array<string, float>
      */
-    private static function readWorkerTimings(string $runId): array
+    private function readWorkerTimings(string $runId): array
     {
         $pattern = sys_get_temp_dir().DIRECTORY_SEPARATOR.'__pest_sharding_'.$runId.'-*.json';
         $files = glob($pattern);
@@ -353,7 +353,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     /**
      * Returns the path to shards.json.
      */
-    private static function shardsPath(): string
+    private function shardsPath(): string
     {
         $testSuite = TestSuite::getInstance();
 
@@ -365,9 +365,9 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      *
      * @return array<string, float>|null
      */
-    private static function loadShardsFile(): ?array
+    private function loadShardsFile(): ?array
     {
-        $path = self::shardsPath();
+        $path = $this->shardsPath();
 
         if (! file_exists($path)) {
             return null;
@@ -385,7 +385,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             throw new InvalidOption('The [tests/.pest/shards.json] file is corrupted. Delete it or run [--update-shards] to regenerate.');
         }
 
-        /** @var array<string, float> */
         return $data['timings'];
     }
 
@@ -396,14 +395,14 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      * @param  array<string, float>  $timings
      * @return list<list<string>>
      */
-    private static function partitionByTime(array $tests, array $timings, int $total): array
+    private function partitionByTime(array $tests, array $timings, int $total): array
     {
         $knownTimings = array_filter(
             array_map(fn (string $test): ?float => $timings[$test] ?? null, $tests),
             fn (?float $t): bool => $t !== null,
         );
 
-        $median = $knownTimings !== [] ? self::median(array_values($knownTimings)) : 1.0;
+        $median = $knownTimings !== [] ? $this->median(array_values($knownTimings)) : 1.0;
 
         $testsWithTimings = array_map(
             fn (string $test): array => ['test' => $test, 'time' => $timings[$test] ?? $median],
@@ -433,7 +432,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      *
      * @param  list<float>  $values
      */
-    private static function median(array $values): float
+    private function median(array $values): float
     {
         sort($values);
 
@@ -452,9 +451,9 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      *
      * @param  array<string, float>  $timings
      */
-    private static function writeTimings(array $timings): void
+    private function writeTimings(array $timings): void
     {
-        $path = self::shardsPath();
+        $path = $this->shardsPath();
 
         $directory = dirname($path);
         if (! is_dir($directory)) {
