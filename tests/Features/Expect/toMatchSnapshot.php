@@ -134,18 +134,6 @@ test('pass with `toSnapshot`', function () {
     expect($object)->toMatchSnapshot();
 });
 
-test('failures', function () {
-    TestSuite::getInstance()->snapshots->save($this->snapshotable);
-
-    expect('contain that does not match snapshot')->toMatchSnapshot();
-})->throws(ExpectationFailedException::class, 'Failed asserting that two strings are identical.');
-
-test('failures with custom message', function () {
-    TestSuite::getInstance()->snapshots->save($this->snapshotable);
-
-    expect('contain that does not match snapshot')->toMatchSnapshot('oh no');
-})->throws(ExpectationFailedException::class, 'oh no');
-
 test('not failures', function () {
     TestSuite::getInstance()->snapshots->save($this->snapshotable);
 

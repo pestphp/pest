@@ -1,5 +1,5 @@
 
-  Pest Testing Framework 4.6.0.  
+  Pest Testing Framework 4.6.1.  
 
   USAGE: pest <file> [options]  
 
@@ -91,7 +91,11 @@
   --cache-result ............................ Write test results to cache file  
   --do-not-cache-result .............. Do not write test results to cache file  
   --order-by [order]  Run tests in order: default|defects|depends|duration|no-depends|random|reverse|size  
+  --resolve-dependencies ...................... Alias for "--order-by depends"  
+  --ignore-dependencies .................... Alias for "--order-by no-depends"  
+  --random-order ............................... Alias for "--order-by random"  
   --random-order-seed [N]  Use the specified random seed when running tests in random order  
+  --reverse-order ............................. Alias for "--order-by reverse"  
 
   REPORTING OPTIONS:
   --colors=[flag] ......... Use colors in output ("never", "auto" or "always")  
