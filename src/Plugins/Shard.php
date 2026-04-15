@@ -193,6 +193,16 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             '--list-tests',
         ]))->setTimeout(120)->mustRun()->getOutput();
 
+        return self::parseListTestsOutput($output);
+    }
+
+    /**
+     * Parses `--list-tests` output into a unique list of test class FQCNs.
+     *
+     * @return list<string>
+     */
+    public static function parseListTestsOutput(string $output): array
+    {
         preg_match_all('/ - (?:P\\\\)?(Tests\\\\[^:]+)::/', $output, $matches);
 
         return array_values(array_unique($matches[1]));
