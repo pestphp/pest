@@ -1037,8 +1037,6 @@
   ✓ pass with toArray
   ✓ pass with array
   ✓ pass with toSnapshot
-  ✓ failures
-  ✓ failures with custom message
   ✓ not failures
   ✓ multiple snapshot expectations
   ✓ multiple snapshot expectations with datasets with (1)
@@ -1915,4 +1913,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1306 passed (2988 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1294 passed (2971 assertions)

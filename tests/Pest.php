@@ -86,5 +86,12 @@ dataset('dataset_in_pest_file', ['A', 'B']);
 
 function removeAnsiEscapeSequences(string $input): ?string
 {
-    return preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $input);
+    return preg_replace(
+        [
+            '#\\x1b[[][^A-Za-z]*[A-Za-z]#',       // CSI (colors, cursor, etc.)
+            '#\\x1b\\]8;[^\\x1b\\x07]*(?:\\x1b\\\\|\\x07)#', // OSC 8 hyperlinks
+        ],
+        '',
+        $input,
+    );
 }
