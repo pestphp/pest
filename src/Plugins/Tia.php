@@ -18,6 +18,7 @@ use Pest\Plugins\Tia\Fingerprint;
 use Pest\Plugins\Tia\Graph;
 use Pest\Plugins\Tia\Recorder;
 use Pest\Plugins\Tia\State;
+use Pest\Plugins\Tia\WatchPatterns;
 use Pest\TestSuite;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
