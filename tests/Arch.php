@@ -7,6 +7,9 @@ arch()->preset()->php()->ignoring([
     'debug_backtrace',
     'var_export',
     'xdebug_info',
+    'xdebug_start_code_coverage',
+    'xdebug_stop_code_coverage',
+    'xdebug_get_code_coverage',
 ]);
 
 arch()->preset()->strict()->ignoring([
