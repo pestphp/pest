@@ -179,7 +179,6 @@ final class TestSuiteLoader
         if (! class_exists($suiteClassName, false)) {
             return $this->exceptionFor($suiteClassName, $suiteClassFile);
         }
-
         // @codeCoverageIgnoreEnd
 
         if ($class->isSubclassOf(TestCase::class) && ! $class->isAbstract()) {

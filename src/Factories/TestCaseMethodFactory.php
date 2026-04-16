@@ -112,7 +112,7 @@ final class TestCaseMethodFactory
      *  'test' => 'first',
      * ]
      *
-     * @var array<int, array{testCase: string, depend: string}>
+     * @var array<int, array{testCase: string, test: string}>
      */
     public array $dependsExternal = [];
 
