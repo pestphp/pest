@@ -198,6 +198,18 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
+     * @param  array<int, string>  $arguments
+     * @return array<int, string>
+     */
+    private function removeParallelArguments(array $arguments): array
+    {
+        return array_filter(
+            $arguments,
+            fn (string $argument): bool => ! in_array($argument, ['--parallel', '-p'], strict: true)
+        );
+    }
+
+    /**
      * Builds the subprocess command used to enumerate tests via `--list-tests`.
      *
      * @param  list<string>  $arguments
@@ -205,10 +217,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      */
     private function buildListTestsCommand(array $arguments, string $testPath): array
     {
-        $filtered = array_values(array_filter(
-            $arguments,
-            fn (string $argument): bool => ! in_array($argument, ['--parallel', '-p'], strict: true),
-        ));
+        $filtered = $this->removeParallelArguments($arguments);
 
         return ['php', ...$filtered, '--test-directory='.$testPath, '--list-tests'];
     }
