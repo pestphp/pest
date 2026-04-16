@@ -1718,6 +1718,18 @@
    PASS  Tests\Unit\Plugins\Retry
   ✓ it orders by defects and stop on defects if when --retry is used
 
+   PASS  Tests\Unit\Plugins\Shard
+  ✓ it parses Tests\ namespaced classes from --list-tests output
+  ✓ it deduplicates repeated class names from multiple test methods
+  ✓ it returns an empty list for output with no matching lines
+  ✓ it parses non-Tests namespaced classes
+  ✓ it parses unnamespaced top-level classes
+  ✓ it strips the P\ Pest prefix but keeps the rest of the FQCN
+  ✓ it ignores junk lines that lack the " - …::" framing
+  ✓ it builds the list-tests command with the forwarded --test-directory
+  ✓ it strips --parallel and -p when building the list-tests command
+  ✓ it forwards --test-directory even when input arguments include one
+
    PASS  Tests\Unit\Preset
   ✓ preset invalid name
   ✓ preset → myFramework
@@ -1903,4 +1915,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1296 passed (2977 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1306 passed (2988 assertions)

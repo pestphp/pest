@@ -220,7 +220,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      */
     public static function parseListTestsOutput(string $output): array
     {
-        preg_match_all('/ - (?:P\\\\)?([A-Za-z_][A-Za-z0-9_]*(?:\\\\[A-Za-z_][A-Za-z0-9_]*)*)::/', $output, $matches);
+        preg_match_all('/ - (?:P\\\\)?([A-Za-z_]\w*(?:\\\\[A-Za-z_]\w*)*)::/', $output, $matches);
 
         return array_values(array_unique($matches[1]));
     }
