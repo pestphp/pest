@@ -187,13 +187,30 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      */
     private function allTests(array $arguments): array
     {
-        $output = (new Process([
-            'php',
-            ...$this->removeParallelArguments($arguments),
-            '--list-tests',
-        ]))->setTimeout(120)->mustRun()->getOutput();
+        $command = self::buildListTestsCommand(
+            $arguments,
+            TestSuite::getInstance()->testPath,
+        );
+
+        $output = (new Process($command))->setTimeout(120)->mustRun()->getOutput();
 
         return self::parseListTestsOutput($output);
+    }
+
+    /**
+     * Builds the subprocess command used to enumerate tests via `--list-tests`.
+     *
+     * @param  list<string>  $arguments
+     * @return list<string>
+     */
+    public static function buildListTestsCommand(array $arguments, string $testPath): array
+    {
+        $filtered = array_values(array_filter(
+            $arguments,
+            fn (string $argument): bool => ! in_array($argument, ['--parallel', '-p'], strict: true),
+        ));
+
+        return ['php', ...$filtered, '--test-directory='.$testPath, '--list-tests'];
     }
 
     /**
@@ -206,15 +223,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
         preg_match_all('/ - (?:P\\\\)?([A-Za-z_][A-Za-z0-9_]*(?:\\\\[A-Za-z_][A-Za-z0-9_]*)*)::/', $output, $matches);
 
         return array_values(array_unique($matches[1]));
-    }
-
-    /**
-     * @param  array<int, string>  $arguments
-     * @return array<int, string>
-     */
-    private function removeParallelArguments(array $arguments): array
-    {
-        return array_filter($arguments, fn (string $argument): bool => ! in_array($argument, ['--parallel', '-p'], strict: true));
     }
 
     /**

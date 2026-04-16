@@ -75,3 +75,36 @@ OUT;
 
     expect(Shard::parseListTestsOutput($output))->toBe(['Acme\\RealTest']);
 });
+
+it('builds the list-tests command with the forwarded --test-directory', function () {
+    $command = Shard::buildListTestsCommand(['bin/pest', '--update-shards'], 'custom/suite');
+
+    expect($command)->toBe([
+        'php',
+        'bin/pest',
+        '--update-shards',
+        '--test-directory=custom/suite',
+        '--list-tests',
+    ]);
+});
+
+it('strips --parallel and -p when building the list-tests command', function () {
+    $command = Shard::buildListTestsCommand(
+        ['bin/pest', '--parallel', '--update-shards', '-p'],
+        'tests',
+    );
+
+    expect($command)->toBe([
+        'php',
+        'bin/pest',
+        '--update-shards',
+        '--test-directory=tests',
+        '--list-tests',
+    ]);
+});
+
+it('forwards --test-directory even when input arguments include one', function () {
+    $command = Shard::buildListTestsCommand(['bin/pest'], 'suites');
+
+    expect($command)->toContain('--test-directory=suites');
+});
