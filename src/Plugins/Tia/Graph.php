@@ -166,11 +166,17 @@ final class Graph
         return array_keys($this->edges);
     }
 
+    /**
+     * @param  array<string, int|string|null>  $fingerprint
+     */
     public function setFingerprint(array $fingerprint): void
     {
         $this->fingerprint = $fingerprint;
     }
 
+    /**
+     * @return array<string, int|string|null>
+     */
     public function fingerprint(): array
     {
         return $this->fingerprint;

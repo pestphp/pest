@@ -66,6 +66,7 @@ final class State
      * Turns on replay mode with the given graph + affected set.
      *
      * @param  array<string, true>  $affectedFiles
+     * @param  array<string, true>  $previousDefects
      */
     public function activate(string $projectRoot, Graph $graph, array $affectedFiles, array $previousDefects): void
     {

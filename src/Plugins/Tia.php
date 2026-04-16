@@ -713,6 +713,6 @@ final class Tia implements AddsOutput, AfterEachable, BeforeEachable, HandlesArg
             return false;
         }
 
-        return property_exists($coverage, 'coverage') && $coverage->coverage === true;
+        return $coverage->coverage === true;
     }
 }

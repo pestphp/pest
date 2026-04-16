@@ -19,7 +19,7 @@ final readonly class Fingerprint
     private const int SCHEMA_VERSION = 2;
 
     /**
-     * @param  non-empty-string  $projectRoot
+     * @return array<string, int|string|null>
      */
     public static function compute(string $projectRoot): array
     {

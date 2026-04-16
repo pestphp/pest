@@ -69,12 +69,20 @@ final class Recorder
                 $this->driver = 'pcov';
                 $this->driverAvailable = true;
             } elseif (function_exists('xdebug_start_code_coverage')) {
-                // Probe: Xdebug silently emits a warning and refuses to start
-                // when not in coverage mode. Suppress + check for mode errors.
-                $ok = @\xdebug_start_code_coverage();
+                // Xdebug is loaded. Probe whether coverage mode is active by
+                // attempting a start — it emits E_WARNING when the mode is off.
+                // We capture the warning via a temporary error handler.
+                $probeOk = true;
+                set_error_handler(static function () use (&$probeOk): bool {
+                    $probeOk = false;
 
-                if ($ok === null || $ok) {
-                    @\xdebug_stop_code_coverage(false);
+                    return true;
+                });
+                \xdebug_start_code_coverage();
+                restore_error_handler();
+
+                if ($probeOk) {
+                    \xdebug_stop_code_coverage(false);
                     $this->driver = 'xdebug';
                     $this->driverAvailable = true;
                 }
@@ -195,31 +203,23 @@ final class Recorder
             return null;
         }
 
-        try {
-            $reflection = new ReflectionClass($className);
-        } catch (ReflectionException) {
-            return null;
-        }
+        $reflection = new ReflectionClass($className);
 
         if ($reflection->hasProperty('__filename')) {
-            try {
-                $property = $reflection->getProperty('__filename');
+            $property = $reflection->getProperty('__filename');
 
-                if ($property->isStatic()) {
-                    $value = $property->getValue();
+            if ($property->isStatic()) {
+                $value = $property->getValue();
 
-                    if (is_string($value) && $value !== '') {
-                        return $value;
-                    }
+                if (is_string($value)) {
+                    return $value;
                 }
-            } catch (ReflectionException) {
-                // fall through to getFileName()
             }
         }
 
         $file = $reflection->getFileName();
 
-        return $file !== false && $file !== '' ? $file : null;
+        return is_string($file) ? $file : null;
     }
 
     /**
