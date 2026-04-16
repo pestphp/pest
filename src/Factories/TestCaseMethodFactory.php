@@ -15,6 +15,7 @@ use Pest\TestSuite;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Depends;
+use PHPUnit\Framework\Attributes\DependsExternal;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
@@ -103,6 +104,19 @@ final class TestCaseMethodFactory
     public array $depends = [];
 
     /**
+     * The test's external dependencies (tests in other Pest test files).
+     *
+     * Example:
+     * [
+     *  'testCase' => 'Tests\Features\Depends',
+     *  'test' => 'first',
+     * ]
+     *
+     * @var array<int, array{testCase: string, depend: string}>
+     */
+    public array $dependsExternal = [];
+
+    /**
      * The test's groups.
      *
      * @var array<int, string>
@@ -183,7 +197,7 @@ final class TestCaseMethodFactory
      */
     public function receivesArguments(): bool
     {
-        return $this->datasets !== [] || $this->depends !== [] || $this->repetitions > 1;
+        return $this->datasets !== [] || $this->depends !== [] || $this->dependsExternal !== [] || $this->repetitions > 1;
     }
 
     /**
@@ -217,6 +231,20 @@ final class TestCaseMethodFactory
             $this->attributes[] = new Attribute(
                 Depends::class,
                 [$depend],
+            );
+        }
+
+        foreach ($this->dependsExternal as $externalDepend) {
+            $depend = Str::evaluable(
+                $this->describing === []
+                    ? $externalDepend['test']
+                    : Str::describe($this->describing, $externalDepend['test'])
+            );
+
+            $className = 'P\\'.$externalDepend['testCase'];
+            $this->attributes[] = new Attribute(
+                DependsExternal::class,
+                [$className, $depend],
             );
         }
 
