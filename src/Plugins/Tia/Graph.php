@@ -47,9 +47,22 @@ final class Graph
     private array $fingerprint = [];
 
     /**
-     * Commit SHA the graph was recorded against (if in a git repo).
+     * Per-branch baselines. Each branch independently tracks:
+     *   - `sha`     — last HEAD at which `--tia` ran on this branch
+     *   - `tree`    — content hashes of modified files at that point
+     *   - `results` — per-test status + message + time
+     *
+     * Graph edges (test → source) stay shared across branches because
+     * structure doesn't change per branch. Only run-state is per-branch so
+     * a failing test on one branch doesn't poison another branch's replay.
+     *
+     * @var array<string, array{
+     *     sha: ?string,
+     *     tree: array<string, string>,
+     *     results: array<string, array{status: int, message: string, time: float}>
+     * }>
      */
-    private ?string $recordedAtSha = null;
+    private array $baselines = [];
 
     /**
      * Canonicalised project root. Resolved through `realpath()` so paths
@@ -224,14 +237,84 @@ final class Graph
         return $this->fingerprint;
     }
 
-    public function setRecordedAtSha(?string $sha): void
+    /**
+     * Returns the SHA the given branch last ran against, or falls back to
+     * `$fallbackBranch` (typically `main`) when this branch has no baseline
+     * yet. That way a freshly-created feature branch inherits main's
+     * baseline on its first run.
+     */
+    public function recordedAtSha(string $branch, string $fallbackBranch = 'main'): ?string
     {
-        $this->recordedAtSha = $sha;
+        $baseline = $this->baselineFor($branch, $fallbackBranch);
+
+        return $baseline['sha'];
     }
 
-    public function recordedAtSha(): ?string
+    public function setRecordedAtSha(string $branch, ?string $sha): void
     {
-        return $this->recordedAtSha;
+        $this->ensureBaseline($branch);
+        $this->baselines[$branch]['sha'] = $sha;
+    }
+
+    public function setResult(string $branch, string $testId, int $status, string $message, float $time): void
+    {
+        $this->ensureBaseline($branch);
+        $this->baselines[$branch]['results'][$testId] = [
+            'status' => $status, 'message' => $message, 'time' => $time,
+        ];
+    }
+
+    public function getResult(string $branch, string $testId, string $fallbackBranch = 'main'): ?CachedTestResult
+    {
+        $baseline = $this->baselineFor($branch, $fallbackBranch);
+
+        if (! isset($baseline['results'][$testId])) {
+            return null;
+        }
+
+        $r = $baseline['results'][$testId];
+
+        return new CachedTestResult($r['status'], $r['message'], $r['time']);
+    }
+
+    /**
+     * @param  array<string, string>  $tree  project-relative path → content hash
+     */
+    public function setLastRunTree(string $branch, array $tree): void
+    {
+        $this->ensureBaseline($branch);
+        $this->baselines[$branch]['tree'] = $tree;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function lastRunTree(string $branch, string $fallbackBranch = 'main'): array
+    {
+        return $this->baselineFor($branch, $fallbackBranch)['tree'];
+    }
+
+    /**
+     * @return array{sha: ?string, tree: array<string, string>, results: array<string, array{status: int, message: string, time: float}>}
+     */
+    private function baselineFor(string $branch, string $fallbackBranch): array
+    {
+        if (isset($this->baselines[$branch])) {
+            return $this->baselines[$branch];
+        }
+
+        if ($branch !== $fallbackBranch && isset($this->baselines[$fallbackBranch])) {
+            return $this->baselines[$fallbackBranch];
+        }
+
+        return ['sha' => null, 'tree' => [], 'results' => []];
+    }
+
+    private function ensureBaseline(string $branch): void
+    {
+        if (! isset($this->baselines[$branch])) {
+            $this->baselines[$branch] = ['sha' => null, 'tree' => [], 'results' => []];
+        }
     }
 
     /**
@@ -296,10 +379,10 @@ final class Graph
 
         $graph = new self($projectRoot);
         $graph->fingerprint = is_array($data['fingerprint'] ?? null) ? $data['fingerprint'] : [];
-        $graph->recordedAtSha = is_string($data['recorded_at_sha'] ?? null) ? $data['recorded_at_sha'] : null;
         $graph->files = is_array($data['files'] ?? null) ? array_values($data['files']) : [];
         $graph->fileIds = array_flip($graph->files);
         $graph->edges = is_array($data['edges'] ?? null) ? $data['edges'] : [];
+        $graph->baselines = is_array($data['baselines'] ?? null) ? $data['baselines'] : [];
 
         return $graph;
     }
@@ -315,9 +398,9 @@ final class Graph
         $payload = [
             'schema' => 1,
             'fingerprint' => $this->fingerprint,
-            'recorded_at_sha' => $this->recordedAtSha,
             'files' => $this->files,
             'edges' => $this->edges,
+            'baselines' => $this->baselines,
         ];
 
         $tmp = $path.'.'.bin2hex(random_bytes(4)).'.tmp';

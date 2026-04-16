@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace Pest\Plugins;
 
 use Pest\Contracts\Plugins\AddsOutput;
+use Pest\Contracts\Plugins\BeforeEachable;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Contracts\Plugins\Terminable;
+use Pest\Plugins\Tia\CachedTestResult;
 use Pest\Plugins\Tia\ChangedFiles;
 use Pest\Plugins\Tia\Fingerprint;
 use Pest\Plugins\Tia\Graph;
 use Pest\Plugins\Tia\Recorder;
+use Pest\Plugins\Tia\ResultCollector;
 use Pest\TestCaseFilters\TiaTestCaseFilter;
 use Pest\Plugins\Tia\WatchPatterns;
 use Pest\Support\Container;
@@ -61,7 +64,7 @@ use Throwable;
  *
  * @internal
  */
-final class Tia implements AddsOutput, HandlesArguments, Terminable
+final class Tia implements AddsOutput, BeforeEachable, HandlesArguments, Terminable
 {
     use Concerns\HandleArguments;
 
@@ -97,6 +100,28 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private const string REPLAYING_GLOBAL = 'TIA_REPLAYING';
 
     private bool $graphWritten = false;
+
+    private bool $replayRan = false;
+
+    /**
+     * Holds the graph during replay so `beforeEach` can look up cached
+     * results without re-loading from disk on every test.
+     */
+    private ?Graph $replayGraph = null;
+
+    /**
+     * Current git branch (or `HEAD` SHA when detached). Resolved once per
+     * run so all graph accesses use the same branch key.
+     */
+    private string $branch = 'main';
+
+    /**
+     * Test files that are affected (should re-execute). Keyed by
+     * project-relative path. Set during `enterReplayMode`.
+     *
+     * @var array<string, true>
+     */
+    private array $affectedFiles = [];
 
     private static function tempDir(): string
     {
@@ -136,6 +161,34 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         private readonly Recorder $recorder,
         private readonly WatchPatterns $watchPatterns,
     ) {}
+
+    public function beforeEach(string $filename, string $testId): ?CachedTestResult
+    {
+        if ($this->replayGraph === null) {
+            return null;
+        }
+
+        // Resolve file to project-relative path.
+        $projectRoot = TestSuite::getInstance()->rootPath;
+        $real = @realpath($filename);
+        $rel = $real !== false
+            ? str_replace(DIRECTORY_SEPARATOR, '/', substr($real, strlen(rtrim($projectRoot, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR)))
+            : null;
+
+        // Affected files must re-execute.
+        if ($rel !== null && isset($this->affectedFiles[$rel])) {
+            return null;
+        }
+
+        // Unknown files (not in graph) must execute — they're new.
+        if ($rel === null || ! $this->replayGraph->knowsTest($rel)) {
+            return null;
+        }
+
+        // Known + unaffected: return cached result if we have one for this
+        // branch (falls back to main if branch is fresh).
+        return $this->replayGraph->getResult($this->branch, $testId);
+    }
 
     /**
      * {@inheritDoc}
@@ -211,7 +264,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         $graph = Graph::load($projectRoot, $cachePath) ?? new Graph($projectRoot);
         $graph->setFingerprint(Fingerprint::compute($projectRoot));
-        $graph->setRecordedAtSha((new ChangedFiles($projectRoot))->currentSha());
+        $graph->setRecordedAtSha($this->branch, (new ChangedFiles($projectRoot))->currentSha());
         $graph->replaceEdges($perTest);
         $graph->pruneMissingTests();
 
@@ -242,6 +295,20 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return $exitCode;
         }
 
+        // After a successful replay run, advance the recorded SHA to HEAD
+        // so the next run only diffs against what changed since NOW, not
+        // since the original recording. Without this, re-running `--tia`
+        // twice in a row would re-execute the same affected tests both
+        // times even though nothing new changed.
+        if ($this->replayRan) {
+            $this->bumpRecordedSha();
+        }
+
+        // Snapshot per-test results (status + message) from PHPUnit's result
+        // cache into our graph so future replay runs can faithfully reproduce
+        // pass/fail/skip/todo/incomplete for unaffected tests.
+        $this->snapshotTestResults();
+
         if ((string) Parallel::getGlobal(self::RECORDING_GLOBAL) !== '1') {
             return $exitCode;
         }
@@ -257,7 +324,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         $graph = Graph::load($projectRoot, $cachePath) ?? new Graph($projectRoot);
         $graph->setFingerprint(Fingerprint::compute($projectRoot));
-        $graph->setRecordedAtSha((new ChangedFiles($projectRoot))->currentSha());
+        $graph->setRecordedAtSha($this->branch, (new ChangedFiles($projectRoot))->currentSha());
 
         $merged = [];
 
@@ -317,6 +384,11 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         // this point).
         $this->watchPatterns->useDefaults($projectRoot);
 
+        // Resolve current branch once per run so every baseline lookup uses
+        // the same key. Detached HEAD (or no git) falls back to `main` as
+        // the implicit branch identity.
+        $this->branch = (new ChangedFiles($projectRoot))->currentBranch() ?? 'main';
+
         $cachePath = self::cachePath();
         $fingerprint = Fingerprint::compute($projectRoot);
 
@@ -331,10 +403,11 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         if ($graph instanceof Graph) {
             $changedFiles = new ChangedFiles($projectRoot);
+            $branchSha = $graph->recordedAtSha($this->branch);
 
             if ($changedFiles->gitAvailable()
-                && $graph->recordedAtSha() !== null
-                && $changedFiles->since($graph->recordedAtSha()) === null) {
+                && $branchSha !== null
+                && $changedFiles->since($branchSha) === null) {
                 $this->output->writeln(
                     '  <fg=yellow>TIA</> recorded commit is no longer reachable — graph will be rebuilt.',
                 );
@@ -355,6 +428,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      */
     private function handleWorker(array $arguments, string $projectRoot, bool $recordingGlobal, bool $replayingGlobal): array
     {
+        $this->branch = (new ChangedFiles($projectRoot))->currentBranch() ?? 'main';
+
         if ($replayingGlobal) {
             // Replay in a worker: load the graph and the affected set that
             // the parent persisted, then install the per-file filter so
@@ -435,7 +510,15 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return $arguments;
         }
 
-        $changed = $changedFiles->since($graph->recordedAtSha()) ?? [];
+        $changed = $changedFiles->since($graph->recordedAtSha($this->branch)) ?? [];
+
+        // Drop files whose content hash matches the last-run snapshot. This
+        // is the "dirty but identical" filter: if a file is uncommitted but
+        // its content hasn't moved since the last `--tia` invocation, its
+        // dependents already re-ran last time and don't need re-running
+        // again.
+        $changed = $changedFiles->filterUnchangedSinceLastRun($changed, $graph->lastRunTree($this->branch));
+
         $affected = $changed === [] ? [] : $graph->affected($changed);
 
         $totalKnown = count($graph->allTestFiles());
@@ -445,13 +528,13 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $testSuite = TestSuite::getInstance();
         $affectedSet = array_fill_keys($affected, true);
 
-        if (! Parallel::isEnabled()) {
-            $testSuite->tests->addTestCaseFilter(
-                new TiaTestCaseFilter($projectRoot, $graph, $affectedSet),
-            );
+        $this->replayRan = true;
+        $this->replayGraph = $graph;
+        $this->affectedFiles = $affectedSet;
 
+        if (! Parallel::isEnabled()) {
             $this->output->writeln(sprintf(
-                '  <fg=green>TIA</> %d changed file(s) → %d affected, %d cached.',
+                '  <fg=green>TIA</> %d changed file(s) → %d affected, %d replayed.',
                 count($changed),
                 $affectedCount,
                 $cachedCount,
@@ -657,6 +740,80 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         return $out;
+    }
+
+    /**
+     * After a successful replay, bump the graph's `recorded_at_sha` to the
+     * current HEAD. This way the next `--tia` run diffs only against what
+     * changed since THIS run, not since the original recording.
+     *
+     * The graph edges themselves are untouched — only the SHA marker moves.
+     */
+    /**
+     * After a successful replay, advance the baseline: bump `recorded_at_sha`
+     * to the current HEAD (handles committed changes) and snapshot the
+     * working tree's content hashes (handles uncommitted changes). Next run
+     * compares against this baseline so identical files are skipped even if
+     * git still reports them as modified.
+     */
+    private function bumpRecordedSha(): void
+    {
+        $projectRoot = TestSuite::getInstance()->rootPath;
+        $cachePath = self::cachePath();
+
+        $graph = Graph::load($projectRoot, $cachePath);
+
+        if (! $graph instanceof Graph) {
+            return;
+        }
+
+        $changedFiles = new ChangedFiles($projectRoot);
+        $currentSha = $changedFiles->currentSha();
+
+        if ($currentSha !== null) {
+            $graph->setRecordedAtSha($this->branch, $currentSha);
+        }
+
+        // Snapshot the working tree: hash every currently-modified file.
+        // On next run, files still appearing as modified but whose hash
+        // matches this snapshot are treated as unchanged.
+        $workingTreeFiles = $changedFiles->since($currentSha) ?? [];
+        $graph->setLastRunTree($this->branch, $changedFiles->snapshotTree($workingTreeFiles));
+
+        $graph->save($cachePath);
+    }
+
+    /**
+     * Merges per-test status + message from the `ResultCollector` into the
+     * TIA graph. Runs after every `--tia` invocation so the graph always has
+     * fresh results for faithful replay (pass, fail, skip, todo, etc.).
+     */
+    private function snapshotTestResults(): void
+    {
+        /** @var ResultCollector $collector */
+        $collector = Container::getInstance()->get(ResultCollector::class);
+
+        $results = $collector->all();
+
+        if ($results === []) {
+            return;
+        }
+
+        $cachePath = self::cachePath();
+        $projectRoot = TestSuite::getInstance()->rootPath;
+
+        $graph = Graph::load($projectRoot, $cachePath);
+
+        if (! $graph instanceof Graph) {
+            return;
+        }
+
+        foreach ($results as $testId => $result) {
+            $graph->setResult($this->branch, $testId, $result['status'], $result['message'], $result['time']);
+        }
+
+        $graph->save($cachePath);
+        $collector->reset();
     }
 
     private function coverageReportActive(): bool

@@ -32,6 +32,84 @@ final readonly class ChangedFiles
      *                                 from HEAD (rebase / force-push) — in
      *                                 that case the graph should be rebuilt.
      */
+    /**
+     * Removes files whose current content hash matches the snapshot from the
+     * last `--tia` run. Used to ignore "dirty but unchanged" files — a file
+     * that git still reports as modified but whose content is bit-identical
+     * to the previous TIA invocation.
+     *
+     * @param  array<int, string>  $files          project-relative paths.
+     * @param  array<string, string>  $lastRunTree  path → content hash from last run.
+     * @return array<int, string>
+     */
+    public function filterUnchangedSinceLastRun(array $files, array $lastRunTree): array
+    {
+        if ($lastRunTree === []) {
+            return $files;
+        }
+
+        $remaining = [];
+
+        foreach ($files as $file) {
+            if (! isset($lastRunTree[$file])) {
+                $remaining[] = $file;
+
+                continue;
+            }
+
+            $absolute = $this->projectRoot.DIRECTORY_SEPARATOR.$file;
+
+            if (! is_file($absolute)) {
+                // File deleted since last run — definitely changed.
+                $remaining[] = $file;
+
+                continue;
+            }
+
+            $hash = @hash_file('xxh128', $absolute);
+
+            if ($hash === false || $hash !== $lastRunTree[$file]) {
+                $remaining[] = $file;
+            }
+        }
+
+        return $remaining;
+    }
+
+    /**
+     * Computes content hashes for the given project-relative files. Used to
+     * snapshot the working tree after a successful run so the next run can
+     * detect which files are actually different.
+     *
+     * @param  array<int, string>  $files
+     * @return array<string, string>  path → xxh128 content hash
+     */
+    public function snapshotTree(array $files): array
+    {
+        $out = [];
+
+        foreach ($files as $file) {
+            $absolute = $this->projectRoot.DIRECTORY_SEPARATOR.$file;
+
+            if (! is_file($absolute)) {
+                continue;
+            }
+
+            $hash = @hash_file('xxh128', $absolute);
+
+            if ($hash !== false) {
+                $out[$file] = $hash;
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * @return array<int, string>|null `null` when git is unavailable, or when
+     *                                 the recorded SHA is no longer reachable
+     *                                 from HEAD (rebase / force-push).
+     */
     public function since(?string $sha): ?array
     {
         if (! $this->gitAvailable()) {
@@ -85,6 +163,24 @@ final readonly class ChangedFiles
         }
 
         return false;
+    }
+
+    public function currentBranch(): ?string
+    {
+        if (! $this->gitAvailable()) {
+            return null;
+        }
+
+        $process = new Process(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], $this->projectRoot);
+        $process->run();
+
+        if (! $process->isSuccessful()) {
+            return null;
+        }
+
+        $branch = trim($process->getOutput());
+
+        return $branch === '' || $branch === 'HEAD' ? null : $branch;
     }
 
     public function gitAvailable(): bool

@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Pest\Concerns;
 
 use Closure;
+use Pest\Contracts\Plugins\BeforeEachable;
 use Pest\Exceptions\DatasetArgumentsMismatch;
 use Pest\Panic;
+use Pest\Plugin\Loader;
+use Pest\Plugins\Tia\CachedTestResult;
 use Pest\Preset;
 use Pest\Support\ChainableClosure;
 use Pest\Support\ExceptionTrace;
@@ -74,6 +77,12 @@ trait Testable
      * Whether the test has ran or not.
      */
     public bool $__ran = false;
+
+    /**
+     * Set when a `BeforeEachable` plugin returns a cached success result.
+     * Checked in `__runTest` and `tearDown` to skip body + cleanup.
+     */
+    private bool $__cachedPass = false;
 
     /**
      * The test's test closure.
@@ -227,6 +236,31 @@ trait Testable
     {
         TestSuite::getInstance()->test = $this;
 
+        $this->__cachedPass = false;
+
+        /** @var BeforeEachable $plugin */
+        foreach (Loader::getPlugins(BeforeEachable::class) as $plugin) {
+            $cached = $plugin->beforeEach(self::$__filename, $this::class.'::'.$this->name());
+
+            if ($cached instanceof CachedTestResult) {
+                if ($cached->isSuccess()) {
+                    $this->__cachedPass = true;
+
+                    return;
+                }
+
+                // Non-success: throw appropriate exception. PHPUnit catches
+                // it in runBare() and marks the test with the correct status.
+                // This makes skips, failures, incompletes, todos appear in
+                // output exactly as if the test ran.
+                match ($cached->status) {
+                    1 => $this->markTestSkipped($cached->message),     // skip / todo
+                    2 => $this->markTestIncomplete($cached->message),  // incomplete
+                    default => throw new \PHPUnit\Framework\AssertionFailedError($cached->message ?: 'Cached failure'),
+                };
+            }
+        }
+
         $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
 
         $description = $method->description;
@@ -302,6 +336,12 @@ trait Testable
      */
     protected function tearDown(...$arguments): void
     {
+        if ($this->__cachedPass) {
+            TestSuite::getInstance()->test = null;
+
+            return;
+        }
+
         $afterEach = TestSuite::getInstance()->afterEach->get(self::$__filename);
 
         if ($this->__afterEach instanceof Closure) {
@@ -327,6 +367,12 @@ trait Testable
      */
     private function __runTest(Closure $closure, ...$args): mixed
     {
+        if ($this->__cachedPass) {
+            $this->addToAssertionCount(1);
+
+            return null;
+        }
+
         $arguments = $this->__resolveTestArguments($args);
         $this->__ensureDatasetArgumentNameAndNumberMatches($arguments);
 

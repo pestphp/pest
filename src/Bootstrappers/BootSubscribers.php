@@ -27,6 +27,7 @@ final readonly class BootSubscribers implements Bootstrapper
         Subscribers\EnsureTeamCityEnabled::class,
         Subscribers\EnsureTiaCoverageIsRecorded::class,
         Subscribers\EnsureTiaCoverageIsFlushed::class,
+        Subscribers\EnsureTiaResultsAreCollected::class,
     ];
 
     /**
