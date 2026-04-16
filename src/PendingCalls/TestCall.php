@@ -209,6 +209,24 @@ final class TestCall // @phpstan-ignore-line
     }
 
     /**
+     * Sets external test dependencies from another Pest test file reference.
+     *
+     * @param string $testCase The Pest test reference (e.g. "Tests\Features\Depends")
+     * @param string ...$depends One or more test descriptions to depend on
+     */
+    public function dependsExternal(string $testCase, string ...$depends): self
+    {
+        foreach ($depends as $depend) {
+            $this->testCaseMethod->dependsExternal[] = [
+                'testCase' => $testCase,
+                'test' => $depend,
+            ];
+        }
+
+        return $this;
+    }
+
+    /**
      * Sets the test group(s).
      */
     public function group(string ...$groups): self
