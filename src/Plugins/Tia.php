@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace Pest\Plugins;
 
 use Pest\Contracts\Plugins\AddsOutput;
+use Pest\Contracts\Plugins\AfterEachable;
+use Pest\Contracts\Plugins\BeforeEachable;
 use Pest\Contracts\Plugins\HandlesArguments;
+use Pest\Contracts\Plugins\Runnable;
 use Pest\Contracts\Plugins\Terminable;
 use Pest\Exceptions\NoDirtyTestsFound;
 use Pest\Panic;
@@ -62,7 +65,7 @@ use Throwable;
  *
  * @internal
  */
-final class Tia implements AddsOutput, HandlesArguments, Terminable
+final class Tia implements AddsOutput, AfterEachable, BeforeEachable, HandlesArguments, Runnable, Terminable
 {
     use Concerns\HandleArguments;
 
@@ -128,6 +131,21 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         return $this->handleParent($arguments, $projectRoot, $forceRebuild);
+    }
+
+    public function beforeEach(string $filename, string $testId): bool
+    {
+        return ! State::instance()->shouldReplayFromCache($filename, $testId);
+    }
+
+    public function run(string $filename, string $testId): bool
+    {
+        return ! State::instance()->shouldReplayFromCache($filename, $testId);
+    }
+
+    public function afterEach(string $filename, string $testId): bool
+    {
+        return ! State::instance()->shouldReplayFromCache($filename, $testId);
     }
 
     public function terminate(): void
