@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pest\Support\Tia;
+namespace Pest\Plugins\Tia;
 
 /**
  * File-level Test Impact Analysis graph.
@@ -130,6 +130,14 @@ final class Graph
         $rel = $this->relative($testFile);
 
         return $rel !== null && isset($this->edges[$rel]);
+    }
+
+    /**
+     * @return array<int, string>  All project-relative test files the graph knows.
+     */
+    public function allTestFiles(): array
+    {
+        return array_keys($this->edges);
     }
 
     public function setFingerprint(array $fingerprint): void

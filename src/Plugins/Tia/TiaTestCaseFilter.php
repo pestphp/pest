@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Pest\TestCaseFilters;
+namespace Pest\Plugins\Tia;
 
 use Pest\Contracts\TestCaseFilter;
-use Pest\Support\Tia\Graph;
+use Pest\Plugins\Tia\Graph;
 
 /**
  * Accepts a test file in one of three cases:

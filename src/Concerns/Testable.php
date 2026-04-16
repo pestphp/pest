@@ -12,6 +12,7 @@ use Pest\Support\ChainableClosure;
 use Pest\Support\ExceptionTrace;
 use Pest\Support\Reflection;
 use Pest\Support\Shell;
+use Pest\Plugins\Tia\State as TiaState;
 use Pest\TestSuite;
 use PHPUnit\Framework\Attributes\PostCondition;
 use PHPUnit\Framework\IncompleteTest;
@@ -227,6 +228,16 @@ trait Testable
     {
         TestSuite::getInstance()->test = $this;
 
+        // TIA replay fast-path. When the file is known to the dependency graph
+        // and none of its deps changed since recording, skip both the
+        // framework `setUp()` (Laravel app bootstrap, DB refresh, etc.) and
+        // the user `beforeEach` chain. The matching short-circuit inside
+        // `__runTest()` ensures the test body never executes, so no
+        // initialisation is needed.
+        if (TiaState::instance()->shouldReplayFromCache(self::$__filename, $this::class.'::'.$this->name())) {
+            return;
+        }
+
         $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
 
         $description = $method->description;
@@ -302,6 +313,15 @@ trait Testable
      */
     protected function tearDown(...$arguments): void
     {
+        // TIA replay: setUp was skipped, the closure never ran — there is
+        // no matching cleanup to perform here. Keep the framework invariant
+        // of clearing the "current test" pointer and bail out.
+        if (TiaState::instance()->shouldReplayFromCache(self::$__filename, $this::class.'::'.$this->name())) {
+            TestSuite::getInstance()->test = null;
+
+            return;
+        }
+
         $afterEach = TestSuite::getInstance()->afterEach->get(self::$__filename);
 
         if ($this->__afterEach instanceof Closure) {
@@ -327,6 +347,15 @@ trait Testable
      */
     private function __runTest(Closure $closure, ...$args): mixed
     {
+        // TIA replay: the file's deps haven't changed and it last passed.
+        // Bypass the closure entirely and register a synthetic assertion so
+        // PHPUnit does not emit a "risky: no assertions" warning.
+        if (TiaState::instance()->shouldReplayFromCache(self::$__filename, $this::class.'::'.$this->name())) {
+            $this->addToAssertionCount(1);
+
+            return null;
+        }
+
         $arguments = $this->__resolveTestArguments($args);
         $this->__ensureDatasetArgumentNameAndNumberMatches($arguments);
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Subscribers;
 
-use Pest\Support\Tia\Recorder;
+use Pest\Plugins\Tia\Recorder;
 use PHPUnit\Event\Code\TestMethod;
 use PHPUnit\Event\Test\Prepared;
 use PHPUnit\Event\Test\PreparedSubscriber;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pest\Support\Tia;
+namespace Pest\Plugins\Tia;
 
 /**
  * Captures environmental inputs that, when changed, make the TIA graph stale.

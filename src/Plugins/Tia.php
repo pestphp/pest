@@ -10,11 +10,11 @@ use Pest\Contracts\Plugins\Terminable;
 use Pest\Exceptions\NoDirtyTestsFound;
 use Pest\Panic;
 use Pest\Support\Container;
-use Pest\Support\Tia\ChangedFiles;
-use Pest\Support\Tia\Fingerprint;
-use Pest\Support\Tia\Graph;
-use Pest\Support\Tia\Recorder;
-use Pest\TestCaseFilters\TiaTestCaseFilter;
+use Pest\Plugins\Tia\ChangedFiles;
+use Pest\Plugins\Tia\Fingerprint;
+use Pest\Plugins\Tia\Graph;
+use Pest\Plugins\Tia\Recorder;
+use Pest\Plugins\Tia\State;
 use Pest\TestSuite;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
@@ -363,9 +363,71 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             }
         }
 
-        TestSuite::getInstance()->tests->addTestCaseFilter(
-            new TiaTestCaseFilter($projectRoot, $graph, $affectedSet),
+        State::instance()->activate(
+            $projectRoot,
+            $graph,
+            $affectedSet,
+            $this->loadPreviousDefects($projectRoot),
         );
+    }
+
+    /**
+     * Reads PHPUnit's own result cache and returns the test ids that failed
+     * or errored in the previous run. These are excluded from replay so the
+     * user sees current state rather than a stale pass.
+     *
+     * @return array<string, true>
+     */
+    private function loadPreviousDefects(string $projectRoot): array
+    {
+        // PHPUnit writes the cache under either `<projectRoot>/.phpunit.result.cache`
+        // (legacy) or `<cacheDirectory>/test-results`. Pest's Cache plugin
+        // additionally defaults `cacheDirectory` to
+        // `vendor/pestphp/pest/.temp` when the user hasn't configured one.
+        // We probe the common locations; if we miss the file, replay falls
+        // back to its safe default (still runs the test).
+        $candidates = [
+            $projectRoot.'/.phpunit.result.cache',
+            $projectRoot.'/.phpunit.cache/test-results',
+            $projectRoot.'/.pest/cache/test-results',
+            $projectRoot.'/vendor/pestphp/pest/.temp/test-results',
+        ];
+
+        $path = null;
+
+        foreach ($candidates as $candidate) {
+            if (is_file($candidate)) {
+                $path = $candidate;
+
+                break;
+            }
+        }
+
+        if ($path === null) {
+            return [];
+        }
+
+        $raw = @file_get_contents($path);
+
+        if ($raw === false) {
+            return [];
+        }
+
+        $data = json_decode($raw, true);
+
+        if (! is_array($data) || ! isset($data['defects']) || ! is_array($data['defects'])) {
+            return [];
+        }
+
+        $out = [];
+
+        foreach ($data['defects'] as $id => $_status) {
+            if (is_string($id)) {
+                $out[$id] = true;
+            }
+        }
+
+        return $out;
     }
 
     /**
@@ -386,28 +448,31 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         $changed = $changedFiles->since($graph->recordedAtSha()) ?? [];
 
-        if ($changed === []) {
-            $this->output->writeln('  <fg=green>TIA</> no changes detected.');
-
-            Panic::with(new NoDirtyTestsFound);
-        }
-
-        $affected = $graph->affected($changed);
+        // Even with zero changes, we still run through the suite so the user
+        // sees the previous results reflected (cached passes replay as
+        // instant passes; failures re-run to surface current state). This
+        // matches the UX of test runners like NCrunch where every run
+        // produces a full report regardless of what actually executed.
+        $affected = $changed === [] ? [] : $graph->affected($changed);
 
         $testSuite = TestSuite::getInstance();
 
         if (! Parallel::isEnabled()) {
-            // Series mode: install the TestCaseFilter so Pest/PHPUnit skips
-            // unaffected tests during discovery. Keep filter semantics
-            // identical to parallel mode: unknown/new tests always pass.
+            // Series mode: activate replay state. Tests still appear in the
+            // run (correct counts, coverage aggregation, event timeline);
+            // unaffected ones short-circuit inside `Testable::__runTest`
+            // and replay their previous passing status.
             $affectedSet = array_fill_keys($affected, true);
 
-            $testSuite->tests->addTestCaseFilter(
-                new TiaTestCaseFilter($projectRoot, $graph, $affectedSet),
+            State::instance()->activate(
+                $projectRoot,
+                $graph,
+                $affectedSet,
+                $this->loadPreviousDefects($projectRoot),
             );
 
             $this->output->writeln(sprintf(
-                '  <fg=green>TIA</> %d changed file(s) → %d known test file(s) + any new/unknown tests.',
+                '  <fg=green>TIA</> %d changed file(s) → %d affected, remaining tests replay cached result.',
                 count($changed),
                 count($affected),
             ));
@@ -435,7 +500,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         Parallel::setGlobal(self::REPLAYING_GLOBAL, '1');
 
         $this->output->writeln(sprintf(
-            '  <fg=green>TIA</> %d changed file(s) → %d known test file(s) + any new/unknown tests (parallel).',
+            '  <fg=green>TIA</> %d changed file(s) → %d affected, remaining tests replay cached result (parallel).',
             count($changed),
             count($affected),
         ));
