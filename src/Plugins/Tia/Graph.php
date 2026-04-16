@@ -101,18 +101,29 @@ final class Graph
      */
     public function affected(array $changedFiles): array
     {
-        // 1. Coverage-edge lookup (PHP → PHP).
-        $changedIds = [];
+        // Normalise all changed paths once.
+        $normalised = [];
 
         foreach ($changedFiles as $file) {
             $rel = $this->relative($file);
 
-            if ($rel === null) {
-                continue;
+            if ($rel !== null) {
+                $normalised[] = $rel;
             }
+        }
 
+        // 1. Coverage-edge lookup (PHP → PHP).
+        $changedIds = [];
+        $unknownSourceDirs = [];
+
+        foreach ($normalised as $rel) {
             if (isset($this->fileIds[$rel])) {
                 $changedIds[$this->fileIds[$rel]] = true;
+            } elseif (str_ends_with($rel, '.php') && ! str_starts_with($rel, 'tests/')) {
+                // Source PHP file unknown to the graph — might be a new file
+                // that only exists on this branch (graph inherited from main).
+                // Track its directory for the sibling heuristic (step 3).
+                $unknownSourceDirs[dirname($rel)] = true;
             }
         }
 
@@ -131,21 +142,49 @@ final class Graph
         // 2. Watch-pattern lookup (non-PHP assets → test directories).
         /** @var WatchPatterns $watchPatterns */
         $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
-        $normalised = [];
-
-        foreach ($changedFiles as $file) {
-            $rel = $this->relative($file);
-
-            if ($rel !== null) {
-                $normalised[] = $rel;
-            }
-        }
 
         $dirs = $watchPatterns->matchedDirectories($this->projectRoot, $normalised);
         $allTestFiles = array_keys($this->edges);
 
         foreach ($watchPatterns->testsUnderDirectories($dirs, $allTestFiles) as $testFile) {
             $affectedSet[$testFile] = true;
+        }
+
+        // 3. Sibling heuristic for unknown source files.
+        //
+        // When a PHP source file is unknown to the graph (no test depends on
+        // it), it is either genuinely untested OR it was added on a branch
+        // whose graph was inherited from another branch (e.g. main). In the
+        // latter case the graph simply never saw the file.
+        //
+        // To avoid silent misses: find tests that already cover ANY file in
+        // the same directory. If `app/Models/OrderItem.php` is unknown but
+        // `app/Models/Order.php` is covered by `OrderTest`, run `OrderTest`
+        // — it likely exercises sibling files in the same module.
+        //
+        // This over-runs slightly (sibling may be unrelated) but never
+        // under-runs. And once the test executes, its coverage captures the
+        // new file → graph self-heals for next run.
+        if ($unknownSourceDirs !== []) {
+            foreach ($this->edges as $testFile => $ids) {
+                if (isset($affectedSet[$testFile])) {
+                    continue;
+                }
+
+                foreach ($ids as $id) {
+                    if (! isset($this->files[$id])) {
+                        continue;
+                    }
+
+                    $depDir = dirname($this->files[$id]);
+
+                    if (isset($unknownSourceDirs[$depDir])) {
+                        $affectedSet[$testFile] = true;
+
+                        break;
+                    }
+                }
+            }
         }
 
         return array_keys($affectedSet);
