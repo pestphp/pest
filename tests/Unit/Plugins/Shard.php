@@ -116,3 +116,29 @@ it('forwards --test-directory even when input arguments include one', function (
 
     expect($command)->toContain('--test-directory=suites');
 });
+
+it('strips --processes=N when building the list-tests command', function () use ($invoke) {
+    $command = $invoke('buildListTestsCommand',
+        ['bin/pest', '--parallel', '--processes=4', '--update-shards'],
+        'tests',
+    );
+
+    expect($command)->toBe([
+        'php',
+        'bin/pest',
+        '--update-shards',
+        '--test-directory=tests',
+        '--list-tests',
+    ]);
+});
+
+it('strips --processes N (space-separated) when building the list-tests command', function () use ($invoke) {
+    $command = $invoke('buildListTestsCommand',
+        ['bin/pest', '--parallel', '--processes', '4', '--update-shards'],
+        'tests',
+    );
+
+    expect($command)->not->toContain('--processes')
+        ->and($command)->toContain('--update-shards')
+        ->and($command)->toContain('--test-directory=tests');
+});
