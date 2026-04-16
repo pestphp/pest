@@ -1,0 +1,194 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Pest\Plugins\Tia;
+
+use Pest\Plugins\Tia\WatchDefaults\WatchDefault;
+
+/**
+ * Maps non-PHP file globs to the test directories they should invalidate.
+ *
+ * Coverage drivers only see `.php` files. Frontend assets, config files,
+ * Blade templates, routes and environment files are invisible to the graph.
+ * Watch patterns bridge the gap: when a changed file matches a glob, every
+ * test under the associated directory is marked as affected.
+ *
+ * Defaults are assembled dynamically from the `WatchDefaults/` registry —
+ * each implementation probes the current project and contributes patterns
+ * when applicable. Users extend via `pest()->tia()->watch(…)`.
+ *
+ * @internal
+ */
+final class WatchPatterns
+{
+    /**
+     * All known default providers, in evaluation order.
+     *
+     * @var array<int, class-string<WatchDefault>>
+     */
+    private const array DEFAULTS = [
+        WatchDefaults\Php::class,
+        WatchDefaults\Laravel::class,
+        WatchDefaults\Symfony::class,
+        WatchDefaults\Livewire::class,
+        WatchDefaults\Inertia::class,
+        WatchDefaults\Browser::class,
+    ];
+
+    /**
+     * @var array<string, array<int, string>>  glob → list of project-relative test dirs
+     */
+    private array $patterns = [];
+
+    private static ?self $instance = null;
+
+    public static function instance(): self
+    {
+        return self::$instance ??= new self;
+    }
+
+    /**
+     * Probes every registered `WatchDefault` and merges the patterns of
+     * those that apply. Called once during Tia plugin boot, after BootFiles
+     * has loaded `tests/Pest.php` (so user-added `pest()->tia()->watch()`
+     * calls are already in `$this->patterns`).
+     */
+    public function useDefaults(string $projectRoot): void
+    {
+        $testPath = \Pest\TestSuite::getInstance()->testPath;
+
+        foreach (self::DEFAULTS as $class) {
+            $default = new $class;
+
+            if (! $default->applicable()) {
+                continue;
+            }
+
+            foreach ($default->defaults($projectRoot, $testPath) as $glob => $dirs) {
+                $this->patterns[$glob] = array_values(array_unique(
+                    array_merge($this->patterns[$glob] ?? [], $dirs),
+                ));
+            }
+        }
+    }
+
+    /**
+     * Adds user-defined patterns. Merges with existing entries so a single
+     * glob can map to multiple directories.
+     *
+     * @param  array<string, string>  $patterns  glob → project-relative test dir
+     */
+    public function add(array $patterns): void
+    {
+        foreach ($patterns as $glob => $dir) {
+            $this->patterns[$glob] = array_values(array_unique(
+                array_merge($this->patterns[$glob] ?? [], [$dir]),
+            ));
+        }
+    }
+
+    /**
+     * Returns all test directories whose watch patterns match at least one of
+     * the given changed files.
+     *
+     * @param  string  $projectRoot  Absolute path.
+     * @param  array<int, string>  $changedFiles  Project-relative paths.
+     * @return array<int, string>  Project-relative test directories.
+     */
+    public function matchedDirectories(string $projectRoot, array $changedFiles): array
+    {
+        if ($this->patterns === []) {
+            return [];
+        }
+
+        $matched = [];
+
+        foreach ($changedFiles as $file) {
+            foreach ($this->patterns as $glob => $dirs) {
+                if ($this->globMatches($glob, $file)) {
+                    foreach ($dirs as $dir) {
+                        $matched[$dir] = true;
+                    }
+                }
+            }
+        }
+
+        return array_keys($matched);
+    }
+
+    /**
+     * Given the affected directories, returns every test file in the graph
+     * that lives under one of those directories.
+     *
+     * @param  array<int, string>  $directories  Project-relative dirs.
+     * @param  array<int, string>  $allTestFiles  Project-relative test files from graph.
+     * @return array<int, string>
+     */
+    public function testsUnderDirectories(array $directories, array $allTestFiles): array
+    {
+        if ($directories === []) {
+            return [];
+        }
+
+        $affected = [];
+
+        foreach ($allTestFiles as $testFile) {
+            foreach ($directories as $dir) {
+                $prefix = rtrim($dir, '/').'/';
+
+                if (str_starts_with($testFile, $prefix)) {
+                    $affected[] = $testFile;
+
+                    break;
+                }
+            }
+        }
+
+        return $affected;
+    }
+
+    public function reset(): void
+    {
+        $this->patterns = [];
+    }
+
+    /**
+     * Matches a project-relative file against a glob pattern.
+     *
+     * Supports `*` (single segment), `**` (any depth) and `?`.
+     */
+    private function globMatches(string $pattern, string $file): bool
+    {
+        $pattern = str_replace('\\', '/', $pattern);
+        $file = str_replace('\\', '/', $file);
+
+        $regex = '';
+        $len = strlen($pattern);
+        $i = 0;
+
+        while ($i < $len) {
+            $c = $pattern[$i];
+
+            if ($c === '*' && isset($pattern[$i + 1]) && $pattern[$i + 1] === '*') {
+                $regex .= '.*';
+                $i += 2;
+
+                if (isset($pattern[$i]) && $pattern[$i] === '/') {
+                    $i++;
+                }
+            } elseif ($c === '*') {
+                $regex .= '[^/]*';
+                $i++;
+            } elseif ($c === '?') {
+                $regex .= '[^/]';
+                $i++;
+            } else {
+                $regex .= preg_quote($c, '#');
+                $i++;
+            }
+        }
+
+        return (bool) preg_match('#^'.$regex.'$#', $file);
+    }
+}

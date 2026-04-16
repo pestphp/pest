@@ -284,6 +284,11 @@ final class Tia implements AddsOutput, AfterEachable, BeforeEachable, HandlesArg
      */
     private function handleParent(array $arguments, string $projectRoot, bool $forceRebuild): array
     {
+        // Initialise watch patterns (defaults + any user additions from
+        // tests/Pest.php which has already been loaded by BootFiles at
+        // this point).
+        WatchPatterns::instance()->useDefaults($projectRoot);
+
         $cachePath = $projectRoot.DIRECTORY_SEPARATOR.self::CACHE_PATH;
         $fingerprint = Fingerprint::compute($projectRoot);
 

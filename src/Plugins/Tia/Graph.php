@@ -88,11 +88,18 @@ final class Graph
     /**
      * Returns the set of test files whose dependencies intersect $changedFiles.
      *
+     * Two resolution paths:
+     *   1. **Coverage edges** — test depends on a PHP source file that changed.
+     *   2. **Watch patterns** — a non-PHP file (JS, CSS, config, …) matches a
+     *      glob that maps to a test directory; every test under that directory
+     *      is affected.
+     *
      * @param  array<int, string>  $changedFiles  Absolute or relative paths.
      * @return array<int, string> Relative test file paths.
      */
     public function affected(array $changedFiles): array
     {
+        // 1. Coverage-edge lookup (PHP → PHP).
         $changedIds = [];
 
         foreach ($changedFiles as $file) {
@@ -107,19 +114,38 @@ final class Graph
             }
         }
 
-        $affected = [];
+        $affectedSet = [];
 
         foreach ($this->edges as $testFile => $ids) {
             foreach ($ids as $id) {
                 if (isset($changedIds[$id])) {
-                    $affected[] = $testFile;
+                    $affectedSet[$testFile] = true;
 
                     break;
                 }
             }
         }
 
-        return $affected;
+        // 2. Watch-pattern lookup (non-PHP assets → test directories).
+        $watchPatterns = WatchPatterns::instance();
+        $normalised = [];
+
+        foreach ($changedFiles as $file) {
+            $rel = $this->relative($file);
+
+            if ($rel !== null) {
+                $normalised[] = $rel;
+            }
+        }
+
+        $dirs = $watchPatterns->matchedDirectories($this->projectRoot, $normalised);
+        $allTestFiles = array_keys($this->edges);
+
+        foreach ($watchPatterns->testsUnderDirectories($dirs, $allTestFiles) as $testFile) {
+            $affectedSet[$testFile] = true;
+        }
+
+        return array_keys($affectedSet);
     }
 
     /**
