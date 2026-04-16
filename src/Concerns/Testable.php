@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace Pest\Concerns;
 
 use Closure;
-use Pest\Contracts\Plugins\BeforeEachable;
 use Pest\Exceptions\DatasetArgumentsMismatch;
 use Pest\Panic;
-use Pest\Plugin\Loader;
-use Pest\Plugins\Tia\CachedTestResult;
+use Pest\Plugins\Tia;
 use Pest\Preset;
+use Pest\Support\Container;
 use Pest\Support\ChainableClosure;
 use Pest\Support\ExceptionTrace;
 use Pest\Support\Reflection;
 use Pest\Support\Shell;
 use Pest\TestSuite;
+use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\Attributes\PostCondition;
 use PHPUnit\Framework\IncompleteTest;
 use PHPUnit\Framework\SkippedTest;
@@ -238,27 +238,30 @@ trait Testable
 
         $this->__cachedPass = false;
 
-        /** @var BeforeEachable $plugin */
-        foreach (Loader::getPlugins(BeforeEachable::class) as $plugin) {
-            $cached = $plugin->beforeEach(self::$__filename, $this::class.'::'.$this->name());
+        /** @var Tia $tia */
+        $tia = Container::getInstance()->get(Tia::class);
+        $cached = $tia->getCachedResult(self::$__filename, $this::class.'::'.$this->name());
 
-            if ($cached instanceof CachedTestResult) {
-                if ($cached->isSuccess()) {
-                    $this->__cachedPass = true;
+        if ($cached !== null) {
+            if ($cached->isSuccess()) {
+                $this->__cachedPass = true;
 
-                    return;
-                }
-
-                // Non-success: throw appropriate exception. PHPUnit catches
-                // it in runBare() and marks the test with the correct status.
-                // This makes skips, failures, incompletes, todos appear in
-                // output exactly as if the test ran.
-                match ($cached->status) {
-                    1 => $this->markTestSkipped($cached->message),     // skip / todo
-                    2 => $this->markTestIncomplete($cached->message),  // incomplete
-                    default => throw new \PHPUnit\Framework\AssertionFailedError($cached->message ?: 'Cached failure'),
-                };
+                return;
             }
+
+            // Non-success: throw the matching PHPUnit exception. Runner
+            // catches it and marks the test with the correct status so
+            // skips, failures, incompletes and todos appear in output
+            // exactly as they did in the cached run.
+            if ($cached->isSkipped()) {
+                $this->markTestSkipped($cached->message());
+            }
+
+            if ($cached->isIncomplete()) {
+                $this->markTestIncomplete($cached->message());
+            }
+
+            throw new AssertionFailedError($cached->message() ?: 'Cached failure');
         }
 
         $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());

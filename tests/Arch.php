@@ -37,7 +37,6 @@ arch('contracts')
     ->toOnlyUse([
         'NunoMaduro\Collision\Contracts',
         'Pest\Factories\TestCaseMethodFactory',
-        'Pest\Plugins\Tia\CachedTestResult',
         'Symfony\Component\Console',
         'Pest\Arch\Contracts',
         'Pest\PendingCalls',

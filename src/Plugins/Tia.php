@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace Pest\Plugins;
 
 use Pest\Contracts\Plugins\AddsOutput;
-use Pest\Contracts\Plugins\BeforeEachable;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Contracts\Plugins\Terminable;
-use Pest\Plugins\Tia\CachedTestResult;
+use PHPUnit\Framework\TestStatus\TestStatus;
 use Pest\Plugins\Tia\ChangedFiles;
 use Pest\Plugins\Tia\Fingerprint;
 use Pest\Plugins\Tia\Graph;
@@ -63,7 +62,7 @@ use Throwable;
  *
  * @internal
  */
-final class Tia implements AddsOutput, BeforeEachable, HandlesArguments, Terminable
+final class Tia implements AddsOutput, HandlesArguments, Terminable
 {
     use Concerns\HandleArguments;
 
@@ -101,6 +100,26 @@ final class Tia implements AddsOutput, BeforeEachable, HandlesArguments, Termina
     private bool $graphWritten = false;
 
     private bool $replayRan = false;
+
+    /**
+     * Counts cache hits during a replay run. Incremented each time
+     * `getCachedResult()` returns a non-null status so the end-of-run
+     * summary reflects what actually happened, not a graph-level estimate.
+     */
+    private int $replayedCount = 0;
+
+    /**
+     * Captured at replay setup so the end-of-run summary can report the
+     * scope of the changes that drove the run.
+     */
+    private int $changedFileCount = 0;
+
+    /**
+     * Captured at replay setup — number of tests the graph flagged as
+     * affected (i.e. should re-execute). May overshoot the actually-
+     * executed count when the user narrows with a path filter.
+     */
+    private int $affectedTestCount = 0;
 
     /**
      * Holds the graph during replay so `beforeEach` can look up cached
@@ -161,7 +180,11 @@ final class Tia implements AddsOutput, BeforeEachable, HandlesArguments, Termina
         private readonly WatchPatterns $watchPatterns,
     ) {}
 
-    public function beforeEach(string $filename, string $testId): ?CachedTestResult
+    /**
+     * Returns the cached result for the given test, or `null` if the test
+     * must run (affected, unknown, or no replay mode active).
+     */
+    public function getCachedResult(string $filename, string $testId): ?TestStatus
     {
         if ($this->replayGraph === null) {
             return null;
@@ -186,7 +209,13 @@ final class Tia implements AddsOutput, BeforeEachable, HandlesArguments, Termina
 
         // Known + unaffected: return cached result if we have one for this
         // branch (falls back to main if branch is fresh).
-        return $this->replayGraph->getResult($this->branch, $testId);
+        $result = $this->replayGraph->getResult($this->branch, $testId);
+
+        if ($result !== null) {
+            $this->replayedCount++;
+        }
+
+        return $result;
     }
 
     /**
@@ -301,6 +330,7 @@ final class Tia implements AddsOutput, BeforeEachable, HandlesArguments, Termina
         // times even though nothing new changed.
         if ($this->replayRan) {
             $this->bumpRecordedSha();
+            $this->emitReplaySummary();
         }
 
         // Snapshot per-test results (status + message) from PHPUnit's result
@@ -526,11 +556,9 @@ final class Tia implements AddsOutput, BeforeEachable, HandlesArguments, Termina
 
         $affected = $changed === [] ? [] : $graph->affected($changed);
 
-        $totalKnown = count($graph->allTestFiles());
-        $affectedCount = count($affected);
-        $cachedCount = $totalKnown - $affectedCount;
+        $this->changedFileCount = count($changed);
+        $this->affectedTestCount = count($affected);
 
-        $testSuite = TestSuite::getInstance();
         $affectedSet = array_fill_keys($affected, true);
 
         $this->replayRan = true;
@@ -538,13 +566,6 @@ final class Tia implements AddsOutput, BeforeEachable, HandlesArguments, Termina
         $this->affectedFiles = $affectedSet;
 
         if (! Parallel::isEnabled()) {
-            $this->output->writeln(sprintf(
-                '  <fg=green>TIA</> %d changed file(s) → %d affected, %d replayed.',
-                count($changed),
-                $affectedCount,
-                $cachedCount,
-            ));
-
             return $arguments;
         }
 
@@ -558,13 +579,6 @@ final class Tia implements AddsOutput, BeforeEachable, HandlesArguments, Termina
         }
 
         Parallel::setGlobal(self::REPLAYING_GLOBAL, '1');
-
-        $this->output->writeln(sprintf(
-            '  <fg=green>TIA</> %d changed file(s) → %d affected, %d cached (parallel).',
-            count($changed),
-            $affectedCount,
-            $cachedCount,
-        ));
 
         return $arguments;
     }
@@ -761,6 +775,22 @@ final class Tia implements AddsOutput, BeforeEachable, HandlesArguments, Termina
      * compares against this baseline so identical files are skipped even if
      * git still reports them as modified.
      */
+    /**
+     * Prints the post-run TIA summary. Runs after the test report so the
+     * replayed count reflects what actually happened (cache hits counted
+     * inside `getCachedResult`) rather than a graph-level estimate that
+     * ignores any CLI path filter the user passed in.
+     */
+    private function emitReplaySummary(): void
+    {
+        $this->output->writeln(sprintf(
+            '  <fg=green>TIA</> %d changed file(s) → %d affected, %d replayed.',
+            $this->changedFileCount,
+            $this->affectedTestCount,
+            $this->replayedCount,
+        ));
+    }
+
     private function bumpRecordedSha(): void
     {
         $projectRoot = TestSuite::getInstance()->rootPath;

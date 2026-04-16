@@ -28,6 +28,13 @@ final readonly class BootSubscribers implements Bootstrapper
         Subscribers\EnsureTiaCoverageIsRecorded::class,
         Subscribers\EnsureTiaCoverageIsFlushed::class,
         Subscribers\EnsureTiaResultsAreCollected::class,
+        Subscribers\EnsureTiaResultIsRecordedOnPassed::class,
+        Subscribers\EnsureTiaResultIsRecordedOnFailed::class,
+        Subscribers\EnsureTiaResultIsRecordedOnErrored::class,
+        Subscribers\EnsureTiaResultIsRecordedOnSkipped::class,
+        Subscribers\EnsureTiaResultIsRecordedOnIncomplete::class,
+        Subscribers\EnsureTiaResultIsRecordedOnRisky::class,
+        Subscribers\EnsureTiaAssertionsAreRecordedOnFinished::class,
     ];
 
     /**

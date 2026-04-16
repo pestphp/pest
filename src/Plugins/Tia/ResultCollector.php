@@ -14,7 +14,7 @@ namespace Pest\Plugins\Tia;
 final class ResultCollector
 {
     /**
-     * @var array<string, array{status: int, message: string, time: float}>
+     * @var array<string, array{status: int, message: string, time: float, assertions: int}>
      */
     private array $results = [];
 
@@ -83,11 +83,18 @@ final class ResultCollector
     }
 
     /**
-     * @return array<string, array{status: int, message: string, time: float}>
+     * @return array<string, array{status: int, message: string, time: float, assertions: int}>
      */
     public function all(): array
     {
         return $this->results;
+    }
+
+    public function recordAssertions(string $testId, int $assertions): void
+    {
+        if (isset($this->results[$testId])) {
+            $this->results[$testId]['assertions'] = $assertions;
+        }
     }
 
     public function reset(): void
@@ -111,6 +118,7 @@ final class ResultCollector
             'status' => $status,
             'message' => $message,
             'time' => $time,
+            'assertions' => 0,
         ];
 
         $this->currentTestId = null;

@@ -60,8 +60,13 @@ final readonly class ChangedFiles
             $absolute = $this->projectRoot.DIRECTORY_SEPARATOR.$file;
 
             if (! is_file($absolute)) {
-                // File deleted since last run — definitely changed.
-                $remaining[] = $file;
+                // File is absent now. If the snapshot recorded it as absent
+                // too (sentinel ''), state is identical to last run — treat
+                // as unchanged. Otherwise it was present last run and got
+                // deleted since — that's a real change.
+                if ($lastRunTree[$file] !== '') {
+                    $remaining[] = $file;
+                }
 
                 continue;
             }
@@ -92,6 +97,11 @@ final readonly class ChangedFiles
             $absolute = $this->projectRoot.DIRECTORY_SEPARATOR.$file;
 
             if (! is_file($absolute)) {
+                // Record the deletion with an empty-string sentinel so the
+                // next run recognises "still deleted" as unchanged rather
+                // than re-flagging the file as a fresh change.
+                $out[$file] = '';
+
                 continue;
             }
 

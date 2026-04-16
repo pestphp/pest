@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 use Pest\Support\Container;
+use PHPUnit\Framework\TestStatus\TestStatus;
 
 /**
  * File-level Test Impact Analysis graph.
@@ -264,7 +265,7 @@ final class Graph
         ];
     }
 
-    public function getResult(string $branch, string $testId, string $fallbackBranch = 'main'): ?CachedTestResult
+    public function getResult(string $branch, string $testId, string $fallbackBranch = 'main'): ?TestStatus
     {
         $baseline = $this->baselineFor($branch, $fallbackBranch);
 
@@ -274,7 +275,21 @@ final class Graph
 
         $r = $baseline['results'][$testId];
 
-        return new CachedTestResult($r['status'], $r['message'], $r['time']);
+        // PHPUnit's `TestStatus::from(int)` ignores messages, so reconstruct
+        // each variant via its specific factory. Keeps the stored message
+        // intact (important for skips/failures shown to the user).
+        return match ($r['status']) {
+            0 => TestStatus::success(),
+            1 => TestStatus::skipped($r['message']),
+            2 => TestStatus::incomplete($r['message']),
+            3 => TestStatus::notice($r['message']),
+            4 => TestStatus::deprecation($r['message']),
+            5 => TestStatus::risky($r['message']),
+            6 => TestStatus::warning($r['message']),
+            7 => TestStatus::failure($r['message']),
+            8 => TestStatus::error($r['message']),
+            default => TestStatus::unknown(),
+        };
     }
 
     /**
