@@ -14,7 +14,6 @@ use Pest\Plugins\Tia\Fingerprint;
 use Pest\Plugins\Tia\Graph;
 use Pest\Plugins\Tia\Recorder;
 use Pest\Plugins\Tia\ResultCollector;
-use Pest\TestCaseFilters\TiaTestCaseFilter;
 use Pest\Plugins\Tia\WatchPatterns;
 use Pest\Support\Container;
 use Pest\TestSuite;
@@ -435,7 +434,7 @@ final class Tia implements AddsOutput, BeforeEachable, HandlesArguments, Termina
             // the parent persisted, then install the per-file filter so
             // whichever tests paratest happens to hand this worker are
             // accepted / rejected consistently with the series path.
-            $this->installWorkerReplayFilter($projectRoot);
+            $this->installWorkerReplay($projectRoot);
 
             return $arguments;
         }
@@ -458,7 +457,14 @@ final class Tia implements AddsOutput, BeforeEachable, HandlesArguments, Termina
         return $arguments;
     }
 
-    private function installWorkerReplayFilter(string $projectRoot): void
+    /**
+     * Wires worker-side replay. Mirrors the series path: sets `replayGraph`
+     * + `affectedFiles` so the `BeforeEachable` hook in `beforeEach()` can
+     * answer per-test. Unaffected tests replay their cached status (pass,
+     * fail, skip, todo, incomplete) so the user sees the full suite report
+     * in parallel runs exactly like in series.
+     */
+    private function installWorkerReplay(string $projectRoot): void
     {
         $cachePath = self::cachePath();
         $affectedPath = self::affectedPath();
@@ -489,9 +495,8 @@ final class Tia implements AddsOutput, BeforeEachable, HandlesArguments, Termina
             }
         }
 
-        TestSuite::getInstance()->tests->addTestCaseFilter(
-            new TiaTestCaseFilter($projectRoot, $graph, $affectedSet),
-        );
+        $this->replayGraph = $graph;
+        $this->affectedFiles = $affectedSet;
     }
 
     /**
