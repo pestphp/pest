@@ -1,8 +1,16 @@
 <?php
 
 use Pest\Plugins\Shard;
+use Symfony\Component\Console\Output\NullOutput;
 
-it('parses Tests\\ namespaced classes from --list-tests output', function () {
+$shard = new Shard(new NullOutput);
+$invoke = function (string $method, mixed ...$args) use ($shard): mixed {
+    $ref = new ReflectionMethod(Shard::class, $method);
+
+    return $ref->invoke($shard, ...$args);
+};
+
+it('parses Tests\\ namespaced classes from --list-tests output', function () use ($invoke) {
     $output = <<<'OUT'
  INFO  Available tests:
 
@@ -11,60 +19,60 @@ it('parses Tests\\ namespaced classes from --list-tests output', function () {
  - P\Tests\Unit\Foo::test_bar
 OUT;
 
-    expect(Shard::parseListTestsOutput($output))->toBe([
+    expect($invoke('parseListTestsOutput', $output))->toBe([
         'Tests\\Features\\After',
         'Tests\\Unit\\Foo',
     ]);
 });
 
-it('deduplicates repeated class names from multiple test methods', function () {
+it('deduplicates repeated class names from multiple test methods', function () use ($invoke) {
     $output = <<<'OUT'
  - P\Tests\Same::method_a
  - P\Tests\Same::method_b
  - P\Tests\Same::method_c
 OUT;
 
-    expect(Shard::parseListTestsOutput($output))->toBe(['Tests\\Same']);
+    expect($invoke('parseListTestsOutput', $output))->toBe(['Tests\\Same']);
 });
 
-it('returns an empty list for output with no matching lines', function () {
-    expect(Shard::parseListTestsOutput(''))->toBe([])
-        ->and(Shard::parseListTestsOutput('some random text'))->toBe([]);
+it('returns an empty list for output with no matching lines', function () use ($invoke) {
+    expect($invoke('parseListTestsOutput', ''))->toBe([])
+        ->and($invoke('parseListTestsOutput', 'some random text'))->toBe([]);
 });
 
-it('parses non-Tests namespaced classes', function () {
+it('parses non-Tests namespaced classes', function () use ($invoke) {
     $output = <<<'OUT'
  - P\Acme\Sharding\OneTest::test_foo
  - P\Acme\Sharding\TwoTest::test_bar
  - App\Suite\BazTest::test_qux
 OUT;
 
-    expect(Shard::parseListTestsOutput($output))->toBe([
+    expect($invoke('parseListTestsOutput', $output))->toBe([
         'Acme\\Sharding\\OneTest',
         'Acme\\Sharding\\TwoTest',
         'App\\Suite\\BazTest',
     ]);
 });
 
-it('parses unnamespaced top-level classes', function () {
+it('parses unnamespaced top-level classes', function () use ($invoke) {
     $output = ' - P\FooTest::test_bar';
 
-    expect(Shard::parseListTestsOutput($output))->toBe(['FooTest']);
+    expect($invoke('parseListTestsOutput', $output))->toBe(['FooTest']);
 });
 
-it('strips the P\\ Pest prefix but keeps the rest of the FQCN', function () {
+it('strips the P\\ Pest prefix but keeps the rest of the FQCN', function () use ($invoke) {
     $output = <<<'OUT'
  - P\Acme\OneTest::a
  - Acme\TwoTest::b
 OUT;
 
-    expect(Shard::parseListTestsOutput($output))->toBe([
+    expect($invoke('parseListTestsOutput', $output))->toBe([
         'Acme\\OneTest',
         'Acme\\TwoTest',
     ]);
 });
 
-it('ignores junk lines that lack the " - …::" framing', function () {
+it('ignores junk lines that lack the " - …::" framing', function () use ($invoke) {
     $output = <<<'OUT'
  INFO  Available tests:
 
@@ -73,11 +81,11 @@ garbage ::: not a test
  - P\Acme\RealTest::method
 OUT;
 
-    expect(Shard::parseListTestsOutput($output))->toBe(['Acme\\RealTest']);
+    expect($invoke('parseListTestsOutput', $output))->toBe(['Acme\\RealTest']);
 });
 
-it('builds the list-tests command with the forwarded --test-directory', function () {
-    $command = Shard::buildListTestsCommand(['bin/pest', '--update-shards'], 'custom/suite');
+it('builds the list-tests command with the forwarded --test-directory', function () use ($invoke) {
+    $command = $invoke('buildListTestsCommand', ['bin/pest', '--update-shards'], 'custom/suite');
 
     expect($command)->toBe([
         'php',
@@ -88,8 +96,8 @@ it('builds the list-tests command with the forwarded --test-directory', function
     ]);
 });
 
-it('strips --parallel and -p when building the list-tests command', function () {
-    $command = Shard::buildListTestsCommand(
+it('strips --parallel and -p when building the list-tests command', function () use ($invoke) {
+    $command = $invoke('buildListTestsCommand',
         ['bin/pest', '--parallel', '--update-shards', '-p'],
         'tests',
     );
@@ -103,8 +111,8 @@ it('strips --parallel and -p when building the list-tests command', function () 
     ]);
 });
 
-it('forwards --test-directory even when input arguments include one', function () {
-    $command = Shard::buildListTestsCommand(['bin/pest'], 'suites');
+it('forwards --test-directory even when input arguments include one', function () use ($invoke) {
+    $command = $invoke('buildListTestsCommand', ['bin/pest'], 'suites');
 
     expect($command)->toContain('--test-directory=suites');
 });

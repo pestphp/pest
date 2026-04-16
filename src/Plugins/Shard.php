@@ -187,14 +187,14 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      */
     private function allTests(array $arguments): array
     {
-        $command = self::buildListTestsCommand(
+        $command = $this->buildListTestsCommand(
             $arguments,
             TestSuite::getInstance()->testPath,
         );
 
         $output = (new Process($command))->setTimeout(120)->mustRun()->getOutput();
 
-        return self::parseListTestsOutput($output);
+        return $this->parseListTestsOutput($output);
     }
 
     /**
@@ -203,7 +203,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      * @param  list<string>  $arguments
      * @return list<string>
      */
-    public static function buildListTestsCommand(array $arguments, string $testPath): array
+    private function buildListTestsCommand(array $arguments, string $testPath): array
     {
         $filtered = array_values(array_filter(
             $arguments,
@@ -218,7 +218,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      *
      * @return list<string>
      */
-    public static function parseListTestsOutput(string $output): array
+    private function parseListTestsOutput(string $output): array
     {
         preg_match_all('/ - (?:P\\\\)?([A-Za-z_]\w*(?:\\\\[A-Za-z_]\w*)*)::/', $output, $matches);
 
