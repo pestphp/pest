@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
+use Pest\Support\Container;
+
 /**
  * File-level Test Impact Analysis graph.
  *
@@ -127,7 +129,8 @@ final class Graph
         }
 
         // 2. Watch-pattern lookup (non-PHP assets → test directories).
-        $watchPatterns = WatchPatterns::instance();
+        /** @var WatchPatterns $watchPatterns */
+        $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
         $normalised = [];
 
         foreach ($changedFiles as $file) {
@@ -159,7 +162,7 @@ final class Graph
     }
 
     /**
-     * @return array<int, string>  All project-relative test files the graph knows.
+     * @return array<int, string> All project-relative test files the graph knows.
      */
     public function allTestFiles(): array
     {

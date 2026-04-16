@@ -22,7 +22,7 @@ interface WatchDefault
     public function applicable(): bool;
 
     /**
-     * @return array<string, array<int, string>>  glob → list of project-relative test dirs
+     * @return array<string, array<int, string>> glob → list of project-relative test dirs
      */
     public function defaults(string $projectRoot, string $testPath): array;
 }

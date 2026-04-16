@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
+use Pest\Support\Container;
+
 /**
  * User-facing TIA configuration, returned by `pest()->tia()`.
  *
@@ -31,7 +33,9 @@ final class Configuration
      */
     public function watch(array $patterns): self
     {
-        WatchPatterns::instance()->add($patterns);
+        /** @var WatchPatterns $watchPatterns */
+        $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
+        $watchPatterns->add($patterns);
 
         return $this;
     }

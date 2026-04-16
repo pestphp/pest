@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia\WatchDefaults;
 
 use Composer\InstalledVersions;
+use Pest\Browser\Support\BrowserTestIdentifier;
 use Pest\Factories\TestCaseFactory;
 use Pest\TestSuite;
 
@@ -72,7 +73,7 @@ final readonly class Browser implements WatchDefault
         // Scan TestRepository via BrowserTestIdentifier if pest-plugin-browser
         // is installed to find tests using `visit()` outside the conventional
         // Browser/ folder.
-        if (class_exists(\Pest\Browser\Support\BrowserTestIdentifier::class)) {
+        if (class_exists(BrowserTestIdentifier::class)) {
             $repo = TestSuite::getInstance()->tests;
 
             foreach ($repo->getFilenames() as $filename) {
@@ -83,7 +84,7 @@ final readonly class Browser implements WatchDefault
                 }
 
                 foreach ($factory->methods as $method) {
-                    if (\Pest\Browser\Support\BrowserTestIdentifier::isBrowserTest($method)) {
+                    if (BrowserTestIdentifier::isBrowserTest($method)) {
                         $rel = $this->fileRelative($projectRoot, $filename);
 
                         if ($rel !== null) {

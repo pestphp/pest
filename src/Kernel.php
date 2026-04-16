@@ -13,6 +13,7 @@ use Pest\Plugins\Actions\CallsBoot;
 use Pest\Plugins\Actions\CallsHandleArguments;
 use Pest\Plugins\Actions\CallsHandleOriginalArguments;
 use Pest\Plugins\Actions\CallsTerminable;
+use Pest\Plugins\Tia;
 use Pest\Support\Container;
 use Pest\Support\Reflection;
 use Pest\Support\View;
@@ -64,7 +65,9 @@ final readonly class Kernel
             ->add(TestSuite::class, $testSuite)
             ->add(InputInterface::class, $input)
             ->add(OutputInterface::class, $output)
-            ->add(Container::class, $container);
+            ->add(Container::class, $container)
+            ->add(Tia\Recorder::class, new Tia\Recorder)
+            ->add(Tia\WatchPatterns::class, new Tia\WatchPatterns);
 
         $kernel = new self(
             new Application,

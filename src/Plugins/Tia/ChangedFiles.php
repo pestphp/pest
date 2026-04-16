@@ -28,9 +28,9 @@ final readonly class ChangedFiles
 
     /**
      * @return array<int, string>|null `null` when git is unavailable, or when
-     *                                  the recorded SHA is no longer reachable
-     *                                  from HEAD (rebase / force-push) — in
-     *                                  that case the graph should be rebuilt.
+     *                                 the recorded SHA is no longer reachable
+     *                                 from HEAD (rebase / force-push) — in
+     *                                 that case the graph should be rebuilt.
      */
     public function since(?string $sha): ?array
     {

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 use ReflectionClass;
-use ReflectionException;
 
 /**
  * Captures per-test file coverage using the PCOV driver.
@@ -18,8 +17,6 @@ use ReflectionException;
  */
 final class Recorder
 {
-    private static ?self $instance = null;
-
     /**
      * Test file currently being recorded, or `null` when idle.
      */
@@ -46,11 +43,6 @@ final class Recorder
     private bool $driverAvailable = false;
 
     private string $driver = 'none';
-
-    public static function instance(): self
-    {
-        return self::$instance ??= new self;
-    }
 
     public function activate(): void
     {

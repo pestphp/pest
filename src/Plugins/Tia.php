@@ -5,20 +5,15 @@ declare(strict_types=1);
 namespace Pest\Plugins;
 
 use Pest\Contracts\Plugins\AddsOutput;
-use Pest\Contracts\Plugins\AfterEachable;
-use Pest\Contracts\Plugins\BeforeEachable;
 use Pest\Contracts\Plugins\HandlesArguments;
-use Pest\Contracts\Plugins\Runnable;
 use Pest\Contracts\Plugins\Terminable;
-use Pest\Exceptions\NoDirtyTestsFound;
-use Pest\Panic;
-use Pest\Support\Container;
 use Pest\Plugins\Tia\ChangedFiles;
 use Pest\Plugins\Tia\Fingerprint;
 use Pest\Plugins\Tia\Graph;
 use Pest\Plugins\Tia\Recorder;
-use Pest\Plugins\Tia\State;
+use Pest\TestCaseFilters\TiaTestCaseFilter;
 use Pest\Plugins\Tia\WatchPatterns;
+use Pest\Support\Container;
 use Pest\TestSuite;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
@@ -30,7 +25,7 @@ use Throwable;
  * -----
  *  - **Record** — no graph (or fingerprint / recording commit drifted). The
  *    full suite runs with PCOV / Xdebug capture per test; the resulting
- *    `test → [source_file, …]` edges land in `.pest/cache/tia.json`.
+ *    `test → [source_file, …]` edges land in `.temp/tia.json`.
  *  - **Replay** — graph valid. We diff the working tree against the recording
  *    commit, intersect changed files with graph edges, and run only the
  *    affected tests. Newly-added tests unknown to the graph are always
@@ -53,7 +48,7 @@ use Throwable;
  *  - **Worker, record**: boots through `bin/worker.php`, which re-runs
  *    `CallsHandleArguments`. We detect the worker context + recording flag,
  *    activate the `Recorder`, and flush the partial graph on `terminate()`
- *    into `.pest/cache/tia-worker-<TEST_TOKEN>.json`.
+ *    into `.temp/tia-worker-<TEST_TOKEN>.json`.
  *  - **Worker, replay**: nothing to do; args already narrowed.
  *
  * Guardrails
@@ -66,7 +61,7 @@ use Throwable;
  *
  * @internal
  */
-final class Tia implements AddsOutput, AfterEachable, BeforeEachable, HandlesArguments, Runnable, Terminable
+final class Tia implements AddsOutput, HandlesArguments, Terminable
 {
     use Concerns\HandleArguments;
 
@@ -74,11 +69,21 @@ final class Tia implements AddsOutput, AfterEachable, BeforeEachable, HandlesArg
 
     private const string REBUILD_OPTION = '--tia-rebuild';
 
-    private const string CACHE_PATH = '.pest/cache/tia.json';
+    /**
+     * TIA cache lives inside Pest's `.temp/` directory (same location as
+     * PHPUnit's result cache). This directory is gitignored by default in
+     * Pest's own `.gitignore`, so the graph is never committed.
+     */
+    private const string TEMP_DIR = __DIR__
+        .DIRECTORY_SEPARATOR.'..'
+        .DIRECTORY_SEPARATOR.'..'
+        .DIRECTORY_SEPARATOR.'.temp';
 
-    private const string AFFECTED_PATH = '.pest/cache/tia-affected.json';
+    private const string CACHE_FILE = 'tia.json';
 
-    private const string WORKER_CACHE_PREFIX = '.pest/cache/tia-worker-';
+    private const string AFFECTED_FILE = 'tia-affected.json';
+
+    private const string WORKER_PREFIX = 'tia-worker-';
 
     /**
      * Global flag toggled by the parent process so workers know to record.
@@ -87,13 +92,50 @@ final class Tia implements AddsOutput, AfterEachable, BeforeEachable, HandlesArg
 
     /**
      * Global flag that tells workers to install the TIA filter (replay mode).
-     * Workers read the affected set from `.pest/cache/tia-affected.json`.
+     * Workers read the affected set from `.temp/tia-affected.json`.
      */
     private const string REPLAYING_GLOBAL = 'TIA_REPLAYING';
 
     private bool $graphWritten = false;
 
-    public function __construct(private readonly OutputInterface $output) {}
+    private static function tempDir(): string
+    {
+        $dir = (string) realpath(self::TEMP_DIR);
+
+        if ($dir === '' || $dir === '.') {
+            // .temp doesn't exist yet — create it.
+            @mkdir(self::TEMP_DIR, 0755, true);
+            $dir = (string) realpath(self::TEMP_DIR);
+        }
+
+        return $dir;
+    }
+
+    private static function cachePath(): string
+    {
+        return self::tempDir().DIRECTORY_SEPARATOR.self::CACHE_FILE;
+    }
+
+    private static function affectedPath(): string
+    {
+        return self::tempDir().DIRECTORY_SEPARATOR.self::AFFECTED_FILE;
+    }
+
+    private static function workerPath(string $token): string
+    {
+        return self::tempDir().DIRECTORY_SEPARATOR.self::WORKER_PREFIX.$token.'.json';
+    }
+
+    private static function workerGlob(): string
+    {
+        return self::tempDir().DIRECTORY_SEPARATOR.self::WORKER_PREFIX.'*.json';
+    }
+
+    public function __construct(
+        private readonly OutputInterface $output,
+        private readonly Recorder $recorder,
+        private readonly WatchPatterns $watchPatterns,
+    ) {}
 
     /**
      * {@inheritDoc}
@@ -134,28 +176,13 @@ final class Tia implements AddsOutput, AfterEachable, BeforeEachable, HandlesArg
         return $this->handleParent($arguments, $projectRoot, $forceRebuild);
     }
 
-    public function beforeEach(string $filename, string $testId): bool
-    {
-        return ! State::instance()->shouldReplayFromCache($filename, $testId);
-    }
-
-    public function run(string $filename, string $testId): bool
-    {
-        return ! State::instance()->shouldReplayFromCache($filename, $testId);
-    }
-
-    public function afterEach(string $filename, string $testId): bool
-    {
-        return ! State::instance()->shouldReplayFromCache($filename, $testId);
-    }
-
     public function terminate(): void
     {
         if ($this->graphWritten) {
             return;
         }
 
-        $recorder = Recorder::instance();
+        $recorder = $this->recorder;
 
         if (! $recorder->isActive()) {
             return;
@@ -180,7 +207,7 @@ final class Tia implements AddsOutput, AfterEachable, BeforeEachable, HandlesArg
         }
 
         // Non-parallel record path: straight into the main cache.
-        $cachePath = $projectRoot.DIRECTORY_SEPARATOR.self::CACHE_PATH;
+        $cachePath = self::cachePath();
 
         $graph = Graph::load($projectRoot, $cachePath) ?? new Graph($projectRoot);
         $graph->setFingerprint(Fingerprint::compute($projectRoot));
@@ -198,7 +225,7 @@ final class Tia implements AddsOutput, AfterEachable, BeforeEachable, HandlesArg
         $this->output->writeln(sprintf(
             '  <fg=green>TIA</> graph recorded (%d test files) at %s',
             count($perTest),
-            self::CACHE_PATH,
+            self::CACHE_FILE,
         ));
 
         $recorder->reset();
@@ -226,7 +253,7 @@ final class Tia implements AddsOutput, AfterEachable, BeforeEachable, HandlesArg
             return $exitCode;
         }
 
-        $cachePath = $projectRoot.DIRECTORY_SEPARATOR.self::CACHE_PATH;
+        $cachePath = self::cachePath();
 
         $graph = Graph::load($projectRoot, $cachePath) ?? new Graph($projectRoot);
         $graph->setFingerprint(Fingerprint::compute($projectRoot));
@@ -273,7 +300,7 @@ final class Tia implements AddsOutput, AfterEachable, BeforeEachable, HandlesArg
             '  <fg=green>TIA</> graph recorded (%d test files, %d worker partials) at %s',
             count($finalised),
             count($partials),
-            self::CACHE_PATH,
+            self::CACHE_FILE,
         ));
 
         return $exitCode;
@@ -288,9 +315,9 @@ final class Tia implements AddsOutput, AfterEachable, BeforeEachable, HandlesArg
         // Initialise watch patterns (defaults + any user additions from
         // tests/Pest.php which has already been loaded by BootFiles at
         // this point).
-        WatchPatterns::instance()->useDefaults($projectRoot);
+        $this->watchPatterns->useDefaults($projectRoot);
 
-        $cachePath = $projectRoot.DIRECTORY_SEPARATOR.self::CACHE_PATH;
+        $cachePath = self::cachePath();
         $fingerprint = Fingerprint::compute($projectRoot);
 
         $graph = $forceRebuild ? null : Graph::load($projectRoot, $cachePath);
@@ -342,7 +369,7 @@ final class Tia implements AddsOutput, AfterEachable, BeforeEachable, HandlesArg
             return $arguments;
         }
 
-        $recorder = Recorder::instance();
+        $recorder = $this->recorder;
 
         if (! $recorder->driverAvailable()) {
             // Driver availability is per-process. If the driver is missing
@@ -358,8 +385,8 @@ final class Tia implements AddsOutput, AfterEachable, BeforeEachable, HandlesArg
 
     private function installWorkerReplayFilter(string $projectRoot): void
     {
-        $cachePath = $projectRoot.DIRECTORY_SEPARATOR.self::CACHE_PATH;
-        $affectedPath = $projectRoot.DIRECTORY_SEPARATOR.self::AFFECTED_PATH;
+        $cachePath = self::cachePath();
+        $affectedPath = self::affectedPath();
 
         $graph = Graph::load($projectRoot, $cachePath);
 
@@ -387,71 +414,9 @@ final class Tia implements AddsOutput, AfterEachable, BeforeEachable, HandlesArg
             }
         }
 
-        State::instance()->activate(
-            $projectRoot,
-            $graph,
-            $affectedSet,
-            $this->loadPreviousDefects($projectRoot),
+        TestSuite::getInstance()->tests->addTestCaseFilter(
+            new TiaTestCaseFilter($projectRoot, $graph, $affectedSet),
         );
-    }
-
-    /**
-     * Reads PHPUnit's own result cache and returns the test ids that failed
-     * or errored in the previous run. These are excluded from replay so the
-     * user sees current state rather than a stale pass.
-     *
-     * @return array<string, true>
-     */
-    private function loadPreviousDefects(string $projectRoot): array
-    {
-        // PHPUnit writes the cache under either `<projectRoot>/.phpunit.result.cache`
-        // (legacy) or `<cacheDirectory>/test-results`. Pest's Cache plugin
-        // additionally defaults `cacheDirectory` to
-        // `vendor/pestphp/pest/.temp` when the user hasn't configured one.
-        // We probe the common locations; if we miss the file, replay falls
-        // back to its safe default (still runs the test).
-        $candidates = [
-            $projectRoot.'/.phpunit.result.cache',
-            $projectRoot.'/.phpunit.cache/test-results',
-            $projectRoot.'/.pest/cache/test-results',
-            $projectRoot.'/vendor/pestphp/pest/.temp/test-results',
-        ];
-
-        $path = null;
-
-        foreach ($candidates as $candidate) {
-            if (is_file($candidate)) {
-                $path = $candidate;
-
-                break;
-            }
-        }
-
-        if ($path === null) {
-            return [];
-        }
-
-        $raw = @file_get_contents($path);
-
-        if ($raw === false) {
-            return [];
-        }
-
-        $data = json_decode($raw, true);
-
-        if (! is_array($data) || ! isset($data['defects']) || ! is_array($data['defects'])) {
-            return [];
-        }
-
-        $out = [];
-
-        foreach ($data['defects'] as $id => $_status) {
-            if (is_string($id)) {
-                $out[$id] = true;
-            }
-        }
-
-        return $out;
     }
 
     /**
@@ -471,48 +436,31 @@ final class Tia implements AddsOutput, AfterEachable, BeforeEachable, HandlesArg
         }
 
         $changed = $changedFiles->since($graph->recordedAtSha()) ?? [];
-
-        // Even with zero changes, we still run through the suite so the user
-        // sees the previous results reflected (cached passes replay as
-        // instant passes; failures re-run to surface current state). This
-        // matches the UX of test runners like NCrunch where every run
-        // produces a full report regardless of what actually executed.
         $affected = $changed === [] ? [] : $graph->affected($changed);
 
+        $totalKnown = count($graph->allTestFiles());
+        $affectedCount = count($affected);
+        $cachedCount = $totalKnown - $affectedCount;
+
         $testSuite = TestSuite::getInstance();
+        $affectedSet = array_fill_keys($affected, true);
 
         if (! Parallel::isEnabled()) {
-            // Series mode: activate replay state. Tests still appear in the
-            // run (correct counts, coverage aggregation, event timeline);
-            // unaffected ones short-circuit inside `Testable::__runTest`
-            // and replay their previous passing status.
-            $affectedSet = array_fill_keys($affected, true);
-
-            State::instance()->activate(
-                $projectRoot,
-                $graph,
-                $affectedSet,
-                $this->loadPreviousDefects($projectRoot),
+            $testSuite->tests->addTestCaseFilter(
+                new TiaTestCaseFilter($projectRoot, $graph, $affectedSet),
             );
 
             $this->output->writeln(sprintf(
-                '  <fg=green>TIA</> %d changed file(s) → %d affected, remaining tests replay cached result.',
+                '  <fg=green>TIA</> %d changed file(s) → %d affected, %d cached.',
                 count($changed),
-                count($affected),
+                $affectedCount,
+                $cachedCount,
             ));
 
             return $arguments;
         }
 
-        // Parallel mode. Paratest's CLI only accepts a single positional
-        // `<path>`, so we cannot pass the affected set as multiple args.
-        // Instead, persist the affected set to a cache file and flip a
-        // global that tells each worker to install the TIA filter on boot.
-        //
-        // Cost trade-off: each worker still discovers the full test tree,
-        // but the filter drops unaffected tests before they ever run. Narrow
-        // CLI handoff would be ideal; it requires generating a temporary
-        // phpunit.xml and is out of scope for the MVP.
+        // Parallel: persist affected set so workers can install the filter.
         if (! $this->persistAffectedSet($projectRoot, $affected)) {
             $this->output->writeln(
                 '  <fg=red>TIA</> failed to persist affected set — running full suite.',
@@ -524,9 +472,10 @@ final class Tia implements AddsOutput, AfterEachable, BeforeEachable, HandlesArg
         Parallel::setGlobal(self::REPLAYING_GLOBAL, '1');
 
         $this->output->writeln(sprintf(
-            '  <fg=green>TIA</> %d changed file(s) → %d affected, remaining tests replay cached result (parallel).',
+            '  <fg=green>TIA</> %d changed file(s) → %d affected, %d cached (parallel).',
             count($changed),
-            count($affected),
+            $affectedCount,
+            $cachedCount,
         ));
 
         return $arguments;
@@ -537,7 +486,7 @@ final class Tia implements AddsOutput, AfterEachable, BeforeEachable, HandlesArg
      */
     private function persistAffectedSet(string $projectRoot, array $affected): bool
     {
-        $path = $projectRoot.DIRECTORY_SEPARATOR.self::AFFECTED_PATH;
+        $path = self::affectedPath();
         $dir = dirname($path);
 
         if (! is_dir($dir) && ! @mkdir($dir, 0755, true) && ! is_dir($dir)) {
@@ -588,15 +537,19 @@ final class Tia implements AddsOutput, AfterEachable, BeforeEachable, HandlesArg
             return $arguments;
         }
 
-        $recorder = Recorder::instance();
+        $recorder = $this->recorder;
 
         if (! $recorder->driverAvailable()) {
-            $this->output->writeln(
-                '  <fg=red>TIA</> No coverage driver is available. '.
-                'Install ext-pcov or enable Xdebug in coverage mode, then rerun with `--tia`.',
-            );
+            $this->output->writeln([
+                '',
+                '  <fg=white;options=bold;bg=red> ERROR </> No coverage driver is available.',
+                '',
+                '  TIA requires ext-pcov or Xdebug with coverage mode enabled to',
+                '  record the dependency graph. Install one and rerun with `--tia`.',
+                '',
+            ]);
 
-            return $arguments;
+            exit(1);
         }
 
         $recorder->activate();
@@ -624,7 +577,7 @@ final class Tia implements AddsOutput, AfterEachable, BeforeEachable, HandlesArg
             $token = (string) getmypid();
         }
 
-        $path = $projectRoot.DIRECTORY_SEPARATOR.self::WORKER_CACHE_PREFIX.$token.'.json';
+        $path = self::workerPath($token);
         $dir = dirname($path);
 
         if (! is_dir($dir) && ! @mkdir($dir, 0755, true) && ! is_dir($dir)) {
@@ -653,7 +606,7 @@ final class Tia implements AddsOutput, AfterEachable, BeforeEachable, HandlesArg
      */
     private function collectWorkerPartials(string $projectRoot): array
     {
-        $pattern = $projectRoot.DIRECTORY_SEPARATOR.self::WORKER_CACHE_PREFIX.'*.json';
+        $pattern = self::workerGlob();
         $matches = glob($pattern);
 
         return $matches === false ? [] : $matches;
@@ -686,10 +639,12 @@ final class Tia implements AddsOutput, AfterEachable, BeforeEachable, HandlesArg
         $out = [];
 
         foreach ($data as $test => $sources) {
-            if (! is_string($test) || ! is_array($sources)) {
+            if (! is_string($test)) {
                 continue;
             }
-
+            if (! is_array($sources)) {
+                continue;
+            }
             $clean = [];
 
             foreach ($sources as $source) {

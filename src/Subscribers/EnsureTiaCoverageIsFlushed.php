@@ -14,10 +14,12 @@ use PHPUnit\Event\Test\FinishedSubscriber;
  *
  * @internal
  */
-final class EnsureTiaCoverageIsFlushed implements FinishedSubscriber
+final readonly class EnsureTiaCoverageIsFlushed implements FinishedSubscriber
 {
+    public function __construct(private Recorder $recorder) {}
+
     public function notify(Finished $event): void
     {
-        Recorder::instance()->endTest();
+        $this->recorder->endTest();
     }
 }

@@ -15,13 +15,13 @@ use PHPUnit\Event\Test\PreparedSubscriber;
  *
  * @internal
  */
-final class EnsureTiaCoverageIsRecorded implements PreparedSubscriber
+final readonly class EnsureTiaCoverageIsRecorded implements PreparedSubscriber
 {
+    public function __construct(private Recorder $recorder) {}
+
     public function notify(Prepared $event): void
     {
-        $recorder = Recorder::instance();
-
-        if (! $recorder->isActive()) {
+        if (! $this->recorder->isActive()) {
             return;
         }
 
@@ -31,6 +31,6 @@ final class EnsureTiaCoverageIsRecorded implements PreparedSubscriber
             return;
         }
 
-        $recorder->beginTest($test->className(), $test->methodName(), $test->file());
+        $this->recorder->beginTest($test->className(), $test->methodName(), $test->file());
     }
 }

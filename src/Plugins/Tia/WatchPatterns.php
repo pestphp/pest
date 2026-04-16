@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 use Pest\Plugins\Tia\WatchDefaults\WatchDefault;
+use Pest\TestSuite;
 
 /**
  * Maps non-PHP file globs to the test directories they should invalidate.
@@ -37,16 +38,9 @@ final class WatchPatterns
     ];
 
     /**
-     * @var array<string, array<int, string>>  glob → list of project-relative test dirs
+     * @var array<string, array<int, string>> glob → list of project-relative test dirs
      */
     private array $patterns = [];
-
-    private static ?self $instance = null;
-
-    public static function instance(): self
-    {
-        return self::$instance ??= new self;
-    }
 
     /**
      * Probes every registered `WatchDefault` and merges the patterns of
@@ -56,7 +50,7 @@ final class WatchPatterns
      */
     public function useDefaults(string $projectRoot): void
     {
-        $testPath = \Pest\TestSuite::getInstance()->testPath;
+        $testPath = TestSuite::getInstance()->testPath;
 
         foreach (self::DEFAULTS as $class) {
             $default = new $class;
@@ -94,7 +88,7 @@ final class WatchPatterns
      *
      * @param  string  $projectRoot  Absolute path.
      * @param  array<int, string>  $changedFiles  Project-relative paths.
-     * @return array<int, string>  Project-relative test directories.
+     * @return array<int, string> Project-relative test directories.
      */
     public function matchedDirectories(string $projectRoot, array $changedFiles): array
     {

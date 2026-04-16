@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pest\Plugins\Tia;
+namespace Pest\TestCaseFilters;
 
 use Pest\Contracts\TestCaseFilter;
 use Pest\Plugins\Tia\Graph;
