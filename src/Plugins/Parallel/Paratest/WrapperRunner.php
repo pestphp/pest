@@ -468,6 +468,16 @@ final class WrapperRunner implements RunnerInterface
             $serializedCoverage['basePath'],
         );
         $codeCoverage = $coverageManager->codeCoverage();
+        $codeCoverage->excludeUncoveredFiles();
+
+        $mergedData = $serializedCoverage['codeCoverage'];
+        $basePath = $serializedCoverage['basePath'];
+        if ($basePath !== '') {
+            foreach ($mergedData->coveredFiles() as $relativePath) {
+                $mergedData->renameFile($relativePath, $basePath.DIRECTORY_SEPARATOR.$relativePath);
+            }
+        }
+        $codeCoverage->setData($mergedData);
         $codeCoverage->setTests($serializedCoverage['testResults']);
         (new ReflectionProperty(\SebastianBergmann\CodeCoverage\CodeCoverage::class, 'cachedReport'))->setValue($codeCoverage, $report);
 
