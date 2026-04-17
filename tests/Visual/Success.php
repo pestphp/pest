@@ -21,8 +21,10 @@ test('visual snapshot of test suite on success', function () {
 
         return preg_replace([
             '#\\x1b[[][^A-Za-z]*[A-Za-z]#',
+            '#\\x1b\\]8;[^\\x1b\\x07]*(?:\\x1b\\\\|\\x07)#',
             '/(Tests\\\PHPUnit\\\CustomAffixes\\\InvalidTestName)([A-Za-z0-9]*)/',
         ], [
+            '',
             '',
             '$1',
         ], $process->getOutput());

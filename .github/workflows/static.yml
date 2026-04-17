@@ -11,6 +11,9 @@ concurrency:
   group: static-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   static:
     if: github.event_name != 'schedule' || github.repository == 'pestphp/pest'
@@ -44,7 +47,7 @@ jobs:
       uses: actions/cache@v5
       with:
         path: ${{ steps.composer-cache.outputs.dir }}
-        key: static-php-8.4-${{ matrix.dependency-version }}-composer-${{ hashFiles('**/composer.json') }}
+        key: static-php-8.4-${{ matrix.dependency-version }}-composer-${{ hashFiles('**/composer.json', '**/composer.lock') }}
         restore-keys: |
           static-php-8.4-${{ matrix.dependency-version }}-composer-
           static-php-8.4-composer-

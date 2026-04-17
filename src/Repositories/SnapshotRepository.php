@@ -59,8 +59,10 @@ final class SnapshotRepository
     {
         $snapshotFilename = $this->getSnapshotFilename();
 
-        if (! file_exists(dirname($snapshotFilename))) {
-            mkdir(dirname($snapshotFilename), 0755, true);
+        $directory = dirname($snapshotFilename);
+
+        if (! is_dir($directory)) {
+            @mkdir($directory, 0755, true);
         }
 
         file_put_contents($snapshotFilename, $snapshot);
