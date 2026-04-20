@@ -328,11 +328,13 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return;
         }
 
-        // Worker in replay mode: flush the ResultCollector + replay counter
-        // into a partial so the parent can merge them into the graph after
-        // paratest returns. Parent's own ResultCollector is empty in parallel
-        // runs because workers — not the parent — execute the tests.
-        if (Parallel::isWorker() && $this->replayGraph !== null) {
+        // Flush the ResultCollector + replay counter from workers into a
+        // partial so the parent can merge them. Needed during replay so the
+        // summary is accurate, and also during the initial record run so
+        // the graph lands with results on first write — otherwise the next
+        // run would load a graph with edges but empty results, miss the
+        // cache for every test, and look pointlessly slow.
+        if (Parallel::isWorker() && ($this->replayGraph !== null || $this->recordingActive)) {
             $this->flushWorkerReplay();
         }
 
@@ -367,9 +369,20 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         // Non-parallel record path: straight into the main cache.
         $cachePath = self::cachePath();
 
+        $changedFiles = new ChangedFiles($projectRoot);
+        $currentSha = $changedFiles->currentSha();
+
         $graph = Graph::load($projectRoot, $cachePath) ?? new Graph($projectRoot);
         $graph->setFingerprint(Fingerprint::compute($projectRoot));
-        $graph->setRecordedAtSha($this->branch, (new ChangedFiles($projectRoot))->currentSha());
+        $graph->setRecordedAtSha($this->branch, $currentSha);
+        // Snapshot whatever is currently dirty in the working tree. Without
+        // this, the very first `--tia` replay would see those same files
+        // via `since()` and report them as "changed" — even though they're
+        // identical to what we just recorded against.
+        $graph->setLastRunTree(
+            $this->branch,
+            $changedFiles->snapshotTree($changedFiles->since($currentSha) ?? []),
+        );
         $graph->replaceEdges($perTest);
         $graph->pruneMissingTests();
 
@@ -406,25 +419,26 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         // since the original recording. Without this, re-running `--tia`
         // twice in a row would re-execute the same affected tests both
         // times even though nothing new changed.
-        if ($this->replayRan) {
-            // In parallel runs the workers executed the tests, so their
-            // ResultCollector + replay counter live in other processes. Pull
-            // those partials in before both the summary and the graph
-            // snapshot so the parent state reflects the whole run.
-            if (Parallel::isEnabled()) {
-                $this->mergeWorkerReplayPartials();
-            }
+        // In parallel runs the workers executed the tests, so their
+        // ResultCollector + replay counter live in other processes. Pull
+        // those partials in first — both replay and record paths need them:
+        // replay to make the summary accurate, record so the initial graph
+        // lands with results instead of a second "warm-up" run being needed
+        // before replay is actually fast.
+        if (Parallel::isEnabled()) {
+            $this->mergeWorkerReplayPartials();
+        }
 
+        if ($this->replayRan) {
             $this->bumpRecordedSha();
             $this->emitReplaySummary();
         }
 
-        // Snapshot per-test results (status + message) from PHPUnit's result
-        // cache into our graph so future replay runs can faithfully reproduce
-        // pass/fail/skip/todo/incomplete for unaffected tests.
-        $this->snapshotTestResults();
-
         if ((string) Parallel::getGlobal(self::RECORDING_GLOBAL) !== '1') {
+            // Series path: graph was already written by `terminate()` (or
+            // nothing to record). Snapshot results now so they ride along.
+            $this->snapshotTestResults();
+
             return $exitCode;
         }
 
@@ -437,9 +451,18 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         $cachePath = self::cachePath();
 
+        $changedFiles = new ChangedFiles($projectRoot);
+        $currentSha = $changedFiles->currentSha();
+
         $graph = Graph::load($projectRoot, $cachePath) ?? new Graph($projectRoot);
         $graph->setFingerprint(Fingerprint::compute($projectRoot));
-        $graph->setRecordedAtSha($this->branch, (new ChangedFiles($projectRoot))->currentSha());
+        $graph->setRecordedAtSha($this->branch, $currentSha);
+        // Snapshot any currently-dirty files so the first replay run
+        // doesn't mis-report them as changed. See the series record path.
+        $graph->setLastRunTree(
+            $this->branch,
+            $changedFiles->snapshotTree($changedFiles->since($currentSha) ?? []),
+        );
 
         $merged = [];
 
@@ -484,6 +507,12 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             count($partials),
             self::CACHE_FILE,
         ));
+
+        // Persist per-test results (merged from worker partials above) into
+        // the freshly-written graph. Without this the graph would ship with
+        // edges but no results, and the very next `--tia` run would miss
+        // cache for every test even though nothing changed.
+        $this->snapshotTestResults();
 
         return $exitCode;
     }
