@@ -69,7 +69,8 @@ final readonly class Kernel
             ->add(Tia\Recorder::class, new Tia\Recorder)
             ->add(Tia\CoverageCollector::class, new Tia\CoverageCollector)
             ->add(Tia\WatchPatterns::class, new Tia\WatchPatterns)
-            ->add(Tia\ResultCollector::class, new Tia\ResultCollector);
+            ->add(Tia\ResultCollector::class, new Tia\ResultCollector)
+            ->add(Tia\Contracts\State::class, new Tia\FileState(__DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'.temp'));
 
         $kernel = new self(
             new Application,

@@ -9,6 +9,7 @@ use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Contracts\Plugins\Terminable;
 use PHPUnit\Framework\TestStatus\TestStatus;
 use Pest\Plugins\Tia\ChangedFiles;
+use Pest\Plugins\Tia\Contracts\State;
 use Pest\Plugins\Tia\CoverageCollector;
 use Pest\Plugins\Tia\Fingerprint;
 use Pest\Plugins\Tia\Graph;
@@ -72,37 +73,31 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private const string REBUILD_OPTION = '--tia-rebuild';
 
     /**
-     * TIA cache lives inside Pest's `.temp/` directory (same location as
-     * PHPUnit's result cache). This directory is gitignored by default in
-     * Pest's own `.gitignore`, so the graph is never committed.
+     * State keys under which TIA persists its blobs. Kept here as constants
+     * (rather than scattered strings) so the storage layout is visible in
+     * one place, and so `CoverageMerger` can reference the same keys.
      */
-    private const string TEMP_DIR = __DIR__
-        .DIRECTORY_SEPARATOR.'..'
-        .DIRECTORY_SEPARATOR.'..'
-        .DIRECTORY_SEPARATOR.'.temp';
+    public const string KEY_GRAPH = 'tia.json';
 
-    private const string CACHE_FILE = 'tia.json';
+    public const string KEY_AFFECTED = 'tia-affected.json';
 
-    private const string AFFECTED_FILE = 'tia-affected.json';
+    private const string KEY_WORKER_EDGES_PREFIX = 'tia-worker-edges-';
+
+    private const string KEY_WORKER_RESULTS_PREFIX = 'tia-worker-results-';
 
     /**
-     * Cache file holding PHPUnit's `CodeCoverage` object from the last
-     * `--tia --coverage` run. When the next run replays most tests from
-     * the TIA graph, only the affected tests produce fresh coverage; the
-     * rest is merged in from this cache so the report stays complete.
+     * Raw-serialised `CodeCoverage` snapshot from the last `--tia --coverage`
+     * run. Stored as bytes so the backend stays JSON/file-agnostic — the
+     * merger un/serialises rather than `require`-ing a PHP file.
      */
-    private const string COVERAGE_CACHE_FILE = 'tia-coverage.php';
+    public const string KEY_COVERAGE_CACHE = 'tia-coverage.bin';
 
     /**
-     * Marker file dropped by `Tia` to tell `Support\Coverage` to apply the
+     * Marker key dropped by `Tia` to tell `Support\Coverage` to apply the
      * merge. Absent on plain `--coverage` runs so non-TIA usage keeps its
      * current (narrow) behaviour.
      */
-    private const string COVERAGE_MARKER_FILE = 'tia-coverage.marker';
-
-    private const string WORKER_PREFIX = 'tia-worker-';
-
-    private const string WORKER_RESULTS_PREFIX = 'tia-worker-results-';
+    public const string KEY_COVERAGE_MARKER = 'tia-coverage.marker';
 
     /**
      * Global flag toggled by the parent process so workers know to record.
@@ -168,57 +163,14 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      */
     private array $affectedFiles = [];
 
-    private static function tempDir(): string
+    private static function workerEdgesKey(string $token): string
     {
-        $dir = (string) realpath(self::TEMP_DIR);
-
-        if ($dir === '' || $dir === '.') {
-            // .temp doesn't exist yet — create it.
-            @mkdir(self::TEMP_DIR, 0755, true);
-            $dir = (string) realpath(self::TEMP_DIR);
-        }
-
-        return $dir;
+        return self::KEY_WORKER_EDGES_PREFIX.$token.'.json';
     }
 
-    private static function cachePath(): string
+    private static function workerResultsKey(string $token): string
     {
-        return self::tempDir().DIRECTORY_SEPARATOR.self::CACHE_FILE;
-    }
-
-    private static function affectedPath(): string
-    {
-        return self::tempDir().DIRECTORY_SEPARATOR.self::AFFECTED_FILE;
-    }
-
-    private static function workerPath(string $token): string
-    {
-        return self::tempDir().DIRECTORY_SEPARATOR.self::WORKER_PREFIX.$token.'.json';
-    }
-
-    private static function workerGlob(): string
-    {
-        return self::tempDir().DIRECTORY_SEPARATOR.self::WORKER_PREFIX.'*.json';
-    }
-
-    private static function workerResultsPath(string $token): string
-    {
-        return self::tempDir().DIRECTORY_SEPARATOR.self::WORKER_RESULTS_PREFIX.$token.'.json';
-    }
-
-    private static function workerResultsGlob(): string
-    {
-        return self::tempDir().DIRECTORY_SEPARATOR.self::WORKER_RESULTS_PREFIX.'*.json';
-    }
-
-    public static function coverageCachePath(): string
-    {
-        return self::tempDir().DIRECTORY_SEPARATOR.self::COVERAGE_CACHE_FILE;
-    }
-
-    public static function coverageMarkerPath(): string
-    {
-        return self::tempDir().DIRECTORY_SEPARATOR.self::COVERAGE_MARKER_FILE;
+        return self::KEY_WORKER_RESULTS_PREFIX.$token.'.json';
     }
 
     /**
@@ -242,7 +194,36 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         private readonly Recorder $recorder,
         private readonly CoverageCollector $coverageCollector,
         private readonly WatchPatterns $watchPatterns,
+        private readonly State $state,
     ) {}
+
+    /**
+     * Convenience wrapper: load + decode the graph, or return `null` if no
+     * graph has been stored. Any call that needs to mutate + re-save the
+     * graph also goes through `saveGraph()` to keep bytes flowing through
+     * the `State` abstraction rather than filesystem paths.
+     */
+    private function loadGraph(string $projectRoot): ?Graph
+    {
+        $json = $this->state->read(self::KEY_GRAPH);
+
+        if ($json === null) {
+            return null;
+        }
+
+        return Graph::decode($json, $projectRoot);
+    }
+
+    private function saveGraph(Graph $graph): bool
+    {
+        $json = $graph->encode();
+
+        if ($json === null) {
+            return false;
+        }
+
+        return $this->state->write(self::KEY_GRAPH, $json);
+    }
 
     /**
      * Returns the cached result for the given test, or `null` if the test
@@ -367,12 +348,10 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         // Non-parallel record path: straight into the main cache.
-        $cachePath = self::cachePath();
-
         $changedFiles = new ChangedFiles($projectRoot);
         $currentSha = $changedFiles->currentSha();
 
-        $graph = Graph::load($projectRoot, $cachePath) ?? new Graph($projectRoot);
+        $graph = $this->loadGraph($projectRoot) ?? new Graph($projectRoot);
         $graph->setFingerprint(Fingerprint::compute($projectRoot));
         $graph->setRecordedAtSha($this->branch, $currentSha);
         // Snapshot whatever is currently dirty in the working tree. Without
@@ -386,17 +365,16 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $graph->replaceEdges($perTest);
         $graph->pruneMissingTests();
 
-        if (! $graph->save($cachePath)) {
-            $this->output->writeln('  <fg=red>TIA</> failed to write graph to '.$cachePath);
+        if (! $this->saveGraph($graph)) {
+            $this->output->writeln('  <fg=red>TIA</> failed to write graph.');
             $recorder->reset();
 
             return;
         }
 
         $this->output->writeln(sprintf(
-            '  <fg=green>TIA</> graph recorded (%d test files) at %s',
+            '  <fg=green>TIA</> graph recorded (%d test files).',
             count($perTest),
-            self::CACHE_FILE,
         ));
 
         $recorder->reset();
@@ -443,18 +421,16 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         $projectRoot = TestSuite::getInstance()->rootPath;
-        $partials = $this->collectWorkerPartials($projectRoot);
+        $partialKeys = $this->collectWorkerEdgesPartials();
 
-        if ($partials === []) {
+        if ($partialKeys === []) {
             return $exitCode;
         }
-
-        $cachePath = self::cachePath();
 
         $changedFiles = new ChangedFiles($projectRoot);
         $currentSha = $changedFiles->currentSha();
 
-        $graph = Graph::load($projectRoot, $cachePath) ?? new Graph($projectRoot);
+        $graph = $this->loadGraph($projectRoot) ?? new Graph($projectRoot);
         $graph->setFingerprint(Fingerprint::compute($projectRoot));
         $graph->setRecordedAtSha($this->branch, $currentSha);
         // Snapshot any currently-dirty files so the first replay run
@@ -466,8 +442,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         $merged = [];
 
-        foreach ($partials as $partialPath) {
-            $data = $this->readPartial($partialPath);
+        foreach ($partialKeys as $key) {
+            $data = $this->readPartial($key);
 
             if ($data === null) {
                 continue;
@@ -483,7 +459,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                 }
             }
 
-            @unlink($partialPath);
+            $this->state->delete($key);
         }
 
         $finalised = [];
@@ -495,17 +471,16 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $graph->replaceEdges($finalised);
         $graph->pruneMissingTests();
 
-        if (! $graph->save($cachePath)) {
-            $this->output->writeln('  <fg=red>TIA</> failed to write graph to '.$cachePath);
+        if (! $this->saveGraph($graph)) {
+            $this->output->writeln('  <fg=red>TIA</> failed to write graph.');
 
             return $exitCode;
         }
 
         $this->output->writeln(sprintf(
-            '  <fg=green>TIA</> graph recorded (%d test files, %d worker partials) at %s',
+            '  <fg=green>TIA</> graph recorded (%d test files, %d worker partials).',
             count($finalised),
-            count($partials),
-            self::CACHE_FILE,
+            count($partialKeys),
         ));
 
         // Persist per-test results (merged from worker partials above) into
@@ -533,10 +508,9 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         // the implicit branch identity.
         $this->branch = (new ChangedFiles($projectRoot))->currentBranch() ?? 'main';
 
-        $cachePath = self::cachePath();
         $fingerprint = Fingerprint::compute($projectRoot);
 
-        $graph = $forceRebuild ? null : Graph::load($projectRoot, $cachePath);
+        $graph = $forceRebuild ? null : $this->loadGraph($projectRoot);
 
         if ($graph instanceof Graph && ! Fingerprint::matches($graph->fingerprint(), $fingerprint)) {
             $this->output->writeln(
@@ -563,7 +537,15 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         // current (narrow) coverage with the cached full-run snapshot. Plain
         // `--coverage` runs don't drop it, so their behaviour is untouched.
         if ($this->piggybackCoverage) {
-            @file_put_contents(self::coverageMarkerPath(), '');
+            $this->state->write(self::KEY_COVERAGE_MARKER, '');
+        }
+
+        // First `--tia --coverage` run has nothing to merge against: if we
+        // replay, the coverage driver sees only the affected tests and the
+        // report collapses to near-zero coverage. Fall back to recording
+        // (full suite) to seed the cache for next time.
+        if ($this->piggybackCoverage && ! $this->state->exists(self::KEY_COVERAGE_CACHE)) {
+            return $this->enterRecordMode($projectRoot, $arguments);
         }
 
         if ($graph instanceof Graph) {
@@ -628,18 +610,15 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      */
     private function installWorkerReplay(string $projectRoot): void
     {
-        $cachePath = self::cachePath();
-        $affectedPath = self::affectedPath();
-
-        $graph = Graph::load($projectRoot, $cachePath);
+        $graph = $this->loadGraph($projectRoot);
 
         if (! $graph instanceof Graph) {
             return;
         }
 
-        $raw = @file_get_contents($affectedPath);
+        $raw = $this->state->read(self::KEY_AFFECTED);
 
-        if ($raw === false) {
+        if ($raw === null) {
             return;
         }
 
@@ -724,32 +703,13 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      */
     private function persistAffectedSet(string $projectRoot, array $affected): bool
     {
-        $path = self::affectedPath();
-        $dir = dirname($path);
-
-        if (! is_dir($dir) && ! @mkdir($dir, 0755, true) && ! is_dir($dir)) {
-            return false;
-        }
-
         $json = json_encode(array_values($affected), JSON_UNESCAPED_SLASHES);
 
         if ($json === false) {
             return false;
         }
 
-        $tmp = $path.'.'.bin2hex(random_bytes(4)).'.tmp';
-
-        if (@file_put_contents($tmp, $json) === false) {
-            return false;
-        }
-
-        if (! @rename($tmp, $path)) {
-            @unlink($tmp);
-
-            return false;
-        }
-
-        return true;
+        return $this->state->write(self::KEY_AFFECTED, $json);
     }
 
     /**
@@ -838,49 +798,31 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      */
     private function flushWorkerPartial(string $projectRoot, array $perTest): void
     {
-        $path = self::workerPath($this->workerToken());
-        $dir = dirname($path);
-
-        if (! is_dir($dir) && ! @mkdir($dir, 0755, true) && ! is_dir($dir)) {
-            return;
-        }
-
         $json = json_encode($perTest, JSON_UNESCAPED_SLASHES);
 
         if ($json === false) {
             return;
         }
 
-        $tmp = $path.'.'.bin2hex(random_bytes(4)).'.tmp';
-
-        if (@file_put_contents($tmp, $json) === false) {
-            return;
-        }
-
-        if (! @rename($tmp, $path)) {
-            @unlink($tmp);
-        }
+        $this->state->write(self::workerEdgesKey($this->workerToken()), $json);
     }
 
     /**
-     * @return array<int, string>
+     * @return list<string> State keys of per-worker edges partials.
      */
-    private function collectWorkerPartials(string $projectRoot): array
+    private function collectWorkerEdgesPartials(): array
     {
-        $pattern = self::workerGlob();
-        $matches = glob($pattern);
-
-        return $matches === false ? [] : $matches;
+        return $this->state->keysWithPrefix(self::KEY_WORKER_EDGES_PREFIX);
     }
 
     private function purgeWorkerPartials(string $projectRoot): void
     {
-        foreach ($this->collectWorkerPartials($projectRoot) as $path) {
-            @unlink($path);
+        foreach ($this->collectWorkerEdgesPartials() as $key) {
+            $this->state->delete($key);
         }
 
-        foreach ($this->collectWorkerReplayPartials() as $path) {
-            @unlink($path);
+        foreach ($this->collectWorkerReplayPartials() as $key) {
+            $this->state->delete($key);
         }
     }
 
@@ -900,14 +842,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return;
         }
 
-        $token = $this->workerToken();
-        $path = self::workerResultsPath($token);
-        $dir = dirname($path);
-
-        if (! is_dir($dir) && ! @mkdir($dir, 0755, true) && ! is_dir($dir)) {
-            return;
-        }
-
         $json = json_encode([
             'results' => $results,
             'replayed' => $this->replayedCount,
@@ -917,25 +851,15 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return;
         }
 
-        $tmp = $path.'.'.bin2hex(random_bytes(4)).'.tmp';
-
-        if (@file_put_contents($tmp, $json) === false) {
-            return;
-        }
-
-        if (! @rename($tmp, $path)) {
-            @unlink($tmp);
-        }
+        $this->state->write(self::workerResultsKey($this->workerToken()), $json);
     }
 
     /**
-     * @return array<int, string>
+     * @return list<string> State keys of per-worker replay partials.
      */
     private function collectWorkerReplayPartials(): array
     {
-        $matches = glob(self::workerResultsGlob());
-
-        return $matches === false ? [] : $matches;
+        return $this->state->keysWithPrefix(self::KEY_WORKER_RESULTS_PREFIX);
     }
 
     /**
@@ -948,17 +872,15 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         /** @var ResultCollector $collector */
         $collector = Container::getInstance()->get(ResultCollector::class);
 
-        foreach ($this->collectWorkerReplayPartials() as $path) {
-            $raw = @file_get_contents($path);
+        foreach ($this->collectWorkerReplayPartials() as $key) {
+            $raw = $this->state->read($key);
+            $this->state->delete($key);
 
-            if ($raw === false) {
-                @unlink($path);
-
+            if ($raw === null) {
                 continue;
             }
 
             $decoded = json_decode($raw, true);
-            @unlink($path);
 
             if (! is_array($decoded)) {
                 continue;
@@ -1009,11 +931,11 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     /**
      * @return array<string, array<int, string>>|null
      */
-    private function readPartial(string $path): ?array
+    private function readPartial(string $key): ?array
     {
-        $raw = @file_get_contents($path);
+        $raw = $this->state->read($key);
 
-        if ($raw === false) {
+        if ($raw === null) {
             return null;
         }
 
@@ -1079,9 +1001,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private function bumpRecordedSha(): void
     {
         $projectRoot = TestSuite::getInstance()->rootPath;
-        $cachePath = self::cachePath();
 
-        $graph = Graph::load($projectRoot, $cachePath);
+        $graph = $this->loadGraph($projectRoot);
 
         if (! $graph instanceof Graph) {
             return;
@@ -1100,7 +1021,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $workingTreeFiles = $changedFiles->since($currentSha) ?? [];
         $graph->setLastRunTree($this->branch, $changedFiles->snapshotTree($workingTreeFiles));
 
-        $graph->save($cachePath);
+        $this->saveGraph($graph);
     }
 
     /**
@@ -1119,10 +1040,9 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return;
         }
 
-        $cachePath = self::cachePath();
         $projectRoot = TestSuite::getInstance()->rootPath;
 
-        $graph = Graph::load($projectRoot, $cachePath);
+        $graph = $this->loadGraph($projectRoot);
 
         if (! $graph instanceof Graph) {
             return;
@@ -1132,7 +1052,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             $graph->setResult($this->branch, $testId, $result['status'], $result['message'], $result['time']);
         }
 
-        $graph->save($cachePath);
+        $this->saveGraph($graph);
         $collector->reset();
     }
 

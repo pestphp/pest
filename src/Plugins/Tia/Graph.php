@@ -374,19 +374,15 @@ final class Graph
         }
     }
 
-    public static function load(string $projectRoot, string $path): ?self
+    /**
+     * Rebuilds a graph from its JSON representation. Returns `null` when
+     * the payload is missing, unreadable, or schema-incompatible. Separated
+     * from transport (state backend, file, etc.) so tests can feed bytes
+     * directly without touching disk.
+     */
+    public static function decode(string $json, string $projectRoot): ?self
     {
-        if (! is_file($path)) {
-            return null;
-        }
-
-        $raw = @file_get_contents($path);
-
-        if ($raw === false) {
-            return null;
-        }
-
-        $data = json_decode($raw, true);
+        $data = json_decode($json, true);
 
         if (! is_array($data) || ($data['schema'] ?? null) !== 1) {
             return null;
@@ -402,14 +398,14 @@ final class Graph
         return $graph;
     }
 
-    public function save(string $path): bool
+    /**
+     * Serialises the graph to its JSON on-disk form. Returns `null` if the
+     * payload can't be encoded (extremely rare — pathological UTF-8 only).
+     * Persistence is the caller's responsibility: write the returned bytes
+     * through whatever `State` implementation is in play.
+     */
+    public function encode(): ?string
     {
-        $dir = dirname($path);
-
-        if (! is_dir($dir) && ! @mkdir($dir, 0755, true) && ! is_dir($dir)) {
-            return false;
-        }
-
         $payload = [
             'schema' => 1,
             'fingerprint' => $this->fingerprint,
@@ -418,25 +414,9 @@ final class Graph
             'baselines' => $this->baselines,
         ];
 
-        $tmp = $path.'.'.bin2hex(random_bytes(4)).'.tmp';
-
         $json = json_encode($payload, JSON_UNESCAPED_SLASHES);
 
-        if ($json === false) {
-            return false;
-        }
-
-        if (@file_put_contents($tmp, $json) === false) {
-            return false;
-        }
-
-        if (! @rename($tmp, $path)) {
-            @unlink($tmp);
-
-            return false;
-        }
-
-        return true;
+        return $json === false ? null : $json;
     }
 
     /**

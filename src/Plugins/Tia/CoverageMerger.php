@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 use Pest\Plugins\Tia;
+use Pest\Plugins\Tia\Contracts\State;
+use Pest\Support\Container;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use Throwable;
 
@@ -14,7 +16,7 @@ use Throwable;
  * executing only the affected tests.
  *
  * Invoked from `Pest\Support\Coverage::report()` right before the coverage
- * file is consumed. A marker file dropped by the `Tia` plugin gates the
+ * file is consumed. A marker dropped by the `Tia` plugin gates the
  * behaviour — plain `--coverage` runs (no `--tia`) leave the marker absent
  * and therefore keep their existing semantics.
  *
@@ -24,19 +26,17 @@ use Throwable;
  * Its `ProcessedCodeCoverageData` stores, per source file, per line, the
  * list of test IDs that covered that line. We:
  *
- *   1. Load the cached snapshot (from a previous `--tia --coverage` run).
+ *   1. Load the cached snapshot from `State` (serialised bytes).
  *   2. Strip every test id that re-ran this time from the cached map —
  *      the tests that ran now are the ones whose attribution is fresh.
  *   3. Merge the current run into the stripped cached snapshot via
  *      `CodeCoverage::merge()`.
  *   4. Write the merged result back to the report path (so Pest's report
- *      generator sees the full suite) and to the cache path (for the
+ *      generator sees the full suite) and back into `State` (for the
  *      next invocation).
- *   5. Remove the marker so subsequent plain `--coverage` runs are
- *      untouched.
  *
  * If no cache exists yet (first `--tia --coverage` run on this machine)
- * we simply save the current file as the cache — nothing to merge yet.
+ * we serialise the current object and save it — nothing to merge yet.
  *
  * @internal
  */
@@ -44,35 +44,33 @@ final class CoverageMerger
 {
     public static function applyIfMarked(string $reportPath): void
     {
-        $markerPath = Tia::coverageMarkerPath();
+        $state = self::state();
 
-        if (! is_file($markerPath)) {
+        if ($state === null || ! $state->exists(Tia::KEY_COVERAGE_MARKER)) {
             return;
         }
 
-        @unlink($markerPath);
+        $state->delete(Tia::KEY_COVERAGE_MARKER);
 
-        $cachePath = Tia::coverageCachePath();
+        $cachedBytes = $state->read(Tia::KEY_COVERAGE_CACHE);
 
-        if (! is_file($cachePath)) {
-            // First `--tia --coverage` run: nothing cached yet, the current
-            // report is the full suite itself. Save it verbatim so the next
-            // run has a snapshot to merge against.
-            @copy($reportPath, $cachePath);
+        if ($cachedBytes === null) {
+            // First `--tia --coverage` run: nothing cached yet, so the
+            // current file already represents the full suite. Capture it
+            // verbatim (as serialised bytes) for next time.
+            $current = self::requireCoverage($reportPath);
+
+            if ($current !== null) {
+                $state->write(Tia::KEY_COVERAGE_CACHE, serialize($current));
+            }
 
             return;
         }
 
-        try {
-            /** @var CodeCoverage $cached */
-            $cached = require $cachePath;
+        $cached = self::unserializeCoverage($cachedBytes);
+        $current = self::requireCoverage($reportPath);
 
-            /** @var CodeCoverage $current */
-            $current = require $reportPath;
-        } catch (Throwable) {
-            // Corrupt cache or unreadable report — fall back to the plain
-            // PHPUnit behaviour (the existing `require $reportPath` in the
-            // caller still runs against the untouched file).
+        if ($cached === null || $current === null) {
             return;
         }
 
@@ -80,15 +78,15 @@ final class CoverageMerger
 
         $cached->merge($current);
 
-        // Serialise the merged object back using PHPUnit's own "return
-        // expression" PHP format. Using `var_export` on the serialised
-        // payload keeps the file self-contained and independent of
-        // PHPUnit's internal exporter — the reader only needs to
-        // `require` it back.
-        $serialised = "<?php return unserialize(".var_export(serialize($cached), true).");\n";
+        $serialised = serialize($cached);
 
-        @file_put_contents($reportPath, $serialised);
-        @file_put_contents($cachePath, $serialised);
+        // Write back to the PHPUnit-style `.cov` path so the report reader
+        // can `require` it, and to the state cache for the next run.
+        @file_put_contents(
+            $reportPath,
+            "<?php return unserialize(".var_export($serialised, true).");\n",
+        );
+        $state->write(Tia::KEY_COVERAGE_CACHE, $serialised);
     }
 
     /**
@@ -145,5 +143,44 @@ final class CoverageMerger
         }
 
         return array_keys($ids);
+    }
+
+    private static function state(): ?State
+    {
+        try {
+            $state = Container::getInstance()->get(State::class);
+        } catch (Throwable) {
+            return null;
+        }
+
+        return $state instanceof State ? $state : null;
+    }
+
+    private static function requireCoverage(string $reportPath): ?CodeCoverage
+    {
+        if (! is_file($reportPath)) {
+            return null;
+        }
+
+        try {
+            /** @var mixed $value */
+            $value = require $reportPath;
+        } catch (Throwable) {
+            return null;
+        }
+
+        return $value instanceof CodeCoverage ? $value : null;
+    }
+
+    private static function unserializeCoverage(string $bytes): ?CodeCoverage
+    {
+        try {
+            /** @var mixed $value */
+            $value = @unserialize($bytes);
+        } catch (Throwable) {
+            return null;
+        }
+
+        return $value instanceof CodeCoverage ? $value : null;
     }
 }
