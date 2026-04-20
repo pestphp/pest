@@ -654,6 +654,20 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      */
     private function enterRecordMode(string $projectRoot, array $arguments): array
     {
+        $recorder = $this->recorder;
+
+        if (! $recorder->driverAvailable()) {
+            // Both series and parallel record require the coverage driver.
+            // Parallel also requires it because workers inherit the parent's
+            // PHP config — if the parent lacks the driver, workers will too
+            // and would silently produce no graph. Warn once, up-front, and
+            // continue running the suite without TIA so the user still gets
+            // their test results.
+            $this->emitCoverageDriverMissing();
+
+            return $arguments;
+        }
+
         if (Parallel::isEnabled()) {
             // Parent driving `--parallel`: workers will do the actual
             // recording. We only advertise the intent through a global.
@@ -671,21 +685,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return $arguments;
         }
 
-        $recorder = $this->recorder;
-
-        if (! $recorder->driverAvailable()) {
-            $this->output->writeln([
-                '',
-                '  <fg=white;options=bold;bg=red> ERROR </> No coverage driver is available.',
-                '',
-                '  TIA requires ext-pcov or Xdebug with coverage mode enabled to',
-                '  record the dependency graph. Install one and rerun with `--tia`.',
-                '',
-            ]);
-
-            exit(1);
-        }
-
         $recorder->activate();
 
         $this->output->writeln(sprintf(
@@ -695,6 +694,18 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         ));
 
         return $arguments;
+    }
+
+    private function emitCoverageDriverMissing(): void
+    {
+        $this->output->writeln([
+            '',
+            '  <fg=black;bg=yellow> WARNING </> No coverage driver is available — TIA skipped.',
+            '',
+            '  TIA needs <fg=cyan>ext-pcov</> or <fg=cyan>Xdebug</> with <fg=cyan>coverage</> mode enabled to record',
+            '  the dependency graph. Install or enable one and rerun with `--tia`.',
+            '',
+        ]);
     }
 
     /**
