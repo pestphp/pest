@@ -70,7 +70,12 @@ final readonly class Kernel
             ->add(Tia\CoverageCollector::class, new Tia\CoverageCollector)
             ->add(Tia\WatchPatterns::class, new Tia\WatchPatterns)
             ->add(Tia\ResultCollector::class, new Tia\ResultCollector)
-            ->add(Tia\Contracts\State::class, new Tia\FileState(__DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'.temp'));
+            ->add(Tia\Contracts\State::class, new Tia\FileState(__DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'.temp'))
+            ->add(Tia\BaselineSync::class, new Tia\BaselineSync(
+                $container->get(Tia\Contracts\State::class), // @phpstan-ignore argument.type
+                $output,
+                $input,
+            ));
 
         $kernel = new self(
             new Application,

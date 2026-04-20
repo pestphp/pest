@@ -8,6 +8,7 @@ use Pest\Contracts\Plugins\AddsOutput;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Contracts\Plugins\Terminable;
 use PHPUnit\Framework\TestStatus\TestStatus;
+use Pest\Plugins\Tia\BaselineSync;
 use Pest\Plugins\Tia\ChangedFiles;
 use Pest\Plugins\Tia\Contracts\State;
 use Pest\Plugins\Tia\CoverageCollector;
@@ -71,6 +72,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private const string OPTION = '--tia';
 
     private const string REBUILD_OPTION = '--tia-rebuild';
+
+    private const string PUBLISH_OPTION = '--tia-publish';
 
     /**
      * State keys under which TIA persists its blobs. Kept here as constants
@@ -195,6 +198,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         private readonly CoverageCollector $coverageCollector,
         private readonly WatchPatterns $watchPatterns,
         private readonly State $state,
+        private readonly BaselineSync $baselineSync,
     ) {}
 
     /**
@@ -271,6 +275,16 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $isWorker = Parallel::isWorker();
         $recordingGlobal = $isWorker && (string) Parallel::getGlobal(self::RECORDING_GLOBAL) === '1';
         $replayingGlobal = $isWorker && (string) Parallel::getGlobal(self::REPLAYING_GLOBAL) === '1';
+
+        // `--tia-publish` is its own entry point: it neither records nor
+        // replays, it just uploads whatever baseline is already on disk
+        // and exits. Handled before the usual `--tia` gating so users can
+        // publish without also triggering a suite run.
+        if (! $isWorker && $this->hasArgument(self::PUBLISH_OPTION, $arguments)) {
+            $projectRoot = TestSuite::getInstance()->rootPath;
+
+            exit($this->baselineSync->publish($projectRoot));
+        }
 
         $enabled = $this->hasArgument(self::OPTION, $arguments);
         $forceRebuild = $this->hasArgument(self::REBUILD_OPTION, $arguments);
@@ -530,6 +544,25 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                     '  <fg=yellow>TIA</> recorded commit is no longer reachable — graph will be rebuilt.',
                 );
                 $graph = null;
+            }
+        }
+
+        // No local graph and not being forced to rebuild from scratch: try
+        // to pull a team-shared baseline so fresh checkouts (new devs, CI
+        // containers) don't pay the full record cost. If the pull succeeds
+        // the graph is re-read and re-validated against the local env.
+        if ($graph === null && ! $forceRebuild) {
+            if ($this->baselineSync->fetchIfAvailable($projectRoot)) {
+                $graph = $this->loadGraph($projectRoot);
+
+                if ($graph instanceof Graph && ! Fingerprint::matches($graph->fingerprint(), $fingerprint)) {
+                    $this->output->writeln(
+                        '  <fg=yellow>TIA</> pulled baseline fingerprint mismatch — discarding.',
+                    );
+                    $this->state->delete(self::KEY_GRAPH);
+                    $this->state->delete(self::KEY_COVERAGE_CACHE);
+                    $graph = null;
+                }
             }
         }
 
