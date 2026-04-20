@@ -97,6 +97,20 @@ final class ResultCollector
         }
     }
 
+    /**
+     * Injects externally-collected results (e.g. partials flushed by parallel
+     * workers) into this collector so the parent can persist them in the same
+     * snapshot pass as non-parallel runs.
+     *
+     * @param  array<string, array{status: int, message: string, time: float, assertions: int}>  $results
+     */
+    public function merge(array $results): void
+    {
+        foreach ($results as $testId => $result) {
+            $this->results[$testId] = $result;
+        }
+    }
+
     public function reset(): void
     {
         $this->results = [];
