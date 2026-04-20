@@ -48,23 +48,37 @@ final readonly class ChangedFiles
             return $files;
         }
 
+        // Union: `$files` (what git currently reports) + every path that was
+        // dirty last run. The second set matters for reverts — when a user
+        // undoes a local edit, the file matches HEAD again and git reports
+        // it clean, so it would never enter `$files`. But it has genuinely
+        // changed vs the snapshot we captured during the bad run, so it
+        // must be checked.
+        $candidates = array_fill_keys($files, true);
+
+        foreach (array_keys($lastRunTree) as $snapshotted) {
+            $candidates[$snapshotted] = true;
+        }
+
         $remaining = [];
 
-        foreach ($files as $file) {
-            if (! isset($lastRunTree[$file])) {
+        foreach (array_keys($candidates) as $file) {
+            $snapshot = $lastRunTree[$file] ?? null;
+            $absolute = $this->projectRoot.DIRECTORY_SEPARATOR.$file;
+            $exists = is_file($absolute);
+
+            if ($snapshot === null) {
+                // File wasn't in last-run tree at all — trust git's signal.
                 $remaining[] = $file;
 
                 continue;
             }
 
-            $absolute = $this->projectRoot.DIRECTORY_SEPARATOR.$file;
-
-            if (! is_file($absolute)) {
-                // File is absent now. If the snapshot recorded it as absent
-                // too (sentinel ''), state is identical to last run — treat
-                // as unchanged. Otherwise it was present last run and got
-                // deleted since — that's a real change.
-                if ($lastRunTree[$file] !== '') {
+            if (! $exists) {
+                // Missing now. If the snapshot recorded it as absent too
+                // (sentinel ''), state is identical to last run — unchanged.
+                // Otherwise it was present last run and got deleted since.
+                if ($snapshot !== '') {
                     $remaining[] = $file;
                 }
 
@@ -73,7 +87,7 @@ final readonly class ChangedFiles
 
             $hash = @hash_file('xxh128', $absolute);
 
-            if ($hash === false || $hash !== $lastRunTree[$file]) {
+            if ($hash === false || $hash !== $snapshot) {
                 $remaining[] = $file;
             }
         }
