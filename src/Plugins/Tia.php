@@ -85,6 +85,21 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
     private const string AFFECTED_FILE = 'tia-affected.json';
 
+    /**
+     * Cache file holding PHPUnit's `CodeCoverage` object from the last
+     * `--tia --coverage` run. When the next run replays most tests from
+     * the TIA graph, only the affected tests produce fresh coverage; the
+     * rest is merged in from this cache so the report stays complete.
+     */
+    private const string COVERAGE_CACHE_FILE = 'tia-coverage.php';
+
+    /**
+     * Marker file dropped by `Tia` to tell `Support\Coverage` to apply the
+     * merge. Absent on plain `--coverage` runs so non-TIA usage keeps its
+     * current (narrow) behaviour.
+     */
+    private const string COVERAGE_MARKER_FILE = 'tia-coverage.marker';
+
     private const string WORKER_PREFIX = 'tia-worker-';
 
     private const string WORKER_RESULTS_PREFIX = 'tia-worker-results-';
@@ -194,6 +209,16 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private static function workerResultsGlob(): string
     {
         return self::tempDir().DIRECTORY_SEPARATOR.self::WORKER_RESULTS_PREFIX.'*.json';
+    }
+
+    public static function coverageCachePath(): string
+    {
+        return self::tempDir().DIRECTORY_SEPARATOR.self::COVERAGE_CACHE_FILE;
+    }
+
+    public static function coverageMarkerPath(): string
+    {
+        return self::tempDir().DIRECTORY_SEPARATOR.self::COVERAGE_MARKER_FILE;
     }
 
     /**
@@ -505,20 +530,15 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             }
         }
 
-        // Force record mode whenever `--coverage` is active. Replay short-
-        // circuits tests via cached results, which would make their code
-        // paths invisible to PHPUnit's coverage driver and tank the report.
-        // A `--tia --coverage` run is the one the user wants FULL coverage
-        // from — we just harvest graph edges alongside, to feed future
-        // `--tia` (no `--coverage`) runs.
-        if ($graph instanceof Graph && ! $this->piggybackCoverage) {
-            return $this->enterReplayMode($graph, $projectRoot, $arguments);
+        // Drop the marker so `Support\Coverage::report()` knows to merge the
+        // current (narrow) coverage with the cached full-run snapshot. Plain
+        // `--coverage` runs don't drop it, so their behaviour is untouched.
+        if ($this->piggybackCoverage) {
+            @file_put_contents(self::coverageMarkerPath(), '');
         }
 
-        if ($graph instanceof Graph && $this->piggybackCoverage) {
-            $this->output->writeln(
-                '  <fg=cyan>TIA</> `--coverage` active — running full suite and refreshing graph.',
-            );
+        if ($graph instanceof Graph) {
+            return $this->enterReplayMode($graph, $projectRoot, $arguments);
         }
 
         return $this->enterRecordMode($projectRoot, $arguments);
