@@ -9,6 +9,7 @@ use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Contracts\Plugins\Terminable;
 use PHPUnit\Framework\TestStatus\TestStatus;
 use Pest\Plugins\Tia\ChangedFiles;
+use Pest\Plugins\Tia\CoverageCollector;
 use Pest\Plugins\Tia\Fingerprint;
 use Pest\Plugins\Tia\Graph;
 use Pest\Plugins\Tia\Recorder;
@@ -99,6 +100,15 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      */
     private const string REPLAYING_GLOBAL = 'TIA_REPLAYING';
 
+    /**
+     * Global flag that tells workers to piggyback on PHPUnit's coverage
+     * driver (set by the parent whenever `--tia --coverage` is used). Workers
+     * can't infer this from their own argv because paratest forwards only
+     * `--coverage-php=<path>` — not the `--coverage` flag Pest's Coverage
+     * plugin inspects.
+     */
+    private const string PIGGYBACK_COVERAGE_GLOBAL = 'TIA_PIGGYBACK_COVERAGE';
+
     private bool $graphWritten = false;
 
     private bool $replayRan = false;
@@ -186,9 +196,26 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         return self::tempDir().DIRECTORY_SEPARATOR.self::WORKER_RESULTS_PREFIX.'*.json';
     }
 
+    /**
+     * True when TIA is piggybacking on PHPUnit's own coverage driver. Toggled
+     * in `handleArguments` whenever `--tia` runs alongside `--coverage` so
+     * both the parent and workers read edges from the shared `CodeCoverage`
+     * instance instead of starting a second PCOV / Xdebug session.
+     */
+    private bool $piggybackCoverage = false;
+
+    /**
+     * True once we have committed to recording in this process — either by
+     * activating our own `Recorder` or by delegating to PHPUnit's coverage
+     * driver via `CoverageCollector`. `terminate()` only flushes when this
+     * is set, so runs that never entered record mode don't poke the graph.
+     */
+    private bool $recordingActive = false;
+
     public function __construct(
         private readonly OutputInterface $output,
         private readonly Recorder $recorder,
+        private readonly CoverageCollector $coverageCollector,
         private readonly WatchPatterns $watchPatterns,
     ) {}
 
@@ -249,16 +276,17 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $arguments = $this->popArgument(self::OPTION, $arguments);
         $arguments = $this->popArgument(self::REBUILD_OPTION, $arguments);
 
-        if ($this->coverageReportActive()) {
-            if (! $isWorker) {
-                $this->output->writeln(
-                    '  <fg=yellow>TIA</> `--coverage` is active — TIA disabled to avoid '.
-                    'conflicting with PHPUnit\'s own coverage collection.',
-                );
-            }
-
-            return $arguments;
-        }
+        // When `--coverage` is active, piggyback on PHPUnit's CodeCoverage
+        // instead of starting our own PCOV / Xdebug session. Running two
+        // collectors against the same driver corrupts both — so we let
+        // PHPUnit drive, and read per-test edges from the shared instance
+        // at the end of the run via `CoverageCollector`. Workers can't
+        // detect `--coverage` from their own argv (paratest strips it,
+        // keeping only `--coverage-php=<path>`) so the parent broadcasts
+        // via a global.
+        $this->piggybackCoverage = $isWorker
+            ? (string) Parallel::getGlobal(self::PIGGYBACK_COVERAGE_GLOBAL) === '1'
+            : $this->coverageReportActive();
 
         $projectRoot = TestSuite::getInstance()->rootPath;
 
@@ -285,17 +313,20 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         $recorder = $this->recorder;
 
-        if (! $recorder->isActive()) {
+        if (! $this->recordingActive && ! $recorder->isActive()) {
             return;
         }
 
         $this->graphWritten = true;
 
         $projectRoot = TestSuite::getInstance()->rootPath;
-        $perTest = $recorder->perTestFiles();
+        $perTest = $this->piggybackCoverage
+            ? $this->coverageCollector->perTestFiles()
+            : $recorder->perTestFiles();
 
         if ($perTest === []) {
             $recorder->reset();
+            $this->coverageCollector->reset();
 
             return;
         }
@@ -303,6 +334,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         if (Parallel::isWorker()) {
             $this->flushWorkerPartial($projectRoot, $perTest);
             $recorder->reset();
+            $this->coverageCollector->reset();
 
             return;
         }
@@ -330,6 +362,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         ));
 
         $recorder->reset();
+        $this->coverageCollector->reset();
     }
 
     /**
@@ -472,8 +505,20 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             }
         }
 
-        if ($graph instanceof Graph) {
+        // Force record mode whenever `--coverage` is active. Replay short-
+        // circuits tests via cached results, which would make their code
+        // paths invisible to PHPUnit's coverage driver and tank the report.
+        // A `--tia --coverage` run is the one the user wants FULL coverage
+        // from — we just harvest graph edges alongside, to feed future
+        // `--tia` (no `--coverage`) runs.
+        if ($graph instanceof Graph && ! $this->piggybackCoverage) {
             return $this->enterReplayMode($graph, $projectRoot, $arguments);
+        }
+
+        if ($graph instanceof Graph && $this->piggybackCoverage) {
+            $this->output->writeln(
+                '  <fg=cyan>TIA</> `--coverage` active — running full suite and refreshing graph.',
+            );
         }
 
         return $this->enterRecordMode($projectRoot, $arguments);
@@ -501,6 +546,15 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return $arguments;
         }
 
+        // Piggyback: PHPUnit starts its coverage driver, `CoverageCollector`
+        // harvests the per-test edges in `terminate()`. The Recorder stays
+        // idle — starting our own driver would corrupt PHPUnit's data.
+        if ($this->piggybackCoverage) {
+            $this->recordingActive = true;
+
+            return $arguments;
+        }
+
         $recorder = $this->recorder;
 
         if (! $recorder->driverAvailable()) {
@@ -511,6 +565,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         $recorder->activate();
+        $this->recordingActive = true;
 
         return $arguments;
     }
@@ -656,7 +711,11 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     {
         $recorder = $this->recorder;
 
-        if (! $recorder->driverAvailable()) {
+        // Piggyback: PHPUnit's coverage driver is already running under
+        // `--coverage`. We don't need our own driver — `CoverageCollector`
+        // harvests the per-test edges from PHPUnit's shared `CodeCoverage`
+        // at terminate time. Skip the driver check entirely in this mode.
+        if (! $this->piggybackCoverage && ! $recorder->driverAvailable()) {
             // Both series and parallel record require the coverage driver.
             // Parallel also requires it because workers inherit the parent's
             // PHP config — if the parent lacks the driver, workers will too
@@ -677,8 +736,24 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
             Parallel::setGlobal(self::RECORDING_GLOBAL, '1');
 
+            if ($this->piggybackCoverage) {
+                Parallel::setGlobal(self::PIGGYBACK_COVERAGE_GLOBAL, '1');
+            }
+
+            $this->output->writeln($this->piggybackCoverage
+                ? '  <fg=cyan>TIA</> recording dependency graph in parallel via `--coverage` (first run) — '.
+                    'subsequent `--tia` runs will only re-execute affected tests.'
+                : '  <fg=cyan>TIA</> recording dependency graph in parallel (first run) — '.
+                    'subsequent `--tia` runs will only re-execute affected tests.');
+
+            return $arguments;
+        }
+
+        if ($this->piggybackCoverage) {
+            $this->recordingActive = true;
+
             $this->output->writeln(
-                '  <fg=cyan>TIA</> recording dependency graph in parallel (first run) — '.
+                '  <fg=cyan>TIA</> recording dependency graph via `--coverage` (first run) — '.
                 'subsequent `--tia` runs will only re-execute affected tests.',
             );
 
@@ -686,6 +761,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         $recorder->activate();
+        $this->recordingActive = true;
 
         $this->output->writeln(sprintf(
             '  <fg=cyan>TIA</> recording dependency graph via %s (first run) — '.

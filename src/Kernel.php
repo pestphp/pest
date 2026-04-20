@@ -67,6 +67,7 @@ final readonly class Kernel
             ->add(OutputInterface::class, $output)
             ->add(Container::class, $container)
             ->add(Tia\Recorder::class, new Tia\Recorder)
+            ->add(Tia\CoverageCollector::class, new Tia\CoverageCollector)
             ->add(Tia\WatchPatterns::class, new Tia\WatchPatterns)
             ->add(Tia\ResultCollector::class, new Tia\ResultCollector);
 
