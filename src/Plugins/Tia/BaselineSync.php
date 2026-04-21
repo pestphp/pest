@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
+use Composer\InstalledVersions;
 use Pest\Plugins\Tia;
 use Pest\Plugins\Tia\Contracts\State;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -111,44 +112,134 @@ final class BaselineSync
 
     /**
      * Prints actionable instructions for publishing a first baseline when
-     * the consumer-side fetch finds nothing. Without this, the "no
-     * baseline yet" state is a dead-end for users — they see the message
-     * and have to guess what to do next.
+     * the consumer-side fetch finds nothing.
+     *
+     * Behaviour splits on environment:
+     *   - **CI:** a single line. The current run is almost certainly *the*
+     *     publisher (it's what this workflow does by definition), so
+     *     printing the whole recipe again is redundant and noisy.
+     *   - **Local:** the full recipe, adapted to Laravel's pre-test steps
+     *     (`.env.example` copy + `artisan key:generate`) when the framework
+     *     is present. Generic PHP projects get a slimmer skeleton.
      */
     private function emitPublishInstructions(string $repo): void
     {
-        $this->output->writeln([
+        if ($this->isCi()) {
+            $this->output->writeln(
+                '  <fg=yellow>TIA</> no baseline yet — this run will produce one.',
+            );
+
+            return;
+        }
+
+        $yaml = $this->isLaravel()
+            ? $this->laravelWorkflowYaml()
+            : $this->genericWorkflowYaml();
+
+        $preamble = [
             '  <fg=yellow>TIA</> no baseline published yet — recording locally.',
             '',
             '  To share the baseline with your team, add this workflow to the repo:',
             '',
             '    <fg=cyan>.github/workflows/tia-baseline.yml</>',
             '',
-            '      name: TIA Baseline',
-            '      on:',
-            '        push: { branches: [main] }',
-            '        schedule: [{ cron: \'0 3 * * *\' }]',
-            '        workflow_dispatch:',
-            '      jobs:',
-            '        baseline:',
-            '          runs-on: ubuntu-latest',
-            '          steps:',
-            '            - uses: actions/checkout@v4',
-            '              with: { fetch-depth: 0 }',
-            '            - uses: shivammathur/setup-php@v2',
-            '              with: { php-version: \'8.4\', coverage: xdebug }',
-            '            - run: composer install --no-interaction --prefer-dist',
-            '            - run: ./vendor/bin/pest --parallel --tia --coverage',
-            '            - uses: actions/upload-artifact@v4',
-            '              with:',
-            '                name: pest-tia-baseline',
-            '                path: vendor/pestphp/pest/.temp/tia/',
-            '                retention-days: 30',
+        ];
+
+        $indentedYaml = array_map(
+            static fn (string $line): string => '      '.$line,
+            explode("\n", $yaml),
+        );
+
+        $trailer = [
             '',
             sprintf('  Commit, push, then run once:  <fg=cyan>gh workflow run tia-baseline.yml -R %s</>', $repo),
             '  Details: <fg=gray>https://pestphp.com/docs/tia/ci</>',
             '',
-        ]);
+        ];
+
+        $this->output->writeln([...$preamble, ...$indentedYaml, ...$trailer]);
+    }
+
+    /**
+     * True when running inside a CI provider. Conservative list — only the
+     * three providers Pest formally supports / sees in the wild. `CI=true`
+     * alone is ambiguous (users set it locally too) so we require a
+     * provider-specific flag.
+     */
+    private function isCi(): bool
+    {
+        return getenv('GITHUB_ACTIONS') === 'true'
+            || getenv('GITLAB_CI') === 'true'
+            || getenv('CIRCLECI') === 'true';
+    }
+
+    private function isLaravel(): bool
+    {
+        return class_exists(InstalledVersions::class)
+            && InstalledVersions::isInstalled('laravel/framework');
+    }
+
+    /**
+     * Laravel projects need a populated `.env` and a generated `APP_KEY`
+     * before the first boot, otherwise `Illuminate\Encryption\MissingAppKeyException`
+     * fires during `setUp`. Include the standard pre-test dance plus the
+     * extension set typical Laravel apps rely on.
+     */
+    private function laravelWorkflowYaml(): string
+    {
+        return <<<'YAML'
+name: TIA Baseline
+on:
+  push: { branches: [main] }
+  schedule: [{ cron: '0 3 * * *' }]
+  workflow_dispatch:
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: xdebug
+          extensions: json, dom, curl, libxml, mbstring, zip, pdo, pdo_sqlite, sqlite3, bcmath, intl
+      - run: cp .env.example .env
+      - run: composer install --no-interaction --prefer-dist
+      - run: php artisan key:generate
+      - run: ./vendor/bin/pest --parallel --tia --coverage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pest-tia-baseline
+          path: vendor/pestphp/pest/.temp/tia/
+          retention-days: 30
+YAML;
+    }
+
+    private function genericWorkflowYaml(): string
+    {
+        return <<<'YAML'
+name: TIA Baseline
+on:
+  push: { branches: [main] }
+  schedule: [{ cron: '0 3 * * *' }]
+  workflow_dispatch:
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: shivammathur/setup-php@v2
+        with: { php-version: '8.4', coverage: xdebug }
+      - run: composer install --no-interaction --prefer-dist
+      - run: ./vendor/bin/pest --parallel --tia --coverage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pest-tia-baseline
+          path: vendor/pestphp/pest/.temp/tia/
+          retention-days: 30
+YAML;
     }
 
     /**
