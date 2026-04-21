@@ -282,9 +282,7 @@ final class Graph
             return null;
         }
 
-        $value = $baseline['results'][$testId]['assertions'];
-
-        return is_int($value) ? $value : null;
+        return $baseline['results'][$testId]['assertions'];
     }
 
     public function getResult(string $branch, string $testId, string $fallbackBranch = 'main'): ?TestStatus
