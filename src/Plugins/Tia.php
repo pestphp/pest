@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Plugins;
 
+use NunoMaduro\Collision\Adapters\Phpunit\Printers\DefaultPrinter;
 use Pest\Contracts\Plugins\AddsOutput;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Contracts\Plugins\Terminable;
@@ -151,12 +152,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      * @var array<string, int>
      */
     private array $cachedAssertionsByTestId = [];
-
-    /**
-     * Captured at replay setup so the end-of-run summary can report the
-     * scope of the changes that drove the run.
-     */
-    private int $changedFileCount = 0;
 
     /**
      * Holds the graph during replay so `beforeEach` can look up cached
@@ -460,7 +455,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         if ($this->replayRan) {
             $this->bumpRecordedSha();
-            $this->emitReplaySummary();
         }
 
         if ((string) Parallel::getGlobal(self::RECORDING_GLOBAL) !== '1') {
@@ -737,13 +731,13 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         $affected = $changed === [] ? [] : $graph->affected($changed);
 
-        $this->changedFileCount = count($changed);
-
         $affectedSet = array_fill_keys($affected, true);
 
         $this->replayRan = true;
         $this->replayGraph = $graph;
         $this->affectedFiles = $affectedSet;
+
+        $this->registerRecap();
 
         if (! Parallel::isEnabled()) {
             return $arguments;
@@ -1057,23 +1051,28 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      * git still reports them as modified.
      */
     /**
-     * Prints the post-run TIA summary. Runs after the test report so the
-     * replayed count reflects what actually happened (cache hits counted
-     * inside `getCachedResult`) rather than a graph-level estimate that
-     * ignores any CLI path filter the user passed in.
+     * Hooks a recap callback into Collision's `DefaultPrinter` so TIA's
+     * counts ride along the "Tests: N passed (M assertions, ...)" line
+     * instead of printing on their own block. Collision joins each
+     * callback's return value with a gray `, ` separator, so we return
+     * a single fragment like `728 replayed via tia` (or nothing when
+     * there's no replay activity to report).
      */
-    private function emitReplaySummary(): void
+    private function registerRecap(): void
     {
-        // `$executedCount` and `$replayedCount` are maintained in lockstep
-        // by `getCachedResult()` — every test id that hits that method bumps
-        // exactly one of them. Summing the two gives the test-method total
-        // that lines up with Pest's "Tests: N" banner directly above.
-        $this->output->writeln(sprintf(
-            '  <fg=green>TIA</> %d changed file(s) → %d affected, %d replayed.',
-            $this->changedFileCount,
-            $this->executedCount,
-            $this->replayedCount,
-        ));
+        DefaultPrinter::addRecap(function (): string {
+            $fragments = [];
+
+            if ($this->executedCount > 0) {
+                $fragments[] = $this->executedCount.' affected';
+            }
+
+            if ($this->replayedCount > 0) {
+                $fragments[] = $this->replayedCount.' replayed';
+            }
+
+            return $fragments === [] ? '' : implode(', ', $fragments);
+        });
     }
 
     private function bumpRecordedSha(): void

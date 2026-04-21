@@ -69,10 +69,6 @@ final class BaselineSync
             return false;
         }
 
-        if (! $this->confirm($repo)) {
-            return false;
-        }
-
         $this->output->writeln(sprintf(
             '  <fg=cyan>TIA</> fetching baseline from <fg=white>%s</>…',
             $repo,
@@ -335,41 +331,6 @@ final class BaselineSync
         }
 
         return null;
-    }
-
-    /**
-     * One-shot Y/n prompt. Defaults to Y. In non-interactive shells (CI,
-     * piped input) returns false so scripted runs never hang waiting for
-     * input.
-     */
-    private function confirm(string $repo): bool
-    {
-        if (! $this->isTerminal()) {
-            return false;
-        }
-
-        $this->output->writeln('');
-        $this->output->writeln(sprintf(
-            '  <fg=cyan>TIA</> no local cache — fetch baseline from <fg=white>%s</>? <fg=gray>[Y/n]</>',
-            $repo,
-        ));
-
-        $handle = @fopen('php://stdin', 'r');
-
-        if ($handle === false) {
-            return false;
-        }
-
-        $line = fgets($handle);
-        fclose($handle);
-
-        if ($line === false) {
-            return false;
-        }
-
-        $line = strtolower(trim($line));
-
-        return $line === '' || $line === 'y' || $line === 'yes';
     }
 
     /**
