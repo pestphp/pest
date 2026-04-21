@@ -29,6 +29,10 @@ final readonly class Livewire implements WatchDefault
             // Livewire views live alongside Blade views or in a dedicated dir.
             'resources/views/livewire/**/*.blade.php' => [$testPath],
             'resources/views/components/**/*.blade.php' => [$testPath],
+            // Volt's second default mount — single-file components used as
+            // full-page routes. Missing this means editing a Volt page
+            // doesn't re-run its tests.
+            'resources/views/pages/**/*.blade.php' => [$testPath],
 
             // Livewire JS interop / Alpine plugins.
             'resources/js/**/*.js' => [$testPath],

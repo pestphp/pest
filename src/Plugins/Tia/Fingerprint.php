@@ -16,7 +16,7 @@ final readonly class Fingerprint
 {
     // Bump this whenever the set of inputs or the hash algorithm changes, so
     // older graphs are invalidated automatically.
-    private const int SCHEMA_VERSION = 2;
+    private const int SCHEMA_VERSION = 3;
 
     /**
      * @return array<string, int|string|null>
@@ -26,6 +26,13 @@ final readonly class Fingerprint
         return [
             'schema' => self::SCHEMA_VERSION,
             'php' => PHP_VERSION,
+            // Loaded extensions + their versions. Guards against the
+            // "recorded without pcov/xdebug → subsequent run has the
+            // driver but graph has no edges" trap where the fingerprint
+            // matches but the graph is effectively empty. Sorted so two
+            // processes with the same extensions in different load order
+            // still produce the same hash.
+            'extensions' => self::extensionsFingerprint(),
             'pest' => self::readPestVersion($projectRoot),
             'composer_lock' => self::hashIfExists($projectRoot.'/composer.lock'),
             'phpunit_xml' => self::hashIfExists($projectRoot.'/phpunit.xml'),
@@ -39,6 +46,27 @@ final readonly class Fingerprint
             'pest_factory' => self::hashIfExists(__DIR__.'/../../Factories/TestCaseFactory.php'),
             'pest_method_factory' => self::hashIfExists(__DIR__.'/../../Factories/TestCaseMethodFactory.php'),
         ];
+    }
+
+    /**
+     * Deterministic hash of the PHP extension set: `ext-name@version` pairs
+     * sorted alphabetically and joined. Captures both presence (pcov
+     * disappeared? graph must rebuild) and version changes (xdebug minor
+     * bump with coverage-mode semantics).
+     */
+    private static function extensionsFingerprint(): string
+    {
+        $extensions = get_loaded_extensions();
+        sort($extensions);
+
+        $parts = [];
+
+        foreach ($extensions as $name) {
+            $version = phpversion($name);
+            $parts[] = $name.'@'.($version === false ? '?' : $version);
+        }
+
+        return hash('xxh128', implode("\n", $parts));
     }
 
     /**

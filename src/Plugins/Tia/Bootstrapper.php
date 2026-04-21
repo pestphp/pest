@@ -32,9 +32,11 @@ final readonly class Bootstrapper implements BootstrapperContract
     }
 
     /**
-     * Resolve Pest's `.temp/` directory relative to this file so TIA's
-     * caches share the same location as the rest of Pest's transient
-     * state (PHPUnit result cache, coverage PHP dumps, etc.).
+     * TIA's own subdirectory under Pest's `.temp/`. Keeping every TIA blob
+     * in a single folder (`.temp/tia/`) avoids the `tia-`-prefix salad
+     * alongside PHPUnit's unrelated files (coverage.php, test-results,
+     * code-coverage/) and makes the CI artifact-upload path a single
+     * directory instead of a list of individual files.
      */
     private function tempDir(): string
     {
@@ -42,6 +44,7 @@ final readonly class Bootstrapper implements BootstrapperContract
             .DIRECTORY_SEPARATOR.'..'
             .DIRECTORY_SEPARATOR.'..'
             .DIRECTORY_SEPARATOR.'..'
-            .DIRECTORY_SEPARATOR.'.temp';
+            .DIRECTORY_SEPARATOR.'.temp'
+            .DIRECTORY_SEPARATOR.'tia';
     }
 }

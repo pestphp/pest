@@ -30,7 +30,7 @@ use Throwable;
  * -----
  *  - **Record** — no graph (or fingerprint / recording commit drifted). The
  *    full suite runs with PCOV / Xdebug capture per test; the resulting
- *    `test → [source_file, …]` edges land in `.temp/tia.json`.
+ *    `test → [source_file, …]` edges land in `.temp/tia/graph.json`.
  *  - **Replay** — graph valid. We diff the working tree against the recording
  *    commit, intersect changed files with graph edges, and run only the
  *    affected tests. Newly-added tests unknown to the graph are always
@@ -53,7 +53,7 @@ use Throwable;
  *  - **Worker, record**: boots through `bin/worker.php`, which re-runs
  *    `CallsHandleArguments`. We detect the worker context + recording flag,
  *    activate the `Recorder`, and flush the partial graph on `terminate()`
- *    into `.temp/tia-worker-<TEST_TOKEN>.json`.
+ *    into `.temp/tia/worker-edges-<TEST_TOKEN>.json`.
  *  - **Worker, replay**: nothing to do; args already narrowed.
  *
  * Guardrails
@@ -77,29 +77,31 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     /**
      * State keys under which TIA persists its blobs. Kept here as constants
      * (rather than scattered strings) so the storage layout is visible in
-     * one place, and so `CoverageMerger` can reference the same keys.
+     * one place, and so `CoverageMerger` can reference the same keys. All
+     * files live under `.temp/tia/` — the `tia-` filename prefix is gone
+     * because the directory already namespaces them.
      */
-    public const string KEY_GRAPH = 'tia.json';
+    public const string KEY_GRAPH = 'graph.json';
 
-    public const string KEY_AFFECTED = 'tia-affected.json';
+    public const string KEY_AFFECTED = 'affected.json';
 
-    private const string KEY_WORKER_EDGES_PREFIX = 'tia-worker-edges-';
+    private const string KEY_WORKER_EDGES_PREFIX = 'worker-edges-';
 
-    private const string KEY_WORKER_RESULTS_PREFIX = 'tia-worker-results-';
+    private const string KEY_WORKER_RESULTS_PREFIX = 'worker-results-';
 
     /**
      * Raw-serialised `CodeCoverage` snapshot from the last `--tia --coverage`
      * run. Stored as bytes so the backend stays JSON/file-agnostic — the
      * merger un/serialises rather than `require`-ing a PHP file.
      */
-    public const string KEY_COVERAGE_CACHE = 'tia-coverage.bin';
+    public const string KEY_COVERAGE_CACHE = 'coverage.bin';
 
     /**
      * Marker key dropped by `Tia` to tell `Support\Coverage` to apply the
      * merge. Absent on plain `--coverage` runs so non-TIA usage keeps its
      * current (narrow) behaviour.
      */
-    public const string KEY_COVERAGE_MARKER = 'tia-coverage.marker';
+    public const string KEY_COVERAGE_MARKER = 'coverage.marker';
 
     /**
      * Global flag toggled by the parent process so workers know to record.
@@ -108,7 +110,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
     /**
      * Global flag that tells workers to install the TIA filter (replay mode).
-     * Workers read the affected set from `.temp/tia-affected.json`.
+     * Workers read the affected set from `.temp/tia/affected.json`.
      */
     private const string REPLAYING_GLOBAL = 'TIA_REPLAYING';
 

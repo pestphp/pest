@@ -16,8 +16,9 @@ use Symfony\Component\Process\Process;
  *
  * Storage: **workflow artifacts**, not releases. A dedicated CI workflow
  * (conventionally `.github/workflows/tia-baseline.yml`) runs the full
- * suite under `--tia` and uploads the resulting `tia.json` +
- * `tia-coverage.bin` as a named artifact (`pest-tia-baseline`). On dev
+ * suite under `--tia` and uploads the `.temp/tia/` directory as a named
+ * artifact (`pest-tia-baseline`) containing `graph.json` +
+ * `coverage.bin`. On dev
  * machines, this class finds the latest successful run of that workflow
  * and downloads the artifact via `gh`.
  *
@@ -48,7 +49,7 @@ final class BaselineSync
 
     /**
      * Artifact name the workflow uploads under. The artifact is a zip
-     * containing `tia.json` (always) + `tia-coverage.bin` (optional).
+     * containing `graph.json` (always) + `coverage.bin` (optional).
      */
     private const string ARTIFACT_NAME = 'pest-tia-baseline';
 
@@ -87,9 +88,7 @@ final class BaselineSync
         $payload = $this->download($repo);
 
         if ($payload === null) {
-            $this->output->writeln(
-                '  <fg=yellow>TIA</> no baseline published yet — recording locally.',
-            );
+            $this->emitPublishInstructions($repo);
 
             return false;
         }
@@ -108,6 +107,48 @@ final class BaselineSync
         ));
 
         return true;
+    }
+
+    /**
+     * Prints actionable instructions for publishing a first baseline when
+     * the consumer-side fetch finds nothing. Without this, the "no
+     * baseline yet" state is a dead-end for users — they see the message
+     * and have to guess what to do next.
+     */
+    private function emitPublishInstructions(string $repo): void
+    {
+        $this->output->writeln([
+            '  <fg=yellow>TIA</> no baseline published yet — recording locally.',
+            '',
+            '  To share the baseline with your team, add this workflow to the repo:',
+            '',
+            '    <fg=cyan>.github/workflows/tia-baseline.yml</>',
+            '',
+            '      name: TIA Baseline',
+            '      on:',
+            '        push: { branches: [main] }',
+            '        schedule: [{ cron: \'0 3 * * *\' }]',
+            '        workflow_dispatch:',
+            '      jobs:',
+            '        baseline:',
+            '          runs-on: ubuntu-latest',
+            '          steps:',
+            '            - uses: actions/checkout@v4',
+            '              with: { fetch-depth: 0 }',
+            '            - uses: shivammathur/setup-php@v2',
+            '              with: { php-version: \'8.4\', coverage: xdebug }',
+            '            - run: composer install --no-interaction --prefer-dist',
+            '            - run: ./vendor/bin/pest --parallel --tia --coverage',
+            '            - uses: actions/upload-artifact@v4',
+            '              with:',
+            '                name: pest-tia-baseline',
+            '                path: vendor/pestphp/pest/.temp/tia/',
+            '                retention-days: 30',
+            '',
+            sprintf('  Commit, push, then run once:  <fg=cyan>gh workflow run tia-baseline.yml -R %s</>', $repo),
+            '  Details: <fg=gray>https://pestphp.com/docs/tia/ci</>',
+            '',
+        ]);
     }
 
     /**

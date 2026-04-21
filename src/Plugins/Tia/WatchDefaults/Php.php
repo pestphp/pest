@@ -25,9 +25,14 @@ final readonly class Php implements WatchDefault
 
         return [
             // Environment files — can change DB drivers, feature flags,
-            // queue connections, etc. Not PHP, not fingerprinted.
+            // queue connections, etc. Not PHP, not fingerprinted. Covers
+            // the local-override variants (`.env.local`, `.env.testing.local`)
+            // that both Laravel and Symfony recommend for machine-specific
+            // config.
             '.env' => [$testPath],
             '.env.testing' => [$testPath],
+            '.env.local' => [$testPath],
+            '.env.*.local' => [$testPath],
 
             // Docker / CI — can affect integration test infrastructure.
             'docker-compose.yml' => [$testPath],

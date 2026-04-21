@@ -46,7 +46,11 @@ final readonly class Symfony implements WatchDefault
             'src/Kernel.php' => [$testPath],
 
             // Migrations — run during setUp (before coverage window).
+            // DoctrineMigrationsBundle's default is `migrations/` at the
+            // project root; many Symfony projects relocate to
+            // `src/Migrations/` — both covered.
             'migrations/**/*.php' => [$testPath],
+            'src/Migrations/**/*.php' => [$testPath],
 
             // Twig templates — compiled, source not PHP-executed.
             'templates/**/*.html.twig' => [$testPath],

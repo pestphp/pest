@@ -60,6 +60,10 @@ final readonly class Laravel implements WatchDefault
 
             // Blade templates — compiled to cache, source file not executed.
             'resources/views/**/*.blade.php' => [$featurePath],
+            // Email templates are nested under views/email or views/emails
+            // by convention and power mailable tests that render markup.
+            'resources/views/email/**/*.blade.php' => [$featurePath],
+            'resources/views/emails/**/*.blade.php' => [$featurePath],
 
             // Translations — JSON translations read via file_get_contents,
             // PHP translations loaded via include (but during boot).

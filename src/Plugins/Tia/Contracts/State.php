@@ -39,7 +39,7 @@ interface State
 
     /**
      * Returns every key whose name starts with `$prefix`. Used to collect
-     * paratest worker partials (`tia-worker-<token>.json`, etc.) without
+     * paratest worker partials (`worker-edges-<token>.json`, etc.) without
      * exposing backend-specific glob semantics.
      *
      * @return list<string>
