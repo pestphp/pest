@@ -74,8 +74,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
     private const string REBUILD_OPTION = '--tia-rebuild';
 
-    private const string PUBLISH_OPTION = '--tia-publish';
-
     /**
      * State keys under which TIA persists its blobs. Kept here as constants
      * (rather than scattered strings) so the storage layout is visible in
@@ -307,16 +305,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $isWorker = Parallel::isWorker();
         $recordingGlobal = $isWorker && (string) Parallel::getGlobal(self::RECORDING_GLOBAL) === '1';
         $replayingGlobal = $isWorker && (string) Parallel::getGlobal(self::REPLAYING_GLOBAL) === '1';
-
-        // `--tia-publish` is its own entry point: it neither records nor
-        // replays, it just uploads whatever baseline is already on disk
-        // and exits. Handled before the usual `--tia` gating so users can
-        // publish without also triggering a suite run.
-        if (! $isWorker && $this->hasArgument(self::PUBLISH_OPTION, $arguments)) {
-            $projectRoot = TestSuite::getInstance()->rootPath;
-
-            exit($this->baselineSync->publish($projectRoot));
-        }
 
         $enabled = $this->hasArgument(self::OPTION, $arguments);
         $forceRebuild = $this->hasArgument(self::REBUILD_OPTION, $arguments);

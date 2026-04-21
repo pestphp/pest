@@ -6,7 +6,6 @@ namespace Pest\Plugins\Tia;
 
 use Pest\Plugins\Tia;
 use Pest\Plugins\Tia\Contracts\State;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 
@@ -15,15 +14,21 @@ use Symfony\Component\Process\Process;
  * contributors and fresh CI workspaces start in replay mode instead of
  * paying the ~30s record cost.
  *
- * The baseline lives as a GitHub Release with a fixed tag containing two
- * assets — the graph JSON and the coverage cache. The repo is inferred
- * from `.git/config`'s `origin` remote, so no per-project configuration
- * is required. Non-GitHub remotes silently opt out.
+ * Storage: **workflow artifacts**, not releases. A dedicated CI workflow
+ * (conventionally `.github/workflows/tia-baseline.yml`) runs the full
+ * suite under `--tia` and uploads the resulting `tia.json` +
+ * `tia-coverage.bin` as a named artifact (`pest-tia-baseline`). On dev
+ * machines, this class finds the latest successful run of that workflow
+ * and downloads the artifact via `gh`.
  *
- * Fetching is attempted in order:
- *   1. `gh release download` — uses the user's existing GitHub auth,
- *      works for private repos.
- *   2. Plain HTTPS — public-repo fallback when `gh` isn't installed.
+ * Why artifacts, not releases:
+ *   - No tag is created → no `push` event cascade into CI workflows.
+ *   - No release event → no deploy workflows tied to `release:published`.
+ *   - Retention is run-scoped and tunable (1-90 days) instead of clobbering
+ *     a single floating tag.
+ *   - Publishing is strictly CI-only: artifacts can't be produced from a
+ *     developer's laptop. This enforces the "CI is the authoritative
+ *     publisher" policy that local-publish paths would otherwise erode.
  *
  * Fingerprint validation happens back in `Tia::handleParent` after the
  * blobs are written: a mismatched environment (different PHP version,
@@ -35,14 +40,20 @@ use Symfony\Component\Process\Process;
 final class BaselineSync
 {
     /**
-     * Conventional tag the CI recipe publishes under. Not configurable for
-     * MVP — if teams outgrow the convention, a `PEST_TIA_BASELINE_TAG` env
-     * var is the likely escape hatch.
+     * Conventional workflow filename teams publish from. Not configurable
+     * for MVP — teams that outgrow the default can set
+     * `PEST_TIA_BASELINE_WORKFLOW` later.
      */
-    private const string RELEASE_TAG = 'pest-tia-baseline';
+    private const string WORKFLOW_FILE = 'tia-baseline.yml';
 
     /**
-     * Asset filenames within the release — mirror the state keys so the
+     * Artifact name the workflow uploads under. The artifact is a zip
+     * containing `tia.json` (always) + `tia-coverage.bin` (optional).
+     */
+    private const string ARTIFACT_NAME = 'pest-tia-baseline';
+
+    /**
+     * Asset filenames inside the artifact — mirror the state keys so the
      * CI publisher and the sync consumer stay in lock-step.
      */
     private const string GRAPH_ASSET = Tia::KEY_GRAPH;
@@ -52,14 +63,13 @@ final class BaselineSync
     public function __construct(
         private readonly State $state,
         private readonly OutputInterface $output,
-        private readonly InputInterface $input,
     ) {}
 
     /**
-     * Attempts the full detect → prompt → download flow. Returns true when
-     * the graph blob was pulled and written to state. Coverage is best-
-     * effort: its absence doesn't fail the sync, since plain `--tia` (no
-     * `--coverage`) works fine without it.
+     * Detects the repo, fetches the latest baseline artifact, writes its
+     * contents into the TIA state store. Returns true when the graph blob
+     * landed; coverage is best-effort since plain `--tia` (no `--coverage`)
+     * never reads it.
      */
     public function fetchIfAvailable(string $projectRoot): bool
     {
@@ -74,9 +84,9 @@ final class BaselineSync
             $repo,
         ));
 
-        $graphJson = $this->download($repo, self::GRAPH_ASSET);
+        $payload = $this->download($repo);
 
-        if ($graphJson === null) {
+        if ($payload === null) {
             $this->output->writeln(
                 '  <fg=yellow>TIA</> no baseline published yet — recording locally.',
             );
@@ -84,226 +94,20 @@ final class BaselineSync
             return false;
         }
 
-        if (! $this->state->write(Tia::KEY_GRAPH, $graphJson)) {
+        if (! $this->state->write(Tia::KEY_GRAPH, $payload['graph'])) {
             return false;
         }
 
-        // Coverage cache is optional. The baseline is useful even without
-        // it (plain `--tia` never needs it) so don't fail the whole sync
-        // just because this asset is missing or slow.
-        $coverageBin = $this->download($repo, self::COVERAGE_ASSET);
-
-        if ($coverageBin !== null) {
-            $this->state->write(Tia::KEY_COVERAGE_CACHE, $coverageBin);
+        if ($payload['coverage'] !== null) {
+            $this->state->write(Tia::KEY_COVERAGE_CACHE, $payload['coverage']);
         }
 
         $this->output->writeln(sprintf(
             '  <fg=green>TIA</> baseline ready (%s).',
-            $this->formatSize(strlen($graphJson) + strlen($coverageBin ?? '')),
+            $this->formatSize(strlen($payload['graph']) + strlen($payload['coverage'] ?? '')),
         ));
 
         return true;
-    }
-
-    /**
-     * Publishes the *local* baseline to GitHub Releases under the
-     * conventional tag, creating the release on first run or uploading
-     * into the existing one otherwise.
-     *
-     * Uploading from a developer workstation is intentionally discouraged
-     * — CI is the authoritative publisher because its environment is
-     * reproducible, its working tree is clean, and its result cache
-     * isn't contaminated by local flakiness. The prompt here defaults to
-     * *No* to keep this an explicit, opt-in action.
-     *
-     * Returns a CLI-style exit code so the caller can `exit()` on it.
-     */
-    public function publish(string $projectRoot): int
-    {
-        $graphBytes = $this->state->read(Tia::KEY_GRAPH);
-
-        if ($graphBytes === null) {
-            $this->output->writeln([
-                '',
-                '  <fg=red>TIA</> no local baseline to publish.',
-                '  Run <fg=cyan>./vendor/bin/pest --tia</> first to record one, then retry.',
-                '',
-            ]);
-
-            return 1;
-        }
-
-        $repo = $this->detectGitHubRepo($projectRoot);
-
-        if ($repo === null) {
-            $this->output->writeln([
-                '',
-                '  <fg=red>TIA</> cannot infer a GitHub repo from <fg=gray>.git/config</>.',
-                '  Publishing is supported only for GitHub-hosted projects.',
-                '',
-            ]);
-
-            return 1;
-        }
-
-        if (! $this->commandExists('gh')) {
-            $this->output->writeln([
-                '',
-                '  <fg=red>TIA</> publishing requires the <fg=cyan>gh</> CLI.',
-                '  Install: <fg=gray>https://cli.github.com</>',
-                '',
-            ]);
-
-            return 1;
-        }
-
-        $this->output->writeln([
-            '',
-            '  <fg=black;bg=yellow> WARNING </> Publishing local baselines is discouraged.',
-            '',
-            '  Local runs can bake flaky results or dirty working-tree state into the',
-            '  baseline, which your team then replays. CI-published baselines are safer.',
-            '  See <fg=gray>https://pestphp.com/docs/tia/ci</> for the recommended workflow.',
-            '',
-            '  Release is created as a <fg=cyan>draft</> to avoid firing `release:published`',
-            '  workflows. Consumers must authenticate `gh` — anonymous downloads are out.',
-            '',
-        ]);
-
-        if (! $this->confirmPublish($repo)) {
-            $this->output->writeln('  <fg=yellow>TIA</> publish cancelled.');
-
-            return 0;
-        }
-
-        $tmpDir = sys_get_temp_dir().DIRECTORY_SEPARATOR.'pest-tia-publish-'.bin2hex(random_bytes(4));
-
-        if (! @mkdir($tmpDir, 0755, true) && ! is_dir($tmpDir)) {
-            $this->output->writeln('  <fg=red>TIA</> failed to create temp dir for upload.');
-
-            return 1;
-        }
-
-        $graphPath = $tmpDir.DIRECTORY_SEPARATOR.self::GRAPH_ASSET;
-
-        if (@file_put_contents($graphPath, $graphBytes) === false) {
-            $this->cleanup($tmpDir);
-
-            return 1;
-        }
-
-        $filesToUpload = [$graphPath];
-
-        $coverageBytes = $this->state->read(Tia::KEY_COVERAGE_CACHE);
-
-        if ($coverageBytes !== null) {
-            $coveragePath = $tmpDir.DIRECTORY_SEPARATOR.self::COVERAGE_ASSET;
-
-            if (@file_put_contents($coveragePath, $coverageBytes) !== false) {
-                $filesToUpload[] = $coveragePath;
-            }
-        }
-
-        $this->output->writeln(sprintf(
-            '  <fg=cyan>TIA</> publishing to <fg=white>%s</> (tag <fg=white>%s</>)…',
-            $repo,
-            self::RELEASE_TAG,
-        ));
-
-        $exitCode = $this->ghReleaseUploadOrCreate($repo, $filesToUpload);
-        $this->cleanup($tmpDir);
-
-        if ($exitCode !== 0) {
-            $this->output->writeln('  <fg=red>TIA</> <fg=cyan>gh release</> failed.');
-
-            return $exitCode;
-        }
-
-        $this->output->writeln(sprintf(
-            '  <fg=green>TIA</> baseline published (%s).',
-            $this->formatSize(strlen($graphBytes) + ($coverageBytes === null ? 0 : strlen($coverageBytes))),
-        ));
-
-        return 0;
-    }
-
-    /**
-     * Uploads into the existing release if present, falls back to
-     * creating the release with the assets attached on first run.
-     *
-     * The release is always created as a **draft**. Drafts don't fire the
-     * `release:published` GitHub Actions event, which matters a lot for
-     * repos that tie deploys to release events (e.g. `laravel/cloud`'s
-     * `deploy.yml` fires `deploy-staging → deploy-production` on any
-     * published release). Authenticated collaborators can still
-     * `gh release download` draft assets. Anonymous HTTPS downloads of
-     * draft assets don't work — acceptable for a feature aimed at teams
-     * that authenticate `gh` anyway.
-     *
-     * @param  array<int, string>  $files
-     */
-    private function ghReleaseUploadOrCreate(string $repo, array $files): int
-    {
-        $uploadArgs = ['gh', 'release', 'upload', self::RELEASE_TAG, ...$files, '-R', $repo, '--clobber'];
-        $upload = new Process($uploadArgs);
-        $upload->setTimeout(300.0);
-        $upload->run(function (string $_, string $buffer): void {
-            $this->output->write($buffer);
-        });
-
-        if ($upload->isSuccessful()) {
-            return 0;
-        }
-
-        // Release likely doesn't exist yet — create it as a draft so it
-        // doesn't trigger release-gated workflows, attaching the files.
-        $createArgs = [
-            'gh', 'release', 'create', self::RELEASE_TAG,
-            ...$files,
-            '-R', $repo,
-            '--draft',
-            '--title', 'Pest TIA baseline',
-            '--notes', 'Machine-generated baseline for Pest TIA. Do not edit manually.',
-        ];
-        $create = new Process($createArgs);
-        $create->setTimeout(300.0);
-        $create->run(function (string $_, string $buffer): void {
-            $this->output->write($buffer);
-        });
-
-        return $create->isSuccessful() ? 0 : 1;
-    }
-
-    private function confirmPublish(string $repo): bool
-    {
-        if (! $this->isTerminal()) {
-            return false;
-        }
-
-        $this->output->writeln(sprintf(
-            '  Publish to <fg=white>%s</> (tag <fg=white>%s</>)? <fg=gray>[y/N]</>',
-            $repo,
-            self::RELEASE_TAG,
-        ));
-
-        $handle = @fopen('php://stdin', 'r');
-
-        if ($handle === false) {
-            return false;
-        }
-
-        $line = fgets($handle);
-        fclose($handle);
-
-        if ($line === false) {
-            return false;
-        }
-
-        // Unlike the fetch prompt, this one defaults to *No*. Empty input
-        // or anything other than an explicit "y"/"yes" cancels.
-        $line = strtolower(trim($line));
-
-        return $line === 'y' || $line === 'yes';
     }
 
     /**
@@ -348,46 +152,23 @@ final class BaselineSync
     }
 
     /**
-     * Real-TTY check for STDIN. Symfony's `isInteractive()` defaults to true
-     * unless `--no-interaction` is explicitly passed, which would make
-     * scripted invocations (CI, pipes, subshells) hang at a prompt nobody
-     * sees. Combining both signals is the safe default.
-     */
-    private function isTerminal(): bool
-    {
-        if (! $this->input->isInteractive()) {
-            return false;
-        }
-
-        if (! defined('STDIN')) {
-            return false;
-        }
-
-        if (function_exists('posix_isatty')) {
-            return @posix_isatty(STDIN) === true;
-        }
-
-        if (function_exists('stream_isatty')) {
-            return @stream_isatty(STDIN) === true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Downloads a release asset via `gh release download`. Returns the raw
-     * asset bytes, or null if `gh` isn't installed, the user isn't
-     * authenticated, the release is missing, or I/O fails.
+     * Two-step fetch: find the latest successful run of the baseline
+     * workflow, then download the named artifact from it. Returns
+     * `['graph' => bytes, 'coverage' => bytes|null]` on success, or null
+     * if `gh` is unavailable, the workflow hasn't run yet, the artifact
+     * is missing, or any shell step fails.
      *
-     * We publish baselines as **draft** releases (see
-     * `ghReleaseUploadOrCreate`) so `release:published` doesn't trigger
-     * deploy-gated workflows. Draft assets aren't served via anonymous
-     * HTTPS, so `gh` + repo auth is the only viable transport — no
-     * plain-HTTPS fallback.
+     * @return array{graph: string, coverage: ?string}|null
      */
-    private function download(string $repo, string $asset): ?string
+    private function download(string $repo): ?array
     {
         if (! $this->commandExists('gh')) {
+            return null;
+        }
+
+        $runId = $this->latestSuccessfulRunId($repo);
+
+        if ($runId === null) {
             return null;
         }
 
@@ -398,29 +179,67 @@ final class BaselineSync
         }
 
         $process = new Process([
-            'gh', 'release', 'download', self::RELEASE_TAG,
+            'gh', 'run', 'download', $runId,
             '-R', $repo,
-            '-p', $asset,
+            '-n', self::ARTIFACT_NAME,
             '-D', $tmpDir,
-            '--clobber',
         ]);
         $process->setTimeout(120.0);
         $process->run();
 
-        $payload = null;
+        if (! $process->isSuccessful()) {
+            $this->cleanup($tmpDir);
 
-        if ($process->isSuccessful()) {
-            $path = $tmpDir.DIRECTORY_SEPARATOR.$asset;
-
-            if (is_file($path)) {
-                $content = @file_get_contents($path);
-                $payload = $content === false ? null : $content;
-            }
+            return null;
         }
+
+        $graphPath = $tmpDir.DIRECTORY_SEPARATOR.self::GRAPH_ASSET;
+        $coveragePath = $tmpDir.DIRECTORY_SEPARATOR.self::COVERAGE_ASSET;
+
+        $graph = is_file($graphPath) ? @file_get_contents($graphPath) : false;
+
+        if ($graph === false) {
+            $this->cleanup($tmpDir);
+
+            return null;
+        }
+
+        $coverage = is_file($coveragePath) ? @file_get_contents($coveragePath) : false;
 
         $this->cleanup($tmpDir);
 
-        return $payload;
+        return [
+            'graph' => $graph,
+            'coverage' => $coverage === false ? null : $coverage,
+        ];
+    }
+
+    /**
+     * Queries GitHub for the most recent successful run of the baseline
+     * workflow. `--jq '.[0].databaseId // empty'` coerces "no runs found"
+     * into an empty string, which we map to null.
+     */
+    private function latestSuccessfulRunId(string $repo): ?string
+    {
+        $process = new Process([
+            'gh', 'run', 'list',
+            '-R', $repo,
+            '--workflow', self::WORKFLOW_FILE,
+            '--status', 'success',
+            '--limit', '1',
+            '--json', 'databaseId',
+            '--jq', '.[0].databaseId // empty',
+        ]);
+        $process->setTimeout(30.0);
+        $process->run();
+
+        if (! $process->isSuccessful()) {
+            return null;
+        }
+
+        $runId = trim($process->getOutput());
+
+        return $runId === '' ? null : $runId;
     }
 
     private function commandExists(string $cmd): bool
