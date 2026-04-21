@@ -503,6 +503,22 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             $finalised[$testFile] = array_keys($sourceSet);
         }
 
+        // Empty-edges guard: if every worker returned no edges it almost
+        // always means the coverage driver wasn't loaded in the workers
+        // (common footgun with custom PHP ini scan dirs, Herd profiles,
+        // stripped CI runners). Writing the empty graph would silently
+        // seed a broken baseline; fail loud instead.
+        if ($finalised === []) {
+            $this->output->writeln([
+                '',
+                '  <fg=white;bg=red> ERROR </> TIA recorded zero edges — coverage driver likely missing.',
+                '  Install / enable <fg=cyan>pcov</> or <fg=cyan>xdebug</> (mode: coverage) in the worker PHP and retry.',
+                '',
+            ]);
+
+            return $exitCode;
+        }
+
         $graph->replaceEdges($finalised);
         $graph->pruneMissingTests();
 
@@ -528,6 +544,56 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
+     * Compares a loaded graph's fingerprint to the current one and decides
+     * how much of the graph is still usable.
+     *
+     *   - **Structural drift** (composer.lock, Pest.php, factory codegen,
+     *     schema bump): edges themselves are potentially wrong → discard
+     *     the whole graph + coverage cache and return null. Caller falls
+     *     through to record mode.
+     *   - **Environmental drift** (PHP minor, extension set, Pest version):
+     *     edges describe the code correctly; only the cached per-test
+     *     results were captured against a different runtime and might not
+     *     reproduce. Drop `baselines[branch].results` + coverage cache,
+     *     bump the fingerprint to the current env, persist. Caller uses
+     *     the graph for edges; results refill naturally during this run's
+     *     replay (every test misses cache, runs normally, seeds results).
+     *   - **Match**: return the graph untouched.
+     *
+     * @param  array{structural: array<string, mixed>, environmental: array<string, mixed>}  $current
+     */
+    private function reconcileFingerprint(Graph $graph, array $current): ?Graph
+    {
+        $stored = $graph->fingerprint();
+
+        if (! Fingerprint::structuralMatches($stored, $current)) {
+            $this->output->writeln(
+                '  <fg=yellow>TIA</> graph structure outdated — rebuilding.',
+            );
+            $this->state->delete(self::KEY_GRAPH);
+            $this->state->delete(self::KEY_COVERAGE_CACHE);
+
+            return null;
+        }
+
+        $drift = Fingerprint::environmentalDrift($stored, $current);
+
+        if ($drift !== []) {
+            $this->output->writeln(sprintf(
+                '  <fg=yellow>TIA</> env differs from baseline (%s) — results dropped, edges reused.',
+                implode(', ', $drift),
+            ));
+
+            $graph->clearResults($this->branch);
+            $graph->setFingerprint($current);
+            $this->saveGraph($graph);
+            $this->state->delete(self::KEY_COVERAGE_CACHE);
+        }
+
+        return $graph;
+    }
+
+    /**
      * @param  array<int, string>  $arguments
      * @return array<int, string>
      */
@@ -547,11 +613,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         $graph = $forceRebuild ? null : $this->loadGraph($projectRoot);
 
-        if ($graph instanceof Graph && ! Fingerprint::matches($graph->fingerprint(), $fingerprint)) {
-            $this->output->writeln(
-                '  <fg=yellow>TIA</> environment fingerprint changed — graph will be rebuilt.',
-            );
-            $graph = null;
+        if ($graph instanceof Graph) {
+            $graph = $this->reconcileFingerprint($graph, $fingerprint);
         }
 
         if ($graph instanceof Graph) {
@@ -571,18 +634,13 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         // No local graph and not being forced to rebuild from scratch: try
         // to pull a team-shared baseline so fresh checkouts (new devs, CI
         // containers) don't pay the full record cost. If the pull succeeds
-        // the graph is re-read and re-validated against the local env.
+        // the graph is re-read and reconciled against the local env.
         if ($graph === null && ! $forceRebuild) {
             if ($this->baselineSync->fetchIfAvailable($projectRoot)) {
                 $graph = $this->loadGraph($projectRoot);
 
-                if ($graph instanceof Graph && ! Fingerprint::matches($graph->fingerprint(), $fingerprint)) {
-                    $this->output->writeln(
-                        '  <fg=yellow>TIA</> pulled baseline fingerprint mismatch — discarding.',
-                    );
-                    $this->state->delete(self::KEY_GRAPH);
-                    $this->state->delete(self::KEY_COVERAGE_CACHE);
-                    $graph = null;
+                if ($graph instanceof Graph) {
+                    $graph = $this->reconcileFingerprint($graph, $fingerprint);
                 }
             }
         }

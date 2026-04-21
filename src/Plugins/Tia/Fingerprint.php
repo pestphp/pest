@@ -5,54 +5,177 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 /**
- * Captures environmental inputs that, when changed, make the TIA graph stale.
+ * Captures environmental inputs that, when changed, may make the TIA graph
+ * or its recorded results stale. The fingerprint is split into two buckets:
  *
- * Any drift in PHP version, Composer lock, or Pest/PHPUnit config can change
- * what a test actually exercises, so the graph must be rebuilt in those cases.
+ *   - **structural** — describes what the graph's *edges* were recorded
+ *     against. If any of these drift (`composer.lock`, `tests/Pest.php`,
+ *     Pest's factory codegen, etc.) the edges themselves are potentially
+ *     wrong and the graph must rebuild from scratch.
+ *   - **environmental** — describes the *runtime* the results were captured
+ *     on (PHP minor, extension set, Pest version). Drift here means the
+ *     edges are still trustworthy, but the cached per-test results (pass/
+ *     fail/time) may not reproduce on this machine. Tia's handler drops the
+ *     branch's results + coverage cache and re-runs to freshen them, rather
+ *     than re-recording from scratch.
+ *
+ * Legacy flat-shape graphs (schema ≤ 3) are read as structurally stale and
+ * rebuilt on first load; the schema bump in the structural bucket takes
+ * care of that automatically.
  *
  * @internal
  */
 final readonly class Fingerprint
 {
-    // Bump this whenever the set of inputs or the hash algorithm changes, so
-    // older graphs are invalidated automatically.
-    private const int SCHEMA_VERSION = 3;
+    // Bump this whenever the set of inputs or the hash algorithm changes,
+    // so older graphs are invalidated automatically.
+    private const int SCHEMA_VERSION = 4;
 
     /**
-     * @return array<string, int|string|null>
+     * @return array{
+     *     structural: array<string, int|string|null>,
+     *     environmental: array<string, string|null>,
+     * }
      */
     public static function compute(string $projectRoot): array
     {
         return [
-            'schema' => self::SCHEMA_VERSION,
-            'php' => PHP_VERSION,
-            // Loaded extensions + their versions. Guards against the
-            // "recorded without pcov/xdebug → subsequent run has the
-            // driver but graph has no edges" trap where the fingerprint
-            // matches but the graph is effectively empty. Sorted so two
-            // processes with the same extensions in different load order
-            // still produce the same hash.
-            'extensions' => self::extensionsFingerprint(),
-            'pest' => self::readPestVersion($projectRoot),
-            'composer_lock' => self::hashIfExists($projectRoot.'/composer.lock'),
-            'phpunit_xml' => self::hashIfExists($projectRoot.'/phpunit.xml'),
-            'phpunit_xml_dist' => self::hashIfExists($projectRoot.'/phpunit.xml.dist'),
-            'pest_php' => self::hashIfExists($projectRoot.'/tests/Pest.php'),
-            // Pest's generated classes bake the code-generation logic in — if
-            // TestCaseFactory changes (new attribute, different method
-            // signature, etc.) every previously-recorded edge is stale.
-            // Hashing the factory sources makes path-repo / dev-main installs
-            // automatically rebuild their graphs when Pest itself is edited.
-            'pest_factory' => self::hashIfExists(__DIR__.'/../../Factories/TestCaseFactory.php'),
-            'pest_method_factory' => self::hashIfExists(__DIR__.'/../../Factories/TestCaseMethodFactory.php'),
+            'structural' => [
+                'schema' => self::SCHEMA_VERSION,
+                'composer_lock' => self::hashIfExists($projectRoot.'/composer.lock'),
+                'phpunit_xml' => self::hashIfExists($projectRoot.'/phpunit.xml'),
+                'phpunit_xml_dist' => self::hashIfExists($projectRoot.'/phpunit.xml.dist'),
+                'pest_php' => self::hashIfExists($projectRoot.'/tests/Pest.php'),
+                // Pest's generated classes bake the code-generation logic
+                // in — if TestCaseFactory changes (new attribute, different
+                // method signature, etc.) every previously-recorded edge is
+                // stale. Hashing the factory sources makes path-repo /
+                // dev-main installs automatically rebuild their graphs when
+                // Pest itself is edited.
+                'pest_factory' => self::hashIfExists(__DIR__.'/../../Factories/TestCaseFactory.php'),
+                'pest_method_factory' => self::hashIfExists(__DIR__.'/../../Factories/TestCaseMethodFactory.php'),
+            ],
+            'environmental' => [
+                // PHP **minor** only (8.4, not 8.4.19) — CI's resolved patch
+                // almost never matches a dev's Herd/Homebrew install, and
+                // the patch rarely changes anything test-visible.
+                'php_minor' => PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION,
+                'extensions' => self::extensionsFingerprint(),
+                'pest' => self::readPestVersion($projectRoot),
+            ],
         ];
     }
 
     /**
+     * True when the structural buckets match. Drift here means the edges
+     * are potentially wrong; caller should discard the graph and rebuild.
+     *
+     * @param  array<string, mixed>  $a
+     * @param  array<string, mixed>  $b
+     */
+    public static function structuralMatches(array $a, array $b): bool
+    {
+        $aStructural = self::structuralOnly($a);
+        $bStructural = self::structuralOnly($b);
+
+        ksort($aStructural);
+        ksort($bStructural);
+
+        return $aStructural === $bStructural;
+    }
+
+    /**
+     * Returns a list of field names that drifted between the stored and
+     * current environmental fingerprints. Empty list = no drift. Caller
+     * uses this to print a human-readable warning and to decide whether
+     * per-test results should be dropped (any drift → yes).
+     *
+     * @param  array<string, mixed>  $stored
+     * @param  array<string, mixed>  $current
+     * @return list<string>
+     */
+    public static function environmentalDrift(array $stored, array $current): array
+    {
+        $a = self::environmentalOnly($stored);
+        $b = self::environmentalOnly($current);
+
+        $drifts = [];
+
+        foreach ($a as $key => $value) {
+            if (($b[$key] ?? null) !== $value) {
+                $drifts[] = $key;
+            }
+        }
+
+        foreach ($b as $key => $value) {
+            if (! array_key_exists($key, $a) && $value !== null) {
+                $drifts[] = $key;
+            }
+        }
+
+        return array_values(array_unique($drifts));
+    }
+
+    /**
+     * @param  array<string, mixed>  $fingerprint
+     * @return array<string, mixed>
+     */
+    private static function structuralOnly(array $fingerprint): array
+    {
+        return self::bucket($fingerprint, 'structural');
+    }
+
+    /**
+     * @param  array<string, mixed>  $fingerprint
+     * @return array<string, mixed>
+     */
+    private static function environmentalOnly(array $fingerprint): array
+    {
+        return self::bucket($fingerprint, 'environmental');
+    }
+
+    /**
+     * Returns `$fingerprint[$key]` as an `array<string, mixed>` if it exists
+     * and is an array, otherwise empty. Legacy flat-shape fingerprints
+     * (schema ≤ 3) return empty here, which makes `structuralMatches` fail
+     * and the caller rebuild — the clean migration path.
+     *
+     * @param  array<string, mixed>  $fingerprint
+     * @return array<string, mixed>
+     */
+    private static function bucket(array $fingerprint, string $key): array
+    {
+        $raw = $fingerprint[$key] ?? null;
+
+        if (! is_array($raw)) {
+            return [];
+        }
+
+        $normalised = [];
+
+        foreach ($raw as $k => $v) {
+            if (is_string($k)) {
+                $normalised[$k] = $v;
+            }
+        }
+
+        return $normalised;
+    }
+
+    private static function hashIfExists(string $path): ?string
+    {
+        if (! is_file($path)) {
+            return null;
+        }
+
+        $hash = @hash_file('xxh128', $path);
+
+        return $hash === false ? null : $hash;
+    }
+
+    /**
      * Deterministic hash of the PHP extension set: `ext-name@version` pairs
-     * sorted alphabetically and joined. Captures both presence (pcov
-     * disappeared? graph must rebuild) and version changes (xdebug minor
-     * bump with coverage-mode semantics).
+     * sorted alphabetically and joined.
      */
     private static function extensionsFingerprint(): string
     {
@@ -67,29 +190,6 @@ final readonly class Fingerprint
         }
 
         return hash('xxh128', implode("\n", $parts));
-    }
-
-    /**
-     * @param  array<string, mixed>  $a
-     * @param  array<string, mixed>  $b
-     */
-    public static function matches(array $a, array $b): bool
-    {
-        ksort($a);
-        ksort($b);
-
-        return $a === $b;
-    }
-
-    private static function hashIfExists(string $path): ?string
-    {
-        if (! is_file($path)) {
-            return null;
-        }
-
-        $hash = @hash_file('xxh128', $path);
-
-        return $hash === false ? null : $hash;
     }
 
     private static function readPestVersion(string $projectRoot): string

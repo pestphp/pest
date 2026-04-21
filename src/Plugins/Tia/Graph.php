@@ -223,7 +223,7 @@ final class Graph
     }
 
     /**
-     * @param  array<string, int|string|null>  $fingerprint
+     * @param  array<string, mixed>  $fingerprint
      */
     public function setFingerprint(array $fingerprint): void
     {
@@ -231,7 +231,7 @@ final class Graph
     }
 
     /**
-     * @return array<string, int|string|null>
+     * @return array<string, mixed>
      */
     public function fingerprint(): array
     {
@@ -321,6 +321,20 @@ final class Graph
     {
         $this->ensureBaseline($branch);
         $this->baselines[$branch]['tree'] = $tree;
+    }
+
+    /**
+     * Wipes cached per-test results for the given branch. Edges and tree
+     * snapshot stay intact — the graph still describes the code correctly,
+     * only the "what happened last time" data is reset. Used on
+     * environmental fingerprint drift: the edges were recorded elsewhere
+     * (e.g. CI) so they're still valid, but the results aren't trustworthy
+     * on this machine until the tests re-run here.
+     */
+    public function clearResults(string $branch): void
+    {
+        $this->ensureBaseline($branch);
+        $this->baselines[$branch]['results'] = [];
     }
 
     /**
