@@ -165,6 +165,9 @@ final class BaselineSync
             '  baseline, which your team then replays. CI-published baselines are safer.',
             '  See <fg=gray>https://pestphp.com/docs/tia/ci</> for the recommended workflow.',
             '',
+            '  Release is created as a <fg=cyan>draft</> to avoid firing `release:published`',
+            '  workflows. Consumers must authenticate `gh` — anonymous downloads are out.',
+            '',
         ]);
 
         if (! $this->confirmPublish($repo)) {
@@ -228,6 +231,15 @@ final class BaselineSync
      * Uploads into the existing release if present, falls back to
      * creating the release with the assets attached on first run.
      *
+     * The release is always created as a **draft**. Drafts don't fire the
+     * `release:published` GitHub Actions event, which matters a lot for
+     * repos that tie deploys to release events (e.g. `laravel/cloud`'s
+     * `deploy.yml` fires `deploy-staging → deploy-production` on any
+     * published release). Authenticated collaborators can still
+     * `gh release download` draft assets. Anonymous HTTPS downloads of
+     * draft assets don't work — acceptable for a feature aimed at teams
+     * that authenticate `gh` anyway.
+     *
      * @param  array<int, string>  $files
      */
     private function ghReleaseUploadOrCreate(string $repo, array $files): int
@@ -243,11 +255,13 @@ final class BaselineSync
             return 0;
         }
 
-        // Release likely doesn't exist yet — create it, attaching the files.
+        // Release likely doesn't exist yet — create it as a draft so it
+        // doesn't trigger release-gated workflows, attaching the files.
         $createArgs = [
             'gh', 'release', 'create', self::RELEASE_TAG,
             ...$files,
             '-R', $repo,
+            '--draft',
             '--title', 'Pest TIA baseline',
             '--notes', 'Machine-generated baseline for Pest TIA. Do not edit manually.',
         ];
@@ -361,22 +375,17 @@ final class BaselineSync
     }
 
     /**
-     * Tries `gh` first (handles private repos + rate limiting via the
-     * user's GitHub auth), falls through to public HTTPS. Returns the
-     * raw asset bytes, or null on any failure.
+     * Downloads a release asset via `gh release download`. Returns the raw
+     * asset bytes, or null if `gh` isn't installed, the user isn't
+     * authenticated, the release is missing, or I/O fails.
+     *
+     * We publish baselines as **draft** releases (see
+     * `ghReleaseUploadOrCreate`) so `release:published` doesn't trigger
+     * deploy-gated workflows. Draft assets aren't served via anonymous
+     * HTTPS, so `gh` + repo auth is the only viable transport — no
+     * plain-HTTPS fallback.
      */
     private function download(string $repo, string $asset): ?string
-    {
-        $viaGh = $this->downloadViaGh($repo, $asset);
-
-        if ($viaGh !== null) {
-            return $viaGh;
-        }
-
-        return $this->downloadViaHttps($repo, $asset);
-    }
-
-    private function downloadViaGh(string $repo, string $asset): ?string
     {
         if (! $this->commandExists('gh')) {
             return null;
@@ -412,28 +421,6 @@ final class BaselineSync
         $this->cleanup($tmpDir);
 
         return $payload;
-    }
-
-    private function downloadViaHttps(string $repo, string $asset): ?string
-    {
-        $url = sprintf(
-            'https://github.com/%s/releases/download/%s/%s',
-            $repo,
-            self::RELEASE_TAG,
-            $asset,
-        );
-
-        $ctx = stream_context_create([
-            'http' => [
-                'timeout' => 120,
-                'follow_location' => 1,
-                'ignore_errors' => false,
-            ],
-        ]);
-
-        $content = @file_get_contents($url, false, $ctx);
-
-        return $content === false ? null : $content;
     }
 
     private function commandExists(string $cmd): bool
