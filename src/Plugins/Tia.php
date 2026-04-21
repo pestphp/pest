@@ -134,17 +134,19 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private int $replayedCount = 0;
 
     /**
+     * Counter-part of `$replayedCount`: every time `getCachedResult()`
+     * decides the test must execute (affected, unknown, or no cached
+     * result), we bump this. Together the two counters let the summary
+     * show "affected + replayed" in units of test methods, not test
+     * files, matching the "Tests: N" total Pest prints above.
+     */
+    private int $executedCount = 0;
+
+    /**
      * Captured at replay setup so the end-of-run summary can report the
      * scope of the changes that drove the run.
      */
     private int $changedFileCount = 0;
-
-    /**
-     * Captured at replay setup — number of tests the graph flagged as
-     * affected (i.e. should re-execute). May overshoot the actually-
-     * executed count when the user narrows with a path filter.
-     */
-    private int $affectedTestCount = 0;
 
     /**
      * Holds the graph during replay so `beforeEach` can look up cached
@@ -248,11 +250,15 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         // Affected files must re-execute.
         if ($rel !== null && isset($this->affectedFiles[$rel])) {
+            $this->executedCount++;
+
             return null;
         }
 
         // Unknown files (not in graph) must execute — they're new.
         if ($rel === null || ! $this->replayGraph->knowsTest($rel)) {
+            $this->executedCount++;
+
             return null;
         }
 
@@ -262,6 +268,11 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         if ($result !== null) {
             $this->replayedCount++;
+        } else {
+            // Graph knows the test file but has no stored result for this
+            // specific test id (new test, or first time seeing this method).
+            // It must execute.
+            $this->executedCount++;
         }
 
         return $result;
@@ -701,7 +712,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $affected = $changed === [] ? [] : $graph->affected($changed);
 
         $this->changedFileCount = count($changed);
-        $this->affectedTestCount = count($affected);
 
         $affectedSet = array_fill_keys($affected, true);
 
@@ -871,13 +881,14 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         $results = $collector->all();
 
-        if ($results === [] && $this->replayedCount === 0) {
+        if ($results === [] && $this->replayedCount === 0 && $this->executedCount === 0) {
             return;
         }
 
         $json = json_encode([
             'results' => $results,
             'replayed' => $this->replayedCount,
+            'executed' => $this->executedCount,
         ], JSON_UNESCAPED_SLASHES);
 
         if ($json === false) {
@@ -921,6 +932,10 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
             if (isset($decoded['replayed']) && is_int($decoded['replayed'])) {
                 $this->replayedCount += $decoded['replayed'];
+            }
+
+            if (isset($decoded['executed']) && is_int($decoded['executed'])) {
+                $this->executedCount += $decoded['executed'];
             }
 
             if (isset($decoded['results']) && is_array($decoded['results'])) {
@@ -1023,10 +1038,14 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      */
     private function emitReplaySummary(): void
     {
+        // `$executedCount` and `$replayedCount` are maintained in lockstep
+        // by `getCachedResult()` — every test id that hits that method bumps
+        // exactly one of them. Summing the two gives the test-method total
+        // that lines up with Pest's "Tests: N" banner directly above.
         $this->output->writeln(sprintf(
             '  <fg=green>TIA</> %d changed file(s) → %d affected, %d replayed.',
             $this->changedFileCount,
-            $this->affectedTestCount,
+            $this->executedCount,
             $this->replayedCount,
         ));
     }
