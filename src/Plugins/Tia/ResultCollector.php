@@ -118,6 +118,17 @@ final class ResultCollector
         $this->startTime = null;
     }
 
+    /**
+     * Called by the Finished subscriber after a test's outcome + assertion
+     * events have all fired. Clears the "currently recording" pointer so
+     * the next test's events don't get mis-attributed.
+     */
+    public function finishTest(): void
+    {
+        $this->currentTestId = null;
+        $this->startTime = null;
+    }
+
     private function record(int $status, string $message): void
     {
         if ($this->currentTestId === null) {
@@ -128,14 +139,17 @@ final class ResultCollector
             ? round(microtime(true) - $this->startTime, 3)
             : 0.0;
 
+        // PHPUnit can fire more than one outcome event per test — the
+        // canonical case is a risky pass (`Passed` then `ConsideredRisky`).
+        // Last-wins semantics preserve the most specific status; the
+        // existing assertion count (if any) survives the overwrite.
+        $existing = $this->results[$this->currentTestId] ?? null;
+
         $this->results[$this->currentTestId] = [
             'status' => $status,
             'message' => $message,
             'time' => $time,
-            'assertions' => 0,
+            'assertions' => $existing['assertions'] ?? 0,
         ];
-
-        $this->currentTestId = null;
-        $this->startTime = null;
     }
 }

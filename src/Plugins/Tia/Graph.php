@@ -60,7 +60,7 @@ final class Graph
      * @var array<string, array{
      *     sha: ?string,
      *     tree: array<string, string>,
-     *     results: array<string, array{status: int, message: string, time: float}>
+     *     results: array<string, array{status: int, message: string, time: float, assertions?: int}>
      * }>
      */
     private array $baselines = [];
@@ -257,12 +257,34 @@ final class Graph
         $this->baselines[$branch]['sha'] = $sha;
     }
 
-    public function setResult(string $branch, string $testId, int $status, string $message, float $time): void
+    public function setResult(string $branch, string $testId, int $status, string $message, float $time, int $assertions = 0): void
     {
         $this->ensureBaseline($branch);
         $this->baselines[$branch]['results'][$testId] = [
-            'status' => $status, 'message' => $message, 'time' => $time,
+            'status' => $status,
+            'message' => $message,
+            'time' => $time,
+            'assertions' => $assertions,
         ];
+    }
+
+    /**
+     * Returns the cached assertion count for a test, or `null` if unknown.
+     * Callers use this to feed `addToAssertionCount()` at replay time so
+     * the "Tests: N passed (M assertions)" banner matches the recorded run
+     * instead of defaulting to 1 assertion per test.
+     */
+    public function getAssertions(string $branch, string $testId, string $fallbackBranch = 'main'): ?int
+    {
+        $baseline = $this->baselineFor($branch, $fallbackBranch);
+
+        if (! isset($baseline['results'][$testId]['assertions'])) {
+            return null;
+        }
+
+        $value = $baseline['results'][$testId]['assertions'];
+
+        return is_int($value) ? $value : null;
     }
 
     public function getResult(string $branch, string $testId, string $fallbackBranch = 'main'): ?TestStatus
@@ -310,7 +332,7 @@ final class Graph
     }
 
     /**
-     * @return array{sha: ?string, tree: array<string, string>, results: array<string, array{status: int, message: string, time: float}>}
+     * @return array{sha: ?string, tree: array<string, string>, results: array<string, array{status: int, message: string, time: float, assertions?: int}>}
      */
     private function baselineFor(string $branch, string $fallbackBranch): array
     {

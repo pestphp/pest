@@ -13,7 +13,6 @@ use Pest\Plugins\Actions\CallsBoot;
 use Pest\Plugins\Actions\CallsHandleArguments;
 use Pest\Plugins\Actions\CallsHandleOriginalArguments;
 use Pest\Plugins\Actions\CallsTerminable;
-use Pest\Plugins\Tia;
 use Pest\Support\Container;
 use Pest\Support\Reflection;
 use Pest\Support\View;
@@ -37,6 +36,7 @@ final readonly class Kernel
      */
     private const array BOOTSTRAPPERS = [
         Bootstrappers\BootOverrides::class,
+        Plugins\Tia\Bootstrapper::class,
         Bootstrappers\BootSubscribers::class,
         Bootstrappers\BootFiles::class,
         Bootstrappers\BootView::class,
@@ -65,17 +65,7 @@ final readonly class Kernel
             ->add(TestSuite::class, $testSuite)
             ->add(InputInterface::class, $input)
             ->add(OutputInterface::class, $output)
-            ->add(Container::class, $container)
-            ->add(Tia\Recorder::class, new Tia\Recorder)
-            ->add(Tia\CoverageCollector::class, new Tia\CoverageCollector)
-            ->add(Tia\WatchPatterns::class, new Tia\WatchPatterns)
-            ->add(Tia\ResultCollector::class, new Tia\ResultCollector)
-            ->add(Tia\Contracts\State::class, new Tia\FileState(__DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'.temp'))
-            ->add(Tia\BaselineSync::class, new Tia\BaselineSync(
-                $container->get(Tia\Contracts\State::class), // @phpstan-ignore argument.type
-                $output,
-                $input,
-            ));
+            ->add(Container::class, $container);
 
         $kernel = new self(
             new Application,

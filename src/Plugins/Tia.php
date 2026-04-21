@@ -143,6 +143,16 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private int $executedCount = 0;
 
     /**
+     * Cached assertion count per test id for the current replay run. Keyed
+     * by `ClassName::methodName`; populated when `getCachedResult()` hits
+     * cache and drained by `Testable::__runTest()` on the short-circuit
+     * path so the emitted count matches the recorded run.
+     *
+     * @var array<string, int>
+     */
+    private array $cachedAssertionsByTestId = [];
+
+    /**
      * Captured at replay setup so the end-of-run summary can report the
      * scope of the changes that drove the run.
      */
@@ -268,6 +278,11 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         if ($result !== null) {
             $this->replayedCount++;
+            // Cache the assertion count alongside the status so `Testable`
+            // can emit the exact `addToAssertionCount()` at replay time
+            // without hitting the graph twice per test.
+            $assertions = $this->replayGraph->getAssertions($this->branch, $testId);
+            $this->cachedAssertionsByTestId[$testId] = $assertions ?? 0;
         } else {
             // Graph knows the test file but has no stored result for this
             // specific test id (new test, or first time seeing this method).
@@ -276,6 +291,17 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         return $result;
+    }
+
+    /**
+     * Exact assertion count captured for the given test during its last
+     * recorded run. Returns `0` if unknown (new test, or old graph entry
+     * pre-dating assertion-count tracking). `Testable::__runTest` reads
+     * this to feed `addToAssertionCount()` instead of defaulting to 1.
+     */
+    public function getCachedAssertions(string $testId): int
+    {
+        return $this->cachedAssertionsByTestId[$testId] ?? 0;
     }
 
     /**
@@ -1101,7 +1127,14 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         foreach ($results as $testId => $result) {
-            $graph->setResult($this->branch, $testId, $result['status'], $result['message'], $result['time']);
+            $graph->setResult(
+                $this->branch,
+                $testId,
+                $result['status'],
+                $result['message'],
+                $result['time'],
+                $result['assertions'],
+            );
         }
 
         $this->saveGraph($graph);

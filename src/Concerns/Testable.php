@@ -249,6 +249,17 @@ trait Testable
                 return;
             }
 
+            // Risky tests have no public PHPUnit hook to replay as-risky.
+            // Best available: short-circuit as a pass so the test doesn't
+            // misreport as a failure. Aggregate risky totals won't
+            // survive replay — accepted trade-off until PHPUnit grows a
+            // programmatic risky-marker API.
+            if ($cached->isRisky()) {
+                $this->__cachedPass = true;
+
+                return;
+            }
+
             // Non-success: throw the matching PHPUnit exception. Runner
             // catches it and marks the test with the correct status so
             // skips, failures, incompletes and todos appear in output
@@ -371,7 +382,14 @@ trait Testable
     private function __runTest(Closure $closure, ...$args): mixed
     {
         if ($this->__cachedPass) {
-            $this->addToAssertionCount(1);
+            // Feed the exact assertion count captured during the recorded
+            // run so Pest's "Tests: N passed (M assertions)" banner stays
+            // accurate on replay instead of collapsing to 1-per-test.
+            /** @var Tia $tia */
+            $tia = Container::getInstance()->get(Tia::class);
+            $assertions = $tia->getCachedAssertions($this::class.'::'.$this->name());
+
+            $this->addToAssertionCount($assertions > 0 ? $assertions : 1);
 
             return null;
         }

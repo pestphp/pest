@@ -30,5 +30,11 @@ final class EnsureTiaAssertionsAreRecordedOnFinished implements FinishedSubscrib
                 $event->numberOfAssertionsPerformed(),
             );
         }
+
+        // Close the "currently recording" window on Finished so the next
+        // test's events don't get mis-attributed. Keeping the pointer open
+        // through the outcome subscribers is what lets a late-firing
+        // `ConsideredRisky` overwrite an earlier `Passed`.
+        $this->collector->finishTest();
     }
 }
