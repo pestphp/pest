@@ -11,9 +11,9 @@ use PHPUnit\Event\Test\FailedSubscriber;
 /**
  * @internal
  */
-final class EnsureTiaResultIsRecordedOnFailed implements FailedSubscriber
+final readonly class EnsureTiaResultIsRecordedOnFailed implements FailedSubscriber
 {
-    public function __construct(private readonly ResultCollector $collector) {}
+    public function __construct(private ResultCollector $collector) {}
 
     public function notify(Failed $event): void
     {

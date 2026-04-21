@@ -8,7 +8,6 @@ use NunoMaduro\Collision\Adapters\Phpunit\Printers\DefaultPrinter;
 use Pest\Contracts\Plugins\AddsOutput;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Contracts\Plugins\Terminable;
-use PHPUnit\Framework\TestStatus\TestStatus;
 use Pest\Plugins\Tia\BaselineSync;
 use Pest\Plugins\Tia\ChangedFiles;
 use Pest\Plugins\Tia\Contracts\State;
@@ -20,6 +19,7 @@ use Pest\Plugins\Tia\ResultCollector;
 use Pest\Plugins\Tia\WatchPatterns;
 use Pest\Support\Container;
 use Pest\TestSuite;
+use PHPUnit\Framework\TestStatus\TestStatus;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 
@@ -173,12 +173,12 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      */
     private array $affectedFiles = [];
 
-    private static function workerEdgesKey(string $token): string
+    private function workerEdgesKey(string $token): string
     {
         return self::KEY_WORKER_EDGES_PREFIX.$token.'.json';
     }
 
-    private static function workerResultsKey(string $token): string
+    private function workerResultsKey(string $token): string
     {
         return self::KEY_WORKER_RESULTS_PREFIX.$token.'.json';
     }
@@ -242,7 +242,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      */
     public function getCachedResult(string $filename, string $testId): ?TestStatus
     {
-        if ($this->replayGraph === null) {
+        if (! $this->replayGraph instanceof Graph) {
             return null;
         }
 
@@ -271,7 +271,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         // branch (falls back to main if branch is fresh).
         $result = $this->replayGraph->getResult($this->branch, $testId);
 
-        if ($result !== null) {
+        if ($result instanceof TestStatus) {
             $this->replayedCount++;
             // Cache the assertion count alongside the status so `Testable`
             // can emit the exact `addToAssertionCount()` at replay time
@@ -351,7 +351,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         // the graph lands with results on first write — otherwise the next
         // run would load a graph with edges but empty results, miss the
         // cache for every test, and look pointlessly slow.
-        if (Parallel::isWorker() && ($this->replayGraph !== null || $this->recordingActive)) {
+        if (Parallel::isWorker() && ($this->replayGraph instanceof Graph || $this->recordingActive)) {
             $this->flushWorkerReplay();
         }
 
@@ -376,7 +376,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         if (Parallel::isWorker()) {
-            $this->flushWorkerPartial($projectRoot, $perTest);
+            $this->flushWorkerPartial($perTest);
             $recorder->reset();
             $this->coverageCollector->reset();
 
@@ -635,13 +635,10 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         // to pull a team-shared baseline so fresh checkouts (new devs, CI
         // containers) don't pay the full record cost. If the pull succeeds
         // the graph is re-read and reconciled against the local env.
-        if ($graph === null && ! $forceRebuild) {
-            if ($this->baselineSync->fetchIfAvailable($projectRoot)) {
-                $graph = $this->loadGraph($projectRoot);
-
-                if ($graph instanceof Graph) {
-                    $graph = $this->reconcileFingerprint($graph, $fingerprint);
-                }
+        if (! $graph instanceof Graph && ! $forceRebuild && $this->baselineSync->fetchIfAvailable($projectRoot)) {
+            $graph = $this->loadGraph($projectRoot);
+            if ($graph instanceof Graph) {
+                $graph = $this->reconcileFingerprint($graph, $fingerprint);
             }
         }
 
@@ -657,14 +654,14 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         // report collapses to near-zero coverage. Fall back to recording
         // (full suite) to seed the cache for next time.
         if ($this->piggybackCoverage && ! $this->state->exists(self::KEY_COVERAGE_CACHE)) {
-            return $this->enterRecordMode($projectRoot, $arguments);
+            return $this->enterRecordMode($arguments);
         }
 
         if ($graph instanceof Graph) {
             return $this->enterReplayMode($graph, $projectRoot, $arguments);
         }
 
-        return $this->enterRecordMode($projectRoot, $arguments);
+        return $this->enterRecordMode($arguments);
     }
 
     /**
@@ -792,7 +789,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         // Parallel: persist affected set so workers can install the filter.
-        if (! $this->persistAffectedSet($projectRoot, $affected)) {
+        if (! $this->persistAffectedSet($affected)) {
             $this->output->writeln(
                 '  <fg=red>TIA</> failed to persist affected set — running full suite.',
             );
@@ -802,7 +799,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         // Clear stale partials from a previous interrupted run so the merge
         // pass doesn't pick up results from an unrelated invocation.
-        $this->purgeWorkerPartials($projectRoot);
+        $this->purgeWorkerPartials();
 
         Parallel::setGlobal(self::REPLAYING_GLOBAL, '1');
 
@@ -812,7 +809,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     /**
      * @param  array<int, string>  $affected  Project-relative paths.
      */
-    private function persistAffectedSet(string $projectRoot, array $affected): bool
+    private function persistAffectedSet(array $affected): bool
     {
         $json = json_encode(array_values($affected), JSON_UNESCAPED_SLASHES);
 
@@ -827,7 +824,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      * @param  array<int, string>  $arguments
      * @return array<int, string>
      */
-    private function enterRecordMode(string $projectRoot, array $arguments): array
+    private function enterRecordMode(array $arguments): array
     {
         $recorder = $this->recorder;
 
@@ -852,7 +849,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             // recording. We only advertise the intent through a global.
             // Clean up any stale partial files from a previous interrupted
             // run so the merge step doesn't confuse itself.
-            $this->purgeWorkerPartials($projectRoot);
+            $this->purgeWorkerPartials();
 
             Parallel::setGlobal(self::RECORDING_GLOBAL, '1');
 
@@ -907,7 +904,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     /**
      * @param  array<string, array<int, string>>  $perTest
      */
-    private function flushWorkerPartial(string $projectRoot, array $perTest): void
+    private function flushWorkerPartial(array $perTest): void
     {
         $json = json_encode($perTest, JSON_UNESCAPED_SLASHES);
 
@@ -915,7 +912,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return;
         }
 
-        $this->state->write(self::workerEdgesKey($this->workerToken()), $json);
+        $this->state->write($this->workerEdgesKey($this->workerToken()), $json);
     }
 
     /**
@@ -926,12 +923,11 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         return $this->state->keysWithPrefix(self::KEY_WORKER_EDGES_PREFIX);
     }
 
-    private function purgeWorkerPartials(string $projectRoot): void
+    private function purgeWorkerPartials(): void
     {
         foreach ($this->collectWorkerEdgesPartials() as $key) {
             $this->state->delete($key);
         }
-
         foreach ($this->collectWorkerReplayPartials() as $key) {
             $this->state->delete($key);
         }
@@ -963,7 +959,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return;
         }
 
-        $this->state->write(self::workerResultsKey($this->workerToken()), $json);
+        $this->state->write($this->workerResultsKey($this->workerToken()), $json);
     }
 
     /**
@@ -1011,10 +1007,12 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
                 /** @var mixed $result */
                 foreach ($decoded['results'] as $testId => $result) {
-                    if (! is_string($testId) || ! is_array($result)) {
+                    if (! is_string($testId)) {
                         continue;
                     }
-
+                    if (! is_array($result)) {
+                        continue;
+                    }
                     $normalised[$testId] = [
                         'status' => is_int($result['status'] ?? null) ? $result['status'] : 0,
                         'message' => is_string($result['message'] ?? null) ? $result['message'] : '',
@@ -1119,7 +1117,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                 $fragments[] = $this->replayedCount.' replayed';
             }
 
-            return $fragments === [] ? '' : implode(', ', $fragments);
+            return implode(', ', $fragments);
         });
     }
 

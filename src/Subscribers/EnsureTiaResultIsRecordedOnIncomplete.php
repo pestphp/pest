@@ -11,9 +11,9 @@ use PHPUnit\Event\Test\MarkedIncompleteSubscriber;
 /**
  * @internal
  */
-final class EnsureTiaResultIsRecordedOnIncomplete implements MarkedIncompleteSubscriber
+final readonly class EnsureTiaResultIsRecordedOnIncomplete implements MarkedIncompleteSubscriber
 {
-    public function __construct(private readonly ResultCollector $collector) {}
+    public function __construct(private ResultCollector $collector) {}
 
     public function notify(MarkedIncomplete $event): void
     {

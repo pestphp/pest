@@ -16,9 +16,9 @@ use PHPUnit\Event\Test\FinishedSubscriber;
  *
  * @internal
  */
-final class EnsureTiaAssertionsAreRecordedOnFinished implements FinishedSubscriber
+final readonly class EnsureTiaAssertionsAreRecordedOnFinished implements FinishedSubscriber
 {
-    public function __construct(private readonly ResultCollector $collector) {}
+    public function __construct(private ResultCollector $collector) {}
 
     public function notify(Finished $event): void
     {

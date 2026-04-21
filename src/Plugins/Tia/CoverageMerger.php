@@ -46,7 +46,7 @@ final class CoverageMerger
     {
         $state = self::state();
 
-        if ($state === null || ! $state->exists(Tia::KEY_COVERAGE_MARKER)) {
+        if (! $state instanceof State || ! $state->exists(Tia::KEY_COVERAGE_MARKER)) {
             return;
         }
 
@@ -60,7 +60,7 @@ final class CoverageMerger
             // verbatim (as serialised bytes) for next time.
             $current = self::requireCoverage($reportPath);
 
-            if ($current !== null) {
+            if ($current instanceof CodeCoverage) {
                 $state->write(Tia::KEY_COVERAGE_CACHE, serialize($current));
             }
 
@@ -70,7 +70,7 @@ final class CoverageMerger
         $cached = self::unserializeCoverage($cachedBytes);
         $current = self::requireCoverage($reportPath);
 
-        if ($cached === null || $current === null) {
+        if (! $cached instanceof CodeCoverage || ! $current instanceof CodeCoverage) {
             return;
         }
 
@@ -84,7 +84,7 @@ final class CoverageMerger
         // can `require` it, and to the state cache for the next run.
         @file_put_contents(
             $reportPath,
-            "<?php return unserialize(".var_export($serialised, true).");\n",
+            '<?php return unserialize('.var_export($serialised, true).");\n",
         );
         $state->write(Tia::KEY_COVERAGE_CACHE, $serialised);
     }
@@ -108,10 +108,12 @@ final class CoverageMerger
 
         foreach ($lineCoverage as $file => $lines) {
             foreach ($lines as $line => $ids) {
-                if ($ids === null || $ids === []) {
+                if ($ids === null) {
                     continue;
                 }
-
+                if ($ids === []) {
+                    continue;
+                }
                 $filtered = array_values(array_diff($ids, $currentIds));
 
                 if ($filtered !== $ids) {
@@ -175,7 +177,6 @@ final class CoverageMerger
     private static function unserializeCoverage(string $bytes): ?CodeCoverage
     {
         try {
-            /** @var mixed $value */
             $value = @unserialize($bytes);
         } catch (Throwable) {
             return null;

@@ -11,9 +11,9 @@ use PHPUnit\Event\Test\ConsideredRiskySubscriber;
 /**
  * @internal
  */
-final class EnsureTiaResultIsRecordedOnRisky implements ConsideredRiskySubscriber
+final readonly class EnsureTiaResultIsRecordedOnRisky implements ConsideredRiskySubscriber
 {
-    public function __construct(private readonly ResultCollector $collector) {}
+    public function __construct(private ResultCollector $collector) {}
 
     public function notify(ConsideredRisky $event): void
     {

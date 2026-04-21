@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Support;
 
 use Pest\Exceptions\ShouldNotHappen;
+use Pest\Plugins\Tia\CoverageMerger;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\Node\Directory;
 use SebastianBergmann\CodeCoverage\Node\File;
@@ -92,7 +93,7 @@ final class Coverage
         // tests. Merge their fresh coverage slice into the cached full-run
         // snapshot (stored by the previous `--tia --coverage` pass) so the
         // report reflects the entire suite, not just what re-ran.
-        \Pest\Plugins\Tia\CoverageMerger::applyIfMarked($reportPath);
+        CoverageMerger::applyIfMarked($reportPath);
 
         /** @var CodeCoverage $codeCoverage */
         $codeCoverage = require $reportPath;

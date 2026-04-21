@@ -39,7 +39,7 @@ use Symfony\Component\Process\Process;
  *
  * @internal
  */
-final class BaselineSync
+final readonly class BaselineSync
 {
     /**
      * Conventional workflow filename teams publish from. Not configurable
@@ -63,8 +63,8 @@ final class BaselineSync
     private const string COVERAGE_ASSET = Tia::KEY_COVERAGE_CACHE;
 
     public function __construct(
-        private readonly State $state,
-        private readonly OutputInterface $output,
+        private State $state,
+        private OutputInterface $output,
     ) {}
 
     /**

@@ -11,9 +11,9 @@ use PHPUnit\Event\Test\PassedSubscriber;
 /**
  * @internal
  */
-final class EnsureTiaResultIsRecordedOnPassed implements PassedSubscriber
+final readonly class EnsureTiaResultIsRecordedOnPassed implements PassedSubscriber
 {
-    public function __construct(private readonly ResultCollector $collector) {}
+    public function __construct(private ResultCollector $collector) {}
 
     public function notify(Passed $event): void
     {

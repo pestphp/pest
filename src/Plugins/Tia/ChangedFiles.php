@@ -38,7 +38,7 @@ final readonly class ChangedFiles
      * that git still reports as modified but whose content is bit-identical
      * to the previous TIA invocation.
      *
-     * @param  array<int, string>  $files          project-relative paths.
+     * @param  array<int, string>  $files  project-relative paths.
      * @param  array<string, string>  $lastRunTree  path → content hash from last run.
      * @return array<int, string>
      */
@@ -101,7 +101,7 @@ final readonly class ChangedFiles
      * detect which files are actually different.
      *
      * @param  array<int, string>  $files
-     * @return array<string, string>  path → xxh128 content hash
+     * @return array<string, string> path → xxh128 content hash
      */
     public function snapshotTree(array $files): array
     {

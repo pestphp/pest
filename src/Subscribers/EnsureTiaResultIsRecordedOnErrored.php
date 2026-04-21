@@ -11,9 +11,9 @@ use PHPUnit\Event\Test\ErroredSubscriber;
 /**
  * @internal
  */
-final class EnsureTiaResultIsRecordedOnErrored implements ErroredSubscriber
+final readonly class EnsureTiaResultIsRecordedOnErrored implements ErroredSubscriber
 {
-    public function __construct(private readonly ResultCollector $collector) {}
+    public function __construct(private ResultCollector $collector) {}
 
     public function notify(Errored $event): void
     {

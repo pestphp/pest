@@ -20,9 +20,9 @@ use PHPUnit\Event\Test\PreparedSubscriber;
  *
  * @internal
  */
-final class EnsureTiaResultsAreCollected implements PreparedSubscriber
+final readonly class EnsureTiaResultsAreCollected implements PreparedSubscriber
 {
-    public function __construct(private readonly ResultCollector $collector) {}
+    public function __construct(private ResultCollector $collector) {}
 
     public function notify(Prepared $event): void
     {

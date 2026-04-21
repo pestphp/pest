@@ -17,14 +17,14 @@ use Pest\Plugins\Tia\Contracts\State;
  *
  * @internal
  */
-final class FileState implements State
+final readonly class FileState implements State
 {
     /**
      * Configured root. May not exist on disk yet; resolved + created on
      * the first write. Keeping the raw string lets the instance be built
      * before Pest's temp dir has been materialised.
      */
-    private readonly string $rootDir;
+    private string $rootDir;
 
     public function __construct(string $rootDir)
     {

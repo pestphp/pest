@@ -11,9 +11,9 @@ use PHPUnit\Event\Test\SkippedSubscriber;
 /**
  * @internal
  */
-final class EnsureTiaResultIsRecordedOnSkipped implements SkippedSubscriber
+final readonly class EnsureTiaResultIsRecordedOnSkipped implements SkippedSubscriber
 {
-    public function __construct(private readonly ResultCollector $collector) {}
+    public function __construct(private ResultCollector $collector) {}
 
     public function notify(Skipped $event): void
     {
