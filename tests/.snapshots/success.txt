@@ -1887,6 +1887,14 @@
   ✓ it gets properties from classes
   ✓ it gets methods from classes
 
+   PASS  Tests\Unit\Support\StateGenerator
+  ✓ it records errors as failed results
+  ✓ it records test runner triggered deprecation events
+  ✓ it records test runner triggered notice events
+  ✓ it records test runner triggered warning events
+  ✓ it records test suite skipped events
+  ✓ it keeps multiple standalone events as distinct entries
+
    PASS  Tests\Unit\Support\Str
   ✓ it evaluates the code with ('version()', '__pest_evaluable_version__')
   ✓ it evaluates the code with ('version__ ', '__pest_evaluable_version_____')
@@ -2006,4 +2014,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1389 passed (3097 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1395 passed (3117 assertions)

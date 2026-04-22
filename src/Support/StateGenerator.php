@@ -10,22 +10,31 @@ use NunoMaduro\Collision\Exceptions\TestOutcome;
 use PHPUnit\Event\Code\TestDoxBuilder;
 use PHPUnit\Event\Code\TestMethod;
 use PHPUnit\Event\Code\ThrowableBuilder;
+use PHPUnit\Event\Test\ConsideredRisky;
 use PHPUnit\Event\Test\Errored;
 use PHPUnit\Event\Test\Failed;
+use PHPUnit\Event\Test\MarkedIncomplete;
 use PHPUnit\Event\Test\PhpunitDeprecationTriggered;
 use PHPUnit\Event\Test\PhpunitErrorTriggered;
 use PHPUnit\Event\Test\PhpunitNoticeTriggered;
 use PHPUnit\Event\Test\PhpunitWarningTriggered;
 use PHPUnit\Event\TestData\TestDataCollection;
+use PHPUnit\Event\TestRunner\DeprecationTriggered;
+use PHPUnit\Event\TestRunner\NoticeTriggered;
+use PHPUnit\Event\TestRunner\WarningTriggered;
 use PHPUnit\Framework\SkippedWithMessageException;
 use PHPUnit\Metadata\MetadataCollection;
+use PHPUnit\TestRunner\TestResult\Issues\Issue;
 use PHPUnit\TestRunner\TestResult\TestResult as PHPUnitTestResult;
 
 final class StateGenerator
 {
+    private int $standaloneSequence = 0;
+
     public function fromPhpUnitTestResult(int $passedTests, PHPUnitTestResult $testResult): State
     {
         $state = new State;
+        $this->standaloneSequence = 0;
 
         foreach ($testResult->testErroredEvents() as $testResultEvent) {
             if ($testResultEvent instanceof Errored) {
@@ -55,23 +64,8 @@ final class StateGenerator
 
         $this->addTriggeredPhpunitEvents($state, $testResult->testTriggeredPhpunitErrorEvents(), TestResult::FAIL);
 
-        foreach ($testResult->testMarkedIncompleteEvents() as $testResultEvent) {
-            $state->add(TestResult::fromPestParallelTestCase(
-                $testResultEvent->test(),
-                TestResult::INCOMPLETE,
-                $testResultEvent->throwable()
-            ));
-        }
-
-        foreach ($testResult->testConsideredRiskyEvents() as $riskyEvents) {
-            foreach ($riskyEvents as $riskyEvent) {
-                $state->add(TestResult::fromPestParallelTestCase(
-                    $riskyEvent->test(),
-                    TestResult::RISKY,
-                    ThrowableBuilder::from(new TestOutcome($riskyEvent->message()))
-                ));
-            }
-        }
+        $this->addThrowableEvents($state, $testResult->testMarkedIncompleteEvents(), TestResult::INCOMPLETE);
+        $this->addTriggeredPhpunitEvents($state, $testResult->testConsideredRiskyEvents(), TestResult::RISKY);
 
         foreach ($testResult->testSkippedEvents() as $testResultEvent) {
             if ($testResultEvent->message() === '__TODO__') {
@@ -87,97 +81,19 @@ final class StateGenerator
             ));
         }
 
-        foreach ($testResult->deprecations() as $testResultEvent) {
-            foreach ($testResultEvent->triggeringTests() as $triggeringTest) {
-                ['test' => $test] = $triggeringTest;
-
-                $state->add(TestResult::fromPestParallelTestCase(
-                    $test,
-                    TestResult::DEPRECATED,
-                    ThrowableBuilder::from(new TestOutcome($testResultEvent->description()))
-                ));
-            }
-        }
-
-        foreach ($testResult->phpDeprecations() as $testResultEvent) {
-            foreach ($testResultEvent->triggeringTests() as $triggeringTest) {
-                ['test' => $test] = $triggeringTest;
-
-                $state->add(TestResult::fromPestParallelTestCase(
-                    $test,
-                    TestResult::DEPRECATED,
-                    ThrowableBuilder::from(new TestOutcome($testResultEvent->description()))
-                ));
-            }
-        }
-
+        $this->addIssueEvents($state, $testResult->deprecations(), TestResult::DEPRECATED);
+        $this->addIssueEvents($state, $testResult->phpDeprecations(), TestResult::DEPRECATED);
         $this->addTriggeredPhpunitEvents($state, $testResult->testTriggeredPhpunitDeprecationEvents(), TestResult::DEPRECATED);
 
-        foreach ($testResult->notices() as $testResultEvent) {
-            foreach ($testResultEvent->triggeringTests() as $triggeringTest) {
-                ['test' => $test] = $triggeringTest;
-
-                $state->add(TestResult::fromPestParallelTestCase(
-                    $test,
-                    TestResult::NOTICE,
-                    ThrowableBuilder::from(new TestOutcome($testResultEvent->description()))
-                ));
-            }
-        }
-
-        foreach ($testResult->phpNotices() as $testResultEvent) {
-            foreach ($testResultEvent->triggeringTests() as $triggeringTest) {
-                ['test' => $test] = $triggeringTest;
-
-                $state->add(TestResult::fromPestParallelTestCase(
-                    $test,
-                    TestResult::NOTICE,
-                    ThrowableBuilder::from(new TestOutcome($testResultEvent->description()))
-                ));
-            }
-        }
-
+        $this->addIssueEvents($state, $testResult->notices(), TestResult::NOTICE);
+        $this->addIssueEvents($state, $testResult->phpNotices(), TestResult::NOTICE);
         $this->addTriggeredPhpunitEvents($state, $testResult->testTriggeredPhpunitNoticeEvents(), TestResult::NOTICE);
 
-        foreach ($testResult->warnings() as $testResultEvent) {
-            foreach ($testResultEvent->triggeringTests() as $triggeringTest) {
-                ['test' => $test] = $triggeringTest;
-
-                $state->add(TestResult::fromPestParallelTestCase(
-                    $test,
-                    TestResult::WARN,
-                    ThrowableBuilder::from(new TestOutcome($testResultEvent->description()))
-                ));
-            }
-        }
-
+        $this->addIssueEvents($state, $testResult->warnings(), TestResult::WARN);
+        $this->addIssueEvents($state, $testResult->phpWarnings(), TestResult::WARN);
         $this->addTriggeredPhpunitEvents($state, $testResult->testTriggeredPhpunitWarningEvents(), TestResult::WARN);
 
-        foreach ($testResult->phpWarnings() as $testResultEvent) {
-            foreach ($testResultEvent->triggeringTests() as $triggeringTest) {
-                ['test' => $test] = $triggeringTest;
-
-                $state->add(TestResult::fromPestParallelTestCase(
-                    $test,
-                    TestResult::WARN,
-                    ThrowableBuilder::from(new TestOutcome($testResultEvent->description()))
-                ));
-            }
-        }
-
-        foreach ($testResult->errors() as $testResultEvent) {
-            foreach ($testResultEvent->triggeringTests() as $triggeringTest) {
-                ['test' => $test] = $triggeringTest;
-
-                $state->add(TestResult::fromPestParallelTestCase(
-                    $test,
-                    TestResult::FAIL,
-                    ThrowableBuilder::from(new TestOutcome($testResultEvent->description()))
-                ));
-            }
-        }
-
-        $standaloneSequence = 0;
+        $this->addIssueEvents($state, $testResult->errors(), TestResult::FAIL);
 
         foreach ($testResult->testSuiteSkippedEvents() as $testResultEvent) {
             $this->addStandaloneEvent(
@@ -185,39 +101,12 @@ final class StateGenerator
                 $testResultEvent->testSuite()->name(),
                 TestResult::SKIPPED,
                 $testResultEvent->message(),
-                ++$standaloneSequence,
             );
         }
 
-        foreach ($testResult->testRunnerTriggeredDeprecationEvents() as $testResultEvent) {
-            $this->addStandaloneEvent(
-                $state,
-                'PHPUnit test runner deprecation',
-                TestResult::DEPRECATED,
-                $testResultEvent->message(),
-                ++$standaloneSequence,
-            );
-        }
-
-        foreach ($testResult->testRunnerTriggeredNoticeEvents() as $testResultEvent) {
-            $this->addStandaloneEvent(
-                $state,
-                'PHPUnit test runner notice',
-                TestResult::NOTICE,
-                $testResultEvent->message(),
-                ++$standaloneSequence,
-            );
-        }
-
-        foreach ($testResult->testRunnerTriggeredWarningEvents() as $testResultEvent) {
-            $this->addStandaloneEvent(
-                $state,
-                'PHPUnit test runner warning',
-                TestResult::WARN,
-                $testResultEvent->message(),
-                ++$standaloneSequence,
-            );
-        }
+        $this->addStandaloneEvents($state, $testResult->testRunnerTriggeredDeprecationEvents(), 'PHPUnit test runner deprecation', TestResult::DEPRECATED);
+        $this->addStandaloneEvents($state, $testResult->testRunnerTriggeredNoticeEvents(), 'PHPUnit test runner notice', TestResult::NOTICE);
+        $this->addStandaloneEvents($state, $testResult->testRunnerTriggeredWarningEvents(), 'PHPUnit test runner warning', TestResult::WARN);
 
         // for each test that passed, we need to add it to the state
         for ($i = 0; $i < $passedTests; $i++) {
@@ -239,7 +128,37 @@ final class StateGenerator
     }
 
     /**
-     * @param  array<string, list<PhpunitDeprecationTriggered|PhpunitErrorTriggered|PhpunitNoticeTriggered|PhpunitWarningTriggered>>  $testResultEvents
+     * @param  list<Issue>  $issues
+     */
+    private function addIssueEvents(State $state, array $issues, string $type): void
+    {
+        foreach ($issues as $issue) {
+            foreach ($issue->triggeringTests() as ['test' => $test]) {
+                $state->add(TestResult::fromPestParallelTestCase(
+                    $test,
+                    $type,
+                    ThrowableBuilder::from(new TestOutcome($issue->description()))
+                ));
+            }
+        }
+    }
+
+    /**
+     * @param  list<Failed|MarkedIncomplete>  $events
+     */
+    private function addThrowableEvents(State $state, array $events, string $type): void
+    {
+        foreach ($events as $event) {
+            $state->add(TestResult::fromPestParallelTestCase(
+                $event->test(),
+                $type,
+                $event->throwable(),
+            ));
+        }
+    }
+
+    /**
+     * @param  array<string, list<ConsideredRisky|PhpunitDeprecationTriggered|PhpunitErrorTriggered|PhpunitNoticeTriggered|PhpunitWarningTriggered>>  $testResultEvents
      */
     private function addTriggeredPhpunitEvents(State $state, array $testResultEvents, string $type): void
     {
@@ -258,9 +177,19 @@ final class StateGenerator
         }
     }
 
-    private function addStandaloneEvent(State $state, string $className, string $type, string $message, int $sequence): void
+    /**
+     * @param  list<DeprecationTriggered|NoticeTriggered|WarningTriggered>  $events
+     */
+    private function addStandaloneEvents(State $state, array $events, string $className, string $type): void
     {
-        $methodName = 'event#'.$sequence;
+        foreach ($events as $event) {
+            $this->addStandaloneEvent($state, $className, $type, $event->message());
+        }
+    }
+
+    private function addStandaloneEvent(State $state, string $className, string $type, string $message): void
+    {
+        $methodName = 'event#'.(++$this->standaloneSequence);
 
         $state->add(TestResult::fromPestParallelTestCase(
             new TestMethod(
