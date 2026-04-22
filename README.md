@@ -6,6 +6,7 @@
         <a href="https://packagist.org/packages/pestphp/pest"><img alt="Latest Version" src="https://img.shields.io/packagist/v/pestphp/pest"></a>
         <a href="https://packagist.org/packages/pestphp/pest"><img alt="License" src="https://img.shields.io/packagist/l/pestphp/pest"></a>
         <a href="https://whyphp.dev"><img src="https://img.shields.io/badge/Why_PHP-in_2026-7A86E8?style=flat-square&labelColor=18181b" alt="Why PHP in 2026"></a>
+        <a href="https://youtube.com/@nunomaduro?sub_confirmation=1"><img alt="YouTube Channel Subscribers" src="https://img.shields.io/youtube/channel/subscribers/UCO_hYZF2gb_CyG5sA7ArlGg?style=flat&label=youtube&color=brightgreen"></a>
     </p>
 </p>
 
