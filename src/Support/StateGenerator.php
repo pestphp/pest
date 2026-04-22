@@ -29,12 +29,9 @@ use PHPUnit\TestRunner\TestResult\TestResult as PHPUnitTestResult;
 
 final class StateGenerator
 {
-    private int $standaloneSequence = 0;
-
     public function fromPhpUnitTestResult(int $passedTests, PHPUnitTestResult $testResult): State
     {
         $state = new State;
-        $this->standaloneSequence = 0;
 
         foreach ($testResult->testErroredEvents() as $testResultEvent) {
             if ($testResultEvent instanceof Errored) {
@@ -95,12 +92,13 @@ final class StateGenerator
 
         $this->addIssueEvents($state, $testResult->errors(), TestResult::FAIL);
 
-        foreach ($testResult->testSuiteSkippedEvents() as $testResultEvent) {
+        foreach ($testResult->testSuiteSkippedEvents() as $index => $testResultEvent) {
             $this->addStandaloneEvent(
                 $state,
                 $testResultEvent->testSuite()->name(),
                 TestResult::SKIPPED,
                 $testResultEvent->message(),
+                $index,
             );
         }
 
@@ -182,14 +180,14 @@ final class StateGenerator
      */
     private function addStandaloneEvents(State $state, array $events, string $className, string $type): void
     {
-        foreach ($events as $event) {
-            $this->addStandaloneEvent($state, $className, $type, $event->message());
+        foreach ($events as $index => $event) {
+            $this->addStandaloneEvent($state, $className, $type, $event->message(), $index);
         }
     }
 
-    private function addStandaloneEvent(State $state, string $className, string $type, string $message): void
+    private function addStandaloneEvent(State $state, string $className, string $type, string $message, int $index): void
     {
-        $methodName = 'event#'.(++$this->standaloneSequence);
+        $methodName = 'event#'.$index;
 
         $state->add(TestResult::fromPestParallelTestCase(
             new TestMethod(
