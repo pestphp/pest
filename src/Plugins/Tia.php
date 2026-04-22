@@ -75,6 +75,14 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private const string REBUILD_OPTION = '--tia-rebuild';
 
     /**
+     * Bypasses `BaselineSync`'s post-failure cooldown. After a failed
+     * baseline fetch, subsequent `--tia` runs skip the fetch for 24h; this
+     * flag forces an immediate retry (e.g. right after publishing a
+     * baseline from CI for the first time).
+     */
+    private const string REFETCH_OPTION = '--tia-refetch';
+
+    /**
      * State keys under which TIA persists its blobs. Kept here as constants
      * (rather than scattered strings) so the storage layout is visible in
      * one place, and so `CoverageMerger` can reference the same keys. All
@@ -102,6 +110,14 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      * current (narrow) behaviour.
      */
     public const string KEY_COVERAGE_MARKER = 'coverage.marker';
+
+    /**
+     * Cooldown marker keyed by `BaselineSync` after a failed fetch. Holds
+     * `{"until": <unix>}` — subsequent runs within the window skip the
+     * fetch attempt (and its `gh run list` network hop) until the
+     * cooldown expires or the user passes `--tia-refetch`.
+     */
+    public const string KEY_FETCH_COOLDOWN = 'fetch-cooldown.json';
 
     /**
      * Global flag toggled by the parent process so workers know to record.
@@ -198,6 +214,12 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      * is set, so runs that never entered record mode don't poke the graph.
      */
     private bool $recordingActive = false;
+
+    /**
+     * True when `--tia-refetch` is in the current argv — `BaselineSync`
+     * uses it to bypass the post-failure fetch cooldown.
+     */
+    private bool $forceRefetch = false;
 
     public function __construct(
         private readonly OutputInterface $output,
@@ -310,13 +332,15 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         $enabled = $this->hasArgument(self::OPTION, $arguments);
         $forceRebuild = $this->hasArgument(self::REBUILD_OPTION, $arguments);
+        $this->forceRefetch = $this->hasArgument(self::REFETCH_OPTION, $arguments);
 
-        if (! $enabled && ! $forceRebuild && ! $recordingGlobal && ! $replayingGlobal) {
+        if (! $enabled && ! $forceRebuild && ! $this->forceRefetch && ! $recordingGlobal && ! $replayingGlobal) {
             return $arguments;
         }
 
         $arguments = $this->popArgument(self::OPTION, $arguments);
         $arguments = $this->popArgument(self::REBUILD_OPTION, $arguments);
+        $arguments = $this->popArgument(self::REFETCH_OPTION, $arguments);
 
         // When `--coverage` is active, piggyback on PHPUnit's CodeCoverage
         // instead of starting our own PCOV / Xdebug session. Running two
@@ -400,6 +424,16 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         );
         $graph->replaceEdges($perTest);
         $graph->pruneMissingTests();
+
+        // Fold in the results collected during this same record run. The
+        // `AddsOutput` pass that runs `snapshotTestResults` fires *before*
+        // `terminate()` in the shutdown chain, so by the time the graph
+        // lands on disk, the snapshot pass has already returned empty.
+        // Writing results here means a first `--tia` invocation produces
+        // a graph with edges *and* results — the immediate next run hits
+        // cache for every unchanged test rather than needing a "warm-up"
+        // pass.
+        $this->seedResultsInto($graph);
 
         if (! $this->saveGraph($graph)) {
             $this->output->writeln('  <fg=red>TIA</> failed to write graph.');
@@ -635,7 +669,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         // to pull a team-shared baseline so fresh checkouts (new devs, CI
         // containers) don't pay the full record cost. If the pull succeeds
         // the graph is re-read and reconciled against the local env.
-        if (! $graph instanceof Graph && ! $forceRebuild && $this->baselineSync->fetchIfAvailable($projectRoot)) {
+        if (! $graph instanceof Graph && ! $forceRebuild && $this->baselineSync->fetchIfAvailable($projectRoot, $this->forceRefetch)) {
             $graph = $this->loadGraph($projectRoot);
             if ($graph instanceof Graph) {
                 $graph = $this->reconcileFingerprint($graph, $fingerprint);
@@ -1145,6 +1179,31 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $graph->setLastRunTree($this->branch, $changedFiles->snapshotTree($workingTreeFiles));
 
         $this->saveGraph($graph);
+    }
+
+    /**
+     * In-memory equivalent of `snapshotTestResults()` — transfers the
+     * collected results straight into the given graph instance without a
+     * load/save round-trip. Used on the record path where the graph
+     * hasn't hit disk yet and a separate `loadGraph()` would find nothing.
+     */
+    private function seedResultsInto(Graph $graph): void
+    {
+        /** @var ResultCollector $collector */
+        $collector = Container::getInstance()->get(ResultCollector::class);
+
+        foreach ($collector->all() as $testId => $result) {
+            $graph->setResult(
+                $this->branch,
+                $testId,
+                $result['status'],
+                $result['message'],
+                $result['time'],
+                $result['assertions'],
+            );
+        }
+
+        $collector->reset();
     }
 
     /**

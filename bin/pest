@@ -142,6 +142,15 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
     // Get $rootPath based on $autoloadPath
     $rootPath = dirname($autoloadPath, 2);
+
+    // Re-execs PHP without Xdebug on TIA replay runs so repeat `--tia`
+    // invocations aren't slowed by a coverage driver they don't use. Plain
+    // `pest` runs are left alone — users may rely on Xdebug for IDE
+    // breakpoints, step-through debugging, or custom tooling. See
+    // XdebugGuard for the full decision (coverage / tia-rebuild / Xdebug
+    // mode gates).
+    \Pest\Support\XdebugGuard::maybeDrop($rootPath);
+
     $input = new ArgvInput;
 
     $testSuite = TestSuite::getInstance(

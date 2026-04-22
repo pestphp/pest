@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="bootstrap.php"
+         colors="true"
+         cacheDirectory="../.phpunit.cache/tests-tia"
+         executionOrder="default"
+         failOnRisky="false"
+         failOnWarning="false">
+    <testsuites>
+        <testsuite name="tia">
+            <directory>.</directory>
+            <exclude>Fixtures</exclude>
+            <exclude>Support</exclude>
+        </testsuite>
+    </testsuites>
+</phpunit>

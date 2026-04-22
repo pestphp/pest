@@ -19,6 +19,7 @@
     "require": {
         "php": "^8.3.0",
         "brianium/paratest": "^7.20.0",
+        "composer/xdebug-handler": "^3.0.5",
         "nunomaduro/collision": "^8.9.4",
         "nunomaduro/termwind": "^2.4.0",
         "pestphp/pest-plugin": "^4.0.0",
@@ -92,6 +93,7 @@
         "test:inline": "php bin/pest --configuration=phpunit.inline.xml",
         "test:parallel": "php bin/pest --exclude-group=integration --parallel --processes=3",
         "test:integration": "php bin/pest --group=integration -v",
+        "test:tia": "php bin/pest --configuration=tests-tia/phpunit.xml",
         "update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --update-snapshots",
         "test": [
             "@test:lint",
@@ -99,7 +101,8 @@
             "@test:type:coverage",
             "@test:unit",
             "@test:parallel",
-            "@test:integration"
+            "@test:integration",
+            "@test:tia"
         ]
     },
     "extra": {

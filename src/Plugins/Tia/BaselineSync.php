@@ -62,6 +62,15 @@ final readonly class BaselineSync
 
     private const string COVERAGE_ASSET = Tia::KEY_COVERAGE_CACHE;
 
+    /**
+     * Cooldown (in seconds) applied after a failed baseline fetch.
+     * Rationale: when the remote workflow hasn't published yet, every
+     * `pest --tia` invocation would otherwise re-hit `gh run list` and
+     * re-print the publish instructions — noisy + slow. Back off for a
+     * day, let the user override with `--tia-refetch`.
+     */
+    private const int FETCH_COOLDOWN_SECONDS = 86400;
+
     public function __construct(
         private State $state,
         private OutputInterface $output,
@@ -72,12 +81,26 @@ final readonly class BaselineSync
      * contents into the TIA state store. Returns true when the graph blob
      * landed; coverage is best-effort since plain `--tia` (no `--coverage`)
      * never reads it.
+     *
+     * `$force = true` (driven by `--tia-refetch`) ignores the post-failure
+     * cooldown so the user can retry on demand without waiting out the
+     * 24h window.
      */
-    public function fetchIfAvailable(string $projectRoot): bool
+    public function fetchIfAvailable(string $projectRoot, bool $force = false): bool
     {
         $repo = $this->detectGitHubRepo($projectRoot);
 
         if ($repo === null) {
+            return false;
+        }
+
+        if (! $force && ($remaining = $this->cooldownRemaining()) !== null) {
+            $this->output->writeln(sprintf(
+                '  <fg=yellow>TIA</> last fetch found no baseline — next auto-retry in %s. '
+                    .'Override with <fg=cyan>--tia-refetch</>.',
+                $this->formatDuration($remaining),
+            ));
+
             return false;
         }
 
@@ -89,6 +112,7 @@ final readonly class BaselineSync
         $payload = $this->download($repo);
 
         if ($payload === null) {
+            $this->startCooldown();
             $this->emitPublishInstructions($repo);
 
             return false;
@@ -102,12 +126,65 @@ final readonly class BaselineSync
             $this->state->write(Tia::KEY_COVERAGE_CACHE, $payload['coverage']);
         }
 
+        // Successful fetch wipes any stale cooldown so the next failure
+        // (say, weeks later) starts a fresh 24h timer rather than inheriting
+        // one from the deep past.
+        $this->clearCooldown();
+
         $this->output->writeln(sprintf(
             '  <fg=green>TIA</> baseline ready (%s).',
             $this->formatSize(strlen($payload['graph']) + strlen($payload['coverage'] ?? '')),
         ));
 
         return true;
+    }
+
+    /**
+     * Seconds left on the cooldown, or `null` when the cooldown is cleared
+     * / expired / unreadable.
+     */
+    private function cooldownRemaining(): ?int
+    {
+        $raw = $this->state->read(Tia::KEY_FETCH_COOLDOWN);
+
+        if ($raw === null) {
+            return null;
+        }
+
+        $decoded = json_decode($raw, true);
+
+        if (! is_array($decoded) || ! isset($decoded['until']) || ! is_int($decoded['until'])) {
+            return null;
+        }
+
+        $remaining = $decoded['until'] - time();
+
+        return $remaining > 0 ? $remaining : null;
+    }
+
+    private function startCooldown(): void
+    {
+        $this->state->write(Tia::KEY_FETCH_COOLDOWN, (string) json_encode([
+            'until' => time() + self::FETCH_COOLDOWN_SECONDS,
+        ]));
+    }
+
+    private function clearCooldown(): void
+    {
+        $this->state->delete(Tia::KEY_FETCH_COOLDOWN);
+    }
+
+    private function formatDuration(int $seconds): string
+    {
+        if ($seconds >= 3600) {
+            return (int) round($seconds / 3600).'h';
+        }
+
+        if ($seconds >= 60) {
+            return (int) round($seconds / 60).'m';
+        }
+
+        return $seconds.'s';
     }
 
     /**
