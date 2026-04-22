@@ -60,7 +60,7 @@ final readonly class Fingerprint
                 // almost never matches a dev's Herd/Homebrew install, and
                 // the patch rarely changes anything test-visible.
                 'php_minor' => PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION,
-                'extensions' => self::extensionsFingerprint(),
+                'extensions' => self::extensionsFingerprint($projectRoot),
                 'pest' => self::readPestVersion($projectRoot),
             ],
         ];
@@ -174,22 +174,81 @@ final readonly class Fingerprint
     }
 
     /**
-     * Deterministic hash of the PHP extension set: `ext-name@version` pairs
-     * sorted alphabetically and joined.
+     * Deterministic hash of the extensions the project actually depends on —
+     * the `ext-*` entries in composer.json's `require` / `require-dev`. An
+     * incidental extension loaded on the developer's machine (or on CI) but
+     * not declared as a dependency can't affect correctness of the test
+     * suite, so we ignore it here to keep the drift signal quiet.
+     *
+     * Declared extensions that aren't currently loaded record as `missing`,
+     * which is itself a drift signal worth surfacing.
      */
-    private static function extensionsFingerprint(): string
+    private static function extensionsFingerprint(string $projectRoot): string
     {
-        $extensions = get_loaded_extensions();
+        $extensions = self::declaredExtensions($projectRoot);
+
+        if ($extensions === []) {
+            return hash('xxh128', '');
+        }
+
         sort($extensions);
 
         $parts = [];
 
         foreach ($extensions as $name) {
             $version = phpversion($name);
-            $parts[] = $name.'@'.($version === false ? '?' : $version);
+            $parts[] = $name.'@'.($version === false ? 'missing' : $version);
         }
 
         return hash('xxh128', implode("\n", $parts));
+    }
+
+    /**
+     * Extension names (without the `ext-` prefix) that appear as keys under
+     * `require` or `require-dev` in the project's composer.json. Returns
+     * an empty list when composer.json is missing / unreadable / malformed,
+     * so the environmental fingerprint stays stable in those cases rather
+     * than flapping.
+     *
+     * @return list<string>
+     */
+    private static function declaredExtensions(string $projectRoot): array
+    {
+        $path = $projectRoot.'/composer.json';
+
+        if (! is_file($path)) {
+            return [];
+        }
+
+        $raw = @file_get_contents($path);
+
+        if ($raw === false) {
+            return [];
+        }
+
+        $data = json_decode($raw, true);
+
+        if (! is_array($data)) {
+            return [];
+        }
+
+        $extensions = [];
+
+        foreach (['require', 'require-dev'] as $section) {
+            $packages = $data[$section] ?? null;
+
+            if (! is_array($packages)) {
+                continue;
+            }
+
+            foreach (array_keys($packages) as $package) {
+                if (is_string($package) && str_starts_with($package, 'ext-')) {
+                    $extensions[] = substr($package, 4);
+                }
+            }
+        }
+
+        return array_values(array_unique($extensions));
     }
 
     private static function readPestVersion(string $projectRoot): string
