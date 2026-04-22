@@ -165,6 +165,60 @@ final class StateGenerator
             }
         }
 
+        foreach ($testResult->errors() as $testResultEvent) {
+            foreach ($testResultEvent->triggeringTests() as $triggeringTest) {
+                ['test' => $test] = $triggeringTest;
+
+                $state->add(TestResult::fromPestParallelTestCase(
+                    $test,
+                    TestResult::FAIL,
+                    ThrowableBuilder::from(new TestOutcome($testResultEvent->description()))
+                ));
+            }
+        }
+
+        $standaloneSequence = 0;
+
+        foreach ($testResult->testSuiteSkippedEvents() as $testResultEvent) {
+            $this->addStandaloneEvent(
+                $state,
+                $testResultEvent->testSuite()->name(),
+                TestResult::SKIPPED,
+                $testResultEvent->message(),
+                ++$standaloneSequence,
+            );
+        }
+
+        foreach ($testResult->testRunnerTriggeredDeprecationEvents() as $testResultEvent) {
+            $this->addStandaloneEvent(
+                $state,
+                'PHPUnit test runner deprecation',
+                TestResult::DEPRECATED,
+                $testResultEvent->message(),
+                ++$standaloneSequence,
+            );
+        }
+
+        foreach ($testResult->testRunnerTriggeredNoticeEvents() as $testResultEvent) {
+            $this->addStandaloneEvent(
+                $state,
+                'PHPUnit test runner notice',
+                TestResult::NOTICE,
+                $testResultEvent->message(),
+                ++$standaloneSequence,
+            );
+        }
+
+        foreach ($testResult->testRunnerTriggeredWarningEvents() as $testResultEvent) {
+            $this->addStandaloneEvent(
+                $state,
+                'PHPUnit test runner warning',
+                TestResult::WARN,
+                $testResultEvent->message(),
+                ++$standaloneSequence,
+            );
+        }
+
         // for each test that passed, we need to add it to the state
         for ($i = 0; $i < $passedTests; $i++) {
             $state->add(TestResult::fromPestParallelTestCase(
@@ -202,5 +256,24 @@ final class StateGenerator
                 ));
             }
         }
+    }
+
+    private function addStandaloneEvent(State $state, string $className, string $type, string $message, int $sequence): void
+    {
+        $methodName = 'event#'.$sequence;
+
+        $state->add(TestResult::fromPestParallelTestCase(
+            new TestMethod(
+                $className, // @phpstan-ignore-line
+                $methodName, // @phpstan-ignore-line
+                ' ', // @phpstan-ignore-line
+                1,
+                TestDoxBuilder::fromClassNameAndMethodName($className, $methodName), // @phpstan-ignore-line
+                MetadataCollection::fromArray([]),
+                TestDataCollection::fromArray([]),
+            ),
+            $type,
+            ThrowableBuilder::from(new TestOutcome($message))
+        ));
     }
 }
