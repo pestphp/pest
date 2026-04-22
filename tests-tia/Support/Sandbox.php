@@ -101,6 +101,13 @@ final class Sandbox
                 'GITHUB_ACTIONS' => '',
                 'GITLAB_CI' => '',
                 'CIRCLECI' => '',
+                // Force TIA's Storage to fall back to the sandbox-local
+                // `.pest/tia/` layout. Without this, every sandbox run
+                // would dump state into the developer's real home dir
+                // (`~/.pest/tia/`), polluting it and making tests
+                // non-hermetic.
+                'HOME' => '',
+                'USERPROFILE' => '',
             ],
         );
         $process->setTimeout(120.0);
@@ -114,7 +121,7 @@ final class Sandbox
      */
     public function graph(): ?array
     {
-        $path = $this->path.'/vendor/pestphp/pest/.temp/tia/graph.json';
+        $path = $this->path.'/.pest/tia/graph.json';
 
         if (! is_file($path)) {
             return null;

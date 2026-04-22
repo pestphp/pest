@@ -17,7 +17,7 @@ use Symfony\Component\Process\Process;
  *
  * Storage: **workflow artifacts**, not releases. A dedicated CI workflow
  * (conventionally `.github/workflows/tia-baseline.yml`) runs the full
- * suite under `--tia` and uploads the `.temp/tia/` directory as a named
+ * suite under `--tia` and uploads the `.pest/tia/` directory as a named
  * artifact (`pest-tia-baseline`) containing `graph.json` +
  * `coverage.bin`. On dev
  * machines, this class finds the latest successful run of that workflow
@@ -285,10 +285,15 @@ jobs:
       - run: composer install --no-interaction --prefer-dist
       - run: php artisan key:generate
       - run: ./vendor/bin/pest --parallel --tia --coverage
+      - name: Stage baseline for upload
+        shell: bash
+        run: |
+          mkdir -p .pest-tia-baseline
+          cp -R "$HOME/.pest/tia"/*/. .pest-tia-baseline/
       - uses: actions/upload-artifact@v4
         with:
           name: pest-tia-baseline
-          path: vendor/pestphp/pest/.temp/tia/
+          path: .pest-tia-baseline/
           retention-days: 30
 YAML;
     }
@@ -311,10 +316,15 @@ jobs:
         with: { php-version: '8.4', coverage: xdebug }
       - run: composer install --no-interaction --prefer-dist
       - run: ./vendor/bin/pest --parallel --tia --coverage
+      - name: Stage baseline for upload
+        shell: bash
+        run: |
+          mkdir -p .pest-tia-baseline
+          cp -R "$HOME/.pest/tia"/*/. .pest-tia-baseline/
       - uses: actions/upload-artifact@v4
         with:
           name: pest-tia-baseline
-          path: vendor/pestphp/pest/.temp/tia/
+          path: .pest-tia-baseline/
           retention-days: 30
 YAML;
     }

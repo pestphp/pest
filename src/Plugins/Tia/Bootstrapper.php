@@ -7,6 +7,7 @@ namespace Pest\Plugins\Tia;
 use Pest\Contracts\Bootstrapper as BootstrapperContract;
 use Pest\Plugins\Tia\Contracts\State;
 use Pest\Support\Container;
+use Pest\TestSuite;
 
 /**
  * Plugin-level container registrations for TIA. Runs as part of Kernel's
@@ -32,19 +33,17 @@ final readonly class Bootstrapper implements BootstrapperContract
     }
 
     /**
-     * TIA's own subdirectory under Pest's `.temp/`. Keeping every TIA blob
-     * in a single folder (`.temp/tia/`) avoids the `tia-`-prefix salad
-     * alongside PHPUnit's unrelated files (coverage.php, test-results,
-     * code-coverage/) and makes the CI artifact-upload path a single
-     * directory instead of a list of individual files.
+     * TIA's per-project state directory. Default layout is
+     * `~/.pest/tia/<project-key>/` so the graph survives `composer
+     * install`, stays out of the project tree, and is naturally shared
+     * across worktrees of the same repo. See {@see Storage} for the key
+     * derivation and the home-dir-missing fallback.
      */
     private function tempDir(): string
     {
-        return __DIR__
-            .DIRECTORY_SEPARATOR.'..'
-            .DIRECTORY_SEPARATOR.'..'
-            .DIRECTORY_SEPARATOR.'..'
-            .DIRECTORY_SEPARATOR.'.temp'
-            .DIRECTORY_SEPARATOR.'tia';
+        $testSuite = $this->container->get(TestSuite::class);
+        assert($testSuite instanceof TestSuite);
+
+        return Storage::tempDir($testSuite->rootPath);
     }
 }

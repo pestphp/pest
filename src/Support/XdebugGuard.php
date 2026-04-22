@@ -8,6 +8,7 @@ use Composer\XdebugHandler\XdebugHandler;
 use Pest\Plugins\Tia;
 use Pest\Plugins\Tia\Fingerprint;
 use Pest\Plugins\Tia\Graph;
+use Pest\Plugins\Tia\Storage;
 
 /**
  * Re-execs the PHP process without Xdebug on TIA replay runs, matching the
@@ -140,7 +141,7 @@ final class XdebugGuard
      */
     private static function tiaWillReplay(string $projectRoot): bool
     {
-        $path = self::graphPath();
+        $path = self::graphPath($projectRoot);
 
         if (! is_file($path)) {
             return false;
@@ -165,15 +166,13 @@ final class XdebugGuard
     }
 
     /**
-     * On-disk location of the TIA graph — mirrors `Bootstrapper::tempDir()`
-     * so both writer and reader stay in sync without a runtime container
-     * lookup (the container isn't booted yet at this point).
+     * On-disk location of the TIA graph — delegates to {@see Storage} so
+     * the writer (TIA's bootstrapper) and this reader stay in sync
+     * without a runtime container lookup (the container isn't booted yet
+     * at this point).
      */
-    private static function graphPath(): string
+    private static function graphPath(string $projectRoot): string
     {
-        return dirname(__DIR__, 2)
-            .DIRECTORY_SEPARATOR.'.temp'
-            .DIRECTORY_SEPARATOR.'tia'
-            .DIRECTORY_SEPARATOR.Tia::KEY_GRAPH;
+        return Storage::tempDir($projectRoot).DIRECTORY_SEPARATOR.Tia::KEY_GRAPH;
     }
 }

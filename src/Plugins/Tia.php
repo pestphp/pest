@@ -30,7 +30,7 @@ use Throwable;
  * -----
  *  - **Record** — no graph (or fingerprint / recording commit drifted). The
  *    full suite runs with PCOV / Xdebug capture per test; the resulting
- *    `test → [source_file, …]` edges land in `.temp/tia/graph.json`.
+ *    `test → [source_file, …]` edges land in `.pest/tia/graph.json`.
  *  - **Replay** — graph valid. We diff the working tree against the recording
  *    commit, intersect changed files with graph edges, and run only the
  *    affected tests. Newly-added tests unknown to the graph are always
@@ -53,7 +53,7 @@ use Throwable;
  *  - **Worker, record**: boots through `bin/worker.php`, which re-runs
  *    `CallsHandleArguments`. We detect the worker context + recording flag,
  *    activate the `Recorder`, and flush the partial graph on `terminate()`
- *    into `.temp/tia/worker-edges-<TEST_TOKEN>.json`.
+ *    into `.pest/tia/worker-edges-<TEST_TOKEN>.json`.
  *  - **Worker, replay**: nothing to do; args already narrowed.
  *
  * Guardrails
@@ -86,7 +86,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      * State keys under which TIA persists its blobs. Kept here as constants
      * (rather than scattered strings) so the storage layout is visible in
      * one place, and so `CoverageMerger` can reference the same keys. All
-     * files live under `.temp/tia/` — the `tia-` filename prefix is gone
+     * files live under `.pest/tia/` — the `tia-` filename prefix is gone
      * because the directory already namespaces them.
      */
     public const string KEY_GRAPH = 'graph.json';
@@ -126,7 +126,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
     /**
      * Global flag that tells workers to install the TIA filter (replay mode).
-     * Workers read the affected set from `.temp/tia/affected.json`.
+     * Workers read the affected set from `.pest/tia/affected.json`.
      */
     private const string REPLAYING_GLOBAL = 'TIA_REPLAYING';
 

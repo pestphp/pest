@@ -13,7 +13,7 @@ test('structural drift discards the graph entirely', function () {
     tiaScenario(function (Sandbox $sandbox) {
         $sandbox->pest(['--tia']);
 
-        $graphPath = $sandbox->path().'/vendor/pestphp/pest/.temp/tia/graph.json';
+        $graphPath = $sandbox->path().'/.pest/tia/graph.json';
         $graph = json_decode((string) file_get_contents($graphPath), true);
         $graph['fingerprint']['structural']['composer_lock'] = str_repeat('0', 32);
         file_put_contents($graphPath, json_encode($graph));
@@ -29,7 +29,7 @@ test('environmental drift keeps edges, drops results', function () {
     tiaScenario(function (Sandbox $sandbox) {
         $sandbox->pest(['--tia']);
 
-        $graphPath = $sandbox->path().'/vendor/pestphp/pest/.temp/tia/graph.json';
+        $graphPath = $sandbox->path().'/.pest/tia/graph.json';
         $graph = json_decode((string) file_get_contents($graphPath), true);
 
         $edgeCountBefore = count($graph['edges']);
