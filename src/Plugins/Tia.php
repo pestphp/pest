@@ -72,7 +72,13 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
     private const string OPTION = '--tia';
 
-    private const string REBUILD_OPTION = '--tia-rebuild';
+    /**
+     * Discards any existing graph and re-records from scratch. Meant to
+     * be combined with `--tia`; the flag is shared with the rest of Pest
+     * (no `tia-` prefix) so a single `--tia --fresh` reads naturally as
+     * "TIA, fresh start".
+     */
+    private const string FRESH_OPTION = '--fresh';
 
     /**
      * Bypasses `BaselineSync`'s post-failure cooldown. After a failed
@@ -331,15 +337,22 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $replayingGlobal = $isWorker && (string) Parallel::getGlobal(self::REPLAYING_GLOBAL) === '1';
 
         $enabled = $this->hasArgument(self::OPTION, $arguments);
-        $forceRebuild = $this->hasArgument(self::REBUILD_OPTION, $arguments);
+        $freshRequested = $this->hasArgument(self::FRESH_OPTION, $arguments);
         $this->forceRefetch = $this->hasArgument(self::REFETCH_OPTION, $arguments);
 
-        if (! $enabled && ! $forceRebuild && ! $this->forceRefetch && ! $recordingGlobal && ! $replayingGlobal) {
+        // `--fresh` only takes effect alongside `--tia` (or from a
+        // worker that's already in TIA mode). Without `--tia`, Pest
+        // users could be passing `--fresh` to an unrelated plugin —
+        // silently ignore it here and let whatever else consumes it
+        // handle it. The flag isn't popped in that branch.
+        $forceRebuild = $freshRequested && ($enabled || $recordingGlobal || $replayingGlobal);
+
+        if (! $enabled && ! $this->forceRefetch && ! $recordingGlobal && ! $replayingGlobal) {
             return $arguments;
         }
 
         $arguments = $this->popArgument(self::OPTION, $arguments);
-        $arguments = $this->popArgument(self::REBUILD_OPTION, $arguments);
+        $arguments = $this->popArgument(self::FRESH_OPTION, $arguments);
         $arguments = $this->popArgument(self::REFETCH_OPTION, $arguments);
 
         // When `--coverage` is active, piggyback on PHPUnit's CodeCoverage
@@ -1141,6 +1154,18 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private function registerRecap(): void
     {
         DefaultPrinter::addRecap(function (): string {
+            // Parallel mode: worker replays live in other processes and
+            // flushed their counters to disk on terminate. Collision's
+            // `writeRecap` fires inside `ExecutionFinished`, which is
+            // strictly before `addOutput` — so we must merge right here
+            // or the fragment below would read 0 and the suffix would
+            // silently disappear on `--tia --parallel`. The merge is
+            // idempotent: partial keys are deleted on read, so the
+            // later `addOutput` call becomes a no-op.
+            if (Parallel::isEnabled() && ! Parallel::isWorker()) {
+                $this->mergeWorkerReplayPartials();
+            }
+
             $fragments = [];
 
             if ($this->executedCount > 0) {

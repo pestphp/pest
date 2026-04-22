@@ -21,7 +21,7 @@ use Pest\Plugins\Tia\Storage;
  *
  * The guard engages only when ALL of these hold:
  *   1. `--tia` is present in argv.
- *   2. No `--tia-rebuild` flag (forced record always drives the coverage
+ *   2. No `--fresh` flag (forced record always drives the coverage
  *      driver; dropping Xdebug would break the recording).
  *   3. No `--coverage*` flag (coverage runs need the driver regardless).
  *   4. A valid graph already exists on disk AND its structural fingerprint
@@ -117,7 +117,7 @@ final class XdebugGuard
                 return false;
             }
 
-            if ($value === '--tia-rebuild') {
+            if ($value === '--fresh') {
                 return false;
             }
 

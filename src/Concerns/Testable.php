@@ -238,6 +238,44 @@ trait Testable
 
         $this->__cachedPass = false;
 
+        $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
+
+        $description = $method->description;
+        if ($this->dataName()) {
+            $description = str_contains((string) $description, ':dataset')
+                ? str_replace(':dataset', str_replace('dataset ', '', $this->dataName()), (string) $description)
+                : $description.' with '.$this->dataName();
+        }
+
+        $description = htmlspecialchars(html_entity_decode((string) $description), ENT_NOQUOTES);
+
+        if ($method->repetitions > 1) {
+            $matches = [];
+            preg_match('/\((.*?)\)/', $description, $matches);
+
+            if (count($matches) > 1) {
+                if (str_contains($description, 'with '.$matches[0].' /')) {
+                    $description = str_replace('with '.$matches[0].' /', '', $description);
+                } else {
+                    $description = str_replace('with '.$matches[0], '', $description);
+                }
+            }
+
+            $description .= ' @ repetition '.($matches[1].' of '.$method->repetitions);
+        }
+
+        $this->__description = self::$__latestDescription = $description;
+        self::$__latestAssignees = $method->assignees;
+        self::$__latestNotes = $method->notes;
+        self::$__latestIssues = $method->issues;
+        self::$__latestPrs = $method->prs;
+
+        // TIA replay short-circuit. Runs AFTER dataset/description/
+        // assignee metadata is populated so output and filtering still
+        // see the correct test name + tags on a cache hit, but BEFORE
+        // `parent::setUp()` and `beforeEach` so we skip the user's
+        // fixture setup (which is the whole point of replay — avoid
+        // paying for work whose outcome we already know).
         /** @var Tia $tia */
         $tia = Container::getInstance()->get(Tia::class);
         $cached = $tia->getCachedResult(self::$__filename, $this::class.'::'.$this->name());
@@ -274,38 +312,6 @@ trait Testable
 
             throw new AssertionFailedError($cached->message() ?: 'Cached failure');
         }
-
-        $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
-
-        $description = $method->description;
-        if ($this->dataName()) {
-            $description = str_contains((string) $description, ':dataset')
-                ? str_replace(':dataset', str_replace('dataset ', '', $this->dataName()), (string) $description)
-                : $description.' with '.$this->dataName();
-        }
-
-        $description = htmlspecialchars(html_entity_decode((string) $description), ENT_NOQUOTES);
-
-        if ($method->repetitions > 1) {
-            $matches = [];
-            preg_match('/\((.*?)\)/', $description, $matches);
-
-            if (count($matches) > 1) {
-                if (str_contains($description, 'with '.$matches[0].' /')) {
-                    $description = str_replace('with '.$matches[0].' /', '', $description);
-                } else {
-                    $description = str_replace('with '.$matches[0], '', $description);
-                }
-            }
-
-            $description .= ' @ repetition '.($matches[1].' of '.$method->repetitions);
-        }
-
-        $this->__description = self::$__latestDescription = $description;
-        self::$__latestAssignees = $method->assignees;
-        self::$__latestNotes = $method->notes;
-        self::$__latestIssues = $method->issues;
-        self::$__latestPrs = $method->prs;
 
         parent::setUp();
 
