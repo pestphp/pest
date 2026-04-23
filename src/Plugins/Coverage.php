@@ -83,11 +83,6 @@ final class Coverage implements AddsOutput, HandlesArguments
     private ?int $shardTotal = null;
 
     /**
-     * Whether to merge shard .cov files and generate a coverage report.
-     */
-    private bool $shardsCoverage = false;
-
-    /**
      * Whether to delete .cov files after generating the shards coverage report.
      */
     private bool $shardsCoverageClean = false;
@@ -107,61 +102,10 @@ final class Coverage implements AddsOutput, HandlesArguments
     {
         if ($this->hasShardsCoverageFlag($originals)) {
             $originals = $this->popShardsCoverageFlags($originals);
-
-            $shardArgs = [...[''], ...array_values(array_filter($originals, function (string $original): bool {
-                foreach ([self::MIN_OPTION, self::EXACTLY_OPTION, self::ONLY_COVERED_OPTION] as $option) {
-                    if ($original === sprintf('--%s', $option)) {
-                        return true;
-                    }
-
-                    if (Str::startsWith($original, sprintf('--%s=', $option))) {
-                        return true;
-                    }
-                }
-
-                return false;
-            }))];
-
-            $shardInput = new ArgvInput($shardArgs, new InputDefinition([
-                new InputOption(self::MIN_OPTION, null, InputOption::VALUE_REQUIRED),
-                new InputOption(self::EXACTLY_OPTION, null, InputOption::VALUE_REQUIRED),
-                new InputOption(self::ONLY_COVERED_OPTION, null, InputOption::VALUE_NONE),
-            ]));
-
-            if ($shardInput->getOption(self::MIN_OPTION) !== null) {
-                $this->coverageMin = (float) $shardInput->getOption(self::MIN_OPTION);
-            }
-
-            if ($shardInput->getOption(self::EXACTLY_OPTION) !== null) {
-                $this->coverageExactly = (float) $shardInput->getOption(self::EXACTLY_OPTION);
-            }
-
-            if ((bool) $shardInput->getOption(self::ONLY_COVERED_OPTION)) {
-                $this->showOnlyCovered = true;
-            }
+            $this->parseThresholdOptions($originals);
 
             $coverage = $this->mergeAndReportShardsCoverage();
-            $exitCode = (int) ($coverage < $this->coverageMin);
-
-            if ($exitCode === 0 && $this->coverageExactly !== null) {
-                $comparableCoverage = $this->computeComparableCoverage($coverage);
-                $comparableCoverageExactly = $this->computeComparableCoverage($this->coverageExactly);
-                $exitCode = $comparableCoverage === $comparableCoverageExactly ? 0 : 1;
-
-                if ($exitCode === 1) {
-                    $this->output->writeln(sprintf(
-                        "\n  <fg=white;bg=red;options=bold> FAIL </> Code coverage not exactly <fg=white;options=bold> %s %%</>, currently <fg=red;options=bold> %s %%</>.",
-                        number_format($this->coverageExactly, 1),
-                        number_format(floor($coverage * 10) / 10, 1),
-                    ));
-                }
-            } elseif ($exitCode === 1) {
-                $this->output->writeln(sprintf(
-                    "\n  <fg=white;bg=red;options=bold> FAIL </> Code coverage below expected <fg=white;options=bold> %s %%</>, currently <fg=red;options=bold> %s %%</>.",
-                    number_format($this->coverageMin, 1),
-                    number_format(floor($coverage * 10) / 10, 1)
-                ));
-            }
+            $exitCode = $this->applyThresholds($coverage);
 
             $this->output->writeln(['']);
 
@@ -236,23 +180,7 @@ final class Coverage implements AddsOutput, HandlesArguments
             }
         }
 
-        if ($input->getOption(self::MIN_OPTION) !== null) {
-            /** @var int|float $minOption */
-            $minOption = $input->getOption(self::MIN_OPTION);
-
-            $this->coverageMin = (float) $minOption;
-        }
-
-        if ($input->getOption(self::EXACTLY_OPTION) !== null) {
-            /** @var int|float $exactlyOption */
-            $exactlyOption = $input->getOption(self::EXACTLY_OPTION);
-
-            $this->coverageExactly = (float) $exactlyOption;
-        }
-
-        if ((bool) $input->getOption(self::ONLY_COVERED_OPTION)) {
-            $this->showOnlyCovered = true;
-        }
+        $this->parseThresholdOptions($arguments);
 
         if ($_SERVER['COLLISION_PRINTER_COMPACT'] ?? false) {
             $this->compact = true;
@@ -294,30 +222,79 @@ final class Coverage implements AddsOutput, HandlesArguments
             }
 
             $coverage = \Pest\Support\Coverage::report($this->output, $this->compact, $this->showOnlyCovered);
-            $exitCode = (int) ($coverage < $this->coverageMin);
-
-            if ($exitCode === 0 && $this->coverageExactly !== null) {
-                $comparableCoverage = $this->computeComparableCoverage($coverage);
-                $comparableCoverageExactly = $this->computeComparableCoverage($this->coverageExactly);
-
-                $exitCode = $comparableCoverage === $comparableCoverageExactly ? 0 : 1;
-
-                if ($exitCode === 1) {
-                    $this->output->writeln(sprintf(
-                        "\n  <fg=white;bg=red;options=bold> FAIL </> Code coverage not exactly <fg=white;options=bold> %s %%</>, currently <fg=red;options=bold> %s %%</>.",
-                        number_format($this->coverageExactly, 1),
-                        number_format(floor($coverage * 10) / 10, 1),
-                    ));
-                }
-            } elseif ($exitCode === 1) {
-                $this->output->writeln(sprintf(
-                    "\n  <fg=white;bg=red;options=bold> FAIL </> Code coverage below expected <fg=white;options=bold> %s %%</>, currently <fg=red;options=bold> %s %%</>.",
-                    number_format($this->coverageMin, 1),
-                    number_format(floor($coverage * 10) / 10, 1)
-                ));
-            }
+            $exitCode = $this->applyThresholds($coverage);
 
             $this->output->writeln(['']);
+        }
+
+        return $exitCode;
+    }
+
+    /**
+     * Parses --min, --exactly, and --only-covered from an argv-style array and sets the corresponding properties.
+     *
+     * @param  array<int, string>  $originals
+     */
+    private function parseThresholdOptions(array $originals): void
+    {
+        $args = [...[''], ...array_values(array_filter($originals, function (string $original): bool {
+            foreach ([self::MIN_OPTION, self::EXACTLY_OPTION, self::ONLY_COVERED_OPTION] as $option) {
+                if ($original === sprintf('--%s', $option)) {
+                    return true;
+                }
+
+                if (Str::startsWith($original, sprintf('--%s=', $option))) {
+                    return true;
+                }
+            }
+
+            return false;
+        }))];
+
+        $input = new ArgvInput($args, new InputDefinition([
+            new InputOption(self::MIN_OPTION, null, InputOption::VALUE_REQUIRED),
+            new InputOption(self::EXACTLY_OPTION, null, InputOption::VALUE_REQUIRED),
+            new InputOption(self::ONLY_COVERED_OPTION, null, InputOption::VALUE_NONE),
+        ]));
+
+        if ($input->getOption(self::MIN_OPTION) !== null) {
+            $this->coverageMin = (float) $input->getOption(self::MIN_OPTION);
+        }
+
+        if ($input->getOption(self::EXACTLY_OPTION) !== null) {
+            $this->coverageExactly = (float) $input->getOption(self::EXACTLY_OPTION);
+        }
+
+        if ((bool) $input->getOption(self::ONLY_COVERED_OPTION)) {
+            $this->showOnlyCovered = true;
+        }
+    }
+
+    /**
+     * Evaluates coverage against --min/--exactly thresholds, writes failure messages, and returns the exit code.
+     */
+    private function applyThresholds(float $coverage): int
+    {
+        $exitCode = (int) ($coverage < $this->coverageMin);
+
+        if ($exitCode === 0 && $this->coverageExactly !== null) {
+            $comparableCoverage = $this->computeComparableCoverage($coverage);
+            $comparableCoverageExactly = $this->computeComparableCoverage($this->coverageExactly);
+            $exitCode = $comparableCoverage === $comparableCoverageExactly ? 0 : 1;
+
+            if ($exitCode === 1) {
+                $this->output->writeln(sprintf(
+                    "\n  <fg=white;bg=red;options=bold> FAIL </> Code coverage not exactly <fg=white;options=bold> %s %%</>, currently <fg=red;options=bold> %s %%</>.",
+                    number_format($this->coverageExactly, 1),
+                    number_format(floor($coverage * 10) / 10, 1),
+                ));
+            }
+        } elseif ($exitCode === 1) {
+            $this->output->writeln(sprintf(
+                "\n  <fg=white;bg=red;options=bold> FAIL </> Code coverage below expected <fg=white;options=bold> %s %%</>, currently <fg=red;options=bold> %s %%</>.",
+                number_format($this->coverageMin, 1),
+                number_format(floor($coverage * 10) / 10, 1)
+            ));
         }
 
         return $exitCode;
