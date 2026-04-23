@@ -16,7 +16,6 @@ use ParaTest\WrapperRunner\SuiteLoader;
 use ParaTest\WrapperRunner\WrapperWorker;
 use Pest\Result;
 use Pest\TestSuite;
-use PHPUnit\Event\Facade as EventFacade;
 use PHPUnit\Event\Test\AfterLastTestMethodFailed;
 use PHPUnit\Event\TestRunner\WarningTriggered;
 use PHPUnit\Runner\CodeCoverage;
@@ -147,8 +146,6 @@ final class WrapperRunner implements RunnerInterface
     {
         $directory = dirname(__DIR__);
         ExcludeList::addDirectory($directory);
-        TestResultFacade::init();
-        EventFacade::instance()->seal();
         $suiteLoader = new SuiteLoader(
             $this->options,
             $this->output,
