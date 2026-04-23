@@ -362,6 +362,7 @@ final class Coverage implements AddsOutput, HandlesArguments
         foreach ($arguments as $arg) {
             if ($skipNext) {
                 $skipNext = false;
+
                 continue;
             }
 
@@ -404,13 +405,7 @@ final class Coverage implements AddsOutput, HandlesArguments
      */
     private function hasShardsCoverageFlag(array $arguments): bool
     {
-        foreach ($arguments as $arg) {
-            if ($arg === '--'.self::SHARDS_COVERAGE_OPTION) {
-                return true;
-            }
-        }
-
-        return false;
+        return in_array('--'.self::SHARDS_COVERAGE_OPTION, $arguments, true);
     }
 
     /**
@@ -428,6 +423,7 @@ final class Coverage implements AddsOutput, HandlesArguments
             }
             if ($arg === '--'.self::CLEAN_OPTION) {
                 $this->shardsCoverageClean = true;
+
                 continue;
             }
             $filtered[] = $arg;
