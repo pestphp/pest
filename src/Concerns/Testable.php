@@ -9,6 +9,7 @@ use Pest\Exceptions\DatasetArgumentsMismatch;
 use Pest\Panic;
 use Pest\Plugins\Tia;
 use Pest\Plugins\Tia\BladeEdges;
+use Pest\Plugins\Tia\InertiaEdges;
 use Pest\Plugins\Tia\Recorder;
 use Pest\Plugins\Tia\TableTracker;
 use Pest\Preset;
@@ -328,6 +329,7 @@ trait Testable
         if ($recorder instanceof Recorder) {
             BladeEdges::arm($recorder);
             TableTracker::arm($recorder);
+            InertiaEdges::arm($recorder);
         }
 
         $beforeEach = TestSuite::getInstance()->beforeEach->get(self::$__filename)[1];

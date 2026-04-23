@@ -59,6 +59,33 @@ final class Graph
     private array $testTables = [];
 
     /**
+     * Inertia page component edges: test file (relative) → list of
+     * component names the test server-side rendered (whatever was
+     * passed to `Inertia::render($component, …)`). Populated from
+     * `Recorder::perTestInertiaComponents()`; consumed at replay time
+     * so an edit to `resources/js/Pages/Users/Show.vue` only invalidates
+     * tests that rendered `Users/Show`. Same string-keyed shape as
+     * `$testTables` for the same diff-readable reasons.
+     *
+     * @var array<string, array<int, string>>
+     */
+    private array $testInertiaComponents = [];
+
+    /**
+     * Inverted JS dependency map: project-relative source path under
+     * `resources/js/**` → list of Inertia page components that
+     * transitively import it. Populated at record time by
+     * `JsModuleGraph::build()` (Vite module graph via Node helper,
+     * with a PHP fallback). Replay uses this to route a
+     * `Components/Button.vue` edit directly to the pages that depend
+     * on it, intersecting against `$testInertiaComponents` for
+     * surgical invalidation.
+     *
+     * @var array<string, array<int, string>>
+     */
+    private array $jsFileToComponents = [];
+
+    /**
      * Environment fingerprint captured at record time.
      *
      * @var array<string, mixed>
@@ -199,6 +226,93 @@ final class Graph
             }
         }
 
+        // Inertia page-component routing. When a Vue/React/Svelte page
+        // under `resources/js/Pages/` changes, map it to the component
+        // name Inertia would use (the path relative to `Pages/`, with
+        // the extension stripped) and intersect with the captured
+        // component edges. Only invalidates tests that actually
+        // rendered the page. Pages with no captured edges (never
+        // rendered during record, brand-new on this branch) fall
+        // through to the watch-pattern fallback via
+        // `$unknownPageComponents` — safe over-run.
+        $changedComponents = [];
+        $unknownPageComponents = [];
+
+        foreach ($nonMigrationPaths as $rel) {
+            $component = $this->componentForInertiaPage($rel);
+
+            if ($component === null) {
+                continue;
+            }
+
+            if ($this->anyTestUses($this->testInertiaComponents, $component)) {
+                $changedComponents[$component] = true;
+            } else {
+                $unknownPageComponents[] = $rel;
+            }
+        }
+
+        // Pages whose component already resolved precisely via the
+        // direct Inertia edges path must not leak back through any
+        // broader mechanism (either the JS-dep lookup below, or the
+        // watch pattern further down).
+        $preciselyHandledPages = [];
+        foreach ($nonMigrationPaths as $rel) {
+            $component = $this->componentForInertiaPage($rel);
+
+            if ($component !== null && isset($changedComponents[$component])) {
+                $preciselyHandledPages[$rel] = true;
+            }
+        }
+
+        // Shared JS files (Components, Layouts, composables, etc.)
+        // aren't Inertia pages but pages depend on them transitively.
+        // `$jsFileToComponents` was computed at record time by walking
+        // Vite's module graph, so a change to
+        // `resources/js/Components/Button.vue` resolves directly to
+        // the set of page components that import it. Union those into
+        // `$changedComponents`. Files that aren't in the JS dep map
+        // fall through to the watch pattern below — same safety-net
+        // path the Inertia block above uses for unresolved pages.
+        $sharedFilesResolved = [];
+        foreach ($nonMigrationPaths as $rel) {
+            if (isset($preciselyHandledPages[$rel])) {
+                continue;
+            }
+
+            if (! isset($this->jsFileToComponents[$rel])) {
+                continue;
+            }
+
+            $touchedAny = false;
+            foreach ($this->jsFileToComponents[$rel] as $pageComponent) {
+                if ($this->anyTestUses($this->testInertiaComponents, $pageComponent)) {
+                    $changedComponents[$pageComponent] = true;
+                    $touchedAny = true;
+                }
+            }
+
+            if ($touchedAny) {
+                $sharedFilesResolved[$rel] = true;
+            }
+        }
+
+        if ($changedComponents !== []) {
+            foreach ($this->testInertiaComponents as $testFile => $components) {
+                if (isset($affectedSet[$testFile])) {
+                    continue;
+                }
+
+                foreach ($components as $component) {
+                    if (isset($changedComponents[$component])) {
+                        $affectedSet[$testFile] = true;
+
+                        break;
+                    }
+                }
+            }
+        }
+
         // 1. Coverage-edge lookup (PHP → PHP). Migrations are already
         // handled above; skipping them here prevents their always-on
         // coverage edges from invalidating the whole DB suite.
@@ -241,8 +355,19 @@ final class Graph
         // (exotic syntax, raw SQL) are funneled back in here too so
         // broad invalidation still kicks in for edge cases we can't
         // parse.
+        // Exclude paths that were already routed precisely through
+        // either the Inertia page-component path or the shared-JS
+        // dependency path. Broadcasting them again via the watch
+        // pattern would re-add every test the pattern maps to,
+        // defeating the surgical match.
         $unknownToGraph = $unparseableMigrations;
         foreach ($nonMigrationPaths as $rel) {
+            if (isset($preciselyHandledPages[$rel])) {
+                continue;
+            }
+            if (isset($sharedFilesResolved[$rel])) {
+                continue;
+            }
             if (! isset($this->fileIds[$rel])) {
                 $unknownToGraph[] = $rel;
             }
@@ -522,6 +647,76 @@ final class Graph
     }
 
     /**
+     * Replaces Inertia component edges for the given test files. Names
+     * preserve case (they're identifiers like `Users/Show`, not
+     * user-supplied strings) but duplicates are collapsed. Same
+     * partial-update policy as `replaceTestTables`.
+     *
+     * @param  array<string, array<int, string>>  $testToComponents
+     */
+    public function replaceTestInertiaComponents(array $testToComponents): void
+    {
+        foreach ($testToComponents as $testFile => $components) {
+            $testRel = $this->relative($testFile);
+
+            if ($testRel === null) {
+                continue;
+            }
+
+            $normalised = [];
+
+            foreach ($components as $component) {
+                if ($component !== '') {
+                    $normalised[$component] = true;
+                }
+            }
+
+            $names = array_keys($normalised);
+            sort($names);
+
+            $this->testInertiaComponents[$testRel] = $names;
+        }
+    }
+
+    /**
+     * Replaces the whole JS dep map. Called at record time with the
+     * output of `JsModuleGraph::build()`. Unlike the test-level
+     * replacements above this is a wholesale overwrite — the
+     * resolver produces the full graph on every run.
+     *
+     * @param  array<string, array<int, string>>  $fileToComponents
+     */
+    public function replaceJsFileToComponents(array $fileToComponents): void
+    {
+        $out = [];
+
+        foreach ($fileToComponents as $path => $components) {
+            if ($path === '') {
+                continue;
+            }
+            $names = [];
+
+            foreach ($components as $component) {
+                if ($component !== '') {
+                    $names[$component] = true;
+                }
+            }
+
+            if ($names === []) {
+                continue;
+            }
+
+            $keys = array_keys($names);
+            sort($keys);
+            $out[$path] = $keys;
+        }
+
+        ksort($out);
+
+        $this->jsFileToComponents = $out;
+    }
+
+    /**
      * Projects under Laravel conventionally keep migrations at
      * `database/migrations/`. We recognise the directory as a prefix
      * so nested subdirectories (a pattern some teams use for grouping
@@ -560,6 +755,58 @@ final class Graph
     }
 
     /**
+     * Maps a project-relative path to its Inertia component name if it
+     * lives under `resources/js/Pages/` with a recognised framework
+     * extension. Returns null otherwise so callers can cheaply ignore
+     * non-page files. Matches Inertia's resolver convention: strip the
+     * `resources/js/Pages/` prefix, strip the extension, preserve the
+     * remaining slashes (`Users/Show.vue` → `Users/Show`).
+     */
+    private function componentForInertiaPage(string $rel): ?string
+    {
+        $prefix = 'resources/js/Pages/';
+
+        if (! str_starts_with($rel, $prefix)) {
+            return null;
+        }
+
+        $tail = substr($rel, strlen($prefix));
+        $dot = strrpos($tail, '.');
+
+        if ($dot === false) {
+            return null;
+        }
+
+        $extension = substr($tail, $dot + 1);
+
+        if (! in_array($extension, ['vue', 'tsx', 'jsx', 'svelte'], true)) {
+            return null;
+        }
+
+        $name = substr($tail, 0, $dot);
+
+        return $name === '' ? null : $name;
+    }
+
+    /**
+     * Whether any test's component set contains `$component`. Used to
+     * decide between precise edge matching and watch-pattern fallback
+     * for a changed Inertia page file.
+     *
+     * @param  array<string, array<int, string>>  $edges
+     */
+    private function anyTestUses(array $edges, string $component): bool
+    {
+        foreach ($edges as $components) {
+            if (in_array($component, $components, true)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Drops edges whose test file no longer exists on disk. Prevents the graph
      * from keeping stale entries for deleted / renamed tests that would later
      * be flagged as affected and confuse PHPUnit's discovery.
@@ -571,6 +818,12 @@ final class Graph
         foreach (array_keys($this->edges) as $testRel) {
             if (! is_file($root.$testRel)) {
                 unset($this->edges[$testRel]);
+            }
+        }
+
+        foreach (array_keys($this->testInertiaComponents) as $testRel) {
+            if (! is_file($root.$testRel)) {
+                unset($this->testInertiaComponents[$testRel]);
             }
         }
 
@@ -624,6 +877,53 @@ final class Graph
             }
         }
 
+        if (isset($data['test_inertia_components']) && is_array($data['test_inertia_components'])) {
+            foreach ($data['test_inertia_components'] as $testRel => $components) {
+                if (! is_string($testRel)) {
+                    continue;
+                }
+                if (! is_array($components)) {
+                    continue;
+                }
+                $names = [];
+
+                foreach ($components as $component) {
+                    if (is_string($component) && $component !== '') {
+                        $names[] = $component;
+                    }
+                }
+
+                if ($names !== []) {
+                    $graph->testInertiaComponents[$testRel] = $names;
+                }
+            }
+        }
+
+        if (isset($data['js_file_to_components']) && is_array($data['js_file_to_components'])) {
+            foreach ($data['js_file_to_components'] as $path => $components) {
+                if (! is_string($path)) {
+                    continue;
+                }
+                if ($path === '') {
+                    continue;
+                }
+                if (! is_array($components)) {
+                    continue;
+                }
+                $names = [];
+
+                foreach ($components as $component) {
+                    if (is_string($component) && $component !== '') {
+                        $names[] = $component;
+                    }
+                }
+
+                if ($names !== []) {
+                    $graph->jsFileToComponents[$path] = $names;
+                }
+            }
+        }
+
         return $graph;
     }
 
@@ -642,6 +942,8 @@ final class Graph
             'edges' => $this->edges,
             'baselines' => $this->baselines,
             'test_tables' => $this->testTables,
+            'test_inertia_components' => $this->testInertiaComponents,
+            'js_file_to_components' => $this->jsFileToComponents,
         ];
 
         $json = json_encode($payload, JSON_UNESCAPED_SLASHES);

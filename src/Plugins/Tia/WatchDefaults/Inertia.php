@@ -31,11 +31,18 @@ final readonly class Inertia implements WatchDefault
             : $testPath;
 
         return [
-            // Inertia page components (React / Vue / Svelte).
-            'resources/js/Pages/**/*.vue' => [$testPath, $browserDir],
-            'resources/js/Pages/**/*.tsx' => [$testPath, $browserDir],
-            'resources/js/Pages/**/*.jsx' => [$testPath, $browserDir],
-            'resources/js/Pages/**/*.svelte' => [$testPath, $browserDir],
+            // Inertia page components (React / Vue / Svelte). Scoped to
+            // `$browserDir` only — a Vue/React edit cannot change the
+            // output of a server-side Inertia test (those assert on the
+            // component *name* returned by `Inertia::render()`, not its
+            // client-side implementation). Broad invalidation is only
+            // meaningful for tests that actually render the DOM. Precise
+            // per-component edges come from `InertiaEdges` at record
+            // time and replace this fallback when available.
+            'resources/js/Pages/**/*.vue' => [$browserDir],
+            'resources/js/Pages/**/*.tsx' => [$browserDir],
+            'resources/js/Pages/**/*.jsx' => [$browserDir],
+            'resources/js/Pages/**/*.svelte' => [$browserDir],
 
             // Shared layouts / components consumed by pages.
             'resources/js/Layouts/**/*.vue' => [$browserDir],

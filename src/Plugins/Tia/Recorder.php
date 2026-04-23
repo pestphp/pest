@@ -40,6 +40,17 @@ final class Recorder
     private array $perTestTables = [];
 
     /**
+     * Aggregated map: absolute test file → set<Inertia component name>.
+     * Populated by `InertiaEdges` from Inertia responses observed at
+     * request-handled time; consumed at record finalize to populate
+     * the graph's per-test component edges that drive Vue / React
+     * page-file impact analysis.
+     *
+     * @var array<string, array<string, true>>
+     */
+    private array $perTestInertiaComponents = [];
+
+    /**
      * Cached class → test file resolution.
      *
      * @var array<string, string|null>
@@ -206,6 +217,32 @@ final class Recorder
     }
 
     /**
+     * Records that the currently-running test server-side-rendered the
+     * named Inertia component. The name is whatever
+     * `Inertia::render($component, …)` was called with — typically a
+     * slash-separated path like `Users/Show` that maps to
+     * `resources/js/Pages/Users/Show.vue`. No-op outside a test window
+     * so the underlying listener can stay armed without leaking
+     * state between tests.
+     */
+    public function linkInertiaComponent(string $component): void
+    {
+        if (! $this->active) {
+            return;
+        }
+
+        if ($this->currentTestFile === null) {
+            return;
+        }
+
+        if ($component === '') {
+            return;
+        }
+
+        $this->perTestInertiaComponents[$this->currentTestFile][$component] = true;
+    }
+
+    /**
      * @return array<string, array<int, string>> absolute test file → list of absolute source files.
      */
     public function perTestFiles(): array
@@ -228,6 +265,22 @@ final class Recorder
 
         foreach ($this->perTestTables as $testFile => $tables) {
             $names = array_keys($tables);
+            sort($names);
+            $out[$testFile] = $names;
+        }
+
+        return $out;
+    }
+
+    /**
+     * @return array<string, array<int, string>> absolute test file → sorted list of Inertia component names.
+     */
+    public function perTestInertiaComponents(): array
+    {
+        $out = [];
+
+        foreach ($this->perTestInertiaComponents as $testFile => $components) {
+            $names = array_keys($components);
             sort($names);
             $out[$testFile] = $names;
         }
@@ -301,6 +354,7 @@ final class Recorder
         $this->currentTestFile = null;
         $this->perTestFiles = [];
         $this->perTestTables = [];
+        $this->perTestInertiaComponents = [];
         $this->classFileCache = [];
         $this->active = false;
     }

@@ -1,0 +1,270 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Pest\Plugins\Tia;
+
+/**
+ * Fallback parser for ES module imports under `resources/js/`.
+ *
+ * Used only when the Node helper (`bin/pest-tia-vite-deps.mjs`) is
+ * unavailable — typically when Node isn't on `PATH` or the user's
+ * `vite.config.*` can't be loaded. Pure PHP, so it degrades
+ * gracefully on locked-down environments but cannot match the
+ * full-fidelity Vite resolver.
+ *
+ * Known limits (intentional — preserving correctness over precision):
+ *   - Only `@/` and `~/` aliases recognised (both resolve to
+ *     `resources/js/`, the community default). Custom aliases from
+ *     `vite.config.ts` are ignored; anything we can't resolve is
+ *     simply skipped and falls through to the watch-pattern safety
+ *     net.
+ *   - Dynamic imports with variable expressions
+ *     (`import(`./${name}`.vue)`) can't be resolved; the literal
+ *     prefix is ignored and the caller over-runs. Safe.
+ *   - Vue SFC `<script>` blocks parsed whole; imports inside
+ *     `<template>` blocks (rare but legal) are not scanned.
+ *
+ * Output shape mirrors the Node helper: project-relative source path
+ * → sorted list of component names of pages that depend on it.
+ *
+ * @internal
+ */
+final class JsImportParser
+{
+    private const array PAGE_EXTENSIONS = ['vue', 'tsx', 'jsx', 'svelte'];
+
+    private const array RESOLVABLE_EXTENSIONS = ['vue', 'tsx', 'jsx', 'svelte', 'ts', 'js', 'mjs', 'mts'];
+
+    private const string PAGES_DIR = 'resources/js/Pages';
+
+    private const string JS_DIR = 'resources/js';
+
+    /**
+     * Walks `resources/js/Pages` and, for each page, collects its
+     * transitive file imports. Returns the inverted graph so callers
+     * can look up "what pages depend on this shared file".
+     *
+     * @return array<string, list<string>>
+     */
+    public static function parse(string $projectRoot): array
+    {
+        $jsRoot = $projectRoot.DIRECTORY_SEPARATOR.self::JS_DIR;
+        $pagesRoot = $projectRoot.DIRECTORY_SEPARATOR.self::PAGES_DIR;
+
+        if (! is_dir($pagesRoot)) {
+            return [];
+        }
+
+        $reverse = [];
+
+        foreach (self::collectPages($pagesRoot) as $pageAbs) {
+            $component = self::componentName($pagesRoot, $pageAbs);
+
+            if ($component === null) {
+                continue;
+            }
+
+            $visited = [];
+            self::collectTransitive($pageAbs, $projectRoot, $jsRoot, $visited);
+
+            foreach (array_keys($visited) as $depAbs) {
+                if ($depAbs === $pageAbs) {
+                    continue;
+                }
+
+                $rel = str_replace(DIRECTORY_SEPARATOR, '/', substr($depAbs, strlen($projectRoot) + 1));
+                $reverse[$rel][$component] = true;
+            }
+        }
+
+        $out = [];
+        foreach ($reverse as $path => $components) {
+            $names = array_keys($components);
+            sort($names);
+            $out[$path] = $names;
+        }
+
+        ksort($out);
+
+        return $out;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function collectPages(string $pagesRoot): array
+    {
+        $out = [];
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($pagesRoot, \FilesystemIterator::SKIP_DOTS),
+        );
+
+        foreach ($iterator as $fileInfo) {
+            if (! $fileInfo->isFile()) {
+                continue;
+            }
+
+            $ext = strtolower((string) $fileInfo->getExtension());
+            if (in_array($ext, self::PAGE_EXTENSIONS, true)) {
+                $out[] = $fileInfo->getPathname();
+            }
+        }
+
+        return $out;
+    }
+
+    private static function componentName(string $pagesRoot, string $pageAbs): ?string
+    {
+        $rel = str_replace(DIRECTORY_SEPARATOR, '/', substr($pageAbs, strlen($pagesRoot) + 1));
+        $dot = strrpos($rel, '.');
+
+        if ($dot === false) {
+            return null;
+        }
+
+        $name = substr($rel, 0, $dot);
+
+        return $name === '' ? null : $name;
+    }
+
+    /**
+     * @param  array<string, true>  $visited
+     */
+    private static function collectTransitive(string $fileAbs, string $projectRoot, string $jsRoot, array &$visited): void
+    {
+        if (isset($visited[$fileAbs])) {
+            return;
+        }
+        $visited[$fileAbs] = true;
+
+        $source = self::loadSource($fileAbs);
+        if ($source === null) {
+            return;
+        }
+
+        foreach (self::extractImports($source) as $spec) {
+            $resolved = self::resolveImport($spec, $fileAbs, $jsRoot);
+            if ($resolved === null) {
+                continue;
+            }
+            if (! is_file($resolved)) {
+                continue;
+            }
+
+            self::collectTransitive($resolved, $projectRoot, $jsRoot, $visited);
+        }
+    }
+
+    /**
+     * Loads the importable region of a file. For Vue SFCs, only the
+     * `<script>` block is relevant for imports; ignoring the rest
+     * avoids false-positive matches inside `<template>` attributes.
+     */
+    private static function loadSource(string $fileAbs): ?string
+    {
+        $content = @file_get_contents($fileAbs);
+        if ($content === false) {
+            return null;
+        }
+
+        if (str_ends_with(strtolower($fileAbs), '.vue')) {
+            $scripts = [];
+            if (preg_match_all('/<script[^>]*>(.*?)<\/script>/si', $content, $m) !== false) {
+                foreach ($m[1] as $block) {
+                    $scripts[] = $block;
+                }
+            }
+
+            return implode("\n", $scripts);
+        }
+
+        return $content;
+    }
+
+    /**
+     * Picks out every `import … from '…'` / `import '…'` / `import('…')`
+     * target. We strip line comments first so a commented-out import
+     * doesn't bloat the dep set.
+     *
+     * @return list<string>
+     */
+    private static function extractImports(string $source): array
+    {
+        $stripped = preg_replace('#//[^\n]*#', '', $source) ?? $source;
+        $stripped = preg_replace('#/\*.*?\*/#s', '', $stripped) ?? $stripped;
+
+        $specs = [];
+
+        if (preg_match_all('/\bimport\s+(?:[^\'"()]*?\s+from\s+)?[\'"]([^\'"]+)[\'"]/', $stripped, $matches) !== false) {
+            foreach ($matches[1] as $spec) {
+                $specs[] = $spec;
+            }
+        }
+
+        if (preg_match_all('/\bimport\(\s*[\'"]([^\'"]+)[\'"]\s*\)/', $stripped, $matches) !== false) {
+            foreach ($matches[1] as $spec) {
+                $specs[] = $spec;
+            }
+        }
+
+        return $specs;
+    }
+
+    private static function resolveImport(string $spec, string $importerAbs, string $jsRoot): ?string
+    {
+        if ($spec === '' || $spec[0] === '.' || $spec[0] === '/') {
+            return self::resolveRelative($spec, $importerAbs);
+        }
+
+        if (str_starts_with($spec, '@/') || str_starts_with($spec, '~/')) {
+            $tail = substr($spec, 2);
+
+            return self::withExtension($jsRoot.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $tail));
+        }
+
+        // Anything else is either a node_modules package or an
+        // unrecognised alias — skip. The watch-pattern fallback
+        // handles the safety-net case for non-matched paths.
+        return null;
+    }
+
+    private static function resolveRelative(string $spec, string $importerAbs): ?string
+    {
+        if ($spec === '' || $spec[0] === '/') {
+            return null;
+        }
+
+        $base = dirname($importerAbs);
+        $path = $base.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $spec);
+
+        return self::withExtension($path);
+    }
+
+    /**
+     * Imports may omit the extension or point at a directory (index.vue,
+     * index.ts). Probe the common targets in order.
+     */
+    private static function withExtension(string $path): ?string
+    {
+        if (is_file($path)) {
+            return realpath($path) ?: $path;
+        }
+
+        foreach (self::RESOLVABLE_EXTENSIONS as $ext) {
+            $candidate = $path.'.'.$ext;
+            if (is_file($candidate)) {
+                return realpath($candidate) ?: $candidate;
+            }
+        }
+
+        foreach (self::RESOLVABLE_EXTENSIONS as $ext) {
+            $candidate = $path.DIRECTORY_SEPARATOR.'index.'.$ext;
+            if (is_file($candidate)) {
+                return realpath($candidate) ?: $candidate;
+            }
+        }
+
+        return null;
+    }
+}

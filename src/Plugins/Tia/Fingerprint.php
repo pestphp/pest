@@ -40,7 +40,19 @@ final readonly class Fingerprint
     //       coverage, which would leave every DB test invalidated by
     //       any migration change — force a rebuild so the new edges
     //       are populated.
-    private const int SCHEMA_VERSION = 6;
+    //   v7: Graph gained per-test Inertia page-component edges
+    //       (`$testInertiaComponents`) for surgical page-file
+    //       invalidation. Worker partial now includes an `inertia`
+    //       section. Old graphs have no component edges; without a
+    //       rebuild Vue/React page edits would fall through to the
+    //       broad watch pattern even when precise matching could have
+    //       worked.
+    //   v8: Graph gained `$jsFileToComponents` — reverse dependency
+    //       map computed at record time from Vite's module graph (or
+    //       the PHP fallback) so shared components / layouts /
+    //       composables invalidate the specific pages they're used
+    //       by, not every browser test.
+    private const int SCHEMA_VERSION = 8;
 
     /**
      * @return array{

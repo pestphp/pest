@@ -14,6 +14,7 @@ use Pest\Plugins\Tia\Contracts\State;
 use Pest\Plugins\Tia\CoverageCollector;
 use Pest\Plugins\Tia\Fingerprint;
 use Pest\Plugins\Tia\Graph;
+use Pest\Plugins\Tia\JsModuleGraph;
 use Pest\Plugins\Tia\Recorder;
 use Pest\Plugins\Tia\ResultCollector;
 use Pest\Plugins\Tia\WatchPatterns;
@@ -413,9 +414,10 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         $perTestTables = $recorder->perTestTables();
+        $perTestInertia = $recorder->perTestInertiaComponents();
 
         if (Parallel::isWorker()) {
-            $this->flushWorkerPartial($perTest, $perTestTables);
+            $this->flushWorkerPartial($perTest, $perTestTables, $perTestInertia);
             $recorder->reset();
             $this->coverageCollector->reset();
 
@@ -439,6 +441,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         );
         $graph->replaceEdges($perTest);
         $graph->replaceTestTables($perTestTables);
+        $graph->replaceTestInertiaComponents($perTestInertia);
+        $graph->replaceJsFileToComponents(JsModuleGraph::build($projectRoot));
         $graph->pruneMissingTests();
 
         // Fold in the results collected during this same record run. The
@@ -527,6 +531,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         $mergedFiles = [];
         $mergedTables = [];
+        $mergedInertia = [];
 
         foreach ($partialKeys as $key) {
             $data = $this->readPartial($key);
@@ -555,6 +560,16 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                 }
             }
 
+            foreach ($data['inertia'] as $testFile => $components) {
+                if (! isset($mergedInertia[$testFile])) {
+                    $mergedInertia[$testFile] = [];
+                }
+
+                foreach ($components as $component) {
+                    $mergedInertia[$testFile][$component] = true;
+                }
+            }
+
             $this->state->delete($key);
         }
 
@@ -568,6 +583,12 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         foreach ($mergedTables as $testFile => $tableSet) {
             $finalisedTables[$testFile] = array_keys($tableSet);
+        }
+
+        $finalisedInertia = [];
+
+        foreach ($mergedInertia as $testFile => $componentSet) {
+            $finalisedInertia[$testFile] = array_keys($componentSet);
         }
 
         // Empty-edges guard: if every worker returned no edges it almost
@@ -588,6 +609,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         $graph->replaceEdges($finalised);
         $graph->replaceTestTables($finalisedTables);
+        $graph->replaceTestInertiaComponents($finalisedInertia);
+        $graph->replaceJsFileToComponents(JsModuleGraph::build($projectRoot));
         $graph->pruneMissingTests();
 
         if (! $this->saveGraph($graph)) {
@@ -979,12 +1002,14 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     /**
      * @param  array<string, array<int, string>>  $perTestFiles
      * @param  array<string, array<int, string>>  $perTestTables
+     * @param  array<string, array<int, string>>  $perTestInertiaComponents
      */
-    private function flushWorkerPartial(array $perTestFiles, array $perTestTables): void
+    private function flushWorkerPartial(array $perTestFiles, array $perTestTables, array $perTestInertiaComponents): void
     {
         $json = json_encode([
             'files' => $perTestFiles,
             'tables' => $perTestTables,
+            'inertia' => $perTestInertiaComponents,
         ], JSON_UNESCAPED_SLASHES);
 
         if ($json === false) {
@@ -1122,7 +1147,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * @return array{files: array<string, array<int, string>>, tables: array<string, array<int, string>>}|null
+     * @return array{files: array<string, array<int, string>>, tables: array<string, array<int, string>>, inertia: array<string, array<int, string>>}|null
      */
     private function readPartial(string $key): ?array
     {
@@ -1140,10 +1165,12 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         $filesSource = is_array($data['files'] ?? null) ? $data['files'] : [];
         $tablesSource = is_array($data['tables'] ?? null) ? $data['tables'] : [];
+        $inertiaSource = is_array($data['inertia'] ?? null) ? $data['inertia'] : [];
 
         return [
             'files' => $this->cleanPartialSection($filesSource),
             'tables' => $this->cleanPartialSection($tablesSource),
+            'inertia' => $this->cleanPartialSection($inertiaSource),
         ];
     }
 
