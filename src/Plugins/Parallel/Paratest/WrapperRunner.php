@@ -33,12 +33,15 @@ use Symfony\Component\Process\PhpExecutableFinder;
 use function array_merge;
 use function array_merge_recursive;
 use function array_shift;
+use function array_unique;
+use function array_values;
 use function assert;
 use function count;
 use function dirname;
 use function file_get_contents;
 use function max;
 use function realpath;
+use function str_contains;
 use function str_starts_with;
 use function unlink;
 use function unserialize;
@@ -106,6 +109,11 @@ final class WrapperRunner implements RunnerInterface
 
     /** @var non-empty-string[] */
     private readonly array $parameters;
+
+    /** @var list<string>|null */
+    private ?array $stopOutcomeChars = null;
+
+    private bool $stopRequested = false;
 
     /**
      * The code coverage filter registry.
@@ -210,10 +218,7 @@ final class WrapperRunner implements RunnerInterface
                     $worker = $this->startWorker($token);
                 }
 
-                if (
-                    $this->exitcode > 0
-                    && $this->options->configuration->stopOnFailure()
-                ) {
+                if ($this->shouldStop()) {
                     $this->pending = [];
                 } elseif (($pending = array_shift($this->pending)) !== null) {
                     $worker->assign($pending);
@@ -223,6 +228,80 @@ final class WrapperRunner implements RunnerInterface
 
             usleep(self::CYCLE_SLEEP);
         }
+    }
+
+    private function shouldStop(): bool
+    {
+        if ($this->stopRequested) {
+            return true;
+        }
+
+        $outcomes = $this->stopOutcomeChars();
+        if ($outcomes === []) {
+            return false;
+        }
+
+        foreach ($this->workers as $worker) {
+            $progress = file_get_contents($worker->progressFile->getPathname());
+            if ($progress === false || $progress === '') {
+                continue;
+            }
+
+            foreach ($outcomes as $outcome) {
+                if (str_contains($progress, $outcome)) {
+                    return $this->stopRequested = true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function stopOutcomeChars(): array
+    {
+        if ($this->stopOutcomeChars !== null) {
+            return $this->stopOutcomeChars;
+        }
+
+        $configuration = $this->options->configuration;
+        $outcomes = [];
+
+        if ($configuration->stopOnFailure() || $configuration->stopOnDefect()) {
+            $outcomes[] = 'F';
+        }
+
+        if ($configuration->stopOnError() || $configuration->stopOnDefect()) {
+            $outcomes[] = 'E';
+        }
+
+        if ($configuration->stopOnRisky() || $configuration->stopOnDefect()) {
+            $outcomes[] = 'R';
+        }
+
+        if ($configuration->stopOnIncomplete() || $configuration->stopOnDefect()) {
+            $outcomes[] = 'I';
+        }
+
+        if ($configuration->stopOnWarning()) {
+            $outcomes[] = 'W';
+        }
+
+        if ($configuration->stopOnNotice()) {
+            $outcomes[] = 'N';
+        }
+
+        if ($configuration->stopOnDeprecation()) {
+            $outcomes[] = 'D';
+        }
+
+        if ($configuration->stopOnSkipped()) {
+            $outcomes[] = 'S';
+        }
+
+        return $this->stopOutcomeChars = array_values(array_unique($outcomes));
     }
 
     private function flushWorker(WrapperWorker $worker): void
