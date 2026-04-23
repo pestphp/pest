@@ -34,7 +34,13 @@ final readonly class Fingerprint
     //       tokens + Blade whitespace/comments) instead of raw bytes.
     //       Old graphs' run-tree hashes are incompatible and must be
     //       rebuilt.
-    private const int SCHEMA_VERSION = 5;
+    //   v6: Graph gained per-test table edges (`$testTables`) powering
+    //       surgical migration invalidation. Worker partial shape
+    //       changed to `{files, tables}`. Old graphs have no table
+    //       coverage, which would leave every DB test invalidated by
+    //       any migration change — force a rebuild so the new edges
+    //       are populated.
+    private const int SCHEMA_VERSION = 6;
 
     /**
      * @return array{

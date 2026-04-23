@@ -30,6 +30,16 @@ final class Recorder
     private array $perTestFiles = [];
 
     /**
+     * Aggregated map: absolute test file → set<lowercase table name>.
+     * Populated by `TableTracker` from `DB::listen` callbacks; consumed
+     * at record finalize to populate the graph's `$testTables` edges
+     * that drive migration-change impact analysis.
+     *
+     * @var array<string, array<string, true>>
+     */
+    private array $perTestTables = [];
+
+    /**
      * Cached class → test file resolution.
      *
      * @var array<string, string|null>
@@ -171,6 +181,31 @@ final class Recorder
     }
 
     /**
+     * Records that the currently-running test queried `$table`. Called
+     * by `TableTracker` for every DML statement Laravel's `DB::listen`
+     * reports; the table name has already been extracted by
+     * `TableExtractor::fromSql()` so we just store it. No-op outside
+     * a test window, so the callback is safe to leave armed across
+     * setUp / tearDown boundaries.
+     */
+    public function linkTable(string $table): void
+    {
+        if (! $this->active) {
+            return;
+        }
+
+        if ($this->currentTestFile === null) {
+            return;
+        }
+
+        if ($table === '') {
+            return;
+        }
+
+        $this->perTestTables[$this->currentTestFile][strtolower($table)] = true;
+    }
+
+    /**
      * @return array<string, array<int, string>> absolute test file → list of absolute source files.
      */
     public function perTestFiles(): array
@@ -179,6 +214,22 @@ final class Recorder
 
         foreach ($this->perTestFiles as $testFile => $sources) {
             $out[$testFile] = array_keys($sources);
+        }
+
+        return $out;
+    }
+
+    /**
+     * @return array<string, array<int, string>> absolute test file → sorted list of table names.
+     */
+    public function perTestTables(): array
+    {
+        $out = [];
+
+        foreach ($this->perTestTables as $testFile => $tables) {
+            $names = array_keys($tables);
+            sort($names);
+            $out[$testFile] = $names;
         }
 
         return $out;
@@ -249,6 +300,7 @@ final class Recorder
     {
         $this->currentTestFile = null;
         $this->perTestFiles = [];
+        $this->perTestTables = [];
         $this->classFileCache = [];
         $this->active = false;
     }

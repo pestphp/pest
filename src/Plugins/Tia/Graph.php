@@ -41,6 +41,24 @@ final class Graph
     private array $edges = [];
 
     /**
+     * Table edges: test file (relative) → list of lowercase SQL table
+     * names the test queried during record. Populated from the
+     * Recorder's `perTestTables()` snapshot; consumed at replay time
+     * to do surgical invalidation when a migration changes — the
+     * test only re-runs if its set intersects the tables the changed
+     * migration touches. Empty for tests that never hit the DB, which
+     * is exactly why those tests stay unaffected by migration edits.
+     *
+     * Unlike `$edges`, we store names rather than ids: the table
+     * universe is small (hundreds at most on a giant app), storing
+     * strings keeps the on-disk graph diff-readable, and the lookup
+     * cost is negligible compared to the per-file ids used above.
+     *
+     * @var array<string, array<int, string>>
+     */
+    private array $testTables = [];
+
+    /**
      * Environment fingerprint captured at record time.
      *
      * @var array<string, mixed>
@@ -126,11 +144,68 @@ final class Graph
             }
         }
 
-        // 1. Coverage-edge lookup (PHP → PHP).
+        $affectedSet = [];
+
+        // Migration changes don't flow through the coverage-edge path —
+        // `RefreshDatabase` in every test's `setUp()` means every test
+        // has an edge to every migration, so step 1 would re-run the
+        // whole DB-touching suite on any migration edit. Route them
+        // separately: static-parse the migration source, union the
+        // referenced tables, and match tests whose recorded query
+        // footprint intersects that set. Missed files (rare: migrations
+        // with pure raw SQL or dynamic names) fall back to the watch
+        // pattern below.
+        $migrationPaths = [];
+        $nonMigrationPaths = [];
+
+        foreach ($normalised as $rel) {
+            if ($this->isMigrationPath($rel)) {
+                $migrationPaths[] = $rel;
+            } else {
+                $nonMigrationPaths[] = $rel;
+            }
+        }
+
+        $changedTables = [];
+        $unparseableMigrations = [];
+
+        foreach ($migrationPaths as $rel) {
+            $tables = $this->tablesForMigration($rel);
+
+            if ($tables === []) {
+                $unparseableMigrations[] = $rel;
+
+                continue;
+            }
+
+            foreach ($tables as $table) {
+                $changedTables[$table] = true;
+            }
+        }
+
+        if ($changedTables !== []) {
+            foreach ($this->testTables as $testFile => $tables) {
+                if (isset($affectedSet[$testFile])) {
+                    continue;
+                }
+
+                foreach ($tables as $table) {
+                    if (isset($changedTables[$table])) {
+                        $affectedSet[$testFile] = true;
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 1. Coverage-edge lookup (PHP → PHP). Migrations are already
+        // handled above; skipping them here prevents their always-on
+        // coverage edges from invalidating the whole DB suite.
         $changedIds = [];
         $unknownSourceDirs = [];
 
-        foreach ($normalised as $rel) {
+        foreach ($nonMigrationPaths as $rel) {
             if (isset($this->fileIds[$rel])) {
                 $changedIds[$this->fileIds[$rel]] = true;
             } elseif (str_ends_with($rel, '.php') && ! str_starts_with($rel, 'tests/')) {
@@ -141,9 +216,11 @@ final class Graph
             }
         }
 
-        $affectedSet = [];
-
         foreach ($this->edges as $testFile => $ids) {
+            if (isset($affectedSet[$testFile])) {
+                continue;
+            }
+
             foreach ($ids as $id) {
                 if (isset($changedIds[$id])) {
                     $affectedSet[$testFile] = true;
@@ -160,9 +237,12 @@ final class Graph
         // defeating the point of recording the edge in the first place.
         // Blade templates captured via Laravel's view composer are the
         // motivating case — we want their specific tests, not every
-        // feature test.
-        $unknownToGraph = [];
-        foreach ($normalised as $rel) {
+        // feature test. Migrations whose static parse yielded nothing
+        // (exotic syntax, raw SQL) are funneled back in here too so
+        // broad invalidation still kicks in for edge cases we can't
+        // parse.
+        $unknownToGraph = $unparseableMigrations;
+        foreach ($nonMigrationPaths as $rel) {
             if (! isset($this->fileIds[$rel])) {
                 $unknownToGraph[] = $rel;
             }
@@ -407,6 +487,79 @@ final class Graph
     }
 
     /**
+     * Replaces table edges for the given test files. Table names are
+     * lowercased + deduplicated; the input comes straight from the
+     * Recorder's `perTestTables()` snapshot. Tests absent from the
+     * input keep their existing table set (same partial-update policy
+     * as `replaceEdges`).
+     *
+     * @param  array<string, array<int, string>>  $testToTables
+     */
+    public function replaceTestTables(array $testToTables): void
+    {
+        foreach ($testToTables as $testFile => $tables) {
+            $testRel = $this->relative($testFile);
+
+            if ($testRel === null) {
+                continue;
+            }
+
+            $normalised = [];
+
+            foreach ($tables as $table) {
+                $lower = strtolower($table);
+
+                if ($lower !== '') {
+                    $normalised[$lower] = true;
+                }
+            }
+
+            $names = array_keys($normalised);
+            sort($names);
+
+            $this->testTables[$testRel] = $names;
+        }
+    }
+
+    /**
+     * Projects under Laravel conventionally keep migrations at
+     * `database/migrations/`. We recognise the directory as a prefix
+     * so nested subdirectories (a pattern some teams use for grouping
+     * — `database/migrations/tenant/`, `database/migrations/archived/`)
+     * are still routed through the table-intersection path.
+     */
+    private function isMigrationPath(string $rel): bool
+    {
+        return str_starts_with($rel, 'database/migrations/') && str_ends_with($rel, '.php');
+    }
+
+    /**
+     * Reads `$rel` relative to the project root and extracts the
+     * tables it declares via `Schema::create/table/drop/rename`.
+     * Empty on missing/unreadable files or when the parser finds
+     * nothing — the caller escalates those cases to the watch
+     * pattern safety net.
+     *
+     * @return list<string>
+     */
+    private function tablesForMigration(string $rel): array
+    {
+        $absolute = rtrim($this->projectRoot, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.$rel;
+
+        if (! is_file($absolute)) {
+            return [];
+        }
+
+        $content = @file_get_contents($absolute);
+
+        if ($content === false) {
+            return [];
+        }
+
+        return TableExtractor::fromMigrationSource($content);
+    }
+
+    /**
      * Drops edges whose test file no longer exists on disk. Prevents the graph
      * from keeping stale entries for deleted / renamed tests that would later
      * be flagged as affected and confuse PHPUnit's discovery.
@@ -418,6 +571,12 @@ final class Graph
         foreach (array_keys($this->edges) as $testRel) {
             if (! is_file($root.$testRel)) {
                 unset($this->edges[$testRel]);
+            }
+        }
+
+        foreach (array_keys($this->testTables) as $testRel) {
+            if (! is_file($root.$testRel)) {
+                unset($this->testTables[$testRel]);
             }
         }
     }
@@ -443,6 +602,28 @@ final class Graph
         $graph->edges = is_array($data['edges'] ?? null) ? $data['edges'] : [];
         $graph->baselines = is_array($data['baselines'] ?? null) ? $data['baselines'] : [];
 
+        if (isset($data['test_tables']) && is_array($data['test_tables'])) {
+            foreach ($data['test_tables'] as $testRel => $tables) {
+                if (! is_string($testRel)) {
+                    continue;
+                }
+                if (! is_array($tables)) {
+                    continue;
+                }
+                $names = [];
+
+                foreach ($tables as $table) {
+                    if (is_string($table) && $table !== '') {
+                        $names[] = $table;
+                    }
+                }
+
+                if ($names !== []) {
+                    $graph->testTables[$testRel] = $names;
+                }
+            }
+        }
+
         return $graph;
     }
 
@@ -460,6 +641,7 @@ final class Graph
             'files' => $this->files,
             'edges' => $this->edges,
             'baselines' => $this->baselines,
+            'test_tables' => $this->testTables,
         ];
 
         $json = json_encode($payload, JSON_UNESCAPED_SLASHES);

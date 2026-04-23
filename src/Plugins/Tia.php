@@ -412,8 +412,10 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return;
         }
 
+        $perTestTables = $recorder->perTestTables();
+
         if (Parallel::isWorker()) {
-            $this->flushWorkerPartial($perTest);
+            $this->flushWorkerPartial($perTest, $perTestTables);
             $recorder->reset();
             $this->coverageCollector->reset();
 
@@ -436,6 +438,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             $changedFiles->snapshotTree($changedFiles->since($currentSha) ?? []),
         );
         $graph->replaceEdges($perTest);
+        $graph->replaceTestTables($perTestTables);
         $graph->pruneMissingTests();
 
         // Fold in the results collected during this same record run. The
@@ -522,7 +525,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             $changedFiles->snapshotTree($changedFiles->since($currentSha) ?? []),
         );
 
-        $merged = [];
+        $mergedFiles = [];
+        $mergedTables = [];
 
         foreach ($partialKeys as $key) {
             $data = $this->readPartial($key);
@@ -531,13 +535,23 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                 continue;
             }
 
-            foreach ($data as $testFile => $sources) {
-                if (! isset($merged[$testFile])) {
-                    $merged[$testFile] = [];
+            foreach ($data['files'] as $testFile => $sources) {
+                if (! isset($mergedFiles[$testFile])) {
+                    $mergedFiles[$testFile] = [];
                 }
 
                 foreach ($sources as $source) {
-                    $merged[$testFile][$source] = true;
+                    $mergedFiles[$testFile][$source] = true;
+                }
+            }
+
+            foreach ($data['tables'] as $testFile => $tables) {
+                if (! isset($mergedTables[$testFile])) {
+                    $mergedTables[$testFile] = [];
+                }
+
+                foreach ($tables as $table) {
+                    $mergedTables[$testFile][$table] = true;
                 }
             }
 
@@ -546,8 +560,14 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         $finalised = [];
 
-        foreach ($merged as $testFile => $sourceSet) {
+        foreach ($mergedFiles as $testFile => $sourceSet) {
             $finalised[$testFile] = array_keys($sourceSet);
+        }
+
+        $finalisedTables = [];
+
+        foreach ($mergedTables as $testFile => $tableSet) {
+            $finalisedTables[$testFile] = array_keys($tableSet);
         }
 
         // Empty-edges guard: if every worker returned no edges it almost
@@ -567,6 +587,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         $graph->replaceEdges($finalised);
+        $graph->replaceTestTables($finalisedTables);
         $graph->pruneMissingTests();
 
         if (! $this->saveGraph($graph)) {
@@ -949,11 +970,15 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * @param  array<string, array<int, string>>  $perTest
+     * @param  array<string, array<int, string>>  $perTestFiles
+     * @param  array<string, array<int, string>>  $perTestTables
      */
-    private function flushWorkerPartial(array $perTest): void
+    private function flushWorkerPartial(array $perTestFiles, array $perTestTables): void
     {
-        $json = json_encode($perTest, JSON_UNESCAPED_SLASHES);
+        $json = json_encode([
+            'files' => $perTestFiles,
+            'tables' => $perTestTables,
+        ], JSON_UNESCAPED_SLASHES);
 
         if ($json === false) {
             return;
@@ -1090,7 +1115,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * @return array<string, array<int, string>>|null
+     * @return array{files: array<string, array<int, string>>, tables: array<string, array<int, string>>}|null
      */
     private function readPartial(string $key): ?array
     {
@@ -1106,20 +1131,36 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return null;
         }
 
+        $filesSource = is_array($data['files'] ?? null) ? $data['files'] : [];
+        $tablesSource = is_array($data['tables'] ?? null) ? $data['tables'] : [];
+
+        return [
+            'files' => $this->cleanPartialSection($filesSource),
+            'tables' => $this->cleanPartialSection($tablesSource),
+        ];
+    }
+
+    /**
+     * @param  array<mixed, mixed>  $section
+     * @return array<string, array<int, string>>
+     */
+    private function cleanPartialSection(array $section): array
+    {
         $out = [];
 
-        foreach ($data as $test => $sources) {
+        foreach ($section as $test => $items) {
             if (! is_string($test)) {
                 continue;
             }
-            if (! is_array($sources)) {
+            if (! is_array($items)) {
                 continue;
             }
+
             $clean = [];
 
-            foreach ($sources as $source) {
-                if (is_string($source)) {
-                    $clean[] = $source;
+            foreach ($items as $item) {
+                if (is_string($item)) {
+                    $clean[] = $item;
                 }
             }
 
