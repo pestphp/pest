@@ -106,10 +106,10 @@ final class Coverage implements AddsOutput, HandlesArguments
     public function handleArguments(array $originals): array
     {
         if ($this->hasShardsCoverageFlag($originals)) {
-            $originals = $this->popShardsCoverageFlags($originals);
-            $this->shardsCoverage = true;
+            $this->popShardsCoverageFlags($originals);
+            $this->mergeAndReportShardsCoverage();
 
-            return $originals;
+            exit(0);
         }
 
         $arguments = [...[''], ...array_values(array_filter($originals, function (string $original): bool {
