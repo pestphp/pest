@@ -106,10 +106,66 @@ final class Coverage implements AddsOutput, HandlesArguments
     public function handleArguments(array $originals): array
     {
         if ($this->hasShardsCoverageFlag($originals)) {
-            $this->popShardsCoverageFlags($originals);
-            $this->mergeAndReportShardsCoverage();
+            $originals = $this->popShardsCoverageFlags($originals);
 
-            exit(0);
+            $shardArgs = [...[''], ...array_values(array_filter($originals, function (string $original): bool {
+                foreach ([self::MIN_OPTION, self::EXACTLY_OPTION, self::ONLY_COVERED_OPTION] as $option) {
+                    if ($original === sprintf('--%s', $option)) {
+                        return true;
+                    }
+
+                    if (Str::startsWith($original, sprintf('--%s=', $option))) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }))];
+
+            $shardInput = new ArgvInput($shardArgs, new InputDefinition([
+                new InputOption(self::MIN_OPTION, null, InputOption::VALUE_REQUIRED),
+                new InputOption(self::EXACTLY_OPTION, null, InputOption::VALUE_REQUIRED),
+                new InputOption(self::ONLY_COVERED_OPTION, null, InputOption::VALUE_NONE),
+            ]));
+
+            if ($shardInput->getOption(self::MIN_OPTION) !== null) {
+                $this->coverageMin = (float) $shardInput->getOption(self::MIN_OPTION);
+            }
+
+            if ($shardInput->getOption(self::EXACTLY_OPTION) !== null) {
+                $this->coverageExactly = (float) $shardInput->getOption(self::EXACTLY_OPTION);
+            }
+
+            if ((bool) $shardInput->getOption(self::ONLY_COVERED_OPTION)) {
+                $this->showOnlyCovered = true;
+            }
+
+            $coverage = $this->mergeAndReportShardsCoverage();
+            $exitCode = (int) ($coverage < $this->coverageMin);
+
+            if ($exitCode === 0 && $this->coverageExactly !== null) {
+                $comparableCoverage = $this->computeComparableCoverage($coverage);
+                $comparableCoverageExactly = $this->computeComparableCoverage($this->coverageExactly);
+                $exitCode = $comparableCoverage === $comparableCoverageExactly ? 0 : 1;
+
+                if ($exitCode === 1) {
+                    $this->output->writeln(sprintf(
+                        "\n  <fg=white;bg=red;options=bold> FAIL </> Code coverage not exactly <fg=white;options=bold> %s %%</>, currently <fg=red;options=bold> %s %%</>.",
+                        number_format($this->coverageExactly, 1),
+                        number_format(floor($coverage * 10) / 10, 1),
+                    ));
+                }
+            } elseif ($exitCode === 1) {
+                $this->output->writeln(sprintf(
+                    "\n  <fg=white;bg=red;options=bold> FAIL </> Code coverage below expected <fg=white;options=bold> %s %%</>, currently <fg=red;options=bold> %s %%</>.",
+                    number_format($this->coverageMin, 1),
+                    number_format(floor($coverage * 10) / 10, 1)
+                ));
+            }
+
+            $this->output->writeln(['']);
+
+            exit($exitCode);
         }
 
         $arguments = [...[''], ...array_values(array_filter($originals, function (string $original): bool {
@@ -211,12 +267,6 @@ final class Coverage implements AddsOutput, HandlesArguments
     public function addOutput(int $exitCode): int
     {
         if (Parallel::isWorker()) {
-            return $exitCode;
-        }
-
-        if ($this->shardsCoverage) {
-            $this->mergeAndReportShardsCoverage();
-
             return $exitCode;
         }
 
@@ -412,7 +462,7 @@ final class Coverage implements AddsOutput, HandlesArguments
     /**
      * Merges all shard .cov files and generates the requested coverage reports.
      */
-    private function mergeAndReportShardsCoverage(): void
+    private function mergeAndReportShardsCoverage(): float
     {
         $coverageDir = $this->getCoverageDir();
         $files = glob($coverageDir.DIRECTORY_SEPARATOR.'*.cov');
@@ -425,7 +475,7 @@ final class Coverage implements AddsOutput, HandlesArguments
                 '',
             ]);
 
-            return;
+            exit(1);
         }
 
         $count = count($files);
@@ -464,10 +514,10 @@ final class Coverage implements AddsOutput, HandlesArguments
                 '',
             ]);
 
-            return;
+            exit(1);
         }
 
-        \Pest\Support\Coverage::render($merged, $this->output, $this->compact, $this->showOnlyCovered);
+        $result = \Pest\Support\Coverage::render($merged, $this->output, $this->compact, $this->showOnlyCovered);
 
         if ($this->shardsCoverageClean) {
             foreach ($files as $file) {
@@ -476,6 +526,6 @@ final class Coverage implements AddsOutput, HandlesArguments
             $this->output->writeln('  <fg=gray>Coverage files cleaned.</>');
         }
 
-        $this->output->writeln('');
+        return $result;
     }
 }
