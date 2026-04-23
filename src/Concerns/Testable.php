@@ -8,6 +8,8 @@ use Closure;
 use Pest\Exceptions\DatasetArgumentsMismatch;
 use Pest\Panic;
 use Pest\Plugins\Tia;
+use Pest\Plugins\Tia\BladeEdges;
+use Pest\Plugins\Tia\Recorder;
 use Pest\Preset;
 use Pest\Support\ChainableClosure;
 use Pest\Support\Container;
@@ -314,6 +316,16 @@ trait Testable
         }
 
         parent::setUp();
+
+        // TIA blade-edge recording (Laravel-only). Runs right after
+        // `parent::setUp()` so the Laravel app exists and the View
+        // facade is bound; idempotent against the current app instance
+        // so the 774-test suite doesn't stack 774 composers when Laravel
+        // keeps the same app across tests.
+        $recorder = Container::getInstance()->get(Recorder::class);
+        if ($recorder instanceof Recorder) {
+            BladeEdges::arm($recorder);
+        }
 
         $beforeEach = TestSuite::getInstance()->beforeEach->get(self::$__filename)[1];
 

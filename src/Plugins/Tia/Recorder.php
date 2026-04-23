@@ -145,6 +145,32 @@ final class Recorder
     }
 
     /**
+     * Records an extra source-file dependency for the currently-running
+     * test. Used by collaborators that capture edges the coverage driver
+     * cannot see — Blade templates rendered through Laravel's view
+     * factory are the motivating case (their `.blade.php` source never
+     * executes directly; a cached compiled PHP file does). No-op when
+     * the recorder is inactive or no test is in flight, so callers can
+     * fire it unconditionally from app-level hooks.
+     */
+    public function linkSource(string $sourceFile): void
+    {
+        if (! $this->active) {
+            return;
+        }
+
+        if ($this->currentTestFile === null) {
+            return;
+        }
+
+        if ($sourceFile === '') {
+            return;
+        }
+
+        $this->perTestFiles[$this->currentTestFile][$sourceFile] = true;
+    }
+
+    /**
      * @return array<string, array<int, string>> absolute test file → list of absolute source files.
      */
     public function perTestFiles(): array

@@ -153,11 +153,25 @@ final class Graph
             }
         }
 
-        // 2. Watch-pattern lookup (non-PHP assets → test directories).
+        // 2. Watch-pattern lookup — fallback for files we don't have
+        // precise edges for. When a file is already in `$fileIds` step
+        // 1 resolved it surgically; broadcasting it again through the
+        // watch pattern would re-add every test the pattern maps to,
+        // defeating the point of recording the edge in the first place.
+        // Blade templates captured via Laravel's view composer are the
+        // motivating case — we want their specific tests, not every
+        // feature test.
+        $unknownToGraph = [];
+        foreach ($normalised as $rel) {
+            if (! isset($this->fileIds[$rel])) {
+                $unknownToGraph[] = $rel;
+            }
+        }
+
         /** @var WatchPatterns $watchPatterns */
         $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
 
-        $dirs = $watchPatterns->matchedDirectories($this->projectRoot, $normalised);
+        $dirs = $watchPatterns->matchedDirectories($this->projectRoot, $unknownToGraph);
         $allTestFiles = array_keys($this->edges);
 
         foreach ($watchPatterns->testsUnderDirectories($dirs, $allTestFiles) as $testFile) {
