@@ -833,14 +833,21 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return $arguments;
         }
 
-        $changed = $changedFiles->since($graph->recordedAtSha($this->branch)) ?? [];
+        $branchSha = $graph->recordedAtSha($this->branch);
+        $changed = $changedFiles->since($branchSha) ?? [];
 
         // Drop files whose content hash matches the last-run snapshot. This
         // is the "dirty but identical" filter: if a file is uncommitted but
         // its content hasn't moved since the last `--tia` invocation, its
         // dependents already re-ran last time and don't need re-running
-        // again.
-        $changed = $changedFiles->filterUnchangedSinceLastRun($changed, $graph->lastRunTree($this->branch));
+        // again. Passing the recorded sha also catches reverts: a file
+        // that was edited last run but is now back to its committed
+        // form no longer looks "changed".
+        $changed = $changedFiles->filterUnchangedSinceLastRun(
+            $changed,
+            $graph->lastRunTree($this->branch),
+            $branchSha,
+        );
 
         $affected = $changed === [] ? [] : $graph->affected($changed);
 

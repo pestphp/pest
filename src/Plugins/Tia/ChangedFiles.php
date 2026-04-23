@@ -42,7 +42,7 @@ final readonly class ChangedFiles
      * @param  array<string, string>  $lastRunTree  path → content hash from last run.
      * @return array<int, string>
      */
-    public function filterUnchangedSinceLastRun(array $files, array $lastRunTree): array
+    public function filterUnchangedSinceLastRun(array $files, array $lastRunTree, ?string $sha = null): array
     {
         if ($lastRunTree === []) {
             return $files;
@@ -87,9 +87,36 @@ final readonly class ChangedFiles
 
             $hash = ContentHash::of($absolute);
 
-            if ($hash === false || $hash !== $snapshot) {
+            if ($hash === false) {
                 $remaining[] = $file;
+
+                continue;
             }
+
+            if ($hash === $snapshot) {
+                // Same state as the last TIA invocation — unchanged.
+                continue;
+            }
+
+            // Differs from the snapshot, but may still be a revert back
+            // to the committed version (scenario: last run had an edit,
+            // this run reverted it). Skipping this check causes stale
+            // snapshots from previous scenarios to cascade into the
+            // current run's invalidation set. Cheap to verify via
+            // `git show <sha>:<path>`.
+            if ($sha !== null && $sha !== '') {
+                $baselineContent = $this->contentAtSha($sha, $file);
+
+                if ($baselineContent !== null) {
+                    $baselineHash = ContentHash::ofContent($file, $baselineContent);
+
+                    if ($hash === $baselineHash) {
+                        continue;
+                    }
+                }
+            }
+
+            $remaining[] = $file;
         }
 
         return $remaining;
