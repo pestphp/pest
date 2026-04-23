@@ -7,10 +7,15 @@ namespace Pest\Plugins;
 use Pest\Contracts\Plugins\AddsOutput;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Support\Str;
+use Pest\TestSuite;
+use SebastianBergmann\CodeCoverage\CodeCoverage;
+use SebastianBergmann\CodeCoverage\Report\Clover;
+use SebastianBergmann\CodeCoverage\Report\Html\Facade as HtmlFacade;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
 
 /**
  * @internal
@@ -27,6 +32,21 @@ final class Coverage implements AddsOutput, HandlesArguments
 
     private const string ONLY_COVERED_OPTION = 'only-covered';
 
+    /**
+     * PHPUnit coverage report flags that produce output and must be suppressed during sharded runs.
+     *
+     * @var array<string, string>
+     */
+    private const array SHARD_BLOCKED_REPORT_FLAGS = [
+        '--coverage-html' => 'html',
+        '--coverage-clover' => 'clover',
+        '--coverage-text' => 'text',
+        '--coverage-xml' => 'xml',
+        '--coverage-cobertura' => 'cobertura',
+        '--coverage-crap4j' => 'crap4j',
+        '--coverage-openclover' => 'openclover',
+    ];
+
     public bool $coverage = false;
 
     public bool $compact = false;
@@ -36,6 +56,16 @@ final class Coverage implements AddsOutput, HandlesArguments
     public ?float $coverageExactly = null;
 
     public bool $showOnlyCovered = false;
+
+    /**
+     * The shard index when running in sharded coverage mode.
+     */
+    private ?int $shardIndex = null;
+
+    /**
+     * The total number of shards when running in sharded coverage mode.
+     */
+    private ?int $shardTotal = null;
 
     public function __construct(private readonly OutputInterface $output)
     {
@@ -47,6 +77,11 @@ final class Coverage implements AddsOutput, HandlesArguments
      */
     public function handleArguments(array $originals): array
     {
+        if (array_key_exists(1, $originals) && $originals[1] === 'coverage:report') {
+            $this->handleCoverageReport($originals);
+            exit(0);
+        }
+
         $arguments = [...[''], ...array_values(array_filter($originals, function (string $original): bool {
             foreach ([self::COVERAGE_OPTION, self::MIN_OPTION, self::EXACTLY_OPTION, self::ONLY_COVERED_OPTION] as $option) {
                 if ($original === sprintf('--%s', $option)) {
@@ -74,8 +109,25 @@ final class Coverage implements AddsOutput, HandlesArguments
         $input = new ArgvInput($arguments, new InputDefinition($inputs));
         if ((bool) $input->getOption(self::COVERAGE_OPTION)) {
             $this->coverage = true;
-            $originals[] = '--coverage-php';
-            $originals[] = \Pest\Support\Coverage::getPath();
+
+            $shard = $this->detectShard($originals);
+
+            if ($shard !== null) {
+                [$this->shardIndex, $this->shardTotal] = $shard;
+
+                $coverageDir = $this->getCoverageDir();
+                if (! is_dir($coverageDir)) {
+                    mkdir($coverageDir, 0755, true);
+                }
+
+                $originals = $this->stripShardBlockedReportFlags($originals);
+
+                $originals[] = '--coverage-php';
+                $originals[] = $coverageDir.DIRECTORY_SEPARATOR.$this->shardIndex.'.cov';
+            } else {
+                $originals[] = '--coverage-php';
+                $originals[] = \Pest\Support\Coverage::getPath();
+            }
 
             if (! \Pest\Support\Coverage::isAvailable()) {
                 if (\Pest\Support\Coverage::usingXdebug()) {
@@ -130,6 +182,21 @@ final class Coverage implements AddsOutput, HandlesArguments
             return $exitCode;
         }
 
+        if ($this->shardIndex !== null) {
+            $this->output->writeln([
+                '',
+                sprintf(
+                    '  <fg=gray>Coverage:</>  Coverage stored for shard %d/%d.',
+                    $this->shardIndex,
+                    $this->shardTotal,
+                ),
+                '  Run: <fg=cyan>pest coverage:report</>',
+                '',
+            ]);
+
+            return $exitCode;
+        }
+
         if ($exitCode === 0 && $this->coverage) {
             if (! \Pest\Support\Coverage::isAvailable()) {
                 $this->output->writeln(
@@ -171,5 +238,211 @@ final class Coverage implements AddsOutput, HandlesArguments
     private function computeComparableCoverage(float $coverage): float
     {
         return floor($coverage * 10) / 10;
+    }
+
+    /**
+     * Detects --shard=X/Y in the arguments and returns [index, total], or null if not present.
+     *
+     * @param  array<int, string>  $arguments
+     * @return array{int, int}|null
+     */
+    private function detectShard(array $arguments): ?array
+    {
+        foreach ($arguments as $i => $arg) {
+            if (str_starts_with($arg, '--shard=')) {
+                $value = substr($arg, strlen('--shard='));
+            } elseif ($arg === '--shard' && isset($arguments[$i + 1])) {
+                $value = $arguments[$i + 1];
+            } else {
+                continue;
+            }
+
+            if (preg_match('/^(\d+)\/(\d+)$/', $value, $m)) {
+                return [(int) $m[1], (int) $m[2]];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the path to the .pest/coverage directory.
+     */
+    private function getCoverageDir(): string
+    {
+        return implode(DIRECTORY_SEPARATOR, [
+            TestSuite::getInstance()->rootPath,
+            '.pest',
+            'coverage',
+        ]);
+    }
+
+    /**
+     * Removes PHPUnit coverage report flags from the arguments during sharded runs,
+     * and warns the user if any were found.
+     *
+     * @param  array<int, string>  $arguments
+     * @return array<int, string>
+     */
+    private function stripShardBlockedReportFlags(array $arguments): array
+    {
+        $blockedFlags = self::SHARD_BLOCKED_REPORT_FLAGS;
+        $firstHint = null;
+        $skipNext = false;
+        $filtered = [];
+
+        foreach ($arguments as $arg) {
+            if ($skipNext) {
+                $skipNext = false;
+                continue;
+            }
+
+            $matched = false;
+            foreach ($blockedFlags as $flag => $hint) {
+                if ($arg === $flag) {
+                    $firstHint ??= $hint;
+                    $skipNext = true;
+                    $matched = true;
+                    break;
+                }
+                if (str_starts_with($arg, $flag.'=')) {
+                    $firstHint ??= $hint;
+                    $matched = true;
+                    break;
+                }
+            }
+
+            if (! $matched) {
+                $filtered[] = $arg;
+            }
+        }
+
+        if ($firstHint !== null) {
+            $this->output->writeln([
+                '',
+                '  <fg=yellow;options=bold> WARN </> Coverage reports are disabled during sharded runs.',
+                sprintf('  Run: <fg=cyan>pest coverage:report --%s</>', $firstHint),
+                '',
+            ]);
+        }
+
+        return $filtered;
+    }
+
+    /**
+     * Handles the `pest coverage:report` sub-command: merges all shard .cov files and generates reports.
+     *
+     * @param  array<int, string>  $arguments
+     */
+    private function handleCoverageReport(array $arguments): void
+    {
+        $hasHtml = false;
+        $htmlPath = 'coverage-html';
+        $hasClover = false;
+        $cloverPath = 'coverage-clover.xml';
+        $hasText = false;
+        $clean = false;
+
+        foreach (array_slice($arguments, 2) as $arg) {
+            if ($arg === '--html') {
+                $hasHtml = true;
+            } elseif (str_starts_with($arg, '--html=')) {
+                $hasHtml = true;
+                $htmlPath = substr($arg, strlen('--html='));
+            } elseif ($arg === '--clover') {
+                $hasClover = true;
+            } elseif (str_starts_with($arg, '--clover=')) {
+                $hasClover = true;
+                $cloverPath = substr($arg, strlen('--clover='));
+            } elseif ($arg === '--text') {
+                $hasText = true;
+            } elseif ($arg === '--clean') {
+                $clean = true;
+            }
+        }
+
+        $coverageDir = $this->getCoverageDir();
+        $files = glob($coverageDir.DIRECTORY_SEPARATOR.'*.cov');
+
+        if ($files === false || $files === []) {
+            $this->output->writeln([
+                '',
+                '  <fg=white;bg=red;options=bold> ERROR </> No coverage files found in .pest/coverage.',
+                '  Run tests with --coverage first.',
+                '',
+            ]);
+            exit(1);
+        }
+
+        $count = count($files);
+        $this->output->writeln([
+            '',
+            sprintf(
+                '  <fg=gray>Merging coverage from %d shard%s...</>',
+                $count,
+                $count === 1 ? '' : 's',
+            ),
+        ]);
+
+        $merged = null;
+        foreach ($files as $file) {
+            try {
+                /** @var CodeCoverage $coverage */
+                $coverage = require $file;
+                if ($merged === null) {
+                    $merged = $coverage;
+                } else {
+                    $merged->merge($coverage);
+                }
+            } catch (Throwable $e) {
+                $this->output->writeln(sprintf(
+                    '  <fg=yellow;options=bold> WARN </> Skipping invalid coverage file: %s (%s)',
+                    basename($file),
+                    $e->getMessage(),
+                ));
+            }
+        }
+
+        if ($merged === null) {
+            $this->output->writeln([
+                '',
+                '  <fg=white;bg=red;options=bold> ERROR </> No valid coverage files could be loaded.',
+                '',
+            ]);
+            exit(1);
+        }
+
+        if (! $hasHtml && ! $hasClover) {
+            \Pest\Support\Coverage::render($merged, $this->output, $this->compact, $this->showOnlyCovered);
+        }
+
+        if ($hasText) {
+            \Pest\Support\Coverage::render($merged, $this->output, $this->compact, $this->showOnlyCovered);
+        }
+
+        if ($hasHtml) {
+            (new HtmlFacade)->process($merged, $htmlPath);
+            $this->output->writeln(sprintf(
+                '  <fg=gray>HTML coverage report generated at:</> %s',
+                $htmlPath,
+            ));
+        }
+
+        if ($hasClover) {
+            (new Clover)->process($merged, $cloverPath);
+            $this->output->writeln(sprintf(
+                '  <fg=gray>Clover coverage report generated at:</> %s',
+                $cloverPath,
+            ));
+        }
+
+        if ($clean) {
+            foreach ($files as $file) {
+                @unlink($file);
+            }
+            $this->output->writeln('  <fg=gray>Coverage files cleaned.</>');
+        }
+
+        $this->output->writeln('');
     }
 }
