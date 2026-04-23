@@ -395,7 +395,7 @@ trait Testable
             $tia = Container::getInstance()->get(Tia::class);
             $assertions = $tia->getCachedAssertions($this::class.'::'.$this->name());
 
-            $this->addToAssertionCount($assertions > 0 ? $assertions : 1);
+            $this->addToAssertionCount($assertions);
 
             return null;
         }

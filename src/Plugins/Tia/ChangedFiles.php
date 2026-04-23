@@ -85,7 +85,7 @@ final readonly class ChangedFiles
                 continue;
             }
 
-            $hash = @hash_file('xxh128', $absolute);
+            $hash = ContentHash::of($absolute);
 
             if ($hash === false || $hash !== $snapshot) {
                 $remaining[] = $file;
@@ -119,7 +119,7 @@ final readonly class ChangedFiles
                 continue;
             }
 
-            $hash = @hash_file('xxh128', $absolute);
+            $hash = ContentHash::of($absolute);
 
             if ($hash !== false) {
                 $out[$file] = $hash;
@@ -167,7 +167,85 @@ final readonly class ChangedFiles
             $unique[$file] = true;
         }
 
-        return array_keys($unique);
+        $candidates = array_keys($unique);
+
+        // Behavioural de-noising: for every file git calls "changed", hash
+        // the current content and the content at `$sha` through
+        // `ContentHash::of()`. A change that only touched comments /
+        // whitespace / blade `{{-- --}}` blocks produces the same hash on
+        // both sides and gets dropped before it can invalidate any test.
+        // Without this, a single-comment edit on a migration re-runs the
+        // entire DB-touching suite.
+        if ($sha !== null && $sha !== '') {
+            return $this->filterBehaviourallyUnchanged($candidates, $sha);
+        }
+
+        return $candidates;
+    }
+
+    /**
+     * @param  array<int, string>  $files
+     * @return array<int, string>
+     */
+    private function filterBehaviourallyUnchanged(array $files, string $sha): array
+    {
+        $remaining = [];
+
+        foreach ($files as $file) {
+            $absolute = $this->projectRoot.DIRECTORY_SEPARATOR.$file;
+
+            if (! is_file($absolute)) {
+                // Deleted on disk — a genuine change, keep it.
+                $remaining[] = $file;
+
+                continue;
+            }
+
+            $currentHash = ContentHash::of($absolute);
+
+            if ($currentHash === false) {
+                $remaining[] = $file;
+
+                continue;
+            }
+
+            $baselineContent = $this->contentAtSha($sha, $file);
+
+            if ($baselineContent === null) {
+                // Couldn't read the baseline (new file, binary, `git show`
+                // failed). Err on the side of re-running.
+                $remaining[] = $file;
+
+                continue;
+            }
+
+            $baselineHash = ContentHash::ofContent($file, $baselineContent);
+
+            if ($currentHash !== $baselineHash) {
+                $remaining[] = $file;
+            }
+        }
+
+        return $remaining;
+    }
+
+    /**
+     * Reads `$path` at `$sha` via `git show`. Returns null when the file
+     * didn't exist at that SHA, when git errors, or when the content
+     * isn't valid UTF-8-safe bytes (rare — binary files that happen to
+     * be tracked).
+     */
+    private function contentAtSha(string $sha, string $path): ?string
+    {
+        $process = new Process(['git', 'show', $sha.':'.$path], $this->projectRoot);
+        $process->setTimeout(5.0);
+        $process->run();
+
+        if (! $process->isSuccessful()) {
+            return null;
+        }
+
+        return $process->getOutput();
     }
 
     private function shouldIgnore(string $path): bool

@@ -29,7 +29,12 @@ final readonly class Fingerprint
 {
     // Bump this whenever the set of inputs or the hash algorithm changes,
     // so older graphs are invalidated automatically.
-    private const int SCHEMA_VERSION = 4;
+    //
+    //   v5: ChangedFiles now hashes via `ContentHash` (normalises PHP
+    //       tokens + Blade whitespace/comments) instead of raw bytes.
+    //       Old graphs' run-tree hashes are incompatible and must be
+    //       rebuilt.
+    private const int SCHEMA_VERSION = 5;
 
     /**
      * @return array{
