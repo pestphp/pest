@@ -95,6 +95,14 @@ final class Coverage
         $codeCoverage = require $reportPath;
         unlink($reportPath);
 
+        return self::render($codeCoverage, $output, $compact, $showOnlyCovered);
+    }
+
+    /**
+     * Renders the coverage report to the console and returns the total coverage as float.
+     */
+    public static function render(CodeCoverage $codeCoverage, OutputInterface $output, bool $compact = false, bool $showOnlyCovered = false): float
+    {
         $totalCoverage = $codeCoverage->getReport()->percentageOfExecutedLines();
 
         /** @var Directory<File|Directory> $report */
