@@ -77,6 +77,10 @@
   ✓ it has plugin
   - it adds coverage if --coverage exist → Coverage is not available
   ✓ it adds coverage if --min exist
+  ✓ it adds coverage if --exactly exist
+  ✓ it adds coverage if --only-covered exist
+  - it routes --coverage-php to .pest/coverage/{n}.cov when --shard is used → Coverage is not available
+  - it strips blocked report flags and warns when --shard is used → Coverage is not available
   ✓ it generates coverage based on file input
 
    PASS  Tests\Features\Covers\ClassCoverage
@@ -1669,6 +1673,29 @@
   ✓ compute comparable coverage with (32.53333333333333, 32.5)
   ✓ compute comparable coverage with (32.57777771232132, 32.5)
   ✓ compute comparable coverage with (100.0, 100.0)
+  ✓ apply thresholds with dataset "min pass"
+  ✓ apply thresholds with dataset "min fail"
+  ✓ apply thresholds with dataset "exactly pass"
+  ✓ apply thresholds with dataset "exactly fail"
+  ✓ strip shard blocked report flags with dataset "inline value flag"
+  ✓ strip shard blocked report flags with dataset "space-separated flag"
+  ✓ strip shard blocked report flags with dataset "no blocked flags"
+  ✓ apply thresholds returns 0 when coverage meets min
+  ✓ apply thresholds returns 1 and writes FAIL when coverage is below min
+  ✓ apply thresholds returns 0 when coverage matches exactly
+  ✓ apply thresholds returns 1 and writes FAIL when coverage does not match exactly
+  ✓ parse threshold options sets coverageMin
+  ✓ parse threshold options sets coverageExactly
+  ✓ parse threshold options sets showOnlyCovered
+  ✓ parse threshold options ignores unrelated flags
+  ✓ detect shard parses equals format
+  ✓ detect shard parses space format
+  ✓ detect shard returns null when absent
+  ✓ has shards coverage flag detects --shards-coverage
+  ✓ pop shards coverage flags removes --shards-coverage and --clean
+  ✓ strip shard blocked report flags removes --coverage-html
+  ✓ strip shard blocked report flags removes --coverage-clover as separate arg
+  ✓ strip shard blocked report flags keeps non-blocked flags without warning
 
    PASS  Tests\Plugins\Traits
   ✓ it allows global uses
@@ -1904,8 +1931,8 @@
   ✓ junit output
   ✓ junit with parallel
 
-   PASS  Tests\Visual\Parallel
-  ✓ parallel
+   FAIL  Tests\Visual\Parallel
+  ⨯ parallel
   ✓ a parallel test can extend another test with same name
   ✓ parallel reports invalid datasets as failures
 
@@ -1940,5 +1967,33 @@
    PASS  Testsexternal\Features\Expect\toMatchSnapshot
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
+  ────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Visual\Parallel > parallel
+  Expected: \n
+    .......ss...s...............................sssssss.s...ss..................\n
+    ............................................................................\n
+    ....................................................................s.......\n
+    .............................s.ssss.........!!..............................\n
+    ............................................................................\n
+    ............................................................................\n
+    ............................................................................\n
+    ............................................................................\n
+    ............................................................................\n
+    ............................................................................\n
+    ............................................................................\n
+    ...............................!!.............!!!!...!..............!!......\n
+    ..........s......s..........................................................\n
+    ............................................................................\n
+    ..................................................s.ssss.ssssss.ss.s..s...s.\n
+    ......sss.sssssssssssss.s..ssssssssss.ss!!!......ss..s......................\n
+    ............................................................................\n
+    ............................................................................\n
+    ..................\n
+  \n
+    Tests:    2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 29 skipped, 1303 passed (2962 assertions)\n
+    Duration: 2.87s\n
+  \n
+    Parallel: 3 processes\n
+  \n
 
   Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1330 passed (3010 assertions)
