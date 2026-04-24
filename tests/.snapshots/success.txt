@@ -1931,8 +1931,8 @@
   ✓ junit output
   ✓ junit with parallel
 
-   FAIL  Tests\Visual\Parallel
-  ⨯ parallel
+   PASS  Tests\Visual\Parallel
+  ✓ parallel
   ✓ a parallel test can extend another test with same name
   ✓ parallel reports invalid datasets as failures
 
