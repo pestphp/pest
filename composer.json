@@ -29,9 +29,6 @@
         "phpunit/phpunit": "^12.5.30",
         "symfony/process": "^7.4.13|^8.1.0"
     },
-    "replace": {
-        "pestphp/pest": "*"
-    },
     "conflict": {
         "filp/whoops": "<2.18.3",
         "phpunit/phpunit": ">12.5.30",
