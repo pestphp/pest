@@ -24,12 +24,12 @@ jobs:
       fail-fast: true
       matrix:
         os: [ubuntu-latest, macos-latest] # windows-latest
-        symfony: ['7.4', '8.0']
+        symfony: ['7.4.8', '8.0.8']
         php: ['8.3', '8.4', '8.5']
         dependency_version: [prefer-stable]
         exclude:
           - php: '8.3'
-            symfony: '8.0'
+            symfony: '8.0.8'
 
     name: PHP ${{ matrix.php }} - Symfony ^${{ matrix.symfony }} - ${{ matrix.os }} - ${{ matrix.dependency_version }}
 
