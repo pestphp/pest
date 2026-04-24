@@ -60,6 +60,12 @@ final class ContentHash
             return self::hashPhpContent($raw);
         }
 
+        foreach (['.vue', '.tsx', '.jsx', '.svelte', '.ts', '.js', '.mjs', '.cjs', '.mts'] as $extension) {
+            if (str_ends_with($lower, $extension)) {
+                return self::hashJsContent($raw);
+            }
+        }
+
         return hash('xxh128', $raw);
     }
 
@@ -111,6 +117,26 @@ final class ContentHash
     private static function hashBladeContent(string $raw): string
     {
         $stripped = preg_replace('/\{\{--.*?--\}\}/s', '', $raw) ?? $raw;
+        $stripped = preg_replace('/\s+/', ' ', $stripped) ?? $stripped;
+
+        return hash('xxh128', trim($stripped));
+    }
+
+    /**
+     * Conservative JS/TS/Vue/Svelte normaliser. Strips `//` line
+     * comments and `/* … *\/` block comments that appear on their own
+     * lines (including leading indentation), then collapses
+     * whitespace. Deliberately leaves trailing comments after code
+     * alone — a string literal like `'http://foo'` would be unsafe to
+     * split on `//` without a full lexer. The direction of error is
+     * over-detection (we may not strip a trailing comment that's
+     * purely cosmetic), never under-detection. Blank lines and
+     * indentation changes are erased regardless.
+     */
+    private static function hashJsContent(string $raw): string
+    {
+        $stripped = preg_replace('/^\s*\/\/[^\n]*$/m', '', $raw) ?? $raw;
+        $stripped = preg_replace('/^\s*\/\*.*?\*\/\s*$/sm', '', $stripped) ?? $stripped;
         $stripped = preg_replace('/\s+/', ' ', $stripped) ?? $stripped;
 
         return hash('xxh128', trim($stripped));

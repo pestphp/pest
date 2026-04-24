@@ -52,7 +52,15 @@ final readonly class Fingerprint
     //       the PHP fallback) so shared components / layouts /
     //       composables invalidate the specific pages they're used
     //       by, not every browser test.
-    private const int SCHEMA_VERSION = 8;
+    //   v9: `ContentHash` now normalises JS/TS/Vue/Svelte comments +
+    //       whitespace. Old graphs' run-tree hashes for those files
+    //       were raw-byte; mixing formats would flag every JS file as
+    //       changed on first run.
+    //   v10: `vite.config.*` hashed into the structural bucket. A
+    //        Vite config change reshapes the module dependency graph
+    //        that `JsModuleGraph` records; without a graph rebuild
+    //        the stored `$jsFileToComponents` map silently goes stale.
+    private const int SCHEMA_VERSION = 10;
 
     /**
      * @return array{
