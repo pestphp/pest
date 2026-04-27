@@ -22,6 +22,7 @@ use Pest\Support\Container;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestStatus\TestStatus;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
 use Throwable;
 
 /**
@@ -658,9 +659,50 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $stored = $graph->fingerprint();
 
         if (! Fingerprint::structuralMatches($stored, $current)) {
-            $this->output->writeln(
-                '  <fg=yellow>TIA</> graph structure outdated — rebuilding.',
-            );
+            $drift = Fingerprint::structuralDrift($stored, $current);
+
+            $this->output->writeln(sprintf(
+                '  <fg=yellow>TIA</> graph structure outdated (%s).',
+                $this->formatStructuralDrift($drift),
+            ));
+
+            // For composer.lock specifically, surface the actual
+            // package-version deltas. Saves the user a `git diff
+            // composer.lock | grep -E "name|version"` round-trip when
+            // a routine `composer update` invalidates the graph.
+            if (in_array('composer_lock', $drift, true)) {
+                $branchSha = $graph->recordedAtSha($this->branch);
+                if ($branchSha !== null) {
+                    $summary = $this->composerLockDelta(
+                        TestSuite::getInstance()->rootPath,
+                        $branchSha,
+                    );
+                    if ($summary !== '') {
+                        $this->output->writeln('    <fg=gray>'.$summary.'</>');
+                    }
+                }
+            }
+
+            // Try the remote baseline before paying for a local
+            // rebuild. CI runs the baseline workflow against every
+            // push to main, so the most common cause of structural
+            // drift (`composer update` landed on main, you pulled it,
+            // your branch hasn't diverged yet) is recoverable in
+            // ~5–30s of network instead of minutes of recording.
+            //
+            // Revalidation is the safety: even if the fetch succeeds,
+            // we only adopt the result when its stored fingerprint
+            // structurally matches the *current* one. A stale CI
+            // baseline (workflow hasn't run since the drift) gets
+            // dropped and we fall through to the local rebuild path.
+            $rebuilt = $this->tryRemoteBaselineForDrift($current);
+
+            if ($rebuilt instanceof Graph) {
+                return $this->reconcileFingerprint($rebuilt, $current);
+            }
+
+            $this->output->writeln('  <fg=yellow>TIA</> rebuilding graph from scratch.');
+
             $this->state->delete(self::KEY_GRAPH);
             $this->state->delete(self::KEY_COVERAGE_CACHE);
 
@@ -1355,5 +1397,175 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         return $coverage->coverage === true;
+    }
+
+    /**
+     * Attempts to short-circuit a structural-drift rebuild by fetching
+     * a fresh CI-recorded baseline. Returns the loaded `Graph` only if
+     * the fetched payload structurally matches the *current* fingerprint
+     * — i.e., CI has already recorded against the new shape and we can
+     * safely use those edges. Any other outcome (no GitHub remote, fetch
+     * cooldown, no successful CI run, fetched-graph-still-drifts) → null,
+     * caller falls back to local rebuild.
+     *
+     * @param  array{structural: array<string, mixed>, environmental: array<string, mixed>}  $current
+     */
+    private function tryRemoteBaselineForDrift(array $current): ?Graph
+    {
+        $projectRoot = TestSuite::getInstance()->rootPath;
+
+        if (! $this->baselineSync->fetchIfAvailable($projectRoot, false)) {
+            return null;
+        }
+
+        $fetched = $this->loadGraph($projectRoot);
+
+        if (! $fetched instanceof Graph) {
+            return null;
+        }
+
+        if (! Fingerprint::structuralMatches($fetched->fingerprint(), $current)) {
+            $this->output->writeln(
+                '  <fg=yellow>TIA</> fetched baseline still drifts — discarding.',
+            );
+
+            return null;
+        }
+
+        $this->output->writeln(
+            '  <fg=green>TIA</> fetched baseline matches — skipping local rebuild.',
+        );
+
+        return $fetched;
+    }
+
+    /**
+     * Maps `Fingerprint::structuralDrift()` field names to a human
+     * label suitable for the `(reason)` part of the rebuild banner.
+     *
+     * @param  list<string>  $drift
+     */
+    private function formatStructuralDrift(array $drift): string
+    {
+        static $labels = [
+            'composer_lock' => 'composer.lock',
+            'composer_json' => 'composer.json',
+            'phpunit_xml' => 'phpunit.xml',
+            'phpunit_xml_dist' => 'phpunit.xml.dist',
+            'vite_config' => 'vite.config',
+            'pest_factory' => 'Pest internals',
+            'pest_method_factory' => 'Pest internals',
+        ];
+
+        $seen = [];
+        foreach ($drift as $key) {
+            $seen[$labels[$key] ?? $key] = true;
+        }
+
+        if ($seen === []) {
+            return 'unknown';
+        }
+
+        return implode(', ', array_keys($seen));
+    }
+
+    /**
+     * Diffs `composer.lock` between the recorded SHA and the current
+     * working tree, returns a one-line summary like:
+     *
+     *   "laravel/framework 12.30 → 12.31, + pestphp/pest 4.7"
+     *
+     * Empty string when git is unavailable, the sha doesn't have the
+     * file, the file can't be parsed, or there are no version
+     * deltas (a content-hash-only edit, vendor URL change, etc.).
+     */
+    private function composerLockDelta(string $projectRoot, string $sha): string
+    {
+        $current = @file_get_contents($projectRoot.'/composer.lock');
+        if ($current === false) {
+            return '';
+        }
+
+        $process = new Process(['git', 'show', $sha.':composer.lock'], $projectRoot);
+        $process->setTimeout(5.0);
+        $process->run();
+
+        if (! $process->isSuccessful()) {
+            return '';
+        }
+
+        $oldVersions = $this->lockVersions($process->getOutput());
+        $newVersions = $this->lockVersions($current);
+
+        if ($oldVersions === [] && $newVersions === []) {
+            return '';
+        }
+
+        $changes = [];
+        foreach ($newVersions as $name => $version) {
+            if (! isset($oldVersions[$name])) {
+                $changes[] = '+ '.$name.' '.$version;
+            } elseif ($oldVersions[$name] !== $version) {
+                $changes[] = $name.' '.$oldVersions[$name].' → '.$version;
+            }
+        }
+        foreach ($oldVersions as $name => $version) {
+            if (! isset($newVersions[$name])) {
+                $changes[] = '− '.$name.' '.$version;
+            }
+        }
+
+        if ($changes === []) {
+            return '';
+        }
+
+        sort($changes);
+
+        // Cap at a sensible number — a wholesale `composer update`
+        // could list 50+ packages and bury the prompt.
+        $maxShown = 8;
+        if (count($changes) > $maxShown) {
+            $extra = count($changes) - $maxShown;
+            $changes = array_slice($changes, 0, $maxShown);
+            $changes[] = sprintf('… +%d more', $extra);
+        }
+
+        return implode(', ', $changes);
+    }
+
+    /**
+     * @return array<string, string> package name → version
+     */
+    private function lockVersions(string $json): array
+    {
+        $data = json_decode($json, true);
+
+        if (! is_array($data)) {
+            return [];
+        }
+
+        $out = [];
+
+        foreach (['packages', 'packages-dev'] as $section) {
+            if (! isset($data[$section])) {
+                continue;
+            }
+            if (! is_array($data[$section])) {
+                continue;
+            }
+            foreach ($data[$section] as $package) {
+                if (! is_array($package)) {
+                    continue;
+                }
+                $name = $package['name'] ?? null;
+                $version = $package['version'] ?? null;
+
+                if (is_string($name) && is_string($version)) {
+                    $out[$name] = $version;
+                }
+            }
+        }
+
+        return $out;
     }
 }
