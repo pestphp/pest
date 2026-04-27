@@ -128,6 +128,19 @@ final class Recorder
 
         $this->currentTestFile = $file;
 
+        // Walk the parent-class chain and link each ancestor's defining
+        // file as a source dependency of this test. Captures the common
+        // `tests/TestCase.php` case (where the user's base may be
+        // trait-only and have no executable lines for the coverage
+        // driver to pick up), and any deeper hierarchy. Vendor parents
+        // are skipped — those are pinned by `composer.lock` and don't
+        // need per-test edges. Same idea applies to traits used by the
+        // ancestors: a trait's body executes when the test method
+        // calls into it, so coverage already captures it; we only need
+        // the explicit walk for ancestors whose own bodies might be
+        // empty.
+        $this->linkAncestorFiles($className);
+
         if ($this->driver === 'pcov') {
             \pcov\clear();
             \pcov\start();
@@ -189,6 +202,40 @@ final class Recorder
         }
 
         $this->perTestFiles[$this->currentTestFile][$sourceFile] = true;
+    }
+
+    /**
+     * Records every project-local ancestor class's defining file as a
+     * source dependency of the currently-running test. PCOV / Xdebug
+     * record *executable lines* — a base class whose body is just
+     * `class TestCase extends BaseTestCase { use CreatesApplication; }`
+     * has no executable bytecode of its own, so the driver doesn't
+     * emit a line for it and it never enters the graph through the
+     * usual coverage path. This walk fills that gap by asking
+     * reflection for each parent's file and linking it explicitly.
+     */
+    private function linkAncestorFiles(string $className): void
+    {
+        if (! class_exists($className, false)) {
+            return;
+        }
+
+        $reflection = new ReflectionClass($className);
+        $parent = $reflection->getParentClass();
+
+        while ($parent !== false) {
+            if ($parent->isInternal()) {
+                break;
+            }
+
+            $file = $parent->getFileName();
+
+            if (is_string($file) && ! str_contains($file, DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR)) {
+                $this->perTestFiles[(string) $this->currentTestFile][$file] = true;
+            }
+
+            $parent = $parent->getParentClass();
+        }
     }
 
     /**

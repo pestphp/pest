@@ -43,6 +43,14 @@ final readonly class Php implements WatchDefault
             // tracked by the coverage driver.
             'phpunit.xml.dist' => [$testPath],
 
+            // `tests/Pest.php` is loaded once per suite (during BootFiles)
+            // so its `pest()->extend()`, `expect()->extend()`, helpers,
+            // etc. execute outside the per-test coverage window — no
+            // edge captures it. Watch-pattern broadcast triggers a
+            // replay of every test (results refresh) without a full
+            // record-mode graph rebuild.
+            $testPath.'/Pest.php' => [$testPath],
+
             // Test fixtures — JSON, CSV, XML, TXT data files consumed by
             // assertions. A fixture change can flip a test result.
             $testPath.'/Fixtures/**/*.json' => [$testPath],

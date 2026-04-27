@@ -106,29 +106,54 @@ final class TableExtractor
 
     /**
      * @return list<string> Table names referenced by `Schema::` calls
-     *                      in the given migration file contents. Empty
-     *                      when nothing matches — callers treat that
-     *                      as "fall back to the broad watch pattern".
+     *                      OR raw DDL statements in the given migration
+     *                      file contents. Empty when nothing matches —
+     *                      callers treat that as "fall back to the
+     *                      broad watch pattern".
+     *
+     * Two passes:
+     *  1. `Schema::create|table|drop|dropIfExists|dropColumn[s]|rename`
+     *     captures the conventional Laravel migration shape.
+     *  2. Raw DDL fallback: scans for `CREATE / ALTER / DROP /
+     *     TRUNCATE / RENAME TABLE <name>` patterns inside string
+     *     literals (i.e. `DB::statement('CREATE TABLE …')`,
+     *     `DB::unprepared('ALTER TABLE …')`). False positives possible
+     *     if the same syntax appears in a comment or unrelated string,
+     *     but over-attribution is correctness-safe.
      */
     public static function fromMigrationSource(string $php): array
     {
-        $pattern = '/Schema::\s*(?:create|table|drop|dropIfExists|dropColumns|rename)\s*\(\s*[\'"]([^\'"]+)[\'"](?:\s*,\s*[\'"]([^\'"]+)[\'"])?/';
-
-        if (preg_match_all($pattern, $php, $matches) === false) {
-            return [];
-        }
-
         $tables = [];
 
-        foreach ($matches[1] as $i => $primary) {
-            // Group 1 always captures at least one char per the regex.
-            $tables[strtolower($primary)] = true;
+        // Pass 1: Schema:: calls. `dropColumn` (singular) covers
+        // `Schema::table('users', fn ($t) => $t->dropColumn('foo'))`
+        // — the closure body's column op is on Blueprint, but the
+        // outer `Schema::table('users', …)` is what we capture here.
+        $schemaPattern = '/Schema::\s*(?:create|table|drop|dropIfExists|dropColumn|dropColumns|rename)\s*\(\s*[\'"]([^\'"]+)[\'"](?:\s*,\s*[\'"]([^\'"]+)[\'"])?/';
 
-            // Group 2 (`Schema::rename('old', 'new')`) is optional and
-            // absent from non-rename matches.
-            $secondary = $matches[2][$i] ?? '';
-            if ($secondary !== '') {
-                $tables[strtolower($secondary)] = true;
+        if (preg_match_all($schemaPattern, $php, $matches) !== false) {
+            foreach ($matches[1] as $i => $primary) {
+                $tables[strtolower($primary)] = true;
+
+                $secondary = $matches[2][$i] ?? '';
+                if ($secondary !== '') {
+                    $tables[strtolower($secondary)] = true;
+                }
+            }
+        }
+
+        // Pass 2: raw DDL fallback. Matches the table name following
+        // `CREATE/ALTER/DROP/TRUNCATE/RENAME TABLE` (plus Postgres'
+        // `IF EXISTS` / `IF NOT EXISTS` variants), with optional
+        // ANSI / MySQL / SQL Server quoting.
+        $ddlPattern = '/(?:CREATE|ALTER|DROP|TRUNCATE|RENAME)\s+TABLE(?:\s+IF\s+(?:NOT\s+)?EXISTS)?\s+["`\[]?(\w+)["`\]]?/i';
+
+        if (preg_match_all($ddlPattern, $php, $matches) !== false) {
+            foreach ($matches[1] as $primary) {
+                $lower = strtolower($primary);
+                if (! self::isSchemaMeta($lower)) {
+                    $tables[$lower] = true;
+                }
             }
         }
 

@@ -9,15 +9,22 @@ namespace Pest\Plugins\Tia;
  * or its recorded results stale. The fingerprint is split into two buckets:
  *
  *   - **structural** — describes what the graph's *edges* were recorded
- *     against. If any of these drift (`composer.lock`, `tests/Pest.php`,
- *     Pest's factory codegen, etc.) the edges themselves are potentially
- *     wrong and the graph must rebuild from scratch.
+ *     against. If any of these drift (`composer.lock`, `composer.json`,
+ *     `phpunit.xml{,.dist}`, `vite.config.*`, Pest's factory codegen) the
+ *     edges themselves are potentially wrong and the graph must rebuild
+ *     from scratch. `tests/TestCase.php` and `tests/Pest.php` are
+ *     intentionally NOT here — those are handled by per-test ancestor
+ *     linking (`Recorder::linkAncestorFiles`) and the Php watch pattern
+ *     respectively, which give precise invalidation rather than a wholesale
+ *     rebuild.
  *   - **environmental** — describes the *runtime* the results were captured
- *     on (PHP minor, extension set, Pest version). Drift here means the
- *     edges are still trustworthy, but the cached per-test results (pass/
- *     fail/time) may not reproduce on this machine. Tia's handler drops the
- *     branch's results + coverage cache and re-runs to freshen them, rather
- *     than re-recording from scratch.
+ *     on (PHP minor, extension set). Drift here means the edges are still
+ *     trustworthy, but the cached per-test results (pass/fail/time) may
+ *     not reproduce on this machine. Tia's handler drops the branch's
+ *     results + coverage cache and re-runs to freshen them, rather than
+ *     re-recording from scratch. Pest's own version is intentionally NOT
+ *     here — `composer.lock`'s structural hash already moves whenever the
+ *     installed Pest version changes.
  *
  * Legacy flat-shape graphs (schema ≤ 3) are read as structurally stale and
  * rebuilt on first load; the schema bump in the structural bucket takes
@@ -60,7 +67,13 @@ final readonly class Fingerprint
     //        Vite config change reshapes the module dependency graph
     //        that `JsModuleGraph` records; without a graph rebuild
     //        the stored `$jsFileToComponents` map silently goes stale.
-    private const int SCHEMA_VERSION = 10;
+    //   v11: `composer.json` added (autoload-dev / extra discovery
+    //        changes). `tests/TestCase.php` and `tests/Pest.php` are
+    //        intentionally NOT fingerprinted — they're handled by the
+    //        watch pattern + `Recorder::linkAncestorFiles` reflection
+    //        walk, which gives precise per-test invalidation rather
+    //        than a wholesale rebuild that trashes the entire graph.
+    private const int SCHEMA_VERSION = 11;
 
     /**
      * @return array{
@@ -76,7 +89,6 @@ final readonly class Fingerprint
                 'composer_lock' => self::hashIfExists($projectRoot.'/composer.lock'),
                 'phpunit_xml' => self::hashIfExists($projectRoot.'/phpunit.xml'),
                 'phpunit_xml_dist' => self::hashIfExists($projectRoot.'/phpunit.xml.dist'),
-                'pest_php' => self::hashIfExists($projectRoot.'/tests/Pest.php'),
                 // Pest's generated classes bake the code-generation logic
                 // in — if TestCaseFactory changes (new attribute, different
                 // method signature, etc.) every previously-recorded edge is
@@ -90,6 +102,12 @@ final readonly class Fingerprint
                 // the config drifts without a rebuild, the stored
                 // `$jsFileToComponents` map is silently stale.
                 'vite_config' => self::viteConfigHash($projectRoot),
+                // `composer.json` carries `autoload-dev`, `extra.laravel`
+                // package discovery, etc. — any change reshapes which
+                // classes Pest can resolve at boot. Hashing the whole
+                // file is over-conservative (cosmetic edits force
+                // rebuild) but cheap, and over-rebuild is always safe.
+                'composer_json' => self::hashIfExists($projectRoot.'/composer.json'),
             ],
             'environmental' => [
                 // PHP **minor** only (8.4, not 8.4.19) — CI's resolved patch
@@ -97,7 +115,6 @@ final readonly class Fingerprint
                 // the patch rarely changes anything test-visible.
                 'php_minor' => PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION,
                 'extensions' => self::extensionsFingerprint($projectRoot),
-                'pest' => self::readPestVersion($projectRoot),
             ],
         ];
     }
@@ -307,34 +324,5 @@ final readonly class Fingerprint
         }
 
         return array_values(array_unique($extensions));
-    }
-
-    private static function readPestVersion(string $projectRoot): string
-    {
-        $installed = $projectRoot.'/vendor/composer/installed.json';
-
-        if (! is_file($installed)) {
-            return 'unknown';
-        }
-
-        $raw = @file_get_contents($installed);
-
-        if ($raw === false) {
-            return 'unknown';
-        }
-
-        $data = json_decode($raw, true);
-
-        if (! is_array($data) || ! isset($data['packages']) || ! is_array($data['packages'])) {
-            return 'unknown';
-        }
-
-        foreach ($data['packages'] as $package) {
-            if (is_array($package) && ($package['name'] ?? null) === 'pestphp/pest') {
-                return (string) ($package['version'] ?? 'unknown');
-            }
-        }
-
-        return 'unknown';
     }
 }
