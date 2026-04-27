@@ -94,28 +94,21 @@ final readonly class ChangedFiles
             }
 
             if ($hash === $snapshot) {
-                // Same state as the last TIA invocation — unchanged.
+                // Same state as the last TIA invocation — cached
+                // result is still valid, no need to re-run.
                 continue;
             }
 
-            // Differs from the snapshot, but may still be a revert back
-            // to the committed version (scenario: last run had an edit,
-            // this run reverted it). Skipping this check causes stale
-            // snapshots from previous scenarios to cascade into the
-            // current run's invalidation set. Cheap to verify via
-            // `git show <sha>:<path>`.
-            if ($sha !== null && $sha !== '') {
-                $baselineContent = $this->contentAtSha($sha, $file);
-
-                if ($baselineContent !== null) {
-                    $baselineHash = ContentHash::ofContent($file, $baselineContent);
-
-                    if ($hash === $baselineHash) {
-                        continue;
-                    }
-                }
-            }
-
+            // Differs from the snapshot. This includes the
+            // revert-back-to-baseline case (last run had a real edit
+            // and was cached against that edit; this run reverted).
+            // Even though the file now matches what's at the recorded
+            // SHA, the cached test result reflects the *modified*
+            // version, not the baseline version — so it's stale and
+            // the test must re-run to refresh the cache. An earlier
+            // version of this filter short-circuited on
+            // matches-baseline, which served the stale failure
+            // forever after the user reverted.
             $remaining[] = $file;
         }
 
