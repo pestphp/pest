@@ -76,6 +76,38 @@ final class Recorder
      */
     private array $classUsesDatabaseCache = [];
 
+    /**
+     * Reverse map of project-local source file → list of class /
+     * interface / trait names declared in it. Built incrementally as
+     * tests run and new classes get autoloaded; consumed by
+     * `linkSourceDependencies()` so a test's covered file's
+     * declared classes can be walked for their interfaces, traits,
+     * and parents (which the coverage driver doesn't capture
+     * because interface declarations and empty traits emit no
+     * executable bytecode).
+     *
+     * @var array<string, list<string>>
+     */
+    private array $fileToClassNames = [];
+
+    /**
+     * Names already folded into `$fileToClassNames`. Lets the
+     * incremental refresher skip classes seen in a previous test.
+     *
+     * @var array<string, true>
+     */
+    private array $indexedClassNames = [];
+
+    /**
+     * Cached "files this class transitively depends on (interfaces,
+     * traits, parent chain, parents' interfaces and traits)" for
+     * project-local class names. Avoids re-walking the same
+     * hierarchy on every test that touches the same class.
+     *
+     * @var array<string, list<string>>
+     */
+    private array $classDependencyCache = [];
+
     private bool $active = false;
 
     private bool $driverChecked = false;
@@ -196,6 +228,16 @@ final class Recorder
             $this->perTestFiles[$this->currentTestFile][$sourceFile] = true;
         }
 
+        // Walk each covered class's interfaces / traits / parent chain
+        // and link those files explicitly. Interface declarations have
+        // no executable bytecode, so coverage drivers never emit lines
+        // for them — without this walk, a signature change to an
+        // interface like `Viewable` would leave the cached results of
+        // every test that exercises an implementing class stale,
+        // because the interface file never enters the graph through
+        // the coverage path.
+        $this->linkSourceDependencies(array_keys($data));
+
         $this->currentTestFile = null;
     }
 
@@ -223,6 +265,173 @@ final class Recorder
         }
 
         $this->perTestFiles[$this->currentTestFile][$sourceFile] = true;
+    }
+
+    /**
+     * For each project-local source file the coverage driver
+     * captured for this test, finds the classes / interfaces / traits
+     * declared in it and links every file in their declarative
+     * hierarchy: implemented interfaces (transitive), used traits,
+     * and parent classes (with their own interfaces and traits).
+     *
+     * Coverage drivers only record executable lines, so an interface
+     * signature change (e.g. adding a return type to a `Viewable`
+     * method) never registers — the interface file has no bytecode
+     * to instrument. Without this walk, every class implementing the
+     * interface would silently keep its stale cached result through
+     * the change, even though `--parallel` (no TIA) catches the
+     * incompatibility immediately.
+     *
+     * @param  array<int, string>  $coveredFiles  absolute paths from coverage
+     */
+    private function linkSourceDependencies(array $coveredFiles): void
+    {
+        if ($this->currentTestFile === null) {
+            return;
+        }
+
+        $this->refreshClassMap();
+
+        foreach ($coveredFiles as $coveredFile) {
+            if (! isset($this->fileToClassNames[$coveredFile])) {
+                continue;
+            }
+
+            foreach ($this->fileToClassNames[$coveredFile] as $name) {
+                foreach ($this->classDependencies($name) as $depFile) {
+                    $this->perTestFiles[$this->currentTestFile][$depFile] = true;
+                }
+            }
+        }
+    }
+
+    /**
+     * Incrementally folds every project-local class / interface /
+     * trait declared since the last refresh into `$fileToClassNames`.
+     * PHP only ever appends to its declared-symbol lists (classes
+     * never get unloaded), so iterating from `$indexedClassNames`'s
+     * cardinality forward is sufficient — and over a long suite this
+     * is dominated by the first test, since most classes are loaded
+     * by then.
+     */
+    private function refreshClassMap(): void
+    {
+        $names = array_merge(
+            get_declared_classes(),
+            get_declared_interfaces(),
+            get_declared_traits(),
+        );
+
+        foreach ($names as $name) {
+            if (isset($this->indexedClassNames[$name])) {
+                continue;
+            }
+            $this->indexedClassNames[$name] = true;
+
+            // Names came directly from `get_declared_*`, so the
+            // class/interface/trait is guaranteed loaded — but
+            // `class_exists($name, false)` (no autoload) keeps the
+            // string narrowed to `class-string` for static analysis
+            // and the `ReflectionClass` constructor stays in its
+            // documented happy path.
+            if (! class_exists($name, false)
+                && ! interface_exists($name, false)
+                && ! trait_exists($name, false)) {
+                continue;
+            }
+
+            $reflection = new ReflectionClass($name);
+
+            if ($reflection->isInternal()) {
+                continue;
+            }
+
+            $file = $reflection->getFileName();
+
+            if (! is_string($file)) {
+                continue;
+            }
+
+            if (str_contains($file, DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR)) {
+                continue;
+            }
+
+            $this->fileToClassNames[$file][] = $name;
+        }
+    }
+
+    /**
+     * Returns the project-local files the named class declaratively
+     * depends on: implemented interfaces (transitive), used traits,
+     * and the entire parent chain (each with their own interfaces
+     * and traits). Cached per class because the answer is invariant
+     * across a single process.
+     *
+     * @return list<string>
+     */
+    private function classDependencies(string $className): array
+    {
+        if (isset($this->classDependencyCache[$className])) {
+            return $this->classDependencyCache[$className];
+        }
+
+        if (! class_exists($className, false)
+            && ! interface_exists($className, false)
+            && ! trait_exists($className, false)) {
+            return $this->classDependencyCache[$className] = [];
+        }
+
+        $reflection = new ReflectionClass($className);
+
+        $files = [];
+
+        $linkSymbol = static function (string $name) use (&$files): void {
+            if (! class_exists($name, false)
+                && ! interface_exists($name, false)
+                && ! trait_exists($name, false)) {
+                return;
+            }
+            $r = new ReflectionClass($name);
+            if ($r->isInternal()) {
+                return;
+            }
+            $f = $r->getFileName();
+            if (! is_string($f) || str_contains($f, DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR)) {
+                return;
+            }
+            $files[$f] = true;
+        };
+
+        // `getInterfaceNames()` is transitive — it returns interfaces
+        // from parent classes and parent interfaces too — so a single
+        // pass covers the whole interface graph.
+        foreach ($reflection->getInterfaceNames() as $iname) {
+            $linkSymbol($iname);
+        }
+
+        // Direct + ancestor traits. `getTraitNames()` doesn't recurse
+        // into traits-using-traits, but that's a rare pattern in
+        // application code; if a project genuinely needs it, the
+        // coverage driver will pick up the executed bytecode of the
+        // outer trait and the dependency walk runs against the
+        // resulting class anyway.
+        foreach ($reflection->getTraitNames() as $tname) {
+            $linkSymbol($tname);
+        }
+
+        $parent = $reflection->getParentClass();
+        while ($parent !== false && ! $parent->isInternal()) {
+            $f = $parent->getFileName();
+            if (is_string($f) && ! str_contains($f, DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR)) {
+                $files[$f] = true;
+            }
+            foreach ($parent->getTraitNames() as $tname) {
+                $linkSymbol($tname);
+            }
+            $parent = $parent->getParentClass();
+        }
+
+        return $this->classDependencyCache[$className] = array_keys($files);
     }
 
     /**
@@ -473,6 +682,9 @@ final class Recorder
         $this->perTestUsesDatabase = [];
         $this->classFileCache = [];
         $this->classUsesDatabaseCache = [];
+        $this->fileToClassNames = [];
+        $this->indexedClassNames = [];
+        $this->classDependencyCache = [];
         $this->active = false;
     }
 }
