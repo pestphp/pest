@@ -75,12 +75,22 @@ final readonly class ChangedFiles
             }
 
             if (! $exists) {
-                // Missing now. If the snapshot recorded it as absent too
-                // (sentinel ''), state is identical to last run — unchanged.
-                // Otherwise it was present last run and got deleted since.
-                if ($snapshot !== '') {
-                    $remaining[] = $file;
-                }
+                // Missing on disk. We always invalidate here, even when
+                // the snapshot also recorded "deleted" (sentinel '').
+                // The `snapshot=='' && !exists` shortcut would in
+                // principle say "no change since last run, cached
+                // result is still valid" — but it's only safe if the
+                // cached result was recorded *during* a run that saw
+                // the file as deleted. A previous run that captured
+                // the deletion in `lastRunTree` but failed to refresh
+                // the cached pass/fail (paratest worker race, an
+                // earlier plugin bug, etc.) would leave the cache
+                // stuck on a stale pass from before the deletion.
+                // Skipping invalidation in that state perpetuates the
+                // wrong result on every subsequent run. Treat any
+                // missing file as a change; cost is one re-run per
+                // `--tia` while the file stays deleted.
+                $remaining[] = $file;
 
                 continue;
             }
