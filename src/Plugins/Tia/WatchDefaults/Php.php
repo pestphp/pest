@@ -51,6 +51,13 @@ final readonly class Php implements WatchDefault
             // record-mode graph rebuild.
             $testPath.'/Pest.php' => [$testPath],
 
+            // Pest dataset definitions are loaded once at boot, outside
+            // the per-test coverage window — no edge captures them. A
+            // change to a shared dataset can flip the result of any test
+            // that uses it, so broadcast every dataset edit to the full
+            // suite.
+            $testPath.'/Datasets/**/*.php' => [$testPath],
+
             // Test fixtures — JSON, CSV, XML, TXT data files consumed by
             // assertions. A fixture change can flip a test result.
             $testPath.'/Fixtures/**/*.json' => [$testPath],

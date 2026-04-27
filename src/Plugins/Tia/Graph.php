@@ -226,17 +226,18 @@ final class Graph
             }
         }
 
-        // Inertia page-component routing. When a Vue/React/Svelte page
-        // under `resources/js/Pages/` changes, map it to the component
-        // name Inertia would use (the path relative to `Pages/`, with
-        // the extension stripped) and intersect with the captured
-        // component edges. Only invalidates tests that actually
-        // rendered the page. Pages with no captured edges (never
-        // rendered during record, brand-new on this branch) fall
-        // through to the watch-pattern fallback via
-        // `$unknownPageComponents` — safe over-run.
+        // Inertia page-component routing. When a page under
+        // `resources/js/Pages/` changes, map it to the component name
+        // Inertia would use (the path relative to `Pages/`, extension
+        // stripped) and intersect with the captured component edges.
+        // Only invalidates tests that actually rendered the page.
+        // Pages with no captured edges (never rendered during record,
+        // brand-new on this branch) fall through to the watch-pattern
+        // fallback — safe over-run. Pages handled here are tracked in
+        // `$preciselyHandledPages` so the watch broadcast and JS-dep
+        // lookup don't re-route them.
         $changedComponents = [];
-        $unknownPageComponents = [];
+        $preciselyHandledPages = [];
 
         foreach ($nonMigrationPaths as $rel) {
             $component = $this->componentForInertiaPage($rel);
@@ -247,20 +248,6 @@ final class Graph
 
             if ($this->anyTestUses($this->testInertiaComponents, $component)) {
                 $changedComponents[$component] = true;
-            } else {
-                $unknownPageComponents[] = $rel;
-            }
-        }
-
-        // Pages whose component already resolved precisely via the
-        // direct Inertia edges path must not leak back through any
-        // broader mechanism (either the JS-dep lookup below, or the
-        // watch pattern further down).
-        $preciselyHandledPages = [];
-        foreach ($nonMigrationPaths as $rel) {
-            $component = $this->componentForInertiaPage($rel);
-
-            if ($component !== null && isset($changedComponents[$component])) {
                 $preciselyHandledPages[$rel] = true;
             }
         }
@@ -356,68 +343,6 @@ final class Graph
                     if ($touchedAny) {
                         $sharedFilesResolved[$rel] = true;
                     }
-                }
-            }
-        }
-
-        // Blade orphan detection. Mirror of the JS orphan check: a
-        // newly-added `.blade.php` that literally nothing references
-        // (no `@include('x.y')`, no `view('x.y')`, no `Route::view`)
-        // can't affect any test, so the broad `resources/views/**`
-        // watch broadcast is wasted work. We only do this for blades
-        // *outside* the auto-resolved directories where Laravel /
-        // Livewire / Flux map class/tag names to file paths without
-        // a literal reference — there the absence of a string match
-        // isn't evidence of orphanhood.
-        $newBlades = [];
-        foreach ($nonMigrationPaths as $rel) {
-            if (isset($preciselyHandledPages[$rel])) {
-                continue;
-            }
-            if (isset($sharedFilesResolved[$rel])) {
-                continue;
-            }
-            if (! str_ends_with(strtolower($rel), '.blade.php')) {
-                continue;
-            }
-            if (isset($this->fileIds[$rel])) {
-                continue;
-            }
-            if (! $this->isBladeOrphanEligible($rel)) {
-                continue;
-            }
-            if (! is_file($this->projectRoot.DIRECTORY_SEPARATOR.$rel)) {
-                continue;
-            }
-            $newBlades[] = $rel;
-        }
-
-        if ($newBlades !== []) {
-            $needles = [];
-            foreach ($newBlades as $rel) {
-                $name = $this->viewNameFromBladePath($rel);
-                if ($name !== null) {
-                    $needles[$name] = $rel;
-                }
-            }
-
-            $referenced = $this->findReferencedViewNames($needles, $newBlades);
-
-            foreach ($newBlades as $rel) {
-                $name = $this->viewNameFromBladePath($rel);
-                if ($name === null) {
-                    continue;
-                }
-                if (! isset($referenced[$name])) {
-                    // No `@include`, `view(…)`, or `Route::view(…)`
-                    // mentions this view name anywhere in the project.
-                    // Dynamic includes (`@include($var)`) can't be
-                    // proven against — we accept the tradeoff of
-                    // under-invalidation in the narrow case where a
-                    // view is loaded exclusively via runtime
-                    // composition. The watch pattern still fires for
-                    // blades in components/, livewire/, pages/ etc.
-                    $sharedFilesResolved[$rel] = true;
                 }
             }
         }
@@ -805,9 +730,13 @@ final class Graph
 
     /**
      * Replaces the whole JS dep map. Called at record time with the
-     * output of `JsModuleGraph::build()`. Unlike the test-level
-     * replacements above this is a wholesale overwrite — the
-     * resolver produces the full graph on every run.
+     * output of `JsModuleGraph::build()`. Empty input is treated as a
+     * resolver failure (Node missing, Vite refused to load, transient
+     * `npm install`) rather than a legitimate "no JS pages" signal —
+     * we keep the previous map. Stale entries for genuinely-deleted
+     * pages are harmless because deleted files never enter the
+     * changed set; over-broadcasting every JS edit through the watch
+     * pattern after a flaky Node run would be a real regression.
      *
      * @param  array<string, array<int, string>>  $fileToComponents
      */
@@ -834,6 +763,10 @@ final class Graph
             $keys = array_keys($names);
             sort($keys);
             $out[$path] = $keys;
+        }
+
+        if ($out === []) {
+            return;
         }
 
         ksort($out);
@@ -904,7 +837,7 @@ final class Graph
 
         $extension = substr($tail, $dot + 1);
 
-        if (! in_array($extension, ['vue', 'tsx', 'jsx', 'svelte'], true)) {
+        if (! in_array($extension, ['vue', 'tsx', 'jsx', 'svelte', 'ts', 'js'], true)) {
             return null;
         }
 
@@ -929,142 +862,6 @@ final class Graph
         }
 
         return false;
-    }
-
-    /**
-     * Blades inside auto-resolving directories (Blade components,
-     * Livewire components, Volt pages, Flux UI, vendor packages) are
-     * referenced by *class name* or *tag name* at runtime rather than
-     * by literal path string. Absence of a string match therefore
-     * can't prove orphanhood — we skip them and let the watch pattern
-     * do its job.
-     */
-    private function isBladeOrphanEligible(string $rel): bool
-    {
-        $prefix = 'resources/views/';
-        if (! str_starts_with($rel, $prefix)) {
-            return false;
-        }
-
-        $tail = substr($rel, strlen($prefix));
-
-        foreach (['components/', 'livewire/', 'pages/', 'flux/', 'vendor/'] as $autoResolved) {
-            if (str_starts_with($tail, $autoResolved)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Maps `resources/views/admin/reports.blade.php` →
-     * `admin.reports` (Laravel's dot-notation view name). Returns
-     * null for anything that isn't a regular `.blade.php` under
-     * `resources/views/`.
-     */
-    private function viewNameFromBladePath(string $rel): ?string
-    {
-        $prefix = 'resources/views/';
-        $suffix = '.blade.php';
-
-        if (! str_starts_with($rel, $prefix)) {
-            return null;
-        }
-        if (! str_ends_with(strtolower($rel), $suffix)) {
-            return null;
-        }
-
-        $tail = substr($rel, strlen($prefix));
-        $base = substr($tail, 0, strlen($tail) - strlen($suffix));
-
-        if ($base === '') {
-            return null;
-        }
-
-        return str_replace('/', '.', $base);
-    }
-
-    /**
-     * Scans every `.php` / `.blade.php` file under `app/`, `routes/`,
-     * `tests/`, and `resources/views/` for a literal occurrence of
-     * each needle (the dot-notation view name). Returns the set of
-     * needles that were found at least once.
-     *
-     * @param  array<string, string>  $needles  view name → blade path (target itself, skipped during scan)
-     * @param  array<int, string>  $skipPaths  project-relative paths to skip (the new blades themselves)
-     * @return array<string, true>
-     */
-    private function findReferencedViewNames(array $needles, array $skipPaths): array
-    {
-        if ($needles === []) {
-            return [];
-        }
-
-        $skipSet = array_fill_keys($skipPaths, true);
-        $found = [];
-
-        $roots = [
-            $this->projectRoot.DIRECTORY_SEPARATOR.'app',
-            $this->projectRoot.DIRECTORY_SEPARATOR.'routes',
-            $this->projectRoot.DIRECTORY_SEPARATOR.'tests',
-            $this->projectRoot.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'views',
-        ];
-
-        $rootLen = strlen(rtrim($this->projectRoot, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR);
-
-        foreach ($roots as $root) {
-            if (! is_dir($root)) {
-                continue;
-            }
-
-            if (count($found) === count($needles)) {
-                break;
-            }
-
-            $iterator = new \RecursiveIteratorIterator(
-                new \RecursiveDirectoryIterator($root, \FilesystemIterator::SKIP_DOTS),
-            );
-
-            foreach ($iterator as $fileInfo) {
-                if (count($found) === count($needles)) {
-                    break;
-                }
-                if (! $fileInfo->isFile()) {
-                    continue;
-                }
-
-                $path = $fileInfo->getPathname();
-                $lower = strtolower((string) $path);
-
-                if (! str_ends_with($lower, '.php')) {
-                    continue;
-                }
-
-                $relPath = str_replace(DIRECTORY_SEPARATOR, '/', substr((string) $path, $rootLen));
-
-                if (isset($skipSet[$relPath])) {
-                    continue;
-                }
-
-                $content = @file_get_contents($path);
-
-                if ($content === false) {
-                    continue;
-                }
-
-                foreach (array_keys($needles) as $needle) {
-                    if (isset($found[$needle])) {
-                        continue;
-                    }
-                    if (str_contains($content, $needle)) {
-                        $found[$needle] = true;
-                    }
-                }
-            }
-        }
-
-        return $found;
     }
 
     /**

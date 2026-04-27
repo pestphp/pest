@@ -88,7 +88,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      * flag forces an immediate retry (e.g. right after publishing a
      * baseline from CI for the first time).
      */
-    private const string REFETCH_OPTION = '--tia-refetch';
+    private const string REFETCH_OPTION = '--refetch';
 
     /**
      * State keys under which TIA persists its blobs. Kept here as constants
@@ -123,7 +123,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      * Cooldown marker keyed by `BaselineSync` after a failed fetch. Holds
      * `{"until": <unix>}` — subsequent runs within the window skip the
      * fetch attempt (and its `gh run list` network hop) until the
-     * cooldown expires or the user passes `--tia-refetch`.
+     * cooldown expires or the user passes `--refetch`.
      */
     public const string KEY_FETCH_COOLDOWN = 'fetch-cooldown.json';
 
@@ -224,10 +224,21 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private bool $recordingActive = false;
 
     /**
-     * True when `--tia-refetch` is in the current argv — `BaselineSync`
+     * True when `--refetch` is in the current argv — `BaselineSync`
      * uses it to bypass the post-failure fetch cooldown.
      */
     private bool $forceRefetch = false;
+
+    /**
+     * True when `--fresh` is in the current argv — record-mode paths
+     * use it to gate `Graph::pruneMissingTests()`. On a partial record
+     * (default `--tia` after a branch switch, etc.) the working tree may
+     * not contain every test the shared graph knows about, so pruning
+     * would silently delete edges for tests that exist on other
+     * branches. `--fresh` rebuilds from scratch anyway, so pruning
+     * there is both safe and useful for cleaning up stale entries.
+     */
+    private bool $freshRebuild = false;
 
     public function __construct(
         private readonly OutputInterface $output,
@@ -348,6 +359,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         // silently ignore it here and let whatever else consumes it
         // handle it. The flag isn't popped in that branch.
         $forceRebuild = $freshRequested && ($enabled || $recordingGlobal || $replayingGlobal);
+        $this->freshRebuild = $forceRebuild;
 
         if (! $enabled && ! $this->forceRefetch && ! $recordingGlobal && ! $replayingGlobal) {
             return $arguments;
@@ -444,7 +456,17 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $graph->replaceTestTables($perTestTables);
         $graph->replaceTestInertiaComponents($perTestInertia);
         $graph->replaceJsFileToComponents(JsModuleGraph::build($projectRoot));
-        $graph->pruneMissingTests();
+
+        // Pruning checks the local filesystem for each known test file —
+        // on a partial record (no `--fresh`) the current checkout may
+        // legitimately be missing tests that exist on other branches
+        // sharing this graph, so pruning would silently delete their
+        // edges. Stale entries for genuinely-deleted tests are harmless
+        // (test discovery never finds the file) and get cleaned up on
+        // the next `--fresh` rebuild.
+        if ($this->freshRebuild) {
+            $graph->pruneMissingTests();
+        }
 
         // Fold in the results collected during this same record run. The
         // `AddsOutput` pass that runs `snapshotTestResults` fires *before*
@@ -612,7 +634,14 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $graph->replaceTestTables($finalisedTables);
         $graph->replaceTestInertiaComponents($finalisedInertia);
         $graph->replaceJsFileToComponents(JsModuleGraph::build($projectRoot));
-        $graph->pruneMissingTests();
+
+        // See `terminate()` — same rationale: pruning by current
+        // working-tree presence would silently drop edges for tests
+        // owned by other branches sharing this graph. Only safe on
+        // `--fresh` rebuilds.
+        if ($this->freshRebuild) {
+            $graph->pruneMissingTests();
+        }
 
         if (! $this->saveGraph($graph)) {
             $this->output->writeln('  <fg=red>TIA</> failed to write graph.');

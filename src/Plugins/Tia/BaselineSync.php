@@ -67,7 +67,7 @@ final readonly class BaselineSync
      * Rationale: when the remote workflow hasn't published yet, every
      * `pest --tia` invocation would otherwise re-hit `gh run list` and
      * re-print the publish instructions — noisy + slow. Back off for a
-     * day, let the user override with `--tia-refetch`.
+     * day, let the user override with `--refetch`.
      */
     private const int FETCH_COOLDOWN_SECONDS = 86400;
 
@@ -82,7 +82,7 @@ final readonly class BaselineSync
      * landed; coverage is best-effort since plain `--tia` (no `--coverage`)
      * never reads it.
      *
-     * `$force = true` (driven by `--tia-refetch`) ignores the post-failure
+     * `$force = true` (driven by `--refetch`) ignores the post-failure
      * cooldown so the user can retry on demand without waiting out the
      * 24h window.
      */
@@ -97,7 +97,7 @@ final readonly class BaselineSync
         if (! $force && ($remaining = $this->cooldownRemaining()) !== null) {
             $this->output->writeln(sprintf(
                 '  <fg=yellow>TIA</> last fetch found no baseline — next auto-retry in %s. '
-                    .'Override with <fg=cyan>--tia-refetch</>.',
+                    .'Override with <fg=cyan>--refetch</>.',
                 $this->formatDuration($remaining),
             ));
 
