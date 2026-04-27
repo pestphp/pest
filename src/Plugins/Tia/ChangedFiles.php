@@ -283,6 +283,11 @@ final readonly class ChangedFiles
             '.phpunit.result.cache',
             'vendor/',
             'node_modules/',
+            // Laravel regenerates these from manifest state
+            // (package.json, service providers) at boot — they're
+            // fully derived, not authored. Treating them as
+            // "changes" just flaps the diff noisily.
+            'bootstrap/cache/',
         ];
 
         foreach ($prefixes as $prefix) {

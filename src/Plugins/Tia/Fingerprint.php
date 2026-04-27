@@ -85,6 +85,11 @@ final readonly class Fingerprint
                 // Pest itself is edited.
                 'pest_factory' => self::hashIfExists(__DIR__.'/../../Factories/TestCaseFactory.php'),
                 'pest_method_factory' => self::hashIfExists(__DIR__.'/../../Factories/TestCaseMethodFactory.php'),
+                // `vite.config.*` reshapes the module graph
+                // `JsModuleGraph` records at the next `--tia` run; if
+                // the config drifts without a rebuild, the stored
+                // `$jsFileToComponents` map is silently stale.
+                'vite_config' => self::viteConfigHash($projectRoot),
             ],
             'environmental' => [
                 // PHP **minor** only (8.4, not 8.4.19) — CI's resolved patch
@@ -191,6 +196,28 @@ final readonly class Fingerprint
         }
 
         return $normalised;
+    }
+
+    /**
+     * Combined hash of every `vite.config.{ts,js,mjs,cjs,mts}` present
+     * at the project root. Most projects have exactly one; we accept
+     * any of the five recognised extensions without assuming which
+     * the user picked. Returns null when no config file exists —
+     * treated as "no Vite project" by the matcher, no drift.
+     */
+    private static function viteConfigHash(string $projectRoot): ?string
+    {
+        $parts = [];
+
+        foreach (['vite.config.ts', 'vite.config.js', 'vite.config.mjs', 'vite.config.cjs', 'vite.config.mts'] as $name) {
+            $hash = self::hashIfExists($projectRoot.'/'.$name);
+
+            if ($hash !== null) {
+                $parts[] = $name.':'.$hash;
+            }
+        }
+
+        return $parts === [] ? null : hash('xxh128', implode("\n", $parts));
     }
 
     private static function hashIfExists(string $path): ?string

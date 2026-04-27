@@ -52,6 +52,24 @@ final class JsModuleGraph
     }
 
     /**
+     * Strict variant — only runs the Node helper, never falls back to
+     * the PHP parser. Returns null when Node isn't available or Vite
+     * won't load.
+     *
+     * Used at replay time when we need to *trust a negative result*
+     * (i.e., "no page imports this file, so it's orphan, safe to
+     * skip"). The PHP fallback is conservative on positives but can
+     * miss imports that rely on custom aliases or plugins — negative
+     * results from it cannot be trusted for orphan pruning.
+     *
+     * @return array<string, list<string>>|null
+     */
+    public static function buildStrict(string $projectRoot): ?array
+    {
+        return self::tryNodeHelper($projectRoot);
+    }
+
+    /**
      * True when the project looks like a Vite + Node project we can
      * ask for a module graph. Gate for callers that want to skip the
      * resolver entirely on non-Vite apps.
