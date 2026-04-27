@@ -17,6 +17,7 @@ use Pest\Plugins\Tia\Graph;
 use Pest\Plugins\Tia\JsModuleGraph;
 use Pest\Plugins\Tia\Recorder;
 use Pest\Plugins\Tia\ResultCollector;
+use Pest\Plugins\Tia\TableExtractor;
 use Pest\Plugins\Tia\WatchPatterns;
 use Pest\Support\Container;
 use Pest\TestSuite;
@@ -104,6 +105,17 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private const string KEY_WORKER_EDGES_PREFIX = 'worker-edges-';
 
     private const string KEY_WORKER_RESULTS_PREFIX = 'worker-results-';
+
+    /**
+     * Sentinel dropped by a recording worker that found no usable
+     * coverage driver in its own process. Workers can have a different
+     * PHP env from the parent (Herd profile, custom ini scandir, CI
+     * runners that strip extensions), so the parent's driver check
+     * doesn't catch this. The parent reads these at end-of-run and
+     * surfaces a single warning so partial coverage loss isn't
+     * silent.
+     */
+    private const string KEY_WORKER_NO_DRIVER_PREFIX = 'worker-no-driver-';
 
     /**
      * Raw-serialised `CodeCoverage` snapshot from the last `--tia --coverage`
@@ -428,6 +440,24 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         $perTestTables = $recorder->perTestTables();
         $perTestInertia = $recorder->perTestInertiaComponents();
+        $perTestUsesDatabase = $recorder->perTestUsesDatabase();
+
+        // Tests that use Laravel's DB-resetting traits (`RefreshDatabase`,
+        // `DatabaseMigrations`, `DatabaseTransactions`) but recorded zero
+        // queries during their body — typical seeded-fixture / attribute-
+        // assertion tests — would otherwise have empty `$testTables` and
+        // get silently skipped on migration changes. The migrations and
+        // seed DML run during `parent::setUp()` before `TableTracker`
+        // arms, so we can't capture them. Instead, conservatively union
+        // the project-wide migration table set into those tests so any
+        // schema change re-runs them.
+        if ($perTestUsesDatabase !== []) {
+            $perTestTables = $this->augmentDatabaseTestTables(
+                $perTestTables,
+                $perTestUsesDatabase,
+                $projectRoot,
+            );
+        }
 
         if (Parallel::isWorker()) {
             $this->flushWorkerPartial($perTest, $perTestTables, $perTestInertia);
@@ -504,6 +534,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         if (Parallel::isWorker()) {
             return $exitCode;
         }
+
+        $this->reportMissingWorkerDrivers();
 
         // After a successful replay run, advance the recorded SHA to HEAD
         // so the next run only diffs against what changed since NOW, not
@@ -860,9 +892,16 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $recorder = $this->recorder;
 
         if (! $recorder->driverAvailable()) {
-            // Driver availability is per-process. If the driver is missing
-            // here, silently skip — the parent has already warned during
-            // its own boot.
+            // Worker PHP can differ from the parent (Herd profile, custom
+            // `php.ini` scan dir, stripped CI runner). Drop a sentinel so
+            // the parent surfaces a single warning at end-of-run instead
+            // of letting the missing per-test edges and results pass
+            // unnoticed.
+            $this->state->write(
+                self::KEY_WORKER_NO_DRIVER_PREFIX.$this->workerToken().'.json',
+                '{}',
+            );
+
             return $arguments;
         }
 
@@ -1096,6 +1135,31 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private function collectWorkerEdgesPartials(): array
     {
         return $this->state->keysWithPrefix(self::KEY_WORKER_EDGES_PREFIX);
+    }
+
+    /**
+     * Reads per-worker "no driver available" sentinels and surfaces a
+     * single warning to the parent's terminal. Self-clears so the
+     * sentinel doesn't leak into the next run. No-op when every worker
+     * had a usable coverage driver.
+     */
+    private function reportMissingWorkerDrivers(): void
+    {
+        $keys = $this->state->keysWithPrefix(self::KEY_WORKER_NO_DRIVER_PREFIX);
+
+        if ($keys === []) {
+            return;
+        }
+
+        foreach ($keys as $key) {
+            $this->state->delete($key);
+        }
+
+        $this->output->writeln(sprintf(
+            '  <fg=yellow>TIA</> %d worker(s) had no coverage driver — their per-test edges and results were dropped. '
+                .'Install / enable <fg=cyan>pcov</> or <fg=cyan>xdebug</> (mode: coverage) in the worker PHP and rerun.',
+            count($keys),
+        ));
     }
 
     private function purgeWorkerPartials(): void
@@ -1560,6 +1624,69 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         return implode(', ', $changes);
+    }
+
+    /**
+     * Unions the project's full migration-defined table set into every
+     * test that uses a Laravel DB-resetting trait. Captures the
+     * seeded-attribute case where `parent::setUp()` ran inserts before
+     * `TableTracker` armed and the test body issued no further queries
+     * — without this, those tests would have empty `$testTables` and
+     * be silently skipped on migration changes.
+     *
+     * Tests that DID record specific tables in their body keep those
+     * (the union is additive). The migration scan is cheap (one pass
+     * over `database/migrations/`) and only runs once per record.
+     *
+     * @param  array<string, array<int, string>>  $perTestTables
+     * @param  array<string, true>  $perTestUsesDatabase
+     * @return array<string, array<int, string>>
+     */
+    private function augmentDatabaseTestTables(array $perTestTables, array $perTestUsesDatabase, string $projectRoot): array
+    {
+        $migrationDir = rtrim($projectRoot, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'database'.DIRECTORY_SEPARATOR.'migrations';
+
+        if (! is_dir($migrationDir)) {
+            return $perTestTables;
+        }
+
+        $allTables = [];
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($migrationDir, \FilesystemIterator::SKIP_DOTS),
+        );
+
+        foreach ($iterator as $fileInfo) {
+            if (! $fileInfo->isFile()) {
+                continue;
+            }
+            if (! str_ends_with(strtolower((string) $fileInfo->getPathname()), '.php')) {
+                continue;
+            }
+
+            $content = @file_get_contents((string) $fileInfo->getPathname());
+
+            if ($content === false) {
+                continue;
+            }
+
+            foreach (TableExtractor::fromMigrationSource($content) as $table) {
+                $allTables[strtolower($table)] = true;
+            }
+        }
+
+        if ($allTables === []) {
+            return $perTestTables;
+        }
+
+        foreach (array_keys($perTestUsesDatabase) as $testFile) {
+            $existing = $perTestTables[$testFile] ?? [];
+            $merged = array_fill_keys($existing, true) + $allTables;
+            $names = array_keys($merged);
+            sort($names);
+            $perTestTables[$testFile] = $names;
+        }
+
+        return $perTestTables;
     }
 
     /**

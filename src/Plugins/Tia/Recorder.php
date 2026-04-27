@@ -51,11 +51,30 @@ final class Recorder
     private array $perTestInertiaComponents = [];
 
     /**
+     * Set of absolute test files whose class hierarchy uses one of
+     * Laravel's database-resetting traits (`RefreshDatabase`,
+     * `DatabaseMigrations`, `DatabaseTransactions`). Captured at
+     * `beginTest` so the finalize path can augment their table edges
+     * even when seeders / pre-test DML fired before `TableTracker`
+     * armed.
+     *
+     * @var array<string, true>
+     */
+    private array $perTestUsesDatabase = [];
+
+    /**
      * Cached class → test file resolution.
      *
      * @var array<string, string|null>
      */
     private array $classFileCache = [];
+
+    /**
+     * Cached class → "uses Laravel DB trait" introspection result.
+     *
+     * @var array<string, bool>
+     */
+    private array $classUsesDatabaseCache = [];
 
     private bool $active = false;
 
@@ -127,6 +146,10 @@ final class Recorder
         }
 
         $this->currentTestFile = $file;
+
+        if ($this->classUsesDatabase($className)) {
+            $this->perTestUsesDatabase[$file] = true;
+        }
 
         // Walk the parent-class chain and link each ancestor's defining
         // file as a source dependency of this test. Captures the common
@@ -239,6 +262,45 @@ final class Recorder
     }
 
     /**
+     * True when `$className` (or any of its ancestors) uses one of
+     * Laravel's database-resetting traits. Walking up `getTraits()` is
+     * necessary because Pest test classes are eval'd from the
+     * generated `*.php` test file and the trait usually lives on a
+     * shared `tests/TestCase.php` ancestor. Result is cached per class
+     * — class hierarchies don't change within a process.
+     */
+    private function classUsesDatabase(string $className): bool
+    {
+        if (array_key_exists($className, $this->classUsesDatabaseCache)) {
+            return $this->classUsesDatabaseCache[$className];
+        }
+
+        if (! class_exists($className, false)) {
+            return $this->classUsesDatabaseCache[$className] = false;
+        }
+
+        static $needles = [
+            'Illuminate\\Foundation\\Testing\\RefreshDatabase' => true,
+            'Illuminate\\Foundation\\Testing\\DatabaseMigrations' => true,
+            'Illuminate\\Foundation\\Testing\\DatabaseTransactions' => true,
+        ];
+
+        $reflection = new ReflectionClass($className);
+
+        do {
+            foreach (array_keys($reflection->getTraits()) as $traitName) {
+                if (isset($needles[$traitName])) {
+                    return $this->classUsesDatabaseCache[$className] = true;
+                }
+            }
+
+            $reflection = $reflection->getParentClass();
+        } while ($reflection !== false && ! $reflection->isInternal());
+
+        return $this->classUsesDatabaseCache[$className] = false;
+    }
+
+    /**
      * Records that the currently-running test queried `$table`. Called
      * by `TableTracker` for every DML statement Laravel's `DB::listen`
      * reports; the table name has already been extracted by
@@ -335,6 +397,14 @@ final class Recorder
         return $out;
     }
 
+    /**
+     * @return array<string, true> absolute test file → true for tests using a Laravel DB-resetting trait.
+     */
+    public function perTestUsesDatabase(): array
+    {
+        return $this->perTestUsesDatabase;
+    }
+
     private function resolveTestFile(string $className, string $fallbackFile): ?string
     {
         if (array_key_exists($className, $this->classFileCache)) {
@@ -402,7 +472,9 @@ final class Recorder
         $this->perTestFiles = [];
         $this->perTestTables = [];
         $this->perTestInertiaComponents = [];
+        $this->perTestUsesDatabase = [];
         $this->classFileCache = [];
+        $this->classUsesDatabaseCache = [];
         $this->active = false;
     }
 }
