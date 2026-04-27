@@ -36,23 +36,32 @@ final class JsImportParser
 
     private const array RESOLVABLE_EXTENSIONS = ['vue', 'tsx', 'jsx', 'svelte', 'ts', 'js', 'mjs', 'mts'];
 
-    private const string PAGES_DIR = 'resources/js/Pages';
-
     private const string JS_DIR = 'resources/js';
 
     /**
-     * Walks `resources/js/Pages` and, for each page, collects its
-     * transitive file imports. Returns the inverted graph so callers
-     * can look up "what pages depend on this shared file".
+     * Walks the project's pages directory (`resources/js/Pages` or its
+     * lowercase Laravel-React-starter-kit equivalent `resources/js/pages`)
+     * and, for each page, collects its transitive file imports. Returns
+     * the inverted graph so callers can look up "what pages depend on
+     * this shared file".
      *
      * @return array<string, list<string>>
      */
     public static function parse(string $projectRoot): array
     {
         $jsRoot = $projectRoot.DIRECTORY_SEPARATOR.self::JS_DIR;
-        $pagesRoot = $projectRoot.DIRECTORY_SEPARATOR.self::PAGES_DIR;
+        $pagesRoot = null;
 
-        if (! is_dir($pagesRoot)) {
+        foreach (['resources/js/Pages', 'resources/js/pages'] as $candidate) {
+            $abs = $projectRoot.DIRECTORY_SEPARATOR.$candidate;
+            if (is_dir($abs)) {
+                $pagesRoot = $abs;
+
+                break;
+            }
+        }
+
+        if ($pagesRoot === null) {
             return [];
         }
 

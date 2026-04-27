@@ -118,6 +118,11 @@ final class TableTracker
             return;
         }
 
-        $events->listen('\\Illuminate\\Database\\Events\\QueryExecuted', $listener);
+        // Event class key intentionally has no leading backslash —
+        // `Dispatcher::listen()` stores by the literal string and the
+        // lookup at dispatch time uses `get_class($event)` (no
+        // leading backslash), so a `\Illuminate\…` key would never
+        // match the fired event.
+        $events->listen('Illuminate\\Database\\Events\\QueryExecuted', $listener);
     }
 }

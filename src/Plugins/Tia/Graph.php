@@ -829,36 +829,45 @@ final class Graph
 
     /**
      * Maps a project-relative path to its Inertia component name if it
-     * lives under `resources/js/Pages/` with a recognised framework
-     * extension. Returns null otherwise so callers can cheaply ignore
-     * non-page files. Matches Inertia's resolver convention: strip the
-     * `resources/js/Pages/` prefix, strip the extension, preserve the
-     * remaining slashes (`Users/Show.vue` → `Users/Show`).
+     * lives under the project's pages directory with a recognised
+     * framework extension. Returns null otherwise so callers can
+     * cheaply ignore non-page files. Matches Inertia's resolver
+     * convention: strip the pages prefix, strip the extension, preserve
+     * the remaining slashes (`Users/Show.vue` → `Users/Show`).
+     *
+     * Both `resources/js/Pages/` (the classic Inertia-Vue convention)
+     * and `resources/js/pages/` (the Laravel React starter kit, and
+     * other lowercase-by-default setups) are accepted — paths from
+     * git are case-sensitive on Linux, so we must match the exact
+     * casing used by the project rather than picking one and forcing
+     * the other to fall through to the broad watch pattern.
      */
     private function componentForInertiaPage(string $rel): ?string
     {
-        $prefix = 'resources/js/Pages/';
+        foreach (['resources/js/Pages/', 'resources/js/pages/'] as $prefix) {
+            if (! str_starts_with($rel, $prefix)) {
+                continue;
+            }
 
-        if (! str_starts_with($rel, $prefix)) {
-            return null;
+            $tail = substr($rel, strlen($prefix));
+            $dot = strrpos($tail, '.');
+
+            if ($dot === false) {
+                return null;
+            }
+
+            $extension = substr($tail, $dot + 1);
+
+            if (! in_array($extension, ['vue', 'tsx', 'jsx', 'svelte', 'ts', 'js'], true)) {
+                return null;
+            }
+
+            $name = substr($tail, 0, $dot);
+
+            return $name === '' ? null : $name;
         }
 
-        $tail = substr($rel, strlen($prefix));
-        $dot = strrpos($tail, '.');
-
-        if ($dot === false) {
-            return null;
-        }
-
-        $extension = substr($tail, $dot + 1);
-
-        if (! in_array($extension, ['vue', 'tsx', 'jsx', 'svelte', 'ts', 'js'], true)) {
-            return null;
-        }
-
-        $name = substr($tail, 0, $dot);
-
-        return $name === '' ? null : $name;
+        return null;
     }
 
     /**

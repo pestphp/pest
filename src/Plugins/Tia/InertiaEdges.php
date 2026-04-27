@@ -33,7 +33,15 @@ final class InertiaEdges
 {
     private const string CONTAINER_CLASS = '\\Illuminate\\Container\\Container';
 
-    private const string REQUEST_HANDLED_EVENT = '\\Illuminate\\Foundation\\Http\\Events\\RequestHandled';
+    /**
+     * Event class name used as the listener key. Stored *without* a
+     * leading backslash because Laravel's `Dispatcher` keys
+     * `$listeners[$eventName]` by the literal string passed to
+     * `listen()`, and looks up incoming events by their PHP-class
+     * name (`get_class($event)`), which never has a leading
+     * backslash. A `\Illuminate\…` key would silently never match.
+     */
+    private const string REQUEST_HANDLED_EVENT = 'Illuminate\\Foundation\\Http\\Events\\RequestHandled';
 
     /**
      * App-scoped marker that makes `arm()` idempotent across per-test
@@ -129,22 +137,66 @@ final class InertiaEdges
             }
         }
 
-        // Initial-load HTML path: Inertia embeds the page payload in a
-        // `data-page` attribute on the root `<div id="app">`. We only
-        // pay the regex cost when the body actually contains the
-        // attribute, so non-Inertia HTML responses are effectively a
-        // no-op.
+        // Initial-load HTML path. Inertia ships two shapes here and
+        // we honour both:
+        //
+        //   1. SSR-safe script tag — `<script data-page="app"
+        //      type="application/json">{…JSON…}</script>`. The
+        //      Laravel React starter kit (and modern Inertia-React)
+        //      use this so the JSON survives server-rendered
+        //      hydration without HTML-encoding the payload into an
+        //      attribute. The `data-page="app"` *attribute value* is
+        //      the literal string `"app"` — only the tag *body*
+        //      carries the page JSON.
+        //   2. Classic — `<div id="app" data-page="{…JSON…}">…`. Older
+        //      Inertia-Vue and Inertia-React still emit this. Here
+        //      `data-page` IS the JSON, HTML-entity-encoded.
+        //
+        // Try the script-tag shape first; if the response uses it,
+        // the classic regex would also see a `data-page="app"` token
+        // and try to JSON-decode the literal string `"app"`.
         $content = self::readContent($response);
 
-        if ($content === null || ! str_contains($content, 'data-page=')) {
+        if ($content === null) {
             return null;
         }
 
-        if (preg_match('/\sdata-page="([^"]+)"/', $content, $match) !== 1) {
-            return null;
+        // Lookahead pair handles arbitrary attribute order on the
+        // `<script>` tag.
+        if (str_contains($content, 'type="application/json"')
+            && preg_match('#<script\b(?=[^>]*\bdata-page="app")(?=[^>]*\btype="application/json")[^>]*>(.+?)</script>#s', $content, $match) === 1) {
+            $component = self::componentFromJson(html_entity_decode($match[1]));
+
+            if ($component !== null) {
+                return $component;
+            }
         }
 
-        $decoded = json_decode(html_entity_decode($match[1]), true);
+        // Classic: only accept a value that looks like a JSON object
+        // (`{…}`). Avoids matching the script-tag form's
+        // `data-page="app"` attribute when both shapes coexist.
+        if (str_contains($content, 'data-page=')
+            && preg_match('/\sdata-page="(\{[^"]+\})"/', $content, $match) === 1) {
+            $component = self::componentFromJson(html_entity_decode($match[1]));
+
+            if ($component !== null) {
+                return $component;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Parses an Inertia page JSON blob and returns the `component`
+     * field if it's a non-empty string. Used by both the script-tag
+     * and the `data-page`-attribute paths so the success criteria are
+     * identical.
+     */
+    private static function componentFromJson(string $json): ?string
+    {
+        /** @var mixed $decoded */
+        $decoded = json_decode($json, true);
 
         if (is_array($decoded)
             && isset($decoded['component'])

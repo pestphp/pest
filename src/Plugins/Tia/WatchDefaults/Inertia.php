@@ -30,37 +30,39 @@ final readonly class Inertia implements WatchDefault
             ? $testPath.'/Browser'
             : $testPath;
 
-        return [
-            // Inertia page components (React / Vue / Svelte). Scoped to
-            // `$browserDir` only — a Vue/React edit cannot change the
-            // output of a server-side Inertia test (those assert on the
-            // component *name* returned by `Inertia::render()`, not its
-            // client-side implementation). Broad invalidation is only
-            // meaningful for tests that actually render the DOM. Precise
-            // per-component edges come from `InertiaEdges` at record
-            // time and replace this fallback when available.
-            'resources/js/Pages/**/*.vue' => [$browserDir],
-            'resources/js/Pages/**/*.tsx' => [$browserDir],
-            'resources/js/Pages/**/*.jsx' => [$browserDir],
-            'resources/js/Pages/**/*.svelte' => [$browserDir],
-            'resources/js/Pages/**/*.ts' => [$browserDir],
-            'resources/js/Pages/**/*.js' => [$browserDir],
+        // Inertia page components (React / Vue / Svelte). Scoped to
+        // `$browserDir` only — a Vue/React edit cannot change the
+        // output of a server-side Inertia test (those assert on the
+        // component *name* returned by `Inertia::render()`, not its
+        // client-side implementation). Broad invalidation is only
+        // meaningful for tests that actually render the DOM. Precise
+        // per-component edges come from `InertiaEdges` at record
+        // time and replace this fallback when available.
+        //
+        // Both `Pages/` (classic Inertia-Vue) and `pages/` (Laravel
+        // React starter kit, and other lowercase-by-default setups)
+        // are emitted — paths from git are case-sensitive on Linux,
+        // so a single casing would silently miss the other convention.
+        $patterns = [];
 
-            // Shared layouts / components consumed by pages.
-            'resources/js/Layouts/**/*.vue' => [$browserDir],
-            'resources/js/Layouts/**/*.tsx' => [$browserDir],
-            'resources/js/Layouts/**/*.ts' => [$browserDir],
-            'resources/js/Layouts/**/*.js' => [$browserDir],
-            'resources/js/Components/**/*.vue' => [$browserDir],
-            'resources/js/Components/**/*.tsx' => [$browserDir],
-            'resources/js/Components/**/*.ts' => [$browserDir],
-            'resources/js/Components/**/*.js' => [$browserDir],
+        foreach (['Pages', 'pages'] as $pages) {
+            foreach (['vue', 'tsx', 'jsx', 'svelte', 'ts', 'js'] as $ext) {
+                $patterns["resources/js/{$pages}/**/*.{$ext}"] = [$browserDir];
+            }
+        }
 
-            // SSR entry point.
-            'resources/js/ssr.js' => [$browserDir],
-            'resources/js/ssr.ts' => [$browserDir],
-            'resources/js/app.js' => [$browserDir],
-            'resources/js/app.ts' => [$browserDir],
-        ];
+        foreach (['Layouts', 'layouts', 'Components', 'components'] as $shared) {
+            foreach (['vue', 'tsx', 'ts', 'js'] as $ext) {
+                $patterns["resources/js/{$shared}/**/*.{$ext}"] = [$browserDir];
+            }
+        }
+
+        // SSR entry point.
+        $patterns['resources/js/ssr.js'] = [$browserDir];
+        $patterns['resources/js/ssr.ts'] = [$browserDir];
+        $patterns['resources/js/app.js'] = [$browserDir];
+        $patterns['resources/js/app.ts'] = [$browserDir];
+
+        return $patterns;
     }
 }

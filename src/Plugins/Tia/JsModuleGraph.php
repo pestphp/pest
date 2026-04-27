@@ -76,7 +76,22 @@ final class JsModuleGraph
      */
     public static function isApplicable(string $projectRoot): bool
     {
-        return self::hasViteConfig($projectRoot) && is_dir($projectRoot.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'js'.DIRECTORY_SEPARATOR.'Pages');
+        if (! self::hasViteConfig($projectRoot)) {
+            return false;
+        }
+
+        // Both the classic Inertia-Vue (`Pages/`) and the Laravel React
+        // starter kit (`pages/`) conventions are accepted — projects
+        // running on a case-sensitive filesystem (Linux CI) get
+        // exactly one of the two, and we shouldn't refuse to walk the
+        // graph based on which one it picks.
+        foreach (['Pages', 'pages'] as $dir) {
+            if (is_dir($projectRoot.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'js'.DIRECTORY_SEPARATOR.$dir)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -104,7 +119,21 @@ final class JsModuleGraph
             return null;
         }
 
-        $process = new Process([$nodeBinary, $helperPath, $projectRoot], $projectRoot);
+        // Tell the Node helper which casing this project uses for its
+        // pages directory. The helper defaults to `resources/js/Pages`;
+        // the Laravel React starter ships lowercase `resources/js/pages`,
+        // and on a case-sensitive filesystem the helper would otherwise
+        // walk a non-existent directory and emit an empty module graph.
+        $env = [];
+        foreach (['resources/js/Pages', 'resources/js/pages'] as $candidate) {
+            if (is_dir($projectRoot.DIRECTORY_SEPARATOR.$candidate)) {
+                $env['TIA_VITE_PAGES_DIR'] = $candidate;
+
+                break;
+            }
+        }
+
+        $process = new Process([$nodeBinary, $helperPath, $projectRoot], $projectRoot, $env);
         $process->setTimeout(self::NODE_TIMEOUT_SECONDS);
         $process->run();
 
