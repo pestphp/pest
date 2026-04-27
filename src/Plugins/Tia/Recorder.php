@@ -100,21 +100,19 @@ final class Recorder
             if (function_exists('pcov\\start')) {
                 $this->driver = 'pcov';
                 $this->driverAvailable = true;
-            } elseif (function_exists('xdebug_start_code_coverage')) {
-                // Xdebug is loaded. Probe whether coverage mode is active by
-                // attempting a start — it emits E_WARNING when the mode is off.
-                // We capture the warning via a temporary error handler.
-                $probeOk = true;
-                set_error_handler(static function () use (&$probeOk): bool {
-                    $probeOk = false;
+            } elseif (function_exists('xdebug_start_code_coverage') && function_exists('xdebug_info')) {
+                // Xdebug 3+ exposes the active mode set via `xdebug_info`,
+                // so we can ask directly instead of probing with a
+                // start/stop pair. The probe approach used to emit
+                // E_WARNING when coverage mode was off; with monitoring
+                // agents (Sentry, Bugsnag) hooked into the error
+                // handler stack that warning could be reported as a
+                // real error. `xdebug_info('mode')` is silent and
+                // returns the active modes as a list, so a presence
+                // check is enough.
+                $modes = \xdebug_info('mode');
 
-                    return true;
-                });
-                \xdebug_start_code_coverage();
-                restore_error_handler();
-
-                if ($probeOk) {
-                    \xdebug_stop_code_coverage(false);
+                if (is_array($modes) && in_array('coverage', $modes, true)) {
                     $this->driver = 'xdebug';
                     $this->driverAvailable = true;
                 }

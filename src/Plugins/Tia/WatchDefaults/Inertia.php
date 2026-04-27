@@ -43,12 +43,18 @@ final readonly class Inertia implements WatchDefault
             'resources/js/Pages/**/*.tsx' => [$browserDir],
             'resources/js/Pages/**/*.jsx' => [$browserDir],
             'resources/js/Pages/**/*.svelte' => [$browserDir],
+            'resources/js/Pages/**/*.ts' => [$browserDir],
+            'resources/js/Pages/**/*.js' => [$browserDir],
 
             // Shared layouts / components consumed by pages.
             'resources/js/Layouts/**/*.vue' => [$browserDir],
             'resources/js/Layouts/**/*.tsx' => [$browserDir],
+            'resources/js/Layouts/**/*.ts' => [$browserDir],
+            'resources/js/Layouts/**/*.js' => [$browserDir],
             'resources/js/Components/**/*.vue' => [$browserDir],
             'resources/js/Components/**/*.tsx' => [$browserDir],
+            'resources/js/Components/**/*.ts' => [$browserDir],
+            'resources/js/Components/**/*.js' => [$browserDir],
 
             // SSR entry point.
             'resources/js/ssr.js' => [$browserDir],

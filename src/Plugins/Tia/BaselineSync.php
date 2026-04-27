@@ -367,6 +367,15 @@ YAML;
             return $m[1];
         }
 
+        // SSH URL form: ssh://[user@]github.com[:port]/org/repo(.git).
+        // Some teams configure this explicitly to pin the SSH port; the
+        // colon-separated form above doesn't match. Mirrors the parser
+        // in `Storage::originIdentity` so the same remote produces the
+        // same project key for both storage and remote-fetch.
+        if (preg_match('#^ssh://(?:[^@/]+@)?github\.com(?::\d+)?/([\w.-]+/[\w.-]+?)(?:\.git)?/?$#i', $url, $m) === 1) {
+            return $m[1];
+        }
+
         return null;
     }
 

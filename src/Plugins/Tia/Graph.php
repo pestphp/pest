@@ -6,6 +6,7 @@ namespace Pest\Plugins\Tia;
 
 use Pest\Support\Container;
 use PHPUnit\Framework\TestStatus\TestStatus;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * File-level Test Impact Analysis graph.
@@ -319,7 +320,21 @@ final class Graph
         if ($newJsFiles !== []) {
             $freshMap = JsModuleGraph::buildStrict($this->projectRoot);
 
-            if ($freshMap !== null) {
+            if ($freshMap === null) {
+                // Vite resolver was unavailable (Node missing, cold-start
+                // timeout, vite.config refused to load). Falling back to
+                // the broad watch pattern is the correct call, but
+                // doing so silently can make a slow replay feel
+                // inexplicable — surface a single line so the user
+                // knows precision was downgraded for these files.
+                $output = Container::getInstance()->get(OutputInterface::class);
+                if ($output instanceof OutputInterface) {
+                    $output->writeln(sprintf(
+                        '  <fg=yellow>TIA</> Vite resolver unavailable — falling back to watch pattern for %d new JS file(s).',
+                        count($newJsFiles),
+                    ));
+                }
+            } else {
                 foreach ($newJsFiles as $rel) {
                     $pages = $freshMap[$rel] ?? [];
 

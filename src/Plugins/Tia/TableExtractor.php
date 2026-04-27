@@ -105,21 +105,27 @@ final class TableExtractor
     }
 
     /**
-     * @return list<string> Table names referenced by `Schema::` calls
-     *                      OR raw DDL statements in the given migration
+     * @return list<string> Table names referenced by `Schema::` calls,
+     *                      raw DDL, or DML inside the given migration
      *                      file contents. Empty when nothing matches —
      *                      callers treat that as "fall back to the
      *                      broad watch pattern".
      *
-     * Two passes:
+     * Three passes:
      *  1. `Schema::create|table|drop|dropIfExists|dropColumn[s]|rename`
      *     captures the conventional Laravel migration shape.
      *  2. Raw DDL fallback: scans for `CREATE / ALTER / DROP /
      *     TRUNCATE / RENAME TABLE <name>` patterns inside string
      *     literals (i.e. `DB::statement('CREATE TABLE …')`,
-     *     `DB::unprepared('ALTER TABLE …')`). False positives possible
-     *     if the same syntax appears in a comment or unrelated string,
-     *     but over-attribution is correctness-safe.
+     *     `DB::unprepared('ALTER TABLE …')`).
+     *  3. DML inside migration bodies — `INSERT INTO`, `UPDATE … SET`,
+     *     `DELETE FROM`, and Laravel's fluent `DB::table('foo')`.
+     *     Catches the seeded-lookup-table case where a migration
+     *     populates rows that tests later read.
+     *
+     * False positives possible when the same syntax appears in a
+     * comment or unrelated string, but over-attribution is
+     * correctness-safe.
      */
     public static function fromMigrationSource(string $php): array
     {
@@ -151,6 +157,33 @@ final class TableExtractor
         if (preg_match_all($ddlPattern, $php, $matches) !== false) {
             foreach ($matches[1] as $primary) {
                 $lower = strtolower($primary);
+                if (! self::isSchemaMeta($lower)) {
+                    $tables[$lower] = true;
+                }
+            }
+        }
+
+        // Pass 3: DML inside migration bodies. Migrations that seed
+        // lookup tables via `DB::statement('INSERT INTO roles …')`,
+        // `DB::table('statuses')->insert(…)`, `UPDATE foo SET …`, or
+        // `DELETE FROM bar` are common in Laravel. Without picking
+        // these up, an edit to the seed payload would route through
+        // only the schema'd tables and silently skip every test that
+        // reads from the populated table. Fluent-builder calls
+        // (`DB::table('x')`) and raw SQL strings are both covered.
+        $dmlPatterns = [
+            '/INSERT\s+(?:IGNORE\s+)?INTO\s+["`\[]?(\w+)["`\]]?/i',
+            '/UPDATE\s+["`\[]?(\w+)["`\]]?\s+SET\b/i',
+            '/DELETE\s+FROM\s+["`\[]?(\w+)["`\]]?/i',
+            '/DB::table\(\s*[\'"]([^\'"]+)[\'"]\s*\)/',
+        ];
+
+        foreach ($dmlPatterns as $pattern) {
+            if (preg_match_all($pattern, $php, $matches) === false) {
+                continue;
+            }
+            foreach ($matches[1] as $name) {
+                $lower = strtolower($name);
                 if (! self::isSchemaMeta($lower)) {
                     $tables[$lower] = true;
                 }
