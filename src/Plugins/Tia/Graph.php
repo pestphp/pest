@@ -426,6 +426,39 @@ final class Graph
             }
         }
 
+        // Unknown Blade files can still be routed precisely when another
+        // recorded Blade view statically references them (`@include`,
+        // `@extends`, `<x-alert />`, etc.). Walk the source-level Blade graph
+        // upward to rendered ancestors and invalidate tests that rendered those
+        // ancestors instead of broadcasting every Blade edit to the whole suite.
+        $staticallyHandledBlade = [];
+        foreach ($nonMigrationPaths as $rel) {
+            if (isset($this->fileIds[$rel])) {
+                continue;
+            }
+            if (! $this->isBladePath($rel)) {
+                continue;
+            }
+            if (! is_file($this->projectRoot.'/'.$rel)) {
+                continue;
+            }
+
+            $bladeAffected = $this->affectedByStaticBladeUsage($rel);
+
+            if ($bladeAffected !== []) {
+                foreach ($bladeAffected as $testFile) {
+                    $affectedSet[$testFile] = true;
+                }
+
+                $staticallyHandledBlade[$rel] = true;
+            } elseif ($this->isBladeComponentPath($rel)) {
+                // Anonymous Blade components are leaf templates. If nothing in
+                // the project statically renders the component, treat it like an
+                // orphan rather than running the full suite.
+                $staticallyHandledBlade[$rel] = true;
+            }
+        }
+
         // 2. Watch-pattern lookup — fallback for files we don't have
         // precise edges for. When a file is already in `$fileIds` step
         // 1 resolved it surgically; broadcasting it again through the
@@ -448,6 +481,9 @@ final class Graph
                 continue;
             }
             if (isset($sharedFilesResolved[$rel])) {
+                continue;
+            }
+            if (isset($staticallyHandledBlade[$rel])) {
                 continue;
             }
             if (! isset($this->fileIds[$rel])) {
@@ -852,6 +888,187 @@ final class Graph
         }
 
         return false;
+    }
+
+    private function isBladePath(string $rel): bool
+    {
+        return str_starts_with($rel, 'resources/views/') && str_ends_with($rel, '.blade.php');
+    }
+
+    private function isBladeComponentPath(string $rel): bool
+    {
+        return str_starts_with($rel, 'resources/views/components/') && str_ends_with($rel, '.blade.php');
+    }
+
+    /**
+     * @return list<string> Project-relative test files.
+     */
+    private function affectedByStaticBladeUsage(string $changedBlade): array
+    {
+        $ancestors = $this->bladeAncestorsFor($changedBlade);
+
+        if ($ancestors === []) {
+            return [];
+        }
+
+        $ancestorIds = [];
+        foreach ($ancestors as $ancestor) {
+            if (isset($this->fileIds[$ancestor])) {
+                $ancestorIds[$this->fileIds[$ancestor]] = true;
+            }
+        }
+
+        if ($ancestorIds === []) {
+            return [];
+        }
+
+        $affected = [];
+        foreach ($this->edges as $testFile => $ids) {
+            foreach ($ids as $id) {
+                if (isset($ancestorIds[$id])) {
+                    $affected[$testFile] = true;
+
+                    break;
+                }
+            }
+        }
+
+        return array_keys($affected);
+    }
+
+    /**
+     * @return list<string> Project-relative Blade files that statically depend on $changedBlade, directly or transitively.
+     */
+    private function bladeAncestorsFor(string $changedBlade): array
+    {
+        $allBladeFiles = $this->allBladeFiles();
+
+        if ($allBladeFiles === []) {
+            return [];
+        }
+
+        $targets = [$changedBlade => true];
+        $ancestors = [];
+        $changed = true;
+
+        while ($changed) {
+            $changed = false;
+
+            foreach ($allBladeFiles as $candidate) {
+                if (isset($targets[$candidate])) {
+                    continue;
+                }
+                if (isset($ancestors[$candidate])) {
+                    continue;
+                }
+
+                $source = @file_get_contents($this->projectRoot.'/'.$candidate);
+                if ($source === false) {
+                    continue;
+                }
+
+                foreach (array_keys($targets) as $target) {
+                    if ($this->bladeSourceReferences($source, $target)) {
+                        $ancestors[$candidate] = true;
+                        $targets[$candidate] = true;
+                        $changed = true;
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        return array_keys($ancestors);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function allBladeFiles(): array
+    {
+        $views = $this->projectRoot.'/resources/views';
+
+        if (! is_dir($views)) {
+            return [];
+        }
+
+        $files = [];
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($views, \FilesystemIterator::SKIP_DOTS),
+        );
+
+        foreach ($iterator as $file) {
+            if (! $file instanceof \SplFileInfo || ! $file->isFile()) {
+                continue;
+            }
+
+            $path = $file->getPathname();
+            if (! str_ends_with($path, '.blade.php')) {
+                continue;
+            }
+
+            $files[] = str_replace(DIRECTORY_SEPARATOR, '/', substr($path, strlen($this->projectRoot) + 1));
+        }
+
+        sort($files);
+
+        return $files;
+    }
+
+    private function bladeSourceReferences(string $source, string $targetBlade): bool
+    {
+        $view = $this->viewNameForBlade($targetBlade);
+
+        if ($view !== null) {
+            $quoted = preg_quote($view, '#');
+
+            if (preg_match('#@(include|includeIf|includeWhen|includeUnless|extends|component|each)\s*\([^)]*[\'\"]'.$quoted.'[\'\"]#', $source) === 1) {
+                return true;
+            }
+
+            if (preg_match('#\b(view|View::make)\s*\(\s*[\'\"]'.$quoted.'[\'\"]#', $source) === 1) {
+                return true;
+            }
+        }
+
+        foreach ($this->componentNamesForBlade($targetBlade) as $component) {
+            $quoted = preg_quote($component, '#');
+
+            if (preg_match('#<x-'.$quoted.'(?=[\s>/.:])#i', $source) === 1) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function viewNameForBlade(string $rel): ?string
+    {
+        if (! $this->isBladePath($rel)) {
+            return null;
+        }
+
+        $tail = substr($rel, strlen('resources/views/'));
+        $tail = substr($tail, 0, -strlen('.blade.php'));
+
+        return str_replace('/', '.', $tail);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function componentNamesForBlade(string $rel): array
+    {
+        if (! $this->isBladeComponentPath($rel)) {
+            return [];
+        }
+
+        $tail = substr($rel, strlen('resources/views/components/'));
+        $tail = substr($tail, 0, -strlen('.blade.php'));
+        $name = str_replace('/', '.', $tail);
+
+        return $name === '' ? [] : [$name, str_replace('_', '-', $name)];
     }
 
     /**
