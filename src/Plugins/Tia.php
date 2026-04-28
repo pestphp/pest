@@ -242,6 +242,14 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private bool $forceRefetch = false;
 
     /**
+     * True once structural-drift recovery has already tried the remote
+     * baseline during this process. Prevents the later "no local graph" path
+     * from fetching the same stale baseline again and printing duplicate drift
+     * / rebuild messages.
+     */
+    private bool $baselineFetchAttemptedForDrift = false;
+
+    /**
      * True when `--fresh` is in the current argv — record-mode paths
      * use it to gate `Graph::pruneMissingTests()`. On a partial record
      * (default `--tia` after a branch switch, etc.) the working tree may
@@ -829,7 +837,10 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         // to pull a team-shared baseline so fresh checkouts (new devs, CI
         // containers) don't pay the full record cost. If the pull succeeds
         // the graph is re-read and reconciled against the local env.
-        if (! $graph instanceof Graph && ! $forceRebuild && $this->baselineSync->fetchIfAvailable($projectRoot, $this->forceRefetch)) {
+        if (! $graph instanceof Graph
+            && ! $forceRebuild
+            && ! $this->baselineFetchAttemptedForDrift
+            && $this->baselineSync->fetchIfAvailable($projectRoot, $this->forceRefetch)) {
             $graph = $this->loadGraph($projectRoot);
             if ($graph instanceof Graph) {
                 $graph = $this->reconcileFingerprint($graph, $fingerprint);
@@ -1506,8 +1517,9 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private function tryRemoteBaselineForDrift(array $current): ?Graph
     {
         $projectRoot = TestSuite::getInstance()->rootPath;
+        $this->baselineFetchAttemptedForDrift = true;
 
-        if (! $this->baselineSync->fetchIfAvailable($projectRoot, false)) {
+        if (! $this->baselineSync->fetchIfAvailable($projectRoot, $this->forceRefetch)) {
             return null;
         }
 
