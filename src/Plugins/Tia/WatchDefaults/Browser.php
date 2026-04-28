@@ -12,9 +12,8 @@ use Pest\TestSuite;
 /**
  * Watch patterns for frontend assets that affect browser tests.
  *
- * Uses `BrowserTestIdentifier` from pest-plugin-browser (if installed) to
- * auto-discover directories containing browser tests. Falls back to the
- * `tests/Browser` convention when the plugin is absent.
+ * Uses `BrowserTestIdentifier` from pest-plugin-browser to auto-discover tests
+ * using `visit()`. Also keeps the `tests/Browser` convention when present.
  *
  * @internal
  */
@@ -31,7 +30,7 @@ final readonly class Browser implements WatchDefault
 
     public function defaults(string $projectRoot, string $testPath): array
     {
-        $browserDirs = $this->detectBrowserTestDirs($projectRoot, $testPath);
+        $browserTargets = self::detectBrowserTestTargets($projectRoot, $testPath);
 
         $globs = [
             'resources/js/**/*.js',
@@ -51,7 +50,7 @@ final readonly class Browser implements WatchDefault
         $patterns = [];
 
         foreach ($globs as $glob) {
-            $patterns[$glob] = $browserDirs;
+            $patterns[$glob] = $browserTargets;
         }
 
         return $patterns;
@@ -60,19 +59,19 @@ final readonly class Browser implements WatchDefault
     /**
      * @return array<int, string>
      */
-    private function detectBrowserTestDirs(string $projectRoot, string $testPath): array
+    public static function detectBrowserTestTargets(string $projectRoot, string $testPath): array
     {
-        $dirs = [];
+        $targets = [];
 
         $candidate = $testPath.'/Browser';
 
         if (is_dir($projectRoot.DIRECTORY_SEPARATOR.$candidate)) {
-            $dirs[] = $candidate;
+            $targets[] = $candidate;
         }
 
         // Scan TestRepository via BrowserTestIdentifier if pest-plugin-browser
-        // is installed to find tests using `visit()` outside the conventional
-        // Browser/ folder.
+        // is installed to find exact tests using `visit()` outside the
+        // conventional Browser/ folder.
         if (class_exists(BrowserTestIdentifier::class)) {
             $repo = TestSuite::getInstance()->tests;
 
@@ -85,10 +84,10 @@ final readonly class Browser implements WatchDefault
 
                 foreach ($factory->methods as $method) {
                     if (BrowserTestIdentifier::isBrowserTest($method)) {
-                        $rel = $this->fileRelative($projectRoot, $filename);
+                        $rel = self::fileRelative($projectRoot, $filename);
 
                         if ($rel !== null) {
-                            $dirs[] = dirname($rel);
+                            $targets[] = $rel;
                         }
 
                         break;
@@ -97,10 +96,10 @@ final readonly class Browser implements WatchDefault
             }
         }
 
-        return array_values(array_unique($dirs === [] ? [$testPath] : $dirs));
+        return array_values(array_unique($targets));
     }
 
-    private function fileRelative(string $projectRoot, string $path): ?string
+    private static function fileRelative(string $projectRoot, string $path): ?string
     {
         $real = @realpath($path);
 

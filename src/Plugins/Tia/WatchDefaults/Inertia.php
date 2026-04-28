@@ -26,12 +26,10 @@ final readonly class Inertia implements WatchDefault
 
     public function defaults(string $projectRoot, string $testPath): array
     {
-        $browserDir = is_dir($projectRoot.DIRECTORY_SEPARATOR.$testPath.'/Browser')
-            ? $testPath.'/Browser'
-            : $testPath;
+        $browserTargets = Browser::detectBrowserTestTargets($projectRoot, $testPath);
 
         // Inertia page components (React / Vue / Svelte). Scoped to
-        // `$browserDir` only — a Vue/React edit cannot change the
+        // browser tests only — a Vue/React edit cannot change the
         // output of a server-side Inertia test (those assert on the
         // component *name* returned by `Inertia::render()`, not its
         // client-side implementation). Broad invalidation is only
@@ -47,21 +45,21 @@ final readonly class Inertia implements WatchDefault
 
         foreach (['Pages', 'pages'] as $pages) {
             foreach (['vue', 'tsx', 'jsx', 'svelte', 'ts', 'js'] as $ext) {
-                $patterns["resources/js/{$pages}/**/*.{$ext}"] = [$browserDir];
+                $patterns["resources/js/{$pages}/**/*.{$ext}"] = $browserTargets;
             }
         }
 
         foreach (['Layouts', 'layouts', 'Components', 'components'] as $shared) {
             foreach (['vue', 'tsx', 'ts', 'js'] as $ext) {
-                $patterns["resources/js/{$shared}/**/*.{$ext}"] = [$browserDir];
+                $patterns["resources/js/{$shared}/**/*.{$ext}"] = $browserTargets;
             }
         }
 
         // SSR entry point.
-        $patterns['resources/js/ssr.js'] = [$browserDir];
-        $patterns['resources/js/ssr.ts'] = [$browserDir];
-        $patterns['resources/js/app.js'] = [$browserDir];
-        $patterns['resources/js/app.ts'] = [$browserDir];
+        $patterns['resources/js/ssr.js'] = $browserTargets;
+        $patterns['resources/js/ssr.ts'] = $browserTargets;
+        $patterns['resources/js/app.js'] = $browserTargets;
+        $patterns['resources/js/app.ts'] = $browserTargets;
 
         return $patterns;
     }

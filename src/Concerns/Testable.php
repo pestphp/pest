@@ -8,6 +8,7 @@ use Closure;
 use Pest\Exceptions\DatasetArgumentsMismatch;
 use Pest\Panic;
 use Pest\Plugins\Tia;
+use Pest\Plugins\Tia\AutoloadEdges;
 use Pest\Plugins\Tia\BladeEdges;
 use Pest\Plugins\Tia\InertiaEdges;
 use Pest\Plugins\Tia\Recorder;
@@ -317,6 +318,16 @@ trait Testable
             throw new AssertionFailedError($cached->message() ?: 'Cached failure');
         }
 
+        $recorder = Container::getInstance()->get(Recorder::class);
+
+        if ($recorder instanceof Recorder && $recorder->isActive()) {
+            $recorder->beginTest($this::class, $this->name(), self::$__filename);
+        }
+
+        $autoloadBeforeSetUp = $recorder instanceof Recorder && $recorder->isActive()
+            ? AutoloadEdges::snapshot()
+            : [];
+
         parent::setUp();
 
         // TIA blade-edge + table-edge recording (Laravel-only). Runs
@@ -325,7 +336,6 @@ trait Testable
         // idempotent against the current app instance so the 774-test
         // suite doesn't stack 774 composers / listeners when Laravel
         // keeps the same app across tests.
-        $recorder = Container::getInstance()->get(Recorder::class);
         if ($recorder instanceof Recorder) {
             BladeEdges::arm($recorder);
             TableTracker::arm($recorder);
@@ -339,6 +349,18 @@ trait Testable
         }
 
         $this->__callClosure($beforeEach, $arguments);
+
+        if ($recorder instanceof Recorder && $recorder->isActive() && $autoloadBeforeSetUp !== []) {
+            $recorder->linkSourcesForTest(
+                self::$__filename,
+                AutoloadEdges::newProjectFiles(
+                    $autoloadBeforeSetUp,
+                    AutoloadEdges::snapshot(),
+                    TestSuite::getInstance()->rootPath,
+                    self::$__filename,
+                ),
+            );
+        }
     }
 
     /**

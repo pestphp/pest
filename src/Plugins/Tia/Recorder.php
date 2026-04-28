@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
+use Pest\TestSuite;
 use ReflectionClass;
 
 /**
@@ -108,6 +109,20 @@ final class Recorder
      */
     private array $classDependencyCache = [];
 
+    /**
+     * Cached test-file import resolution.
+     *
+     * @var array<string, list<string>>
+     */
+    private array $testImportFileCache = [];
+
+    /**
+     * Included-file snapshot captured at the start of the current test.
+     *
+     * @var array<string, true>
+     */
+    private array $includedFilesAtTestStart = [];
+
     private bool $active = false;
 
     private bool $driverChecked = false;
@@ -169,6 +184,10 @@ final class Recorder
             return;
         }
 
+        if ($this->currentTestFile !== null) {
+            return;
+        }
+
         $file = $this->resolveTestFile($className, $fallbackFile);
 
         if ($file === null) {
@@ -176,6 +195,7 @@ final class Recorder
         }
 
         $this->currentTestFile = $file;
+        $this->includedFilesAtTestStart = AutoloadEdges::snapshot();
 
         if ($this->classUsesDatabase($className)) {
             $this->perTestUsesDatabase[$file] = true;
@@ -193,6 +213,7 @@ final class Recorder
         // the explicit walk for ancestors whose own bodies might be
         // empty.
         $this->linkAncestorFiles($className);
+        $this->linkImportedFiles($file);
 
         if ($this->driver === 'pcov') {
             \pcov\clear();
@@ -228,6 +249,15 @@ final class Recorder
             $this->perTestFiles[$this->currentTestFile][$sourceFile] = true;
         }
 
+        foreach (AutoloadEdges::newProjectFiles(
+            $this->includedFilesAtTestStart,
+            AutoloadEdges::snapshot(),
+            TestSuite::getInstance()->rootPath,
+            $this->currentTestFile,
+        ) as $sourceFile) {
+            $this->perTestFiles[$this->currentTestFile][$sourceFile] = true;
+        }
+
         // Walk each covered class's interfaces / traits / parent chain
         // and link those files explicitly. Interface declarations have
         // no executable bytecode, so coverage drivers never emit lines
@@ -239,6 +269,7 @@ final class Recorder
         $this->linkSourceDependencies(array_keys($data));
 
         $this->currentTestFile = null;
+        $this->includedFilesAtTestStart = [];
     }
 
     /**
@@ -265,6 +296,31 @@ final class Recorder
         }
 
         $this->perTestFiles[$this->currentTestFile][$sourceFile] = true;
+    }
+
+    /**
+     * Records source dependencies for a specific test file. Used for edges
+     * captured before `Prepared` has opened the normal per-test recorder window.
+     *
+     * @param  iterable<int, string>  $sourceFiles
+     */
+    public function linkSourcesForTest(string $testFile, iterable $sourceFiles): void
+    {
+        if (! $this->active) {
+            return;
+        }
+
+        if ($testFile === '') {
+            return;
+        }
+
+        foreach ($sourceFiles as $sourceFile) {
+            if ($sourceFile === '') {
+                continue;
+            }
+
+            $this->perTestFiles[$testFile][$sourceFile] = true;
+        }
     }
 
     /**
@@ -466,6 +522,135 @@ final class Recorder
 
             $parent = $parent->getParentClass();
         }
+    }
+
+    /**
+     * Links project-local classes imported by the test file. This catches
+     * declaration-only support classes / enums / interfaces that may never emit
+     * executable coverage lines, and avoids relying on global autoload timing.
+     */
+    private function linkImportedFiles(string $testFile): void
+    {
+        if ($this->currentTestFile === null) {
+            return;
+        }
+
+        foreach ($this->importedFilesFor($testFile) as $file) {
+            $this->perTestFiles[$this->currentTestFile][$file] = true;
+        }
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function importedFilesFor(string $testFile): array
+    {
+        if (array_key_exists($testFile, $this->testImportFileCache)) {
+            return $this->testImportFileCache[$testFile];
+        }
+
+        $source = @file_get_contents($testFile);
+        if ($source === false) {
+            return $this->testImportFileCache[$testFile] = [];
+        }
+
+        $files = [];
+
+        foreach ($this->importedClassNames($source) as $className) {
+            $file = $this->findAutoloadFile($className);
+
+            if ($file !== null && ! str_contains($file, DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR)) {
+                $files[$file] = true;
+            }
+        }
+
+        return $this->testImportFileCache[$testFile] = array_keys($files);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function importedClassNames(string $source): array
+    {
+        preg_match_all('/^use\s+(?!function\s|const\s)([^;]+);/mi', $source, $matches);
+
+        $classes = [];
+
+        foreach ($matches[1] as $import) {
+            $import = trim($import);
+
+            if ($import === '') {
+                continue;
+            }
+
+            $open = strpos($import, '{');
+            $close = strrpos($import, '}');
+
+            if ($open !== false && $close !== false && $close > $open) {
+                $prefix = trim(trim(substr($import, 0, $open)), '\\');
+                $items = explode(',', substr($import, $open + 1, $close - $open - 1));
+
+                foreach ($items as $item) {
+                    $class = $this->normaliseImportedClass($prefix.'\\'.trim($item));
+
+                    if ($class !== null) {
+                        $classes[$class] = true;
+                    }
+                }
+
+                continue;
+            }
+
+            $class = $this->normaliseImportedClass($import);
+
+            if ($class !== null) {
+                $classes[$class] = true;
+            }
+        }
+
+        return array_keys($classes);
+    }
+
+    private function normaliseImportedClass(string $import): ?string
+    {
+        $import = trim(trim($import), '\\');
+
+        if ($import === '') {
+            return null;
+        }
+
+        $parts = preg_split('/\s+as\s+/i', $import);
+        if ($parts === false || $parts === []) {
+            return null;
+        }
+
+        $class = trim(trim($parts[0]), '\\');
+
+        return $class === '' ? null : $class;
+    }
+
+    private function findAutoloadFile(string $className): ?string
+    {
+        foreach (spl_autoload_functions() as $loader) {
+            if (! is_array($loader) || ! isset($loader[0]) || ! is_object($loader[0])) {
+                continue;
+            }
+
+            if (! method_exists($loader[0], 'findFile')) {
+                continue;
+            }
+
+            /** @var mixed $file */
+            $file = $loader[0]->findFile($className);
+
+            if (is_string($file) && $file !== '') {
+                $real = @realpath($file);
+
+                return $real === false ? $file : $real;
+            }
+        }
+
+        return null;
     }
 
     /**

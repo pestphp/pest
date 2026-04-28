@@ -27,10 +27,6 @@ final readonly class Laravel implements WatchDefault
 
     public function defaults(string $projectRoot, string $testPath): array
     {
-        $featurePath = is_dir($projectRoot.DIRECTORY_SEPARATOR.$testPath.'/Feature')
-            ? $testPath.'/Feature'
-            : $testPath;
-
         return [
             // Config — loaded during app boot (setUp), invisible to coverage.
             // Affects both Feature and Unit: Pest.php commonly binds fakes
@@ -39,8 +35,8 @@ final readonly class Laravel implements WatchDefault
             'config/**/*.php' => [$testPath],
 
             // Routes — loaded during boot. HTTP/Feature tests depend on them.
-            'routes/*.php' => [$featurePath],
-            'routes/**/*.php' => [$featurePath],
+            'routes/*.php' => [$testPath],
+            'routes/**/*.php' => [$testPath],
 
             // Service providers / bootstrap — loaded during boot, affect
             // bindings, middleware, event listeners, scheduled tasks.
@@ -59,27 +55,27 @@ final readonly class Laravel implements WatchDefault
             'database/factories/**/*.php' => [$testPath],
 
             // Blade templates — compiled to cache, source file not executed.
-            'resources/views/**/*.blade.php' => [$featurePath],
+            'resources/views/**/*.blade.php' => [$testPath],
             // Email templates are nested under views/email or views/emails
             // by convention and power mailable tests that render markup.
-            'resources/views/email/**/*.blade.php' => [$featurePath],
-            'resources/views/emails/**/*.blade.php' => [$featurePath],
+            'resources/views/email/**/*.blade.php' => [$testPath],
+            'resources/views/emails/**/*.blade.php' => [$testPath],
 
             // Translations — JSON translations read via file_get_contents,
             // PHP translations loaded via include (but during boot).
-            'lang/**/*.php' => [$featurePath],
-            'lang/**/*.json' => [$featurePath],
-            'resources/lang/**/*.php' => [$featurePath],
-            'resources/lang/**/*.json' => [$featurePath],
+            'lang/**/*.php' => [$testPath],
+            'lang/**/*.json' => [$testPath],
+            'resources/lang/**/*.php' => [$testPath],
+            'resources/lang/**/*.json' => [$testPath],
 
             // Build tool config — affects compiled assets consumed by
             // browser and Inertia tests.
-            'vite.config.js' => [$featurePath],
-            'vite.config.ts' => [$featurePath],
-            'webpack.mix.js' => [$featurePath],
-            'tailwind.config.js' => [$featurePath],
-            'tailwind.config.ts' => [$featurePath],
-            'postcss.config.js' => [$featurePath],
+            'vite.config.js' => [$testPath],
+            'vite.config.ts' => [$testPath],
+            'webpack.mix.js' => [$testPath],
+            'tailwind.config.js' => [$testPath],
+            'tailwind.config.ts' => [$testPath],
+            'postcss.config.js' => [$testPath],
         ];
     }
 }

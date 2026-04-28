@@ -8,12 +8,13 @@ use Pest\Plugins\Tia\WatchDefaults\WatchDefault;
 use Pest\TestSuite;
 
 /**
- * Maps non-PHP file globs to the test directories they should invalidate.
+ * Maps non-PHP file globs to the tests they should invalidate.
  *
  * Coverage drivers only see `.php` files. Frontend assets, config files,
  * Blade templates, routes and environment files are invisible to the graph.
  * Watch patterns bridge the gap: when a changed file matches a glob, every
- * test under the associated directory is marked as affected.
+ * test under the associated directory (or the exact associated test file) is
+ * marked as affected.
  *
  * Defaults are assembled dynamically from the `WatchDefaults/` registry —
  * each implementation probes the current project and contributes patterns
@@ -38,7 +39,7 @@ final class WatchPatterns
     ];
 
     /**
-     * @var array<string, array<int, string>> glob → list of project-relative test dirs
+     * @var array<string, array<int, string>> glob → list of project-relative test dirs/files
      */
     private array $patterns = [];
 
@@ -71,7 +72,7 @@ final class WatchPatterns
      * Adds user-defined patterns. Merges with existing entries so a single
      * glob can map to multiple directories.
      *
-     * @param  array<string, string>  $patterns  glob → project-relative test dir
+     * @param  array<string, string>  $patterns  glob → project-relative test dir/file
      */
     public function add(array $patterns): void
     {
@@ -83,12 +84,12 @@ final class WatchPatterns
     }
 
     /**
-     * Returns all test directories whose watch patterns match at least one of
+     * Returns all test targets whose watch patterns match at least one of
      * the given changed files.
      *
      * @param  string  $projectRoot  Absolute path.
      * @param  array<int, string>  $changedFiles  Project-relative paths.
-     * @return array<int, string> Project-relative test directories.
+     * @return array<int, string> Project-relative test dirs/files.
      */
     public function matchedDirectories(string $projectRoot, array $changedFiles): array
     {
@@ -112,10 +113,10 @@ final class WatchPatterns
     }
 
     /**
-     * Given the affected directories, returns every test file in the graph
-     * that lives under one of those directories.
+     * Given the affected targets, returns every test file in the graph that
+     * either matches an exact file target or lives under a directory target.
      *
-     * @param  array<int, string>  $directories  Project-relative dirs.
+     * @param  array<int, string>  $directories  Project-relative dirs/files.
      * @param  array<int, string>  $allTestFiles  Project-relative test files from graph.
      * @return array<int, string>
      */
@@ -128,8 +129,14 @@ final class WatchPatterns
         $affected = [];
 
         foreach ($allTestFiles as $testFile) {
-            foreach ($directories as $dir) {
-                $prefix = rtrim($dir, '/').'/';
+            foreach ($directories as $target) {
+                if ($testFile === $target) {
+                    $affected[] = $testFile;
+
+                    break;
+                }
+
+                $prefix = rtrim($target, '/').'/';
 
                 if (str_starts_with($testFile, $prefix)) {
                     $affected[] = $testFile;

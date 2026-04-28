@@ -387,11 +387,28 @@ final class Graph
         foreach ($nonMigrationPaths as $rel) {
             if (isset($this->fileIds[$rel])) {
                 $changedIds[$this->fileIds[$rel]] = true;
-            } elseif (str_ends_with($rel, '.php') && ! str_starts_with($rel, 'tests/')) {
+
+                continue;
+            }
+
+            if (str_ends_with($rel, '.php') && ! str_starts_with($rel, 'tests/')) {
+                $absolute = $this->projectRoot.'/'.$rel;
+
+                if (! is_file($absolute)) {
+                    // Deleted source file unknown to the graph — can't affect
+                    // any test because no edge ever pointed to it.
+                    continue;
+                }
+
                 // Source PHP file unknown to the graph — might be a new file
                 // that only exists on this branch (graph inherited from main).
-                // Track its directory for the sibling heuristic (step 3).
-                $unknownSourceDirs[dirname($rel)] = true;
+                // Only use the sibling heuristic for files that commonly
+                // participate in framework discovery / bootstrap. Ordinary new
+                // classes, enums, DTOs, services, etc. should not re-run sibling
+                // tests just because they live in the same directory.
+                if ($this->usesSiblingHeuristicForUnknownPhp($rel)) {
+                    $unknownSourceDirs[dirname($rel)] = true;
+                }
             }
         }
 
@@ -434,6 +451,12 @@ final class Graph
                 continue;
             }
             if (! isset($this->fileIds[$rel])) {
+                if (! is_file($this->projectRoot.'/'.$rel)) {
+                    // Deleted file unknown to the graph — no edge ever
+                    // pointed to it, so it can't affect any test.
+                    continue;
+                }
+
                 $unknownToGraph[] = $rel;
             }
         }
@@ -455,10 +478,11 @@ final class Graph
         // whose graph was inherited from another branch (e.g. main). In the
         // latter case the graph simply never saw the file.
         //
-        // To avoid silent misses: find tests that already cover ANY file in
-        // the same directory. If `app/Models/OrderItem.php` is unknown but
-        // `app/Models/Order.php` is covered by `OrderTest`, run `OrderTest`
-        // — it likely exercises sibling files in the same module.
+        // To avoid silent misses for framework-discovered files: find tests
+        // that already cover ANY file in the same directory. If
+        // `app/Listeners/SendWelcomeEmail.php` is unknown but neighbouring
+        // listeners are covered by a mail-flow test, run that test — it likely
+        // exercises the same discovery surface.
         //
         // This over-runs slightly (sibling may be unrelated) but never
         // under-runs. And once the test executes, its coverage captures the
@@ -799,6 +823,35 @@ final class Graph
     private function isMigrationPath(string $rel): bool
     {
         return str_starts_with($rel, 'database/migrations/') && str_ends_with($rel, '.php');
+    }
+
+    /**
+     * Unknown PHP files have no historical edge yet. Keep sibling fan-out only
+     * for framework-discovered / boot-loaded conventions where adding a file can
+     * change behaviour without another source file changing too.
+     */
+    private function usesSiblingHeuristicForUnknownPhp(string $rel): bool
+    {
+        static $prefixes = [
+            'app/Providers/',
+            'app/Listeners/',
+            'app/Events/',
+            'app/Observers/',
+            'app/Policies/',
+            'app/Console/Commands/',
+            'app/Mail/',
+            'app/Notifications/',
+            'database/factories/',
+            'database/seeders/',
+        ];
+
+        foreach ($prefixes as $prefix) {
+            if (str_starts_with($rel, $prefix)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
