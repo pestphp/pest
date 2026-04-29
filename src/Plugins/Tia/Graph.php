@@ -383,8 +383,13 @@ final class Graph
         // coverage edges from invalidating the whole DB suite.
         $changedIds = [];
         $unknownSourceDirs = [];
+        $sourcePhpChanged = false;
 
         foreach ($nonMigrationPaths as $rel) {
+            if ($this->isProjectSourcePhp($rel)) {
+                $sourcePhpChanged = true;
+            }
+
             if (isset($this->fileIds[$rel])) {
                 $changedIds[$this->fileIds[$rel]] = true;
 
@@ -408,6 +413,18 @@ final class Graph
                 // tests just because they live in the same directory.
                 if ($this->usesSiblingHeuristicForUnknownPhp($rel)) {
                     $unknownSourceDirs[dirname($rel)] = true;
+                }
+            }
+        }
+
+        // Architecture tests inspect source structure by namespace / path rather
+        // than by executing the inspected files. A new enum/class can therefore
+        // fail an Arch expectation without ever producing a coverage edge. Keep
+        // this fallback narrow: only known Arch test files run, not the suite.
+        if ($sourcePhpChanged) {
+            foreach (array_keys($this->edges) as $testFile) {
+                if ($this->isArchTestFile($testFile)) {
+                    $affectedSet[$testFile] = true;
                 }
             }
         }
@@ -888,6 +905,21 @@ final class Graph
         }
 
         return false;
+    }
+
+    private function isProjectSourcePhp(string $rel): bool
+    {
+        return str_ends_with($rel, '.php')
+            && ! str_starts_with($rel, 'tests/')
+            && ! str_starts_with($rel, 'vendor/')
+            && ! str_starts_with($rel, 'storage/framework/')
+            && ! str_starts_with($rel, 'bootstrap/cache/');
+    }
+
+    private function isArchTestFile(string $rel): bool
+    {
+        return str_ends_with($rel, '.php')
+            && (str_contains($rel, '/Arch/') || str_ends_with($rel, '/ArchTest.php'));
     }
 
     private function isBladePath(string $rel): bool
