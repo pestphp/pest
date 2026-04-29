@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 use Pest\Support\Container;
+use Pest\TestSuite;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestStatus\TestStatus;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -118,6 +120,14 @@ final class Graph
      * separators.
      */
     private readonly string $projectRoot;
+
+    /**
+     * Cached project-relative test files that contain at least one test in the
+     * `arch` group.
+     *
+     * @var array<string, true>|null
+     */
+    private ?array $archTestFiles = null;
 
     public function __construct(string $projectRoot)
     {
@@ -420,7 +430,8 @@ final class Graph
         // Architecture tests inspect source structure by namespace / path rather
         // than by executing the inspected files. A new enum/class can therefore
         // fail an Arch expectation without ever producing a coverage edge. Keep
-        // this fallback narrow: only known Arch test files run, not the suite.
+        // this fallback narrow: only tests in Pest's `arch` group run, not the
+        // suite.
         if ($sourcePhpChanged) {
             foreach (array_keys($this->edges) as $testFile) {
                 if ($this->isArchTestFile($testFile)) {
@@ -910,6 +921,7 @@ final class Graph
     private function isProjectSourcePhp(string $rel): bool
     {
         return str_ends_with($rel, '.php')
+            && ! $this->isBladePath($rel)
             && ! str_starts_with($rel, 'tests/')
             && ! str_starts_with($rel, 'vendor/')
             && ! str_starts_with($rel, 'storage/framework/')
@@ -918,8 +930,97 @@ final class Graph
 
     private function isArchTestFile(string $rel): bool
     {
-        return str_ends_with($rel, '.php')
-            && (str_contains($rel, '/Arch/') || str_ends_with($rel, '/ArchTest.php'));
+        return isset($this->archTestFiles()[$rel]);
+    }
+
+    /**
+     * @return array<string, true>
+     */
+    private function archTestFiles(): array
+    {
+        if ($this->archTestFiles !== null) {
+            return $this->archTestFiles;
+        }
+
+        $this->archTestFiles = [];
+        $repo = TestSuite::getInstance()->tests;
+
+        foreach ($repo->getFilenames() as $filename) {
+            $factory = $repo->get($filename);
+
+            if ($factory === null) {
+                continue;
+            }
+
+            foreach ($factory->methods as $method) {
+                if (! $this->methodHasGroup($method, 'arch')) {
+                    continue;
+                }
+
+                $rel = $this->relative($filename);
+
+                if ($rel !== null) {
+                    $this->archTestFiles[$rel] = true;
+                }
+
+                break;
+            }
+        }
+
+        foreach (array_keys($this->edges) as $testFile) {
+            if (isset($this->archTestFiles[$testFile])) {
+                continue;
+            }
+            if ($this->testSourceDeclaresArchGroup($testFile)) {
+                $this->archTestFiles[$testFile] = true;
+            }
+        }
+
+        return $this->archTestFiles;
+    }
+
+    private function methodHasGroup(object $method, string $group): bool
+    {
+        if (property_exists($method, 'groups') && is_array($method->groups) && in_array($group, $method->groups, true)) {
+            return true;
+        }
+
+        if (! property_exists($method, 'attributes') || ! is_array($method->attributes)) {
+            return false;
+        }
+
+        foreach ($method->attributes as $attribute) {
+            if (! is_object($attribute)) {
+                continue;
+            }
+            if (! property_exists($attribute, 'name') || $attribute->name !== Group::class) {
+                continue;
+            }
+            if (! property_exists($attribute, 'arguments')) {
+                continue;
+            }
+
+            foreach ($attribute->arguments as $argument) {
+                if ($argument === $group) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private function testSourceDeclaresArchGroup(string $rel): bool
+    {
+        $source = @file_get_contents($this->projectRoot.'/'.$rel);
+
+        if ($source === false) {
+            return false;
+        }
+
+        return preg_match('/\barch\s*\(/', $source) === 1
+            || preg_match('/->\s*group\s*\(\s*[\'\"]arch[\'\"]/', $source) === 1
+            || preg_match('/#\[\s*(?:\\\\)?(?:PHPUnit\\\\Framework\\\\Attributes\\\\)?Group\s*\(\s*[\'\"]arch[\'\"]/', $source) === 1;
     }
 
     private function isBladePath(string $rel): bool

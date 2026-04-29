@@ -79,7 +79,11 @@ final readonly class Fingerprint
     //        composer.lock hash a behavioural subset — description,
     //        keywords, scripts, authors, install timestamps, dist
     //        URLs etc. no longer drift the structural fingerprint.
-    private const int SCHEMA_VERSION = 12;
+    //   v13: Environment files (`.env`, `.env.testing`, local variants)
+    //        are included in the environmental bucket. They are commonly
+    //        git-ignored, so watch patterns alone cannot reliably notice
+    //        edits; a drift drops cached results and re-executes the suite.
+    private const int SCHEMA_VERSION = 13;
 
     /**
      * @return array{
@@ -128,6 +132,7 @@ final readonly class Fingerprint
                 // the patch rarely changes anything test-visible.
                 'php_minor' => PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION,
                 'extensions' => self::extensionsFingerprint($projectRoot),
+                'env_files' => self::envFilesHash($projectRoot),
             ],
         ];
     }
@@ -287,6 +292,60 @@ final readonly class Fingerprint
         }
 
         return $parts === [] ? null : hash('xxh128', implode("\n", $parts));
+    }
+
+    /**
+     * Hashes environment files that can globally alter app boot behaviour.
+     * These files are often git-ignored, so they cannot rely on changed-file
+     * detection. The environmental bucket keeps graph edges while forcing all
+     * cached results to refresh after an env edit.
+     */
+    private static function envFilesHash(string $projectRoot): ?string
+    {
+        $paths = [
+            $projectRoot.'/.env',
+            $projectRoot.'/.env.testing',
+            $projectRoot.'/.env.local',
+        ];
+
+        $localVariants = glob($projectRoot.'/.env.*.local');
+
+        if (is_array($localVariants)) {
+            foreach ($localVariants as $path) {
+                $paths[] = $path;
+            }
+        }
+
+        $parts = [];
+        $seen = [];
+
+        foreach ($paths as $path) {
+            if (isset($seen[$path])) {
+                continue;
+            }
+
+            $seen[$path] = true;
+
+            if (! is_file($path)) {
+                continue;
+            }
+
+            $contents = @file_get_contents($path);
+
+            if ($contents === false) {
+                continue;
+            }
+
+            $parts[] = basename($path).':'.hash('xxh128', $contents);
+        }
+
+        if ($parts === []) {
+            return null;
+        }
+
+        sort($parts);
+
+        return hash('xxh128', implode("\n", $parts));
     }
 
     /**
