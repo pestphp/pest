@@ -149,7 +149,7 @@ final class Recorder
         if ($this->driver === 'pcov') {
             \pcov\stop();
             /** @var array<string, mixed> $data */
-            $data = \pcov\collect(\pcov\inclusive);
+            $data = \pcov\collect(\pcov\all);
         } else {
             /** @var array<string, mixed> $data */
             $data = \xdebug_get_code_coverage();

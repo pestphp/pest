@@ -597,6 +597,16 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             $this->state->write(self::KEY_COVERAGE_MARKER, '');
         }
 
+        // Kick off the JS module graph resolver in the background so it
+        // runs in parallel with the test suite. By the time the flush
+        // path calls `JsModuleGraph::build()`, the result is usually
+        // already on stdout and `wait()` returns instantly. Cheap when
+        // the cache is fresh — the warmer fingerprint-checks first and
+        // skips spawning Node entirely.
+        if (! Parallel::isWorker() && JsModuleGraph::isApplicable($projectRoot)) {
+            JsModuleGraph::warmInBackground($projectRoot);
+        }
+
         // First `--tia --coverage` run: no cache to merge against yet, must record the full suite.
         if ($this->piggybackCoverage && ! $this->state->exists(self::KEY_COVERAGE_CACHE)) {
             return $this->enterRecordMode($arguments);
@@ -1298,6 +1308,10 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      */
     private function tryRemoteBaselineForDrift(array $current): ?Graph
     {
+        if ($this->baselineFetchAttemptedForDrift) {
+            return null;
+        }
+
         $projectRoot = TestSuite::getInstance()->rootPath;
         $this->baselineFetchAttemptedForDrift = true;
 

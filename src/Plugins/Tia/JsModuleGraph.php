@@ -12,23 +12,29 @@ use Symfony\Component\Process\Process;
  * `resources/js/**` — for every source file, the list of Inertia page
  * components that transitively import it.
  *
- * Tries two resolvers in order:
+ * Backed by a Node helper (`bin/pest-tia-vite-deps.mjs`) that boots a
+ * headless Vite server in middleware mode, walks Vite's own module
+ * graph for each page entry, and outputs JSON. Uses the project's real
+ * `vite.config.*`, so aliases, plugins, and SFC transformers produce
+ * the exact graph Vite itself would use.
  *
- *   1. **Node helper** (`bin/pest-tia-vite-deps.mjs`). Spins up a
- *      headless Vite server in middleware mode, walks Vite's own
- *      module graph for each page entry, and outputs JSON. Uses the
- *      project's real `vite.config.*`, so aliases, plugins, and SFC
- *      transformers produce the same graph Vite itself would use.
+ * Two latency mitigations:
  *
- *   2. **PHP fallback** (`JsImportParser`). Regex-scans ES imports
- *      and resolves `@/` / `~/` aliases manually. Strictly less
- *      precise — anything it can't resolve is skipped, leaving the
- *      caller to fall back to the broad watch pattern. Only kicks in
- *      when the Node helper is unusable (no Node on PATH, no Vite
- *      installed, vite.config fails to load).
+ *   1. **Content-hash cache** keyed by every file under `resources/js/`
+ *      (path + size + mtime) plus the bytes of `vite.config.*` and the
+ *      pages-directory casing. When inputs are unchanged, the 13s+ Node
+ *      bootstrap is skipped entirely and the previous result is reused.
  *
- * Callers invoke this at record time; results are persisted into the
- * graph so replay never re-runs the resolver. On stale-map detection
+ *   2. **Background warmer** — `warmInBackground()` is called at suite
+ *      start. It computes the fingerprint, checks the cache, and only
+ *      spawns Node if a refresh is needed. The subprocess runs in
+ *      parallel with the test suite. By the time `build()` is called at
+ *      flush time, the result is usually already on stdout — `wait()`
+ *      returns instantly. If tests finish faster than Vite boots,
+ *      `build()` simply pays the remainder, never the full bootstrap.
+ *
+ * Callers invoke `build()` at record time; results are persisted into
+ * the graph so replay never re-runs the resolver. On stale-map detection
  * the callers decide whether to rebuild.
  *
  * @internal
@@ -37,36 +43,94 @@ final class JsModuleGraph
 {
     private const int NODE_TIMEOUT_SECONDS = 25;
 
+    private const string CACHE_FILE = 'js-module-graph.cache.json';
+
+    /** Active warmer subprocess, or null when none is in flight. */
+    private static ?Process $warmer = null;
+
+    /** Fingerprint the warmer was started against — used to detect drift between warm and build. */
+    private static ?string $warmerFingerprint = null;
+
+    /** True when the warmer found a fresh cache and skipped spawning Node. */
+    private static bool $warmerCacheHit = false;
+
+    /** Project root the warmer was launched for. */
+    private static ?string $warmerProjectRoot = null;
+
+    /**
+     * Kicks off the Node helper in the background, so by the time
+     * `build()` is called at flush time the result is (usually) already
+     * sitting on stdout. Idempotent — a second call while a warmer is
+     * already in flight is a no-op. Cheap when the cache is fresh: it
+     * checks the fingerprint first and skips the subprocess.
+     *
+     * Safe to call from any TIA entry point that will eventually write
+     * the graph from the main process. Workers must NOT call this — they
+     * don't flush the graph and would duplicate the Node bootstrap on
+     * every worker.
+     */
+    public static function warmInBackground(string $projectRoot): void
+    {
+        if (self::$warmer !== null || self::$warmerCacheHit) {
+            return;
+        }
+
+        if (! self::isApplicable($projectRoot)) {
+            return;
+        }
+
+        $fingerprint = self::fingerprint($projectRoot);
+
+        if ($fingerprint !== null && self::readCache($projectRoot, $fingerprint) !== null) {
+            self::$warmerCacheHit = true;
+            self::$warmerFingerprint = $fingerprint;
+            self::$warmerProjectRoot = $projectRoot;
+
+            return;
+        }
+
+        $process = self::buildNodeProcess($projectRoot);
+
+        if ($process === null) {
+            return;
+        }
+
+        try {
+            $process->start();
+        } catch (\Throwable) {
+            return;
+        }
+
+        self::$warmer = $process;
+        self::$warmerFingerprint = $fingerprint;
+        self::$warmerProjectRoot = $projectRoot;
+
+        register_shutdown_function(self::reapWarmer(...));
+    }
+
     /**
      * @return array<string, list<string>> project-relative source path → sorted list of page component names
      */
     public static function build(string $projectRoot): array
     {
-        $viaNode = self::tryNodeHelper($projectRoot);
+        $result = self::resolve($projectRoot);
 
-        if ($viaNode !== null) {
-            return $viaNode;
-        }
-
-        return JsImportParser::parse($projectRoot);
+        return $result ?? [];
     }
 
     /**
-     * Strict variant — only runs the Node helper, never falls back to
-     * the PHP parser. Returns null when Node isn't available or Vite
-     * won't load.
+     * Strict variant — returns null when the Node resolver isn't
+     * available, so callers can distinguish "Vite says nothing imports
+     * this file" (empty list) from "we couldn't ask Vite" (null).
      *
      * Used at replay time when we need to *trust a negative result*
-     * (i.e., "no page imports this file, so it's orphan, safe to
-     * skip"). The PHP fallback is conservative on positives but can
-     * miss imports that rely on custom aliases or plugins — negative
-     * results from it cannot be trusted for orphan pruning.
+     * (i.e., "no page imports this file, so it's orphan, safe to skip").
      *
      * @return array<string, list<string>>|null
      */
     public static function buildStrict(string $projectRoot): ?array
     {
-        return self::tryNodeHelper($projectRoot);
+        return self::resolve($projectRoot);
     }
 
     /**
@@ -97,7 +161,100 @@ final class JsModuleGraph
     /**
      * @return array<string, list<string>>|null
      */
-    private static function tryNodeHelper(string $projectRoot): ?array
+    private static function resolve(string $projectRoot): ?array
+    {
+        $fingerprint = self::fingerprint($projectRoot);
+
+        if ($fingerprint !== null) {
+            $cached = self::readCache($projectRoot, $fingerprint);
+
+            if ($cached !== null) {
+                self::reapWarmer();
+
+                return $cached;
+            }
+        }
+
+        // Pick up the warmer when it was launched against the same
+        // fingerprint and project root. Drift between warm and build
+        // (rare — would require a JS file to change mid-test-run)
+        // discards the warmer and re-runs synchronously.
+        if (self::$warmerCacheHit
+            && self::$warmerFingerprint === $fingerprint
+            && self::$warmerProjectRoot === $projectRoot
+            && $fingerprint !== null) {
+            $cached = self::readCache($projectRoot, $fingerprint);
+            self::$warmerCacheHit = false;
+            self::$warmerFingerprint = null;
+            self::$warmerProjectRoot = null;
+
+            if ($cached !== null) {
+                return $cached;
+            }
+        }
+
+        if (self::$warmer !== null
+            && self::$warmerFingerprint === $fingerprint
+            && self::$warmerProjectRoot === $projectRoot) {
+            $process = self::$warmer;
+            self::$warmer = null;
+            self::$warmerFingerprint = null;
+            self::$warmerProjectRoot = null;
+
+            try {
+                $process->wait();
+            } catch (\Throwable) {
+                // fall through to synchronous run
+                $process = null;
+            }
+
+            if ($process !== null && $process->isSuccessful()) {
+                $result = self::parseNodeOutput($process->getOutput());
+
+                if ($result !== null) {
+                    if ($fingerprint !== null) {
+                        self::writeCache($projectRoot, $fingerprint, $result);
+                    }
+
+                    return $result;
+                }
+            }
+        } else {
+            // Different fingerprint or different project root: discard
+            // any stale warmer before we start a fresh run.
+            self::reapWarmer();
+        }
+
+        $viaNode = self::runNodeSync($projectRoot);
+
+        if ($viaNode !== null && $fingerprint !== null) {
+            self::writeCache($projectRoot, $fingerprint, $viaNode);
+        }
+
+        return $viaNode;
+    }
+
+    /**
+     * @return array<string, list<string>>|null
+     */
+    private static function runNodeSync(string $projectRoot): ?array
+    {
+        $process = self::buildNodeProcess($projectRoot);
+
+        if ($process === null) {
+            return null;
+        }
+
+        $process->run();
+
+        if (! $process->isSuccessful()) {
+            return null;
+        }
+
+        return self::parseNodeOutput($process->getOutput());
+    }
+
+    private static function buildNodeProcess(string $projectRoot): ?Process
     {
         if (! self::hasViteConfig($projectRoot)) {
             return null;
@@ -135,14 +292,17 @@ final class JsModuleGraph
 
         $process = new Process([$nodeBinary, $helperPath, $projectRoot], $projectRoot, $env);
         $process->setTimeout(self::NODE_TIMEOUT_SECONDS);
-        $process->run();
 
-        if (! $process->isSuccessful()) {
-            return null;
-        }
+        return $process;
+    }
 
+    /**
+     * @return array<string, list<string>>|null
+     */
+    private static function parseNodeOutput(string $output): ?array
+    {
         /** @var mixed $decoded */
-        $decoded = json_decode($process->getOutput(), true);
+        $decoded = json_decode($output, true);
 
         if (! is_array($decoded)) {
             return null;
@@ -174,6 +334,200 @@ final class JsModuleGraph
         ksort($out);
 
         return $out;
+    }
+
+    /**
+     * Stop and discard a leftover warmer subprocess (e.g. on shutdown,
+     * or when `build()` resolved from cache without needing the warmer).
+     */
+    private static function reapWarmer(): void
+    {
+        $process = self::$warmer;
+        self::$warmer = null;
+        self::$warmerFingerprint = null;
+        self::$warmerProjectRoot = null;
+        self::$warmerCacheHit = false;
+
+        if ($process === null) {
+            return;
+        }
+
+        try {
+            if ($process->isRunning()) {
+                $process->stop(0.5);
+            }
+        } catch (\Throwable) {
+            // best-effort cleanup
+        }
+    }
+
+    /**
+     * Content fingerprint of every input that can change the Node/Vite
+     * module graph: each `resources/js/**` source (path + size + mtime),
+     * each `vite.config.*` (path + size + mtime + sha-of-bytes), and
+     * the chosen pages-directory casing. Returns null only when no
+     * `vite.config.*` exists — i.e. the resolver itself wouldn't run.
+     *
+     * File inputs use `mtime+size` rather than full content hashes —
+     * walking thousands of SFCs and re-hashing them on every flush
+     * would defeat the point of the cache. mtime/size collisions on
+     * an edited file are theoretically possible but vanishingly rare,
+     * and the cost of a rare miss (one extra Node run) is exactly what
+     * the cache costs anyway. The vite config itself is small and
+     * load-bearing for plugin/alias behaviour, so we hash its bytes
+     * outright.
+     */
+    private static function fingerprint(string $projectRoot): ?string
+    {
+        if (! self::hasViteConfig($projectRoot)) {
+            return null;
+        }
+
+        $parts = [];
+
+        foreach (['vite.config.ts', 'vite.config.js', 'vite.config.mjs', 'vite.config.cjs', 'vite.config.mts'] as $name) {
+            $path = $projectRoot.DIRECTORY_SEPARATOR.$name;
+
+            if (! is_file($path)) {
+                continue;
+            }
+
+            $stat = @stat($path);
+            $bytes = @file_get_contents($path);
+
+            $parts[] = 'config:'.$name
+                .':'.($stat === false ? '0' : (string) $stat['mtime'])
+                .':'.($stat === false ? '0' : (string) $stat['size'])
+                .':'.($bytes === false ? '' : hash('sha256', $bytes));
+        }
+
+        foreach (['Pages', 'pages'] as $dir) {
+            if (is_dir($projectRoot.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'js'.DIRECTORY_SEPARATOR.$dir)) {
+                $parts[] = 'pagesDir:'.$dir;
+
+                break;
+            }
+        }
+
+        $jsRoot = $projectRoot.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'js';
+
+        if (is_dir($jsRoot)) {
+            $entries = [];
+
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($jsRoot, \FilesystemIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::LEAVES_ONLY,
+            );
+
+            /** @var \SplFileInfo $file */
+            foreach ($iterator as $file) {
+                if (! $file->isFile()) {
+                    continue;
+                }
+
+                $entries[] = $file->getPathname()
+                    .':'.$file->getSize()
+                    .':'.$file->getMTime();
+            }
+
+            sort($entries);
+
+            $parts[] = 'js:'.hash('sha256', implode("\n", $entries));
+        }
+
+        return hash('sha256', implode('|', $parts));
+    }
+
+    /**
+     * @return array<string, list<string>>|null
+     */
+    private static function readCache(string $projectRoot, string $fingerprint): ?array
+    {
+        $path = self::cachePath($projectRoot);
+
+        if (! is_file($path)) {
+            return null;
+        }
+
+        $raw = @file_get_contents($path);
+
+        if ($raw === false) {
+            return null;
+        }
+
+        /** @var mixed $decoded */
+        $decoded = json_decode($raw, true);
+
+        if (! is_array($decoded)) {
+            return null;
+        }
+
+        if (($decoded['fingerprint'] ?? null) !== $fingerprint) {
+            return null;
+        }
+
+        $graph = $decoded['graph'] ?? null;
+
+        if (! is_array($graph)) {
+            return null;
+        }
+
+        $out = [];
+
+        foreach ($graph as $key => $value) {
+            if (! is_string($key) || ! is_array($value)) {
+                continue;
+            }
+
+            $names = [];
+
+            foreach ($value as $name) {
+                if (is_string($name) && $name !== '') {
+                    $names[] = $name;
+                }
+            }
+
+            $out[$key] = $names;
+        }
+
+        return $out;
+    }
+
+    /**
+     * @param array<string, list<string>> $graph
+     */
+    private static function writeCache(string $projectRoot, string $fingerprint, array $graph): void
+    {
+        $path = self::cachePath($projectRoot);
+        $dir = dirname($path);
+
+        if (! is_dir($dir) && ! @mkdir($dir, 0755, true) && ! is_dir($dir)) {
+            return;
+        }
+
+        $payload = json_encode([
+            'fingerprint' => $fingerprint,
+            'graph' => $graph,
+        ]);
+
+        if ($payload === false) {
+            return;
+        }
+
+        $tmp = $path.'.tmp.'.bin2hex(random_bytes(4));
+
+        if (@file_put_contents($tmp, $payload) === false) {
+            return;
+        }
+
+        if (! @rename($tmp, $path)) {
+            @unlink($tmp);
+        }
+    }
+
+    private static function cachePath(string $projectRoot): string
+    {
+        return Storage::tempDir($projectRoot).DIRECTORY_SEPARATOR.self::CACHE_FILE;
     }
 
     private static function hasViteConfig(string $projectRoot): bool
