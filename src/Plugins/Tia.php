@@ -179,6 +179,12 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $result = $this->replayGraph->getResult($this->branch, $testId);
 
         if ($result instanceof TestStatus) {
+            if ($result->isFailure() || $result->isError()) {
+                $this->executedCount++;
+
+                return null;
+            }
+
             $this->replayedCount++;
             $assertions = $this->replayGraph->getAssertions($this->branch, $testId);
             $this->cachedAssertionsByTestId[$testId] = $assertions ?? 0;
