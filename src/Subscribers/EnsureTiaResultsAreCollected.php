@@ -29,7 +29,7 @@ final readonly class EnsureTiaResultsAreCollected implements PreparedSubscriber
         $test = $event->test();
 
         if ($test instanceof TestMethod) {
-            $this->collector->testPrepared($test->className().'::'.$test->methodName());
+            $this->collector->testPrepared($test->className().'::'.$test->methodName(), $test->file());
         }
     }
 }

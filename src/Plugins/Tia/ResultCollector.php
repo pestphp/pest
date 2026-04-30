@@ -14,17 +14,20 @@ namespace Pest\Plugins\Tia;
 final class ResultCollector
 {
     /**
-     * @var array<string, array{status: int, message: string, time: float, assertions: int}>
+     * @var array<string, array{status: int, message: string, time: float, assertions: int, file?: string}>
      */
     private array $results = [];
 
     private ?string $currentTestId = null;
 
+    private ?string $currentTestFile = null;
+
     private ?float $startTime = null;
 
-    public function testPrepared(string $testId): void
+    public function testPrepared(string $testId, ?string $testFile = null): void
     {
         $this->currentTestId = $testId;
+        $this->currentTestFile = $testFile;
         $this->startTime = microtime(true);
     }
 
@@ -83,7 +86,7 @@ final class ResultCollector
     }
 
     /**
-     * @return array<string, array{status: int, message: string, time: float, assertions: int}>
+     * @return array<string, array{status: int, message: string, time: float, assertions: int, file?: string}>
      */
     public function all(): array
     {
@@ -102,7 +105,7 @@ final class ResultCollector
      * workers) into this collector so the parent can persist them in the same
      * snapshot pass as non-parallel runs.
      *
-     * @param  array<string, array{status: int, message: string, time: float, assertions: int}>  $results
+     * @param  array<string, array{status: int, message: string, time: float, assertions: int, file?: string}>  $results
      */
     public function merge(array $results): void
     {
@@ -115,6 +118,7 @@ final class ResultCollector
     {
         $this->results = [];
         $this->currentTestId = null;
+        $this->currentTestFile = null;
         $this->startTime = null;
     }
 
@@ -126,6 +130,7 @@ final class ResultCollector
     public function finishTest(): void
     {
         $this->currentTestId = null;
+        $this->currentTestFile = null;
         $this->startTime = null;
     }
 
@@ -151,5 +156,9 @@ final class ResultCollector
             'time' => $time,
             'assertions' => $existing['assertions'] ?? 0,
         ];
+
+        if ($this->currentTestFile !== null) {
+            $this->results[$this->currentTestId]['file'] = $this->currentTestFile;
+        }
     }
 }

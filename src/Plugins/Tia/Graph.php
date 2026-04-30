@@ -43,7 +43,7 @@ final class Graph
      * @var array<string, array{
      *     sha: ?string,
      *     tree: array<string, string>,
-     *     results: array<string, array{status: int, message: string, time: float, assertions?: int}>
+     *     results: array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>
      * }>
      */
     private array $baselines = [];
@@ -468,7 +468,7 @@ final class Graph
         $this->baselines[$branch]['sha'] = $sha;
     }
 
-    public function setResult(string $branch, string $testId, int $status, string $message, float $time, int $assertions = 0): void
+    public function setResult(string $branch, string $testId, int $status, string $message, float $time, int $assertions = 0, ?string $file = null): void
     {
         $this->ensureBaseline($branch);
         $this->baselines[$branch]['results'][$testId] = [
@@ -477,6 +477,14 @@ final class Graph
             'time' => $time,
             'assertions' => $assertions,
         ];
+
+        if ($file !== null) {
+            $rel = $this->relative($file);
+
+            if ($rel !== null) {
+                $this->baselines[$branch]['results'][$testId]['file'] = $rel;
+            }
+        }
     }
 
     public function getAssertions(string $branch, string $testId, string $fallbackBranch = 'main'): ?int
@@ -518,6 +526,58 @@ final class Graph
     }
 
     /**
+     * @return array<int, string>
+     */
+    public function failedOrErroredTestFiles(string $branch, string $fallbackBranch = 'main'): array
+    {
+        $baseline = $this->baselineFor($branch, $fallbackBranch);
+        $files = [];
+
+        foreach ($baseline['results'] as $result) {
+            $status = $result['status'] ?? null;
+
+            if ($status !== 7 && $status !== 8) {
+                continue;
+            }
+
+            $file = $result['file'] ?? null;
+
+            if (! is_string($file) || $file === '') {
+                continue;
+            }
+
+            $rel = $this->relative($file);
+
+            if ($rel !== null) {
+                $files[$rel] = true;
+            }
+        }
+
+        return array_keys($files);
+    }
+
+    public function hasUnlocatedFailuresOrErrors(string $branch, string $fallbackBranch = 'main'): bool
+    {
+        $baseline = $this->baselineFor($branch, $fallbackBranch);
+
+        foreach ($baseline['results'] as $result) {
+            $status = $result['status'] ?? null;
+
+            if ($status !== 7 && $status !== 8) {
+                continue;
+            }
+
+            $file = $result['file'] ?? null;
+
+            if (! is_string($file) || $file === '' || $this->relative($file) === null) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * @param  array<string, string>  $tree  project-relative path → content hash
      */
     public function setLastRunTree(string $branch, array $tree): void
@@ -542,7 +602,7 @@ final class Graph
     }
 
     /**
-     * @return array{sha: ?string, tree: array<string, string>, results: array<string, array{status: int, message: string, time: float, assertions?: int}>}
+     * @return array{sha: ?string, tree: array<string, string>, results: array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>}
      */
     private function baselineFor(string $branch, string $fallbackBranch): array
     {

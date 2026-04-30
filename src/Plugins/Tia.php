@@ -768,6 +768,23 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         $affected = $changed === [] ? [] : $graph->affected($changed);
 
+        if ($this->filteredMode) {
+            if ($graph->hasUnlocatedFailuresOrErrors($this->branch)) {
+                $this->output->writeln([
+                    '',
+                    '  <fg=yellow>TIA</> cached failures/errors exist but this baseline cannot map them to files — running full suite.',
+                    '',
+                ]);
+
+                return $arguments;
+            }
+
+            $affected = array_values(array_unique([
+                ...$affected,
+                ...$graph->failedOrErroredTestFiles($this->branch),
+            ]));
+        }
+
         $affectedSet = array_fill_keys($affected, true);
         $canRefreshReplayEdges = $affected !== [] && $coverageAvailable;
 
@@ -1032,6 +1049,10 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                         'time' => is_float($result['time'] ?? null) || is_int($result['time'] ?? null) ? (float) $result['time'] : 0.0,
                         'assertions' => is_int($result['assertions'] ?? null) ? $result['assertions'] : 0,
                     ];
+
+                    if (isset($result['file']) && is_string($result['file'])) {
+                        $normalised[$testId]['file'] = $result['file'];
+                    }
                 }
 
                 if ($normalised !== []) {
@@ -1178,6 +1199,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                 $result['message'],
                 $result['time'],
                 $result['assertions'],
+                $result['file'] ?? null,
             );
         }
 
@@ -1211,6 +1233,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                 $result['message'],
                 $result['time'],
                 $result['assertions'],
+                $result['file'] ?? null,
             );
         }
 
