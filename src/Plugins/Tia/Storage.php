@@ -52,6 +52,53 @@ final class Storage
     }
 
     /**
+     * Wipes the on-disk state directory for `$projectRoot`. Called by
+     * `--fresh` so a rebuild starts from a truly empty cache: no stale
+     * baseline, no leftover worker partials, no fingerprint, no JS
+     * module cache. Subsequent writes recreate the directory on demand.
+     *
+     * Per-project (project key is part of the path) — sibling projects'
+     * caches under `~/.pest/tia/` are untouched.
+     */
+    public static function purge(string $projectRoot): void
+    {
+        $dir = self::tempDir($projectRoot);
+
+        if (! is_dir($dir)) {
+            return;
+        }
+
+        self::removeRecursive($dir);
+    }
+
+    private static function removeRecursive(string $dir): void
+    {
+        $entries = @scandir($dir);
+
+        if ($entries === false) {
+            return;
+        }
+
+        foreach ($entries as $entry) {
+            if ($entry === '.' || $entry === '..') {
+                continue;
+            }
+
+            $path = $dir.DIRECTORY_SEPARATOR.$entry;
+
+            if (is_dir($path) && ! is_link($path)) {
+                self::removeRecursive($path);
+
+                continue;
+            }
+
+            @unlink($path);
+        }
+
+        @rmdir($dir);
+    }
+
+    /**
      * OS-neutral home directory — `HOME` on Unix, `USERPROFILE` on
      * Windows. Returns null if neither resolves to an existing
      * directory, in which case callers fall back to project-local state.

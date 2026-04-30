@@ -17,6 +17,7 @@ use Pest\Plugins\Tia\Graph;
 use Pest\Plugins\Tia\JsModuleGraph;
 use Pest\Plugins\Tia\Recorder;
 use Pest\Plugins\Tia\ResultCollector;
+use Pest\Plugins\Tia\Storage;
 use Pest\Plugins\Tia\TableExtractor;
 use Pest\Plugins\Tia\WatchPatterns;
 use Pest\Exceptions\NoAffectedTestsFound;
@@ -558,6 +559,18 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         $fingerprint = Fingerprint::compute($projectRoot);
 
+        // `--fresh` is meant to be a clean slate: nuke the entire per-project
+        // state dir up front (graph, baseline, worker partials, fingerprint,
+        // JS module cache, coverage marker, etc.). Wiping per-key in code
+        // would leave room for stale entries we forgot about — most
+        // recently, status-7/8 result entries with no `file` that survived
+        // a rebuild and kept tripping `hasUnlocatedFailuresOrErrors()` on
+        // subsequent `--filtered` runs. Safe here because `handleParent`
+        // runs in the parent before any worker is spawned.
+        if ($forceRebuild) {
+            Storage::purge($projectRoot);
+        }
+
         $graph = $forceRebuild ? null : $this->loadGraph($projectRoot);
 
         if ($graph instanceof Graph) {
@@ -782,7 +795,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             if ($graph->hasUnlocatedFailuresOrErrors($this->branch)) {
                 $this->output->writeln([
                     '',
-                    '  <fg=yellow>TIA</> cached failures/errors exist but this baseline cannot map them to files — running full suite.',
+                    '  <fg=yellow>TIA</> cached failures/errors exist but this baseline cannot map them to files — running full suite. Re-run with <fg=cyan>--fresh</> to rebuild the baseline.',
                     '',
                 ]);
 
