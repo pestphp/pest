@@ -33,7 +33,7 @@ final class Configuration
     {
         /** @var WatchPatterns $watchPatterns */
         $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
-        $watchPatterns->markAlways();
+        $watchPatterns->markEnabled();
 
         return $this;
     }
@@ -49,6 +49,7 @@ final class Configuration
     {
         /** @var WatchPatterns $watchPatterns */
         $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
+        $watchPatterns->markEnabled();
         $watchPatterns->markLocally();
 
         return $this;

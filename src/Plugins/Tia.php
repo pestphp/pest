@@ -212,7 +212,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         /** @var Tia\WatchPatterns $watchPatterns */
         $watchPatterns = Container::getInstance()->get(Tia\WatchPatterns::class);
         $cliEnabled = $this->hasArgument(self::OPTION, $arguments);
-        $alwaysEnabled = $watchPatterns->isAlways()
+        $alwaysEnabled = $watchPatterns->isEnabled()
             && (! $watchPatterns->isLocally() || Environment::name() === Environment::LOCAL);
         $enabled = $cliEnabled || $alwaysEnabled;
         $this->filteredMode = $this->hasArgument(self::FILTERED_OPTION, $arguments) || $watchPatterns->isFiltered();
@@ -576,6 +576,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             && ! $forceRebuild
             && ! $this->baselineFetchAttemptedForDrift
             && $this->baselineSync->fetchIfAvailable($projectRoot, $this->forceRefetch)) {
+            $this->baselineFetchAttemptedForDrift = true;
             $graph = $this->loadGraph($projectRoot);
             if ($graph instanceof Graph) {
                 $graph = $this->reconcileFingerprint($graph, $fingerprint);

@@ -43,7 +43,7 @@ final class WatchPatterns
      */
     private array $patterns = [];
 
-    private bool $always = false;
+    private bool $enabled = false;
 
     private bool $locally = false;
 
@@ -155,14 +155,14 @@ final class WatchPatterns
         return $affected;
     }
 
-    public function markAlways(): void
+    public function markEnabled(): void
     {
-        $this->always = true;
+        $this->enabled = true;
     }
 
-    public function isAlways(): bool
+    public function isEnabled(): bool
     {
-        return $this->always;
+        return $this->enabled;
     }
 
     public function markLocally(): void
@@ -188,7 +188,7 @@ final class WatchPatterns
     public function reset(): void
     {
         $this->patterns = [];
-        $this->always = false;
+        $this->enabled = false;
         $this->locally = false;
         $this->filtered = false;
     }
