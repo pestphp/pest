@@ -359,6 +359,10 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $partialKeys = $this->collectWorkerEdgesPartials();
 
         if ($partialKeys === []) {
+            if ($this->replayRan) {
+                $this->snapshotTestResults();
+            }
+
             return $exitCode;
         }
 
@@ -438,6 +442,12 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         if ($finalised === []) {
+            if ($this->replayRan) {
+                $this->snapshotTestResults();
+
+                return $exitCode;
+            }
+
             $this->output->writeln([
                 '',
                 '  <fg=white;bg=red> ERROR </> TIA recorded zero edges — coverage driver likely missing.',
@@ -610,6 +620,10 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         if ($replayingGlobal) {
             $this->installWorkerReplay($projectRoot);
 
+            if ($recordingGlobal) {
+                return $this->activateWorkerRecorderForReplay($arguments);
+            }
+
             return $arguments;
         }
 
@@ -679,6 +693,41 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
+     * During replay, affected tests execute normally. If a coverage driver is
+     * available, record those executions too so refactors that introduce new
+     * dependencies update the graph without requiring a full `--fresh` run.
+     * Cached tests short-circuit before `Recorder::beginTest()`, so they don't
+     * produce empty replacement edges.
+     *
+     * @param  array<int, string>  $arguments
+     * @return array<int, string>
+     */
+    private function activateWorkerRecorderForReplay(array $arguments): array
+    {
+        if ($this->piggybackCoverage) {
+            $this->recordingActive = true;
+
+            return $arguments;
+        }
+
+        $recorder = $this->recorder;
+
+        if (! $recorder->driverAvailable()) {
+            $this->state->write(
+                self::KEY_WORKER_NO_DRIVER_PREFIX.$this->workerToken().'.json',
+                '{}',
+            );
+
+            return $arguments;
+        }
+
+        $recorder->activate();
+        $this->recordingActive = true;
+
+        return $arguments;
+    }
+
+    /**
      * @param  array<int, string>  $arguments
      * @return array<int, string>
      */
@@ -703,9 +752,24 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             $branchSha,
         );
 
+        $hasProjectPhpSourceChanges = $this->hasProjectPhpSourceChanges($changed);
+        $coverageAvailable = $this->piggybackCoverage || $this->recorder->driverAvailable();
+
+        if ($hasProjectPhpSourceChanges && ! $coverageAvailable) {
+            $this->output->writeln([
+                '',
+                '  <fg=black;bg=yellow> WARNING </> TIA detected PHP source changes but no coverage driver is available.',
+                '  Running the full suite to avoid using a stale dependency graph. Install / enable <fg=cyan>pcov</> or <fg=cyan>xdebug</> (mode: coverage) so TIA can safely refresh edges after PHP refactors.',
+                '',
+            ]);
+
+            return $arguments;
+        }
+
         $affected = $changed === [] ? [] : $graph->affected($changed);
 
         $affectedSet = array_fill_keys($affected, true);
+        $canRefreshReplayEdges = $affected !== [] && $coverageAvailable;
 
         $this->replayRan = true;
         $this->replayGraph = $graph;
@@ -724,6 +788,11 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         if (! Parallel::isEnabled()) {
+            if ($canRefreshReplayEdges) {
+                $this->recorder->activate();
+                $this->recordingActive = true;
+            }
+
             return $arguments;
         }
 
@@ -738,6 +807,10 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $this->purgeWorkerPartials();
 
         Parallel::setGlobal(self::REPLAYING_GLOBAL, '1');
+
+        if ($canRefreshReplayEdges) {
+            Parallel::setGlobal(self::RECORDING_GLOBAL, '1');
+        }
 
         if ($this->filteredMode) {
             Parallel::setGlobal(self::FILTERED_GLOBAL, '1');
@@ -1155,6 +1228,46 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         return $coverage->coverage === true;
+    }
+
+    /**
+     * PHP source changes can introduce new dependencies. Without a coverage
+     * driver, replay can run the currently affected tests but cannot refresh
+     * the graph, so a later edit to the newly introduced dependency could be
+     * missed. Treat those runs as full-suite unless coverage can self-heal.
+     *
+     * @param  array<int, string>  $changedFiles
+     */
+    private function hasProjectPhpSourceChanges(array $changedFiles): bool
+    {
+        foreach ($changedFiles as $rel) {
+            if (! is_string($rel)) {
+                continue;
+            }
+
+            if (! str_ends_with($rel, '.php')) {
+                continue;
+            }
+
+            if (str_ends_with($rel, '.blade.php')) {
+                continue;
+            }
+
+            if (str_starts_with($rel, 'tests/')
+                || str_starts_with($rel, 'vendor/')
+                || str_starts_with($rel, 'storage/framework/')
+                || str_starts_with($rel, 'bootstrap/cache/')) {
+                continue;
+            }
+
+            if (! is_file(TestSuite::getInstance()->rootPath.DIRECTORY_SEPARATOR.$rel)) {
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     /**
