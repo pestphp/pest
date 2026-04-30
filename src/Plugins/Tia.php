@@ -19,6 +19,8 @@ use Pest\Plugins\Tia\Recorder;
 use Pest\Plugins\Tia\ResultCollector;
 use Pest\Plugins\Tia\TableExtractor;
 use Pest\Plugins\Tia\WatchPatterns;
+use Pest\Exceptions\NoAffectedTestsFound;
+use Pest\Panic;
 use Pest\Support\Container;
 use Pest\TestCaseFilters\TiaTestCaseFilter;
 use Pest\TestSuite;
@@ -705,6 +707,10 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $this->registerRecap();
 
         if ($this->filteredMode) {
+            if ($affected === []) {
+                Panic::with(new NoAffectedTestsFound);
+            }
+
             TestSuite::getInstance()->tests->addTestCaseFilter(
                 new TiaTestCaseFilter($projectRoot, $graph, $affectedSet),
             );
