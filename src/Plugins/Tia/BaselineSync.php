@@ -11,64 +11,26 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 
 /**
- * Pulls a team-shared TIA baseline on the first `--tia` run so new
- * contributors and fresh CI workspaces start in replay mode instead of
- * paying the ~30s record cost.
+ * Downloads a team-shared TIA baseline from GitHub workflow artifacts so new contributors and
+ * fresh CI workspaces start in replay mode. Artifacts are used instead of releases because they
+ * produce no tag (no push cascade), support tunable retention, and can only be published by CI.
  *
- * Storage: **workflow artifacts**, not releases. A dedicated CI workflow
- * (conventionally `.github/workflows/tia-baseline.yml`) runs the full
- * suite under `--tia` and uploads the `.pest/tia/` directory as a named
- * artifact (`pest-tia-baseline`) containing `graph.json` +
- * `coverage.bin`. On dev
- * machines, this class finds the latest successful run of that workflow
- * and downloads the artifact via `gh`.
- *
- * Why artifacts, not releases:
- *   - No tag is created → no `push` event cascade into CI workflows.
- *   - No release event → no deploy workflows tied to `release:published`.
- *   - Retention is run-scoped and tunable (1-90 days) instead of clobbering
- *     a single floating tag.
- *   - Publishing is strictly CI-only: artifacts can't be produced from a
- *     developer's laptop. This enforces the "CI is the authoritative
- *     publisher" policy that local-publish paths would otherwise erode.
- *
- * Fingerprint validation happens back in `Tia::handleParent` after the
- * blobs are written: a mismatched environment (different PHP version,
- * composer.lock, etc.) discards the pulled baseline and falls through to
- * the regular record path.
+ * Fingerprint validation happens in `Tia::handleParent` after the blobs land; a mismatched
+ * environment falls through to the normal record path.
  *
  * @internal
  */
 final readonly class BaselineSync
 {
-    /**
-     * Conventional workflow filename teams publish from. Not configurable
-     * for MVP — teams that outgrow the default can set
-     * `PEST_TIA_BASELINE_WORKFLOW` later.
-     */
     private const string WORKFLOW_FILE = 'tia-baseline.yml';
 
-    /**
-     * Artifact name the workflow uploads under. The artifact is a zip
-     * containing `graph.json` (always) + `coverage.bin` (optional).
-     */
     private const string ARTIFACT_NAME = 'pest-tia-baseline';
 
-    /**
-     * Asset filenames inside the artifact — mirror the state keys so the
-     * CI publisher and the sync consumer stay in lock-step.
-     */
     private const string GRAPH_ASSET = Tia::KEY_GRAPH;
 
     private const string COVERAGE_ASSET = Tia::KEY_COVERAGE_CACHE;
 
-    /**
-     * Cooldown (in seconds) applied after a failed baseline fetch.
-     * Rationale: when the remote workflow hasn't published yet, every
-     * `pest --tia` invocation would otherwise re-hit `gh run list` and
-     * re-print the publish instructions — noisy + slow. Back off for a
-     * day, let the user override with `--refetch`.
-     */
+    // 24 h cooldown after a failed fetch so repeated `pest --tia` calls don't re-hit `gh run list`.
     private const int FETCH_COOLDOWN_SECONDS = 86400;
 
     public function __construct(
@@ -76,16 +38,6 @@ final readonly class BaselineSync
         private OutputInterface $output,
     ) {}
 
-    /**
-     * Detects the repo, fetches the latest baseline artifact, writes its
-     * contents into the TIA state store. Returns true when the graph blob
-     * landed; coverage is best-effort since plain `--tia` (no `--coverage`)
-     * never reads it.
-     *
-     * `$force = true` (driven by `--refetch`) ignores the post-failure
-     * cooldown so the user can retry on demand without waiting out the
-     * 24h window.
-     */
     public function fetchIfAvailable(string $projectRoot, bool $force = false): bool
     {
         $repo = $this->detectGitHubRepo($projectRoot);
@@ -126,9 +78,6 @@ final readonly class BaselineSync
             $this->state->write(Tia::KEY_COVERAGE_CACHE, $payload['coverage']);
         }
 
-        // Successful fetch wipes any stale cooldown so the next failure
-        // (say, weeks later) starts a fresh 24h timer rather than inheriting
-        // one from the deep past.
         $this->clearCooldown();
 
         $this->output->writeln(sprintf(
@@ -139,10 +88,6 @@ final readonly class BaselineSync
         return true;
     }
 
-    /**
-     * Seconds left on the cooldown, or `null` when the cooldown is cleared
-     * / expired / unreadable.
-     */
     private function cooldownRemaining(): ?int
     {
         $raw = $this->state->read(Tia::KEY_FETCH_COOLDOWN);
@@ -187,18 +132,6 @@ final readonly class BaselineSync
         return $seconds.'s';
     }
 
-    /**
-     * Prints actionable instructions for publishing a first baseline when
-     * the consumer-side fetch finds nothing.
-     *
-     * Behaviour splits on environment:
-     *   - **CI:** a single line. The current run is almost certainly *the*
-     *     publisher (it's what this workflow does by definition), so
-     *     printing the whole recipe again is redundant and noisy.
-     *   - **Local:** the full recipe, adapted to Laravel's pre-test steps
-     *     (`.env.example` copy + `artisan key:generate`) when the framework
-     *     is present. Generic PHP projects get a slimmer skeleton.
-     */
     private function emitPublishInstructions(string $repo): void
     {
         if ($this->isCi()) {
@@ -237,12 +170,7 @@ final readonly class BaselineSync
         $this->output->writeln([...$preamble, ...$indentedYaml, ...$trailer]);
     }
 
-    /**
-     * True when running inside a CI provider. Conservative list — only the
-     * three providers Pest formally supports / sees in the wild. `CI=true`
-     * alone is ambiguous (users set it locally too) so we require a
-     * provider-specific flag.
-     */
+    // `CI=true` alone is ambiguous (users set it locally) — require a provider-specific env var.
     private function isCi(): bool
     {
         return getenv('GITHUB_ACTIONS') === 'true'
@@ -256,12 +184,6 @@ final readonly class BaselineSync
             && InstalledVersions::isInstalled('laravel/framework');
     }
 
-    /**
-     * Laravel projects need a populated `.env` and a generated `APP_KEY`
-     * before the first boot, otherwise `Illuminate\Encryption\MissingAppKeyException`
-     * fires during `setUp`. Include the standard pre-test dance plus the
-     * extension set typical Laravel apps rely on.
-     */
     private function laravelWorkflowYaml(): string
     {
         return <<<'YAML'
@@ -329,12 +251,6 @@ jobs:
 YAML;
     }
 
-    /**
-     * Parses `.git/config` for the `origin` remote and extracts
-     * `org/repo`. Supports the two URL flavours git emits out of the box.
-     * Non-GitHub remotes (GitLab, Bitbucket, self-hosted) → null, which
-     * silently opts the repo out of auto-sync.
-     */
     private function detectGitHubRepo(string $projectRoot): ?string
     {
         $gitConfig = $projectRoot.DIRECTORY_SEPARATOR.'.git'.DIRECTORY_SEPARATOR.'config';
@@ -349,29 +265,20 @@ YAML;
             return null;
         }
 
-        // Find the `[remote "origin"]` section and the first `url` line
-        // inside it. Tolerates INI whitespace quirks (tabs, CRLF).
         if (preg_match('/\[remote "origin"\][^\[]*?url\s*=\s*(\S+)/s', $content, $match) !== 1) {
             return null;
         }
 
         $url = $match[1];
 
-        // SSH: git@github.com:org/repo(.git)
         if (preg_match('#^git@github\.com:([\w.-]+/[\w.-]+?)(?:\.git)?$#', $url, $m) === 1) {
             return $m[1];
         }
 
-        // HTTPS: https://github.com/org/repo(.git) (optional trailing slash)
         if (preg_match('#^https?://github\.com/([\w.-]+/[\w.-]+?)(?:\.git)?/?$#', $url, $m) === 1) {
             return $m[1];
         }
 
-        // SSH URL form: ssh://[user@]github.com[:port]/org/repo(.git).
-        // Some teams configure this explicitly to pin the SSH port; the
-        // colon-separated form above doesn't match. Mirrors the parser
-        // in `Storage::originIdentity` so the same remote produces the
-        // same project key for both storage and remote-fetch.
         if (preg_match('#^ssh://(?:[^@/]+@)?github\.com(?::\d+)?/([\w.-]+/[\w.-]+?)(?:\.git)?/?$#i', $url, $m) === 1) {
             return $m[1];
         }
@@ -379,15 +286,7 @@ YAML;
         return null;
     }
 
-    /**
-     * Two-step fetch: find the latest successful run of the baseline
-     * workflow, then download the named artifact from it. Returns
-     * `['graph' => bytes, 'coverage' => bytes|null]` on success, or null
-     * if `gh` is unavailable, the workflow hasn't run yet, the artifact
-     * is missing, or any shell step fails.
-     *
-     * @return array{graph: string, coverage: ?string}|null
-     */
+    /** @return array{graph: string, coverage: ?string}|null */
     private function download(string $repo): ?array
     {
         if (! $this->commandExists('gh')) {
@@ -442,11 +341,6 @@ YAML;
         ];
     }
 
-    /**
-     * Queries GitHub for the most recent successful run of the baseline
-     * workflow. `--jq '.[0].databaseId // empty'` coerces "no runs found"
-     * into an empty string, which we map to null.
-     */
     private function latestSuccessfulRunId(string $repo): ?string
     {
         $process = new Process([

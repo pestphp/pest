@@ -25,6 +25,52 @@ use Pest\Support\Container;
 final class Configuration
 {
     /**
+     * Activates TIA for every run without requiring the `--tia` CLI flag.
+     *
+     * @return $this
+     */
+    public function always(): self
+    {
+        /** @var WatchPatterns $watchPatterns */
+        $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
+        $watchPatterns->markAlways();
+
+        return $this;
+    }
+
+    /**
+     * Restricts the `always()` activation to local environments only.
+     * On CI (`--ci` flag or `CI` env var), TIA is skipped even if `always()` is set.
+     * Explicit `--tia` on the CLI always takes effect regardless.
+     *
+     * @return $this
+     */
+    public function locally(): self
+    {
+        /** @var WatchPatterns $watchPatterns */
+        $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
+        $watchPatterns->markLocally();
+
+        return $this;
+    }
+
+    /**
+     * In replay mode, instead of short-circuiting cached results for unaffected
+     * tests, narrows PHPUnit to only the affected files — unaffected tests are
+     * never loaded. Can also be enabled with the `--filtered` CLI flag.
+     *
+     * @return $this
+     */
+    public function filtered(): self
+    {
+        /** @var WatchPatterns $watchPatterns */
+        $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
+        $watchPatterns->markFiltered();
+
+        return $this;
+    }
+
+    /**
      * Adds watch-pattern → test-directory mappings that supplement (or
      * override) the built-in defaults.
      *

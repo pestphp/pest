@@ -288,6 +288,7 @@ trait Testable
         if ($cached !== null) {
             if ($cached->isSuccess()) {
                 $this->__cachedPass = true;
+                $this->__ran = true;
 
                 return;
             }
@@ -299,6 +300,7 @@ trait Testable
             // programmatic risky-marker API.
             if ($cached->isRisky()) {
                 $this->__cachedPass = true;
+                $this->__ran = true;
 
                 return;
             }
@@ -313,6 +315,7 @@ trait Testable
 
             if ($cached->isIncomplete()) {
                 $this->markTestIncomplete($cached->message());
+                $this->__ran = true;
             }
 
             throw new AssertionFailedError($cached->message() ?: 'Cached failure');

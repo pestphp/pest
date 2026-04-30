@@ -45,6 +45,21 @@ final readonly class Browser implements WatchDefault
             // Vite / Webpack build output that browser tests may consume.
             'public/build/**/*.js',
             'public/build/**/*.css',
+            // Static public assets can affect browser-rendered pages without
+            // any PHP file changing (favicons, robots, images, downloaded
+            // manifests, etc.). Only browser-test targets are invalidated.
+            'public/**/*.js',
+            'public/**/*.css',
+            'public/**/*.svg',
+            'public/**/*.png',
+            'public/**/*.jpg',
+            'public/**/*.jpeg',
+            'public/**/*.webp',
+            'public/**/*.ico',
+            'public/**/*.txt',
+            'public/**/*.json',
+            'public/**/*.xml',
+            'public/hot',
         ];
 
         $patterns = [];

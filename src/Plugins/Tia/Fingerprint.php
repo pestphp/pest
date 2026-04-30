@@ -5,30 +5,14 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 /**
- * Captures environmental inputs that, when changed, may make the TIA graph
- * or its recorded results stale. The fingerprint is split into two buckets:
+ * Two-bucket fingerprint for TIA staleness detection.
  *
- *   - **structural** — describes what the graph's *edges* were recorded
- *     against. If any of these drift (`composer.lock`, `composer.json`,
- *     `phpunit.xml{,.dist}`, `vite.config.*`, Pest's factory codegen) the
- *     edges themselves are potentially wrong and the graph must rebuild
- *     from scratch. `tests/TestCase.php` and `tests/Pest.php` are
- *     intentionally NOT here — those are handled by per-test ancestor
- *     linking (`Recorder::linkAncestorFiles`) and the Php watch pattern
- *     respectively, which give precise invalidation rather than a wholesale
- *     rebuild.
- *   - **environmental** — describes the *runtime* the results were captured
- *     on (PHP minor, extension set). Drift here means the edges are still
- *     trustworthy, but the cached per-test results (pass/fail/time) may
- *     not reproduce on this machine. Tia's handler drops the branch's
- *     results + coverage cache and re-runs to freshen them, rather than
- *     re-recording from scratch. Pest's own version is intentionally NOT
- *     here — `composer.lock`'s structural hash already moves whenever the
- *     installed Pest version changes.
- *
- * Legacy flat-shape graphs (schema ≤ 3) are read as structurally stale and
- * rebuilt on first load; the schema bump in the structural bucket takes
- * care of that automatically.
+ * - **structural**: inputs whose drift means graph *edges* may be wrong → full rebuild.
+ *   `tests/TestCase.php` and `tests/Pest.php` are intentionally absent; they're covered by
+ *   `Recorder::linkAncestorFiles` and the watch pattern, giving precise per-test invalidation.
+ * - **environmental**: runtime inputs (PHP version, extensions, env files) whose drift means
+ *   edges are still valid but cached results may not reproduce → drop results and re-run.
+ *   Pest's own version is absent; `composer.lock` moves whenever Pest is upgraded.
  *
  * @internal
  */
@@ -83,7 +67,11 @@ final readonly class Fingerprint
     //        are included in the environmental bucket. They are commonly
     //        git-ignored, so watch patterns alone cannot reliably notice
     //        edits; a drift drops cached results and re-executes the suite.
-    private const int SCHEMA_VERSION = 13;
+    //   v14: Node/Vite resolver inputs (`package*.json`, `tsconfig.*`,
+    //        `jsconfig.*`) are included in the structural bucket. They can
+    //        reshape the persisted JS module graph without touching
+    //        `vite.config.*` itself.
+    private const int SCHEMA_VERSION = 14;
 
     /**
      * @return array{
@@ -96,40 +84,19 @@ final readonly class Fingerprint
         return [
             'structural' => [
                 'schema' => self::SCHEMA_VERSION,
-                // `composer.lock` hashed against a *behavioural*
-                // subset (per-package version + reference + autoload +
-                // extra). Skips per-package install timestamps, dist
-                // URLs, support links, descriptions — none of which
-                // affect what code runs.
                 'composer_lock' => self::composerLockHash($projectRoot),
                 'phpunit_xml' => self::hashIfExists($projectRoot.'/phpunit.xml'),
                 'phpunit_xml_dist' => self::hashIfExists($projectRoot.'/phpunit.xml.dist'),
-                // Pest's generated classes bake the code-generation logic
-                // in — if TestCaseFactory changes (new attribute, different
-                // method signature, etc.) every previously-recorded edge is
-                // stale. Hashing via `ContentHash::of()` so cosmetic edits
-                // (comments, formatting) don't drift the fingerprint.
                 'pest_factory' => self::contentHashOrNull(__DIR__.'/../../Factories/TestCaseFactory.php'),
                 'pest_method_factory' => self::contentHashOrNull(__DIR__.'/../../Factories/TestCaseMethodFactory.php'),
-                // `vite.config.*` reshapes the module graph
-                // `JsModuleGraph` records at the next `--tia` run; if
-                // the config drifts without a rebuild, the stored
-                // `$jsFileToComponents` map is silently stale.
-                // `viteConfigHash` itself uses `ContentHash::of()` so
-                // a comment-only edit to vite.config doesn't rebuild.
                 'vite_config' => self::viteConfigHash($projectRoot),
-                // `composer.json` hashed against a behavioural subset:
-                // autoload(-dev), require(-dev), extra (Laravel
-                // package discovery), repositories, minimum-stability,
-                // and the platform / allow-plugins entries from
-                // `config`. Cosmetic fields (description, keywords,
-                // scripts, authors, funding, support) are excluded.
+                'package_json' => self::packageJsonHash($projectRoot),
+                'package_lock' => self::packageLockHash($projectRoot),
+                'js_config' => self::jsConfigHash($projectRoot),
                 'composer_json' => self::composerJsonHash($projectRoot),
             ],
             'environmental' => [
-                // PHP **minor** only (8.4, not 8.4.19) — CI's resolved patch
-                // almost never matches a dev's Herd/Homebrew install, and
-                // the patch rarely changes anything test-visible.
+                // Minor only (8.4, not 8.4.19) — CI's patch rarely matches dev installs.
                 'php_minor' => PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION,
                 'extensions' => self::extensionsFingerprint($projectRoot),
                 'env_files' => self::envFilesHash($projectRoot),
@@ -138,9 +105,6 @@ final readonly class Fingerprint
     }
 
     /**
-     * True when the structural buckets match. Drift here means the edges
-     * are potentially wrong; caller should discard the graph and rebuild.
-     *
      * @param  array<string, mixed>  $a
      * @param  array<string, mixed>  $b
      */
@@ -156,12 +120,6 @@ final readonly class Fingerprint
     }
 
     /**
-     * Returns the list of structural field names that drifted between
-     * the stored and current fingerprints. Empty list = no drift.
-     * Caller uses this to tell the user *why* the graph rebuilt — a
-     * generic "graph outdated" message leaves people staring at
-     * unrelated diffs.
-     *
      * @param  array<string, mixed>  $stored
      * @param  array<string, mixed>  $current
      * @return list<string>
@@ -195,11 +153,6 @@ final readonly class Fingerprint
     }
 
     /**
-     * Returns a list of field names that drifted between the stored and
-     * current environmental fingerprints. Empty list = no drift. Caller
-     * uses this to print a human-readable warning and to decide whether
-     * per-test results should be dropped (any drift → yes).
-     *
      * @param  array<string, mixed>  $stored
      * @param  array<string, mixed>  $current
      * @return list<string>
@@ -244,12 +197,8 @@ final readonly class Fingerprint
         return self::bucket($fingerprint, 'environmental');
     }
 
+    // Legacy flat-shape fingerprints (schema ≤ 3) return empty, causing structuralMatches to fail → rebuild.
     /**
-     * Returns `$fingerprint[$key]` as an `array<string, mixed>` if it exists
-     * and is an array, otherwise empty. Legacy flat-shape fingerprints
-     * (schema ≤ 3) return empty here, which makes `structuralMatches` fail
-     * and the caller rebuild — the clean migration path.
-     *
      * @param  array<string, mixed>  $fingerprint
      * @return array<string, mixed>
      */
@@ -272,13 +221,6 @@ final readonly class Fingerprint
         return $normalised;
     }
 
-    /**
-     * Combined hash of every `vite.config.{ts,js,mjs,cjs,mts}` present
-     * at the project root. Most projects have exactly one; we accept
-     * any of the five recognised extensions without assuming which
-     * the user picked. Returns null when no config file exists —
-     * treated as "no Vite project" by the matcher, no drift.
-     */
     private static function viteConfigHash(string $projectRoot): ?string
     {
         $parts = [];
@@ -294,12 +236,79 @@ final readonly class Fingerprint
         return $parts === [] ? null : hash('xxh128', implode("\n", $parts));
     }
 
-    /**
-     * Hashes environment files that can globally alter app boot behaviour.
-     * These files are often git-ignored, so they cannot rely on changed-file
-     * detection. The environmental bucket keeps graph edges while forcing all
-     * cached results to refresh after an env edit.
-     */
+    private static function jsConfigHash(string $projectRoot): ?string
+    {
+        $parts = [];
+
+        foreach (['tsconfig.json', 'tsconfig.app.json', 'jsconfig.json'] as $name) {
+            $hash = self::hashIfExists($projectRoot.'/'.$name);
+
+            if ($hash !== null) {
+                $parts[] = $name.':'.$hash;
+            }
+        }
+
+        return $parts === [] ? null : hash('xxh128', implode("\n", $parts));
+    }
+
+    private static function packageJsonHash(string $projectRoot): ?string
+    {
+        $path = $projectRoot.'/package.json';
+
+        if (! is_file($path)) {
+            return null;
+        }
+
+        $raw = @file_get_contents($path);
+
+        if ($raw === false) {
+            return null;
+        }
+
+        $data = json_decode($raw, true);
+
+        if (! is_array($data)) {
+            $hash = @hash_file('xxh128', $path);
+
+            return $hash === false ? null : $hash;
+        }
+
+        $relevant = [
+            'type' => $data['type'] ?? null,
+            'packageManager' => $data['packageManager'] ?? null,
+            'dependencies' => $data['dependencies'] ?? null,
+            'devDependencies' => $data['devDependencies'] ?? null,
+            'optionalDependencies' => $data['optionalDependencies'] ?? null,
+            'peerDependencies' => $data['peerDependencies'] ?? null,
+            'overrides' => $data['overrides'] ?? null,
+            'resolutions' => $data['resolutions'] ?? null,
+            'imports' => $data['imports'] ?? null,
+            'exports' => $data['exports'] ?? null,
+            'browser' => $data['browser'] ?? null,
+        ];
+
+        self::sortRecursively($relevant);
+
+        $json = json_encode($relevant);
+
+        return $json === false ? null : hash('xxh128', $json);
+    }
+
+    private static function packageLockHash(string $projectRoot): ?string
+    {
+        $parts = [];
+
+        foreach (['package-lock.json', 'pnpm-lock.yaml', 'yarn.lock', 'bun.lock', 'bun.lockb'] as $name) {
+            $hash = self::hashIfExists($projectRoot.'/'.$name);
+
+            if ($hash !== null) {
+                $parts[] = $name.':'.$hash;
+            }
+        }
+
+        return $parts === [] ? null : hash('xxh128', implode("\n", $parts));
+    }
+
     private static function envFilesHash(string $projectRoot): ?string
     {
         $paths = [
@@ -348,14 +357,6 @@ final readonly class Fingerprint
         return hash('xxh128', implode("\n", $parts));
     }
 
-    /**
-     * Behavioural subset of `composer.json`. Keeps the keys that
-     * actually move test outcomes (autoload, require, extra,
-     * repositories, minimum-stability, platform / allow-plugins
-     * config) and drops cosmetic ones (description, keywords,
-     * scripts, authors, funding, homepage, support). Falls back to
-     * a raw hash on parse errors so any change still rebuilds.
-     */
     private static function composerJsonHash(string $projectRoot): ?string
     {
         $path = $projectRoot.'/composer.json';
@@ -403,15 +404,6 @@ final readonly class Fingerprint
         return $json === false ? null : hash('xxh128', $json);
     }
 
-    /**
-     * Behavioural subset of `composer.lock`. For every package in
-     * `packages` and `packages-dev`, keeps version + dist/source
-     * reference (commit SHA — catches dev-branch updates that don't
-     * bump the version string) + autoload(-dev) + extra (Laravel
-     * package discovery). Drops install timestamps, dist URLs,
-     * support links, descriptions, etc. — none of which change what
-     * code runs.
-     */
     private static function composerLockHash(string $projectRoot): ?string
     {
         $path = $projectRoot.'/composer.lock';
@@ -492,12 +484,6 @@ final readonly class Fingerprint
         return is_string($reference) ? $reference : null;
     }
 
-    /**
-     * Recursively sorts associative arrays by key so semantically
-     * equivalent JSON produces the same hash regardless of key
-     * ordering. Lists (numeric arrays) keep their order — they're
-     * meaningful in `repositories`, `autoload.files`, etc.
-     */
     private static function sortRecursively(mixed &$value): void
     {
         if (! is_array($value)) {
@@ -537,16 +523,8 @@ final readonly class Fingerprint
         return $hash === false ? null : $hash;
     }
 
-    /**
-     * Deterministic hash of the extensions the project actually depends on —
-     * the `ext-*` entries in composer.json's `require` / `require-dev`. An
-     * incidental extension loaded on the developer's machine (or on CI) but
-     * not declared as a dependency can't affect correctness of the test
-     * suite, so we ignore it here to keep the drift signal quiet.
-     *
-     * Declared extensions that aren't currently loaded record as `missing`,
-     * which is itself a drift signal worth surfacing.
-     */
+    // Only hashes `ext-*` entries declared in composer.json — incidental extensions loaded on the
+    // machine but not declared can't affect suite correctness, so they're excluded to reduce noise.
     private static function extensionsFingerprint(string $projectRoot): string
     {
         $extensions = self::declaredExtensions($projectRoot);
@@ -567,15 +545,7 @@ final readonly class Fingerprint
         return hash('xxh128', implode("\n", $parts));
     }
 
-    /**
-     * Extension names (without the `ext-` prefix) that appear as keys under
-     * `require` or `require-dev` in the project's composer.json. Returns
-     * an empty list when composer.json is missing / unreadable / malformed,
-     * so the environmental fingerprint stays stable in those cases rather
-     * than flapping.
-     *
-     * @return list<string>
-     */
+    /** @return list<string> */
     private static function declaredExtensions(string $projectRoot): array
     {
         $path = $projectRoot.'/composer.json';

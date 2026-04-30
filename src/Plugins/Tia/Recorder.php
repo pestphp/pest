@@ -8,119 +8,49 @@ use Pest\TestSuite;
 use ReflectionClass;
 
 /**
- * Captures per-test file coverage using the PCOV driver.
- *
- * Acts as a singleton because PCOV has a single global collection state and
- * the recorder is wired into PHPUnit through two distinct subscribers
- * (`Prepared` / `Finished`) that must share context.
+ * Captures per-test file coverage. Singleton because PCOV/Xdebug have a single global state
+ * shared across the `Prepared` and `Finished` subscribers.
  *
  * @internal
  */
 final class Recorder
 {
-    /**
-     * Test file currently being recorded, or `null` when idle.
-     */
     private ?string $currentTestFile = null;
 
-    /**
-     * Aggregated map: absolute test file → set<absolute source file>.
-     *
-     * @var array<string, array<string, true>>
-     */
+    /** @var array<string, array<string, true>> */
     private array $perTestFiles = [];
 
-    /**
-     * Aggregated map: absolute test file → set<lowercase table name>.
-     * Populated by `TableTracker` from `DB::listen` callbacks; consumed
-     * at record finalize to populate the graph's `$testTables` edges
-     * that drive migration-change impact analysis.
-     *
-     * @var array<string, array<string, true>>
-     */
+    /** @var array<string, array<string, true>> */
     private array $perTestTables = [];
 
-    /**
-     * Aggregated map: absolute test file → set<Inertia component name>.
-     * Populated by `InertiaEdges` from Inertia responses observed at
-     * request-handled time; consumed at record finalize to populate
-     * the graph's per-test component edges that drive Vue / React
-     * page-file impact analysis.
-     *
-     * @var array<string, array<string, true>>
-     */
+    /** @var array<string, array<string, true>> */
     private array $perTestInertiaComponents = [];
 
-    /**
-     * Set of absolute test files whose class hierarchy uses one of
-     * Laravel's database-resetting traits (`RefreshDatabase`,
-     * `DatabaseMigrations`, `DatabaseTransactions`). Captured at
-     * `beginTest` so the finalize path can augment their table edges
-     * even when seeders / pre-test DML fired before `TableTracker`
-     * armed.
-     *
-     * @var array<string, true>
-     */
+    /** @var array<string, true> */
     private array $perTestUsesDatabase = [];
 
-    /**
-     * Cached class → test file resolution.
-     *
-     * @var array<string, string|null>
-     */
+    /** @var array<string, string|null> */
     private array $classFileCache = [];
 
-    /**
-     * Cached class → "uses Laravel DB trait" introspection result.
-     *
-     * @var array<string, bool>
-     */
+    /** @var array<string, bool> */
     private array $classUsesDatabaseCache = [];
 
-    /**
-     * Reverse map of project-local source file → list of class /
-     * interface / trait names declared in it. Built incrementally as
-     * tests run and new classes get autoloaded; consumed by
-     * `linkSourceDependencies()` so a test's covered file's
-     * declared classes can be walked for their interfaces, traits,
-     * and parents (which the coverage driver doesn't capture
-     * because interface declarations and empty traits emit no
-     * executable bytecode).
-     *
-     * @var array<string, list<string>>
-     */
+    // Source file → declared class names. Built incrementally as classes are autoloaded.
+    // Used to walk the interface/trait/parent hierarchy which coverage drivers miss
+    // (interfaces and empty traits emit no executable bytecode).
+    /** @var array<string, list<string>> */
     private array $fileToClassNames = [];
 
-    /**
-     * Names already folded into `$fileToClassNames`. Lets the
-     * incremental refresher skip classes seen in a previous test.
-     *
-     * @var array<string, true>
-     */
+    /** @var array<string, true> */
     private array $indexedClassNames = [];
 
-    /**
-     * Cached "files this class transitively depends on (interfaces,
-     * traits, parent chain, parents' interfaces and traits)" for
-     * project-local class names. Avoids re-walking the same
-     * hierarchy on every test that touches the same class.
-     *
-     * @var array<string, list<string>>
-     */
+    /** @var array<string, list<string>> */
     private array $classDependencyCache = [];
 
-    /**
-     * Cached test-file import resolution.
-     *
-     * @var array<string, list<string>>
-     */
+    /** @var array<string, list<string>> */
     private array $testImportFileCache = [];
 
-    /**
-     * Included-file snapshot captured at the start of the current test.
-     *
-     * @var array<string, true>
-     */
+    /** @var array<string, true> */
     private array $includedFilesAtTestStart = [];
 
     private bool $active = false;
@@ -148,15 +78,8 @@ final class Recorder
                 $this->driver = 'pcov';
                 $this->driverAvailable = true;
             } elseif (function_exists('xdebug_start_code_coverage') && function_exists('xdebug_info')) {
-                // Xdebug 3+ exposes the active mode set via `xdebug_info`,
-                // so we can ask directly instead of probing with a
-                // start/stop pair. The probe approach used to emit
-                // E_WARNING when coverage mode was off; with monitoring
-                // agents (Sentry, Bugsnag) hooked into the error
-                // handler stack that warning could be reported as a
-                // real error. `xdebug_info('mode')` is silent and
-                // returns the active modes as a list, so a presence
-                // check is enough.
+                // Probing with start/stop emits E_WARNING when coverage is off, which monitoring agents
+                // (Sentry, Bugsnag) can surface as a real error. xdebug_info('mode') is silent.
                 $modes = \xdebug_info('mode');
 
                 if (is_array($modes) && in_array('coverage', $modes, true)) {
@@ -201,17 +124,8 @@ final class Recorder
             $this->perTestUsesDatabase[$file] = true;
         }
 
-        // Walk the parent-class chain and link each ancestor's defining
-        // file as a source dependency of this test. Captures the common
-        // `tests/TestCase.php` case (where the user's base may be
-        // trait-only and have no executable lines for the coverage
-        // driver to pick up), and any deeper hierarchy. Vendor parents
-        // are skipped — those are pinned by `composer.lock` and don't
-        // need per-test edges. Same idea applies to traits used by the
-        // ancestors: a trait's body executes when the test method
-        // calls into it, so coverage already captures it; we only need
-        // the explicit walk for ancestors whose own bodies might be
-        // empty.
+        // Walk parent-class chain to link ancestor files. Empty base classes (e.g. a trait-only
+        // TestCase) emit no executable bytecode, so the coverage driver never records them.
         $this->linkAncestorFiles($className);
         $this->linkImportedFiles($file);
 
@@ -239,9 +153,7 @@ final class Recorder
         } else {
             /** @var array<string, mixed> $data */
             $data = \xdebug_get_code_coverage();
-            // `true` resets Xdebug's internal buffer so the next `start()`
-            // does not accumulate earlier tests' coverage into the current
-            // one — otherwise the graph becomes progressively polluted.
+            // `true` resets Xdebug's buffer; without it the next start() accumulates prior test coverage.
             \xdebug_stop_code_coverage(true);
         }
 
@@ -258,29 +170,14 @@ final class Recorder
             $this->perTestFiles[$this->currentTestFile][$sourceFile] = true;
         }
 
-        // Walk each covered class's interfaces / traits / parent chain
-        // and link those files explicitly. Interface declarations have
-        // no executable bytecode, so coverage drivers never emit lines
-        // for them — without this walk, a signature change to an
-        // interface like `Viewable` would leave the cached results of
-        // every test that exercises an implementing class stale,
-        // because the interface file never enters the graph through
-        // the coverage path.
+        // Walk covered classes' interfaces/traits/parents. Interfaces have no executable bytecode,
+        // so a signature change would leave implementing-class tests stale without this walk.
         $this->linkSourceDependencies(array_keys($data));
 
         $this->currentTestFile = null;
         $this->includedFilesAtTestStart = [];
     }
 
-    /**
-     * Records an extra source-file dependency for the currently-running
-     * test. Used by collaborators that capture edges the coverage driver
-     * cannot see — Blade templates rendered through Laravel's view
-     * factory are the motivating case (their `.blade.php` source never
-     * executes directly; a cached compiled PHP file does). No-op when
-     * the recorder is inactive or no test is in flight, so callers can
-     * fire it unconditionally from app-level hooks.
-     */
     public function linkSource(string $sourceFile): void
     {
         if (! $this->active) {
@@ -298,12 +195,7 @@ final class Recorder
         $this->perTestFiles[$this->currentTestFile][$sourceFile] = true;
     }
 
-    /**
-     * Records source dependencies for a specific test file. Used for edges
-     * captured before `Prepared` has opened the normal per-test recorder window.
-     *
-     * @param  iterable<int, string>  $sourceFiles
-     */
+    /** @param  iterable<int, string>  $sourceFiles */
     public function linkSourcesForTest(string $testFile, iterable $sourceFiles): void
     {
         if (! $this->active) {
@@ -323,23 +215,7 @@ final class Recorder
         }
     }
 
-    /**
-     * For each project-local source file the coverage driver
-     * captured for this test, finds the classes / interfaces / traits
-     * declared in it and links every file in their declarative
-     * hierarchy: implemented interfaces (transitive), used traits,
-     * and parent classes (with their own interfaces and traits).
-     *
-     * Coverage drivers only record executable lines, so an interface
-     * signature change (e.g. adding a return type to a `Viewable`
-     * method) never registers — the interface file has no bytecode
-     * to instrument. Without this walk, every class implementing the
-     * interface would silently keep its stale cached result through
-     * the change, even though `--parallel` (no TIA) catches the
-     * incompatibility immediately.
-     *
-     * @param  array<int, string>  $coveredFiles  absolute paths from coverage
-     */
+    /** @param  array<int, string>  $coveredFiles */
     private function linkSourceDependencies(array $coveredFiles): void
     {
         if ($this->currentTestFile === null) {
@@ -361,15 +237,6 @@ final class Recorder
         }
     }
 
-    /**
-     * Incrementally folds every project-local class / interface /
-     * trait declared since the last refresh into `$fileToClassNames`.
-     * PHP only ever appends to its declared-symbol lists (classes
-     * never get unloaded), so iterating from `$indexedClassNames`'s
-     * cardinality forward is sufficient — and over a long suite this
-     * is dominated by the first test, since most classes are loaded
-     * by then.
-     */
     private function refreshClassMap(): void
     {
         $names = array_merge(
@@ -384,12 +251,6 @@ final class Recorder
             }
             $this->indexedClassNames[$name] = true;
 
-            // Names came directly from `get_declared_*`, so the
-            // class/interface/trait is guaranteed loaded — but
-            // `class_exists($name, false)` (no autoload) keeps the
-            // string narrowed to `class-string` for static analysis
-            // and the `ReflectionClass` constructor stays in its
-            // documented happy path.
             if (! class_exists($name, false)
                 && ! interface_exists($name, false)
                 && ! trait_exists($name, false)) {
@@ -416,15 +277,7 @@ final class Recorder
         }
     }
 
-    /**
-     * Returns the project-local files the named class declaratively
-     * depends on: implemented interfaces (transitive), used traits,
-     * and the entire parent chain (each with their own interfaces
-     * and traits). Cached per class because the answer is invariant
-     * across a single process.
-     *
-     * @return list<string>
-     */
+    /** @return list<string> */
     private function classDependencies(string $className): array
     {
         if (isset($this->classDependencyCache[$className])) {
@@ -458,19 +311,11 @@ final class Recorder
             $files[$f] = true;
         };
 
-        // `getInterfaceNames()` is transitive — it returns interfaces
-        // from parent classes and parent interfaces too — so a single
-        // pass covers the whole interface graph.
+        // getInterfaceNames() is transitive — includes parents' interfaces — so one pass suffices.
         foreach ($reflection->getInterfaceNames() as $iname) {
             $linkSymbol($iname);
         }
 
-        // Direct + ancestor traits. `getTraitNames()` doesn't recurse
-        // into traits-using-traits, but that's a rare pattern in
-        // application code; if a project genuinely needs it, the
-        // coverage driver will pick up the executed bytecode of the
-        // outer trait and the dependency walk runs against the
-        // resulting class anyway.
         foreach ($reflection->getTraitNames() as $tname) {
             $linkSymbol($tname);
         }
@@ -490,16 +335,6 @@ final class Recorder
         return $this->classDependencyCache[$className] = array_keys($files);
     }
 
-    /**
-     * Records every project-local ancestor class's defining file as a
-     * source dependency of the currently-running test. PCOV / Xdebug
-     * record *executable lines* — a base class whose body is just
-     * `class TestCase extends BaseTestCase { use CreatesApplication; }`
-     * has no executable bytecode of its own, so the driver doesn't
-     * emit a line for it and it never enters the graph through the
-     * usual coverage path. This walk fills that gap by asking
-     * reflection for each parent's file and linking it explicitly.
-     */
     private function linkAncestorFiles(string $className): void
     {
         if (! class_exists($className, false)) {
@@ -524,11 +359,6 @@ final class Recorder
         }
     }
 
-    /**
-     * Links project-local classes imported by the test file. This catches
-     * declaration-only support classes / enums / interfaces that may never emit
-     * executable coverage lines, and avoids relying on global autoload timing.
-     */
     private function linkImportedFiles(string $testFile): void
     {
         if ($this->currentTestFile === null) {
@@ -653,14 +483,6 @@ final class Recorder
         return null;
     }
 
-    /**
-     * True when `$className` (or any of its ancestors) uses one of
-     * Laravel's database-resetting traits. Walking up `getTraits()` is
-     * necessary because Pest test classes are eval'd from the
-     * generated `*.php` test file and the trait usually lives on a
-     * shared `tests/TestCase.php` ancestor. Result is cached per class
-     * — class hierarchies don't change within a process.
-     */
     private function classUsesDatabase(string $className): bool
     {
         if (array_key_exists($className, $this->classUsesDatabaseCache)) {
@@ -692,14 +514,6 @@ final class Recorder
         return $this->classUsesDatabaseCache[$className] = false;
     }
 
-    /**
-     * Records that the currently-running test queried `$table`. Called
-     * by `TableTracker` for every DML statement Laravel's `DB::listen`
-     * reports; the table name has already been extracted by
-     * `TableExtractor::fromSql()` so we just store it. No-op outside
-     * a test window, so the callback is safe to leave armed across
-     * setUp / tearDown boundaries.
-     */
     public function linkTable(string $table): void
     {
         if (! $this->active) {
@@ -717,15 +531,6 @@ final class Recorder
         $this->perTestTables[$this->currentTestFile][strtolower($table)] = true;
     }
 
-    /**
-     * Records that the currently-running test server-side-rendered the
-     * named Inertia component. The name is whatever
-     * `Inertia::render($component, …)` was called with — typically a
-     * slash-separated path like `Users/Show` that maps to
-     * `resources/js/Pages/Users/Show.vue`. No-op outside a test window
-     * so the underlying listener can stay armed without leaking
-     * state between tests.
-     */
     public function linkInertiaComponent(string $component): void
     {
         if (! $this->active) {
@@ -743,9 +548,7 @@ final class Recorder
         $this->perTestInertiaComponents[$this->currentTestFile][$component] = true;
     }
 
-    /**
-     * @return array<string, array<int, string>> absolute test file → list of absolute source files.
-     */
+    /** @return array<string, array<int, string>> */
     public function perTestFiles(): array
     {
         $out = [];
@@ -757,9 +560,7 @@ final class Recorder
         return $out;
     }
 
-    /**
-     * @return array<string, array<int, string>> absolute test file → sorted list of table names.
-     */
+    /** @return array<string, array<int, string>> */
     public function perTestTables(): array
     {
         $out = [];
@@ -773,9 +574,7 @@ final class Recorder
         return $out;
     }
 
-    /**
-     * @return array<string, array<int, string>> absolute test file → sorted list of Inertia component names.
-     */
+    /** @return array<string, array<int, string>> */
     public function perTestInertiaComponents(): array
     {
         $out = [];
@@ -789,9 +588,7 @@ final class Recorder
         return $out;
     }
 
-    /**
-     * @return array<string, true> absolute test file → true for tests using a Laravel DB-resetting trait.
-     */
+    /** @return array<string, true> */
     public function perTestUsesDatabase(): array
     {
         return $this->perTestUsesDatabase;
@@ -817,17 +614,8 @@ final class Recorder
         return null;
     }
 
-    /**
-     * Resolves the file that *defines* the test class.
-     *
-     * Order of preference:
-     *   1. Pest's generated `$__filename` static — the original `*.php` file
-     *      containing the `test()` calls (the eval'd class itself has no file).
-     *   2. `ReflectionClass::getFileName()` — the concrete class's file. This
-     *      is intentionally more specific than `ReflectionMethod::getFileName()`
-     *      (which would return the *trait* file for methods brought in via
-     *      `uses SharedTestBehavior`).
-     */
+    // Prefers Pest's `$__filename` static (the original .php file) over ReflectionClass::getFileName()
+    // (which returns the trait file for methods brought in via `uses SharedTestBehavior`).
     private function readPestFilename(string $className): ?string
     {
         if (! class_exists($className, false)) {
@@ -853,11 +641,6 @@ final class Recorder
         return is_string($file) ? $file : null;
     }
 
-    /**
-     * Clears all captured state. Useful for long-running hosts (daemons,
-     * PHP-FPM, watchers) that invoke Pest multiple times in a single process
-     * — without this, coverage from run N would bleed into run N+1.
-     */
     public function reset(): void
     {
         $this->currentTestFile = null;

@@ -58,12 +58,12 @@ final readonly class Php implements WatchDefault
             // suite.
             $testPath.'/Datasets/**/*.php' => [$testPath],
 
-            // Test fixtures — JSON, CSV, XML, TXT data files consumed by
-            // assertions. A fixture change can flip a test result.
-            $testPath.'/Fixtures/**/*.json' => [$testPath],
-            $testPath.'/Fixtures/**/*.csv' => [$testPath],
-            $testPath.'/Fixtures/**/*.xml' => [$testPath],
-            $testPath.'/Fixtures/**/*.txt' => [$testPath],
+            // Test fixtures — data/source snippets consumed by assertions or
+            // external analysers. Nested `Fixtures/` directories are common
+            // beside a single test class, and PHP fixtures may be parsed by
+            // tools without being `require`d, so coverage cannot see them.
+            $testPath.'/Fixtures/**/*' => [$testPath],
+            $testPath.'/**/Fixtures/**/*' => [$testPath],
 
             // Pest snapshots — external edits to snapshot files invalidate
             // snapshot assertions.

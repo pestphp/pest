@@ -27,17 +27,6 @@ final readonly class ChangedFiles
     public function __construct(private string $projectRoot) {}
 
     /**
-     * @return array<int, string>|null `null` when git is unavailable, or when
-     *                                 the recorded SHA is no longer reachable
-     *                                 from HEAD (rebase / force-push) — in
-     *                                 that case the graph should be rebuilt.
-     */
-    /**
-     * Removes files whose current content hash matches the snapshot from the
-     * last `--tia` run. Used to ignore "dirty but unchanged" files — a file
-     * that git still reports as modified but whose content is bit-identical
-     * to the previous TIA invocation.
-     *
      * @param  array<int, string>  $files  project-relative paths.
      * @param  array<string, string>  $lastRunTree  path → content hash from last run.
      * @return array<int, string>
@@ -48,12 +37,7 @@ final readonly class ChangedFiles
             return $files;
         }
 
-        // Union: `$files` (what git currently reports) + every path that was
-        // dirty last run. The second set matters for reverts — when a user
-        // undoes a local edit, the file matches HEAD again and git reports
-        // it clean, so it would never enter `$files`. But it has genuinely
-        // changed vs the snapshot we captured during the bad run, so it
-        // must be checked.
+        // Union with last-run snapshot: catches reverts that git reports clean but are new vs the snapshot.
         $candidates = array_fill_keys($files, true);
 
         foreach (array_keys($lastRunTree) as $snapshotted) {
@@ -68,28 +52,14 @@ final readonly class ChangedFiles
             $exists = is_file($absolute);
 
             if ($snapshot === null) {
-                // File wasn't in last-run tree at all — trust git's signal.
                 $remaining[] = $file;
 
                 continue;
             }
 
             if (! $exists) {
-                // Missing on disk. We always invalidate here, even when
-                // the snapshot also recorded "deleted" (sentinel '').
-                // The `snapshot=='' && !exists` shortcut would in
-                // principle say "no change since last run, cached
-                // result is still valid" — but it's only safe if the
-                // cached result was recorded *during* a run that saw
-                // the file as deleted. A previous run that captured
-                // the deletion in `lastRunTree` but failed to refresh
-                // the cached pass/fail (paratest worker race, an
-                // earlier plugin bug, etc.) would leave the cache
-                // stuck on a stale pass from before the deletion.
-                // Skipping invalidation in that state perpetuates the
-                // wrong result on every subsequent run. Treat any
-                // missing file as a change; cost is one re-run per
-                // `--tia` while the file stays deleted.
+                // Always invalidate deletions — a stale cached result from before the deletion
+                // would persist forever otherwise, even if the snapshot recorded the empty sentinel.
                 $remaining[] = $file;
 
                 continue;
@@ -104,21 +74,9 @@ final readonly class ChangedFiles
             }
 
             if ($hash === $snapshot) {
-                // Same state as the last TIA invocation — cached
-                // result is still valid, no need to re-run.
                 continue;
             }
 
-            // Differs from the snapshot. This includes the
-            // revert-back-to-baseline case (last run had a real edit
-            // and was cached against that edit; this run reverted).
-            // Even though the file now matches what's at the recorded
-            // SHA, the cached test result reflects the *modified*
-            // version, not the baseline version — so it's stale and
-            // the test must re-run to refresh the cache. An earlier
-            // version of this filter short-circuited on
-            // matches-baseline, which served the stale failure
-            // forever after the user reverted.
             $remaining[] = $file;
         }
 

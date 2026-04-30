@@ -43,6 +43,12 @@ final class WatchPatterns
      */
     private array $patterns = [];
 
+    private bool $always = false;
+
+    private bool $locally = false;
+
+    private bool $filtered = false;
+
     /**
      * Probes every registered `WatchDefault` and merges the patterns of
      * those that apply. Called once during Tia plugin boot, after BootFiles
@@ -149,9 +155,42 @@ final class WatchPatterns
         return $affected;
     }
 
+    public function markAlways(): void
+    {
+        $this->always = true;
+    }
+
+    public function isAlways(): bool
+    {
+        return $this->always;
+    }
+
+    public function markLocally(): void
+    {
+        $this->locally = true;
+    }
+
+    public function isLocally(): bool
+    {
+        return $this->locally;
+    }
+
+    public function markFiltered(): void
+    {
+        $this->filtered = true;
+    }
+
+    public function isFiltered(): bool
+    {
+        return $this->filtered;
+    }
+
     public function reset(): void
     {
         $this->patterns = [];
+        $this->always = false;
+        $this->locally = false;
+        $this->filtered = false;
     }
 
     /**

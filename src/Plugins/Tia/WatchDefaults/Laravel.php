@@ -54,8 +54,28 @@ final readonly class Laravel implements WatchDefault
             // if the factory file was already autoloaded before Prepared.
             'database/factories/**/*.php' => [$testPath],
 
+            // Project fixture data. Laravel apps often keep fake repository
+            // lockfiles / API payloads here and read them via `storage_path()`
+            // + `file_get_contents()`, which neither PHP coverage nor static
+            // import edges can observe.
+            'storage/fixtures/**/*' => [$testPath],
+
+            // Non-PHP templates/data living beside app code. These are often
+            // read dynamically by services (Dockerfile templates, stubs,
+            // payload examples) and never appear in coverage because PHP only
+            // sees the reader method, not the external file.
+            'app/**/*.tpl' => [$testPath],
+            'app/**/*.stub' => [$testPath],
+            'app/**/*.json' => [$testPath],
+            'app/**/*.yaml' => [$testPath],
+            'app/**/*.yml' => [$testPath],
+            'app/**/*.txt' => [$testPath],
+
             // Blade templates — compiled to cache, source file not executed.
             'resources/views/**/*.blade.php' => [$testPath],
+            // Mail / view-adjacent themes can be read dynamically by
+            // mailables (for example Laravel's markdown mail theme CSS).
+            'resources/views/**/*.css' => [$testPath],
             // Email templates are nested under views/email or views/emails
             // by convention and power mailable tests that render markup.
             'resources/views/email/**/*.blade.php' => [$testPath],
