@@ -560,8 +560,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                 return $this->reconcileFingerprint($rebuilt, $current);
             }
 
-            $this->renderBadge('WARN', 'Rebuilding graph from scratch.');
-
             $this->state->delete(self::KEY_GRAPH);
             $this->state->delete(self::KEY_COVERAGE_CACHE);
 

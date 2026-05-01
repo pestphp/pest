@@ -101,7 +101,7 @@ final readonly class BaselineSync
 
         $this->clearCooldown();
 
-        $this->renderBadge('SUCCESS', sprintf(
+        $this->renderBadge('INFO', sprintf(
             'Baseline ready (%s).',
             $this->formatSize(strlen($payload['graph']) + strlen($payload['coverage'] ?? '')),
         ));
