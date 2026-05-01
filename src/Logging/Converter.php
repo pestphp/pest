@@ -12,7 +12,9 @@ use PHPUnit\Event\Code\Test;
 use PHPUnit\Event\Code\TestMethod;
 use PHPUnit\Event\Code\Throwable;
 use PHPUnit\Event\Test\AfterLastTestMethodErrored;
+use PHPUnit\Event\Test\AfterLastTestMethodFailed;
 use PHPUnit\Event\Test\BeforeFirstTestMethodErrored;
+use PHPUnit\Event\Test\BeforeFirstTestMethodFailed;
 use PHPUnit\Event\Test\ConsideredRisky;
 use PHPUnit\Event\Test\Errored;
 use PHPUnit\Event\Test\Failed;
@@ -255,9 +257,11 @@ final readonly class Converter
         $numberOfNotPassedTests = count(
             array_unique(
                 array_map(
-                    function (AfterLastTestMethodErrored|BeforeFirstTestMethodErrored|Errored|Failed|Skipped|ConsideredRisky|MarkedIncomplete $event): string {
+                    function (AfterLastTestMethodErrored|AfterLastTestMethodFailed|BeforeFirstTestMethodErrored|BeforeFirstTestMethodFailed|Errored|Failed|Skipped|ConsideredRisky|MarkedIncomplete $event): string {
                         if ($event instanceof BeforeFirstTestMethodErrored
-                            || $event instanceof AfterLastTestMethodErrored) {
+                            || $event instanceof AfterLastTestMethodErrored
+                            || $event instanceof BeforeFirstTestMethodFailed
+                            || $event instanceof AfterLastTestMethodFailed) {
                             return $event->testClassName();
                         }
 

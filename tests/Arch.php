@@ -1,6 +1,7 @@
 <?php
 
 use Pest\Expectation;
+use Pest\Plugins\Tia\BaselineSync;
 
 arch()->preset()->php()->ignoring([
     Expectation::class,
@@ -13,6 +14,7 @@ arch()->preset()->php()->ignoring([
 ]);
 
 arch()->preset()->strict()->ignoring([
+    BaselineSync::class,
     'usleep',
 ]);
 
