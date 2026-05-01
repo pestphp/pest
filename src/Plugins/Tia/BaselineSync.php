@@ -467,7 +467,7 @@ YAML;
             'gh', 'api',
             sprintf('repos/%s/actions/runs/%s/artifacts', $repo, $runId),
             '--jq', sprintf(
-                '.artifacts[] | select(.name == "%s") | .size_in_bytes',
+                '.artifacts[] | select(.name == "%s") | .size_in_bytes', // @pest-ignore-type
                 self::ARTIFACT_NAME,
             ),
         ]);

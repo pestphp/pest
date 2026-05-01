@@ -322,12 +322,13 @@ trait Testable
         }
 
         $recorder = Container::getInstance()->get(Recorder::class);
+        assert($recorder instanceof Recorder);
 
-        if ($recorder instanceof Recorder && $recorder->isActive()) {
+        if ($recorder->isActive()) {
             $recorder->beginTest($this::class, $this->name(), self::$__filename);
         }
 
-        $autoloadBeforeSetUp = $recorder instanceof Recorder && $recorder->isActive()
+        $autoloadBeforeSetUp = $recorder->isActive()
             ? AutoloadEdges::snapshot()
             : [];
 
@@ -339,11 +340,9 @@ trait Testable
         // idempotent against the current app instance so the 774-test
         // suite doesn't stack 774 composers / listeners when Laravel
         // keeps the same app across tests.
-        if ($recorder instanceof Recorder) {
-            BladeEdges::arm($recorder);
-            TableTracker::arm($recorder);
-            InertiaEdges::arm($recorder);
-        }
+        BladeEdges::arm($recorder);
+        TableTracker::arm($recorder);
+        InertiaEdges::arm($recorder);
 
         $beforeEach = TestSuite::getInstance()->beforeEach->get(self::$__filename)[1];
 
@@ -353,7 +352,7 @@ trait Testable
 
         $this->__callClosure($beforeEach, $arguments);
 
-        if ($recorder instanceof Recorder && $recorder->isActive() && $autoloadBeforeSetUp !== []) {
+        if ($recorder->isActive() && $autoloadBeforeSetUp !== []) {
             $recorder->linkSourcesForTest(
                 self::$__filename,
                 AutoloadEdges::newProjectFiles(

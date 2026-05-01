@@ -152,6 +152,42 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         return $this->state->write(self::KEY_GRAPH, $json);
     }
 
+    /**
+     * Predicts whether TIA will activate for this run, *before* the Tia
+     * plugin's `handleArguments` runs. Mirrors the same gate the plugin
+     * itself applies: `--tia` on the CLI, or `pest()->tia()->always()`
+     * (optionally `->locally()`, which is honoured only outside CI).
+     *
+     * Used by the restarters in `bin/pest`, which fire after
+     * `Kernel::boot()` (so `tests/Pest.php` has populated WatchPatterns)
+     * but before any plugin's `handleArguments` runs.
+     *
+     * @param  array<int, string>  $arguments
+     */
+    public static function isEnabledForRun(array $arguments): bool
+    {
+        if (in_array(self::OPTION, $arguments, true)) {
+            return true;
+        }
+
+        $watchPatterns = Container::getInstance()->get(Tia\WatchPatterns::class);
+        assert($watchPatterns instanceof Tia\WatchPatterns);
+
+        if (! $watchPatterns->isEnabled()) {
+            return false;
+        }
+
+        // `locally()` opts out on CI. Environment::name() reflects --ci
+        // only after Environment's own handleArguments has run, which
+        // hasn't happened at the restart-decision point — so check argv
+        // directly here.
+        if ($watchPatterns->isLocally() && in_array('--ci', $arguments, true)) {
+            return false;
+        }
+
+        return true;
+    }
+
     public function getCachedResult(string $filename, string $testId): ?TestStatus
     {
         if (! $this->replayGraph instanceof Graph) {

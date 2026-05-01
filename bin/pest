@@ -143,20 +143,6 @@ use Symfony\Component\Console\Output\ConsoleOutput;
     // Get $rootPath based on $autoloadPath
     $rootPath = dirname($autoloadPath, 2);
 
-    // Re-execs PHP without Xdebug on TIA replay runs so repeat `--tia`
-    // invocations aren't slowed by a coverage driver they don't use. Plain
-    // `pest` runs are left alone — users may rely on Xdebug for IDE
-    // breakpoints, step-through debugging, or custom tooling. See
-    // XdebugGuard for the full decision (coverage / tia-rebuild / Xdebug
-    // mode gates).
-    \Pest\Support\XdebugGuard::maybeDrop($rootPath);
-
-    // Restarts PHP with `pcov.directory=<root>` when `--tia` is active and
-    // pcov is loaded, so the driver never instruments anything outside the
-    // project (vendor, system includes). Idempotent — guarded by an env
-    // sentinel so a single round-trip is enough.
-    \Pest\Support\PcovGuard::maybeRestart($rootPath);
-
     $input = new ArgvInput;
 
     $testSuite = TestSuite::getInstance(
@@ -206,6 +192,21 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
     try {
         $kernel = Kernel::boot($testSuite, $input, $output);
+
+        // Restarters re-exec the PHP process when conditions warrant it
+        // (XdebugRestarter drops Xdebug on TIA replay; PcovRestarter pins
+        // `pcov.directory` to the project root). Runs here, after
+        // Kernel::boot has loaded `tests/Pest.php` (so
+        // `pest()->tia()->always()` is visible) and before any plugin's
+        // `handleArguments` runs (so a re-exec replays cleanly).
+        $container = \Pest\Support\Container::getInstance();
+
+        foreach (Kernel::RESTARTERS as $restarterClass) {
+            $restarter = $container->get($restarterClass);
+            assert($restarter instanceof \Pest\Contracts\Restarter);
+
+            $restarter->maybeRestart($rootPath, $originalArguments);
+        }
 
         $result = $kernel->handle($originalArguments, $arguments);
 

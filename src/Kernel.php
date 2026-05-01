@@ -45,6 +45,18 @@ final readonly class Kernel
     ];
 
     /**
+     * The Kernel restarters — resolved and invoked from `bin/pest`
+     * before any other Pest class is touched, so the list is exposed
+     * on the Kernel rather than driven from `bin/pest` directly.
+     *
+     * @var array<int, class-string<Contracts\Restarter>>
+     */
+    public const array RESTARTERS = [
+        Restarters\XdebugRestarter::class,
+        Restarters\PcovRestarter::class,
+    ];
+
+    /**
      * Creates a new Kernel instance.
      */
     public function __construct(
