@@ -12,7 +12,7 @@ use Symfony\Component\Process\Process;
  */
 final class JsModuleGraph
 {
-    private const int NODE_TIMEOUT_SECONDS = 25;
+    private const int NODE_TIMEOUT_SECONDS = 180;
 
     private const string CACHE_FILE = 'js-module-graph.cache.json';
 
@@ -66,11 +66,7 @@ final class JsModuleGraph
             return;
         }
 
-        try {
-            $process->start();
-        } catch (\Throwable) {
-            return;
-        }
+        $process->start();
 
         self::$warmer = $process;
         self::$warmerFingerprint = $fingerprint;
@@ -172,12 +168,7 @@ final class JsModuleGraph
             self::$warmerFingerprint = null;
             self::$warmerProjectRoot = null;
 
-            try {
-                $process->wait();
-            } catch (\Throwable) {
-                // fall through to synchronous run
-                $process = null;
-            }
+            $process->wait();
 
             if ($process instanceof Process && $process->isSuccessful()) {
                 $result = self::parseNodeOutput($process->getOutput());
@@ -328,26 +319,10 @@ final class JsModuleGraph
                 $process->stop(0.5);
             }
         } catch (\Throwable) {
-            // best-effort cleanup
+            //
         }
     }
 
-    /**
-     * Content fingerprint of every input that can change the Node/Vite
-     * module graph: each `resources/js/**` source (path + size + mtime),
-     * each `vite.config.*` (path + size + mtime + sha-of-bytes), and
-     * the chosen pages-directory casing. Returns null only when no
-     * `vite.config.*` exists — i.e. the resolver itself wouldn't run.
-     *
-     * File inputs use `mtime+size` rather than full content hashes —
-     * walking thousands of SFCs and re-hashing them on every flush
-     * would defeat the point of the cache. mtime/size collisions on
-     * an edited file are theoretically possible but vanishingly rare,
-     * and the cost of a rare miss (one extra Node run) is exactly what
-     * the cache costs anyway. The vite config itself is small and
-     * load-bearing for plugin/alias behaviour, so we hash its bytes
-     * outright.
-     */
     private static function fingerprint(string $projectRoot): ?string
     {
         if (! self::hasViteConfig($projectRoot)) {
