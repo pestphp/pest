@@ -151,6 +151,12 @@ use Symfony\Component\Console\Output\ConsoleOutput;
     // mode gates).
     \Pest\Support\XdebugGuard::maybeDrop($rootPath);
 
+    // Restarts PHP with `pcov.directory=<root>` when `--tia` is active and
+    // pcov is loaded, so the driver never instruments anything outside the
+    // project (vendor, system includes). Idempotent — guarded by an env
+    // sentinel so a single round-trip is enough.
+    \Pest\Support\PcovGuard::maybeRestart($rootPath);
+
     $input = new ArgvInput;
 
     $testSuite = TestSuite::getInstance(
