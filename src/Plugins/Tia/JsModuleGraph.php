@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
+use Pest\Support\Cpu;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 
@@ -166,7 +167,7 @@ final class JsModuleGraph
             return null;
         }
 
-        $env = [];
+        $env = ['TIA_VITE_CONCURRENCY' => (string) max(4, min(32, Cpu::cores() * 2))];
         foreach (['resources/js/Pages', 'resources/js/pages'] as $candidate) {
             if (is_dir($projectRoot.DIRECTORY_SEPARATOR.$candidate)) {
                 $env['TIA_VITE_PAGES_DIR'] = $candidate;

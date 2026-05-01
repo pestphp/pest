@@ -10,6 +10,7 @@ const PAGE_EXTENSIONS = new Set(['.vue', '.tsx', '.jsx', '.svelte'])
 const PROJECT_ROOT = resolve(process.argv[2] ?? process.cwd())
 const PAGES_REL = (process.env.TIA_VITE_PAGES_DIR ?? 'resources/js/Pages').replace(/\\/g, '/')
 const TIMEOUT_MS = Number.parseInt(process.env.TIA_VITE_TIMEOUT_MS ?? '20000', 10)
+const CONCURRENCY = Math.max(1, Number.parseInt(process.env.TIA_VITE_CONCURRENCY ?? '16', 10))
 
 async function loadVite() {
   const projectRequire = createRequire(join(PROJECT_ROOT, 'package.json'))
@@ -77,42 +78,70 @@ async function main() {
     pageComponentCache.set(page, componentNameFor(page, pagesDir))
   }
 
+  const projectRootPosix = PROJECT_ROOT.split(sep).join('/')
+  const pageEntries = pages.map((pagePath) => ({
+    pagePath,
+    pageComponent: pageComponentCache.get(pagePath),
+    pageUrl: '/' + posix.relative(projectRootPosix, pagePath.split(sep).join('/')),
+  }))
+
   try {
-    for (const pagePath of pages) {
-      const pageComponent = pageComponentCache.get(pagePath)
-      const pageUrl = '/' + posix.relative(
-        PROJECT_ROOT.split(sep).join('/'),
-        pagePath.split(sep).join('/'),
-      )
-
-      try {
-        await server.transformRequest(pageUrl, { ssr: false })
-      } catch {
-        continue
+    let cursor = 0
+    const workers = Array.from({ length: Math.min(CONCURRENCY, pageEntries.length) }, async () => {
+      while (true) {
+        const i = cursor++
+        if (i >= pageEntries.length) return
+        const { pageUrl } = pageEntries[i]
+        try {
+          await server.transformRequest(pageUrl, { ssr: false })
+        } catch {
+          // ignore, handled below when we look up the module
+        }
       }
+    })
+    await Promise.all(workers)
 
+    const transitiveCache = new Map()
+    const computeTransitive = (mod, stack) => {
+      const key = mod.file ?? mod.id
+      if (!key) return null
+      const cached = transitiveCache.get(key)
+      if (cached) return cached
+      if (stack.has(key)) return null // cycle: let the originating frame fold us in
+
+      stack.add(key)
+      const acc = new Set()
+      for (const imported of mod.importedModules) {
+        const id = imported.file ?? imported.id
+        if (!id) continue
+        if (id.startsWith('\0')) continue
+
+        if (id.startsWith(PROJECT_ROOT)) {
+          const rel = relative(PROJECT_ROOT, id).split(sep).join('/')
+          acc.add(rel)
+        }
+
+        const childKey = id
+        if (stack.has(childKey)) continue
+        const child = computeTransitive(imported, stack)
+        if (child) for (const r of child) acc.add(r)
+      }
+      stack.delete(key)
+      transitiveCache.set(key, acc)
+      return acc
+    }
+
+    for (const { pageComponent, pageUrl } of pageEntries) {
       const pageModule = await server.moduleGraph.getModuleByUrl(pageUrl, false)
       if (!pageModule) continue
 
-      const visited = new Set()
-      const queue = [pageModule]
-      while (queue.length) {
-        const mod = queue.shift()
-        for (const imported of mod.importedModules) {
-          const id = imported.file ?? imported.id
-          if (!id || visited.has(id)) continue
-          visited.add(id)
+      const reachable = computeTransitive(pageModule, new Set())
+      if (!reachable) continue
 
-          if (id.startsWith('\0')) continue
-          if (!id.startsWith(PROJECT_ROOT)) continue
-
-          const rel = relative(PROJECT_ROOT, id).split(sep).join('/')
-          const bucket = reverse.get(rel) ?? new Set()
-          bucket.add(pageComponent)
-          reverse.set(rel, bucket)
-
-          queue.push(imported)
-        }
+      for (const rel of reachable) {
+        const bucket = reverse.get(rel) ?? new Set()
+        bucket.add(pageComponent)
+        reverse.set(rel, bucket)
       }
     }
   } finally {
