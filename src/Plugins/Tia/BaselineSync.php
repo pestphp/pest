@@ -103,7 +103,7 @@ final readonly class BaselineSync
 
         $this->renderBadge('INFO', sprintf(
             'Baseline ready (%s).',
-            $this->formatSize(strlen($payload['graph']) + strlen($payload['coverage'] ?? '')),
+            $this->formatSize($payload['sizeOnDisk']),
         ));
 
         return true;
@@ -538,7 +538,7 @@ YAML;
     }
 
     /**
-     * @return array{graph: string, coverage: ?string}|null
+     * @return array{graph: string, coverage: ?string, sizeOnDisk: int}|null
      */
     private function readArtifact(string $dir): ?array
     {
@@ -556,6 +556,7 @@ YAML;
         return [
             'graph' => $graph,
             'coverage' => $coverage === false ? null : $coverage,
+            'sizeOnDisk' => $this->dirSize($dir),
         ];
     }
 
