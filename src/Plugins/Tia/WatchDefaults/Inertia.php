@@ -7,12 +7,6 @@ namespace Pest\Plugins\Tia\WatchDefaults;
 use Composer\InstalledVersions;
 
 /**
- * Watch patterns for Inertia.js projects (Laravel or otherwise).
- *
- * Inertia bridges PHP controllers with JS/TS page components. A change to
- * a React / Vue / Svelte page can break assertions in browser tests or
- * Inertia-specific feature tests.
- *
  * @internal
  */
 final readonly class Inertia implements WatchDefault

@@ -8,35 +8,6 @@ use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 
 /**
- * Builds a reverse dependency map for the project's JS sources under
- * `resources/js/**` — for every source file, the list of Inertia page
- * components that transitively import it.
- *
- * Backed by a Node helper (`bin/pest-tia-vite-deps.mjs`) that boots a
- * headless Vite server in middleware mode, walks Vite's own module
- * graph for each page entry, and outputs JSON. Uses the project's real
- * `vite.config.*`, so aliases, plugins, and SFC transformers produce
- * the exact graph Vite itself would use.
- *
- * Two latency mitigations:
- *
- *   1. **Content-hash cache** keyed by every file under `resources/js/`
- *      (path + size + mtime) plus the bytes of `vite.config.*` and the
- *      pages-directory casing. When inputs are unchanged, the 13s+ Node
- *      bootstrap is skipped entirely and the previous result is reused.
- *
- *   2. **Background warmer** — `warmInBackground()` is called at suite
- *      start. It computes the fingerprint, checks the cache, and only
- *      spawns Node if a refresh is needed. The subprocess runs in
- *      parallel with the test suite. By the time `build()` is called at
- *      flush time, the result is usually already on stdout — `wait()`
- *      returns instantly. If tests finish faster than Vite boots,
- *      `build()` simply pays the remainder, never the full bootstrap.
- *
- * Callers invoke `build()` at record time; results are persisted into
- * the graph so replay never re-runs the resolver. On stale-map detection
- * the callers decide whether to rebuild.
- *
  * @internal
  */
 final class JsModuleGraph

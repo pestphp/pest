@@ -11,33 +11,6 @@ use SebastianBergmann\CodeCoverage\CodeCoverage;
 use Throwable;
 
 /**
- * Merges the current run's PHPUnit coverage into a cached full-suite
- * snapshot so `--tia --coverage` can produce a complete report after
- * executing only the affected tests.
- *
- * Invoked from `Pest\Support\Coverage::report()` right before the coverage
- * file is consumed. A marker dropped by the `Tia` plugin gates the
- * behaviour — plain `--coverage` runs (no `--tia`) leave the marker absent
- * and therefore keep their existing semantics.
- *
- * Algorithm
- * ---------
- * The PHPUnit coverage PHP file unserialises to a `CodeCoverage` object.
- * Its `ProcessedCodeCoverageData` stores, per source file, per line, the
- * list of test IDs that covered that line. We:
- *
- *   1. Load the cached snapshot from `State` (serialised bytes).
- *   2. Strip every test id that re-ran this time from the cached map —
- *      the tests that ran now are the ones whose attribution is fresh.
- *   3. Merge the current run into the stripped cached snapshot via
- *      `CodeCoverage::merge()`.
- *   4. Write the merged result back to the report path (so Pest's report
- *      generator sees the full suite) and back into `State` (for the
- *      next invocation).
- *
- * If no cache exists yet (first `--tia --coverage` run on this machine)
- * we serialise the current object and save it — nothing to merge yet.
- *
  * @internal
  */
 final class CoverageMerger

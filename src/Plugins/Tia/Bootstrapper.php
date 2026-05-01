@@ -10,17 +10,6 @@ use Pest\Support\Container;
 use Pest\TestSuite;
 
 /**
- * Plugin-level container registrations for TIA. Runs as part of Kernel's
- * bootstrapper chain so Tia's own service graph is set up without Kernel
- * having to know about any of its internals.
- *
- * Most Tia services (`Recorder`, `CoverageCollector`, `WatchPatterns`,
- * `ResultCollector`, `BaselineSync`) are auto-buildable — Pest's container
- * resolves them lazily via constructor reflection. The only service that
- * requires an explicit binding is the `State` contract, because the
- * filesystem implementation needs a root-directory string that reflection
- * can't infer.
- *
  * @internal
  */
 final readonly class Bootstrapper implements BootstrapperContract

@@ -7,8 +7,6 @@ namespace Pest\Plugins\Tia\WatchDefaults;
 use Composer\InstalledVersions;
 
 /**
- * Watch patterns for Symfony projects.
- *
  * @internal
  */
 final readonly class Symfony implements WatchDefault

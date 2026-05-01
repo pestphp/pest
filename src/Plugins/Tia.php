@@ -31,11 +31,6 @@ use Symfony\Component\Process\Process;
 use Throwable;
 
 /**
- * Test Impact Analysis plugin — record/replay, parallel-aware.
- *
- * Must be registered before `Parallel` — Parallel exits on `--parallel`,
- * so later plugins never execute.
- *
  * @internal
  */
 final class Tia implements AddsOutput, HandlesArguments, Terminable

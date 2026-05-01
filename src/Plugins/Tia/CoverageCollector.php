@@ -9,16 +9,6 @@ use ReflectionClass;
 use Throwable;
 
 /**
- * Extracts per-test file coverage from PHPUnit's shared `CodeCoverage`
- * instance. Used when TIA piggybacks on `--coverage` instead of starting
- * its own driver session — both share the same PCOV / Xdebug state, so
- * running two recorders in parallel would corrupt each other's data.
- *
- * PHPUnit tags every coverage sample with the current test's id
- * (`$test->valueObjectForEvents()->id()`, e.g. `Foo\BarTest::baz`). The
- * per-file / per-line coverage map therefore already carries everything
- * we need to rebuild TIA edges at the end of the run.
- *
  * @internal
  */
 final class CoverageCollector

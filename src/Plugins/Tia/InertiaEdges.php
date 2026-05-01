@@ -5,28 +5,6 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 /**
- * Inertia-aware collaborator: during record mode, attributes every
- * Inertia component the test server-side renders to the currently-
- * running test file.
- *
- * Why this exists: a change to `resources/js/Pages/Users/Show.vue`
- * should only invalidate tests that actually rendered `Users/Show`.
- * The Laravel `WatchDefaults\Inertia` glob is a broad fallback — fine
- * for brand-new pages, but noisy once the graph has real data. With
- * this armed, each test's recorded edge set grows to include the
- * component names it returned through `Inertia::render()`, and
- * subsequent replay intersects page-file changes against that set.
- *
- * Mechanism: listen for `Illuminate\Foundation\Http\Events\RequestHandled`
- * on Laravel's event dispatcher. Inertia responses are identifiable by
- * either an `X-Inertia` header (XHR / JSON shape) or a `data-page`
- * attribute on the root `<div id="app">` (full HTML shape). Both carry
- * the component name in a structured payload we can parse cheaply.
- *
- * Same dep-free handshake as `BladeEdges` / `TableTracker`: string
- * class lookup + method-capability probes so Pest's `require` stays
- * Laravel-free.
- *
  * @internal
  */
 final class InertiaEdges

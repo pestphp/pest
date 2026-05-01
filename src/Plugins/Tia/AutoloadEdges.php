@@ -5,12 +5,6 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 /**
- * Captures PHP files that were included while a test was running.
- *
- * Coverage drivers miss declaration-only files (classes, enums, interfaces,
- * traits) and files loaded before the coverage window opens. Diffing
- * `get_included_files()` gives TIA an explicit edge for those autoloaded files.
- *
  * @internal
  */
 final readonly class AutoloadEdges

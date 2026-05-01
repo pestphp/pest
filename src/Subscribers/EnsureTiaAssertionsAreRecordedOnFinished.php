@@ -10,10 +10,6 @@ use PHPUnit\Event\Test\Finished;
 use PHPUnit\Event\Test\FinishedSubscriber;
 
 /**
- * Fires last for each test, after the outcome subscribers. Records the exact
- * assertion count so replay can emit the same `addToAssertionCount()` instead
- * of a hardcoded value.
- *
  * @internal
  */
 final readonly class EnsureTiaAssertionsAreRecordedOnFinished implements FinishedSubscriber

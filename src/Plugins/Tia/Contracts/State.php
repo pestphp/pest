@@ -5,12 +5,6 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia\Contracts;
 
 /**
- * Storage contract for TIA's persistent state (graph, baselines, affected
- * set, worker partials, coverage snapshots). Modelled as a flat key/value
- * store of raw byte blobs so implementations can sit on top of whatever
- * backend fits — a directory, a shared cache, a remote object store — and
- * TIA's logic stays identical.
- *
  * @internal
  */
 interface State

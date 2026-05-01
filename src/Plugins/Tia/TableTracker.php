@@ -5,25 +5,6 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 /**
- * Laravel-only collaborator: during record mode, attributes every SQL
- * table the test body queries to the currently-running test.
- *
- * Why this exists: the coverage graph can tell us which PHP files a
- * test touched but cannot distinguish "this test depends on the
- * `users` table" from "this test depends on `questions`". That
- * distinction is the whole point of surgical migration invalidation —
- * a column rename in `create_questions_table.php` should only re-run
- * tests whose body actually queried `questions`.
- *
- * Mechanism: install a listener on Laravel's event dispatcher that
- * subscribes to `Illuminate\Database\Events\QueryExecuted`. Each
- * query string is piped through `TableExtractor::fromSql()`; DDL is
- * filtered at extraction time so migrations running in `setUp` don't
- * attribute every table to every test.
- *
- * Same dep-free handshake as `BladeEdges`: string class lookup +
- * method-capability probes so Pest's `require` stays Laravel-free.
- *
  * @internal
  */
 final class TableTracker

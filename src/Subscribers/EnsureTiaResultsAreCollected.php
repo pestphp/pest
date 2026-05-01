@@ -10,14 +10,6 @@ use PHPUnit\Event\Test\Prepared;
 use PHPUnit\Event\Test\PreparedSubscriber;
 
 /**
- * Starts a per-test recording window on Prepared. Sibling subscribers
- * (`EnsureTia*`) close it with the outcome and the assertion count so the
- * graph can persist everything needed for faithful replay.
- *
- * Why one subscriber per event: PHPUnit's `TypeMap::map()` picks only the
- * first subscriber interface it finds on a class, so one class cannot fan
- * out to multiple events — each event needs its own subscriber class.
- *
  * @internal
  */
 final readonly class EnsureTiaResultsAreCollected implements PreparedSubscriber

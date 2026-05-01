@@ -8,25 +8,6 @@ use Pest\Contracts\Restarter;
 use Pest\Plugins\Tia;
 
 /**
- * Re-execs the PHP process with `pcov.directory` pinned to the project
- * root so pcov never instruments anything outside it (vendor, system
- * includes, etc.).
- *
- * pcov reads `pcov.directory` once, on the first file it instruments —
- * setting it via `ini_set()` from inside the test runner is too late
- * for files already compiled by Composer's autoloader. Restarting with
- * `-dpcov.directory=<root>` means *every* file pcov sees is filtered
- * correctly.
- *
- * Only fires when ALL of these hold:
- *   1. The pcov extension is loaded.
- *   2. TIA is enabled for this run (see {@see Tia::isEnabledForRun()} —
- *      either `--tia` on the CLI or `pest()->tia()->always()`); plain
- *      `pest` runs are unaffected.
- *   3. The current `pcov.directory` differs from the project root.
- *   4. We are not already the restarted process — guarded by an env
- *      sentinel so a single round-trip is enough.
- *
  * @internal
  */
 final class PcovRestarter implements Restarter

@@ -7,14 +7,6 @@ namespace Pest\Plugins\Tia\WatchDefaults;
 use Composer\InstalledVersions;
 
 /**
- * Watch patterns for Laravel projects.
- *
- * Laravel boots the entire application inside `setUp()` (before PHPUnit's
- * `Prepared` event where TIA's coverage window opens). That means PHP files
- * loaded during boot — config, routes, service providers, migrations — are
- * invisible to the coverage driver. Watch patterns are the only way to
- * track them.
- *
  * @internal
  */
 final readonly class Laravel implements WatchDefault

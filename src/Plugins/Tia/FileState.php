@@ -7,14 +7,6 @@ namespace Pest\Plugins\Tia;
 use Pest\Plugins\Tia\Contracts\State;
 
 /**
- * Filesystem-backed implementation of the TIA `State` contract. Each key
- * maps verbatim to a file name under `$rootDir`, so existing `.temp/*.json`
- * layouts are preserved exactly.
- *
- * The root directory is created lazily on first write — callers don't have
- * to pre-provision it, and reads against a missing directory simply return
- * `null` rather than throwing.
- *
  * @internal
  */
 final readonly class FileState implements State

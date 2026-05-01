@@ -5,13 +5,6 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia\WatchDefaults;
 
 /**
- * A set of file-watch patterns that apply when a particular framework,
- * library or project layout is detected.
- *
- * Each implementation probes for the presence of the tool it covers
- * (`applicable`) and returns glob → test-directory mappings (`defaults`)
- * that are merged into `WatchPatterns`.
- *
  * @internal
  */
 interface WatchDefault

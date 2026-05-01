@@ -10,10 +10,6 @@ use PHPUnit\Event\Test\Prepared;
 use PHPUnit\Event\Test\PreparedSubscriber;
 
 /**
- * Starts PCOV collection before each test. Pest tests start from
- * `Testable::setUp()` so Laravel boot is covered; this subscriber remains the
- * fallback for PHPUnit-style tests and is idempotent for Pest tests.
- *
  * @internal
  */
 final readonly class EnsureTiaCoverageIsRecorded implements PreparedSubscriber

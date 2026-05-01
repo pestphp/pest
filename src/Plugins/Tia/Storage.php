@@ -5,29 +5,6 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 /**
- * Resolves TIA's on-disk state directory.
- *
- * Default location: `$HOME/.pest/tia/<project-key>/`. Keeping state in the
- * user's home directory (rather than under `vendor/pestphp/pest/`) means:
- *
- *   - `composer install` / path-repo reinstalls don't wipe the graph.
- *   - The state lives outside the project tree, so there is nothing for
- *     users to gitignore or accidentally commit.
- *   - Multiple worktrees of the same repo share one cache naturally.
- *
- * The project key is derived from the git origin URL when available — a
- * CI workflow running on `github.com/org/repo` and a developer's clone
- * of the same remote both compute the *same* key, which is what lets the
- * CI-uploaded baseline line up with the dev-side reader. When the project
- * is not in git, the key falls back to a hash of the absolute path so
- * unrelated projects on the same machine stay isolated.
- *
- * When no home directory is resolvable (`HOME` / `USERPROFILE` both
- * unset — the tests-tia sandboxes strip these deliberately, and some
- * locked-down CI environments do the same), state falls back to
- * `<projectRoot>/.pest/tia/`. That path is project-local but still
- * survives composer installs, so the degradation is graceful.
- *
  * @internal
  */
 final class Storage

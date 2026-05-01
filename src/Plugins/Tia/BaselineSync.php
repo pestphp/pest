@@ -13,13 +13,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 
 /**
- * Downloads a team-shared TIA baseline from GitHub workflow artifacts so new contributors and
- * fresh CI workspaces start in replay mode. Artifacts are used instead of releases because they
- * produce no tag (no push cascade), support tunable retention, and can only be published by CI.
- *
- * Fingerprint validation happens in `Tia::handleParent` after the blobs land; a mismatched
- * environment falls through to the normal record path.
- *
  * @internal
  */
 final readonly class BaselineSync

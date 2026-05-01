@@ -5,22 +5,6 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 /**
- * Scopes coverage collection to project source — the directories
- * declared in `phpunit.xml`'s `<source>` config plus any other
- * top-level project directories that aren't on a hard-coded noise
- * list (vendor, caches, IDE/git metadata).
- *
- * Used by `Recorder` as the per-test filter passed to
- * `\pcov\collect(\pcov\inclusive, …)` — pcov tracks every file PHP
- * loads, but we only ask for coverage on files inside the project
- * source scope, so anything outside (vendor / caches / etc.) is
- * dropped before any line counts come back.
- *
- * Falls back to "every top-level project dir minus the noise list"
- * when no `phpunit.xml` / `phpunit.xml.dist` is present or it has no
- * `<source>` block — Pest projects without explicit phpunit config
- * still get sensible scoping.
- *
  * @internal
  */
 final class SourceScope

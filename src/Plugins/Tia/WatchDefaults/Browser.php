@@ -10,11 +10,6 @@ use Pest\Factories\TestCaseFactory;
 use Pest\TestSuite;
 
 /**
- * Watch patterns for frontend assets that affect browser tests.
- *
- * Uses `BrowserTestIdentifier` from pest-plugin-browser to auto-discover tests
- * using `visit()`. Also keeps the `tests/Browser` convention when present.
- *
  * @internal
  */
 final readonly class Browser implements WatchDefault

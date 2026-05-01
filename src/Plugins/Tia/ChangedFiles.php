@@ -7,19 +7,6 @@ namespace Pest\Plugins\Tia;
 use Symfony\Component\Process\Process;
 
 /**
- * Detects files that changed between the last recorded TIA run and the
- * current working tree.
- *
- * Strategy:
- *   1. If we have a `recordedAtSha`, `git diff <sha>..HEAD` captures committed
- *      changes on top of the recording point.
- *   2. `git status --short` captures unstaged + staged + untracked changes on
- *      top of that.
- *
- * We return relative paths to the project root. Deletions are included so the
- * caller can decide whether to invalidate: a deleted source file may still
- * appear in the graph and should mark its dependents as affected.
- *
  * @internal
  */
 final readonly class ChangedFiles

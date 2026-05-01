@@ -7,12 +7,6 @@ namespace Pest\Plugins\Tia\WatchDefaults;
 use Composer\InstalledVersions;
 
 /**
- * Watch patterns for projects using Livewire.
- *
- * Livewire components pair a PHP class with a Blade view. A view change can
- * break rendering or assertions in feature / browser tests even though the
- * PHP side is untouched.
- *
  * @internal
  */
 final readonly class Livewire implements WatchDefault

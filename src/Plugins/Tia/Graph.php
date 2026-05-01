@@ -11,9 +11,6 @@ use PHPUnit\Framework\TestStatus\TestStatus;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Dependency graph: test file → set<source file>. Skips unchanged tests on replay.
- * Source files are indexed by numeric id to keep the on-disk JSON compact.
- *
  * @internal
  */
 final class Graph

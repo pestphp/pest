@@ -8,11 +8,6 @@ use Pest\Contracts\TestCaseFilter;
 use Pest\Plugins\Tia\Graph;
 
 /**
- * Accepts a test file only if it is in the TIA-computed affected set.
- *
- * Falls back to accepting when the graph has no record of the file (new tests
- * must always run) or when the file is outside the project root.
- *
  * @internal
  */
 final readonly class TiaTestCaseFilter implements TestCaseFilter

@@ -8,18 +8,6 @@ use Pest\Plugins\Tia\WatchDefaults\WatchDefault;
 use Pest\TestSuite;
 
 /**
- * Maps non-PHP file globs to the tests they should invalidate.
- *
- * Coverage drivers only see `.php` files. Frontend assets, config files,
- * Blade templates, routes and environment files are invisible to the graph.
- * Watch patterns bridge the gap: when a changed file matches a glob, every
- * test under the associated directory (or the exact associated test file) is
- * marked as affected.
- *
- * Defaults are assembled dynamically from the `WatchDefaults/` registry —
- * each implementation probes the current project and contributes patterns
- * when applicable. Users extend via `pest()->tia()->watch(…)`.
- *
  * @internal
  */
 final class WatchPatterns

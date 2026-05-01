@@ -5,10 +5,6 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 /**
- * Collects per-test status + message during the run so the graph can persist
- * them for faithful replay. PHPUnit's own result cache discards messages
- * during serialisation — this collector retains them.
- *
  * @internal
  */
 final class ResultCollector

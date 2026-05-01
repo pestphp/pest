@@ -5,24 +5,6 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 /**
- * Per-file hashing that ignores changes which can't alter behaviour —
- * comments and whitespace for PHP, `{{-- … --}}` comments and whitespace
- * runs for Blade templates. Every other file type falls back to a plain
- * xxh128 of the raw bytes.
- *
- * Why it matters: TIA's file diff signals drive which tests re-run. A
- * one-line comment tweak on a migration is a behavioural no-op, but the
- * raw-bytes hash still differs, so every test that talks to the DB would
- * currently re-execute. Normalising to the parsed-token / compiled-shape
- * keeps the drift signal honest: edits that can't change runtime
- * behaviour don't invalidate the replay cache.
- *
- * Important: this hash is stored in the graph's last-run tree, so any
- * format change here must be paired with a `Fingerprint::SCHEMA_VERSION`
- * bump — otherwise stale hashes from older graphs would be compared
- * against normalised hashes from the new code and everything would
- * appear changed.
- *
  * @internal
  */
 final class ContentHash

@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia\WatchDefaults;
 
 /**
- * Baseline watch patterns for any PHP project.
- *
  * @internal
  */
 final readonly class Php implements WatchDefault

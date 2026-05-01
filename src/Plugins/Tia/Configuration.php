@@ -7,19 +7,6 @@ namespace Pest\Plugins\Tia;
 use Pest\Support\Container;
 
 /**
- * User-facing TIA configuration, returned by `pest()->tia()`.
- *
- * Usage in `tests/Pest.php`:
- *
- *     pest()->tia()->watch([
- *         'resources/js/**\/*.tsx' => 'tests/Browser',
- *         'public/build/**\/*'     => 'tests/Browser',
- *     ]);
- *
- * Patterns are merged with the built-in defaults (config, routes, views,
- * frontend assets, migrations). Duplicate glob keys overwrite the default
- * mapping so users can redirect a pattern to a narrower directory.
- *
  * @internal
  */
 final class Configuration

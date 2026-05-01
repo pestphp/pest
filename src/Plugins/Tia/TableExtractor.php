@@ -5,30 +5,6 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 /**
- * Extracts table names from SQL statements and migration PHP sources.
- *
- * Two callers, two methods:
- *
- *   - `fromSql()` runs against query strings Laravel's `DB::listen`
- *     hands us at record time. We only look at DML (`SELECT`, `INSERT`,
- *     `UPDATE`, `DELETE`) because DDL emitted by `RefreshDatabase` in
- *     `setUp()` is noise — we don't want every test to end up linked
- *     to every migration's `CREATE TABLE`.
- *   - `fromMigrationSource()` reads a migration file on disk at
- *     replay time and pulls table names out of `Schema::` calls.
- *     Used in two places:
- *       1. For every migration file reported as changed — what
- *          tables does the current version of this file touch?
- *       2. For brand-new migration files that weren't in the graph
- *          yet, so we never had a chance to observe their DDL.
- *
- * Regex isn't a parser. CTEs, subqueries, and raw `DB::statement()`
- * that reference tables only inside exotic syntax can slip through.
- * The direction of that error is under-attribution (a table the test
- * genuinely touches but we missed), so the safety net is to keep the
- * broad `database/migrations/**` watch pattern as a last resort for
- * files that produce an empty extraction.
- *
  * @internal
  */
 final class TableExtractor

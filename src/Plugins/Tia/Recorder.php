@@ -8,9 +8,6 @@ use Pest\TestSuite;
 use ReflectionClass;
 
 /**
- * Captures per-test file coverage. Singleton because PCOV/Xdebug have a single global state
- * shared across the `Prepared` and `Finished` subscribers.
- *
  * @internal
  */
 final class Recorder

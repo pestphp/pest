@@ -5,29 +5,6 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 /**
- * Fallback parser for ES module imports under `resources/js/`.
- *
- * Used only when the Node helper (`bin/pest-tia-vite-deps.mjs`) is
- * unavailable — typically when Node isn't on `PATH` or the user's
- * `vite.config.*` can't be loaded. Pure PHP, so it degrades
- * gracefully on locked-down environments but cannot match the
- * full-fidelity Vite resolver.
- *
- * Known limits (intentional — preserving correctness over precision):
- *   - Only `@/` and `~/` aliases recognised (both resolve to
- *     `resources/js/`, the community default). Custom aliases from
- *     `vite.config.ts` are ignored; anything we can't resolve is
- *     simply skipped and falls through to the watch-pattern safety
- *     net.
- *   - Dynamic imports with variable expressions
- *     (`import(`./${name}`.vue)`) can't be resolved; the literal
- *     prefix is ignored and the caller over-runs. Safe.
- *   - Vue SFC `<script>` blocks parsed whole; imports inside
- *     `<template>` blocks (rare but legal) are not scanned.
- *
- * Output shape mirrors the Node helper: project-relative source path
- * → sorted list of component names of pages that depend on it.
- *
  * @internal
  */
 final class JsImportParser

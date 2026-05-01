@@ -5,15 +5,6 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 /**
- * Two-bucket fingerprint for TIA staleness detection.
- *
- * - **structural**: inputs whose drift means graph *edges* may be wrong → full rebuild.
- *   `tests/TestCase.php` and `tests/Pest.php` are intentionally absent; they're covered by
- *   `Recorder::linkAncestorFiles` and the watch pattern, giving precise per-test invalidation.
- * - **environmental**: runtime inputs (PHP version, extensions, env files) whose drift means
- *   edges are still valid but cached results may not reproduce → drop results and re-run.
- *   Pest's own version is absent; `composer.lock` moves whenever Pest is upgraded.
- *
  * @internal
  */
 final readonly class Fingerprint
