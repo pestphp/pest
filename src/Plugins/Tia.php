@@ -190,7 +190,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         return ! ($watchPatterns->isLocally() && in_array('--ci', $arguments, true));
     }
 
-    public function getCachedResult(string $filename, string $testId): ?TestStatus
+    public function getStatus(string $filename, string $testId): ?TestStatus
     {
         if (! $this->replayGraph instanceof Graph) {
             return null;

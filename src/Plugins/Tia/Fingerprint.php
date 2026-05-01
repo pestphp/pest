@@ -75,7 +75,7 @@ final readonly class Fingerprint
         return [
             'structural' => [
                 'schema' => self::SCHEMA_VERSION,
-                'composer_lock' => self::composerLockHash($projectRoot),
+                // 'composer_lock' => self::composerLockHash($projectRoot),
                 'phpunit_xml' => self::hashIfExists($projectRoot.'/phpunit.xml'),
                 'phpunit_xml_dist' => self::hashIfExists($projectRoot.'/phpunit.xml.dist'),
                 'pest_factory' => self::contentHashOrNull(__DIR__.'/../../Factories/TestCaseFactory.php'),
@@ -88,9 +88,9 @@ final readonly class Fingerprint
             ],
             'environmental' => [
                 // Minor only (8.4, not 8.4.19) — CI's patch rarely matches dev installs.
-                'php_minor' => PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION,
-                'extensions' => self::extensionsFingerprint($projectRoot),
-                'env_files' => self::envFilesHash($projectRoot),
+                // 'php_minor' => PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION,
+                // 'extensions' => self::extensionsFingerprint($projectRoot),
+                // 'env_files' => self::envFilesHash($projectRoot),
             ],
         ];
     }
@@ -300,54 +300,6 @@ final readonly class Fingerprint
         return $parts === [] ? null : hash('xxh128', implode("\n", $parts));
     }
 
-    private static function envFilesHash(string $projectRoot): ?string
-    {
-        $paths = [
-            $projectRoot.'/.env',
-            $projectRoot.'/.env.testing',
-            $projectRoot.'/.env.local',
-        ];
-
-        $localVariants = glob($projectRoot.'/.env.*.local');
-
-        if (is_array($localVariants)) {
-            foreach ($localVariants as $path) {
-                $paths[] = $path;
-            }
-        }
-
-        $parts = [];
-        $seen = [];
-
-        foreach ($paths as $path) {
-            if (isset($seen[$path])) {
-                continue;
-            }
-
-            $seen[$path] = true;
-
-            if (! is_file($path)) {
-                continue;
-            }
-
-            $contents = @file_get_contents($path);
-
-            if ($contents === false) {
-                continue;
-            }
-
-            $parts[] = basename($path).':'.hash('xxh128', $contents);
-        }
-
-        if ($parts === []) {
-            return null;
-        }
-
-        sort($parts);
-
-        return hash('xxh128', implode("\n", $parts));
-    }
-
     private static function composerJsonHash(string $projectRoot): ?string
     {
         $path = $projectRoot.'/composer.json';
@@ -395,86 +347,6 @@ final readonly class Fingerprint
         return $json === false ? null : hash('xxh128', $json);
     }
 
-    private static function composerLockHash(string $projectRoot): ?string
-    {
-        $path = $projectRoot.'/composer.lock';
-
-        if (! is_file($path)) {
-            return null;
-        }
-
-        $raw = @file_get_contents($path);
-
-        if ($raw === false) {
-            return null;
-        }
-
-        $data = json_decode($raw, true);
-
-        if (! is_array($data)) {
-            $hash = @hash_file('xxh128', $path);
-
-            return $hash === false ? null : $hash;
-        }
-
-        $relevant = [
-            'platform' => $data['platform'] ?? null,
-            'platform-dev' => $data['platform-dev'] ?? null,
-        ];
-
-        foreach (['packages', 'packages-dev'] as $section) {
-            if (! isset($data[$section])) {
-                continue;
-            }
-            if (! is_array($data[$section])) {
-                continue;
-            }
-            $packages = [];
-
-            foreach ($data[$section] as $package) {
-                if (! is_array($package)) {
-                    continue;
-                }
-
-                $name = $package['name'] ?? null;
-
-                if (! is_string($name)) {
-                    continue;
-                }
-
-                $packages[$name] = [
-                    'version' => $package['version'] ?? null,
-                    'reference' => self::lockReference($package),
-                    'autoload' => $package['autoload'] ?? null,
-                    'autoload-dev' => $package['autoload-dev'] ?? null,
-                    'extra' => $package['extra'] ?? null,
-                ];
-            }
-
-            ksort($packages);
-            $relevant[$section] = $packages;
-        }
-
-        self::sortRecursively($relevant);
-
-        $json = json_encode($relevant);
-
-        return $json === false ? null : hash('xxh128', $json);
-    }
-
-    /**
-     * @param  array<string, mixed>  $package
-     */
-    private static function lockReference(array $package): ?string
-    {
-        $dist = is_array($package['dist'] ?? null) ? $package['dist'] : [];
-        $source = is_array($package['source'] ?? null) ? $package['source'] : [];
-
-        $reference = $dist['reference'] ?? $source['reference'] ?? null;
-
-        return is_string($reference) ? $reference : null;
-    }
-
     private static function sortRecursively(mixed &$value): void
     {
         if (! is_array($value)) {
@@ -512,67 +384,5 @@ final readonly class Fingerprint
         $hash = @hash_file('xxh128', $path);
 
         return $hash === false ? null : $hash;
-    }
-
-    // Only hashes `ext-*` entries declared in composer.json — incidental extensions loaded on the
-    // machine but not declared can't affect suite correctness, so they're excluded to reduce noise.
-    private static function extensionsFingerprint(string $projectRoot): string
-    {
-        $extensions = self::declaredExtensions($projectRoot);
-
-        if ($extensions === []) {
-            return hash('xxh128', '');
-        }
-
-        sort($extensions);
-
-        $parts = [];
-
-        foreach ($extensions as $name) {
-            $version = phpversion($name);
-            $parts[] = $name.'@'.($version === false ? 'missing' : $version);
-        }
-
-        return hash('xxh128', implode("\n", $parts));
-    }
-
-    /** @return list<string> */
-    private static function declaredExtensions(string $projectRoot): array
-    {
-        $path = $projectRoot.'/composer.json';
-
-        if (! is_file($path)) {
-            return [];
-        }
-
-        $raw = @file_get_contents($path);
-
-        if ($raw === false) {
-            return [];
-        }
-
-        $data = json_decode($raw, true);
-
-        if (! is_array($data)) {
-            return [];
-        }
-
-        $extensions = [];
-
-        foreach (['require', 'require-dev'] as $section) {
-            $packages = $data[$section] ?? null;
-
-            if (! is_array($packages)) {
-                continue;
-            }
-
-            foreach (array_keys($packages) as $package) {
-                if (is_string($package) && str_starts_with($package, 'ext-')) {
-                    $extensions[] = substr($package, 4);
-                }
-            }
-        }
-
-        return array_values(array_unique($extensions));
     }
 }

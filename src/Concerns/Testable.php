@@ -276,14 +276,18 @@ trait Testable
 
         /** @var Tia $tia */
         $tia = Container::getInstance()->get(Tia::class);
-        $cached = $tia->getCachedResult(self::$__filename, $this::class.'::'.$this->name());
+        $status = $tia->getStatus(self::$__filename, $this::class.'::'.$this->name());
+        $replay = Replay::fromStatus($status);
 
-        if ($cached !== null) {
-            match (Replay::from($cached)) {
+        if ($replay !== Replay::No) {
+            assert($status !== null);
+
+            match ($replay) {
                 Replay::Pass => $this->__shortCircuitCachedPass(),
-                Replay::Skipped => $this->markTestSkipped($cached->message()),
-                Replay::Incomplete => $this->markTestIncomplete($cached->message()),
-                Replay::Failure => throw new AssertionFailedError($cached->message() ?: 'Cached failure'),
+                Replay::Skipped => $this->markTestSkipped($status->message()),
+                Replay::Incomplete => $this->markTestIncomplete($status->message()),
+                Replay::Failure => throw new AssertionFailedError($status->message() ?: 'Cached failure'),
+                Replay::No => null,
             };
 
             return;
