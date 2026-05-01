@@ -69,11 +69,6 @@ final readonly class BaselineSync
             return false;
         }
 
-        $this->output->writeln(sprintf(
-            '  <fg=cyan>TIA</> fetching baseline from <fg=white>%s</>…',
-            $repo,
-        ));
-
         $payload = $this->download($repo, $projectRoot);
 
         if ($payload === null) {
@@ -322,12 +317,31 @@ YAML;
             // id as recently used and doesn't evict it later.
             @touch($runCacheDir);
 
+            $this->output->writeln(sprintf(
+                '  <fg=cyan>TIA</> using cached baseline from <fg=white>%s</> (run %s).',
+                $repo,
+                $runId,
+            ));
+
             return $this->readArtifact($runCacheDir);
         }
 
         if (! @mkdir($runCacheDir, 0755, true) && ! is_dir($runCacheDir)) {
             return null;
         }
+
+        $artifactSize = $this->artifactSize($repo, $runId);
+
+        $this->output->writeln($artifactSize !== null
+            ? sprintf(
+                '  <fg=cyan>TIA</> fetching baseline (%s) from <fg=white>%s</>…',
+                $this->formatSize($artifactSize),
+                $repo,
+            )
+            : sprintf(
+                '  <fg=cyan>TIA</> fetching baseline from <fg=white>%s</>…',
+                $repo,
+            ));
 
         $process = new Process([
             'gh', 'run', 'download', $runId,
@@ -336,7 +350,17 @@ YAML;
             '-D', $runCacheDir,
         ]);
         $process->setTimeout(900.0);
-        $process->run();
+        $process->start();
+
+        $startedAt = microtime(true);
+
+        while ($process->isRunning()) {
+            $this->renderDownloadProgress($runCacheDir, $artifactSize, $startedAt);
+            usleep(250_000);
+        }
+
+        $process->wait();
+        $this->clearProgressLine();
 
         if (! $process->isSuccessful()) {
             $this->cleanup($runCacheDir);
@@ -355,6 +379,93 @@ YAML;
         $this->trimDownloadCache($projectRoot);
 
         return $payload;
+    }
+
+    /**
+     * Looks up the artifact's compressed size so the progress bar has a
+     * denominator. Returns null on any failure — callers fall back to a
+     * size-less spinner.
+     */
+    private function artifactSize(string $repo, string $runId): ?int
+    {
+        $process = new Process([
+            'gh', 'api',
+            sprintf('repos/%s/actions/runs/%s/artifacts', $repo, $runId),
+            '--jq', sprintf(
+                '.artifacts[] | select(.name == "%s") | .size_in_bytes',
+                self::ARTIFACT_NAME,
+            ),
+        ]);
+        $process->setTimeout(30.0);
+        $process->run();
+
+        if (! $process->isSuccessful()) {
+            return null;
+        }
+
+        $size = trim($process->getOutput());
+
+        return is_numeric($size) ? (int) $size : null;
+    }
+
+    private function renderDownloadProgress(string $dir, ?int $totalBytes, float $startedAt): void
+    {
+        $current = $this->dirSize($dir);
+        $elapsed = max(0.001, microtime(true) - $startedAt);
+        $speed = (int) ($current / $elapsed);
+
+        if ($totalBytes !== null && $totalBytes > 0) {
+            // gh extracts as it downloads, so disk size can briefly exceed
+            // the compressed `size_in_bytes` for multi-file artifacts. Cap
+            // the percentage at 99% until the process actually exits — the
+            // cleared line + completion message take care of the final
+            // "100%" message naturally.
+            $percent = min(99, (int) floor(($current / $totalBytes) * 100));
+            $message = sprintf(
+                '  <fg=cyan>TIA</> downloading %s / %s (%d%%, %s/s)',
+                $this->formatSize($current),
+                $this->formatSize($totalBytes),
+                $percent,
+                $this->formatSize($speed),
+            );
+        } else {
+            $message = sprintf(
+                '  <fg=cyan>TIA</> downloading %s (%s/s)',
+                $this->formatSize($current),
+                $this->formatSize($speed),
+            );
+        }
+
+        // \r returns to start of line, \033[K erases from cursor to end —
+        // safe regardless of message length, no ANSI-aware padding needed.
+        $this->output->write("\r\033[K".$message);
+    }
+
+    private function clearProgressLine(): void
+    {
+        $this->output->write("\r\033[K");
+    }
+
+    private function dirSize(string $dir): int
+    {
+        if (! is_dir($dir)) {
+            return 0;
+        }
+
+        $total = 0;
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+        );
+
+        /** @var \SplFileInfo $entry */
+        foreach ($iterator as $entry) {
+            if ($entry->isFile()) {
+                $total += $entry->getSize();
+            }
+        }
+
+        return $total;
     }
 
     /**
