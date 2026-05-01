@@ -929,15 +929,24 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             $reasons === [] ? '' : ' ('.implode(', ', $reasons).')',
         ));
 
-        if ($changedFiles !== []) {
-            $preview = array_slice($changedFiles, 0, 3);
-            $remainder = count($changedFiles) - count($preview);
-            $suffix = $remainder > 0 ? sprintf(', +%d more', $remainder) : '';
+        // List the first few affected test files so the developer can see
+        // *which* tests are about to run, not just the count. Capped at 10
+        // to keep the line tight on large impact sets.
+        $previewLimit = 10;
+        $sorted = $affected;
+        sort($sorted);
+        $preview = array_slice($sorted, 0, $previewLimit);
 
+        foreach ($preview as $file) {
+            $this->output->writeln(sprintf('  <fg=gray>  • %s</>', $file));
+        }
+
+        $remainder = count($sorted) - count($preview);
+
+        if ($remainder > 0) {
             $this->output->writeln(sprintf(
-                '  <fg=gray>└ %s%s</>',
-                implode(', ', $preview),
-                $suffix,
+                '  <fg=gray>  … +%d more</>',
+                $remainder,
             ));
         }
     }
