@@ -316,6 +316,23 @@ final class Graph
             }
         }
 
+        // A changed file inside the configured test suites is itself the unit
+        // of work — always run it (new untracked tests, edited tests, renames).
+        $testPaths = TestPaths::fromProjectRoot($this->projectRoot);
+
+        foreach ($nonMigrationPaths as $rel) {
+            if (isset($affectedSet[$rel])) {
+                continue;
+            }
+            if (! $testPaths->isTestFile($rel)) {
+                continue;
+            }
+            if (! is_file($this->projectRoot.'/'.$rel)) {
+                continue;
+            }
+            $affectedSet[$rel] = true;
+        }
+
         // Unknown Blade files: walk static references (@include, @extends, <x-*>) up to rendered
         $staticallyHandledBlade = [];
         foreach ($nonMigrationPaths as $rel) {

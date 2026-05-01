@@ -42,12 +42,12 @@ final readonly class BaselineSync
         View::render('components.badge', ['type' => $type, 'content' => $content]);
     }
 
-    private function renderDetail(string $left, string $right = ''): void
+    private function renderChild(string $text): void
     {
-        View::render('components.two-column-detail', ['left' => $left, 'right' => $right]);
+        $this->output->writeln(sprintf('  <fg=gray>─ %s</>', $text));
     }
 
-    public function fetchIfAvailable(string $projectRoot, bool $force = false): bool
+    public function fetchIfAvailable(string $projectRoot, bool $force = false, bool $hasAnchor = false): bool
     {
         $repo = $this->detectGitHubRepo($projectRoot);
 
@@ -65,7 +65,7 @@ final readonly class BaselineSync
         }
 
         $failureKind = null;
-        $payload = $this->download($repo, $projectRoot, $failureKind);
+        $payload = $this->download($repo, $projectRoot, $failureKind, $hasAnchor);
 
         if ($payload === null) {
             if ($failureKind === 'no-runs' || $failureKind === null) {
@@ -151,8 +151,8 @@ final readonly class BaselineSync
             : $this->genericWorkflowYaml();
 
         $this->renderBadge('WARN', 'No baseline published yet — recording locally.');
-        $this->renderDetail('To share the baseline with your team, add this workflow to the repo:');
-        $this->renderDetail('.github/workflows/tia-baseline.yml');
+        $this->renderChild('To share the baseline with your team, add this workflow to the repo:');
+        $this->renderChild('.github/workflows/tia-baseline.yml');
 
         $indentedYaml = array_map(
             static fn (string $line): string => '      '.$line,
@@ -161,8 +161,8 @@ final readonly class BaselineSync
 
         $this->output->writeln(['', ...$indentedYaml, '']);
 
-        $this->renderDetail(sprintf('Commit, push, then run once: gh workflow run tia-baseline.yml -R %s', $repo));
-        $this->renderDetail('Details: https://pestphp.com/docs/tia/ci');
+        $this->renderChild(sprintf('Commit, push, then run once: gh workflow run tia-baseline.yml -R %s', $repo));
+        $this->renderChild('Details: https://pestphp.com/docs/tia/ci');
     }
 
     private function isCi(): bool
@@ -285,7 +285,7 @@ YAML;
      *
      * @return array{graph: string, coverage: ?string}|null
      */
-    private function download(string $repo, string $projectRoot, ?string &$failureKind = null): ?array
+    private function download(string $repo, string $projectRoot, ?string &$failureKind = null, bool $hasAnchor = false): ?array
     {
         $failureKind = null;
 
@@ -293,6 +293,7 @@ YAML;
             Panic::with(new BaselineFetchFailed(
                 'GitHub CLI (gh) not found — cannot fetch baseline.',
                 'Install it from https://cli.github.com.',
+                $hasAnchor,
             ));
         }
 
@@ -300,6 +301,7 @@ YAML;
             Panic::with(new BaselineFetchFailed(
                 'GitHub CLI (gh) is not authenticated — cannot fetch baseline.',
                 'Run `gh auth login` and retry.',
+                $hasAnchor,
             ));
         }
 
@@ -311,7 +313,8 @@ YAML;
             if (in_array($failureKind, ['forbidden', 'not-found'], true)) {
                 Panic::with(new BaselineFetchFailed(
                     sprintf('Failed to query baseline runs — %s', $listError['message']),
-                    'Check the workflow file name (tia-baseline.yml), artifact name (pest-tia-baseline), and your gh token scope.',
+                    'Verify workflow tia-baseline.yml, artifact pest-tia-baseline, and gh token scope.',
+                    $hasAnchor,
                 ));
             }
 
@@ -388,7 +391,8 @@ YAML;
             if (in_array($failureKind, ['forbidden', 'not-found'], true)) {
                 Panic::with(new BaselineFetchFailed(
                     sprintf('Baseline download failed — %s', $diagnosis['message']),
-                    'Check the workflow file name (tia-baseline.yml), artifact name (pest-tia-baseline), and your gh token scope.',
+                    'Verify workflow tia-baseline.yml, artifact pest-tia-baseline, and gh token scope.',
+                    $hasAnchor,
                 ));
             }
 
@@ -408,6 +412,7 @@ YAML;
             Panic::with(new BaselineFetchFailed(
                 'Baseline downloaded but the artifact is missing expected files (graph.json).',
                 'Your CI publish step is broken — check the workflow that uploads pest-tia-baseline.',
+                $hasAnchor,
             ));
         }
 

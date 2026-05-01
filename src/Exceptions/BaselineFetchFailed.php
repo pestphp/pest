@@ -20,6 +20,7 @@ final class BaselineFetchFailed extends RuntimeException implements ExceptionInt
     public function __construct(
         private readonly string $headline,
         private readonly string $hint,
+        private readonly bool $hasAnchor = false,
     ) {
         parent::__construct($headline);
     }
@@ -28,16 +29,26 @@ final class BaselineFetchFailed extends RuntimeException implements ExceptionInt
     {
         View::renderUsing($output);
 
-        View::render('components.badge', ['type' => 'ERROR', 'content' => $this->headline]);
-        View::render('components.two-column-detail', ['left' => $this->hint, 'right' => '']);
-        View::render('components.two-column-detail', [
-            'left' => 'Bypass with --fresh to record locally and skip the baseline fetch.',
-            'right' => '',
-        ]);
+        if (! $this->hasAnchor) {
+            View::render('components.badge', ['type' => 'ERROR', 'content' => $this->headline]);
+            $this->renderChild($output, $this->hint.' Or use [--fresh] to record locally.');
+            $output->writeln('');
+
+            return;
+        }
+
+        $this->renderChild($output, $this->headline);
+        $this->renderChild($output, $this->hint.' Or use [--fresh] to record locally.');
+        $output->writeln('');
     }
 
     public function exitCode(): int
     {
         return 1;
+    }
+
+    private function renderChild(OutputInterface $output, string $text): void
+    {
+        $output->writeln(sprintf('  <fg=gray>─ %s</>', $text));
     }
 }

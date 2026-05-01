@@ -90,6 +90,9 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     /** @var array<string, true> */
     private array $affectedFiles = [];
 
+    /** @var array{structural: array<string, mixed>, environmental: array<string, mixed>}|null */
+    private ?array $startFingerprint = null;
+
     private function workerEdgesKey(string $token): string
     {
         return self::KEY_WORKER_EDGES_PREFIX.$token.'.json';
@@ -126,9 +129,19 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         View::render('components.badge', ['type' => $type, 'content' => $content]);
     }
 
-    private function renderDetail(string $left, string $right = ''): void
+    private function renderChild(string $text): void
     {
-        View::render('components.two-column-detail', ['left' => $left, 'right' => $right]);
+        $this->output->writeln(sprintf('  <fg=gray>─ %s</>', $text));
+    }
+
+    /**
+     * @param  array{structural: array<string, mixed>, environmental: array<string, mixed>}  $current
+     */
+    private function structuralFingerprintShifted(array $current): bool
+    {
+        assert($this->startFingerprint !== null);
+
+        return ! Fingerprint::structuralMatches($this->startFingerprint, $current);
     }
 
     private function loadGraph(string $projectRoot): ?Graph
@@ -318,8 +331,19 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $changedFiles = new ChangedFiles($projectRoot);
         $currentSha = $changedFiles->currentSha();
 
+        $currentFingerprint = Fingerprint::compute($projectRoot);
+
+        if ($this->structuralFingerprintShifted($currentFingerprint)) {
+            $this->renderBadge('WARN', 'Project files changed during the run — discarding recorded edges.');
+            $this->renderChild('Re-run --tia after your edits settle to record a fresh dependency graph.');
+            $recorder->reset();
+            $this->coverageCollector->reset();
+
+            return;
+        }
+
         $graph = $this->loadGraph($projectRoot) ?? new Graph($projectRoot);
-        $graph->setFingerprint(Fingerprint::compute($projectRoot));
+        $graph->setFingerprint($currentFingerprint);
         $graph->setRecordedAtSha($this->branch, $currentSha);
         $graph->setLastRunTree(
             $this->branch,
@@ -342,12 +366,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
             return;
         }
-
-        $this->renderBadge('INFO', sprintf(
-            'Recorded the dependency graph (%d test file%s).',
-            count($perTest),
-            count($perTest) === 1 ? '' : 's',
-        ));
 
         $recorder->reset();
         $this->coverageCollector->reset();
@@ -389,8 +407,21 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $changedFiles = new ChangedFiles($projectRoot);
         $currentSha = $changedFiles->currentSha();
 
+        $currentFingerprint = Fingerprint::compute($projectRoot);
+
+        if ($this->structuralFingerprintShifted($currentFingerprint)) {
+            $this->renderBadge('WARN', 'Project files changed during the run — discarding recorded edges.');
+            $this->renderChild('Re-run --tia after your edits settle to record a fresh dependency graph.');
+
+            foreach ($partialKeys as $key) {
+                $this->state->delete($key);
+            }
+
+            return $exitCode;
+        }
+
         $graph = $this->loadGraph($projectRoot) ?? new Graph($projectRoot);
-        $graph->setFingerprint(Fingerprint::compute($projectRoot));
+        $graph->setFingerprint($currentFingerprint);
         $graph->setRecordedAtSha($this->branch, $currentSha);
         $graph->setLastRunTree(
             $this->branch,
@@ -467,7 +498,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             }
 
             $this->renderBadge('ERROR', 'Recorded zero edges — coverage driver likely missing.');
-            $this->renderDetail('Install / enable pcov or xdebug (mode: coverage) in the worker PHP and retry.');
+            $this->renderChild('Install / enable pcov or xdebug (mode: coverage) in the worker PHP and retry.');
 
             return $exitCode;
         }
@@ -486,14 +517,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
             return $exitCode;
         }
-
-        $this->renderBadge('INFO', sprintf(
-            'Recorded the dependency graph (%d test file%s, %d worker partial%s).',
-            count($finalised),
-            count($finalised) === 1 ? '' : 's',
-            count($partialKeys),
-            count($partialKeys) === 1 ? '' : 's',
-        ));
 
         $this->snapshotTestResults();
 
@@ -523,7 +546,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                         $branchSha,
                     );
                     if ($summary !== '') {
-                        $this->renderDetail($summary);
+                        $this->renderChild($summary);
                     }
                 }
             }
@@ -567,12 +590,13 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $this->branch = (new ChangedFiles($projectRoot))->currentBranch() ?? 'main';
 
         $fingerprint = Fingerprint::compute($projectRoot);
+        $this->startFingerprint = $fingerprint;
 
         if ($forceRebuild) {
             Storage::purge($projectRoot);
         }
 
-        $graph = $forceRebuild ? null : $this->loadGraph($projectRoot);
+        $graph = ($forceRebuild || $this->forceRefetch) ? null : $this->loadGraph($projectRoot);
 
         if ($graph instanceof Graph) {
             $graph = $this->reconcileFingerprint($graph, $fingerprint);
@@ -759,8 +783,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         if ($hasProjectPhpSourceChanges && ! $coverageAvailable) {
             $this->renderBadge('WARN', 'Detected PHP source changes but no coverage driver is available.');
-            $this->renderDetail('Running the full suite to avoid using a stale dependency graph.');
-            $this->renderDetail('Install / enable pcov or xdebug (mode: coverage) so edges can be safely refreshed after PHP refactors.');
+            $this->renderChild('Running the full suite to avoid using a stale dependency graph.');
+            $this->renderChild('Install / enable pcov or xdebug (mode: coverage) so edges can be safely refreshed after PHP refactors.');
 
             return $arguments;
         }
@@ -836,6 +860,9 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      */
     private function reportAffectedSummary(array $changedFiles, array $affectedFromChanges, array $failedFromCache, array $affected): void
     {
+        $this->output->writeln('');
+        $this->renderChild('TIA mode enabled.');
+
         if ($affected === []) {
             return;
         }
@@ -936,11 +963,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                 Parallel::setGlobal(self::PIGGYBACK_COVERAGE_GLOBAL, '1');
             }
 
-            $this->renderBadge('INFO', $this->piggybackCoverage
-                ? 'Recording dependency graph in parallel via --coverage (first run) — '.
-                    'subsequent --tia runs will only re-execute affected tests.'
-                : 'Recording dependency graph in parallel (first run) — '.
-                    'subsequent --tia runs will only re-execute affected tests.');
+            $this->output->writeln('');
+            $this->renderChild('TIA mode enabled / fresh graph.');
 
             return $arguments;
         }
@@ -948,8 +972,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         if ($this->piggybackCoverage) {
             $this->recordingActive = true;
 
-            $this->renderBadge('INFO', 'Recording dependency graph via --coverage (first run) — '.
-                'subsequent --tia runs will only re-execute affected tests.');
+            $this->output->writeln('');
+            $this->renderChild('TIA mode enabled / fresh graph.');
 
             return $arguments;
         }
@@ -957,11 +981,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $recorder->activate();
         $this->recordingActive = true;
 
-        $this->renderBadge('INFO', sprintf(
-            'Recording dependency graph via %s (first run) — '.
-            'subsequent --tia runs will only re-execute affected tests.',
-            $recorder->driver(),
-        ));
+        $this->renderChild('Running in TIA mode.');
 
         return $arguments;
     }
@@ -969,8 +989,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private function emitCoverageDriverMissing(): void
     {
         $this->renderBadge('WARN', 'No coverage driver is available — skipped.');
-        $this->renderDetail('Needs ext-pcov or Xdebug with coverage mode enabled to record the dependency graph.');
-        $this->renderDetail('Install or enable one and rerun with --tia.');
+        $this->renderChild('Needs ext-pcov or Xdebug with coverage mode enabled to record the dependency graph.');
+        $this->renderChild('Install or enable one and rerun with --tia.');
     }
 
     /**
@@ -1017,7 +1037,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             '%d worker(s) had no coverage driver — their per-test edges and results were dropped.',
             count($keys),
         ));
-        $this->renderDetail('Install / enable pcov or xdebug (mode: coverage) in the worker PHP and rerun.');
+        $this->renderChild('Install / enable pcov or xdebug (mode: coverage) in the worker PHP and rerun.');
     }
 
     private function purgeWorkerPartials(): void
@@ -1404,7 +1424,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $projectRoot = TestSuite::getInstance()->rootPath;
         $this->baselineFetchAttemptedForDrift = true;
 
-        if (! $this->baselineSync->fetchIfAvailable($projectRoot, $this->forceRefetch)) {
+        if (! $this->baselineSync->fetchIfAvailable($projectRoot, $this->forceRefetch, hasAnchor: true)) {
             return null;
         }
 
