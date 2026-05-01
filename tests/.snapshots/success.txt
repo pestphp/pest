@@ -1,7 +1,7 @@
 
    PASS  Tests\Arch
   ✓ preset → php → ignoring ['Pest\Expectation', 'debug_backtrace', 'var_export', …]
-  ✓ preset → strict → ignoring ['usleep']
+  ✓ preset → strict → ignoring ['Pest\Plugins\Tia\BaselineSync', 'usleep']
   ✓ preset → security → ignoring ['eval', 'str_shuffle', 'exec', …]
   ✓ globals
   ✓ contracts
