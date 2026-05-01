@@ -249,7 +249,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $alwaysEnabled = $watchPatterns->isEnabled()
             && (! $watchPatterns->isLocally() || Environment::name() === Environment::LOCAL);
         $enabled = $cliEnabled || $alwaysEnabled;
-        $this->filteredMode = $this->hasArgument(self::FILTERED_OPTION, $arguments) || $watchPatterns->isFiltered();
+        $this->filteredMode = ($this->hasArgument(self::FILTERED_OPTION, $arguments) || $watchPatterns->isFiltered())
+            && ! $this->hasExplicitPathArgument($arguments);
         $freshRequested = $this->hasArgument(self::FRESH_OPTION, $arguments);
         $this->forceRefetch = $this->hasArgument(self::REFETCH_OPTION, $arguments);
 
@@ -1375,6 +1376,32 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         return $coverage->coverage === true;
+    }
+
+    /**
+     * @param  array<int, string>  $arguments
+     */
+    private function hasExplicitPathArgument(array $arguments): bool
+    {
+        $projectRoot = TestSuite::getInstance()->rootPath;
+
+        foreach ($arguments as $arg) {
+            if ($arg === '' || str_starts_with($arg, '-')) {
+                continue;
+            }
+
+            if (is_file($arg) || is_dir($arg)) {
+                return true;
+            }
+
+            $absolute = rtrim($projectRoot, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.ltrim($arg, DIRECTORY_SEPARATOR);
+
+            if (is_file($absolute) || is_dir($absolute)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
