@@ -149,7 +149,10 @@ final class Recorder
         if ($this->driver === 'pcov') {
             \pcov\stop();
             /** @var array<string, mixed> $data */
-            $data = \pcov\collect(\pcov\all);
+            $filesToCollectCoverageFor = \pcov\waiting();
+
+            /** @var array<string, mixed> $data */
+            $data = \pcov\collect(\pcov\inclusive, $filesToCollectCoverageFor);
 
             // pcov returns every executable line in every file it
             // tracked: positive values for executed lines, `-1` for
@@ -160,7 +163,9 @@ final class Recorder
             // at framework boot. Including those attributes every
             // globally-bootstrapped class to whichever test triggered
             // the boot, blowing up the affected set on edits to those
-            // files.
+            // files. We further narrow to phpunit.xml's `<source>`
+            // scope so files outside the configured include set never
+            // become edges.
             $coveredFiles = self::filesWithExecutedLines($data);
         } else {
             /** @var array<string, mixed> $data */
@@ -656,11 +661,16 @@ final class Recorder
     }
 
     /**
-     * Filters pcov's `file => line => executionCount` map to the files
-     * that actually had at least one executed line. pcov reports `-1`
-     * for "executable but not run" and a positive count for executed
-     * lines; a file with no positives was loaded but contributed no
-     * executed code to this test.
+     * Filters pcov's `file => line => executionCount` map to files that
+     * actually had executed code AND live inside the configured source
+     * scope (`phpunit.xml`'s `<source>` block, or the project root with
+     * vendor/etc. excluded as fallback).
+     *
+     * pcov reports `-1` for "executable but not run" and a positive
+     * count for executed lines. We also skip files where the *only*
+     * positive line is the implicit `ZEND_RETURN` at end-of-file: pcov
+     * surfaces that as a one-line artifact for files that were merely
+     * included (autoloaded) without any real code running.
      *
      * @param  array<string, mixed>  $data
      * @return list<string>
@@ -674,13 +684,25 @@ final class Recorder
                 continue;
             }
 
-            foreach ($lines as $count) {
+            $covered = [];
+            foreach ($lines as $line => $count) {
                 if (is_int($count) && $count > 0) {
-                    $out[] = $file;
-
-                    continue 2;
+                    $covered[] = $line;
                 }
             }
+
+            if ($covered === []) {
+                continue;
+            }
+
+            // Skip files where the only "executed" line is the implicit
+            // ZEND_RETURN at end-of-file (pcov artifact from being included
+            // but never actually run).
+            if (count($covered) === 1 && max($covered) === max(array_keys($lines))) {
+                continue;
+            }
+
+            $out[] = $file;
         }
 
         return $out;
