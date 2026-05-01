@@ -234,7 +234,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         return $result;
     }
 
-    public function getCachedAssertions(string $testId): int
+    public function getAssertionCount(string $testId): int
     {
         return $this->cachedAssertionsByTestId[$testId] ?? 0;
     }

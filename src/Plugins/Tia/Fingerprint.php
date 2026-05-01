@@ -9,59 +9,6 @@ namespace Pest\Plugins\Tia;
  */
 final readonly class Fingerprint
 {
-    // Bump this whenever the set of inputs or the hash algorithm changes,
-    // so older graphs are invalidated automatically.
-    //
-    //   v5: ChangedFiles now hashes via `ContentHash` (normalises PHP
-    //       tokens + Blade whitespace/comments) instead of raw bytes.
-    //       Old graphs' run-tree hashes are incompatible and must be
-    //       rebuilt.
-    //   v6: Graph gained per-test table edges (`$testTables`) powering
-    //       surgical migration invalidation. Worker partial shape
-    //       changed to `{files, tables}`. Old graphs have no table
-    //       coverage, which would leave every DB test invalidated by
-    //       any migration change — force a rebuild so the new edges
-    //       are populated.
-    //   v7: Graph gained per-test Inertia page-component edges
-    //       (`$testInertiaComponents`) for surgical page-file
-    //       invalidation. Worker partial now includes an `inertia`
-    //       section. Old graphs have no component edges; without a
-    //       rebuild Vue/React page edits would fall through to the
-    //       broad watch pattern even when precise matching could have
-    //       worked.
-    //   v8: Graph gained `$jsFileToComponents` — reverse dependency
-    //       map computed at record time from Vite's module graph (or
-    //       the PHP fallback) so shared components / layouts /
-    //       composables invalidate the specific pages they're used
-    //       by, not every browser test.
-    //   v9: `ContentHash` now normalises JS/TS/Vue/Svelte comments +
-    //       whitespace. Old graphs' run-tree hashes for those files
-    //       were raw-byte; mixing formats would flag every JS file as
-    //       changed on first run.
-    //   v10: `vite.config.*` hashed into the structural bucket. A
-    //        Vite config change reshapes the module dependency graph
-    //        that `JsModuleGraph` records; without a graph rebuild
-    //        the stored `$jsFileToComponents` map silently goes stale.
-    //   v11: `composer.json` added (autoload-dev / extra discovery
-    //        changes). `tests/TestCase.php` and `tests/Pest.php` are
-    //        intentionally NOT fingerprinted — they're handled by the
-    //        watch pattern + `Recorder::linkAncestorFiles` reflection
-    //        walk, which gives precise per-test invalidation rather
-    //        than a wholesale rebuild that trashes the entire graph.
-    //   v12: PHP/JS structural inputs (pest_factory*, vite.config.*)
-    //        now hash via `ContentHash::of()` so cosmetic comment +
-    //        whitespace edits don't fire rebuilds. composer.json and
-    //        composer.lock hash a behavioural subset — description,
-    //        keywords, scripts, authors, install timestamps, dist
-    //        URLs etc. no longer drift the structural fingerprint.
-    //   v13: Environment files (`.env`, `.env.testing`, local variants)
-    //        are included in the environmental bucket. They are commonly
-    //        git-ignored, so watch patterns alone cannot reliably notice
-    //        edits; a drift drops cached results and re-executes the suite.
-    //   v14: Node/Vite resolver inputs (`package*.json`, `tsconfig.*`,
-    //        `jsconfig.*`) are included in the structural bucket. They can
-    //        reshape the persisted JS module graph without touching
-    //        `vite.config.*` itself.
     private const int SCHEMA_VERSION = 14;
 
     /**

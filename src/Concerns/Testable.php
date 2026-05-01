@@ -410,7 +410,7 @@ trait Testable
             // accurate on replay instead of collapsing to 1-per-test.
             /** @var Tia $tia */
             $tia = Container::getInstance()->get(Tia::class);
-            $assertions = $tia->getCachedAssertions($this::class.'::'.$this->name());
+            $assertions = $tia->getAssertionCount($this::class.'::'.$this->name());
 
             if ($assertions === 0) {
                 $this->expectNotToPerformAssertions();
