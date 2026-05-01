@@ -335,7 +335,7 @@ YAML;
             '-n', self::ARTIFACT_NAME,
             '-D', $runCacheDir,
         ]);
-        $process->setTimeout(300.0);
+        $process->setTimeout(900.0);
         $process->run();
 
         if (! $process->isSuccessful()) {
