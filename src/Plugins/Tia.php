@@ -789,7 +789,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return $arguments;
         }
 
-        $affected = $changed === [] ? [] : $graph->affected($changed);
+        $affectedFromChanges = $changed === [] ? [] : $graph->affected($changed);
+        $failedFromCache = [];
 
         if ($this->filteredMode) {
             // `failedOrErroredTestFiles()` only yields failures that have a
@@ -798,11 +799,15 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             // is no longer expected. If one slips through, doing the best
             // we can with the located ones is strictly better than bailing
             // to a full suite.
-            $affected = array_values(array_unique([
-                ...$affected,
-                ...$graph->failedOrErroredTestFiles($this->branch),
-            ]));
+            $failedFromCache = $graph->failedOrErroredTestFiles($this->branch);
         }
+
+        $affected = array_values(array_unique([
+            ...$affectedFromChanges,
+            ...$failedFromCache,
+        ]));
+
+        $this->reportAffectedSummary($changed, $affectedFromChanges, $failedFromCache, $affected);
 
         $affectedSet = array_fill_keys($affected, true);
         $canRefreshReplayEdges = $affected !== [] && $coverageAvailable;
@@ -853,6 +858,74 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         return $arguments;
+    }
+
+    /**
+     * Surfaces what TIA decided to run and why, before the suite
+     * starts. Two pieces a developer wants at a glance:
+     *
+     *   1. *How many* tests are about to run — the deciding factor for
+     *      whether they wait for the run or kick off something else.
+     *   2. *Why* — which changed files drove the affected set, and how
+     *      many came in via cached failures (filtered mode).
+     *
+     * Stays quiet when nothing is affected: the existing
+     * `NoAffectedTestsFound` panic / recap line covers that path.
+     *
+     * @param  array<int, string>  $changedFiles
+     * @param  array<int, string>  $affectedFromChanges
+     * @param  array<int, string>  $failedFromCache
+     * @param  array<int, string>  $affected
+     */
+    private function reportAffectedSummary(array $changedFiles, array $affectedFromChanges, array $failedFromCache, array $affected): void
+    {
+        if ($affected === []) {
+            return;
+        }
+
+        $reasons = [];
+
+        if ($affectedFromChanges !== []) {
+            $reasons[] = sprintf(
+                '%d from %d changed file%s',
+                count($affectedFromChanges),
+                count($changedFiles),
+                count($changedFiles) === 1 ? '' : 's',
+            );
+        }
+
+        // Failures that overlap with the change-driven set are already
+        // counted there — don't double-count them in the breakdown.
+        $newFailures = $failedFromCache === []
+            ? 0
+            : count(array_diff($failedFromCache, $affectedFromChanges));
+
+        if ($newFailures > 0) {
+            $reasons[] = sprintf(
+                '%d cached failure%s',
+                $newFailures,
+                $newFailures === 1 ? '' : 's',
+            );
+        }
+
+        $this->output->writeln(sprintf(
+            '  <fg=cyan>TIA</> %d affected test%s%s.',
+            count($affected),
+            count($affected) === 1 ? '' : 's',
+            $reasons === [] ? '' : ' ('.implode(', ', $reasons).')',
+        ));
+
+        if ($changedFiles !== []) {
+            $preview = array_slice($changedFiles, 0, 3);
+            $remainder = count($changedFiles) - count($preview);
+            $suffix = $remainder > 0 ? sprintf(', +%d more', $remainder) : '';
+
+            $this->output->writeln(sprintf(
+                '  <fg=gray>└ %s%s</>',
+                implode(', ', $preview),
+                $suffix,
+            ));
+        }
     }
 
     /**
