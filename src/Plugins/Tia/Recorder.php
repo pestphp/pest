@@ -473,7 +473,7 @@ final class Recorder
         }
 
         $parts = preg_split('/\s+as\s+/i', $import);
-        if ($parts === false || $parts === []) {
+        if ($parts === false) {
             return null;
         }
 
@@ -486,9 +486,6 @@ final class Recorder
     {
         foreach (spl_autoload_functions() as $loader) {
             if (! is_array($loader)) {
-                continue;
-            }
-            if (! isset($loader[0])) {
                 continue;
             }
             if (! is_object($loader[0])) {
@@ -689,9 +686,6 @@ final class Recorder
         $out = [];
 
         foreach ($data as $file => $lines) {
-            if (! is_string($file)) {
-                continue;
-            }
             if (! is_array($lines)) {
                 continue;
             }
@@ -709,7 +703,8 @@ final class Recorder
             // Skip files where the only "executed" line is the implicit
             // ZEND_RETURN at end-of-file (pcov artifact from being included
             // but never actually run).
-            if (count($covered) === 1 && max($covered) === max(array_keys($lines))) {
+            $lineKeys = array_keys($lines);
+            if ($lineKeys !== [] && count($covered) === 1 && $covered[0] === max($lineKeys)) {
                 continue;
             }
 

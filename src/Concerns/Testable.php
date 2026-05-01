@@ -274,24 +274,11 @@ trait Testable
         self::$__latestIssues = $method->issues;
         self::$__latestPrs = $method->prs;
 
-        // TIA replay short-circuit. Runs AFTER dataset/description/
-        // assignee metadata is populated so output and filtering still
-        // see the correct test name + tags on a cache hit, but BEFORE
-        // `parent::setUp()` and `beforeEach` so we skip the user's
-        // fixture setup (which is the whole point of replay — avoid
-        // paying for work whose outcome we already know).
         /** @var Tia $tia */
         $tia = Container::getInstance()->get(Tia::class);
         $cached = $tia->getCachedResult(self::$__filename, $this::class.'::'.$this->name());
 
         if ($cached !== null) {
-            // Risky has no public PHPUnit hook to replay as-risky, so we
-            // collapse it into Pass — the test doesn't misreport as a
-            // failure, at the cost of losing aggregate risky totals on
-            // replay (accepted until PHPUnit grows a programmatic
-            // risky-marker API). Skipped/Incomplete throw the matching
-            // PHPUnit exception so the runner marks the status exactly
-            // as it did on the recorded run.
             match (Replay::from($cached)) {
                 Replay::Pass => $this->__shortCircuitCachedPass(),
                 Replay::Skipped => $this->markTestSkipped($cached->message()),

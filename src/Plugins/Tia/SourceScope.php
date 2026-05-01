@@ -77,7 +77,7 @@ final readonly class SourceScope
             $includes = [self::normalise($projectRoot)];
         }
 
-        return new self($projectRoot, $includes, $excludes);
+        return new self($includes, $excludes);
     }
 
     /**
@@ -152,13 +152,7 @@ final readonly class SourceScope
                 continue;
             }
 
-            $absolute = self::resolveRelative($value, $configDir);
-
-            if ($absolute === null) {
-                continue;
-            }
-
-            $out[] = $absolute;
+            $out[] = self::resolveRelative($value, $configDir);
         }
 
         return array_values(array_unique($out));

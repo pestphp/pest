@@ -67,7 +67,7 @@ final readonly class BaselineSync
 
         if (! $force && ($remaining = $this->cooldownRemaining()) !== null) {
             $this->renderBadge('WARN', sprintf(
-                'TIA last fetch found no baseline — next auto-retry in %s. Override with --refetch.',
+                'Last fetch found no baseline — next auto-retry in %s. Override with --refetch.',
                 $this->formatDuration($remaining),
             ));
 
@@ -102,7 +102,7 @@ final readonly class BaselineSync
         $this->clearCooldown();
 
         $this->renderBadge('SUCCESS', sprintf(
-            'TIA baseline ready (%s).',
+            'Baseline ready (%s).',
             $this->formatSize(strlen($payload['graph']) + strlen($payload['coverage'] ?? '')),
         ));
 
@@ -156,7 +156,7 @@ final readonly class BaselineSync
     private function emitPublishInstructions(string $repo): void
     {
         if ($this->isCi()) {
-            $this->renderBadge('INFO', 'TIA no baseline yet — this run will produce one.');
+            $this->renderBadge('INFO', 'No baseline yet — this run will produce one.');
 
             return;
         }
@@ -165,7 +165,7 @@ final readonly class BaselineSync
             ? $this->laravelWorkflowYaml()
             : $this->genericWorkflowYaml();
 
-        $this->renderBadge('WARN', 'TIA no baseline published yet — recording locally.');
+        $this->renderBadge('WARN', 'No baseline published yet — recording locally.');
         $this->renderDetail('To share the baseline with your team, add this workflow to the repo:');
         $this->renderDetail('.github/workflows/tia-baseline.yml');
 
@@ -339,7 +339,7 @@ YAML;
             // Tier 2 — transient (network, rate-limit, unknown). Surface
             // the diagnostic but let the suite fall through to record mode.
             $this->renderBadge('WARN', sprintf(
-                'TIA failed to query baseline runs — %s',
+                'Failed to query baseline runs — %s',
                 $listError['message'],
             ));
 
@@ -364,7 +364,7 @@ YAML;
             @touch($runCacheDir);
 
             $this->renderBadge('INFO', sprintf(
-                'TIA using cached baseline from %s (run %s).',
+                'Using cached baseline from %s (run %s).',
                 $repo,
                 $runId,
             ));
@@ -380,12 +380,12 @@ YAML;
 
         $this->renderBadge('INFO', $artifactSize !== null
             ? sprintf(
-                'TIA fetching baseline (%s) from %s…',
+                'Fetching baseline (%s) from %s…',
                 $this->formatSize($artifactSize),
                 $repo,
             )
             : sprintf(
-                'TIA fetching baseline from %s…',
+                'Fetching baseline from %s…',
                 $repo,
             ));
 
@@ -424,7 +424,7 @@ YAML;
 
             // Tier 2 — transient. Diagnostic + fall through to record mode.
             $this->renderBadge('WARN', sprintf(
-                'TIA baseline download failed — %s',
+                'Baseline download failed — %s',
                 $diagnosis['message'],
             ));
 
@@ -491,7 +491,7 @@ YAML;
             // "100%" message naturally.
             $percent = min(99, (int) floor(($current / $totalBytes) * 100));
             $message = sprintf(
-                '  <fg=cyan>TIA</> downloading %s / %s (%d%%, %s/s)',
+                '  <fg=cyan>Downloading</> %s / %s (%d%%, %s/s)',
                 $this->formatSize($current),
                 $this->formatSize($totalBytes),
                 $percent,
@@ -499,7 +499,7 @@ YAML;
             );
         } else {
             $message = sprintf(
-                '  <fg=cyan>TIA</> downloading %s (%s/s)',
+                '  <fg=cyan>Downloading</> %s (%s/s)',
                 $this->formatSize($current),
                 $this->formatSize($speed),
             );
@@ -723,8 +723,7 @@ YAML;
 
         // Unknown — surface the first informative line so the user has
         // *something* to act on.
-        $first = strtok($output, "\n");
-        $message = is_string($first) ? trim($first) : 'unknown error';
+        $message = trim(strtok($output, "\n"));
 
         return ['kind' => 'unknown', 'message' => $message];
     }

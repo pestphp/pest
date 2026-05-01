@@ -234,7 +234,7 @@ final class Graph
                 View::render('components.badge', [
                     'type' => 'WARN',
                     'content' => sprintf(
-                        'TIA Vite resolver unavailable — falling back to watch pattern for %d new JS file(s).',
+                        'Vite resolver unavailable — falling back to watch pattern for %d new JS file(s).',
                         count($newJsFiles),
                     ),
                 ]);
@@ -469,7 +469,8 @@ final class Graph
     public function setResult(string $branch, string $testId, int $status, string $message, float $time, int $assertions = 0, ?string $file = null): void
     {
         $this->ensureBaseline($branch);
-        $this->baselines[$branch]['results'][$testId] = [
+
+        $entry = [
             'status' => $status,
             'message' => $message,
             'time' => $time,
@@ -480,9 +481,11 @@ final class Graph
             $rel = $this->relative($file);
 
             if ($rel !== null) {
-                $this->baselines[$branch]['results'][$testId]['file'] = $rel;
+                $entry['file'] = $rel;
             }
         }
+
+        $this->baselines[$branch]['results'][$testId] = $entry;
     }
 
     public function getAssertions(string $branch, string $testId, string $fallbackBranch = 'main'): ?int
@@ -532,17 +535,12 @@ final class Graph
         $files = [];
 
         foreach ($baseline['results'] as $result) {
-            $status = $result['status'] ?? null;
-
-            if ($status !== 7 && $status !== 8) {
+            if ($result['status'] !== 7 && $result['status'] !== 8) {
                 continue;
             }
 
             $file = $result['file'] ?? null;
-            if (! is_string($file)) {
-                continue;
-            }
-            if ($file === '') {
+            if ($file === null || $file === '') {
                 continue;
             }
 
@@ -561,15 +559,13 @@ final class Graph
         $baseline = $this->baselineFor($branch, $fallbackBranch);
 
         foreach ($baseline['results'] as $result) {
-            $status = $result['status'] ?? null;
-
-            if ($status !== 7 && $status !== 8) {
+            if ($result['status'] !== 7 && $result['status'] !== 8) {
                 continue;
             }
 
             $file = $result['file'] ?? null;
 
-            if (! is_string($file) || $file === '' || $this->relative($file) === null) {
+            if ($file === null || $file === '' || $this->relative($file) === null) {
                 return true;
             }
         }

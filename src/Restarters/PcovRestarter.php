@@ -79,9 +79,7 @@ final class PcovRestarter implements Restarter
         $env = [];
 
         foreach (getenv() as $name => $value) {
-            if (is_string($value)) {
-                $env[$name] = $value;
-            }
+            $env[$name] = $value;
         }
 
         return $env;
