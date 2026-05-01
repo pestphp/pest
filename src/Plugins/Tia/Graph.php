@@ -540,7 +540,10 @@ final class Graph
             }
 
             $file = $result['file'] ?? null;
-            if ($file === null || $file === '') {
+            if ($file === null) {
+                continue;
+            }
+            if ($file === '') {
                 continue;
             }
 
