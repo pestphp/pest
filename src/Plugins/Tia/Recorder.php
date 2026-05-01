@@ -61,6 +61,8 @@ final class Recorder
 
     private string $driver = 'none';
 
+    private ?SourceScope $sourceScope = null;
+
     public function activate(): void
     {
         $this->active = true;
@@ -148,24 +150,28 @@ final class Recorder
 
         if ($this->driver === 'pcov') {
             \pcov\stop();
-            /** @var array<string, mixed> $data */
-            $filesToCollectCoverageFor = \pcov\waiting();
+
+            // pcov\waiting() lists every file pcov has tracked but not
+            // yet collected for. Filter that list down to the project's
+            // source scope (phpunit.xml's `<source>` plus other
+            // top-level project dirs, minus vendor / caches), then ask
+            // pcov to collect *only* for those — `pcov\inclusive`
+            // narrows the result set at the driver level instead of us
+            // post-filtering after a full collect. Anything pcov saw
+            // outside the scope is dropped before any line counts come
+            // back.
+            $scope = $this->sourceScope();
+            $filesToCollectCoverageFor = [];
+
+            foreach (\pcov\waiting() as $file) {
+                if (is_string($file) && $scope->contains($file)) {
+                    $filesToCollectCoverageFor[] = $file;
+                }
+            }
 
             /** @var array<string, mixed> $data */
             $data = \pcov\collect(\pcov\inclusive, $filesToCollectCoverageFor);
 
-            // pcov returns every executable line in every file it
-            // tracked: positive values for executed lines, `-1` for
-            // executable-but-not-run. A file with no positives was
-            // loaded but nothing in it ran during this test's window
-            // — typically a declaration-only file (Mailables, Enums,
-            // DTOs) pulled in by some service-provider's static `use`
-            // at framework boot. Including those attributes every
-            // globally-bootstrapped class to whichever test triggered
-            // the boot, blowing up the affected set on edits to those
-            // files. We further narrow to phpunit.xml's `<source>`
-            // scope so files outside the configured include set never
-            // become edges.
             $coveredFiles = self::filesWithExecutedLines($data);
         } else {
             /** @var array<string, mixed> $data */
@@ -708,6 +714,11 @@ final class Recorder
         return $out;
     }
 
+    private function sourceScope(): SourceScope
+    {
+        return $this->sourceScope ??= SourceScope::fromProjectRoot(TestSuite::getInstance()->rootPath);
+    }
+
     public function reset(): void
     {
         $this->currentTestFile = null;
@@ -720,6 +731,7 @@ final class Recorder
         $this->fileToClassNames = [];
         $this->indexedClassNames = [];
         $this->classDependencyCache = [];
+        $this->sourceScope = null;
         $this->active = false;
     }
 }
