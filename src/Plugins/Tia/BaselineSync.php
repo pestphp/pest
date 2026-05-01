@@ -30,6 +30,19 @@ final readonly class BaselineSync
 
     private const string COVERAGE_ASSET = Tia::KEY_COVERAGE_CACHE;
 
+    // Project-local directory where artifacts from previous downloads are
+    // kept (one subfolder per workflow run id). Hitting the same run id on
+    // a later fetch skips the `gh run download` round trip entirely —
+    // artifacts are immutable per run id, so the cached bytes are exactly
+    // what gh would re-download.
+    private const string DOWNLOAD_CACHE_REL_DIR = '.pest/artifacts';
+
+    // Most recently downloaded artifacts to retain on disk. Branch
+    // switches and partial baseline rollouts hop across run ids — keeping
+    // the last few avoids re-downloading when the user toggles between
+    // them. Older entries get evicted on the next download.
+    private const int DOWNLOAD_CACHE_MAX_ENTRIES = 5;
+
     // 24 h cooldown after a failed fetch so repeated `pest --tia` calls don't re-hit `gh run list`.
     private const int FETCH_COOLDOWN_SECONDS = 86400;
 
@@ -61,7 +74,7 @@ final readonly class BaselineSync
             $repo,
         ));
 
-        $payload = $this->download($repo);
+        $payload = $this->download($repo, $projectRoot);
 
         if ($payload === null) {
             $this->startCooldown();
@@ -287,7 +300,7 @@ YAML;
     }
 
     /** @return array{graph: string, coverage: ?string}|null */
-    private function download(string $repo): ?array
+    private function download(string $repo, string $projectRoot): ?array
     {
         if (! $this->commandExists('gh')) {
             return null;
@@ -299,9 +312,20 @@ YAML;
             return null;
         }
 
-        $tmpDir = sys_get_temp_dir().DIRECTORY_SEPARATOR.'pest-tia-'.bin2hex(random_bytes(4));
+        $runCacheDir = $this->downloadCacheDir($projectRoot).DIRECTORY_SEPARATOR.$this->safeRunId($runId);
 
-        if (! @mkdir($tmpDir, 0755, true) && ! is_dir($tmpDir)) {
+        // Cache hit: a previous fetch already extracted this run id's
+        // artifact into the run-specific dir. Read the assets straight
+        // out of it and skip `gh run download` entirely.
+        if (is_file($runCacheDir.DIRECTORY_SEPARATOR.self::GRAPH_ASSET)) {
+            // Bump the dir mtime so trimDownloadCache() treats this run
+            // id as recently used and doesn't evict it later.
+            @touch($runCacheDir);
+
+            return $this->readArtifact($runCacheDir);
+        }
+
+        if (! @mkdir($runCacheDir, 0755, true) && ! is_dir($runCacheDir)) {
             return null;
         }
 
@@ -309,36 +333,121 @@ YAML;
             'gh', 'run', 'download', $runId,
             '-R', $repo,
             '-n', self::ARTIFACT_NAME,
-            '-D', $tmpDir,
+            '-D', $runCacheDir,
         ]);
-        $process->setTimeout(120.0);
+        $process->setTimeout(300.0);
         $process->run();
 
         if (! $process->isSuccessful()) {
-            $this->cleanup($tmpDir);
+            $this->cleanup($runCacheDir);
 
             return null;
         }
 
-        $graphPath = $tmpDir.DIRECTORY_SEPARATOR.self::GRAPH_ASSET;
-        $coveragePath = $tmpDir.DIRECTORY_SEPARATOR.self::COVERAGE_ASSET;
+        $payload = $this->readArtifact($runCacheDir);
+
+        if ($payload === null) {
+            $this->cleanup($runCacheDir);
+
+            return null;
+        }
+
+        $this->trimDownloadCache($projectRoot);
+
+        return $payload;
+    }
+
+    /**
+     * @return array{graph: string, coverage: ?string}|null
+     */
+    private function readArtifact(string $dir): ?array
+    {
+        $graphPath = $dir.DIRECTORY_SEPARATOR.self::GRAPH_ASSET;
+        $coveragePath = $dir.DIRECTORY_SEPARATOR.self::COVERAGE_ASSET;
 
         $graph = is_file($graphPath) ? @file_get_contents($graphPath) : false;
 
         if ($graph === false) {
-            $this->cleanup($tmpDir);
-
             return null;
         }
 
         $coverage = is_file($coveragePath) ? @file_get_contents($coveragePath) : false;
 
-        $this->cleanup($tmpDir);
-
         return [
             'graph' => $graph,
             'coverage' => $coverage === false ? null : $coverage,
         ];
+    }
+
+    private function downloadCacheDir(string $projectRoot): string
+    {
+        return rtrim($projectRoot, '/\\')
+            .DIRECTORY_SEPARATOR
+            .str_replace('/', DIRECTORY_SEPARATOR, self::DOWNLOAD_CACHE_REL_DIR);
+    }
+
+    /**
+     * Run ids returned by `gh` are numeric strings, but defend against a
+     * surprising response by stripping anything non-alphanumeric — the
+     * value is used as a directory name.
+     */
+    private function safeRunId(string $runId): string
+    {
+        $sanitised = preg_replace('/[^A-Za-z0-9_-]/', '', $runId) ?? '';
+
+        return $sanitised === '' ? 'unknown' : $sanitised;
+    }
+
+    /**
+     * Keep the N most recently used cached artifacts and evict the rest.
+     * Recency is taken from the directory mtime — `mkdir`/`gh run download`
+     * stamps it on a fresh entry, and a cache hit `touch`es it back to
+     * the front of the line, so a frequently-reused run id won't be
+     * evicted just because newer ids have been seen between uses.
+     */
+    private function trimDownloadCache(string $projectRoot): void
+    {
+        $root = $this->downloadCacheDir($projectRoot);
+
+        if (! is_dir($root)) {
+            return;
+        }
+
+        $entries = @scandir($root);
+
+        if ($entries === false) {
+            return;
+        }
+
+        $candidates = [];
+
+        foreach ($entries as $entry) {
+            if ($entry === '.' || $entry === '..') {
+                continue;
+            }
+
+            $path = $root.DIRECTORY_SEPARATOR.$entry;
+
+            if (! is_dir($path)) {
+                continue;
+            }
+
+            $mtime = @filemtime($path);
+            $candidates[] = ['path' => $path, 'mtime' => $mtime === false ? 0 : $mtime];
+        }
+
+        if (count($candidates) <= self::DOWNLOAD_CACHE_MAX_ENTRIES) {
+            return;
+        }
+
+        usort(
+            $candidates,
+            static fn (array $a, array $b): int => $b['mtime'] <=> $a['mtime'],
+        );
+
+        foreach (array_slice($candidates, self::DOWNLOAD_CACHE_MAX_ENTRIES) as $stale) {
+            $this->cleanup($stale['path']);
+        }
     }
 
     private function latestSuccessfulRunId(string $repo): ?string
