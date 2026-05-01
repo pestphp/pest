@@ -861,9 +861,10 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private function reportAffectedSummary(array $changedFiles, array $affectedFromChanges, array $failedFromCache, array $affected): void
     {
         $this->output->writeln('');
-        $this->renderChild('TIA mode enabled.');
 
         if ($affected === []) {
+            $this->renderChild('TIA mode enabled.');
+
             return;
         }
 
@@ -903,8 +904,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                 );
         }
 
-        $this->renderBadge('INFO', sprintf(
-            '%d affected test file%s%s.',
+        $this->renderChild(sprintf(
+            'TIA mode enabled / %d affected test file%s%s.',
             count($affected),
             count($affected) === 1 ? '' : 's',
             $reasons === [] ? '' : ' ('.implode(', ', $reasons).')',
@@ -916,13 +917,13 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $preview = array_slice($sorted, 0, $previewLimit);
 
         foreach ($preview as $file) {
-            $this->output->writeln(sprintf('  <fg=gray>  • %s</>', $file));
+            $this->output->writeln(sprintf('  <fg=gray>%s</>', $file));
         }
 
         $remainder = count($sorted) - count($preview);
 
         if ($remainder > 0) {
-            $this->output->writeln(sprintf('  <fg=gray>  … +%d more</>', $remainder));
+            $this->output->writeln(sprintf('  <fg=gray>… +%d more</>', $remainder));
         }
     }
 
