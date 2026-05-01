@@ -150,14 +150,28 @@ final class Recorder
             \pcov\stop();
             /** @var array<string, mixed> $data */
             $data = \pcov\collect(\pcov\all);
+
+            // pcov returns every executable line in every file it
+            // tracked: positive values for executed lines, `-1` for
+            // executable-but-not-run. A file with no positives was
+            // loaded but nothing in it ran during this test's window
+            // — typically a declaration-only file (Mailables, Enums,
+            // DTOs) pulled in by some service-provider's static `use`
+            // at framework boot. Including those attributes every
+            // globally-bootstrapped class to whichever test triggered
+            // the boot, blowing up the affected set on edits to those
+            // files.
+            $coveredFiles = self::filesWithExecutedLines($data);
         } else {
             /** @var array<string, mixed> $data */
             $data = \xdebug_get_code_coverage();
             // `true` resets Xdebug's buffer; without it the next start() accumulates prior test coverage.
             \xdebug_stop_code_coverage(true);
+
+            $coveredFiles = array_keys($data);
         }
 
-        foreach (array_keys($data) as $sourceFile) {
+        foreach ($coveredFiles as $sourceFile) {
             $this->perTestFiles[$this->currentTestFile][$sourceFile] = true;
         }
 
@@ -172,7 +186,7 @@ final class Recorder
 
         // Walk covered classes' interfaces/traits/parents. Interfaces have no executable bytecode,
         // so a signature change would leave implementing-class tests stale without this walk.
-        $this->linkSourceDependencies(array_keys($data));
+        $this->linkSourceDependencies($coveredFiles);
 
         $this->currentTestFile = null;
         $this->includedFilesAtTestStart = [];
@@ -639,6 +653,37 @@ final class Recorder
         $file = $reflection->getFileName();
 
         return is_string($file) ? $file : null;
+    }
+
+    /**
+     * Filters pcov's `file => line => executionCount` map to the files
+     * that actually had at least one executed line. pcov reports `-1`
+     * for "executable but not run" and a positive count for executed
+     * lines; a file with no positives was loaded but contributed no
+     * executed code to this test.
+     *
+     * @param  array<string, mixed>  $data
+     * @return list<string>
+     */
+    private static function filesWithExecutedLines(array $data): array
+    {
+        $out = [];
+
+        foreach ($data as $file => $lines) {
+            if (! is_string($file) || ! is_array($lines)) {
+                continue;
+            }
+
+            foreach ($lines as $count) {
+                if (is_int($count) && $count > 0) {
+                    $out[] = $file;
+
+                    continue 2;
+                }
+            }
+        }
+
+        return $out;
     }
 
     public function reset(): void

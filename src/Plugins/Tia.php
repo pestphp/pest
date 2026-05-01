@@ -1250,22 +1250,12 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             // The collector occasionally hands us nothing usable: PHPUnit's
             // Prepared event can miss the file for Pest-generated classes,
             // and an eval'd class path (".../IndexTest.php(1) : eval()'d code")
-            // would be rejected later by Graph::relative(). Reflect on the
-            // class embedded in the test ID as a fallback so the failure
-            // gets stored *with* a file — without it, filtered runs lose
-            // the ability to re-run only the failing test next time and
-            // bail out to the full suite.
+            // would be rejected later by Graph::relative(). Recover the real
+            // path from the class embedded in the test ID — without it,
+            // filtered runs lose the ability to re-run only the failing test
+            // next time.
             if ($file === null || (is_string($file) && str_contains($file, "eval()'d"))) {
-                $class = strstr($testId, '::', true);
-
-                if (is_string($class) && $class !== '') {
-                    try {
-                        $reflected = (new \ReflectionClass($class))->getFileName();
-                        $file = $reflected === false ? null : $reflected;
-                    } catch (\ReflectionException) {
-                        $file = null;
-                    }
-                }
+                $file = self::resolveFailedTestFile($testId);
             }
 
             $graph->setResult(
@@ -1281,6 +1271,63 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         $this->saveGraph($graph);
         $collector->reset();
+    }
+
+    /**
+     * Resolves the source file for a Pest-generated test class.
+     *
+     * Pest synthesises a per-test class via `eval()` and writes the
+     * original test file path to a `private static $__filename` property
+     * (see `src/Factories/TestCaseFactory.php`). Reflecting on the class
+     * with `getFileName()` would return the eval'd location, which
+     * `Graph::relative()` rejects — losing the file mapping.
+     *
+     * Strategy:
+     *   1. Read the `__filename` static if the class declares it (Pest
+     *      tests).
+     *   2. Otherwise use `getFileName()` and skip eval'd frames by
+     *      walking up the parent class chain — a plain PHPUnit test
+     *      lives in a real file at the top of that chain.
+     */
+    private static function resolveFailedTestFile(string $testId): ?string
+    {
+        $class = strstr($testId, '::', true);
+
+        if (! is_string($class) || $class === '') {
+            return null;
+        }
+
+        try {
+            $reflection = new \ReflectionClass($class);
+        } catch (\ReflectionException) {
+            return null;
+        }
+
+        if ($reflection->hasProperty('__filename')) {
+            try {
+                $filename = $reflection->getStaticPropertyValue('__filename');
+            } catch (\ReflectionException) {
+                $filename = null;
+            }
+
+            if (is_string($filename) && $filename !== '' && ! str_contains($filename, "eval()'d")) {
+                return $filename;
+            }
+        }
+
+        $current = $reflection;
+
+        while ($current !== false) {
+            $file = $current->getFileName();
+
+            if (is_string($file) && $file !== '' && ! str_contains($file, "eval()'d")) {
+                return $file;
+            }
+
+            $current = $current->getParentClass();
+        }
+
+        return null;
     }
 
     private function coverageReportActive(): bool
