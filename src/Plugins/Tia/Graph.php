@@ -46,7 +46,6 @@ final class Graph
      */
     private array $baselines = [];
 
-    // Resolved via realpath() so coverage driver paths (always real targets) match even when CWD is a symlink.
     private readonly string $projectRoot;
 
     /** @var array<string, true>|null */
@@ -95,9 +94,6 @@ final class Graph
 
         $affectedSet = [];
 
-        // Migrations can't flow through coverage edges: `RefreshDatabase` gives every test an edge to
-        // every migration, so any migration change would re-run the whole DB suite. Route them via
-        // table-intersection instead; unparseable migrations fall through to the watch pattern.
         $migrationPaths = [];
         $nonMigrationPaths = [];
 
@@ -142,8 +138,6 @@ final class Graph
             }
         }
 
-        // Inertia page routing: map changed page files to component names and intersect with recorded
-        // component edges. Pages with no captured edges fall through to the watch pattern.
         $globalFrontendRuntimeFiles = [];
 
         foreach ($nonMigrationPaths as $rel) {
@@ -174,8 +168,6 @@ final class Graph
             }
         }
 
-        // Shared JS files: resolve via the recorded Vite module graph to their dependent page components.
-        // Files absent from the map fall through to the watch pattern.
         $sharedFilesResolved = [];
         foreach ($nonMigrationPaths as $rel) {
             if (isset($globalFrontendRuntimeFiles[$rel])) {
@@ -202,9 +194,6 @@ final class Graph
             }
         }
 
-        // New JS files absent from the record-time map: ask Vite (strict, no PHP fallback) which pages
-        // import them. A negative answer suppresses the broad watch broadcast; Node is the only resolver
-        // trustworthy enough to honour a negative (PHP parser can miss custom aliases).
         $newJsFiles = [];
         foreach ($nonMigrationPaths as $rel) {
             if (isset($globalFrontendRuntimeFiles[$rel])) {
@@ -229,8 +218,6 @@ final class Graph
             $freshMap = JsModuleGraph::buildStrict($this->projectRoot);
 
             if ($freshMap === null) {
-                // Vite resolver unavailable — falling back to watch pattern; surface a line so the user
-                // knows precision was downgraded rather than leaving the slower replay unexplained.
                 View::render('components.badge', [
                     'type' => 'WARN',
                     'content' => sprintf(
@@ -243,7 +230,6 @@ final class Graph
                     $pages = $freshMap[$rel] ?? [];
 
                     if ($pages === []) {
-                        // Vite confirms no page imports this file — suppress the watch broadcast.
                         $sharedFilesResolved[$rel] = true;
 
                         continue;
@@ -280,8 +266,6 @@ final class Graph
             }
         }
 
-        // Coverage-edge lookup (PHP → PHP). Migrations already handled above; skipping here prevents
-        // their always-on edges from re-running the whole DB suite.
         $changedIds = [];
         $unknownSourceDirs = [];
         $sourcePhpChanged = false;
@@ -301,7 +285,6 @@ final class Graph
                 $absolute = $this->projectRoot.'/'.$rel;
 
                 if (! is_file($absolute)) {
-                    // Deleted source file unknown to the graph — no edge ever pointed to it.
                     continue;
                 }
 
@@ -311,8 +294,6 @@ final class Graph
             }
         }
 
-        // Arch tests inspect structure by namespace/path, never producing coverage edges for the files
-        // they examine — so a new class can fail an arch expectation without any edge to it.
         if ($sourcePhpChanged) {
             foreach (array_keys($this->edges) as $testFile) {
                 if ($this->isArchTestFile($testFile)) {
@@ -336,7 +317,6 @@ final class Graph
         }
 
         // Unknown Blade files: walk static references (@include, @extends, <x-*>) up to rendered
-        // ancestors and invalidate only tests that covered them.
         $staticallyHandledBlade = [];
         foreach ($nonMigrationPaths as $rel) {
             if (isset($this->fileIds[$rel])) {
@@ -358,13 +338,10 @@ final class Graph
 
                 $staticallyHandledBlade[$rel] = true;
             } elseif ($this->isBladeComponentPath($rel)) {
-                // Anonymous component with no static usages — treat as orphan rather than broadcasting.
                 $staticallyHandledBlade[$rel] = true;
             }
         }
 
-        // Watch-pattern fallback: files with no precise edges. Already-resolved files are excluded
-        // to avoid re-broadcasting via the watch pattern and defeating the surgical match.
         $unknownToGraph = $unparseableMigrations;
         foreach ($nonMigrationPaths as $rel) {
             if (isset($preciselyHandledPages[$rel])) {
@@ -378,7 +355,6 @@ final class Graph
             }
             if (! isset($this->fileIds[$rel])) {
                 if (! is_file($this->projectRoot.'/'.$rel)) {
-                    // Deleted file unknown to the graph — no edge ever pointed to it.
                     continue;
                 }
 
@@ -396,9 +372,6 @@ final class Graph
             $affectedSet[$testFile] = true;
         }
 
-        // Sibling heuristic: unknown PHP source files may be new files whose graph was inherited from
-        // another branch. Run tests that cover neighbouring files in the same directory so framework-
-        // discovered files (Listeners, Events, Policies, etc.) aren't silently missed.
         if ($unknownSourceDirs !== []) {
             foreach ($this->edges as $testFile => $ids) {
                 if (isset($affectedSet[$testFile])) {
@@ -509,9 +482,6 @@ final class Graph
 
         $r = $baseline['results'][$testId];
 
-        // PHPUnit's `TestStatus::from(int)` ignores messages, so reconstruct
-        // each variant via its specific factory. Keeps the stored message
-        // intact (important for skips/failures shown to the user).
         return match ($r['status']) {
             0 => TestStatus::success(),
             1 => TestStatus::skipped($r['message']),
@@ -585,7 +555,6 @@ final class Graph
         $this->baselines[$branch]['tree'] = $tree;
     }
 
-    // Edges and tree snapshot stay intact; only the run-state is reset.
     public function clearResults(string $branch): void
     {
         $this->ensureBaseline($branch);
@@ -641,7 +610,6 @@ final class Graph
                 $this->link($testFile, $source);
             }
 
-            // Deduplicate ids for this test.
             $this->edges[$testRel] = array_values(array_unique($this->edges[$testRel]));
         }
     }
@@ -702,7 +670,6 @@ final class Graph
         }
     }
 
-    // Empty input is treated as a resolver failure (not "no JS pages") — keep the previous map.
     /**
      * @param  array<string, array<int, string>>  $fileToComponents
      */
@@ -1086,7 +1053,6 @@ final class Graph
         return TableExtractor::fromMigrationSource($content);
     }
 
-    // Both `Pages/` and `pages/` are accepted — git paths are case-sensitive on Linux.
     private function componentForInertiaPage(string $rel): ?string
     {
         foreach (['resources/js/Pages/', 'resources/js/pages/'] as $prefix) {
@@ -1275,8 +1241,6 @@ final class Graph
         return $json === false ? null : $json;
     }
 
-    // Accepts both absolute paths (from coverage drivers) and project-relative paths (from git diff).
-    // Relative paths are NOT resolved via realpath() because CWD is not guaranteed to be the project root.
     private function relative(string $path): ?string
     {
         if ($path === '' || $path === 'unknown') {
@@ -1290,8 +1254,7 @@ final class Graph
         $root = rtrim($this->projectRoot, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
 
         $isAbsolute = str_starts_with($path, DIRECTORY_SEPARATOR)
-            || (strlen($path) >= 2 && $path[1] === ':'); // Windows drive
-
+            || (strlen($path) >= 2 && $path[1] === ':');
         if ($isAbsolute) {
             $real = @realpath($path);
 
@@ -1303,7 +1266,6 @@ final class Graph
                 return null;
             }
 
-            // Always forward slashes — git always uses them; Windows backslashes would never match.
             $relative = str_replace(DIRECTORY_SEPARATOR, '/', substr($real, strlen($root)));
         } else {
             $relative = str_replace(DIRECTORY_SEPARATOR, '/', $path);

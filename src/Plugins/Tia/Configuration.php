@@ -12,8 +12,6 @@ use Pest\Support\Container;
 final class Configuration
 {
     /**
-     * Activates TIA for every run without requiring the `--tia` CLI flag.
-     *
      * @return $this
      */
     public function always(): self
@@ -26,10 +24,6 @@ final class Configuration
     }
 
     /**
-     * Restricts the `always()` activation to local environments only.
-     * On CI (`--ci` flag or `CI` env var), TIA is skipped even if `always()` is set.
-     * Explicit `--tia` on the CLI always takes effect regardless.
-     *
      * @return $this
      */
     public function locally(): self
@@ -43,10 +37,6 @@ final class Configuration
     }
 
     /**
-     * In replay mode, instead of short-circuiting cached results for unaffected
-     * tests, narrows PHPUnit to only the affected files — unaffected tests are
-     * never loaded. Can also be enabled with the `--filtered` CLI flag.
-     *
      * @return $this
      */
     public function filtered(): self
@@ -59,9 +49,6 @@ final class Configuration
     }
 
     /**
-     * Adds watch-pattern → test-directory mappings that supplement (or
-     * override) the built-in defaults.
-     *
      * @param  array<string, string>  $patterns  glob → project-relative test dir
      * @return $this
      */

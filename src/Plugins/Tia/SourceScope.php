@@ -9,11 +9,6 @@ namespace Pest\Plugins\Tia;
  */
 final readonly class SourceScope
 {
-    /**
-     * Top-level directory names always treated as out-of-scope. These
-     * mirror what a Laravel app considers "not source": dependencies,
-     * editor metadata, framework artefacts, the TIA state itself.
-     */
     private const array TOP_LEVEL_NOISE = [
         'vendor',
         'node_modules',
@@ -26,13 +21,6 @@ final readonly class SourceScope
         '.cache',
     ];
 
-    /**
-     * Nested paths (relative to project root) that must be excluded
-     * even when their top-level parent is in scope. Laravel writes
-     * compiled views, route caches, and packaged manifests here on
-     * every framework boot — instrumenting them would burn cycles
-     * and create noisy edges.
-     */
     private const array NESTED_NOISE = [
         'storage/framework',
         'storage/logs',
@@ -80,12 +68,6 @@ final readonly class SourceScope
         return new self($includes, $excludes);
     }
 
-    /**
-     * True when the absolute file path is inside an `<include>`
-     * directory and not under any exclude. Symlinks are resolved on
-     * the input so a `realpath()`'d coverage entry still matches a
-     * config that pointed at the unresolved tree.
-     */
     public function contains(string $absoluteFile): bool
     {
         $real = @realpath($absoluteFile);
@@ -108,10 +90,6 @@ final readonly class SourceScope
     }
 
     /**
-     * Project-relative directories the resolver considers in scope.
-     * Useful for setting `pcov.directory` (a single common ancestor)
-     * or `\pcov\collect()`'s file filter.
-     *
      * @return list<string>
      */
     public function includes(): array
@@ -159,11 +137,6 @@ final readonly class SourceScope
     }
 
     /**
-     * Every top-level directory under `$projectRoot` except those on
-     * the noise list. Hidden entries (dotdirs) are skipped unless
-     * they're explicitly project source — keeping `.git/`, `.idea/`
-     * etc. out without an explicit allowlist.
-     *
      * @return list<string>
      */
     private static function topLevelProjectDirs(string $projectRoot): array
@@ -228,8 +201,6 @@ final readonly class SourceScope
         $real = @realpath($combined);
 
         if ($real === false) {
-            // Directory may not exist yet (e.g. generated source) — keep
-            // the unresolved path so a future file under it still matches.
             return self::normalise($combined);
         }
 

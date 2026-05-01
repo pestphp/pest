@@ -16,12 +16,6 @@ final class JsImportParser
     private const string JS_DIR = 'resources/js';
 
     /**
-     * Walks the project's pages directory (`resources/js/Pages` or its
-     * lowercase Laravel-React-starter-kit equivalent `resources/js/pages`)
-     * and, for each page, collects its transitive file imports. Returns
-     * the inverted graph so callers can look up "what pages depend on
-     * this shared file".
-     *
      * @return array<string, list<string>>
      */
     public static function parse(string $projectRoot): array
@@ -142,11 +136,6 @@ final class JsImportParser
         }
     }
 
-    /**
-     * Loads the importable region of a file. For Vue SFCs, only the
-     * `<script>` block is relevant for imports; ignoring the rest
-     * avoids false-positive matches inside `<template>` attributes.
-     */
     private static function loadSource(string $fileAbs): ?string
     {
         $content = @file_get_contents($fileAbs);
@@ -169,10 +158,6 @@ final class JsImportParser
     }
 
     /**
-     * Picks out every `import … from '…'` / `import '…'` / `import('…')`
-     * target. We strip line comments first so a commented-out import
-     * doesn't bloat the dep set.
-     *
      * @return list<string>
      */
     private static function extractImports(string $source): array
@@ -209,9 +194,6 @@ final class JsImportParser
             return self::withExtension($jsRoot.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $tail));
         }
 
-        // Anything else is either a node_modules package or an
-        // unrecognised alias — skip. The watch-pattern fallback
-        // handles the safety-net case for non-matched paths.
         return null;
     }
 
@@ -227,10 +209,6 @@ final class JsImportParser
         return self::withExtension($path);
     }
 
-    /**
-     * Imports may omit the extension or point at a directory (index.vue,
-     * index.ts). Probe the common targets in order.
-     */
     private static function withExtension(string $path): ?string
     {
         if (is_file($path)) {

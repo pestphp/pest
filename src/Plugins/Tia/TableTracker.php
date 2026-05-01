@@ -11,13 +11,6 @@ final class TableTracker
 {
     private const string CONTAINER_CLASS = '\\Illuminate\\Container\\Container';
 
-    /**
-     * App-scoped marker that makes `arm()` idempotent across the 774
-     * per-test `setUp()` calls — Laravel reuses the same app instance
-     * within a single test run, so without this guard we'd stack
-     * one listener per test and each query would fire the closure
-     * hundreds of times.
-     */
     private const string MARKER = 'pest.tia.table-tracker-armed';
 
     public static function arm(Recorder $recorder): void
@@ -66,12 +59,6 @@ final class TableTracker
             }
         };
 
-        // Preferred path: `DatabaseManager::listen(Closure $callback)`.
-        // It's a real method — `method_exists` returns false because
-        // some Laravel versions compose it via a trait the reflection
-        // probe can't always see, so we gate via `is_callable` instead.
-        // This path pushes the listener onto every existing AND future
-        // connection, which is what we want for a process-wide capture.
         /** @var object $db */
         $db = $app->make('db');
 
@@ -83,11 +70,6 @@ final class TableTracker
             return;
         }
 
-        // Fallback: register directly on the event dispatcher. Works
-        // as long as every connection shares the same dispatcher
-        // instance this app resolved to — true in vanilla setups,
-        // but not guaranteed with connections instantiated pre-arm
-        // that captured an older dispatcher.
         if (! $app->bound('events')) {
             return;
         }
@@ -99,11 +81,6 @@ final class TableTracker
             return;
         }
 
-        // Event class key intentionally has no leading backslash —
-        // `Dispatcher::listen()` stores by the literal string and the
-        // lookup at dispatch time uses `get_class($event)` (no
-        // leading backslash), so a `\Illuminate\…` key would never
-        // match the fired event.
         $events->listen('Illuminate\\Database\\Events\\QueryExecuted', $listener);
     }
 }

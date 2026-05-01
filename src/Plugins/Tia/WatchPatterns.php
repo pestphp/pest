@@ -13,8 +13,6 @@ use Pest\TestSuite;
 final class WatchPatterns
 {
     /**
-     * All known default providers, in evaluation order.
-     *
      * @var array<int, class-string<WatchDefault>>
      */
     private const array DEFAULTS = [
@@ -37,12 +35,6 @@ final class WatchPatterns
 
     private bool $filtered = false;
 
-    /**
-     * Probes every registered `WatchDefault` and merges the patterns of
-     * those that apply. Called once during Tia plugin boot, after BootFiles
-     * has loaded `tests/Pest.php` (so user-added `pest()->tia()->watch()`
-     * calls are already in `$this->patterns`).
-     */
     public function useDefaults(string $projectRoot): void
     {
         $testPath = TestSuite::getInstance()->testPath;
@@ -63,9 +55,6 @@ final class WatchPatterns
     }
 
     /**
-     * Adds user-defined patterns. Merges with existing entries so a single
-     * glob can map to multiple directories.
-     *
      * @param  array<string, string>  $patterns  glob → project-relative test dir/file
      */
     public function add(array $patterns): void
@@ -78,9 +67,6 @@ final class WatchPatterns
     }
 
     /**
-     * Returns all test targets whose watch patterns match at least one of
-     * the given changed files.
-     *
      * @param  string  $projectRoot  Absolute path.
      * @param  array<int, string>  $changedFiles  Project-relative paths.
      * @return array<int, string> Project-relative test dirs/files.
@@ -107,9 +93,6 @@ final class WatchPatterns
     }
 
     /**
-     * Given the affected targets, returns every test file in the graph that
-     * either matches an exact file target or lives under a directory target.
-     *
      * @param  array<int, string>  $directories  Project-relative dirs/files.
      * @param  array<int, string>  $allTestFiles  Project-relative test files from graph.
      * @return array<int, string>
@@ -181,11 +164,6 @@ final class WatchPatterns
         $this->filtered = false;
     }
 
-    /**
-     * Matches a project-relative file against a glob pattern.
-     *
-     * Supports `*` (single segment), `**` (any depth) and `?`.
-     */
     private function globMatches(string $pattern, string $file): bool
     {
         $pattern = str_replace('\\', '/', $pattern);

@@ -22,19 +22,6 @@ final readonly class Inertia implements WatchDefault
     {
         $browserTargets = Browser::detectBrowserTestTargets($projectRoot, $testPath);
 
-        // Inertia page components (React / Vue / Svelte). Scoped to
-        // browser tests only — a Vue/React edit cannot change the
-        // output of a server-side Inertia test (those assert on the
-        // component *name* returned by `Inertia::render()`, not its
-        // client-side implementation). Broad invalidation is only
-        // meaningful for tests that actually render the DOM. Precise
-        // per-component edges come from `InertiaEdges` at record
-        // time and replace this fallback when available.
-        //
-        // Both `Pages/` (classic Inertia-Vue) and `pages/` (Laravel
-        // React starter kit, and other lowercase-by-default setups)
-        // are emitted — paths from git are case-sensitive on Linux,
-        // so a single casing would silently miss the other convention.
         $patterns = [];
 
         foreach (['Pages', 'pages'] as $pages) {
@@ -49,7 +36,6 @@ final readonly class Inertia implements WatchDefault
             }
         }
 
-        // SSR entry point.
         $patterns['resources/js/ssr.js'] = $browserTargets;
         $patterns['resources/js/ssr.ts'] = $browserTargets;
         $patterns['resources/js/app.js'] = $browserTargets;

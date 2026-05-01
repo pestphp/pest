@@ -13,13 +13,6 @@ final class BladeEdges
 {
     private const string CONTAINER_CLASS = '\\Illuminate\\Container\\Container';
 
-    /**
-     * App-scoped marker that makes `arm()` idempotent. Tests call it
-     * from every `setUp()`, and Laravel reuses the same app instance
-     * across tests in most configurations — without this guard we'd
-     * stack one composer per test and replay every one of them on
-     * every view render.
-     */
     private const string MARKER = 'pest.tia.blade-edges-armed';
 
     public static function arm(Recorder $recorder): void

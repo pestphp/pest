@@ -10,8 +10,6 @@ namespace Pest\Contracts;
 interface Restarter
 {
     /**
-     * Re-execs the PHP process when conditions warrant it.
-     *
      * @param  array<int, string>  $arguments
      */
     public function maybeRestart(string $projectRoot, array $arguments): void;

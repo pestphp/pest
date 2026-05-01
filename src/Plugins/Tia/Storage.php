@@ -9,9 +9,6 @@ namespace Pest\Plugins\Tia;
  */
 final class Storage
 {
-    /**
-     * Directory where TIA's State blobs live for `$projectRoot`.
-     */
     public static function tempDir(string $projectRoot): string
     {
         $home = self::homeDir();
@@ -28,15 +25,6 @@ final class Storage
             .DIRECTORY_SEPARATOR.self::projectKey($projectRoot);
     }
 
-    /**
-     * Wipes the on-disk state directory for `$projectRoot`. Called by
-     * `--fresh` so a rebuild starts from a truly empty cache: no stale
-     * baseline, no leftover worker partials, no fingerprint, no JS
-     * module cache. Subsequent writes recreate the directory on demand.
-     *
-     * Per-project (project key is part of the path) — sibling projects'
-     * caches under `~/.pest/tia/` are untouched.
-     */
     public static function purge(string $projectRoot): void
     {
         $dir = self::tempDir($projectRoot);
@@ -77,11 +65,6 @@ final class Storage
         @rmdir($dir);
     }
 
-    /**
-     * OS-neutral home directory — `HOME` on Unix, `USERPROFILE` on
-     * Windows. Returns null if neither resolves to an existing
-     * directory, in which case callers fall back to project-local state.
-     */
     private static function homeDir(): ?string
     {
         foreach (['HOME', 'USERPROFILE'] as $key) {
@@ -96,27 +79,7 @@ final class Storage
     }
 
     /**
-     * Folder name for `$projectRoot` under `~/.pest/tia/`.
-     *
-     * Strategy — each step rules out a class of collision:
-     *
-     *   1. If the project has a git origin URL, use a **normalised** form
-     *      (`host/org/repo`, lowercased, no `.git` suffix) as the input.
      *      `git@github.com:foo/bar.git`, `ssh://git@github.com/foo/bar`
-     *      and `https://github.com/foo/bar` all collapse to
-     *      `github.com/foo/bar` — three developers cloning the same repo
-     *      by different transports share one cache, which is what we want.
-     *   2. Otherwise, use the canonicalised absolute path (`realpath`).
-     *      Two unrelated `app/` checkouts under different parent folders
-     *      have different realpaths → different hashes → isolated.
-     *   3. Hash the chosen input with sha256 and keep the first 16 hex
-     *      chars — 64 bits of entropy makes accidental collision
-     *      astronomically unlikely even across thousands of projects.
-     *   4. Prefix with a slug of the project basename so `ls ~/.pest/tia/`
-     *      is readable; the slug is cosmetic only, all isolation comes
-     *      from the hash.
-     *
-     * Result: `myapp-a1b2c3d4e5f67890`.
      */
     private static function projectKey(string $projectRoot): string
     {
@@ -131,12 +94,6 @@ final class Storage
         return $slug === '' ? $hash : $slug.'-'.$hash;
     }
 
-    /**
-     * Canonical git origin identity for `$projectRoot`, or null when
-     * no origin URL can be parsed. The returned form is
-     * `host/org/repo` (lowercased, `.git` stripped) so SSH / HTTPS / git
-     * protocol clones of the same remote produce the same value.
-     */
     private static function originIdentity(string $projectRoot): ?string
     {
         $url = self::rawOriginUrl($projectRoot);
@@ -155,8 +112,6 @@ final class Storage
             return strtolower($m[1].'/'.$m[2]);
         }
 
-        // Unrecognised form — hash the raw URL so different inputs still
-        // diverge, but lowercased so the only variance is intentional.
         return strtolower($url);
     }
 
@@ -181,11 +136,6 @@ final class Storage
         return null;
     }
 
-    /**
-     * Filesystem-safe kebab of `$name`. Cosmetic only — used as a
-     * human-readable prefix on the hash so `~/.pest/tia/` lists
-     * recognisable folders.
-     */
     private static function slug(string $name): string
     {
         $slug = strtolower($name);

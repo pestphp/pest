@@ -26,20 +26,10 @@ final readonly class BaselineSync
 
     private const string COVERAGE_ASSET = Tia::KEY_COVERAGE_CACHE;
 
-    // Subdirectory under the per-project state dir (`~/.pest/tia/<project>/`)
-    // where artifacts from previous downloads are kept (one subfolder per
-    // workflow run id). Hitting the same run id on a later fetch skips
-    // the `gh run download` round trip entirely — artifacts are immutable
-    // per run id, so the cached bytes are exactly what gh would re-download.
     private const string DOWNLOAD_CACHE_DIR = 'artifacts';
 
-    // Most recently downloaded artifacts to retain on disk. Branch
-    // switches and partial baseline rollouts hop across run ids — keeping
-    // the last few avoids re-downloading when the user toggles between
-    // them. Older entries get evicted on the next download.
     private const int DOWNLOAD_CACHE_MAX_ENTRIES = 5;
 
-    // 24 h cooldown after a failed fetch so repeated `pest --tia` calls don't re-hit `gh run list`.
     private const int FETCH_COOLDOWN_SECONDS = 86400;
 
     public function __construct(
@@ -78,11 +68,6 @@ final readonly class BaselineSync
         $payload = $this->download($repo, $projectRoot, $failureKind);
 
         if ($payload === null) {
-            // Genuine "no baseline published yet" → cool down and show
-            // the publish-instructions YAML so the user can wire CI.
-            // Anything else (missing gh, auth, network, mid-download
-            // error) is transient and gets a one-line diagnostic
-            // instead — no cooldown, no noisy YAML.
             if ($failureKind === 'no-runs' || $failureKind === null) {
                 $this->startCooldown();
                 $this->emitPublishInstructions($repo);
@@ -169,8 +154,6 @@ final readonly class BaselineSync
         $this->renderDetail('To share the baseline with your team, add this workflow to the repo:');
         $this->renderDetail('.github/workflows/tia-baseline.yml');
 
-        // YAML stays as a raw indented block — Termwind would mangle the
-        // verbatim whitespace.
         $indentedYaml = array_map(
             static fn (string $line): string => '      '.$line,
             explode("\n", $yaml),
@@ -182,7 +165,6 @@ final readonly class BaselineSync
         $this->renderDetail('Details: https://pestphp.com/docs/tia/ci');
     }
 
-    // `CI=true` alone is ambiguous (users set it locally) — require a provider-specific env var.
     private function isCi(): bool
     {
         return getenv('GITHUB_ACTIONS') === 'true'
@@ -326,9 +308,6 @@ YAML;
         if ($listError !== null) {
             $failureKind = $listError['kind'];
 
-            // Tier 1 — actionable misconfiguration. Stop the suite and
-            // tell the user what to fix; a silent fall-through to a
-            // full record would just paper over the bug.
             if (in_array($failureKind, ['forbidden', 'not-found'], true)) {
                 Panic::with(new BaselineFetchFailed(
                     sprintf('Failed to query baseline runs — %s', $listError['message']),
@@ -336,8 +315,6 @@ YAML;
                 ));
             }
 
-            // Tier 2 — transient (network, rate-limit, unknown). Surface
-            // the diagnostic but let the suite fall through to record mode.
             $this->renderBadge('WARN', sprintf(
                 'Failed to query baseline runs — %s',
                 $listError['message'],
@@ -347,7 +324,6 @@ YAML;
         }
 
         if ($runId === null) {
-            // Genuine missing baseline — caller emits publish instructions.
             $failureKind = 'no-runs';
 
             return null;
@@ -355,12 +331,7 @@ YAML;
 
         $runCacheDir = $this->downloadCacheDir($projectRoot).DIRECTORY_SEPARATOR.$this->safeRunId($runId);
 
-        // Cache hit: a previous fetch already extracted this run id's
-        // artifact into the run-specific dir. Read the assets straight
-        // out of it and skip `gh run download` entirely.
         if (is_file($runCacheDir.DIRECTORY_SEPARATOR.self::GRAPH_ASSET)) {
-            // Bump the dir mtime so trimDownloadCache() treats this run
-            // id as recently used and doesn't evict it later.
             @touch($runCacheDir);
 
             $this->renderBadge('INFO', sprintf(
@@ -414,7 +385,6 @@ YAML;
             $diagnosis = $this->classifyGhError($process->getErrorOutput().$process->getOutput());
             $failureKind = $diagnosis['kind'];
 
-            // Tier 1 — actionable. Stop hard with a clear diagnostic.
             if (in_array($failureKind, ['forbidden', 'not-found'], true)) {
                 Panic::with(new BaselineFetchFailed(
                     sprintf('Baseline download failed — %s', $diagnosis['message']),
@@ -422,7 +392,6 @@ YAML;
                 ));
             }
 
-            // Tier 2 — transient. Diagnostic + fall through to record mode.
             $this->renderBadge('WARN', sprintf(
                 'Baseline download failed — %s',
                 $diagnosis['message'],
@@ -436,9 +405,6 @@ YAML;
         if ($payload === null) {
             $this->cleanup($runCacheDir);
 
-            // Artifact present but malformed — CI's publish step is
-            // broken. Falling through would silently waste the next
-            // run; surface the bug instead.
             Panic::with(new BaselineFetchFailed(
                 'Baseline downloaded but the artifact is missing expected files (graph.json).',
                 'Your CI publish step is broken — check the workflow that uploads pest-tia-baseline.',
@@ -450,11 +416,6 @@ YAML;
         return $payload;
     }
 
-    /**
-     * Looks up the artifact's compressed size so the progress bar has a
-     * denominator. Returns null on any failure — callers fall back to a
-     * size-less spinner.
-     */
     private function artifactSize(string $repo, string $runId): ?int
     {
         $process = new Process([
@@ -484,11 +445,6 @@ YAML;
         $speed = (int) ($current / $elapsed);
 
         if ($totalBytes !== null && $totalBytes > 0) {
-            // gh extracts as it downloads, so disk size can briefly exceed
-            // the compressed `size_in_bytes` for multi-file artifacts. Cap
-            // the percentage at 99% until the process actually exits — the
-            // cleared line + completion message take care of the final
-            // "100%" message naturally.
             $percent = min(99, (int) floor(($current / $totalBytes) * 100));
             $message = sprintf(
                 '  <fg=cyan>Downloading</> %s / %s (%d%%, %s/s)',
@@ -505,8 +461,6 @@ YAML;
             );
         }
 
-        // \r returns to start of line, \033[K erases from cursor to end —
-        // safe regardless of message length, no ANSI-aware padding needed.
         $this->output->write("\r\033[K".$message);
     }
 
@@ -565,11 +519,6 @@ YAML;
         return Storage::tempDir($projectRoot).DIRECTORY_SEPARATOR.self::DOWNLOAD_CACHE_DIR;
     }
 
-    /**
-     * Run ids returned by `gh` are numeric strings, but defend against a
-     * surprising response by stripping anything non-alphanumeric — the
-     * value is used as a directory name.
-     */
     private function safeRunId(string $runId): string
     {
         $sanitised = preg_replace('/[^A-Za-z0-9_-]/', '', $runId) ?? '';
@@ -577,13 +526,6 @@ YAML;
         return $sanitised === '' ? 'unknown' : $sanitised;
     }
 
-    /**
-     * Keep the N most recently used cached artifacts and evict the rest.
-     * Recency is taken from the directory mtime — `mkdir`/`gh run download`
-     * stamps it on a fresh entry, and a cache hit `touch`es it back to
-     * the front of the line, so a frequently-reused run id won't be
-     * evicted just because newer ids have been seen between uses.
-     */
     private function trimDownloadCache(string $projectRoot): void
     {
         $root = $this->downloadCacheDir($projectRoot);
@@ -632,12 +574,6 @@ YAML;
     }
 
     /**
-     * Returns `[runId|null, errorOrNull]`. Distinguishes "no runs yet"
-     * (runId null, error null) from "couldn't ask GitHub" (error
-     * populated with kind + message). Lets the caller pick between
-     * showing publish instructions and emitting a transient-failure
-     * diagnostic.
-     *
      * @return array{0: ?string, 1: ?array{kind: string, message: string}}
      */
     private function latestSuccessfulRunIdWithError(string $repo): array
@@ -673,10 +609,6 @@ YAML;
     }
 
     /**
-     * Maps a chunk of `gh` stderr/stdout to a coarse kind + a short,
-     * actionable message. Falls back to the first non-empty line of
-     * the output so even unrecognised errors aren't reduced to "unknown".
-     *
      * @return array{kind: string, message: string}
      */
     private function classifyGhError(string $output): array
@@ -722,8 +654,6 @@ YAML;
             ];
         }
 
-        // Unknown — surface the first informative line so the user has
-        // *something* to act on.
         $message = trim(strtok($output, "\n"));
 
         return ['kind' => 'unknown', 'message' => $message];

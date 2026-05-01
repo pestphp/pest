@@ -40,11 +40,6 @@ final class XdebugRestarter implements Restarter
         (new XdebugHandler('pest'))->check();
     }
 
-    /**
-     * True when Xdebug 3+ is running in coverage-only mode (or empty). False
-     * for older Xdebug without `xdebug_info` — be conservative and leave it
-     * loaded; we can't prove the mode is safe to drop.
-     */
     private function xdebugIsCoverageOnly(): bool
     {
         if (! function_exists('xdebug_info')) {
@@ -67,11 +62,6 @@ final class XdebugRestarter implements Restarter
     }
 
     /**
-     * TIA must be enabled for this run, no coverage flag, no forced
-     * rebuild, and TIA must be about to replay rather than record. Plain
-     * `pest` (and anything else without TIA enabled) keeps Xdebug loaded
-     * so non-TIA users aren't surprised by behaviour changes.
-     *
      * @param  array<int, string>  $arguments
      */
     private function runLooksDroppable(array $arguments, string $projectRoot): bool
@@ -95,12 +85,6 @@ final class XdebugRestarter implements Restarter
         return $this->tiaWillReplay($projectRoot);
     }
 
-    /**
-     * True when a valid TIA graph already lives on disk AND its structural
-     * fingerprint matches the current environment. Any other outcome
-     * (missing graph, unreadable JSON, structural drift) means TIA will
-     * record and the driver must stay loaded.
-     */
     private function tiaWillReplay(string $projectRoot): bool
     {
         $path = Storage::tempDir($projectRoot).DIRECTORY_SEPARATOR.Tia::KEY_GRAPH;

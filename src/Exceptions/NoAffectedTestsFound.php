@@ -16,9 +16,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class NoAffectedTestsFound extends InvalidArgumentException implements ExceptionInterface, Panicable, RenderlessEditor, RenderlessTrace
 {
-    /**
-     * Renders the panic on the given output.
-     */
     public function render(OutputInterface $output): void
     {
         $output->writeln([
@@ -28,9 +25,6 @@ final class NoAffectedTestsFound extends InvalidArgumentException implements Exc
         ]);
     }
 
-    /**
-     * The exit code to be used.
-     */
     public function exitCode(): int
     {
         return 0;

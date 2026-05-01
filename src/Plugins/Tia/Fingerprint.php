@@ -22,7 +22,6 @@ final readonly class Fingerprint
         return [
             'structural' => [
                 'schema' => self::SCHEMA_VERSION,
-                // 'composer_lock' => self::composerLockHash($projectRoot),
                 'phpunit_xml' => self::hashIfExists($projectRoot.'/phpunit.xml'),
                 'phpunit_xml_dist' => self::hashIfExists($projectRoot.'/phpunit.xml.dist'),
                 'pest_factory' => self::contentHashOrNull(__DIR__.'/../../Factories/TestCaseFactory.php'),
@@ -34,10 +33,6 @@ final readonly class Fingerprint
                 'composer_json' => self::composerJsonHash($projectRoot),
             ],
             'environmental' => [
-                // Minor only (8.4, not 8.4.19) — CI's patch rarely matches dev installs.
-                // 'php_minor' => PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION,
-                // 'extensions' => self::extensionsFingerprint($projectRoot),
-                // 'env_files' => self::envFilesHash($projectRoot),
             ],
         ];
     }
@@ -135,7 +130,6 @@ final readonly class Fingerprint
         return self::bucket($fingerprint, 'environmental');
     }
 
-    // Legacy flat-shape fingerprints (schema ≤ 3) return empty, causing structuralMatches to fail → rebuild.
     /**
      * @param  array<string, mixed>  $fingerprint
      * @return array<string, mixed>

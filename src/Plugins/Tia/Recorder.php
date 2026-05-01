@@ -33,9 +33,6 @@ final class Recorder
     /** @var array<string, bool> */
     private array $classUsesDatabaseCache = [];
 
-    // Source file → declared class names. Built incrementally as classes are autoloaded.
-    // Used to walk the interface/trait/parent hierarchy which coverage drivers miss
-    // (interfaces and empty traits emit no executable bytecode).
     /** @var array<string, list<string>> */
     private array $fileToClassNames = [];
 
@@ -78,8 +75,6 @@ final class Recorder
                 $this->driver = 'pcov';
                 $this->driverAvailable = true;
             } elseif (function_exists('xdebug_start_code_coverage') && function_exists('xdebug_info')) {
-                // Probing with start/stop emits E_WARNING when coverage is off, which monitoring agents
-                // (Sentry, Bugsnag) can surface as a real error. xdebug_info('mode') is silent.
                 $modes = \xdebug_info('mode');
 
                 if (is_array($modes) && in_array('coverage', $modes, true)) {
@@ -124,8 +119,6 @@ final class Recorder
             $this->perTestUsesDatabase[$file] = true;
         }
 
-        // Walk parent-class chain to link ancestor files. Empty base classes (e.g. a trait-only
-        // TestCase) emit no executable bytecode, so the coverage driver never records them.
         $this->linkAncestorFiles($className);
         $this->linkImportedFiles($file);
 
@@ -136,7 +129,6 @@ final class Recorder
             return;
         }
 
-        // Xdebug
         \xdebug_start_code_coverage();
     }
 
@@ -149,15 +141,6 @@ final class Recorder
         if ($this->driver === 'pcov') {
             \pcov\stop();
 
-            // pcov\waiting() lists every file pcov has tracked but not
-            // yet collected for. Filter that list down to the project's
-            // source scope (phpunit.xml's `<source>` plus other
-            // top-level project dirs, minus vendor / caches), then ask
-            // pcov to collect *only* for those — `pcov\inclusive`
-            // narrows the result set at the driver level instead of us
-            // post-filtering after a full collect. Anything pcov saw
-            // outside the scope is dropped before any line counts come
-            // back.
             $scope = $this->sourceScope();
             $filesToCollectCoverageFor = [];
 
@@ -174,7 +157,6 @@ final class Recorder
         } else {
             /** @var array<string, mixed> $data */
             $data = \xdebug_get_code_coverage();
-            // `true` resets Xdebug's buffer; without it the next start() accumulates prior test coverage.
             \xdebug_stop_code_coverage(true);
 
             $coveredFiles = array_keys($data);
@@ -193,8 +175,6 @@ final class Recorder
             $this->perTestFiles[$this->currentTestFile][$sourceFile] = true;
         }
 
-        // Walk covered classes' interfaces/traits/parents. Interfaces have no executable bytecode,
-        // so a signature change would leave implementing-class tests stale without this walk.
         $this->linkSourceDependencies($coveredFiles);
 
         $this->currentTestFile = null;
@@ -334,7 +314,6 @@ final class Recorder
             $files[$f] = true;
         };
 
-        // getInterfaceNames() is transitive — includes parents' interfaces — so one pass suffices.
         foreach ($reflection->getInterfaceNames() as $iname) {
             $linkSymbol($iname);
         }
@@ -639,8 +618,6 @@ final class Recorder
         return null;
     }
 
-    // Prefers Pest's `$__filename` static (the original .php file) over ReflectionClass::getFileName()
-    // (which returns the trait file for methods brought in via `uses SharedTestBehavior`).
     private function readPestFilename(string $className): ?string
     {
         if (! class_exists($className, false)) {
@@ -667,17 +644,6 @@ final class Recorder
     }
 
     /**
-     * Filters pcov's `file => line => executionCount` map to files that
-     * actually had executed code AND live inside the configured source
-     * scope (`phpunit.xml`'s `<source>` block, or the project root with
-     * vendor/etc. excluded as fallback).
-     *
-     * pcov reports `-1` for "executable but not run" and a positive
-     * count for executed lines. We also skip files where the *only*
-     * positive line is the implicit `ZEND_RETURN` at end-of-file: pcov
-     * surfaces that as a one-line artifact for files that were merely
-     * included (autoloaded) without any real code running.
-     *
      * @param  array<string, mixed>  $data
      * @return list<string>
      */
@@ -700,9 +666,6 @@ final class Recorder
                 continue;
             }
 
-            // Skip files where the only "executed" line is the implicit
-            // ZEND_RETURN at end-of-file (pcov artifact from being included
-            // but never actually run).
             $lineKeys = array_keys($lines);
             if ($lineKeys !== [] && count($covered) === 1 && $covered[0] === max($lineKeys)) {
                 continue;

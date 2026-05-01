@@ -22,11 +22,7 @@ final readonly class Bootstrapper implements BootstrapperContract
     }
 
     /**
-     * TIA's per-project state directory. Default layout is
-     * `~/.pest/tia/<project-key>/` so the graph survives `composer
-     * install`, stays out of the project tree, and is naturally shared
      * across worktrees of the same repo. See {@see Storage} for the key
-     * derivation and the home-dir-missing fallback.
      */
     private function tempDir(): string
     {

@@ -9,9 +9,6 @@ namespace Pest\Plugins\Tia\WatchDefaults;
  */
 interface WatchDefault
 {
-    /**
-     * Whether this default set applies to the current project.
-     */
     public function applicable(): bool;
 
     /**

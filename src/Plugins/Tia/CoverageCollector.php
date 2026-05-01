@@ -14,19 +14,11 @@ use Throwable;
 final class CoverageCollector
 {
     /**
-     * Cached `className → test file` lookups. Class reflection is cheap
-     * individually but the record run can visit tens of thousands of
-     * samples, so the cache matters.
-     *
      * @var array<string, string|null>
      */
     private array $classFileCache = [];
 
     /**
-     * Rebuilds the same `absolute test file → list<absolute source file>`
-     * shape that `Recorder::perTestFiles()` exposes, so callers can treat
-     * the two collectors interchangeably when feeding the graph.
-     *
      * @return array<string, array<int, string>>
      */
     public function perTestFiles(): array
@@ -48,9 +40,6 @@ final class CoverageCollector
         $edges = [];
 
         foreach ($lineCoverage as $sourceFile => $lines) {
-            // Collect the set of tests that hit any line in this file once,
-            // then emit one edge per (testFile, sourceFile) pair. Walking
-            // the lines per test would re-resolve the test file repeatedly.
             $testIds = [];
 
             foreach ($lines as $hits) {
@@ -90,9 +79,6 @@ final class CoverageCollector
 
     private function testIdToFile(string $testId): ?string
     {
-        // PHPUnit's test id is `ClassName::methodName` with an optional
-        // `#dataSetName` suffix for data-provider runs. Strip the dataset
-        // part — we only need the class.
         $hash = strpos($testId, '#');
         $identifier = $hash === false ? $testId : substr($testId, 0, $hash);
 
@@ -120,9 +106,6 @@ final class CoverageCollector
 
         $reflection = new ReflectionClass($className);
 
-        // Pest's eval'd test classes expose the original `.php` path on a
-        // static `$__filename`. The eval'd class itself has no file of its
-        // own, so prefer this property when present.
         if ($reflection->hasProperty('__filename')) {
             $property = $reflection->getProperty('__filename');
 

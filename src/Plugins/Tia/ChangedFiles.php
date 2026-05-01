@@ -24,7 +24,6 @@ final readonly class ChangedFiles
             return $files;
         }
 
-        // Union with last-run snapshot: catches reverts that git reports clean but are new vs the snapshot.
         $candidates = array_fill_keys($files, true);
 
         foreach (array_keys($lastRunTree) as $snapshotted) {
@@ -45,8 +44,6 @@ final readonly class ChangedFiles
             }
 
             if (! $exists) {
-                // Always invalidate deletions — a stale cached result from before the deletion
-                // would persist forever otherwise, even if the snapshot recorded the empty sentinel.
                 $remaining[] = $file;
 
                 continue;
@@ -71,10 +68,6 @@ final readonly class ChangedFiles
     }
 
     /**
-     * Computes content hashes for the given project-relative files. Used to
-     * snapshot the working tree after a successful run so the next run can
-     * detect which files are actually different.
-     *
      * @param  array<int, string>  $files
      * @return array<string, string> path → xxh128 content hash
      */
@@ -86,9 +79,6 @@ final readonly class ChangedFiles
             $absolute = $this->projectRoot.DIRECTORY_SEPARATOR.$file;
 
             if (! is_file($absolute)) {
-                // Record the deletion with an empty-string sentinel so the
-                // next run recognises "still deleted" as unchanged rather
-                // than re-flagging the file as a fresh change.
                 $out[$file] = '';
 
                 continue;
@@ -106,8 +96,6 @@ final readonly class ChangedFiles
 
     /**
      * @return array<int, string>|null `null` when git is unavailable, or when
-     *                                 the recorded SHA is no longer reachable
-     *                                 from HEAD (rebase / force-push).
      */
     public function since(?string $sha): ?array
     {
@@ -127,9 +115,6 @@ final readonly class ChangedFiles
 
         $files = array_merge($files, $this->workingTreeChanges());
 
-        // Normalise + dedupe, filtering out paths that can never belong to the
-        // graph: vendor (caught by the fingerprint instead), cache dirs, and
-        // anything starting with a dot we don't care about.
         $unique = [];
 
         foreach ($files as $file) {
@@ -144,13 +129,6 @@ final readonly class ChangedFiles
 
         $candidates = array_keys($unique);
 
-        // Behavioural de-noising: for every file git calls "changed", hash
-        // the current content and the content at `$sha` through
-        // `ContentHash::of()`. A change that only touched comments /
-        // whitespace / blade `{{-- --}}` blocks produces the same hash on
-        // both sides and gets dropped before it can invalidate any test.
-        // Without this, a single-comment edit on a migration re-runs the
-        // entire DB-touching suite.
         if ($sha !== null && $sha !== '') {
             return $this->filterBehaviourallyUnchanged($candidates, $sha);
         }
@@ -170,7 +148,6 @@ final readonly class ChangedFiles
             $absolute = $this->projectRoot.DIRECTORY_SEPARATOR.$file;
 
             if (! is_file($absolute)) {
-                // Deleted on disk — a genuine change, keep it.
                 $remaining[] = $file;
 
                 continue;
@@ -187,8 +164,6 @@ final readonly class ChangedFiles
             $baselineContent = $this->contentAtSha($sha, $file);
 
             if ($baselineContent === null) {
-                // Couldn't read the baseline (new file, binary, `git show`
-                // failed). Err on the side of re-running.
                 $remaining[] = $file;
 
                 continue;
@@ -204,12 +179,6 @@ final readonly class ChangedFiles
         return $remaining;
     }
 
-    /**
-     * Reads `$path` at `$sha` via `git show`. Returns null when the file
-     * didn't exist at that SHA, when git errors, or when the content
-     * isn't valid UTF-8-safe bytes (rare — binary files that happen to
-     * be tracked).
-     */
     private function contentAtSha(string $sha, string $path): ?string
     {
         $process = new Process(['git', 'show', $sha.':'.$path], $this->projectRoot);
@@ -231,10 +200,6 @@ final readonly class ChangedFiles
             '.phpunit.result.cache',
             'vendor/',
             'node_modules/',
-            // Laravel regenerates these from manifest state
-            // (package.json, service providers) at boot — they're
-            // fully derived, not authored. Treating them as
-            // "changes" just flaps the diff noisily.
             'bootstrap/cache/',
         ];
 
@@ -281,9 +246,6 @@ final readonly class ChangedFiles
         );
         $process->run();
 
-        // Exit 0 → ancestor; 1 → not ancestor; anything else → git error
-        // (e.g. unknown commit after a rebase/gc). Treat non-zero as
-        // "unreachable" and force a rebuild.
         return $process->getExitCode() === 0;
     }
 
@@ -310,14 +272,6 @@ final readonly class ChangedFiles
      */
     private function workingTreeChanges(): array
     {
-        // `-z` produces NUL-terminated records with no path quoting, so paths
-        // that contain spaces, tabs, unicode or other special characters
-        // are passed through verbatim. Without `-z`, git wraps such paths in
-        // quotes with backslash escapes, which would corrupt our lookup keys.
-        //
-        // Record format: `XY <SP> <path> <NUL>` for most entries, and
-        // `R  <new> <NUL> <orig> <NUL>` for renames/copies (two NUL-separated
-        // fields).
         $process = new Process(
             ['git', 'status', '--porcelain', '-z', '--untracked-files=all'],
             $this->projectRoot,
@@ -348,8 +302,6 @@ final readonly class ChangedFiles
             $status = substr($record, 0, 2);
             $path = substr($record, 3);
 
-            // Renames/copies emit two records: the new path first, then the
-            // original. Consume both.
             if ($status[0] === 'R' || $status[0] === 'C') {
                 $files[] = $path;
 

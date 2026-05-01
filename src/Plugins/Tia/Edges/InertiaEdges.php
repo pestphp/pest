@@ -13,22 +13,8 @@ final class InertiaEdges
 {
     private const string CONTAINER_CLASS = '\\Illuminate\\Container\\Container';
 
-    /**
-     * Event class name used as the listener key. Stored *without* a
-     * leading backslash because Laravel's `Dispatcher` keys
-     * `$listeners[$eventName]` by the literal string passed to
-     * `listen()`, and looks up incoming events by their PHP-class
-     * name (`get_class($event)`), which never has a leading
-     * backslash. A `\Illuminate\…` key would silently never match.
-     */
     private const string REQUEST_HANDLED_EVENT = 'Illuminate\\Foundation\\Http\\Events\\RequestHandled';
 
-    /**
-     * App-scoped marker that makes `arm()` idempotent across per-test
-     * `setUp()` calls. Laravel reuses the same app across tests in
-     * most configurations — without this guard we'd stack one
-     * listener per test.
-     */
     private const string MARKER = 'pest.tia.inertia-edges-armed';
 
     public static function arm(Recorder $recorder): void
@@ -87,16 +73,8 @@ final class InertiaEdges
         });
     }
 
-    /**
-     * Pulls the Inertia component name out of a Laravel response,
-     * handling both XHR (`X-Inertia` + JSON body) and full HTML
-     * (`<div id="app" data-page="…">`) shapes. Returns null for any
-     * non-Inertia response so the caller can ignore it cheaply.
-     */
     private static function extractComponent(object $response): ?string
     {
-        // XHR path: Inertia sets an `X-Inertia: true` header and the
-        // body is JSON with a `component` key.
         if (property_exists($response, 'headers') && is_object($response->headers)) {
             $headers = $response->headers;
 
@@ -117,32 +95,12 @@ final class InertiaEdges
             }
         }
 
-        // Initial-load HTML path. Inertia ships two shapes here and
-        // we honour both:
-        //
-        //   1. SSR-safe script tag — `<script data-page="app"
-        //      type="application/json">{…JSON…}</script>`. The
-        //      Laravel React starter kit (and modern Inertia-React)
-        //      use this so the JSON survives server-rendered
-        //      hydration without HTML-encoding the payload into an
-        //      attribute. The `data-page="app"` *attribute value* is
-        //      the literal string `"app"` — only the tag *body*
-        //      carries the page JSON.
-        //   2. Classic — `<div id="app" data-page="{…JSON…}">…`. Older
-        //      Inertia-Vue and Inertia-React still emit this. Here
-        //      `data-page` IS the JSON, HTML-entity-encoded.
-        //
-        // Try the script-tag shape first; if the response uses it,
-        // the classic regex would also see a `data-page="app"` token
-        // and try to JSON-decode the literal string `"app"`.
         $content = self::readContent($response);
 
         if ($content === null) {
             return null;
         }
 
-        // Lookahead pair handles arbitrary attribute order on the
-        // `<script>` tag.
         if (str_contains($content, 'type="application/json"')
             && preg_match('#<script\b(?=[^>]*\bdata-page="app")(?=[^>]*\btype="application/json")[^>]*>(.+?)</script>#s', $content, $match) === 1) {
             $component = self::componentFromJson(html_entity_decode($match[1]));
@@ -152,9 +110,6 @@ final class InertiaEdges
             }
         }
 
-        // Classic: only accept a value that looks like a JSON object
-        // (`{…}`). Avoids matching the script-tag form's
-        // `data-page="app"` attribute when both shapes coexist.
         if (str_contains($content, 'data-page=')
             && preg_match('/\sdata-page="(\{[^"]+\})"/', $content, $match) === 1) {
             $component = self::componentFromJson(html_entity_decode($match[1]));
@@ -167,12 +122,6 @@ final class InertiaEdges
         return null;
     }
 
-    /**
-     * Parses an Inertia page JSON blob and returns the `component`
-     * field if it's a non-empty string. Used by both the script-tag
-     * and the `data-page`-attribute paths so the success criteria are
-     * identical.
-     */
     private static function componentFromJson(string $json): ?string
     {
         /** @var mixed $decoded */

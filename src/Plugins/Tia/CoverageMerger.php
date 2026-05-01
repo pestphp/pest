@@ -28,9 +28,6 @@ final class CoverageMerger
         $cachedBytes = $state->read(Tia::KEY_COVERAGE_CACHE);
 
         if ($cachedBytes === null) {
-            // First `--tia --coverage` run: nothing cached yet, so the
-            // current file already represents the full suite. Capture it
-            // verbatim (as serialised bytes) for next time.
             $current = self::requireCoverage($reportPath);
 
             if ($current instanceof CodeCoverage) {
@@ -61,8 +58,6 @@ final class CoverageMerger
 
         $serialised = serialize($cached);
 
-        // Write back to the PHPUnit-style `.cov` path so the report reader
-        // can `require` it, and to the state cache for the next run.
         @file_put_contents(
             $reportPath,
             '<?php return unserialize('.var_export($serialised, true).");\n",
@@ -84,12 +79,6 @@ final class CoverageMerger
         return $decoded === false ? null : $decoded;
     }
 
-    /**
-     * Removes from `$cached`'s per-line test attribution any test id that
-     * appears in `$current`. Those tests just ran, so the fresh slice is
-     * authoritative — keeping stale attribution in the cache would claim
-     * a test still covers a line it no longer touches.
-     */
     private static function stripCurrentTestsFromCached(CodeCoverage $cached, CodeCoverage $current): void
     {
         $currentIds = self::collectTestIds($current);

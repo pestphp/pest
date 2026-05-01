@@ -16,9 +16,6 @@ final readonly class Browser implements WatchDefault
 {
     public function applicable(): bool
     {
-        // Browser tests can exist in any PHP project. We only activate when
-        // there is an actual `tests/Browser` directory OR pest-plugin-browser
-        // is installed.
         return class_exists(InstalledVersions::class)
             && InstalledVersions::isInstalled('pestphp/pest-plugin-browser');
     }
@@ -37,12 +34,8 @@ final readonly class Browser implements WatchDefault
             'resources/css/**/*.css',
             'resources/css/**/*.scss',
             'resources/css/**/*.less',
-            // Vite / Webpack build output that browser tests may consume.
             'public/build/**/*.js',
             'public/build/**/*.css',
-            // Static public assets can affect browser-rendered pages without
-            // any PHP file changing (favicons, robots, images, downloaded
-            // manifests, etc.). Only browser-test targets are invalidated.
             'public/**/*.js',
             'public/**/*.css',
             'public/**/*.svg',
@@ -79,9 +72,6 @@ final readonly class Browser implements WatchDefault
             $targets[] = $candidate;
         }
 
-        // Scan TestRepository via BrowserTestIdentifier if pest-plugin-browser
-        // is installed to find exact tests using `visit()` outside the
-        // conventional Browser/ folder.
         if (class_exists(BrowserTestIdentifier::class)) {
             $repo = TestSuite::getInstance()->tests;
 

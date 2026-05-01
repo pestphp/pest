@@ -54,7 +54,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
     private const string KEY_WORKER_RESULTS_PREFIX = 'worker-results-';
 
-    /** Sentinel dropped by a recording worker without a usable coverage driver. */
     private const string KEY_WORKER_NO_DRIVER_PREFIX = 'worker-no-driver-';
 
     public const string KEY_COVERAGE_CACHE = 'coverage.bin.gz';
@@ -67,10 +66,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
     private const string REPLAYING_GLOBAL = 'TIA_REPLAYING';
 
-    /** Tells workers to apply TiaTestCaseFilter instead of cache short-circuiting. */
     private const string FILTERED_GLOBAL = 'TIA_FILTERED';
 
-    /** Workers can't detect `--coverage` from their own argv — paratest strips it. */
     private const string PIGGYBACK_COVERAGE_GLOBAL = 'TIA_PIGGYBACK_COVERAGE';
 
     private bool $graphWritten = false;
@@ -109,10 +106,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
     private bool $forceRefetch = false;
 
-    /** Prevents fetching the same stale baseline twice after structural drift. */
     private bool $baselineFetchAttemptedForDrift = false;
 
-    /** Gates `Graph::pruneMissingTests()` — only safe on full `--fresh` rebuilds. */
     private bool $freshRebuild = false;
 
     private bool $filteredMode = false;
@@ -159,15 +154,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Predicts whether TIA will activate for this run, *before* the Tia
-     * plugin's `handleArguments` runs. Mirrors the same gate the plugin
-     * itself applies: `--tia` on the CLI, or `pest()->tia()->always()`
-     * (optionally `->locally()`, which is honoured only outside CI).
-     *
-     * Used by the restarters in `bin/pest`, which fire after
-     * `Kernel::boot()` (so `tests/Pest.php` has populated WatchPatterns)
-     * but before any plugin's `handleArguments` runs.
-     *
      * @param  array<int, string>  $arguments
      */
     public static function isEnabledForRun(array $arguments): bool
@@ -183,10 +169,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return false;
         }
 
-        // `locally()` opts out on CI. Environment::name() reflects --ci
-        // only after Environment's own handleArguments has run, which
-        // hasn't happened at the restart-decision point — so check argv
-        // directly here.
         return ! ($watchPatterns->isLocally() && in_array('--ci', $arguments, true));
     }
 
@@ -258,8 +240,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $freshRequested = $this->hasArgument(self::FRESH_OPTION, $arguments);
         $this->forceRefetch = $this->hasArgument(self::REFETCH_OPTION, $arguments);
 
-        // Always strip TIA-owned flags so they never reach PHPUnit, even when
-        // TIA is not active for this run.
         $arguments = $this->popArgument(self::OPTION, $arguments);
         $arguments = $this->popArgument(self::FRESH_OPTION, $arguments);
         $arguments = $this->popArgument(self::REFETCH_OPTION, $arguments);
@@ -412,8 +392,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $graph = $this->loadGraph($projectRoot) ?? new Graph($projectRoot);
         $graph->setFingerprint(Fingerprint::compute($projectRoot));
         $graph->setRecordedAtSha($this->branch, $currentSha);
-        // Snapshot any currently-dirty files so the first replay run
-        // doesn't mis-report them as changed. See the series record path.
         $graph->setLastRunTree(
             $this->branch,
             $changedFiles->snapshotTree($changedFiles->since($currentSha) ?? []),
@@ -523,10 +501,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Structural drift → discard graph, return null (caller enters record mode).
-     * Environmental drift → drop results, keep edges, return updated graph.
-     * Match → return graph unchanged.
-     *
      * @param  array{structural: array<string, mixed>, environmental: array<string, mixed>}  $current
      */
     private function reconcileFingerprint(Graph $graph, array $current): ?Graph
@@ -594,14 +568,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         $fingerprint = Fingerprint::compute($projectRoot);
 
-        // `--fresh` is meant to be a clean slate: nuke the entire per-project
-        // state dir up front (graph, baseline, worker partials, fingerprint,
-        // JS module cache, coverage marker, etc.). Wiping per-key in code
-        // would leave room for stale entries we forgot about — most
-        // recently, status-7/8 result entries with no `file` that survived
-        // a rebuild and kept tripping `hasUnlocatedFailuresOrErrors()` on
-        // subsequent `--filtered` runs. Safe here because `handleParent`
-        // runs in the parent before any worker is spawned.
         if ($forceRebuild) {
             Storage::purge($projectRoot);
         }
@@ -624,10 +590,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             }
         }
 
-        // No local graph and not being forced to rebuild from scratch: try
-        // to pull a team-shared baseline so fresh checkouts (new devs, CI
-        // containers) don't pay the full record cost. If the pull succeeds
-        // the graph is re-read and reconciled against the local env.
         if (! $graph instanceof Graph
             && ! $forceRebuild
             && ! $this->baselineFetchAttemptedForDrift
@@ -643,17 +605,10 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             $this->state->write(self::KEY_COVERAGE_MARKER, '');
         }
 
-        // Kick off the JS module graph resolver in the background so it
-        // runs in parallel with the test suite. By the time the flush
-        // path calls `JsModuleGraph::build()`, the result is usually
-        // already on stdout and `wait()` returns instantly. Cheap when
-        // the cache is fresh — the warmer fingerprint-checks first and
-        // skips spawning Node entirely.
         if (! Parallel::isWorker() && JsModuleGraph::isApplicable($projectRoot)) {
             JsModuleGraph::warmInBackground($projectRoot);
         }
 
-        // First `--tia --coverage` run: no cache to merge against yet, must record the full suite.
         if ($this->piggybackCoverage && ! $this->state->exists(self::KEY_COVERAGE_CACHE)) {
             return $this->enterRecordMode($arguments);
         }
@@ -749,12 +704,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * During replay, affected tests execute normally. If a coverage driver is
-     * available, record those executions too so refactors that introduce new
-     * dependencies update the graph without requiring a full `--fresh` run.
-     * Cached tests short-circuit before `Recorder::beginTest()`, so they don't
-     * produce empty replacement edges.
-     *
      * @param  array<int, string>  $arguments
      * @return array<int, string>
      */
@@ -820,12 +769,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $failedFromCache = [];
 
         if ($this->filteredMode) {
-            // `failedOrErroredTestFiles()` only yields failures that have a
-            // mapped file — the snapshot path now reflects on the class
-            // when the collector loses the path, so an unlocated failure
-            // is no longer expected. If one slips through, doing the best
-            // we can with the located ones is strictly better than bailing
-            // to a full suite.
             $failedFromCache = $graph->failedOrErroredTestFiles($this->branch);
         }
 
@@ -886,17 +829,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Surfaces what TIA decided to run and why, before the suite
-     * starts. Two pieces a developer wants at a glance:
-     *
-     *   1. *How many* tests are about to run — the deciding factor for
-     *      whether they wait for the run or kick off something else.
-     *   2. *Why* — which changed files drove the affected set, and how
-     *      many came in via cached failures (filtered mode).
-     *
-     * Stays quiet when nothing is affected: the existing
-     * `NoAffectedTestsFound` panic / recap line covers that path.
-     *
      * @param  array<int, string>  $changedFiles
      * @param  array<int, string>  $affectedFromChanges
      * @param  array<int, string>  $failedFromCache
@@ -908,9 +840,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return;
         }
 
-        // Failures that overlap with the change-driven set are already
-        // pulled in by edges — don't double-count them as a separate
-        // reason in the breakdown.
         $newFailures = $failedFromCache === []
             ? 0
             : count(array_diff($failedFromCache, $affectedFromChanges));
@@ -954,9 +883,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             $reasons === [] ? '' : ' ('.implode(', ', $reasons).')',
         ));
 
-        // List the first few affected test files so the developer can see
-        // *which* tests are about to run, not just the count. Capped at 10
-        // to keep the line tight on large impact sets.
         $previewLimit = 10;
         $sorted = $affected;
         sort($sorted);
@@ -1273,8 +1199,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private function registerRecap(): void
     {
         DefaultPrinter::addRecap(function (): string {
-            // mergeWorkerReplayPartials fires before addOutput on --parallel, which is intentional:
-            // partial keys are deleted on read so the later addOutput call becomes a no-op.
             if (Parallel::isEnabled() && ! Parallel::isWorker()) {
                 $this->mergeWorkerReplayPartials();
             }
@@ -1364,13 +1288,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         foreach ($results as $testId => $result) {
             $file = $result['file'] ?? null;
 
-            // The collector occasionally hands us nothing usable: PHPUnit's
-            // Prepared event can miss the file for Pest-generated classes,
-            // and an eval'd class path (".../IndexTest.php(1) : eval()'d code")
-            // would be rejected later by Graph::relative(). Recover the real
-            // path from the class embedded in the test ID — without it,
-            // filtered runs lose the ability to re-run only the failing test
-            // next time.
             if ($file === null || str_contains($file, "eval()'d")) {
                 $file = $this->resolveFailedTestFile($testId);
             }
@@ -1390,22 +1307,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $collector->reset();
     }
 
-    /**
-     * Resolves the source file for a Pest-generated test class.
-     *
-     * Pest synthesises a per-test class via `eval()` and writes the
-     * original test file path to a `private static $__filename` property
-     * (see `src/Factories/TestCaseFactory.php`). Reflecting on the class
-     * with `getFileName()` would return the eval'd location, which
-     * `Graph::relative()` rejects — losing the file mapping.
-     *
-     * Strategy:
-     *   1. Read the `__filename` static if the class declares it (Pest
-     *      tests).
-     *   2. Otherwise use `getFileName()` and skip eval'd frames by
-     *      walking up the parent class chain — a plain PHPUnit test
-     *      lives in a real file at the top of that chain.
-     */
     private function resolveFailedTestFile(string $testId): ?string
     {
         $class = strstr($testId, '::', true);
@@ -1456,11 +1357,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * PHP source changes can introduce new dependencies. Without a coverage
-     * driver, replay can run the currently affected tests but cannot refresh
-     * the graph, so a later edit to the newly introduced dependency could be
-     * missed. Treat those runs as full-suite unless coverage can self-heal.
-     *
      * @param  array<int, string>  $changedFiles
      */
     private function hasProjectPhpSourceChanges(array $changedFiles): bool

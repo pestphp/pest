@@ -11,11 +11,6 @@ use Pest\Plugins\Tia\Contracts\State;
  */
 final readonly class FileState implements State
 {
-    /**
-     * Configured root. May not exist on disk yet; resolved + created on
-     * the first write. Keeping the raw string lets the instance be built
-     * before Pest's temp dir has been materialised.
-     */
     private string $rootDir;
 
     public function __construct(string $rootDir)
@@ -49,8 +44,6 @@ final readonly class FileState implements State
             return false;
         }
 
-        // Atomic rename — on POSIX filesystems this is a single-step
-        // replacement, so concurrent readers never see a half-written file.
         if (! @rename($tmp, $path)) {
             @unlink($tmp);
 
@@ -100,22 +93,11 @@ final readonly class FileState implements State
         return $keys;
     }
 
-    /**
-     * Absolute path for `$key`. Not part of the interface — used by the
-     * coverage merger and similar callers that need direct filesystem
-     * access (e.g. `require` on a cached PHP file). Consumers that only
-     * deal in bytes should go through `read()` / `write()`.
-     */
     public function pathFor(string $key): string
     {
         return $this->rootDir.DIRECTORY_SEPARATOR.$key;
     }
 
-    /**
-     * Returns the resolved root if it exists already, otherwise `null`.
-     * Used by read-side helpers so they don't eagerly create the directory
-     * just to find nothing inside.
-     */
     private function resolvedRoot(): ?string
     {
         $resolved = @realpath($this->rootDir);
@@ -123,10 +105,6 @@ final readonly class FileState implements State
         return $resolved === false ? null : $resolved;
     }
 
-    /**
-     * Creates the root dir on demand. Returns false only when creation
-     * fails and the directory still isn't there afterwards.
-     */
     private function ensureRoot(): bool
     {
         if (is_dir($this->rootDir)) {
