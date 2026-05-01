@@ -34,13 +34,21 @@ final class CoverageMerger
             $current = self::requireCoverage($reportPath);
 
             if ($current instanceof CodeCoverage) {
-                $state->write(Tia::KEY_COVERAGE_CACHE, serialize($current));
+                $state->write(Tia::KEY_COVERAGE_CACHE, self::compress(serialize($current)));
             }
 
             return;
         }
 
-        $cached = self::unserializeCoverage($cachedBytes);
+        $decoded = self::decompress($cachedBytes);
+
+        if ($decoded === null) {
+            $state->delete(Tia::KEY_COVERAGE_CACHE);
+
+            return;
+        }
+
+        $cached = self::unserializeCoverage($decoded);
         $current = self::requireCoverage($reportPath);
 
         if (! $cached instanceof CodeCoverage || ! $current instanceof CodeCoverage) {
@@ -59,7 +67,21 @@ final class CoverageMerger
             $reportPath,
             '<?php return unserialize('.var_export($serialised, true).");\n",
         );
-        $state->write(Tia::KEY_COVERAGE_CACHE, $serialised);
+        $state->write(Tia::KEY_COVERAGE_CACHE, self::compress($serialised));
+    }
+
+    private static function compress(string $bytes): string
+    {
+        $compressed = @gzencode($bytes);
+
+        return $compressed === false ? $bytes : $compressed;
+    }
+
+    private static function decompress(string $bytes): ?string
+    {
+        $decoded = @gzdecode($bytes);
+
+        return $decoded === false ? null : $decoded;
     }
 
     /**

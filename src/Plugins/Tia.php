@@ -57,7 +57,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     /** Sentinel dropped by a recording worker without a usable coverage driver. */
     private const string KEY_WORKER_NO_DRIVER_PREFIX = 'worker-no-driver-';
 
-    public const string KEY_COVERAGE_CACHE = 'coverage.bin';
+    public const string KEY_COVERAGE_CACHE = 'coverage.bin.gz';
 
     public const string KEY_COVERAGE_MARKER = 'coverage.marker';
 
