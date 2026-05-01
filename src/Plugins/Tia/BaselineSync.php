@@ -30,12 +30,12 @@ final readonly class BaselineSync
 
     private const string COVERAGE_ASSET = Tia::KEY_COVERAGE_CACHE;
 
-    // Project-local directory where artifacts from previous downloads are
-    // kept (one subfolder per workflow run id). Hitting the same run id on
-    // a later fetch skips the `gh run download` round trip entirely —
-    // artifacts are immutable per run id, so the cached bytes are exactly
-    // what gh would re-download.
-    private const string DOWNLOAD_CACHE_REL_DIR = '.pest/artifacts';
+    // Subdirectory under the per-project state dir (`~/.pest/tia/<project>/`)
+    // where artifacts from previous downloads are kept (one subfolder per
+    // workflow run id). Hitting the same run id on a later fetch skips
+    // the `gh run download` round trip entirely — artifacts are immutable
+    // per run id, so the cached bytes are exactly what gh would re-download.
+    private const string DOWNLOAD_CACHE_DIR = 'artifacts';
 
     // Most recently downloaded artifacts to retain on disk. Branch
     // switches and partial baseline rollouts hop across run ids — keeping
@@ -381,9 +381,7 @@ YAML;
 
     private function downloadCacheDir(string $projectRoot): string
     {
-        return rtrim($projectRoot, '/\\')
-            .DIRECTORY_SEPARATOR
-            .str_replace('/', DIRECTORY_SEPARATOR, self::DOWNLOAD_CACHE_REL_DIR);
+        return Storage::tempDir($projectRoot).DIRECTORY_SEPARATOR.self::DOWNLOAD_CACHE_DIR;
     }
 
     /**
