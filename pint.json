@@ -1,6 +1,0 @@
-{
-    "preset": "laravel",
-    "rules": {
-        "Pint/phpdoc_type_annotations_only": true
-    }
-}
