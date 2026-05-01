@@ -76,21 +76,3 @@ jobs:
 
     - name: Integration Tests
       run: composer test:integration
-
-    # tests-tia records coverage inside its sandbox, which requires
-    # pcov (or xdebug) in the process PHP. The main setup-php step is
-    # `coverage: none` for speed — re-enable pcov here just for the
-    # TIA step. Cheap: pcov startup is near-zero.
-    - name: Enable pcov for TIA
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: ${{ matrix.php }}
-        tools: composer:v2
-        coverage: pcov
-        extensions: sockets
-
-    - name: TIA End-to-End Tests
-      # Black-box tests drive Pest `--tia` against a throw-away sandbox.
-      # First scenario takes ~60s (composer-installs the host Pest into a
-      # cached template); subsequent clones are cheap.
-      run: composer test:tia

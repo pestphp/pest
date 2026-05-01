@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 use Composer\InstalledVersions;
+use Pest\Exceptions\BaselineFetchFailed;
+use Pest\Panic;
 use Pest\Plugins\Tia;
 use Pest\Plugins\Tia\Contracts\State;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -69,11 +71,19 @@ final readonly class BaselineSync
             return false;
         }
 
-        $payload = $this->download($repo, $projectRoot);
+        $failureKind = null;
+        $payload = $this->download($repo, $projectRoot, $failureKind);
 
         if ($payload === null) {
-            $this->startCooldown();
-            $this->emitPublishInstructions($repo);
+            // Genuine "no baseline published yet" → cool down and show
+            // the publish-instructions YAML so the user can wire CI.
+            // Anything else (missing gh, auth, network, mid-download
+            // error) is transient and gets a one-line diagnostic
+            // instead — no cooldown, no noisy YAML.
+            if ($failureKind === 'no-runs' || $failureKind === null) {
+                $this->startCooldown();
+                $this->emitPublishInstructions($repo);
+            }
 
             return false;
         }
@@ -294,16 +304,58 @@ YAML;
         return null;
     }
 
-    /** @return array{graph: string, coverage: ?string}|null */
-    private function download(string $repo, string $projectRoot): ?array
+    /**
+     * @param-out string|null $failureKind
+     *
+     * @return array{graph: string, coverage: ?string}|null
+     */
+    private function download(string $repo, string $projectRoot, ?string &$failureKind = null): ?array
     {
+        $failureKind = null;
+
         if (! $this->commandExists('gh')) {
+            Panic::with(new BaselineFetchFailed(
+                'GitHub CLI (gh) not found — cannot fetch baseline.',
+                'Install it from https://cli.github.com.',
+            ));
+        }
+
+        if (! $this->ghAuthenticated()) {
+            Panic::with(new BaselineFetchFailed(
+                'GitHub CLI (gh) is not authenticated — cannot fetch baseline.',
+                'Run `gh auth login` and retry.',
+            ));
+        }
+
+        [$runId, $listError] = $this->latestSuccessfulRunIdWithError($repo);
+
+        if ($listError !== null) {
+            $failureKind = $listError['kind'];
+
+            // Tier 1 — actionable misconfiguration. Stop the suite and
+            // tell the user what to fix; a silent fall-through to a
+            // full record would just paper over the bug.
+            if (in_array($failureKind, ['forbidden', 'not-found'], true)) {
+                Panic::with(new BaselineFetchFailed(
+                    sprintf('Failed to query baseline runs — %s', $listError['message']),
+                    'Check the workflow file name (tia-baseline.yml), artifact name (pest-tia-baseline), and your gh token scope.',
+                ));
+            }
+
+            // Tier 2 — transient (network, rate-limit, unknown). Surface
+            // the diagnostic but let the suite fall through to record mode.
+            $this->output->writeln(sprintf(
+                '  <fg=yellow>TIA</> failed to query baseline runs — %s',
+                $listError['message'],
+            ));
+
             return null;
         }
 
-        $runId = $this->latestSuccessfulRunId($repo);
-
         if ($runId === null) {
+            // Genuine missing baseline — caller emits publish instructions.
+            $failureKind = 'no-runs';
+
             return null;
         }
 
@@ -365,6 +417,23 @@ YAML;
         if (! $process->isSuccessful()) {
             $this->cleanup($runCacheDir);
 
+            $diagnosis = $this->classifyGhError($process->getErrorOutput().$process->getOutput());
+            $failureKind = $diagnosis['kind'];
+
+            // Tier 1 — actionable. Stop hard with a clear diagnostic.
+            if (in_array($failureKind, ['forbidden', 'not-found'], true)) {
+                Panic::with(new BaselineFetchFailed(
+                    sprintf('Baseline download failed — %s', $diagnosis['message']),
+                    'Check the workflow file name (tia-baseline.yml), artifact name (pest-tia-baseline), and your gh token scope.',
+                ));
+            }
+
+            // Tier 2 — transient. Diagnostic + fall through to record mode.
+            $this->output->writeln(sprintf(
+                '  <fg=yellow>TIA</> baseline download failed — %s',
+                $diagnosis['message'],
+            ));
+
             return null;
         }
 
@@ -373,7 +442,13 @@ YAML;
         if ($payload === null) {
             $this->cleanup($runCacheDir);
 
-            return null;
+            // Artifact present but malformed — CI's publish step is
+            // broken. Falling through would silently waste the next
+            // run; surface the bug instead.
+            Panic::with(new BaselineFetchFailed(
+                'Baseline downloaded but the artifact is missing expected files (graph.json).',
+                'Your CI publish step is broken — check the workflow that uploads pest-tia-baseline.',
+            ));
         }
 
         $this->trimDownloadCache($projectRoot);
@@ -559,7 +634,16 @@ YAML;
         }
     }
 
-    private function latestSuccessfulRunId(string $repo): ?string
+    /**
+     * Returns `[runId|null, errorOrNull]`. Distinguishes "no runs yet"
+     * (runId null, error null) from "couldn't ask GitHub" (error
+     * populated with kind + message). Lets the caller pick between
+     * showing publish instructions and emitting a transient-failure
+     * diagnostic.
+     *
+     * @return array{0: ?string, 1: ?array{kind: string, message: string}}
+     */
+    private function latestSuccessfulRunIdWithError(string $repo): array
     {
         $process = new Process([
             'gh', 'run', 'list',
@@ -574,12 +658,79 @@ YAML;
         $process->run();
 
         if (! $process->isSuccessful()) {
-            return null;
+            return [null, $this->classifyGhError($process->getErrorOutput().$process->getOutput())];
         }
 
         $runId = trim($process->getOutput());
 
-        return $runId === '' ? null : $runId;
+        return [$runId === '' ? null : $runId, null];
+    }
+
+    private function ghAuthenticated(): bool
+    {
+        $process = new Process(['gh', 'auth', 'status']);
+        $process->setTimeout(10.0);
+        $process->run();
+
+        return $process->isSuccessful();
+    }
+
+    /**
+     * Maps a chunk of `gh` stderr/stdout to a coarse kind + a short,
+     * actionable message. Falls back to the first non-empty line of
+     * the output so even unrecognised errors aren't reduced to "unknown".
+     *
+     * @return array{kind: string, message: string}
+     */
+    private function classifyGhError(string $output): array
+    {
+        $output = trim($output);
+
+        if ($output === '') {
+            return ['kind' => 'unknown', 'message' => 'unknown error'];
+        }
+
+        if (preg_match('/(could not resolve host|connection refused|connection reset|temporary failure in name resolution|network is unreachable|no route to host|i\/o timeout|tls handshake|getaddrinfo)/i', $output) === 1) {
+            return [
+                'kind' => 'network',
+                'message' => 'network error (offline or DNS unreachable). Try again when connected.',
+            ];
+        }
+
+        if (preg_match('/(authentication failed|not logged in|requires authentication|bad credentials|401)/i', $output) === 1) {
+            return [
+                'kind' => 'gh-auth',
+                'message' => 'authentication failed — run `gh auth login` and retry.',
+            ];
+        }
+
+        if (preg_match('/(rate limit|too many requests|secondary rate limit)/i', $output) === 1) {
+            return [
+                'kind' => 'rate-limit',
+                'message' => 'GitHub API rate limit hit — try again later.',
+            ];
+        }
+
+        if (preg_match('/(404|not found|repository not found)/i', $output) === 1) {
+            return [
+                'kind' => 'not-found',
+                'message' => 'workflow or artifact not found in repo.',
+            ];
+        }
+
+        if (preg_match('/(403|forbidden|access denied)/i', $output) === 1) {
+            return [
+                'kind' => 'forbidden',
+                'message' => 'access denied — check that your `gh` token has repo + actions read scope.',
+            ];
+        }
+
+        // Unknown — surface the first informative line so the user has
+        // *something* to act on.
+        $first = strtok($output, "\n");
+        $message = is_string($first) ? trim($first) : 'unknown error';
+
+        return ['kind' => 'unknown', 'message' => $message];
     }
 
     private function commandExists(string $cmd): bool
