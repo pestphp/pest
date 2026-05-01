@@ -792,16 +792,12 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $affected = $changed === [] ? [] : $graph->affected($changed);
 
         if ($this->filteredMode) {
-            if ($graph->hasUnlocatedFailuresOrErrors($this->branch)) {
-                $this->output->writeln([
-                    '',
-                    '  <fg=yellow>TIA</> cached failures/errors exist but this baseline cannot map them to files — running full suite. Re-run with <fg=cyan>--fresh</> to rebuild the baseline.',
-                    '',
-                ]);
-
-                return $arguments;
-            }
-
+            // `failedOrErroredTestFiles()` only yields failures that have a
+            // mapped file — the snapshot path now reflects on the class
+            // when the collector loses the path, so an unlocated failure
+            // is no longer expected. If one slips through, doing the best
+            // we can with the located ones is strictly better than bailing
+            // to a full suite.
             $affected = array_values(array_unique([
                 ...$affected,
                 ...$graph->failedOrErroredTestFiles($this->branch),
@@ -1249,6 +1245,29 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         foreach ($results as $testId => $result) {
+            $file = $result['file'] ?? null;
+
+            // The collector occasionally hands us nothing usable: PHPUnit's
+            // Prepared event can miss the file for Pest-generated classes,
+            // and an eval'd class path (".../IndexTest.php(1) : eval()'d code")
+            // would be rejected later by Graph::relative(). Reflect on the
+            // class embedded in the test ID as a fallback so the failure
+            // gets stored *with* a file — without it, filtered runs lose
+            // the ability to re-run only the failing test next time and
+            // bail out to the full suite.
+            if ($file === null || (is_string($file) && str_contains($file, "eval()'d"))) {
+                $class = strstr($testId, '::', true);
+
+                if (is_string($class) && $class !== '') {
+                    try {
+                        $reflected = (new \ReflectionClass($class))->getFileName();
+                        $file = $reflected === false ? null : $reflected;
+                    } catch (\ReflectionException) {
+                        $file = null;
+                    }
+                }
+            }
+
             $graph->setResult(
                 $this->branch,
                 $testId,
@@ -1256,7 +1275,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                 $result['message'],
                 $result['time'],
                 $result['assertions'],
-                $result['file'] ?? null,
+                $file,
             );
         }
 
