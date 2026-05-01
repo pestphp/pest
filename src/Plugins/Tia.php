@@ -8,6 +8,8 @@ use NunoMaduro\Collision\Adapters\Phpunit\Printers\DefaultPrinter;
 use Pest\Contracts\Plugins\AddsOutput;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Contracts\Plugins\Terminable;
+use Pest\Exceptions\NoAffectedTestsFound;
+use Pest\Panic;
 use Pest\Plugins\Tia\BaselineSync;
 use Pest\Plugins\Tia\ChangedFiles;
 use Pest\Plugins\Tia\Contracts\State;
@@ -20,9 +22,8 @@ use Pest\Plugins\Tia\ResultCollector;
 use Pest\Plugins\Tia\Storage;
 use Pest\Plugins\Tia\TableExtractor;
 use Pest\Plugins\Tia\WatchPatterns;
-use Pest\Exceptions\NoAffectedTestsFound;
-use Pest\Panic;
 use Pest\Support\Container;
+use Pest\Support\View;
 use Pest\TestCaseFilters\TiaTestCaseFilter;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestStatus\TestStatus;
@@ -125,6 +126,16 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         private readonly BaselineSync $baselineSync,
     ) {}
 
+    private function renderBadge(string $type, string $content): void
+    {
+        View::render('components.badge', ['type' => $type, 'content' => $content]);
+    }
+
+    private function renderDetail(string $left, string $right = ''): void
+    {
+        View::render('components.two-column-detail', ['left' => $left, 'right' => $right]);
+    }
+
     private function loadGraph(string $projectRoot): ?Graph
     {
         $json = $this->state->read(self::KEY_GRAPH);
@@ -165,8 +176,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return true;
         }
 
-        $watchPatterns = Container::getInstance()->get(Tia\WatchPatterns::class);
-        assert($watchPatterns instanceof Tia\WatchPatterns);
+        $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
+        assert($watchPatterns instanceof WatchPatterns);
 
         if (! $watchPatterns->isEnabled()) {
             return false;
@@ -176,11 +187,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         // only after Environment's own handleArguments has run, which
         // hasn't happened at the restart-decision point — so check argv
         // directly here.
-        if ($watchPatterns->isLocally() && in_array('--ci', $arguments, true)) {
-            return false;
-        }
-
-        return true;
+        return ! ($watchPatterns->isLocally() && in_array('--ci', $arguments, true));
     }
 
     public function getCachedResult(string $filename, string $testId): ?TestStatus
@@ -241,8 +248,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $recordingGlobal = $isWorker && (string) Parallel::getGlobal(self::RECORDING_GLOBAL) === '1';
         $replayingGlobal = $isWorker && (string) Parallel::getGlobal(self::REPLAYING_GLOBAL) === '1';
 
-        /** @var Tia\WatchPatterns $watchPatterns */
-        $watchPatterns = Container::getInstance()->get(Tia\WatchPatterns::class);
+        /** @var WatchPatterns $watchPatterns */
+        $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
         $cliEnabled = $this->hasArgument(self::OPTION, $arguments);
         $alwaysEnabled = $watchPatterns->isEnabled()
             && (! $watchPatterns->isLocally() || Environment::name() === Environment::LOCAL);
@@ -350,15 +357,16 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $this->seedResultsInto($graph);
 
         if (! $this->saveGraph($graph)) {
-            $this->output->writeln('  <fg=red>TIA</> failed to write graph.');
+            $this->renderBadge('ERROR', 'TIA could not write the dependency graph.');
             $recorder->reset();
 
             return;
         }
 
-        $this->output->writeln(sprintf(
-            '  <fg=green>TIA</> graph recorded (%d test files).',
+        $this->renderBadge('INFO', sprintf(
+            'TIA recorded the dependency graph (%d test file%s).',
             count($perTest),
+            count($perTest) === 1 ? '' : 's',
         ));
 
         $recorder->reset();
@@ -480,12 +488,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                 return $exitCode;
             }
 
-            $this->output->writeln([
-                '',
-                '  <fg=white;bg=red> ERROR </> TIA recorded zero edges — coverage driver likely missing.',
-                '  Install / enable <fg=cyan>pcov</> or <fg=cyan>xdebug</> (mode: coverage) in the worker PHP and retry.',
-                '',
-            ]);
+            $this->renderBadge('ERROR', 'TIA recorded zero edges — coverage driver likely missing.');
+            $this->renderDetail('Install / enable pcov or xdebug (mode: coverage) in the worker PHP and retry.');
 
             return $exitCode;
         }
@@ -500,15 +504,17 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         if (! $this->saveGraph($graph)) {
-            $this->output->writeln('  <fg=red>TIA</> failed to write graph.');
+            $this->renderBadge('ERROR', 'TIA could not write the dependency graph.');
 
             return $exitCode;
         }
 
-        $this->output->writeln(sprintf(
-            '  <fg=green>TIA</> graph recorded (%d test files, %d worker partials).',
+        $this->renderBadge('INFO', sprintf(
+            'TIA recorded the dependency graph (%d test file%s, %d worker partial%s).',
             count($finalised),
+            count($finalised) === 1 ? '' : 's',
             count($partialKeys),
+            count($partialKeys) === 1 ? '' : 's',
         ));
 
         $this->snapshotTestResults();
@@ -530,8 +536,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         if (! Fingerprint::structuralMatches($stored, $current)) {
             $drift = Fingerprint::structuralDrift($stored, $current);
 
-            $this->output->writeln(sprintf(
-                '  <fg=yellow>TIA</> graph structure outdated (%s).',
+            $this->renderBadge('WARN', sprintf(
+                'TIA graph structure outdated (%s).',
                 $this->formatStructuralDrift($drift),
             ));
 
@@ -543,7 +549,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                         $branchSha,
                     );
                     if ($summary !== '') {
-                        $this->output->writeln('    <fg=gray>'.$summary.'</>');
+                        $this->renderDetail($summary);
                     }
                 }
             }
@@ -554,7 +560,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                 return $this->reconcileFingerprint($rebuilt, $current);
             }
 
-            $this->output->writeln('  <fg=yellow>TIA</> rebuilding graph from scratch.');
+            $this->renderBadge('WARN', 'TIA rebuilding graph from scratch.');
 
             $this->state->delete(self::KEY_GRAPH);
             $this->state->delete(self::KEY_COVERAGE_CACHE);
@@ -565,8 +571,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $drift = Fingerprint::environmentalDrift($stored, $current);
 
         if ($drift !== []) {
-            $this->output->writeln(sprintf(
-                '  <fg=yellow>TIA</> env differs from baseline (%s) — results dropped, edges reused.',
+            $this->renderBadge('WARN', sprintf(
+                'TIA env differs from baseline (%s) — results dropped, edges reused.',
                 implode(', ', $drift),
             ));
 
@@ -615,9 +621,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             if ($changedFiles->gitAvailable()
                 && $branchSha !== null
                 && $changedFiles->since($branchSha) === null) {
-                $this->output->writeln(
-                    '  <fg=yellow>TIA</> recorded commit is no longer reachable — graph will be rebuilt.',
-                );
+                $this->renderBadge('WARN', 'TIA recorded commit is no longer reachable — graph will be rebuilt.');
                 $graph = null;
             }
         }
@@ -790,9 +794,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $changedFiles = new ChangedFiles($projectRoot);
 
         if (! $changedFiles->gitAvailable()) {
-            $this->output->writeln(
-                '  <fg=yellow>TIA</> git unavailable — running full suite.',
-            );
+            $this->renderBadge('WARN', 'TIA git unavailable — running full suite.');
 
             return $arguments;
         }
@@ -803,19 +805,15 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $changed = $changedFiles->filterUnchangedSinceLastRun(
             $changed,
             $graph->lastRunTree($this->branch),
-            $branchSha,
         );
 
         $hasProjectPhpSourceChanges = $this->hasProjectPhpSourceChanges($changed);
         $coverageAvailable = $this->piggybackCoverage || $this->recorder->driverAvailable();
 
         if ($hasProjectPhpSourceChanges && ! $coverageAvailable) {
-            $this->output->writeln([
-                '',
-                '  <fg=black;bg=yellow> WARNING </> TIA detected PHP source changes but no coverage driver is available.',
-                '  Running the full suite to avoid using a stale dependency graph. Install / enable <fg=cyan>pcov</> or <fg=cyan>xdebug</> (mode: coverage) so TIA can safely refresh edges after PHP refactors.',
-                '',
-            ]);
+            $this->renderBadge('WARN', 'TIA detected PHP source changes but no coverage driver is available.');
+            $this->renderDetail('Running the full suite to avoid using a stale dependency graph.');
+            $this->renderDetail('Install / enable pcov or xdebug (mode: coverage) so TIA can safely refresh edges after PHP refactors.');
 
             return $arguments;
         }
@@ -869,9 +867,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         if (! $this->persistAffectedSet($affected)) {
-            $this->output->writeln(
-                '  <fg=red>TIA</> failed to persist affected set — running full suite.',
-            );
+            $this->renderBadge('ERROR', 'TIA could not persist affected set — running full suite.');
 
             return $arguments;
         }
@@ -953,8 +949,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                 );
         }
 
-        $this->output->writeln(sprintf(
-            '  <fg=cyan>TIA</> %d affected test file%s%s.',
+        $this->renderBadge('INFO', sprintf(
+            '%d affected test file%s%s.',
             count($affected),
             count($affected) === 1 ? '' : 's',
             $reasons === [] ? '' : ' ('.implode(', ', $reasons).')',
@@ -975,10 +971,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $remainder = count($sorted) - count($preview);
 
         if ($remainder > 0) {
-            $this->output->writeln(sprintf(
-                '  <fg=gray>  … +%d more</>',
-                $remainder,
-            ));
+            $this->output->writeln(sprintf('  <fg=gray>  … +%d more</>', $remainder));
         }
     }
 
@@ -1019,11 +1012,11 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                 Parallel::setGlobal(self::PIGGYBACK_COVERAGE_GLOBAL, '1');
             }
 
-            $this->output->writeln($this->piggybackCoverage
-                ? '  <fg=cyan>TIA</> recording dependency graph in parallel via `--coverage` (first run) — '.
-                    'subsequent `--tia` runs will only re-execute affected tests.'
-                : '  <fg=cyan>TIA</> recording dependency graph in parallel (first run) — '.
-                    'subsequent `--tia` runs will only re-execute affected tests.');
+            $this->renderBadge('INFO', $this->piggybackCoverage
+                ? 'TIA recording dependency graph in parallel via --coverage (first run) — '.
+                    'subsequent --tia runs will only re-execute affected tests.'
+                : 'TIA recording dependency graph in parallel (first run) — '.
+                    'subsequent --tia runs will only re-execute affected tests.');
 
             return $arguments;
         }
@@ -1031,10 +1024,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         if ($this->piggybackCoverage) {
             $this->recordingActive = true;
 
-            $this->output->writeln(
-                '  <fg=cyan>TIA</> recording dependency graph via `--coverage` (first run) — '.
-                'subsequent `--tia` runs will only re-execute affected tests.',
-            );
+            $this->renderBadge('INFO', 'TIA recording dependency graph via --coverage (first run) — '.
+                'subsequent --tia runs will only re-execute affected tests.');
 
             return $arguments;
         }
@@ -1042,9 +1033,9 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $recorder->activate();
         $this->recordingActive = true;
 
-        $this->output->writeln(sprintf(
-            '  <fg=cyan>TIA</> recording dependency graph via %s (first run) — '.
-            'subsequent `--tia` runs will only re-execute affected tests.',
+        $this->renderBadge('INFO', sprintf(
+            'TIA recording dependency graph via %s (first run) — '.
+            'subsequent --tia runs will only re-execute affected tests.',
             $recorder->driver(),
         ));
 
@@ -1053,14 +1044,9 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
     private function emitCoverageDriverMissing(): void
     {
-        $this->output->writeln([
-            '',
-            '  <fg=black;bg=yellow> WARNING </> No coverage driver is available — TIA skipped.',
-            '',
-            '  TIA needs <fg=cyan>ext-pcov</> or <fg=cyan>Xdebug</> with <fg=cyan>coverage</> mode enabled to record',
-            '  the dependency graph. Install or enable one and rerun with `--tia`.',
-            '',
-        ]);
+        $this->renderBadge('WARN', 'No coverage driver is available — TIA skipped.');
+        $this->renderDetail('TIA needs ext-pcov or Xdebug with coverage mode enabled to record the dependency graph.');
+        $this->renderDetail('Install or enable one and rerun with --tia.');
     }
 
     /**
@@ -1100,11 +1086,11 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             $this->state->delete($key);
         }
 
-        $this->output->writeln(sprintf(
-            '  <fg=yellow>TIA</> %d worker(s) had no coverage driver — their per-test edges and results were dropped. '
-                .'Install / enable <fg=cyan>pcov</> or <fg=cyan>xdebug</> (mode: coverage) in the worker PHP and rerun.',
+        $this->renderBadge('WARN', sprintf(
+            '%d worker(s) had no coverage driver — their per-test edges and results were dropped.',
             count($keys),
         ));
+        $this->renderDetail('Install / enable pcov or xdebug (mode: coverage) in the worker PHP and rerun.');
     }
 
     private function purgeWorkerPartials(): void
@@ -1382,7 +1368,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             // filtered runs lose the ability to re-run only the failing test
             // next time.
             if ($file === null || (is_string($file) && str_contains($file, "eval()'d"))) {
-                $file = self::resolveFailedTestFile($testId);
+                $file = $this->resolveFailedTestFile($testId);
             }
 
             $graph->setResult(
@@ -1416,7 +1402,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      *      walking up the parent class chain — a plain PHPUnit test
      *      lives in a real file at the top of that chain.
      */
-    private static function resolveFailedTestFile(string $testId): ?string
+    private function resolveFailedTestFile(string $testId): ?string
     {
         $class = strstr($testId, '::', true);
 
@@ -1491,11 +1477,16 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             if (str_ends_with($rel, '.blade.php')) {
                 continue;
             }
-
-            if (str_starts_with($rel, 'tests/')
-                || str_starts_with($rel, 'vendor/')
-                || str_starts_with($rel, 'storage/framework/')
-                || str_starts_with($rel, 'bootstrap/cache/')) {
+            if (str_starts_with($rel, 'tests/')) {
+                continue;
+            }
+            if (str_starts_with($rel, 'vendor/')) {
+                continue;
+            }
+            if (str_starts_with($rel, 'storage/framework/')) {
+                continue;
+            }
+            if (str_starts_with($rel, 'bootstrap/cache/')) {
                 continue;
             }
 
@@ -1532,16 +1523,12 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         if (! Fingerprint::structuralMatches($fetched->fingerprint(), $current)) {
-            $this->output->writeln(
-                '  <fg=yellow>TIA</> fetched baseline still drifts — discarding.',
-            );
+            $this->renderBadge('WARN', 'TIA fetched baseline still drifts — discarding.');
 
             return null;
         }
 
-        $this->output->writeln(
-            '  <fg=green>TIA</> fetched baseline matches — skipping local rebuild.',
-        );
+        $this->renderBadge('SUCCESS', 'TIA fetched baseline matches — skipping local rebuild.');
 
         return $fetched;
     }

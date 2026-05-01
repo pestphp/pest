@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
+use Pest\Factories\TestCaseFactory;
 use Pest\Support\Container;
+use Pest\Support\View;
 use Pest\TestSuite;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestStatus\TestStatus;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @internal
@@ -230,13 +231,13 @@ final class Graph
             if ($freshMap === null) {
                 // Vite resolver unavailable — falling back to watch pattern; surface a line so the user
                 // knows precision was downgraded rather than leaving the slower replay unexplained.
-                $output = Container::getInstance()->get(OutputInterface::class);
-                if ($output instanceof OutputInterface) {
-                    $output->writeln(sprintf(
-                        '  <fg=yellow>TIA</> Vite resolver unavailable — falling back to watch pattern for %d new JS file(s).',
+                View::render('components.badge', [
+                    'type' => 'WARN',
+                    'content' => sprintf(
+                        'TIA Vite resolver unavailable — falling back to watch pattern for %d new JS file(s).',
                         count($newJsFiles),
-                    ));
-                }
+                    ),
+                ]);
             } else {
                 foreach ($newJsFiles as $rel) {
                     $pages = $freshMap[$rel] ?? [];
@@ -538,8 +539,10 @@ final class Graph
             }
 
             $file = $result['file'] ?? null;
-
-            if (! is_string($file) || $file === '') {
+            if (! is_string($file)) {
+                continue;
+            }
+            if ($file === '') {
                 continue;
             }
 
@@ -767,7 +770,7 @@ final class Graph
         ];
 
         foreach ($prefixes as $prefix) {
-            if (str_starts_with($rel, $prefix)) {
+            if (str_starts_with($rel, (string) $prefix)) {
                 return true;
             }
         }
@@ -805,7 +808,7 @@ final class Graph
         foreach ($repo->getFilenames() as $filename) {
             $factory = $repo->get($filename);
 
-            if ($factory === null) {
+            if (! $factory instanceof TestCaseFactory) {
                 continue;
             }
 
@@ -850,7 +853,10 @@ final class Graph
             if (! is_object($attribute)) {
                 continue;
             }
-            if (! property_exists($attribute, 'name') || $attribute->name !== Group::class) {
+            if (! property_exists($attribute, 'name')) {
+                continue;
+            }
+            if ($attribute->name !== Group::class) {
                 continue;
             }
             if (! property_exists($attribute, 'arguments')) {
@@ -989,10 +995,12 @@ final class Graph
         );
 
         foreach ($iterator as $file) {
-            if (! $file instanceof \SplFileInfo || ! $file->isFile()) {
+            if (! $file instanceof \SplFileInfo) {
                 continue;
             }
-
+            if (! $file->isFile()) {
+                continue;
+            }
             $path = $file->getPathname();
             if (! str_ends_with($path, '.blade.php')) {
                 continue;

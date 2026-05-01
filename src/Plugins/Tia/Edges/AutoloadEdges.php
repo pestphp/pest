@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pest\Plugins\Tia;
+namespace Pest\Plugins\Tia\Edges;
 
 /**
  * @internal
@@ -17,7 +17,7 @@ final readonly class AutoloadEdges
         $files = [];
 
         foreach (get_included_files() as $file) {
-            if (is_string($file) && $file !== '') {
+            if ($file !== '') {
                 $files[$file] = true;
             }
         }
@@ -80,7 +80,7 @@ final readonly class AutoloadEdges
         ];
 
         foreach ($prefixes as $prefix) {
-            if (str_starts_with($relative, $prefix)) {
+            if (str_starts_with($relative, (string) $prefix)) {
                 return true;
             }
         }

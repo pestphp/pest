@@ -57,10 +57,12 @@ final class Storage
         }
 
         foreach ($entries as $entry) {
-            if ($entry === '.' || $entry === '..') {
+            if ($entry === '.') {
                 continue;
             }
-
+            if ($entry === '..') {
+                continue;
+            }
             $path = $dir.DIRECTORY_SEPARATOR.$entry;
 
             if (is_dir($path) && ! is_link($path)) {

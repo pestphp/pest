@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
+use Pest\Plugins\Tia\Edges\AutoloadEdges;
 use Pest\TestSuite;
 use ReflectionClass;
 
@@ -169,7 +170,7 @@ final class Recorder
             /** @var array<string, mixed> $data */
             $data = \pcov\collect(\pcov\inclusive, $filesToCollectCoverageFor);
 
-            $coveredFiles = self::filesWithExecutedLines($data);
+            $coveredFiles = $this->filesWithExecutedLines($data);
         } else {
             /** @var array<string, mixed> $data */
             $data = \xdebug_get_code_coverage();
@@ -484,10 +485,15 @@ final class Recorder
     private function findAutoloadFile(string $className): ?string
     {
         foreach (spl_autoload_functions() as $loader) {
-            if (! is_array($loader) || ! isset($loader[0]) || ! is_object($loader[0])) {
+            if (! is_array($loader)) {
                 continue;
             }
-
+            if (! isset($loader[0])) {
+                continue;
+            }
+            if (! is_object($loader[0])) {
+                continue;
+            }
             if (! method_exists($loader[0], 'findFile')) {
                 continue;
             }
@@ -678,15 +684,17 @@ final class Recorder
      * @param  array<string, mixed>  $data
      * @return list<string>
      */
-    private static function filesWithExecutedLines(array $data): array
+    private function filesWithExecutedLines(array $data): array
     {
         $out = [];
 
         foreach ($data as $file => $lines) {
-            if (! is_string($file) || ! is_array($lines)) {
+            if (! is_string($file)) {
                 continue;
             }
-
+            if (! is_array($lines)) {
+                continue;
+            }
             $covered = [];
             foreach ($lines as $line => $count) {
                 if (is_int($count) && $count > 0) {

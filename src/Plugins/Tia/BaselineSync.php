@@ -9,6 +9,7 @@ use Pest\Exceptions\BaselineFetchFailed;
 use Pest\Panic;
 use Pest\Plugins\Tia;
 use Pest\Plugins\Tia\Contracts\State;
+use Pest\Support\View;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 
@@ -46,6 +47,16 @@ final readonly class BaselineSync
         private OutputInterface $output,
     ) {}
 
+    private function renderBadge(string $type, string $content): void
+    {
+        View::render('components.badge', ['type' => $type, 'content' => $content]);
+    }
+
+    private function renderDetail(string $left, string $right = ''): void
+    {
+        View::render('components.two-column-detail', ['left' => $left, 'right' => $right]);
+    }
+
     public function fetchIfAvailable(string $projectRoot, bool $force = false): bool
     {
         $repo = $this->detectGitHubRepo($projectRoot);
@@ -55,9 +66,8 @@ final readonly class BaselineSync
         }
 
         if (! $force && ($remaining = $this->cooldownRemaining()) !== null) {
-            $this->output->writeln(sprintf(
-                '  <fg=yellow>TIA</> last fetch found no baseline — next auto-retry in %s. '
-                    .'Override with <fg=cyan>--refetch</>.',
+            $this->renderBadge('WARN', sprintf(
+                'TIA last fetch found no baseline — next auto-retry in %s. Override with --refetch.',
                 $this->formatDuration($remaining),
             ));
 
@@ -91,8 +101,8 @@ final readonly class BaselineSync
 
         $this->clearCooldown();
 
-        $this->output->writeln(sprintf(
-            '  <fg=green>TIA</> baseline ready (%s).',
+        $this->renderBadge('SUCCESS', sprintf(
+            'TIA baseline ready (%s).',
             $this->formatSize(strlen($payload['graph']) + strlen($payload['coverage'] ?? '')),
         ));
 
@@ -146,9 +156,7 @@ final readonly class BaselineSync
     private function emitPublishInstructions(string $repo): void
     {
         if ($this->isCi()) {
-            $this->output->writeln(
-                '  <fg=yellow>TIA</> no baseline yet — this run will produce one.',
-            );
+            $this->renderBadge('INFO', 'TIA no baseline yet — this run will produce one.');
 
             return;
         }
@@ -157,28 +165,21 @@ final readonly class BaselineSync
             ? $this->laravelWorkflowYaml()
             : $this->genericWorkflowYaml();
 
-        $preamble = [
-            '  <fg=yellow>TIA</> no baseline published yet — recording locally.',
-            '',
-            '  To share the baseline with your team, add this workflow to the repo:',
-            '',
-            '    <fg=cyan>.github/workflows/tia-baseline.yml</>',
-            '',
-        ];
+        $this->renderBadge('WARN', 'TIA no baseline published yet — recording locally.');
+        $this->renderDetail('To share the baseline with your team, add this workflow to the repo:');
+        $this->renderDetail('.github/workflows/tia-baseline.yml');
 
+        // YAML stays as a raw indented block — Termwind would mangle the
+        // verbatim whitespace.
         $indentedYaml = array_map(
             static fn (string $line): string => '      '.$line,
             explode("\n", $yaml),
         );
 
-        $trailer = [
-            '',
-            sprintf('  Commit, push, then run once:  <fg=cyan>gh workflow run tia-baseline.yml -R %s</>', $repo),
-            '  Details: <fg=gray>https://pestphp.com/docs/tia/ci</>',
-            '',
-        ];
+        $this->output->writeln(['', ...$indentedYaml, '']);
 
-        $this->output->writeln([...$preamble, ...$indentedYaml, ...$trailer]);
+        $this->renderDetail(sprintf('Commit, push, then run once: gh workflow run tia-baseline.yml -R %s', $repo));
+        $this->renderDetail('Details: https://pestphp.com/docs/tia/ci');
     }
 
     // `CI=true` alone is ambiguous (users set it locally) — require a provider-specific env var.
@@ -337,8 +338,8 @@ YAML;
 
             // Tier 2 — transient (network, rate-limit, unknown). Surface
             // the diagnostic but let the suite fall through to record mode.
-            $this->output->writeln(sprintf(
-                '  <fg=yellow>TIA</> failed to query baseline runs — %s',
+            $this->renderBadge('WARN', sprintf(
+                'TIA failed to query baseline runs — %s',
                 $listError['message'],
             ));
 
@@ -362,8 +363,8 @@ YAML;
             // id as recently used and doesn't evict it later.
             @touch($runCacheDir);
 
-            $this->output->writeln(sprintf(
-                '  <fg=cyan>TIA</> using cached baseline from <fg=white>%s</> (run %s).',
+            $this->renderBadge('INFO', sprintf(
+                'TIA using cached baseline from %s (run %s).',
                 $repo,
                 $runId,
             ));
@@ -377,14 +378,14 @@ YAML;
 
         $artifactSize = $this->artifactSize($repo, $runId);
 
-        $this->output->writeln($artifactSize !== null
+        $this->renderBadge('INFO', $artifactSize !== null
             ? sprintf(
-                '  <fg=cyan>TIA</> fetching baseline (%s) from <fg=white>%s</>…',
+                'TIA fetching baseline (%s) from %s…',
                 $this->formatSize($artifactSize),
                 $repo,
             )
             : sprintf(
-                '  <fg=cyan>TIA</> fetching baseline from <fg=white>%s</>…',
+                'TIA fetching baseline from %s…',
                 $repo,
             ));
 
@@ -422,8 +423,8 @@ YAML;
             }
 
             // Tier 2 — transient. Diagnostic + fall through to record mode.
-            $this->output->writeln(sprintf(
-                '  <fg=yellow>TIA</> baseline download failed — %s',
+            $this->renderBadge('WARN', sprintf(
+                'TIA baseline download failed — %s',
                 $diagnosis['message'],
             ));
 
@@ -599,10 +600,12 @@ YAML;
         $candidates = [];
 
         foreach ($entries as $entry) {
-            if ($entry === '.' || $entry === '..') {
+            if ($entry === '.') {
                 continue;
             }
-
+            if ($entry === '..') {
+                continue;
+            }
             $path = $root.DIRECTORY_SEPARATOR.$entry;
 
             if (! is_dir($path)) {

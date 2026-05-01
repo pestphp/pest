@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Pest\Plugins\Tia;
+namespace Pest\Plugins\Tia\Edges;
+
+use Pest\Plugins\Tia\Recorder;
 
 /**
  * @internal

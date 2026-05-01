@@ -42,7 +42,7 @@ final class JsModuleGraph
      */
     public static function warmInBackground(string $projectRoot): void
     {
-        if (self::$warmer !== null || self::$warmerCacheHit) {
+        if (self::$warmer instanceof Process || self::$warmerCacheHit) {
             return;
         }
 
@@ -62,7 +62,7 @@ final class JsModuleGraph
 
         $process = self::buildNodeProcess($projectRoot);
 
-        if ($process === null) {
+        if (! $process instanceof Process) {
             return;
         }
 
@@ -164,7 +164,7 @@ final class JsModuleGraph
             }
         }
 
-        if (self::$warmer !== null
+        if (self::$warmer instanceof Process
             && self::$warmerFingerprint === $fingerprint
             && self::$warmerProjectRoot === $projectRoot) {
             $process = self::$warmer;
@@ -179,7 +179,7 @@ final class JsModuleGraph
                 $process = null;
             }
 
-            if ($process !== null && $process->isSuccessful()) {
+            if ($process instanceof Process && $process->isSuccessful()) {
                 $result = self::parseNodeOutput($process->getOutput());
 
                 if ($result !== null) {
@@ -212,7 +212,7 @@ final class JsModuleGraph
     {
         $process = self::buildNodeProcess($projectRoot);
 
-        if ($process === null) {
+        if (! $process instanceof Process) {
             return null;
         }
 
@@ -319,7 +319,7 @@ final class JsModuleGraph
         self::$warmerProjectRoot = null;
         self::$warmerCacheHit = false;
 
-        if ($process === null) {
+        if (! $process instanceof Process) {
             return;
         }
 
@@ -446,10 +446,12 @@ final class JsModuleGraph
         $out = [];
 
         foreach ($graph as $key => $value) {
-            if (! is_string($key) || ! is_array($value)) {
+            if (! is_string($key)) {
                 continue;
             }
-
+            if (! is_array($value)) {
+                continue;
+            }
             $names = [];
 
             foreach ($value as $name) {
@@ -465,7 +467,7 @@ final class JsModuleGraph
     }
 
     /**
-     * @param array<string, list<string>> $graph
+     * @param  array<string, list<string>>  $graph
      */
     private static function writeCache(string $projectRoot, string $fingerprint, array $graph): void
     {

@@ -12,7 +12,6 @@ use Pest\Plugins\Tia\Graph;
 use Pest\Plugins\Tia\Storage;
 
 /**
- *
  * @internal
  */
 final class XdebugRestarter implements Restarter

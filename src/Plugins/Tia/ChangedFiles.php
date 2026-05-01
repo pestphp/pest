@@ -18,7 +18,7 @@ final readonly class ChangedFiles
      * @param  array<string, string>  $lastRunTree  path → content hash from last run.
      * @return array<int, string>
      */
-    public function filterUnchangedSinceLastRun(array $files, array $lastRunTree, ?string $sha = null): array
+    public function filterUnchangedSinceLastRun(array $files, array $lastRunTree): array
     {
         if ($lastRunTree === []) {
             return $files;

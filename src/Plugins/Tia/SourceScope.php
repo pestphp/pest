@@ -7,7 +7,7 @@ namespace Pest\Plugins\Tia;
 /**
  * @internal
  */
-final class SourceScope
+final readonly class SourceScope
 {
     /**
      * Top-level directory names always treated as out-of-scope. These
@@ -44,9 +44,8 @@ final class SourceScope
      * @param  list<string>  $excludes  Absolute, normalised directory paths.
      */
     public function __construct(
-        private readonly string $projectRoot,
-        private readonly array $includes,
-        private readonly array $excludes,
+        private array $includes,
+        private array $excludes,
     ) {}
 
     public static function fromProjectRoot(string $projectRoot): self
@@ -94,13 +93,13 @@ final class SourceScope
         $candidate = self::normalise($candidate);
 
         foreach ($this->excludes as $excluded) {
-            if (self::startsWithDir($candidate, $excluded)) {
+            if ($this->startsWithDir($candidate, $excluded)) {
                 return false;
             }
         }
 
         foreach ($this->includes as $included) {
-            if (self::startsWithDir($candidate, $included)) {
+            if ($this->startsWithDir($candidate, $included)) {
                 return true;
             }
         }
@@ -184,10 +183,12 @@ final class SourceScope
         $out = [];
 
         foreach ($entries as $entry) {
-            if ($entry === '.' || $entry === '..') {
+            if ($entry === '.') {
                 continue;
             }
-
+            if ($entry === '..') {
+                continue;
+            }
             if (in_array($entry, self::TOP_LEVEL_NOISE, true)) {
                 continue;
             }
@@ -223,7 +224,7 @@ final class SourceScope
         return $out;
     }
 
-    private static function resolveRelative(string $path, string $configDir): ?string
+    private static function resolveRelative(string $path, string $configDir): string
     {
         $isAbsolute = $path !== '' && ($path[0] === DIRECTORY_SEPARATOR || $path[0] === '/'
             || (strlen($path) >= 2 && $path[1] === ':'));
@@ -246,7 +247,7 @@ final class SourceScope
         return rtrim($path, '/\\');
     }
 
-    private static function startsWithDir(string $candidate, string $dir): bool
+    private function startsWithDir(string $candidate, string $dir): bool
     {
         if ($candidate === $dir) {
             return true;

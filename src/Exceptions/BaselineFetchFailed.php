@@ -7,6 +7,7 @@ namespace Pest\Exceptions;
 use NunoMaduro\Collision\Contracts\RenderlessEditor;
 use NunoMaduro\Collision\Contracts\RenderlessTrace;
 use Pest\Contracts\Panicable;
+use Pest\Support\View;
 use RuntimeException;
 use Symfony\Component\Console\Exception\ExceptionInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -25,12 +26,13 @@ final class BaselineFetchFailed extends RuntimeException implements ExceptionInt
 
     public function render(OutputInterface $output): void
     {
-        $output->writeln([
-            '',
-            '  <fg=white;options=bold;bg=red> TIA </> '.$this->headline,
-            '  <fg=gray>'.$this->hint.'</>',
-            '  <fg=gray>Bypass with</> <fg=cyan>--fresh</> <fg=gray>to record locally and skip the baseline fetch.</>',
-            '',
+        View::renderUsing($output);
+
+        View::render('components.badge', ['type' => 'ERROR', 'content' => $this->headline]);
+        View::render('components.two-column-detail', ['left' => $this->hint, 'right' => '']);
+        View::render('components.two-column-detail', [
+            'left' => 'Bypass with --fresh to record locally and skip the baseline fetch.',
+            'right' => '',
         ]);
     }
 

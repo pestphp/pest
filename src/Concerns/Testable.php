@@ -8,11 +8,10 @@ use Closure;
 use Pest\Exceptions\DatasetArgumentsMismatch;
 use Pest\Panic;
 use Pest\Plugins\Tia;
-use Pest\Plugins\Tia\AutoloadEdges;
-use Pest\Plugins\Tia\BladeEdges;
-use Pest\Plugins\Tia\InertiaEdges;
+use Pest\Plugins\Tia\Collectors;
+use Pest\Plugins\Tia\Edges\AutoloadEdges;
 use Pest\Plugins\Tia\Recorder;
-use Pest\Plugins\Tia\TableTracker;
+use Pest\Plugins\Tia\Replay;
 use Pest\Preset;
 use Pest\Support\ChainableClosure;
 use Pest\Support\Container;
@@ -286,39 +285,21 @@ trait Testable
         $cached = $tia->getCachedResult(self::$__filename, $this::class.'::'.$this->name());
 
         if ($cached !== null) {
-            if ($cached->isSuccess()) {
-                $this->__cachedPass = true;
-                $this->__ran = true;
+            // Risky has no public PHPUnit hook to replay as-risky, so we
+            // collapse it into Pass — the test doesn't misreport as a
+            // failure, at the cost of losing aggregate risky totals on
+            // replay (accepted until PHPUnit grows a programmatic
+            // risky-marker API). Skipped/Incomplete throw the matching
+            // PHPUnit exception so the runner marks the status exactly
+            // as it did on the recorded run.
+            match (Replay::from($cached)) {
+                Replay::Pass => $this->__shortCircuitCachedPass(),
+                Replay::Skipped => $this->markTestSkipped($cached->message()),
+                Replay::Incomplete => $this->markTestIncomplete($cached->message()),
+                Replay::Failure => throw new AssertionFailedError($cached->message() ?: 'Cached failure'),
+            };
 
-                return;
-            }
-
-            // Risky tests have no public PHPUnit hook to replay as-risky.
-            // Best available: short-circuit as a pass so the test doesn't
-            // misreport as a failure. Aggregate risky totals won't
-            // survive replay — accepted trade-off until PHPUnit grows a
-            // programmatic risky-marker API.
-            if ($cached->isRisky()) {
-                $this->__cachedPass = true;
-                $this->__ran = true;
-
-                return;
-            }
-
-            // Non-success: throw the matching PHPUnit exception. Runner
-            // catches it and marks the test with the correct status so
-            // skips, failures, incompletes and todos appear in output
-            // exactly as they did in the cached run.
-            if ($cached->isSkipped()) {
-                $this->markTestSkipped($cached->message());
-            }
-
-            if ($cached->isIncomplete()) {
-                $this->markTestIncomplete($cached->message());
-                $this->__ran = true;
-            }
-
-            throw new AssertionFailedError($cached->message() ?: 'Cached failure');
+            return;
         }
 
         $recorder = Container::getInstance()->get(Recorder::class);
@@ -334,15 +315,13 @@ trait Testable
 
         parent::setUp();
 
-        // TIA blade-edge + table-edge recording (Laravel-only). Runs
-        // right after `parent::setUp()` so the Laravel app exists and
-        // the View / DB facades are bound; each arm call is
-        // idempotent against the current app instance so the 774-test
-        // suite doesn't stack 774 composers / listeners when Laravel
-        // keeps the same app across tests.
-        BladeEdges::arm($recorder);
-        TableTracker::arm($recorder);
-        InertiaEdges::arm($recorder);
+        // TIA edge collectors (Laravel-only). Runs right after
+        // `parent::setUp()` so the Laravel app exists and the View /
+        // DB facades are bound; each arm call is idempotent against
+        // the current app instance so the 774-test suite doesn't stack
+        // 774 composers / listeners when Laravel keeps the same app
+        // across tests.
+        Collectors::armAll($recorder);
 
         $beforeEach = TestSuite::getInstance()->beforeEach->get(self::$__filename)[1];
 
@@ -363,6 +342,12 @@ trait Testable
                 ),
             );
         }
+    }
+
+    private function __shortCircuitCachedPass(): void
+    {
+        $this->__cachedPass = true;
+        $this->__ran = true;
     }
 
     /**
