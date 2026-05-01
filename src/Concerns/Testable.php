@@ -306,12 +306,6 @@ trait Testable
 
         parent::setUp();
 
-        // TIA edge collectors (Laravel-only). Runs right after
-        // `parent::setUp()` so the Laravel app exists and the View /
-        // DB facades are bound; each arm call is idempotent against
-        // the current app instance so the 774-test suite doesn't stack
-        // 774 composers / listeners when Laravel keeps the same app
-        // across tests.
         Collectors::armAll($recorder);
 
         $beforeEach = TestSuite::getInstance()->beforeEach->get(self::$__filename)[1];
