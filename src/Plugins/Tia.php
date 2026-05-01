@@ -883,33 +883,47 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return;
         }
 
-        $reasons = [];
-
-        if ($affectedFromChanges !== []) {
-            $reasons[] = sprintf(
-                '%d from %d changed file%s',
-                count($affectedFromChanges),
-                count($changedFiles),
-                count($changedFiles) === 1 ? '' : 's',
-            );
-        }
-
         // Failures that overlap with the change-driven set are already
-        // counted there — don't double-count them in the breakdown.
+        // pulled in by edges — don't double-count them as a separate
+        // reason in the breakdown.
         $newFailures = $failedFromCache === []
             ? 0
             : count(array_diff($failedFromCache, $affectedFromChanges));
 
+        $reasons = [];
+        $singleReason = (int) ($affectedFromChanges !== []) + (int) ($newFailures > 0) === 1;
+
+        if ($affectedFromChanges !== []) {
+            $reasons[] = $singleReason
+                ? sprintf(
+                    'from %d changed file%s',
+                    count($changedFiles),
+                    count($changedFiles) === 1 ? '' : 's',
+                )
+                : sprintf(
+                    '%d from %d changed file%s',
+                    count($affectedFromChanges),
+                    count($changedFiles),
+                    count($changedFiles) === 1 ? '' : 's',
+                );
+        }
+
         if ($newFailures > 0) {
-            $reasons[] = sprintf(
-                '%d cached failure%s',
-                $newFailures,
-                $newFailures === 1 ? '' : 's',
-            );
+            $reasons[] = $singleReason
+                ? sprintf(
+                    'from %d previous failure%s',
+                    $newFailures,
+                    $newFailures === 1 ? '' : 's',
+                )
+                : sprintf(
+                    '%d from previous failure%s',
+                    $newFailures,
+                    $newFailures === 1 ? '' : 's',
+                );
         }
 
         $this->output->writeln(sprintf(
-            '  <fg=cyan>TIA</> %d affected test%s%s.',
+            '  <fg=cyan>TIA</> %d affected test file%s%s.',
             count($affected),
             count($affected) === 1 ? '' : 's',
             $reasons === [] ? '' : ' ('.implode(', ', $reasons).')',
