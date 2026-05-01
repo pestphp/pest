@@ -1,32 +1,5 @@
 #!/usr/bin/env node
 
-/**
- * TIA Vite dependency resolver.
- *
- * Spins up a throwaway headless Vite dev server using the project's
- * `vite.config.*`, walks every `resources/js/Pages/**` entry to warm
- * up the module graph, then serializes the graph as a reverse map:
- *
- *   { "<abs source path>": ["<page component name>", ...], ... }
- *
- * The resulting JSON is written to stdout. Stderr is silent on
- * success so Pest can parse stdout without stripping.
- *
- * Why this exists: at TIA record time we need to know which Inertia
- * page components depend on each shared source file (Button.vue,
- * Layouts/*.vue, etc.) so a later edit to one of those files can
- * invalidate only the tests that rendered an affected page. Vite
- * already knows this via its module graph — we borrow it.
- *
- * Called from `Pest\Plugins\Tia\JsModuleGraph::build()` as:
- *
- *   node bin/pest-tia-vite-deps.mjs <absoluteProjectRoot>
- *
- * Environment:
- *   TIA_VITE_PAGES_DIR  override the `resources/js/Pages` default.
- *   TIA_VITE_TIMEOUT_MS  override the 20s internal watchdog.
- */
-
 import { readdir } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { createRequire } from 'node:module'
@@ -38,11 +11,6 @@ const PROJECT_ROOT = resolve(process.argv[2] ?? process.cwd())
 const PAGES_REL = (process.env.TIA_VITE_PAGES_DIR ?? 'resources/js/Pages').replace(/\\/g, '/')
 const TIMEOUT_MS = Number.parseInt(process.env.TIA_VITE_TIMEOUT_MS ?? '20000', 10)
 
-// Resolve Vite from the project's own `node_modules`, not from this
-// helper's location (which lives under `vendor/pestphp/pest/bin/` and
-// has no `node_modules`). `createRequire` anchored at the project
-// root walks up from there, matching the resolution behaviour any
-// project-local script would see.
 async function loadVite() {
   const projectRequire = createRequire(join(PROJECT_ROOT, 'package.json'))
   const vitePath = projectRequire.resolve('vite')
@@ -84,9 +52,6 @@ async function main() {
     return
   }
 
-  // Boot Vite in middleware mode (no port binding, no HMR server).
-  // We only need the module graph; transformRequest per page warms
-  // it without running a bundle.
   const server = await createServer({
     configFile: undefined, // auto-detect vite.config.*
     root: PROJECT_ROOT,
@@ -101,12 +66,10 @@ async function main() {
     optimizeDeps: { disabled: true },
   })
 
-  // Watchdog — don't let a pathological config hang the record run.
   const killer = setTimeout(() => {
     server.close().catch(() => {}).finally(() => process.exit(2))
   }, TIMEOUT_MS)
 
-  // Reverse map: depSourcePath → Set<component name>.
   const reverse = new Map()
 
   const pageComponentCache = new Map()
@@ -125,15 +88,12 @@ async function main() {
       try {
         await server.transformRequest(pageUrl, { ssr: false })
       } catch {
-        // Transform errors (missing deps, syntax issues) shouldn't
-        // poison the whole graph — skip this page and continue.
         continue
       }
 
       const pageModule = await server.moduleGraph.getModuleByUrl(pageUrl, false)
       if (!pageModule) continue
 
-      // BFS over importedModules, scoped to files inside the project.
       const visited = new Set()
       const queue = [pageModule]
       while (queue.length) {
@@ -143,8 +103,6 @@ async function main() {
           if (!id || visited.has(id)) continue
           visited.add(id)
 
-          // Skip files outside the project root (node_modules, etc.)
-          // and virtual modules (`\0`-prefixed ids from plugins).
           if (id.startsWith('\0')) continue
           if (!id.startsWith(PROJECT_ROOT)) continue
 
@@ -172,8 +130,7 @@ async function main() {
 }
 
 try {
-  // Node 20 dynamic-import path — some environments are pickier than others.
-  void pathToFileURL // retained to silence tree-shakers referencing the import
+  void pathToFileURL
   await main()
 } catch (err) {
   process.stderr.write(String(err?.stack ?? err ?? 'unknown error'))
