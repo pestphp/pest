@@ -30,7 +30,6 @@ use Pest\TestSuite;
 use PHPUnit\Framework\TestStatus\TestStatus;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
-use Throwable;
 
 /**
  * @internal
@@ -108,17 +107,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     /** @var array{structural: array<string, mixed>, environmental: array<string, mixed>}|null */
     private ?array $startFingerprint = null;
 
-    private function workerEdgesKey(string $token): string
-    {
-        return self::KEY_WORKER_EDGES_PREFIX.$token.'.json';
-    }
-
-    private function workerResultsKey(string $token): string
-    {
-        return self::KEY_WORKER_RESULTS_PREFIX.$token.'.json';
-    }
-
-    private bool $piggybackCoverage = false;
+private bool $piggybackCoverage = false;
 
     private bool $recordingActive = false;
 
@@ -993,7 +982,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return;
         }
 
-        $this->state->write($this->workerEdgesKey($this->workerToken()), $json);
+        $this->state->write(self::KEY_WORKER_EDGES_PREFIX.$this->workerToken().'.json', $json);
     }
 
     /**
@@ -1055,7 +1044,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return;
         }
 
-        $this->state->write($this->workerResultsKey($this->workerToken()), $json);
+        $this->state->write(self::KEY_WORKER_RESULTS_PREFIX.$this->workerToken().'.json', $json);
     }
 
     /**
@@ -1386,12 +1375,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
     private function coverageReportActive(): bool
     {
-        try {
-            /** @var Coverage $coverage */
-            $coverage = Container::getInstance()->get(Coverage::class);
-        } catch (Throwable) {
-            return false;
-        }
+        $coverage = Container::getInstance()->get(Coverage::class);
+        assert($coverage instanceof Coverage);
 
         return $coverage->coverage === true;
     }
