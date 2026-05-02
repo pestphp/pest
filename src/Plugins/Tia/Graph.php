@@ -516,13 +516,13 @@ final class Graph
     /**
      * @return array<int, string>
      */
-    public function failedOrErroredTestFiles(string $branch, string $fallbackBranch = 'main'): array
+    public function testFilesToRerun(string $branch, string $fallbackBranch = 'main'): array
     {
         $baseline = $this->baselineFor($branch, $fallbackBranch);
         $files = [];
 
         foreach ($baseline['results'] as $result) {
-            if ($result['status'] !== 7 && $result['status'] !== 8) {
+            if (! self::shouldRerun($result['status'])) {
                 continue;
             }
 
@@ -544,12 +544,12 @@ final class Graph
         return array_keys($files);
     }
 
-    public function hasUnlocatedFailuresOrErrors(string $branch, string $fallbackBranch = 'main'): bool
+    public function hasUnlocatedTestsToRerun(string $branch, string $fallbackBranch = 'main'): bool
     {
         $baseline = $this->baselineFor($branch, $fallbackBranch);
 
         foreach ($baseline['results'] as $result) {
-            if ($result['status'] !== 7 && $result['status'] !== 8) {
+            if (! self::shouldRerun($result['status'])) {
                 continue;
             }
 
@@ -561,6 +561,16 @@ final class Graph
         }
 
         return false;
+    }
+
+    private static function shouldRerun(int $status): bool
+    {
+        $testStatus = TestStatus::from($status);
+
+        return $testStatus->isFailure()
+            || $testStatus->isError()
+            || $testStatus->isIncomplete()
+            || $testStatus->isRisky();
     }
 
     /**

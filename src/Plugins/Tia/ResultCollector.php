@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
+use PHPUnit\Framework\TestStatus\TestStatus;
+
 /**
  * @internal
  */
@@ -33,7 +35,7 @@ final class ResultCollector
             return;
         }
 
-        $this->record(0, '');
+        $this->record(TestStatus::success());
     }
 
     public function testFailed(string $message): void
@@ -42,7 +44,7 @@ final class ResultCollector
             return;
         }
 
-        $this->record(7, $message);
+        $this->record(TestStatus::failure($message));
     }
 
     public function testErrored(string $message): void
@@ -51,7 +53,7 @@ final class ResultCollector
             return;
         }
 
-        $this->record(8, $message);
+        $this->record(TestStatus::error($message));
     }
 
     public function testSkipped(string $message): void
@@ -60,7 +62,7 @@ final class ResultCollector
             return;
         }
 
-        $this->record(1, $message);
+        $this->record(TestStatus::skipped($message));
     }
 
     public function testIncomplete(string $message): void
@@ -69,7 +71,7 @@ final class ResultCollector
             return;
         }
 
-        $this->record(2, $message);
+        $this->record(TestStatus::incomplete($message));
     }
 
     public function testRisky(string $message): void
@@ -78,7 +80,7 @@ final class ResultCollector
             return;
         }
 
-        $this->record(5, $message);
+        $this->record(TestStatus::risky($message));
     }
 
     /**
@@ -121,7 +123,7 @@ final class ResultCollector
         $this->startTime = null;
     }
 
-    private function record(int $status, string $message): void
+    private function record(TestStatus $status): void
     {
         if ($this->currentTestId === null) {
             return;
@@ -134,8 +136,8 @@ final class ResultCollector
         $existing = $this->results[$this->currentTestId] ?? null;
 
         $this->results[$this->currentTestId] = [
-            'status' => $status,
-            'message' => $message,
+            'status' => $status->asInt(),
+            'message' => $status->message(),
             'time' => $time,
             'assertions' => $existing['assertions'] ?? 0,
         ];

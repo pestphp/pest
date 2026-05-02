@@ -119,8 +119,8 @@ final class Recorder
             $this->perTestUsesDatabase[$file] = true;
         }
 
-        $this->linkAncestorFiles($className);
-        $this->linkImportedFiles($file);
+        // $this->linkAncestorFiles($className);
+        // $this->linkImportedFiles($file);
 
         if ($this->driver === 'pcov') {
             \pcov\clear();
@@ -175,7 +175,7 @@ final class Recorder
             $this->perTestFiles[$this->currentTestFile][$sourceFile] = true;
         }
 
-        $this->linkSourceDependencies($coveredFiles);
+        // $this->linkSourceDependencies($coveredFiles);
 
         $this->currentTestFile = null;
         $this->includedFilesAtTestStart = [];

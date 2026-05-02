@@ -787,18 +787,18 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         $affectedFromChanges = $changed === [] ? [] : $graph->affected($changed);
-        $failedFromCache = [];
+        $rerunFromCache = [];
 
         if ($this->filteredMode) {
-            $failedFromCache = $graph->failedOrErroredTestFiles($this->branch);
+            $rerunFromCache = $graph->testFilesToRerun($this->branch);
         }
 
         $affected = array_values(array_unique([
             ...$affectedFromChanges,
-            ...$failedFromCache,
+            ...$rerunFromCache,
         ]));
 
-        $this->reportAffectedSummary($changed, $affectedFromChanges, $failedFromCache, $affected);
+        $this->reportAffectedSummary($changed, $affectedFromChanges, $rerunFromCache, $affected);
 
         $affectedSet = array_fill_keys($affected, true);
         $canRefreshReplayEdges = $affected !== [] && $coverageAvailable;
@@ -852,10 +852,10 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     /**
      * @param  array<int, string>  $changedFiles
      * @param  array<int, string>  $affectedFromChanges
-     * @param  array<int, string>  $failedFromCache
+     * @param  array<int, string>  $rerunFromCache
      * @param  array<int, string>  $affected
      */
-    private function reportAffectedSummary(array $changedFiles, array $affectedFromChanges, array $failedFromCache, array $affected): void
+    private function reportAffectedSummary(array $changedFiles, array $affectedFromChanges, array $rerunFromCache, array $affected): void
     {
         $this->output->writeln('');
 
@@ -865,12 +865,12 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return;
         }
 
-        $newFailures = $failedFromCache === []
+        $newReruns = $rerunFromCache === []
             ? 0
-            : count(array_diff($failedFromCache, $affectedFromChanges));
+            : count(array_diff($rerunFromCache, $affectedFromChanges));
 
         $reasons = [];
-        $singleReason = (int) ($affectedFromChanges !== []) + (int) ($newFailures > 0) === 1;
+        $singleReason = (int) ($affectedFromChanges !== []) + (int) ($newReruns > 0) === 1;
 
         if ($affectedFromChanges !== []) {
             $reasons[] = $singleReason
@@ -887,17 +887,17 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                 );
         }
 
-        if ($newFailures > 0) {
+        if ($newReruns > 0) {
             $reasons[] = $singleReason
                 ? sprintf(
-                    'from %d previous failure%s',
-                    $newFailures,
-                    $newFailures === 1 ? '' : 's',
+                    'from %d previously unsuccessful test%s',
+                    $newReruns,
+                    $newReruns === 1 ? '' : 's',
                 )
                 : sprintf(
-                    '%d from previous failure%s',
-                    $newFailures,
-                    $newFailures === 1 ? '' : 's',
+                    '%d from previously unsuccessful test%s',
+                    $newReruns,
+                    $newReruns === 1 ? '' : 's',
                 );
         }
 

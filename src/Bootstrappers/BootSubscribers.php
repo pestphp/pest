@@ -25,6 +25,7 @@ final readonly class BootSubscribers implements Bootstrapper
         Subscribers\EnsureIgnorableTestCasesAreIgnored::class,
         Subscribers\EnsureKernelDumpIsFlushed::class,
         Subscribers\EnsureTeamCityEnabled::class,
+        Subscribers\EnsureTiaIsRunningPestTestsOnly::class,
         Subscribers\EnsureTiaCoverageIsRecorded::class,
         Subscribers\EnsureTiaCoverageIsFlushed::class,
         Subscribers\EnsureTiaResultsAreCollected::class,
