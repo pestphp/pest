@@ -25,29 +25,10 @@ final readonly class Browser implements WatchDefault
         $browserTargets = self::detectBrowserTestTargets($projectRoot, $testPath);
 
         $globs = [
-            'resources/js/**/*.js',
-            'resources/js/**/*.ts',
-            'resources/js/**/*.tsx',
-            'resources/js/**/*.jsx',
-            'resources/js/**/*.vue',
-            'resources/js/**/*.svelte',
-            'resources/css/**/*.css',
-            'resources/css/**/*.scss',
-            'resources/css/**/*.less',
-            'public/build/**/*.js',
-            'public/build/**/*.css',
-            'public/**/*.js',
-            'public/**/*.css',
-            'public/**/*.svg',
-            'public/**/*.png',
-            'public/**/*.jpg',
-            'public/**/*.jpeg',
-            'public/**/*.webp',
-            'public/**/*.ico',
-            'public/**/*.txt',
-            'public/**/*.json',
-            'public/**/*.xml',
-            'public/hot',
+            'resources/js/** !*.php',
+            'resources/css/** !*.php',
+            'public/hot !*.php',
+            'public/** !*.php',
         ];
 
         $patterns = [];
