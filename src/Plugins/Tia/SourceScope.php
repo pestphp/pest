@@ -68,6 +68,31 @@ final readonly class SourceScope
         return new self($includes, $excludes);
     }
 
+    /**
+     * @return list<string>  Absolute, normalised paths to testsuite directories and files declared in phpunit.xml.
+     */
+    public static function testPaths(string $projectRoot): array
+    {
+        $configPath = self::configPath($projectRoot);
+
+        if ($configPath === null) {
+            return [];
+        }
+
+        $xml = @simplexml_load_file($configPath);
+
+        if ($xml === false) {
+            return [];
+        }
+
+        $configDir = dirname($configPath);
+
+        return array_values(array_unique([
+            ...self::extractDirectories($xml, 'testsuites/testsuite/directory', $configDir),
+            ...self::extractDirectories($xml, 'testsuites/testsuite/file', $configDir),
+        ]));
+    }
+
     public function contains(string $absoluteFile): bool
     {
         $real = @realpath($absoluteFile);

@@ -1380,25 +1380,70 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      */
     private function hasExplicitPathArgument(array $arguments): bool
     {
-        $projectRoot = TestSuite::getInstance()->rootPath;
+        static $valueTakingFlags = [
+            '-c', '--configuration', '--bootstrap', '--cache-directory',
+            '--filter', '--group', '--exclude-group', '--covers', '--uses',
+            '--test-suffix', '--testsuite', '--exclude-testsuite',
+            '--printer', '--columns', '--colors', '--order-by', '--random-order-seed',
+            '--include-path', '--whitelist',
+            '--log-junit', '--log-teamcity', '--testdox-html', '--testdox-text',
+            '--coverage-clover', '--coverage-cobertura', '--coverage-crap4j',
+            '--coverage-html', '--coverage-php', '--coverage-text', '--coverage-xml',
+            '--coverage-filter', '--path-coverage',
+            '--repeat', '--retry-times', '--memory-limit', '--seed',
+            '--compact', '--ci-build-id', '--min',
+        ];
 
-        foreach ($arguments as $arg) {
+        $projectRoot = TestSuite::getInstance()->rootPath;
+        $testPaths = \Pest\Plugins\Tia\SourceScope::testPaths($projectRoot);
+
+        if ($testPaths === []) {
+            return false;
+        }
+
+        foreach ($arguments as $index => $arg) {
             if ($arg === '' || str_starts_with($arg, '-')) {
                 continue;
             }
 
-            if (is_file($arg) || is_dir($arg)) {
-                return true;
+            if ($index > 0) {
+                $previous = $arguments[$index - 1] ?? '';
+                if (in_array($previous, $valueTakingFlags, true)) {
+                    continue;
+                }
             }
 
-            $absolute = rtrim($projectRoot, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.ltrim($arg, DIRECTORY_SEPARATOR);
+            $candidate = $this->resolveArgumentPath($arg, $projectRoot);
 
-            if (is_file($absolute) || is_dir($absolute)) {
-                return true;
+            if ($candidate === null) {
+                continue;
+            }
+
+            foreach ($testPaths as $testPath) {
+                if ($candidate === $testPath || str_starts_with($candidate, $testPath.DIRECTORY_SEPARATOR)) {
+                    return true;
+                }
             }
         }
 
         return false;
+    }
+
+    private function resolveArgumentPath(string $arg, string $projectRoot): ?string
+    {
+        $candidates = [$arg, rtrim($projectRoot, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.ltrim($arg, DIRECTORY_SEPARATOR)];
+
+        foreach ($candidates as $candidate) {
+            if (! is_file($candidate) && ! is_dir($candidate)) {
+                continue;
+            }
+
+            $real = @realpath($candidate);
+
+            return rtrim($real === false ? $candidate : $real, '/\\');
+        }
+
+        return null;
     }
 
     /**
