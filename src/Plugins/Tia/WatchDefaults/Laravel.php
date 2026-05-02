@@ -28,8 +28,8 @@ final readonly class Laravel implements WatchDefault
 
             'resources/views/**' => [$testPath],
 
-            'lang/**/*.json' => [$testPath],
-            'resources/lang/**/*.json' => [$testPath],
+            'lang/**' => [$testPath],
+            'resources/lang/**' => [$testPath],
 
             'vite.config.* !*.php' => [$testPath],
             'webpack.mix.* !*.php' => [$testPath],

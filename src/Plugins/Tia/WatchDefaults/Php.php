@@ -25,7 +25,7 @@ final readonly class Php implements WatchDefault
             'docker-compose.yml' => [$testPath],
             'docker-compose.yaml' => [$testPath],
 
-            'phpunit.xml.*' => [$testPath],
+            'phpunit.xml*' => [$testPath],
 
             $testPath.'/Fixtures/**/*' => [$testPath],
             $testPath.'/**/Fixtures/**/*' => [$testPath],
