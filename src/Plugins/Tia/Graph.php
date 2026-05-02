@@ -1159,9 +1159,8 @@ final class Graph
         );
 
         foreach ($iterator as $file) {
-            if (! $file instanceof \SplFileInfo) {
-                continue;
-            }
+            assert($file instanceof \SplFileInfo);
+
             if (! $file->isFile()) {
                 continue;
             }
