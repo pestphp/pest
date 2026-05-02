@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
+use Pest\Exceptions\MissingDependency;
 use Symfony\Component\Process\Process;
 
 /**
@@ -222,7 +223,7 @@ final readonly class ChangedFiles
         $process->run();
 
         if (! $process->isSuccessful()) {
-            return null;
+            throw new MissingDependency('Tia mode', 'git');
         }
 
         $branch = trim($process->getOutput());
@@ -261,7 +262,7 @@ final readonly class ChangedFiles
         $process->run();
 
         if (! $process->isSuccessful()) {
-            return [];
+            throw new MissingDependency('Tia mode', 'git');
         }
 
         return $this->splitLines($process->getOutput());
@@ -279,7 +280,7 @@ final readonly class ChangedFiles
         $process->run();
 
         if (! $process->isSuccessful()) {
-            return [];
+            throw new MissingDependency('Tia mode', 'git');
         }
 
         $output = $process->getOutput();
@@ -329,7 +330,7 @@ final readonly class ChangedFiles
         $process->run();
 
         if (! $process->isSuccessful()) {
-            return null;
+            throw new MissingDependency('Tia mode', 'git');
         }
 
         $sha = trim($process->getOutput());
