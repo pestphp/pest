@@ -32,6 +32,29 @@ final readonly class BaselineSync
 
     private const int FETCH_COOLDOWN_SECONDS = 86400;
 
+    private const array DIAGNOSES = [
+        'network' => [
+            'pattern' => '/could not resolve host|connection refused|connection reset|temporary failure in name resolution|network is unreachable|no route to host|i\/o timeout|tls handshake|getaddrinfo/i',
+            'message' => 'network error (offline or DNS unreachable). Try again when connected.',
+        ],
+        'gh-auth' => [
+            'pattern' => '/authentication failed|not logged in|requires authentication|bad credentials|401/i',
+            'message' => 'authentication failed — run `gh auth login` and retry.',
+        ],
+        'rate-limit' => [
+            'pattern' => '/rate limit|too many requests|secondary rate limit/i',
+            'message' => 'GitHub API rate limit hit — try again later.',
+        ],
+        'not-found' => [
+            'pattern' => '/404|not found|repository not found/i',
+            'message' => 'workflow or artifact not found in repo.',
+        ],
+        'forbidden' => [
+            'pattern' => '/403|forbidden|access denied/i',
+            'message' => 'access denied — check that your `gh` token has repo + actions read scope.',
+        ],
+    ];
+
     public function __construct(
         private State $state,
         private OutputInterface $output,
@@ -64,8 +87,9 @@ final readonly class BaselineSync
             return false;
         }
 
-        $failureKind = null;
-        $payload = $this->download($repo, $projectRoot, $failureKind, $hasAnchor);
+        $result = $this->download($repo, $projectRoot, $hasAnchor);
+        $payload = $result['payload'];
+        $failureKind = $result['failureKind'];
 
         if ($payload === null) {
             if ($failureKind === 'no-runs' || $failureKind === null) {
@@ -162,7 +186,7 @@ final readonly class BaselineSync
         $this->output->writeln(['', ...$indentedYaml, '']);
 
         $this->renderChild(sprintf('Commit, push, then run once: gh workflow run tia-baseline.yml -R %s', $repo));
-        $this->renderChild('Details: https://pestphp.com/docs/tia/ci');
+        $this->renderChild('Details: https://pestphp.com/docs/tia');
     }
 
     private function isCi(): bool
@@ -281,41 +305,27 @@ YAML;
     }
 
     /**
-     * @param-out string|null $failureKind
-     *
-     * @return array{graph: string, coverage: ?string, sizeOnDisk: int}|null
+     * @return array{payload: array{graph: string, coverage: ?string, sizeOnDisk: int}|null, failureKind: ?string}
      */
-    private function download(string $repo, string $projectRoot, ?string &$failureKind = null, bool $hasAnchor = false): ?array
+    private function download(string $repo, string $projectRoot, bool $hasAnchor = false): array
     {
-        $failureKind = null;
-
         $this->validateGhDependencies($hasAnchor);
 
         [$runId, $listError] = $this->latestSuccessfulRunIdWithError($repo);
 
         if ($listError !== null) {
-            $failureKind = $listError['kind'];
-
-            if (in_array($failureKind, ['forbidden', 'not-found'], true)) {
-                Panic::with(new BaselineFetchFailed(
-                    sprintf('Failed to query baseline runs — %s', $listError['message']),
-                    'Verify workflow tia-baseline.yml, artifact pest-tia-baseline, and gh token scope.',
-                    $hasAnchor,
-                ));
-            }
+            $this->panicOnClassifiedError($listError, 'Failed to query baseline runs', $hasAnchor);
 
             $this->renderBadge('WARN', sprintf(
                 'Failed to query baseline runs — %s',
                 $listError['message'],
             ));
 
-            return null;
+            return ['payload' => null, 'failureKind' => $listError['kind']];
         }
 
         if ($runId === null) {
-            $failureKind = 'no-runs';
-
-            return null;
+            return ['payload' => null, 'failureKind' => 'no-runs'];
         }
 
         $runCacheDir = $this->downloadCacheDir($projectRoot).DIRECTORY_SEPARATOR.$this->safeRunId($runId);
@@ -329,22 +339,40 @@ YAML;
                 $runId,
             ));
 
-            return $this->readArtifact($runCacheDir);
+            return ['payload' => $this->readArtifact($runCacheDir), 'failureKind' => null];
         }
 
         if (! @mkdir($runCacheDir, 0755, true) && ! is_dir($runCacheDir)) {
-            return null;
+            return ['payload' => null, 'failureKind' => null];
         }
 
-        if (! $this->downloadArtifact($repo, $runId, $runCacheDir, $hasAnchor, $failureKind)) {
-            return null;
+        $download = $this->downloadArtifact($repo, $runId, $runCacheDir, $hasAnchor);
+
+        if (! $download['success']) {
+            return ['payload' => null, 'failureKind' => $download['failureKind']];
         }
 
         $payload = $this->validateDownloadedArtifact($runCacheDir, $hasAnchor);
 
         $this->trimDownloadCache($projectRoot);
 
-        return $payload;
+        return ['payload' => $payload, 'failureKind' => null];
+    }
+
+    /**
+     * @param  array{kind: string, message: string}  $diagnosis
+     */
+    private function panicOnClassifiedError(array $diagnosis, string $contextPrefix, bool $hasAnchor): void
+    {
+        if (! in_array($diagnosis['kind'], ['forbidden', 'not-found'], true)) {
+            return;
+        }
+
+        Panic::with(new BaselineFetchFailed(
+            sprintf('%s — %s', $contextPrefix, $diagnosis['message']),
+            'Verify workflow tia-baseline.yml, artifact pest-tia-baseline, and gh token scope.',
+            $hasAnchor,
+        ));
     }
 
     private function validateGhDependencies(bool $hasAnchor): void
@@ -367,9 +395,9 @@ YAML;
     }
 
     /**
-     * @param-out string|null $failureKind
+     * @return array{success: bool, failureKind: ?string}
      */
-    private function downloadArtifact(string $repo, string $runId, string $runCacheDir, bool $hasAnchor, ?string &$failureKind): bool
+    private function downloadArtifact(string $repo, string $runId, string $runCacheDir, bool $hasAnchor): array
     {
         $artifactSize = $this->artifactSize($repo, $runId);
 
@@ -404,28 +432,21 @@ YAML;
         $this->clearProgressLine();
 
         if ($process->isSuccessful()) {
-            return true;
+            return ['success' => true, 'failureKind' => null];
         }
 
         $this->cleanup($runCacheDir);
 
         $diagnosis = $this->classifyGhError($process->getErrorOutput().$process->getOutput());
-        $failureKind = $diagnosis['kind'];
 
-        if (in_array($failureKind, ['forbidden', 'not-found'], true)) {
-            Panic::with(new BaselineFetchFailed(
-                sprintf('Baseline download failed — %s', $diagnosis['message']),
-                'Verify workflow tia-baseline.yml, artifact pest-tia-baseline, and gh token scope.',
-                $hasAnchor,
-            ));
-        }
+        $this->panicOnClassifiedError($diagnosis, 'Baseline download failed', $hasAnchor);
 
         $this->renderBadge('WARN', sprintf(
             'Baseline download failed — %s',
             $diagnosis['message'],
         ));
 
-        return false;
+        return ['success' => false, 'failureKind' => $diagnosis['kind']];
     }
 
     /**
@@ -575,12 +596,10 @@ YAML;
         $candidates = [];
 
         foreach ($entries as $entry) {
-            if ($entry === '.') {
+            if (in_array($entry, ['.', '..'], true)) {
                 continue;
             }
-            if ($entry === '..') {
-                continue;
-            }
+
             $path = $root.DIRECTORY_SEPARATOR.$entry;
 
             if (! is_dir($path)) {
@@ -651,30 +670,7 @@ YAML;
             return ['kind' => 'unknown', 'message' => 'unknown error'];
         }
 
-        $diagnoses = [
-            'network' => [
-                'pattern' => '/could not resolve host|connection refused|connection reset|temporary failure in name resolution|network is unreachable|no route to host|i\/o timeout|tls handshake|getaddrinfo/i',
-                'message' => 'network error (offline or DNS unreachable). Try again when connected.',
-            ],
-            'gh-auth' => [
-                'pattern' => '/authentication failed|not logged in|requires authentication|bad credentials|401/i',
-                'message' => 'authentication failed — run `gh auth login` and retry.',
-            ],
-            'rate-limit' => [
-                'pattern' => '/rate limit|too many requests|secondary rate limit/i',
-                'message' => 'GitHub API rate limit hit — try again later.',
-            ],
-            'not-found' => [
-                'pattern' => '/404|not found|repository not found/i',
-                'message' => 'workflow or artifact not found in repo.',
-            ],
-            'forbidden' => [
-                'pattern' => '/403|forbidden|access denied/i',
-                'message' => 'access denied — check that your `gh` token has repo + actions read scope.',
-            ],
-        ];
-
-        foreach ($diagnoses as $kind => $diagnosis) {
+        foreach (self::DIAGNOSES as $kind => $diagnosis) {
             if (preg_match($diagnosis['pattern'], $output) === 1) {
                 return ['kind' => $kind, 'message' => $diagnosis['message']];
             }
@@ -685,17 +681,10 @@ YAML;
 
     private function commandExists(string $cmd): bool
     {
-        $probe = new Process(['command', '-v', $cmd]);
-        $probe->run();
+        $process = new Process(['which', $cmd]);
+        $process->run();
 
-        if ($probe->isSuccessful()) {
-            return true;
-        }
-
-        $which = new Process(['which', $cmd]);
-        $which->run();
-
-        return $which->isSuccessful();
+        return $process->isSuccessful();
     }
 
     private function cleanup(string $dir): void
@@ -704,13 +693,17 @@ YAML;
             return;
         }
 
-        $entries = glob($dir.DIRECTORY_SEPARATOR.'*');
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST,
+        );
 
-        if ($entries !== false) {
-            foreach ($entries as $entry) {
-                if (is_file($entry)) {
-                    @unlink($entry);
-                }
+        /** @var \SplFileInfo $entry */
+        foreach ($iterator as $entry) {
+            if ($entry->isDir()) {
+                @rmdir($entry->getPathname());
+            } else {
+                @unlink($entry->getPathname());
             }
         }
 

@@ -1363,21 +1363,15 @@ private bool $piggybackCoverage = false;
             return null;
         }
 
-        $reflection = new \ReflectionClass($class);
+        assert(property_exists($class, '__filename') && is_string($class::$__filename));
 
-        if ($reflection->hasProperty('__filename')) {
-            try {
-                $filename = $reflection->getStaticPropertyValue('__filename');
-            } catch (\ReflectionException) {
-                $filename = null;
-            }
+        $filename = $class::$__filename;
 
-            if (is_string($filename) && $filename !== '' && ! str_contains($filename, "eval()'d")) {
-                return $filename;
-            }
+        if ($filename !== '' && ! str_contains($filename, "eval()'d")) {
+            return $filename;
         }
 
-        $current = $reflection;
+        $current = new \ReflectionClass($class);
 
         while ($current !== false) {
             $file = $current->getFileName();

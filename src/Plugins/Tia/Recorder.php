@@ -296,23 +296,9 @@ final class Recorder
             return null;
         }
 
-        $reflection = new ReflectionClass($className);
+        assert(property_exists($className, '__filename') && is_string($className::$__filename));
 
-        if ($reflection->hasProperty('__filename')) {
-            $property = $reflection->getProperty('__filename');
-
-            if ($property->isStatic()) {
-                $value = $property->getValue();
-
-                if (is_string($value)) {
-                    return $value;
-                }
-            }
-        }
-
-        $file = $reflection->getFileName();
-
-        return is_string($file) ? $file : null;
+        return $className::$__filename;
     }
 
     /**
