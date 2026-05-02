@@ -52,6 +52,9 @@ final class Graph
     /** @var array<string, true>|null */
     private ?array $archTestFiles = null;
 
+    /** @var array<string, string|false> */
+    private array $realpathCache = [];
+
     public function __construct(string $projectRoot)
     {
         $real = @realpath($projectRoot);
@@ -1331,7 +1334,11 @@ final class Graph
         $isAbsolute = str_starts_with($path, DIRECTORY_SEPARATOR)
             || (strlen($path) >= 2 && $path[1] === ':');
         if ($isAbsolute) {
-            $real = @realpath($path);
+            if (array_key_exists($path, $this->realpathCache)) {
+                $real = $this->realpathCache[$path];
+            } else {
+                $real = $this->realpathCache[$path] = @realpath($path);
+            }
 
             if ($real === false) {
                 $real = $path;

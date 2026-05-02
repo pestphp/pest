@@ -9,9 +9,11 @@ use Pest\Plugins\Tia\Contracts\State;
 /**
  * @internal
  */
-final readonly class FileState implements State
+final class FileState implements State
 {
-    private string $rootDir;
+    private readonly string $rootDir;
+
+    private ?string $resolvedRoot = null;
 
     public function __construct(string $rootDir)
     {
@@ -100,9 +102,17 @@ final readonly class FileState implements State
 
     private function resolvedRoot(): ?string
     {
+        if ($this->resolvedRoot !== null) {
+            return $this->resolvedRoot;
+        }
+
         $resolved = @realpath($this->rootDir);
 
-        return $resolved === false ? null : $resolved;
+        if ($resolved === false) {
+            return null;
+        }
+
+        return $this->resolvedRoot = $resolved;
     }
 
     private function ensureRoot(): bool
