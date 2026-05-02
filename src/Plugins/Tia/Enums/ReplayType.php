@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pest\Plugins\Tia;
+namespace Pest\Plugins\Tia\Enums;
 
 use PHPUnit\Framework\TestStatus\TestStatus;
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
-use Pest\Plugins\Tia\WatchDefaults\WatchDefault;
+use Pest\Plugins\Tia\Contracts\WatchDefault;
 use Pest\TestSuite;
 
 /**

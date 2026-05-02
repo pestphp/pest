@@ -7,6 +7,7 @@ namespace Pest\Plugins\Tia\WatchDefaults;
 use Composer\InstalledVersions;
 use Pest\Browser\Support\BrowserTestIdentifier;
 use Pest\Factories\TestCaseFactory;
+use Pest\Plugins\Tia\Contracts\WatchDefault;
 use Pest\TestSuite;
 
 /**

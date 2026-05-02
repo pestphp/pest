@@ -852,7 +852,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $this->output->writeln('');
 
         if ($affected === []) {
-            $this->renderChild('TIA mode enabled.');
+            $this->renderChild('Experimental TIA mode enabled.');
 
             return;
         }

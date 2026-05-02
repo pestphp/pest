@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pest\Plugins\Tia\WatchDefaults;
+namespace Pest\Plugins\Tia\Contracts;
 
 /**
  * @internal

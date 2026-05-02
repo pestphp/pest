@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia\WatchDefaults;
 
 use Composer\InstalledVersions;
+use Pest\Plugins\Tia\Contracts\WatchDefault;
 
 /**
  * @internal
