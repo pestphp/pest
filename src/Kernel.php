@@ -27,8 +27,13 @@ use Whoops\Exception\Inspector;
 /**
  * @internal
  */
-final readonly class Kernel
+final class Kernel
 {
+    /**
+     * Either the kernel is terminated or not.
+     */
+    private bool $terminated;
+
     /**
      * The Kernel bootstrappers.
      *
@@ -63,7 +68,7 @@ final readonly class Kernel
         private Application $application,
         private OutputInterface $output,
     ) {
-        //
+        $this->terminated = false;
     }
 
     /**
@@ -125,9 +130,13 @@ final readonly class Kernel
         $configuration = Registry::get();
         $result = Facade::result();
 
-        return CallsAddsOutput::execute(
+        $result = CallsAddsOutput::execute(
             Result::exitCode($configuration, $result),
         );
+
+        $this->terminate();
+
+        return $result;
     }
 
     /**
@@ -135,6 +144,12 @@ final readonly class Kernel
      */
     public function terminate(): void
     {
+        if ($this->terminated) {
+            return;
+        }
+
+        $this->terminated = true;
+
         $preBufferOutput = Container::getInstance()->get(KernelDump::class);
 
         assert($preBufferOutput instanceof KernelDump);
