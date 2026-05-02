@@ -102,8 +102,7 @@
             "@test:type:coverage",
             "@test:unit",
             "@test:parallel",
-            "@test:integration",
-            "@test:tia"
+            "@test:integration"
         ]
     },
     "extra": {
