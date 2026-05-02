@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Pest\Subscribers;
 
-use Pest\Concerns\Testable;
 use Pest\Exceptions\TiaRequiresPestTests;
 use Pest\Panic;
 use Pest\Plugins\Tia\Recorder;
 use PHPUnit\Event\Code\TestMethod;
 use PHPUnit\Event\Test\Prepared;
 use PHPUnit\Event\Test\PreparedSubscriber;
-use ReflectionClass;
 
 /**
  * @internal
@@ -38,30 +36,10 @@ final readonly class EnsureTiaIsRunningPestTestsOnly implements PreparedSubscrib
             return;
         }
 
-        if ($this->usesTestableTrait($className)) {
+        if (method_exists($className, '__initializeTestCase')) {
             return;
         }
 
         Panic::with(new TiaRequiresPestTests($className, $test->file()));
-    }
-
-    /**
-     * @param  class-string  $className
-     */
-    private function usesTestableTrait(string $className): bool
-    {
-        $reflection = new ReflectionClass($className);
-
-        do {
-            foreach ($reflection->getTraitNames() as $trait) {
-                if ($trait === Testable::class) {
-                    return true;
-                }
-            }
-
-            $reflection = $reflection->getParentClass();
-        } while ($reflection !== false);
-
-        return false;
     }
 }
