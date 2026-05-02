@@ -630,10 +630,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             $this->state->write(self::KEY_COVERAGE_MARKER, '');
         }
 
-        if (! Parallel::isWorker() && JsModuleGraph::isApplicable($projectRoot)) {
-            JsModuleGraph::warmInBackground($projectRoot);
-        }
-
         if ($this->piggybackCoverage && ! $this->state->exists(self::KEY_COVERAGE_CACHE)) {
             return $this->enterRecordMode($arguments);
         }

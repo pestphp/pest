@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
-use Pest\Support\Cpu;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 
@@ -16,49 +15,6 @@ final class JsModuleGraph
     private const int NODE_TIMEOUT_SECONDS = 180;
 
     private const string CACHE_FILE = 'js-module-graph.cache.json';
-
-    private static ?Process $warmer = null;
-
-    private static ?string $warmerFingerprint = null;
-
-    private static bool $warmerCacheHit = false;
-
-    private static ?string $warmerProjectRoot = null;
-
-    public static function warmInBackground(string $projectRoot): void
-    {
-        if (self::$warmer instanceof Process || self::$warmerCacheHit) {
-            return;
-        }
-
-        if (! self::isApplicable($projectRoot)) {
-            return;
-        }
-
-        $fingerprint = self::fingerprint($projectRoot);
-
-        if ($fingerprint !== null && self::readCache($projectRoot, $fingerprint) !== null) {
-            self::$warmerCacheHit = true;
-            self::$warmerFingerprint = $fingerprint;
-            self::$warmerProjectRoot = $projectRoot;
-
-            return;
-        }
-
-        $process = self::buildNodeProcess($projectRoot);
-
-        if (! $process instanceof Process) {
-            return;
-        }
-
-        $process->start();
-
-        self::$warmer = $process;
-        self::$warmerFingerprint = $fingerprint;
-        self::$warmerProjectRoot = $projectRoot;
-
-        register_shutdown_function(self::reapWarmer(...));
-    }
 
     /**
      * @return array<string, list<string>>
@@ -104,33 +60,17 @@ final class JsModuleGraph
             $cached = self::readCache($projectRoot, $fingerprint);
 
             if ($cached !== null) {
-                self::reapWarmer();
-
                 return $cached;
             }
         }
 
-        if (self::$warmerCacheHit && $fingerprint !== null) {
-            $cached = self::readCache($projectRoot, $fingerprint);
-            self::$warmerCacheHit = false;
-            self::$warmerFingerprint = null;
-            self::$warmerProjectRoot = null;
-
-            if ($cached !== null) {
-                return $cached;
-            }
-        }
-
-        $process = self::$warmer;
-        self::$warmer = null;
-        self::$warmerFingerprint = null;
-        self::$warmerProjectRoot = null;
+        $process = self::buildNodeProcess($projectRoot);
 
         if (! $process instanceof Process) {
             return null;
         }
 
-        $process->wait();
+        $process->run();
 
         if (! $process->isSuccessful()) {
             return null;
@@ -167,16 +107,7 @@ final class JsModuleGraph
             return null;
         }
 
-        $env = ['TIA_VITE_CONCURRENCY' => (string) max(4, min(32, Cpu::cores() * 2))];
-        foreach (['resources/js/Pages', 'resources/js/pages'] as $candidate) {
-            if (is_dir($projectRoot.DIRECTORY_SEPARATOR.$candidate)) {
-                $env['TIA_VITE_PAGES_DIR'] = $candidate;
-
-                break;
-            }
-        }
-
-        $process = new Process([$nodeBinary, $helperPath, $projectRoot], $projectRoot, $env);
+        $process = new Process([$nodeBinary, $helperPath, $projectRoot], $projectRoot);
         $process->setTimeout(self::NODE_TIMEOUT_SECONDS);
 
         return $process;
@@ -220,27 +151,6 @@ final class JsModuleGraph
         ksort($out);
 
         return $out;
-    }
-
-    private static function reapWarmer(): void
-    {
-        $process = self::$warmer;
-        self::$warmer = null;
-        self::$warmerFingerprint = null;
-        self::$warmerProjectRoot = null;
-        self::$warmerCacheHit = false;
-
-        if (! $process instanceof Process) {
-            return;
-        }
-
-        try {
-            if ($process->isRunning()) {
-                $process->stop(0.5);
-            }
-        } catch (\Throwable) {
-            //
-        }
     }
 
     private static function fingerprint(string $projectRoot): ?string
