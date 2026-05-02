@@ -82,11 +82,15 @@ trait Testable
     public bool $__ran = false;
 
     /**
-     * True while this test is being replayed as a cached pass — set in
-     * `setUp()`, checked in `__runTest()` and `tearDown()` to skip the body
-     * and after-each cleanup.
+     * The active replay mode for this test, set in `setUp()` and checked
+     * in `__runTest()` / `tearDown()` to skip the body and after-each.
      */
-    private bool $__replayingPass = false;
+    private Replay $__replay = Replay::No;
+
+    /**
+     * The cached assertion count to replay, captured when entering replay mode.
+     */
+    private int $__replayAssertions = 0;
 
     /**
      * The test's test closure.
@@ -240,8 +244,6 @@ trait Testable
     {
         TestSuite::getInstance()->test = $this;
 
-        $this->__replayingPass = false;
-
         $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
 
         $description = $method->description;
@@ -283,11 +285,10 @@ trait Testable
             assert($status !== null);
 
             match ($replay) {
-                Replay::Pass => $this->__replayPass(),
+                Replay::Pass, Replay::Risky => $this->__beginReplay($replay, $tia),
                 Replay::Skipped => $this->markTestSkipped($status->message()),
                 Replay::Incomplete => $this->markTestIncomplete($status->message()),
                 Replay::Failure => throw new AssertionFailedError($status->message() ?: 'Cached failure'),
-                Replay::No => null,
             };
 
             return;
@@ -313,9 +314,10 @@ trait Testable
         $this->__callClosure($beforeEach, $arguments);
     }
 
-    private function __replayPass(): void
+    private function __beginReplay(Replay $replay, Tia $tia): void
     {
-        $this->__replayingPass = true;
+        $this->__replay = $replay;
+        $this->__replayAssertions = $tia->getAssertionCount($this::class.'::'.$this->name());
         $this->__ran = true;
     }
 
@@ -351,7 +353,7 @@ trait Testable
      */
     protected function tearDown(...$arguments): void
     {
-        if ($this->__replayingPass) {
+        if ($this->__replay !== Replay::No) {
             TestSuite::getInstance()->test = null;
 
             return;
@@ -382,19 +384,12 @@ trait Testable
      */
     private function __runTest(Closure $closure, ...$args): mixed
     {
-        if ($this->__replayingPass) {
-            // Feed the exact assertion count captured during the recorded
-            // run so Pest's "Tests: N passed (M assertions)" banner stays
-            // accurate on replay instead of collapsing to 1-per-test.
-            /** @var Tia $tia */
-            $tia = Container::getInstance()->get(Tia::class);
-            $assertions = $tia->getAssertionCount($this::class.'::'.$this->name());
-
-            if ($assertions === 0) {
+        if ($this->__replay === Replay::Pass || $this->__replay === Replay::Risky) {
+            if ($this->__replay === Replay::Pass && $this->__replayAssertions === 0) {
                 $this->expectNotToPerformAssertions();
             }
 
-            $this->addToAssertionCount($assertions);
+            $this->addToAssertionCount($this->__replayAssertions);
 
             return null;
         }

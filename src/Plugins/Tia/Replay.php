@@ -13,6 +13,7 @@ enum Replay
 {
     case No;
     case Pass;
+    case Risky;
     case Skipped;
     case Incomplete;
     case Failure;
@@ -24,7 +25,8 @@ enum Replay
         }
 
         return match (true) {
-            $status->isSuccess(), $status->isRisky() => self::Pass,
+            $status->isSuccess() => self::Pass,
+            $status->isRisky() => self::Risky,
             $status->isSkipped() => self::Skipped,
             $status->isIncomplete() => self::Incomplete,
             default => self::Failure,
