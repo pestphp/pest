@@ -40,6 +40,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
     private const string OPTION = '--tia';
 
+    private const string NO_OPTION = '--no-tia';
+
     private const string FRESH_OPTION = '--fresh';
 
     private const string REFETCH_OPTION = '--refetch';
@@ -245,19 +247,29 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         /** @var WatchPatterns $watchPatterns */
         $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
+        $disabled = $this->hasArgument(self::NO_OPTION, $arguments);
         $cliEnabled = $this->hasArgument(self::OPTION, $arguments);
         $alwaysEnabled = $watchPatterns->isEnabled()
             && (! $watchPatterns->isLocally() || Environment::name() === Environment::LOCAL);
-        $enabled = $cliEnabled || $alwaysEnabled;
+        $enabled = ! $disabled && ($cliEnabled || $alwaysEnabled);
         $this->filteredMode = ($this->hasArgument(self::FILTERED_OPTION, $arguments) || $watchPatterns->isFiltered())
             && ! $this->hasExplicitPathArgument($arguments);
         $freshRequested = $this->hasArgument(self::FRESH_OPTION, $arguments);
         $this->forceRefetch = $this->hasArgument(self::REFETCH_OPTION, $arguments);
 
         $arguments = $this->popArgument(self::OPTION, $arguments);
+        $arguments = $this->popArgument(self::NO_OPTION, $arguments);
         $arguments = $this->popArgument(self::FRESH_OPTION, $arguments);
         $arguments = $this->popArgument(self::REFETCH_OPTION, $arguments);
         $arguments = $this->popArgument(self::FILTERED_OPTION, $arguments);
+
+        if ($disabled) {
+            $this->forceRefetch = false;
+            $this->filteredMode = false;
+            $this->freshRebuild = false;
+
+            return $arguments;
+        }
 
         $forceRebuild = $freshRequested && ($enabled || $recordingGlobal || $replayingGlobal);
         $this->freshRebuild = $forceRebuild;
