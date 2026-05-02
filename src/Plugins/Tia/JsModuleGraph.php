@@ -28,6 +28,31 @@ final class JsModuleGraph
     ];
 
     /**
+     * Candidate page directories, in priority order. Must stay in sync with
+     * `PAGE_DIR_CANDIDATES` in bin/pest-tia-vite-deps.mjs.
+     *
+     * @var list<string>
+     */
+    private const array PAGE_DIR_CANDIDATES = [
+        'resources/js/Pages',
+        'resources/js/pages',
+        'assets/js/Pages',
+        'assets/js/pages',
+        'assets/Pages',
+        'assets/pages',
+    ];
+
+    /**
+     * @var list<string>
+     */
+    private const array PAGE_EXTENSIONS = [
+        'vue', 'svelte',
+        'tsx', 'jsx',
+        'ts', 'js',
+        'mts', 'cts', 'mjs', 'cjs',
+    ];
+
+    /**
      * @return array<string, list<string>>
      */
     public static function build(string $projectRoot): array
@@ -51,8 +76,44 @@ final class JsModuleGraph
             return false;
         }
 
-        foreach (['Pages', 'pages'] as $dir) {
-            if (is_dir($projectRoot.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'js'.DIRECTORY_SEPARATOR.$dir)) {
+        return self::firstExistingPagesDir($projectRoot) !== null;
+    }
+
+    private static function firstExistingPagesDir(string $projectRoot): ?string
+    {
+        foreach (self::PAGE_DIR_CANDIDATES as $rel) {
+            $abs = $projectRoot.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $rel);
+
+            if (! is_dir($abs)) {
+                continue;
+            }
+
+            if (self::dirHasPageFile($abs)) {
+                return $abs;
+            }
+        }
+
+        return null;
+    }
+
+    private static function dirHasPageFile(string $dir): bool
+    {
+        try {
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::LEAVES_ONLY,
+            );
+        } catch (\UnexpectedValueException) {
+            return false;
+        }
+
+        /** @var \SplFileInfo $file */
+        foreach ($iterator as $file) {
+            if (! $file->isFile()) {
+                continue;
+            }
+
+            if (in_array(strtolower($file->getExtension()), self::PAGE_EXTENSIONS, true)) {
                 return true;
             }
         }
@@ -188,17 +249,21 @@ final class JsModuleGraph
             return null;
         }
 
-        foreach (['Pages', 'pages'] as $dir) {
-            if (is_dir($projectRoot.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'js'.DIRECTORY_SEPARATOR.$dir)) {
-                $parts[] = 'pagesDir:'.$dir;
+        $override = getenv('TIA_VITE_PAGES_DIR');
 
-                break;
-            }
+        if (is_string($override) && $override !== '') {
+            $parts[] = 'pagesDirOverride:'.$override;
         }
 
-        $jsRoot = $projectRoot.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'js';
+        $pagesDir = self::firstExistingPagesDir($projectRoot);
 
-        if (is_dir($jsRoot)) {
+        if ($pagesDir !== null) {
+            $parts[] = 'pagesDir:'.str_replace($projectRoot.DIRECTORY_SEPARATOR, '', $pagesDir);
+        }
+
+        $jsRoot = $pagesDir !== null ? dirname($pagesDir) : null;
+
+        if ($jsRoot !== null && is_dir($jsRoot)) {
             $entries = [];
 
             $iterator = new \RecursiveIteratorIterator(

@@ -6,10 +6,22 @@ import { createRequire } from 'node:module'
 import { resolve, relative, extname, sep, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
-const PAGE_EXTENSIONS = new Set(['.vue', '.tsx', '.jsx', '.svelte'])
+const PAGE_EXTENSIONS = new Set([
+  '.vue', '.svelte',
+  '.tsx', '.jsx',
+  '.ts', '.js',
+  '.mts', '.cts', '.mjs', '.cjs',
+])
 const ASSET_EXT_RE = /\.(css|scss|sass|less|styl|stylus|svg|png|jpe?g|gif|webp|avif|ico|bmp|woff2?|ttf|eot|otf|md|mdx|txt|html|mp4|webm|mp3|wav|ogg|m4a|pdf|wasm|glsl|frag|vert)$/i
 const PROJECT_ROOT = resolve(process.argv[2] ?? process.cwd())
-const PAGES_REL = (process.env.TIA_VITE_PAGES_DIR ?? 'resources/js/Pages').replace(/\\/g, '/')
+const PAGE_DIR_CANDIDATES = [
+  'resources/js/Pages',
+  'resources/js/pages',
+  'assets/js/Pages',
+  'assets/js/pages',
+  'assets/Pages',
+  'assets/pages',
+]
 
 async function loadRolldown() {
   const projectRequire = createRequire(join(PROJECT_ROOT, 'package.json'))
@@ -64,6 +76,22 @@ async function listPageFiles(pagesDir) {
   return out
 }
 
+async function discoverPagesDir() {
+  const override = process.env.TIA_VITE_PAGES_DIR
+  if (override && override.length > 0) {
+    return resolve(PROJECT_ROOT, override.replace(/\\/g, '/'))
+  }
+
+  for (const rel of PAGE_DIR_CANDIDATES) {
+    const abs = resolve(PROJECT_ROOT, rel)
+    if (!existsSync(abs)) continue
+    const files = await listPageFiles(abs)
+    if (files.length > 0) return abs
+  }
+
+  return null
+}
+
 function componentNameFor(pageAbs, pagesDir) {
   const rel = relative(pagesDir, pageAbs).split(sep).join('/')
   const ext = extname(rel)
@@ -79,7 +107,13 @@ function isLocalSpecifier(source, aliasKeys) {
 }
 
 async function main() {
-  const pagesDir = resolve(PROJECT_ROOT, PAGES_REL)
+  const pagesDir = await discoverPagesDir()
+
+  if (pagesDir === null) {
+    process.stdout.write('{}')
+    return
+  }
+
   const pages = await listPageFiles(pagesDir)
 
   if (pages.length === 0) {
