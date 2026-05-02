@@ -89,10 +89,6 @@ final class Coverage
             throw ShouldNotHappen::fromMessage(sprintf('Coverage not found in path: %s.', $reportPath));
         }
 
-        // If TIA's marker is present, this run executed only the affected
-        // tests. Merge their fresh coverage slice into the cached full-run
-        // snapshot (stored by the previous `--tia --coverage` pass) so the
-        // report reflects the entire suite, not just what re-ran.
         CoverageMerger::applyIfMarked($reportPath);
 
         /** @var CodeCoverage $codeCoverage */
