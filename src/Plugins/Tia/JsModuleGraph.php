@@ -17,6 +17,17 @@ final class JsModuleGraph
     private const string CACHE_FILE = 'js-module-graph.cache.json';
 
     /**
+     * @var list<string>
+     */
+    public const array VITE_CONFIG_NAMES = [
+        'vite.config.ts',
+        'vite.config.js',
+        'vite.config.mjs',
+        'vite.config.cjs',
+        'vite.config.mts',
+    ];
+
+    /**
      * @return array<string, list<string>>
      */
     public static function build(string $projectRoot): array
@@ -161,7 +172,7 @@ final class JsModuleGraph
 
         $parts = [];
 
-        foreach (['vite.config.ts', 'vite.config.js', 'vite.config.mjs', 'vite.config.cjs', 'vite.config.mts'] as $name) {
+        foreach (self::VITE_CONFIG_NAMES as $name) {
             $path = $projectRoot.DIRECTORY_SEPARATOR.$name;
 
             if (! is_file($path)) {
@@ -310,7 +321,7 @@ final class JsModuleGraph
 
     private static function hasViteConfig(string $projectRoot): bool
     {
-        foreach (['vite.config.ts', 'vite.config.js', 'vite.config.mjs', 'vite.config.cjs', 'vite.config.mts'] as $name) {
+        foreach (self::VITE_CONFIG_NAMES as $name) {
             if (is_file($projectRoot.DIRECTORY_SEPARATOR.$name)) {
                 return true;
             }
