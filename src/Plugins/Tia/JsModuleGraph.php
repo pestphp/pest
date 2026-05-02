@@ -166,10 +166,6 @@ final class JsModuleGraph
 
     private static function fingerprint(string $projectRoot): ?string
     {
-        if (! self::hasViteConfig($projectRoot)) {
-            return null;
-        }
-
         $parts = [];
 
         foreach (self::VITE_CONFIG_NAMES as $name) {
@@ -186,6 +182,10 @@ final class JsModuleGraph
                 .':'.($stat === false ? '0' : (string) $stat['mtime'])
                 .':'.($stat === false ? '0' : (string) $stat['size'])
                 .':'.($bytes === false ? '' : hash('sha256', $bytes));
+        }
+
+        if ($parts === []) {
+            return null;
         }
 
         foreach (['Pages', 'pages'] as $dir) {
