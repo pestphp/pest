@@ -651,44 +651,36 @@ YAML;
             return ['kind' => 'unknown', 'message' => 'unknown error'];
         }
 
-        if (preg_match('/(could not resolve host|connection refused|connection reset|temporary failure in name resolution|network is unreachable|no route to host|i\/o timeout|tls handshake|getaddrinfo)/i', $output) === 1) {
-            return [
-                'kind' => 'network',
+        $diagnoses = [
+            'network' => [
+                'pattern' => '/could not resolve host|connection refused|connection reset|temporary failure in name resolution|network is unreachable|no route to host|i\/o timeout|tls handshake|getaddrinfo/i',
                 'message' => 'network error (offline or DNS unreachable). Try again when connected.',
-            ];
-        }
-
-        if (preg_match('/(authentication failed|not logged in|requires authentication|bad credentials|401)/i', $output) === 1) {
-            return [
-                'kind' => 'gh-auth',
+            ],
+            'gh-auth' => [
+                'pattern' => '/authentication failed|not logged in|requires authentication|bad credentials|401/i',
                 'message' => 'authentication failed — run `gh auth login` and retry.',
-            ];
-        }
-
-        if (preg_match('/(rate limit|too many requests|secondary rate limit)/i', $output) === 1) {
-            return [
-                'kind' => 'rate-limit',
+            ],
+            'rate-limit' => [
+                'pattern' => '/rate limit|too many requests|secondary rate limit/i',
                 'message' => 'GitHub API rate limit hit — try again later.',
-            ];
-        }
-
-        if (preg_match('/(404|not found|repository not found)/i', $output) === 1) {
-            return [
-                'kind' => 'not-found',
+            ],
+            'not-found' => [
+                'pattern' => '/404|not found|repository not found/i',
                 'message' => 'workflow or artifact not found in repo.',
-            ];
-        }
-
-        if (preg_match('/(403|forbidden|access denied)/i', $output) === 1) {
-            return [
-                'kind' => 'forbidden',
+            ],
+            'forbidden' => [
+                'pattern' => '/403|forbidden|access denied/i',
                 'message' => 'access denied — check that your `gh` token has repo + actions read scope.',
-            ];
+            ],
+        ];
+
+        foreach ($diagnoses as $kind => $diagnosis) {
+            if (preg_match($diagnosis['pattern'], $output) === 1) {
+                return ['kind' => $kind, 'message' => $diagnosis['message']];
+            }
         }
 
-        $message = trim(strtok($output, "\n"));
-
-        return ['kind' => 'unknown', 'message' => $message];
+        return ['kind' => 'unknown', 'message' => trim(strtok($output, "\n"))];
     }
 
     private function commandExists(string $cmd): bool
