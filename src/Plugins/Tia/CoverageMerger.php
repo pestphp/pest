@@ -19,7 +19,7 @@ final class CoverageMerger
     {
         $state = self::state();
 
-        if (! $state instanceof State || ! $state->exists(Tia::KEY_COVERAGE_MARKER)) {
+        if (! $state->exists(Tia::KEY_COVERAGE_MARKER)) {
             return;
         }
 
@@ -131,15 +131,12 @@ final class CoverageMerger
         return array_keys($ids);
     }
 
-    private static function state(): ?State
+    private static function state(): State
     {
-        try {
-            $state = Container::getInstance()->get(State::class);
-        } catch (Throwable) {
-            return null;
-        }
+        $state = Container::getInstance()->get(State::class);
+        assert($state instanceof State);
 
-        return $state instanceof State ? $state : null;
+        return $state;
     }
 
     private static function requireCoverage(string $reportPath): ?CodeCoverage
