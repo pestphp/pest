@@ -18,17 +18,11 @@ final readonly class Bootstrapper implements BootstrapperContract
 
     public function boot(): void
     {
-        $this->container->add(State::class, new FileState($this->tempDir()));
-    }
-
-    /**
-     * across worktrees of the same repo. See {@see Storage} for the key
-     */
-    private function tempDir(): string
-    {
         $testSuite = $this->container->get(TestSuite::class);
         assert($testSuite instanceof TestSuite);
 
-        return Storage::tempDir($testSuite->rootPath);
+        $tempDir = Storage::tempDir($testSuite->rootPath);
+
+        $this->container->add(State::class, new FileState($tempDir));
     }
 }
