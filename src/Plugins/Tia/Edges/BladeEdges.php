@@ -34,11 +34,7 @@ final class BladeEdges
             return;
         }
 
-        if ($app->bound(self::MARKER)) {
-            return;
-        }
-
-        if (! $app->bound('view')) {
+        if ($app->bound(self::MARKER) || ! $app->bound('view')) {
             return;
         }
 
