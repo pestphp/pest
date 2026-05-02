@@ -108,13 +108,10 @@ final readonly class ChangedFiles
             if ($file === '') {
                 continue;
             }
-            if ($this->shouldIgnore($file)) {
-                continue;
-            }
             $unique[$file] = true;
         }
 
-        $candidates = array_keys($unique);
+        $candidates = array_keys($this->filterIgnored($unique));
 
         if ($sha !== null && $sha !== '') {
             return $this->filterBehaviourallyUnchanged($candidates, $sha);
@@ -169,24 +166,43 @@ final readonly class ChangedFiles
         return $process->getOutput();
     }
 
-    private function shouldIgnore(string $path): bool
+    /**
+     * @param  array<string, true>  $candidates
+     * @return array<string, true>
+     */
+    private function filterIgnored(array $candidates): array
     {
-        static $prefixes = [
-            '.pest/',
-            '.phpunit.cache/',
-            '.phpunit.result.cache',
-            'vendor/',
-            'node_modules/',
-            'bootstrap/cache/',
-        ];
+        if ($candidates === []) {
+            return $candidates;
+        }
 
-        foreach ($prefixes as $prefix) {
-            if (str_starts_with($path, (string) $prefix)) {
-                return true;
+        $process = new Process(
+            ['git', 'check-ignore', '--no-index', '-z', '--stdin'],
+            $this->projectRoot,
+        );
+        $process->setTimeout(5.0);
+        $process->setInput(implode("\x00", array_keys($candidates)));
+        $process->run();
+
+        $exitCode = $process->getExitCode();
+
+        if ($exitCode !== 0 && $exitCode !== 1) {
+            throw new MissingDependency('Tia mode', 'git');
+        }
+
+        $output = $process->getOutput();
+
+        if ($output === '') {
+            return $candidates;
+        }
+
+        foreach (explode("\x00", rtrim($output, "\x00")) as $ignored) {
+            if ($ignored !== '') {
+                unset($candidates[$ignored]);
             }
         }
 
-        return false;
+        return $candidates;
     }
 
     public function currentBranch(): ?string
