@@ -10,7 +10,7 @@ use Pest\Panic;
 use Pest\Plugins\Tia;
 use Pest\Plugins\Tia\Collectors;
 use Pest\Plugins\Tia\Recorder;
-use Pest\Plugins\Tia\Replay;
+use Pest\Plugins\Tia\ReplayType;
 use Pest\Preset;
 use Pest\Support\ChainableClosure;
 use Pest\Support\Container;
@@ -85,7 +85,7 @@ trait Testable
      * The active replay mode for this test, set in `setUp()` and checked
      * in `__runTest()` / `tearDown()` to skip the body and after-each.
      */
-    private Replay $__replay = Replay::No;
+    private ReplayType $__replay = ReplayType::None;
 
     /**
      * The cached assertion count to replay, captured when entering replay mode.
@@ -279,16 +279,16 @@ trait Testable
         /** @var Tia $tia */
         $tia = Container::getInstance()->get(Tia::class);
         $status = $tia->getStatus(self::$__filename, $this::class.'::'.$this->name());
-        $replay = Replay::fromStatus($status);
+        $replay = ReplayType::fromStatus($status);
 
-        if ($replay !== Replay::No) {
+        if ($replay !== ReplayType::None) {
             assert($status !== null);
 
             match ($replay) {
-                Replay::Pass, Replay::Risky => $this->__beginReplay($replay, $tia),
-                Replay::Skipped => $this->markTestSkipped($status->message()),
-                Replay::Incomplete => $this->markTestIncomplete($status->message()),
-                Replay::Failure => throw new AssertionFailedError($status->message() ?: 'Cached failure'),
+                ReplayType::Pass, ReplayType::Risky => $this->__beginReplay($replay, $tia),
+                ReplayType::Skipped => $this->markTestSkipped($status->message()),
+                ReplayType::Incomplete => $this->markTestIncomplete($status->message()),
+                ReplayType::Failure => throw new AssertionFailedError($status->message() ?: 'Cached failure'),
             };
 
             return;
@@ -314,7 +314,7 @@ trait Testable
         $this->__callClosure($beforeEach, $arguments);
     }
 
-    private function __beginReplay(Replay $replay, Tia $tia): void
+    private function __beginReplay(ReplayType $replay, Tia $tia): void
     {
         $this->__replay = $replay;
         $this->__replayAssertions = $tia->getAssertionCount($this::class.'::'.$this->name());
@@ -353,7 +353,7 @@ trait Testable
      */
     protected function tearDown(...$arguments): void
     {
-        if ($this->__replay !== Replay::No) {
+        if ($this->__replay !== ReplayType::None) {
             TestSuite::getInstance()->test = null;
 
             return;
@@ -384,8 +384,8 @@ trait Testable
      */
     private function __runTest(Closure $closure, ...$args): mixed
     {
-        if ($this->__replay === Replay::Pass || $this->__replay === Replay::Risky) {
-            if ($this->__replay === Replay::Pass && $this->__replayAssertions === 0) {
+        if ($this->__replay === ReplayType::Pass || $this->__replay === ReplayType::Risky) {
+            if ($this->__replay === ReplayType::Pass && $this->__replayAssertions === 0) {
                 $this->expectNotToPerformAssertions();
             }
 

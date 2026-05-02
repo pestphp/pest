@@ -9,9 +9,9 @@ use PHPUnit\Framework\TestStatus\TestStatus;
 /**
  * @internal
  */
-enum Replay
+enum ReplayType
 {
-    case No;
+    case None;
     case Pass;
     case Risky;
     case Skipped;
@@ -21,7 +21,7 @@ enum Replay
     public static function fromStatus(?TestStatus $status): self
     {
         if (! $status instanceof TestStatus) {
-            return self::No;
+            return self::None;
         }
 
         return match (true) {
