@@ -24,10 +24,17 @@ final class WatchPatterns
         WatchDefaults\Browser::class,
     ];
 
+    private const array VCS_DIRS = ['.git', '.svn', '.hg'];
+
     /**
-     * @var array<string, array<int, string>> glob → list of project-relative test dirs/files
+     * @var array<string, array<int, string>> raw pattern key → list of project-relative test dirs/files
      */
     private array $patterns = [];
+
+    /**
+     * @var array<string, array{include: string, excludes: array<int, string>, allowDotfiles: bool}>
+     */
+    private array $parsed = [];
 
     private bool $enabled = false;
 
@@ -48,22 +55,22 @@ final class WatchPatterns
                 continue;
             }
 
-            foreach ($default->defaults($projectRoot, $testPath) as $glob => $dirs) {
-                $this->patterns[$glob] = array_values(array_unique(
-                    array_merge($this->patterns[$glob] ?? [], $dirs),
+            foreach ($default->defaults($projectRoot, $testPath) as $key => $dirs) {
+                $this->patterns[$key] = array_values(array_unique(
+                    array_merge($this->patterns[$key] ?? [], $dirs),
                 ));
             }
         }
     }
 
     /**
-     * @param  array<string, string>  $patterns  glob → project-relative test dir/file
+     * @param  array<string, string>  $patterns  pattern key → project-relative test dir/file
      */
     public function add(array $patterns): void
     {
-        foreach ($patterns as $glob => $dir) {
-            $this->patterns[$glob] = array_values(array_unique(
-                array_merge($this->patterns[$glob] ?? [], [$dir]),
+        foreach ($patterns as $key => $dir) {
+            $this->patterns[$key] = array_values(array_unique(
+                array_merge($this->patterns[$key] ?? [], [$dir]),
             ));
         }
     }
@@ -82,11 +89,13 @@ final class WatchPatterns
         $matched = [];
 
         foreach ($changedFiles as $file) {
-            foreach ($this->patterns as $glob => $dirs) {
-                if ($this->globMatches($glob, $file)) {
-                    foreach ($dirs as $dir) {
-                        $matched[$dir] = true;
-                    }
+            foreach ($this->patterns as $key => $dirs) {
+                if (! $this->keyMatches($key, $file)) {
+                    continue;
+                }
+
+                foreach ($dirs as $dir) {
+                    $matched[$dir] = true;
                 }
             }
         }
@@ -171,10 +180,119 @@ final class WatchPatterns
     public function reset(): void
     {
         $this->patterns = [];
+        $this->parsed = [];
         $this->enabled = false;
         $this->locally = false;
         $this->filtered = false;
         $this->baselined = false;
+    }
+
+    private function keyMatches(string $key, string $file): bool
+    {
+        $rule = $this->parse($key);
+
+        if (! $this->globMatches($rule['include'], $file)) {
+            return false;
+        }
+
+        $file = str_replace('\\', '/', $file);
+
+        if ($this->touchesVcs($file)) {
+            return false;
+        }
+
+        if (! $rule['allowDotfiles'] && $this->touchesDotfile($file)) {
+            return false;
+        }
+
+        foreach ($rule['excludes'] as $exclude) {
+            if ($this->excludeMatches($exclude, $file)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @return array{include: string, excludes: array<int, string>, allowDotfiles: bool}
+     */
+    private function parse(string $key): array
+    {
+        if (isset($this->parsed[$key])) {
+            return $this->parsed[$key];
+        }
+
+        $tokens = preg_split('/\s+/', trim($key)) ?: [];
+
+        $include = '';
+        $excludes = [];
+
+        foreach ($tokens as $token) {
+            if ($token === '') {
+                continue;
+            }
+
+            if ($token[0] === '!') {
+                $excludes[] = substr($token, 1);
+
+                continue;
+            }
+
+            if ($include === '') {
+                $include = $token;
+            }
+        }
+
+        return $this->parsed[$key] = [
+            'include' => $include,
+            'excludes' => $excludes,
+            'allowDotfiles' => $this->patternTargetsDotfiles($include),
+        ];
+    }
+
+    private function patternTargetsDotfiles(string $pattern): bool
+    {
+        foreach (explode('/', str_replace('\\', '/', $pattern)) as $segment) {
+            if ($segment !== '' && $segment[0] === '.') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function touchesVcs(string $file): bool
+    {
+        foreach (explode('/', $file) as $segment) {
+            if (in_array($segment, self::VCS_DIRS, true)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function touchesDotfile(string $file): bool
+    {
+        foreach (explode('/', $file) as $segment) {
+            if ($segment !== '' && $segment[0] === '.') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function excludeMatches(string $exclude, string $file): bool
+    {
+        $pattern = str_contains($exclude, '/') ? $exclude : '**/'.$exclude;
+
+        if ($this->globMatches($pattern, $file)) {
+            return true;
+        }
+
+        return $this->globMatches($exclude, basename($file));
     }
 
     private function globMatches(string $pattern, string $file): bool
