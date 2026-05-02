@@ -522,7 +522,7 @@ final class Graph
         $files = [];
 
         foreach ($baseline['results'] as $result) {
-            if (! self::shouldRerun($result['status'])) {
+            if (! $this->shouldRerun($result['status'])) {
                 continue;
             }
 
@@ -549,7 +549,7 @@ final class Graph
         $baseline = $this->baselineFor($branch, $fallbackBranch);
 
         foreach ($baseline['results'] as $result) {
-            if (! self::shouldRerun($result['status'])) {
+            if (! $this->shouldRerun($result['status'])) {
                 continue;
             }
 
@@ -563,14 +563,20 @@ final class Graph
         return false;
     }
 
-    private static function shouldRerun(int $status): bool
+    private function shouldRerun(int $status): bool
     {
         $testStatus = TestStatus::from($status);
+        if ($testStatus->isFailure()) {
+            return true;
+        }
+        if ($testStatus->isError()) {
+            return true;
+        }
+        if ($testStatus->isIncomplete()) {
+            return true;
+        }
 
-        return $testStatus->isFailure()
-            || $testStatus->isError()
-            || $testStatus->isIncomplete()
-            || $testStatus->isRisky();
+        return $testStatus->isRisky();
     }
 
     /**

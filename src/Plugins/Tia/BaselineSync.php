@@ -283,7 +283,7 @@ YAML;
     /**
      * @param-out string|null $failureKind
      *
-     * @return array{graph: string, coverage: ?string}|null
+     * @return array{graph: string, coverage: ?string, sizeOnDisk: int}|null
      */
     private function download(string $repo, string $projectRoot, ?string &$failureKind = null, bool $hasAnchor = false): ?array
     {

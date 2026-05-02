@@ -11,6 +11,9 @@ use Fidry\CpuCoreCounter\CpuCoreCounter;
  */
 final class Cpu
 {
+    /**
+     * @param  int<1, max>  $fallback
+     */
     public static function cores(int $fallback = 4): int
     {
         return (new CpuCoreCounter)->getCountWithFallback($fallback);

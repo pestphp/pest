@@ -32,7 +32,7 @@ final class Kernel
     /**
      * Either the kernel is terminated or not.
      */
-    private bool $terminated;
+    private bool $terminated = false;
 
     /**
      * The Kernel bootstrappers.
@@ -64,12 +64,7 @@ final class Kernel
     /**
      * Creates a new Kernel instance.
      */
-    public function __construct(
-        private Application $application,
-        private OutputInterface $output,
-    ) {
-        $this->terminated = false;
-    }
+    public function __construct(private readonly Application $application, private readonly OutputInterface $output) {}
 
     /**
      * Boots the Kernel.

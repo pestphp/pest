@@ -45,6 +45,9 @@ final readonly class EnsureTiaIsRunningPestTestsOnly implements PreparedSubscrib
         Panic::with(new TiaRequiresPestTests($className, $test->file()));
     }
 
+    /**
+     * @param  class-string  $className
+     */
     private function usesTestableTrait(string $className): bool
     {
         $reflection = new ReflectionClass($className);

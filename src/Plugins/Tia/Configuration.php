@@ -49,6 +49,18 @@ final class Configuration
     }
 
     /**
+     * @return $this
+     */
+    public function baselined(): self
+    {
+        /** @var WatchPatterns $watchPatterns */
+        $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
+        $watchPatterns->markBaselined();
+
+        return $this;
+    }
+
+    /**
      * @param  array<string, string>  $patterns  glob → project-relative test dir
      * @return $this
      */

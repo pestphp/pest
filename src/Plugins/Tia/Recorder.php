@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
-use Pest\Plugins\Tia\Edges\AutoloadEdges;
 use Pest\TestSuite;
 use ReflectionClass;
 
@@ -32,21 +31,6 @@ final class Recorder
 
     /** @var array<string, bool> */
     private array $classUsesDatabaseCache = [];
-
-    /** @var array<string, list<string>> */
-    private array $fileToClassNames = [];
-
-    /** @var array<string, true> */
-    private array $indexedClassNames = [];
-
-    /** @var array<string, list<string>> */
-    private array $classDependencyCache = [];
-
-    /** @var array<string, list<string>> */
-    private array $testImportFileCache = [];
-
-    /** @var array<string, true> */
-    private array $includedFilesAtTestStart = [];
 
     private bool $active = false;
 
@@ -89,13 +73,6 @@ final class Recorder
         return $this->driverAvailable;
     }
 
-    public function driver(): string
-    {
-        $this->driverAvailable();
-
-        return $this->driver;
-    }
-
     public function beginTest(string $className, string $methodName, string $fallbackFile): void
     {
         if (! $this->active || ! $this->driverAvailable()) {
@@ -113,14 +90,10 @@ final class Recorder
         }
 
         $this->currentTestFile = $file;
-        $this->includedFilesAtTestStart = AutoloadEdges::snapshot();
 
         if ($this->classUsesDatabase($className)) {
             $this->perTestUsesDatabase[$file] = true;
         }
-
-        // $this->linkAncestorFiles($className);
-        // $this->linkImportedFiles($file);
 
         if ($this->driver === 'pcov') {
             \pcov\clear();
@@ -166,19 +139,7 @@ final class Recorder
             $this->perTestFiles[$this->currentTestFile][$sourceFile] = true;
         }
 
-        foreach (AutoloadEdges::newProjectFiles(
-            $this->includedFilesAtTestStart,
-            AutoloadEdges::snapshot(),
-            TestSuite::getInstance()->rootPath,
-            $this->currentTestFile,
-        ) as $sourceFile) {
-            $this->perTestFiles[$this->currentTestFile][$sourceFile] = true;
-        }
-
-        // $this->linkSourceDependencies($coveredFiles);
-
         $this->currentTestFile = null;
-        $this->includedFilesAtTestStart = [];
     }
 
     public function linkSource(string $sourceFile): void
@@ -196,295 +157,6 @@ final class Recorder
         }
 
         $this->perTestFiles[$this->currentTestFile][$sourceFile] = true;
-    }
-
-    /** @param  iterable<int, string>  $sourceFiles */
-    public function linkSourcesForTest(string $testFile, iterable $sourceFiles): void
-    {
-        if (! $this->active) {
-            return;
-        }
-
-        if ($testFile === '') {
-            return;
-        }
-
-        foreach ($sourceFiles as $sourceFile) {
-            if ($sourceFile === '') {
-                continue;
-            }
-
-            $this->perTestFiles[$testFile][$sourceFile] = true;
-        }
-    }
-
-    /** @param  array<int, string>  $coveredFiles */
-    private function linkSourceDependencies(array $coveredFiles): void
-    {
-        if ($this->currentTestFile === null) {
-            return;
-        }
-
-        $this->refreshClassMap();
-
-        foreach ($coveredFiles as $coveredFile) {
-            if (! isset($this->fileToClassNames[$coveredFile])) {
-                continue;
-            }
-
-            foreach ($this->fileToClassNames[$coveredFile] as $name) {
-                foreach ($this->classDependencies($name) as $depFile) {
-                    $this->perTestFiles[$this->currentTestFile][$depFile] = true;
-                }
-            }
-        }
-    }
-
-    private function refreshClassMap(): void
-    {
-        $names = array_merge(
-            get_declared_classes(),
-            get_declared_interfaces(),
-            get_declared_traits(),
-        );
-
-        foreach ($names as $name) {
-            if (isset($this->indexedClassNames[$name])) {
-                continue;
-            }
-            $this->indexedClassNames[$name] = true;
-
-            if (! class_exists($name, false)
-                && ! interface_exists($name, false)
-                && ! trait_exists($name, false)) {
-                continue;
-            }
-
-            $reflection = new ReflectionClass($name);
-
-            if ($reflection->isInternal()) {
-                continue;
-            }
-
-            $file = $reflection->getFileName();
-
-            if (! is_string($file)) {
-                continue;
-            }
-
-            if (str_contains($file, DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR)) {
-                continue;
-            }
-
-            $this->fileToClassNames[$file][] = $name;
-        }
-    }
-
-    /** @return list<string> */
-    private function classDependencies(string $className): array
-    {
-        if (isset($this->classDependencyCache[$className])) {
-            return $this->classDependencyCache[$className];
-        }
-
-        if (! class_exists($className, false)
-            && ! interface_exists($className, false)
-            && ! trait_exists($className, false)) {
-            return $this->classDependencyCache[$className] = [];
-        }
-
-        $reflection = new ReflectionClass($className);
-
-        $files = [];
-
-        $linkSymbol = static function (string $name) use (&$files): void {
-            if (! class_exists($name, false)
-                && ! interface_exists($name, false)
-                && ! trait_exists($name, false)) {
-                return;
-            }
-            $r = new ReflectionClass($name);
-            if ($r->isInternal()) {
-                return;
-            }
-            $f = $r->getFileName();
-            if (! is_string($f) || str_contains($f, DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR)) {
-                return;
-            }
-            $files[$f] = true;
-        };
-
-        foreach ($reflection->getInterfaceNames() as $iname) {
-            $linkSymbol($iname);
-        }
-
-        foreach ($reflection->getTraitNames() as $tname) {
-            $linkSymbol($tname);
-        }
-
-        $parent = $reflection->getParentClass();
-        while ($parent !== false && ! $parent->isInternal()) {
-            $f = $parent->getFileName();
-            if (is_string($f) && ! str_contains($f, DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR)) {
-                $files[$f] = true;
-            }
-            foreach ($parent->getTraitNames() as $tname) {
-                $linkSymbol($tname);
-            }
-            $parent = $parent->getParentClass();
-        }
-
-        return $this->classDependencyCache[$className] = array_keys($files);
-    }
-
-    private function linkAncestorFiles(string $className): void
-    {
-        if (! class_exists($className, false)) {
-            return;
-        }
-
-        $reflection = new ReflectionClass($className);
-        $parent = $reflection->getParentClass();
-
-        while ($parent !== false) {
-            if ($parent->isInternal()) {
-                break;
-            }
-
-            $file = $parent->getFileName();
-
-            if (is_string($file) && ! str_contains($file, DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR)) {
-                $this->perTestFiles[(string) $this->currentTestFile][$file] = true;
-            }
-
-            $parent = $parent->getParentClass();
-        }
-    }
-
-    private function linkImportedFiles(string $testFile): void
-    {
-        if ($this->currentTestFile === null) {
-            return;
-        }
-
-        foreach ($this->importedFilesFor($testFile) as $file) {
-            $this->perTestFiles[$this->currentTestFile][$file] = true;
-        }
-    }
-
-    /**
-     * @return list<string>
-     */
-    private function importedFilesFor(string $testFile): array
-    {
-        if (array_key_exists($testFile, $this->testImportFileCache)) {
-            return $this->testImportFileCache[$testFile];
-        }
-
-        $source = @file_get_contents($testFile);
-        if ($source === false) {
-            return $this->testImportFileCache[$testFile] = [];
-        }
-
-        $files = [];
-
-        foreach ($this->importedClassNames($source) as $className) {
-            $file = $this->findAutoloadFile($className);
-
-            if ($file !== null && ! str_contains($file, DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR)) {
-                $files[$file] = true;
-            }
-        }
-
-        return $this->testImportFileCache[$testFile] = array_keys($files);
-    }
-
-    /**
-     * @return list<string>
-     */
-    private function importedClassNames(string $source): array
-    {
-        preg_match_all('/^use\s+(?!function\s|const\s)([^;]+);/mi', $source, $matches);
-
-        $classes = [];
-
-        foreach ($matches[1] as $import) {
-            $import = trim($import);
-
-            if ($import === '') {
-                continue;
-            }
-
-            $open = strpos($import, '{');
-            $close = strrpos($import, '}');
-
-            if ($open !== false && $close !== false && $close > $open) {
-                $prefix = trim(trim(substr($import, 0, $open)), '\\');
-                $items = explode(',', substr($import, $open + 1, $close - $open - 1));
-
-                foreach ($items as $item) {
-                    $class = $this->normaliseImportedClass($prefix.'\\'.trim($item));
-
-                    if ($class !== null) {
-                        $classes[$class] = true;
-                    }
-                }
-
-                continue;
-            }
-
-            $class = $this->normaliseImportedClass($import);
-
-            if ($class !== null) {
-                $classes[$class] = true;
-            }
-        }
-
-        return array_keys($classes);
-    }
-
-    private function normaliseImportedClass(string $import): ?string
-    {
-        $import = trim(trim($import), '\\');
-
-        if ($import === '') {
-            return null;
-        }
-
-        $parts = preg_split('/\s+as\s+/i', $import);
-        if ($parts === false) {
-            return null;
-        }
-
-        $class = trim(trim($parts[0]), '\\');
-
-        return $class === '' ? null : $class;
-    }
-
-    private function findAutoloadFile(string $className): ?string
-    {
-        foreach (spl_autoload_functions() as $loader) {
-            if (! is_array($loader)) {
-                continue;
-            }
-            if (! is_object($loader[0])) {
-                continue;
-            }
-            if (! method_exists($loader[0], 'findFile')) {
-                continue;
-            }
-
-            /** @var mixed $file */
-            $file = $loader[0]->findFile($className);
-
-            if (is_string($file) && $file !== '') {
-                $real = @realpath($file);
-
-                return $real === false ? $file : $real;
-            }
-        }
-
-        return null;
     }
 
     private function classUsesDatabase(string $className): bool
@@ -691,9 +363,6 @@ final class Recorder
         $this->perTestUsesDatabase = [];
         $this->classFileCache = [];
         $this->classUsesDatabaseCache = [];
-        $this->fileToClassNames = [];
-        $this->indexedClassNames = [];
-        $this->classDependencyCache = [];
         $this->sourceScope = null;
         $this->active = false;
     }

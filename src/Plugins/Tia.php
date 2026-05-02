@@ -631,6 +631,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         if (! $graph instanceof Graph
             && ! $forceRebuild
             && ! $this->baselineFetchAttemptedForDrift
+            && $this->watchPatterns->isBaselined()
             && $this->baselineSync->fetchIfAvailable($projectRoot, $this->forceRefetch)) {
             $this->baselineFetchAttemptedForDrift = true;
             $graph = $this->loadGraph($projectRoot);
@@ -1415,10 +1416,12 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         foreach ($arguments as $index => $arg) {
-            if ($arg === '' || str_starts_with($arg, '-')) {
+            if ($arg === '') {
                 continue;
             }
-
+            if (str_starts_with($arg, '-')) {
+                continue;
+            }
             if ($index > 0) {
                 $previous = $arguments[$index - 1] ?? '';
                 if (in_array($previous, $valueTakingFlags, true)) {
@@ -1506,6 +1509,10 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         $projectRoot = TestSuite::getInstance()->rootPath;
         $this->baselineFetchAttemptedForDrift = true;
+
+        if (! $this->watchPatterns->isBaselined()) {
+            return null;
+        }
 
         if (! $this->baselineSync->fetchIfAvailable($projectRoot, $this->forceRefetch, hasAnchor: true)) {
             return null;

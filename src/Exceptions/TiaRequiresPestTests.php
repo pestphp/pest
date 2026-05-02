@@ -16,7 +16,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class TiaRequiresPestTests extends RuntimeException implements ExceptionInterface, Panicable, RenderlessEditor, RenderlessTrace
 {
-    public function __construct(private readonly string $className, private readonly string $filename)
+    public function __construct(private readonly string $className, string $filename)
     {
         parent::__construct(sprintf(
             'Tia mode requires only functional based Pest tests, but encountered PHPUnit class [%s] in [%s].',

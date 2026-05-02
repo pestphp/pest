@@ -9,7 +9,6 @@ use Pest\Exceptions\DatasetArgumentsMismatch;
 use Pest\Panic;
 use Pest\Plugins\Tia;
 use Pest\Plugins\Tia\Collectors;
-use Pest\Plugins\Tia\Edges\AutoloadEdges;
 use Pest\Plugins\Tia\Recorder;
 use Pest\Plugins\Tia\Replay;
 use Pest\Preset;
@@ -300,10 +299,6 @@ trait Testable
             $recorder->beginTest($this::class, $this->name(), self::$__filename);
         }
 
-        $autoloadBeforeSetUp = $recorder->isActive()
-            ? AutoloadEdges::snapshot()
-            : [];
-
         parent::setUp();
 
         Collectors::armAll($recorder);
@@ -315,18 +310,6 @@ trait Testable
         }
 
         $this->__callClosure($beforeEach, $arguments);
-
-        if ($recorder->isActive() && $autoloadBeforeSetUp !== []) {
-            $recorder->linkSourcesForTest(
-                self::$__filename,
-                AutoloadEdges::newProjectFiles(
-                    $autoloadBeforeSetUp,
-                    AutoloadEdges::snapshot(),
-                    TestSuite::getInstance()->rootPath,
-                    self::$__filename,
-                ),
-            );
-        }
     }
 
     private function __shortCircuitCachedPass(): void

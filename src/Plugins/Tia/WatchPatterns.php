@@ -35,6 +35,8 @@ final class WatchPatterns
 
     private bool $filtered = false;
 
+    private bool $baselined = false;
+
     public function useDefaults(string $projectRoot): void
     {
         $testPath = TestSuite::getInstance()->testPath;
@@ -156,12 +158,23 @@ final class WatchPatterns
         return $this->filtered;
     }
 
+    public function markBaselined(): void
+    {
+        $this->baselined = true;
+    }
+
+    public function isBaselined(): bool
+    {
+        return $this->baselined;
+    }
+
     public function reset(): void
     {
         $this->patterns = [];
         $this->enabled = false;
         $this->locally = false;
         $this->filtered = false;
+        $this->baselined = false;
     }
 
     private function globMatches(string $pattern, string $file): bool
