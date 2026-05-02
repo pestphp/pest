@@ -11,7 +11,7 @@ use PHPUnit\Event\Test\FinishedSubscriber;
 /**
  * @internal
  */
-final readonly class EnsureTiaCoverageIsFlushed implements FinishedSubscriber
+final readonly class EnsureTiaEnds implements FinishedSubscriber
 {
     public function __construct(private Recorder $recorder) {}
 

@@ -12,7 +12,7 @@ use PHPUnit\Event\Test\PreparedSubscriber;
 /**
  * @internal
  */
-final readonly class EnsureTiaCoverageIsRecorded implements PreparedSubscriber
+final readonly class EnsureTiaStarts implements PreparedSubscriber
 {
     public function __construct(private Recorder $recorder) {}
 

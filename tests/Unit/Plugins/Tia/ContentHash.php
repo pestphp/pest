@@ -22,7 +22,7 @@ describe('of()', function () {
 describe('PHP files', function () {
     it('produces the same hash regardless of whitespace differences', function () {
         $a = ContentHash::ofContent('a.php', "<?php \$foo   =   1;\n\necho   \$foo;");
-        $b = ContentHash::ofContent('a.php', "<?php \$foo=1; echo \$foo;");
+        $b = ContentHash::ofContent('a.php', '<?php $foo=1; echo $foo;');
 
         expect($a)->toBe($b);
     });
@@ -56,8 +56,8 @@ describe('PHP files', function () {
     });
 
     it('detects code changes', function () {
-        $a = ContentHash::ofContent('a.php', "<?php \$foo = 1;");
-        $b = ContentHash::ofContent('a.php', "<?php \$foo = 2;");
+        $a = ContentHash::ofContent('a.php', '<?php $foo = 1;');
+        $b = ContentHash::ofContent('a.php', '<?php $foo = 2;');
 
         expect($a)->not->toBe($b);
     });
@@ -70,8 +70,8 @@ describe('PHP files', function () {
     });
 
     it('treats variable renames as a change', function () {
-        $a = ContentHash::ofContent('a.php', "<?php \$foo = 1;");
-        $b = ContentHash::ofContent('a.php', "<?php \$bar = 1;");
+        $a = ContentHash::ofContent('a.php', '<?php $foo = 1;');
+        $b = ContentHash::ofContent('a.php', '<?php $bar = 1;');
 
         expect($a)->not->toBe($b);
     });
@@ -92,43 +92,43 @@ describe('PHP files', function () {
 
 describe('Blade files', function () {
     it('strips blade comments', function () {
-        $a = ContentHash::ofContent('a.blade.php', "<div>{{-- a comment --}}Hello</div>");
-        $b = ContentHash::ofContent('a.blade.php', "<div>Hello</div>");
+        $a = ContentHash::ofContent('a.blade.php', '<div>{{-- a comment --}}Hello</div>');
+        $b = ContentHash::ofContent('a.blade.php', '<div>Hello</div>');
 
         expect($a)->toBe($b);
     });
 
     it('strips multi-line blade comments', function () {
         $a = ContentHash::ofContent('a.blade.php', "<div>\n{{--\n multi\n line\n--}}\nHello\n</div>");
-        $b = ContentHash::ofContent('a.blade.php', "<div> Hello </div>");
+        $b = ContentHash::ofContent('a.blade.php', '<div> Hello </div>');
 
         expect($a)->toBe($b);
     });
 
     it('collapses whitespace', function () {
         $a = ContentHash::ofContent('a.blade.php', "<div>\n  Hello\n  World\n</div>");
-        $b = ContentHash::ofContent('a.blade.php', "<div> Hello World </div>");
+        $b = ContentHash::ofContent('a.blade.php', '<div> Hello World </div>');
 
         expect($a)->toBe($b);
     });
 
     it('detects content changes', function () {
-        $a = ContentHash::ofContent('a.blade.php', "<div>Hello</div>");
-        $b = ContentHash::ofContent('a.blade.php', "<div>Goodbye</div>");
+        $a = ContentHash::ofContent('a.blade.php', '<div>Hello</div>');
+        $b = ContentHash::ofContent('a.blade.php', '<div>Goodbye</div>');
 
         expect($a)->not->toBe($b);
     });
 
     it('keeps blade directives intact', function () {
-        $a = ContentHash::ofContent('a.blade.php', "@if(\$user)Hi @endif");
-        $b = ContentHash::ofContent('a.blade.php', "@if(\$user)Bye @endif");
+        $a = ContentHash::ofContent('a.blade.php', '@if($user)Hi @endif');
+        $b = ContentHash::ofContent('a.blade.php', '@if($user)Bye @endif');
 
         expect($a)->not->toBe($b);
     });
 
     it('does not use the PHP tokenizer for blade files', function () {
-        $a = ContentHash::ofContent('a.blade.php', "<?php // not stripped ?> hello");
-        $b = ContentHash::ofContent('a.blade.php', "<?php ?> hello");
+        $a = ContentHash::ofContent('a.blade.php', '<?php // not stripped ?> hello');
+        $b = ContentHash::ofContent('a.blade.php', '<?php ?> hello');
 
         expect($a)->not->toBe($b);
     });
@@ -137,70 +137,70 @@ describe('Blade files', function () {
 describe('JavaScript-like files', function () {
     it('strips line comments', function () {
         $a = ContentHash::ofContent('a.js', "// a comment\nconst foo = 1;");
-        $b = ContentHash::ofContent('a.js', "const foo = 1;");
+        $b = ContentHash::ofContent('a.js', 'const foo = 1;');
 
         expect($a)->toBe($b);
     });
 
     it('strips block comments on their own lines', function () {
         $a = ContentHash::ofContent('a.js', "/* block */\nconst foo = 1;");
-        $b = ContentHash::ofContent('a.js', "const foo = 1;");
+        $b = ContentHash::ofContent('a.js', 'const foo = 1;');
 
         expect($a)->toBe($b);
     });
 
     it('collapses whitespace', function () {
         $a = ContentHash::ofContent('a.js', "const  foo  =  1;\n\nconst bar = 2;");
-        $b = ContentHash::ofContent('a.js', "const foo = 1; const bar = 2;");
+        $b = ContentHash::ofContent('a.js', 'const foo = 1; const bar = 2;');
 
         expect($a)->toBe($b);
     });
 
     it('detects code changes', function () {
-        $a = ContentHash::ofContent('a.js', "const foo = 1;");
-        $b = ContentHash::ofContent('a.js', "const foo = 2;");
+        $a = ContentHash::ofContent('a.js', 'const foo = 1;');
+        $b = ContentHash::ofContent('a.js', 'const foo = 2;');
 
         expect($a)->not->toBe($b);
     });
 
     it('does not strip inline trailing comments', function () {
-        $a = ContentHash::ofContent('a.js', "const foo = 1; // inline");
-        $b = ContentHash::ofContent('a.js', "const foo = 1;");
+        $a = ContentHash::ofContent('a.js', 'const foo = 1; // inline');
+        $b = ContentHash::ofContent('a.js', 'const foo = 1;');
 
         expect($a)->not->toBe($b);
     });
 
     it('applies the same rules to .ts files', function () {
         $a = ContentHash::ofContent('a.ts', "// comment\nconst foo: number = 1;");
-        $b = ContentHash::ofContent('a.ts', "const foo: number = 1;");
+        $b = ContentHash::ofContent('a.ts', 'const foo: number = 1;');
 
         expect($a)->toBe($b);
     });
 
     it('applies the same rules to .tsx files', function () {
         $a = ContentHash::ofContent('a.tsx', "// comment\nconst Foo = () => <div/>;");
-        $b = ContentHash::ofContent('a.tsx', "const Foo = () => <div/>;");
+        $b = ContentHash::ofContent('a.tsx', 'const Foo = () => <div/>;');
 
         expect($a)->toBe($b);
     });
 
     it('applies the same rules to .jsx files', function () {
         $a = ContentHash::ofContent('a.jsx', "// comment\nconst Foo = () => <div/>;");
-        $b = ContentHash::ofContent('a.jsx', "const Foo = () => <div/>;");
+        $b = ContentHash::ofContent('a.jsx', 'const Foo = () => <div/>;');
 
         expect($a)->toBe($b);
     });
 
     it('applies the same rules to .vue files', function () {
         $a = ContentHash::ofContent('a.vue', "<script>\n// comment\nexport default {}\n</script>");
-        $b = ContentHash::ofContent('a.vue', "<script> export default {} </script>");
+        $b = ContentHash::ofContent('a.vue', '<script> export default {} </script>');
 
         expect($a)->toBe($b);
     });
 
     it('applies the same rules to .svelte files', function () {
         $a = ContentHash::ofContent('a.svelte', "<script>\n// comment\nlet foo = 1;\n</script>");
-        $b = ContentHash::ofContent('a.svelte', "<script> let foo = 1; </script>");
+        $b = ContentHash::ofContent('a.svelte', '<script> let foo = 1; </script>');
 
         expect($a)->toBe($b);
     });
@@ -208,7 +208,7 @@ describe('JavaScript-like files', function () {
     it('applies the same rules to .mjs, .cjs, and .mts files', function () {
         foreach (['mjs', 'cjs', 'mts'] as $ext) {
             $a = ContentHash::ofContent("a.$ext", "// comment\nexport const foo = 1;");
-            $b = ContentHash::ofContent("a.$ext", "export const foo = 1;");
+            $b = ContentHash::ofContent("a.$ext", 'export const foo = 1;');
 
             expect($a)->toBe($b);
         }
@@ -217,22 +217,22 @@ describe('JavaScript-like files', function () {
 
 describe('unknown extensions', function () {
     it('hashes the raw content for unknown extensions', function () {
-        $a = ContentHash::ofContent('a.txt', "hello world");
-        $b = ContentHash::ofContent('a.txt', "hello world");
+        $a = ContentHash::ofContent('a.txt', 'hello world');
+        $b = ContentHash::ofContent('a.txt', 'hello world');
 
         expect($a)->toBe($b);
     });
 
     it('does not normalise whitespace for unknown extensions', function () {
-        $a = ContentHash::ofContent('a.txt', "hello  world");
-        $b = ContentHash::ofContent('a.txt', "hello world");
+        $a = ContentHash::ofContent('a.txt', 'hello  world');
+        $b = ContentHash::ofContent('a.txt', 'hello world');
 
         expect($a)->not->toBe($b);
     });
 
     it('does not strip comments for unknown extensions', function () {
         $a = ContentHash::ofContent('a.txt', "// not a comment here\nhello");
-        $b = ContentHash::ofContent('a.txt', "hello");
+        $b = ContentHash::ofContent('a.txt', 'hello');
 
         expect($a)->not->toBe($b);
     });

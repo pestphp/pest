@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 use PHPUnit\Runner\CodeCoverage as PhpUnitCodeCoverage;
-use ReflectionClass;
 use Throwable;
 
 /**

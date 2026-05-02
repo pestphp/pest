@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
-use Composer\InstalledVersions;
 use Pest\Exceptions\BaselineFetchFailed;
 use Pest\Panic;
 use Pest\Plugins\Tia;
@@ -94,7 +93,7 @@ final readonly class BaselineSync
         if ($payload === null) {
             if ($failureKind === 'no-runs' || $failureKind === null) {
                 $this->startCooldown();
-                $this->emitPublishInstructions($repo);
+                $this->emitPublishInstructions();
             }
 
             return false;
@@ -162,7 +161,7 @@ final readonly class BaselineSync
         return $seconds.'s';
     }
 
-    private function emitPublishInstructions(string $repo): void
+    private function emitPublishInstructions(): void
     {
         if ($this->isCi()) {
             $this->renderBadge('INFO', 'No baseline yet — this run will produce one.');
@@ -170,23 +169,8 @@ final readonly class BaselineSync
             return;
         }
 
-        $yaml = $this->isLaravel()
-            ? $this->laravelWorkflowYaml()
-            : $this->genericWorkflowYaml();
-
         $this->renderBadge('WARN', 'No baseline published yet — recording locally.');
-        $this->renderChild('To share the baseline with your team, add this workflow to the repo:');
-        $this->renderChild('.github/workflows/tia-baseline.yml');
-
-        $indentedYaml = array_map(
-            static fn (string $line): string => '      '.$line,
-            explode("\n", $yaml),
-        );
-
-        $this->output->writeln(['', ...$indentedYaml, '']);
-
-        $this->renderChild(sprintf('Commit, push, then run once: gh workflow run tia-baseline.yml -R %s', $repo));
-        $this->renderChild('Details: https://pestphp.com/docs/tia');
+        $this->renderChild('See https://pestphp.com/docs/tia for how to publish one from CI.');
     }
 
     private function isCi(): bool
@@ -194,79 +178,6 @@ final readonly class BaselineSync
         return getenv('GITHUB_ACTIONS') === 'true'
             || getenv('GITLAB_CI') === 'true'
             || getenv('CIRCLECI') === 'true';
-    }
-
-    private function isLaravel(): bool
-    {
-        return class_exists(InstalledVersions::class)
-            && InstalledVersions::isInstalled('laravel/framework');
-    }
-
-    private function laravelWorkflowYaml(): string
-    {
-        return <<<'YAML'
-name: TIA Baseline
-on:
-  push: { branches: [main] }
-  schedule: [{ cron: '0 3 * * *' }]
-  workflow_dispatch:
-jobs:
-  baseline:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-          coverage: xdebug
-          extensions: json, dom, curl, libxml, mbstring, zip, pdo, pdo_sqlite, sqlite3, bcmath, intl
-      - run: cp .env.example .env
-      - run: composer install --no-interaction --prefer-dist
-      - run: php artisan key:generate
-      - run: ./vendor/bin/pest --parallel --tia --coverage
-      - name: Stage baseline for upload
-        shell: bash
-        run: |
-          mkdir -p .pest-tia-baseline
-          cp -R "$HOME/.pest/tia"/*/. .pest-tia-baseline/
-      - uses: actions/upload-artifact@v4
-        with:
-          name: pest-tia-baseline
-          path: .pest-tia-baseline/
-          retention-days: 30
-YAML;
-    }
-
-    private function genericWorkflowYaml(): string
-    {
-        return <<<'YAML'
-name: TIA Baseline
-on:
-  push: { branches: [main] }
-  schedule: [{ cron: '0 3 * * *' }]
-  workflow_dispatch:
-jobs:
-  baseline:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
-      - uses: shivammathur/setup-php@v2
-        with: { php-version: '8.4', coverage: xdebug }
-      - run: composer install --no-interaction --prefer-dist
-      - run: ./vendor/bin/pest --parallel --tia --coverage
-      - name: Stage baseline for upload
-        shell: bash
-        run: |
-          mkdir -p .pest-tia-baseline
-          cp -R "$HOME/.pest/tia"/*/. .pest-tia-baseline/
-      - uses: actions/upload-artifact@v4
-        with:
-          name: pest-tia-baseline
-          path: .pest-tia-baseline/
-          retention-days: 30
-YAML;
     }
 
     private function detectGitHubRepo(string $projectRoot): ?string

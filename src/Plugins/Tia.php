@@ -126,7 +126,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     /** @var array{structural: array<string, mixed>, environmental: array<string, mixed>}|null */
     private ?array $startFingerprint = null;
 
-private bool $piggybackCoverage = false;
+    private bool $piggybackCoverage = false;
 
     private bool $recordingActive = false;
 
@@ -1391,7 +1391,7 @@ private bool $piggybackCoverage = false;
         $coverage = Container::getInstance()->get(Coverage::class);
         assert($coverage instanceof Coverage);
 
-        return $coverage->coverage === true;
+        return $coverage->coverage;
     }
 
     /**

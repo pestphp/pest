@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
-use Pest\Factories\Attribute;
 use Pest\Factories\TestCaseFactory;
 use Pest\Factories\TestCaseMethodFactory;
 use Pest\Support\Container;
@@ -1012,7 +1011,7 @@ final class Graph
         }
 
         foreach ($method->attributes as $attribute) {
-            if (! $attribute instanceof Attribute || $attribute->name !== Group::class) {
+            if ($attribute->name !== Group::class) {
                 continue;
             }
 
