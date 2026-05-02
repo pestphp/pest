@@ -100,10 +100,6 @@ final readonly class ChangedFiles
      */
     public function since(?string $sha): ?array
     {
-        if (! $this->gitAvailable()) {
-            return null;
-        }
-
         $files = [];
 
         if ($sha !== null && $sha !== '') {
@@ -215,10 +211,6 @@ final readonly class ChangedFiles
 
     public function currentBranch(): ?string
     {
-        if (! $this->gitAvailable()) {
-            return null;
-        }
-
         $process = new Process(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], $this->projectRoot);
         $process->run();
 
@@ -229,14 +221,6 @@ final readonly class ChangedFiles
         $branch = trim($process->getOutput());
 
         return $branch === '' || $branch === 'HEAD' ? null : $branch;
-    }
-
-    public function gitAvailable(): bool
-    {
-        $process = new Process(['git', 'rev-parse', '--git-dir'], $this->projectRoot);
-        $process->run();
-
-        return $process->isSuccessful();
     }
 
     private function shaIsReachable(string $sha): bool
@@ -322,10 +306,6 @@ final readonly class ChangedFiles
 
     public function currentSha(): ?string
     {
-        if (! $this->gitAvailable()) {
-            return null;
-        }
-
         $process = new Process(['git', 'rev-parse', 'HEAD'], $this->projectRoot);
         $process->run();
 

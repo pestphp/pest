@@ -657,8 +657,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             $changedFiles = new ChangedFiles($projectRoot);
             $branchSha = $graph->recordedAtSha($this->branch);
 
-            if ($changedFiles->gitAvailable()
-                && $branchSha !== null
+            if ($branchSha !== null
                 && $changedFiles->since($branchSha) === null) {
                 $this->renderBadge('WARN', 'Recorded commit is no longer reachable — graph will be rebuilt.');
                 $graph = null;
@@ -811,12 +810,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private function enterReplayMode(Graph $graph, string $projectRoot, array $arguments): array
     {
         $changedFiles = new ChangedFiles($projectRoot);
-
-        if (! $changedFiles->gitAvailable()) {
-            $this->renderBadge('WARN', 'Git unavailable — running full suite.');
-
-            return $arguments;
-        }
 
         $branchSha = $graph->recordedAtSha($this->branch);
         $changed = $changedFiles->since($branchSha) ?? [];

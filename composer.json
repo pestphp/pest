@@ -93,7 +93,6 @@
         "test:inline": "php bin/pest --configuration=phpunit.inline.xml",
         "test:parallel": "php bin/pest --exclude-group=integration --parallel --processes=3",
         "test:integration": "php bin/pest --group=integration -v",
-        "test:tia": "php bin/pest --configuration=tests-tia/phpunit.xml",
         "update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --update-snapshots",
         "test": [
             "@test:lint",
