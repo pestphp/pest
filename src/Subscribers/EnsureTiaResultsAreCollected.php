@@ -6,17 +6,17 @@ namespace Pest\Subscribers;
 
 use Pest\Plugins\Tia\ResultCollector;
 use PHPUnit\Event\Code\TestMethod;
-use PHPUnit\Event\Test\Prepared;
-use PHPUnit\Event\Test\PreparedSubscriber;
+use PHPUnit\Event\Test\PreparationStarted;
+use PHPUnit\Event\Test\PreparationStartedSubscriber;
 
 /**
  * @internal
  */
-final readonly class EnsureTiaResultsAreCollected implements PreparedSubscriber
+final readonly class EnsureTiaResultsAreCollected implements PreparationStartedSubscriber
 {
     public function __construct(private ResultCollector $collector) {}
 
-    public function notify(Prepared $event): void
+    public function notify(PreparationStarted $event): void
     {
         $test = $event->test();
 
