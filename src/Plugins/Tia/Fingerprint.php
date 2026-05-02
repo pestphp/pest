@@ -9,12 +9,12 @@ namespace Pest\Plugins\Tia;
  */
 final readonly class Fingerprint
 {
-    private const int SCHEMA_VERSION = 14;
+    private const int SCHEMA_VERSION = 15;
 
     /**
      * @return array{
      *     structural: array<string, int|string|null>,
-     *     environmental: array<string, string|null>,
+     *     environmental: array<string, int|string|null>,
      * }
      */
     public static function compute(string $projectRoot): array
@@ -22,6 +22,7 @@ final readonly class Fingerprint
         return [
             'structural' => [
                 'schema' => self::SCHEMA_VERSION,
+                'composer_lock' => self::composerLockHash($projectRoot),
                 'phpunit_xml' => self::hashIfExists($projectRoot.'/phpunit.xml'),
                 'phpunit_xml_dist' => self::hashIfExists($projectRoot.'/phpunit.xml.dist'),
                 'pest_factory' => self::contentHashOrNull(__DIR__.'/../../Factories/TestCaseFactory.php'),
@@ -33,6 +34,10 @@ final readonly class Fingerprint
                 'composer_json' => self::composerJsonHash($projectRoot),
             ],
             'environmental' => [
+                'php_minor' => PHP_MAJOR_VERSION,
+
+                // 'extensions' => self::extensionsFingerprint($projectRoot),
+                // 'env_files' => self::envFilesHash($projectRoot),
             ],
         ];
     }
@@ -224,6 +229,11 @@ final readonly class Fingerprint
         $json = json_encode($relevant);
 
         return $json === false ? null : hash('xxh128', $json);
+    }
+
+    private static function composerLockHash(string $projectRoot): ?string
+    {
+        return self::hashIfExists($projectRoot.'/composer.lock');
     }
 
     private static function packageLockHash(string $projectRoot): ?string

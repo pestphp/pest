@@ -49,6 +49,10 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
     private const string FILTERED_OPTION = '--filtered';
 
+    private const string ENV_TIA = 'PEST_TIA';
+
+    private const string ENV_FILTERED = 'PEST_TIA_FILTERED';
+
     public const string KEY_GRAPH = 'graph.json';
 
     public const string KEY_AFFECTED = 'affected.json';
@@ -174,7 +178,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      */
     public static function isEnabledForRun(array $arguments): bool
     {
-        if (in_array(self::OPTION, $arguments, true)) {
+        if (in_array(self::OPTION, $arguments, true) || self::envFlagEnabled(self::ENV_TIA)) {
             return true;
         }
 
@@ -186,6 +190,11 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         return ! ($watchPatterns->isLocally() && in_array('--ci', $arguments, true));
+    }
+
+    private static function envFlagEnabled(string $name): bool
+    {
+        return filter_var(getenv($name), FILTER_VALIDATE_BOOL);
     }
 
     public function getStatus(string $filename, string $testId): ?TestStatus
@@ -249,11 +258,11 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         /** @var WatchPatterns $watchPatterns */
         $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
         $disabled = $this->hasArgument(self::NO_OPTION, $arguments);
-        $cliEnabled = $this->hasArgument(self::OPTION, $arguments);
+        $cliEnabled = $this->hasArgument(self::OPTION, $arguments) || self::envFlagEnabled(self::ENV_TIA);
         $alwaysEnabled = $watchPatterns->isEnabled()
             && (! $watchPatterns->isLocally() || Environment::name() === Environment::LOCAL);
         $enabled = ! $disabled && ($cliEnabled || $alwaysEnabled);
-        $this->filteredMode = ($this->hasArgument(self::FILTERED_OPTION, $arguments) || $watchPatterns->isFiltered())
+        $this->filteredMode = ($this->hasArgument(self::FILTERED_OPTION, $arguments) || self::envFlagEnabled(self::ENV_FILTERED) || $watchPatterns->isFiltered())
             && ! $this->hasExplicitPathArgument($arguments);
         $freshRequested = $this->hasArgument(self::FRESH_OPTION, $arguments);
         $this->forceRefetch = $this->hasArgument(self::REFETCH_OPTION, $arguments);
