@@ -162,7 +162,7 @@ final readonly class Fingerprint
     {
         $parts = [];
 
-        foreach (['vite.config.ts', 'vite.config.js', 'vite.config.mjs', 'vite.config.cjs', 'vite.config.mts'] as $name) {
+        foreach (JsModuleGraph::VITE_CONFIG_NAMES as $name) {
             $hash = self::contentHashOrNull($projectRoot.'/'.$name);
 
             if ($hash !== null) {
