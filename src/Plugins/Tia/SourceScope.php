@@ -10,8 +10,12 @@ use Throwable;
 /**
  * @internal
  */
-final readonly class SourceScope
+final class SourceScope
 {
+    /** @var array<string, bool> */
+    private array $containsCache = [];
+
+
     private const array TOP_LEVEL_NOISE = [
         'vendor',
         'node_modules',
@@ -35,8 +39,8 @@ final readonly class SourceScope
      * @param  list<string>  $excludes  Absolute, normalised directory paths.
      */
     public function __construct(
-        private array $includes,
-        private array $excludes,
+        private readonly array $includes,
+        private readonly array $excludes,
     ) {}
 
     public static function fromProjectRoot(string $projectRoot): self
@@ -99,23 +103,27 @@ final readonly class SourceScope
 
     public function contains(string $absoluteFile): bool
     {
+        if (isset($this->containsCache[$absoluteFile])) {
+            return $this->containsCache[$absoluteFile];
+        }
+
         $real = @realpath($absoluteFile);
         $candidate = $real === false ? $absoluteFile : $real;
         $candidate = self::normalise($candidate);
 
         foreach ($this->excludes as $excluded) {
             if ($this->startsWithDir($candidate, $excluded)) {
-                return false;
+                return $this->containsCache[$absoluteFile] = false;
             }
         }
 
         foreach ($this->includes as $included) {
             if ($this->startsWithDir($candidate, $included)) {
-                return true;
+                return $this->containsCache[$absoluteFile] = true;
             }
         }
 
-        return false;
+        return $this->containsCache[$absoluteFile] = false;
     }
 
     /**
