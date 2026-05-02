@@ -36,11 +36,7 @@ final class InertiaEdges
             return;
         }
 
-        if ($app->bound(self::MARKER)) {
-            return;
-        }
-
-        if (! $app->bound('events')) {
+        if ($app->bound(self::MARKER) || ! $app->bound('events')) {
             return;
         }
 
@@ -54,18 +50,11 @@ final class InertiaEdges
         }
 
         $events->listen(self::REQUEST_HANDLED_EVENT, static function (object $event) use ($recorder): void {
-            if (! property_exists($event, 'response')) {
+            if (! property_exists($event, 'response') || ! is_object($event->response)) {
                 return;
             }
 
-            /** @var mixed $response */
-            $response = $event->response;
-
-            if (! is_object($response)) {
-                return;
-            }
-
-            $component = self::extractComponent($response);
+            $component = self::extractComponent($event->response);
 
             if ($component !== null) {
                 $recorder->linkInertiaComponent($component);
@@ -75,30 +64,14 @@ final class InertiaEdges
 
     private static function extractComponent(object $response): ?string
     {
-        if (property_exists($response, 'headers') && is_object($response->headers)) {
-            $headers = $response->headers;
-
-            if (method_exists($headers, 'has') && $headers->has('X-Inertia')) {
-                $content = self::readContent($response);
-
-                if ($content !== null) {
-                    /** @var mixed $decoded */
-                    $decoded = json_decode($content, true);
-
-                    if (is_array($decoded)
-                        && isset($decoded['component'])
-                        && is_string($decoded['component'])
-                        && $decoded['component'] !== '') {
-                        return $decoded['component'];
-                    }
-                }
-            }
-        }
-
         $content = self::readContent($response);
 
         if ($content === null) {
             return null;
+        }
+
+        if (self::isInertiaJsonResponse($response)) {
+            return self::componentFromJson($content);
         }
 
         if (str_contains($content, 'type="application/json"')
@@ -112,14 +85,21 @@ final class InertiaEdges
 
         if (str_contains($content, 'data-page=')
             && preg_match('/\sdata-page="(\{[^"]+\})"/', $content, $match) === 1) {
-            $component = self::componentFromJson(html_entity_decode($match[1]));
-
-            if ($component !== null) {
-                return $component;
-            }
+            return self::componentFromJson(html_entity_decode($match[1]));
         }
 
         return null;
+    }
+
+    private static function isInertiaJsonResponse(object $response): bool
+    {
+        if (! property_exists($response, 'headers') || ! is_object($response->headers)) {
+            return false;
+        }
+
+        $headers = $response->headers;
+
+        return method_exists($headers, 'has') && $headers->has('X-Inertia') === true;
     }
 
     private static function componentFromJson(string $json): ?string
