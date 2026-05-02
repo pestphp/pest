@@ -69,7 +69,7 @@ final readonly class SourceScope
     }
 
     /**
-     * @return list<string>  Absolute, normalised paths to testsuite directories and files declared in phpunit.xml.
+     * @return list<string> Absolute, normalised paths to testsuite directories and files declared in phpunit.xml.
      */
     public static function testPaths(string $projectRoot): array
     {

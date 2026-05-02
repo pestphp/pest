@@ -17,8 +17,8 @@ final readonly class TestPaths
 {
     /**
      * @param  list<string>  $directories  Project-relative directory prefixes (no trailing slash).
-     * @param  list<string>  $files        Project-relative file paths.
-     * @param  list<string>  $suffixes     Filename suffixes (e.g. '.php').
+     * @param  list<string>  $files  Project-relative file paths.
+     * @param  list<string>  $suffixes  Filename suffixes (e.g. '.php').
      */
     public function __construct(
         private array $directories,

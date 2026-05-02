@@ -19,6 +19,7 @@ use Pest\Plugins\Tia\Graph;
 use Pest\Plugins\Tia\JsModuleGraph;
 use Pest\Plugins\Tia\Recorder;
 use Pest\Plugins\Tia\ResultCollector;
+use Pest\Plugins\Tia\SourceScope;
 use Pest\Plugins\Tia\Storage;
 use Pest\Plugins\Tia\TableExtractor;
 use Pest\Plugins\Tia\WatchPatterns;
@@ -1407,7 +1408,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         ];
 
         $projectRoot = TestSuite::getInstance()->rootPath;
-        $testPaths = \Pest\Plugins\Tia\SourceScope::testPaths($projectRoot);
+        $testPaths = SourceScope::testPaths($projectRoot);
 
         if ($testPaths === []) {
             return false;
