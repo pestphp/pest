@@ -84,6 +84,25 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
     private const string PIGGYBACK_COVERAGE_GLOBAL = 'TIA_PIGGYBACK_COVERAGE';
 
+    /**
+     * PHPUnit/Pest CLI flags whose subsequent argument is a value, not a path.
+     *
+     * @var list<string>
+     */
+    private const array VALUE_TAKING_FLAGS = [
+        '-c', '--configuration', '--bootstrap', '--cache-directory',
+        '--filter', '--group', '--exclude-group', '--covers', '--uses',
+        '--test-suffix', '--testsuite', '--exclude-testsuite',
+        '--printer', '--columns', '--colors', '--order-by', '--random-order-seed',
+        '--include-path', '--whitelist',
+        '--log-junit', '--log-teamcity', '--testdox-html', '--testdox-text',
+        '--coverage-clover', '--coverage-cobertura', '--coverage-crap4j',
+        '--coverage-html', '--coverage-php', '--coverage-text', '--coverage-xml',
+        '--coverage-filter', '--path-coverage',
+        '--repeat', '--retry-times', '--memory-limit', '--seed',
+        '--compact', '--ci-build-id', '--min',
+    ];
+
     private bool $graphWritten = false;
 
     private bool $replayRan = false;
@@ -1386,20 +1405,6 @@ private bool $piggybackCoverage = false;
      */
     private function hasExplicitPathArgument(array $arguments): bool
     {
-        static $valueTakingFlags = [
-            '-c', '--configuration', '--bootstrap', '--cache-directory',
-            '--filter', '--group', '--exclude-group', '--covers', '--uses',
-            '--test-suffix', '--testsuite', '--exclude-testsuite',
-            '--printer', '--columns', '--colors', '--order-by', '--random-order-seed',
-            '--include-path', '--whitelist',
-            '--log-junit', '--log-teamcity', '--testdox-html', '--testdox-text',
-            '--coverage-clover', '--coverage-cobertura', '--coverage-crap4j',
-            '--coverage-html', '--coverage-php', '--coverage-text', '--coverage-xml',
-            '--coverage-filter', '--path-coverage',
-            '--repeat', '--retry-times', '--memory-limit', '--seed',
-            '--compact', '--ci-build-id', '--min',
-        ];
-
         $projectRoot = TestSuite::getInstance()->rootPath;
         $testPaths = SourceScope::testPaths();
 
@@ -1416,7 +1421,7 @@ private bool $piggybackCoverage = false;
             }
             if ($index > 0) {
                 $previous = $arguments[$index - 1] ?? '';
-                if (in_array($previous, $valueTakingFlags, true)) {
+                if (in_array($previous, self::VALUE_TAKING_FLAGS, true)) {
                     continue;
                 }
             }
