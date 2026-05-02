@@ -35,37 +35,27 @@ final readonly class ChangedFiles
 
         foreach (array_keys($candidates) as $file) {
             $snapshot = $lastRunTree[$file] ?? null;
-            $absolute = $this->projectRoot.DIRECTORY_SEPARATOR.$file;
-            $exists = is_file($absolute);
+            $current = $this->currentHash($file);
 
-            if ($snapshot === null) {
+            if ($snapshot === null || $current === null || $current !== $snapshot) {
                 $remaining[] = $file;
-
-                continue;
             }
-
-            if (! $exists) {
-                $remaining[] = $file;
-
-                continue;
-            }
-
-            $hash = ContentHash::of($absolute);
-
-            if ($hash === false) {
-                $remaining[] = $file;
-
-                continue;
-            }
-
-            if ($hash === $snapshot) {
-                continue;
-            }
-
-            $remaining[] = $file;
         }
 
         return $remaining;
+    }
+
+    private function currentHash(string $relativePath): ?string
+    {
+        $absolute = $this->projectRoot.DIRECTORY_SEPARATOR.$relativePath;
+
+        if (! is_file($absolute)) {
+            return null;
+        }
+
+        $hash = ContentHash::of($absolute);
+
+        return $hash === false ? null : $hash;
     }
 
     /**
@@ -142,17 +132,9 @@ final readonly class ChangedFiles
         $remaining = [];
 
         foreach ($files as $file) {
-            $absolute = $this->projectRoot.DIRECTORY_SEPARATOR.$file;
+            $currentHash = $this->currentHash($file);
 
-            if (! is_file($absolute)) {
-                $remaining[] = $file;
-
-                continue;
-            }
-
-            $currentHash = ContentHash::of($absolute);
-
-            if ($currentHash === false) {
+            if ($currentHash === null) {
                 $remaining[] = $file;
 
                 continue;
@@ -166,9 +148,7 @@ final readonly class ChangedFiles
                 continue;
             }
 
-            $baselineHash = ContentHash::ofContent($file, $baselineContent);
-
-            if ($currentHash !== $baselineHash) {
+            if ($currentHash !== ContentHash::ofContent($file, $baselineContent)) {
                 $remaining[] = $file;
             }
         }
