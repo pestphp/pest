@@ -121,14 +121,6 @@ final readonly class SourceScope
     /**
      * @return list<string>
      */
-    public function includes(): array
-    {
-        return $this->includes;
-    }
-
-    /**
-     * @return list<string>
-     */
     private static function topLevelProjectDirs(string $projectRoot): array
     {
         $entries = @scandir($projectRoot);
