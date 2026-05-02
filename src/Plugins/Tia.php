@@ -49,9 +49,17 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
     private const string FILTERED_OPTION = '--filtered';
 
+    private const string LOCALLY_OPTION = '--locally';
+
+    private const string BASELINED_OPTION = '--baselined';
+
     private const string ENV_TIA = 'PEST_TIA';
 
     private const string ENV_FILTERED = 'PEST_TIA_FILTERED';
+
+    private const string ENV_LOCALLY = 'PEST_TIA_LOCALLY';
+
+    private const string ENV_BASELINED = 'PEST_TIA_BASELINED';
 
     public const string KEY_GRAPH = 'graph.json';
 
@@ -178,18 +186,35 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      */
     public static function isEnabledForRun(array $arguments): bool
     {
+        $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
+        assert($watchPatterns instanceof WatchPatterns);
+
+        self::applyWatchPatternMarks($arguments, $watchPatterns);
+
         if (in_array(self::OPTION, $arguments, true) || self::envFlagEnabled(self::ENV_TIA)) {
             return true;
         }
-
-        $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
-        assert($watchPatterns instanceof WatchPatterns);
 
         if (! $watchPatterns->isEnabled()) {
             return false;
         }
 
         return ! ($watchPatterns->isLocally() && in_array('--ci', $arguments, true));
+    }
+
+    /**
+     * @param  array<int, string>  $arguments
+     */
+    private static function applyWatchPatternMarks(array $arguments, WatchPatterns $watchPatterns): void
+    {
+        if (in_array(self::LOCALLY_OPTION, $arguments, true) || self::envFlagEnabled(self::ENV_LOCALLY)) {
+            $watchPatterns->markEnabled();
+            $watchPatterns->markLocally();
+        }
+
+        if (in_array(self::BASELINED_OPTION, $arguments, true) || self::envFlagEnabled(self::ENV_BASELINED)) {
+            $watchPatterns->markBaselined();
+        }
     }
 
     private static function envFlagEnabled(string $name): bool
@@ -257,6 +282,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         /** @var WatchPatterns $watchPatterns */
         $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
+        self::applyWatchPatternMarks($arguments, $watchPatterns);
         $disabled = $this->hasArgument(self::NO_OPTION, $arguments);
         $cliEnabled = $this->hasArgument(self::OPTION, $arguments) || self::envFlagEnabled(self::ENV_TIA);
         $alwaysEnabled = $watchPatterns->isEnabled()
@@ -272,6 +298,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $arguments = $this->popArgument(self::FRESH_OPTION, $arguments);
         $arguments = $this->popArgument(self::REFETCH_OPTION, $arguments);
         $arguments = $this->popArgument(self::FILTERED_OPTION, $arguments);
+        $arguments = $this->popArgument(self::LOCALLY_OPTION, $arguments);
+        $arguments = $this->popArgument(self::BASELINED_OPTION, $arguments);
 
         if ($disabled) {
             $this->forceRefetch = false;
