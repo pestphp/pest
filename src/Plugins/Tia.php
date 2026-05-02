@@ -194,12 +194,16 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      */
     public static function isEnabledForRun(array $arguments): bool
     {
+        if (self::argumentPresent(self::NO_OPTION, $arguments)) {
+            return false;
+        }
+
         $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
         assert($watchPatterns instanceof WatchPatterns);
 
         self::applyWatchPatternMarks($arguments, $watchPatterns);
 
-        if (in_array(self::OPTION, $arguments, true) || self::envFlagEnabled(self::ENV_TIA)) {
+        if (self::argumentPresent(self::OPTION, $arguments) || self::envFlagEnabled(self::ENV_TIA)) {
             return true;
         }
 
@@ -207,7 +211,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return false;
         }
 
-        return ! ($watchPatterns->isLocally() && in_array('--ci', $arguments, true));
+        return ! ($watchPatterns->isLocally() && self::argumentPresent('--ci', $arguments));
     }
 
     /**
@@ -215,14 +219,35 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      */
     private static function applyWatchPatternMarks(array $arguments, WatchPatterns $watchPatterns): void
     {
-        if (in_array(self::LOCALLY_OPTION, $arguments, true) || self::envFlagEnabled(self::ENV_LOCALLY)) {
+        if (self::argumentPresent(self::LOCALLY_OPTION, $arguments) || self::envFlagEnabled(self::ENV_LOCALLY)) {
             $watchPatterns->markEnabled();
             $watchPatterns->markLocally();
         }
 
-        if (in_array(self::BASELINED_OPTION, $arguments, true) || self::envFlagEnabled(self::ENV_BASELINED)) {
+        if (self::argumentPresent(self::BASELINED_OPTION, $arguments) || self::envFlagEnabled(self::ENV_BASELINED)) {
             $watchPatterns->markBaselined();
         }
+    }
+
+    /**
+     * Mirrors {@see \Pest\Plugins\Concerns\HandleArguments::hasArgument()} for
+     * use from static contexts — matches both `--flag` and `--flag=value`.
+     *
+     * @param  array<int, string>  $arguments
+     */
+    private static function argumentPresent(string $argument, array $arguments): bool
+    {
+        foreach ($arguments as $arg) {
+            if ($arg === $argument) {
+                return true;
+            }
+
+            if (str_starts_with($arg, "$argument=")) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static function envFlagEnabled(string $name): bool
