@@ -82,10 +82,11 @@ trait Testable
     public bool $__ran = false;
 
     /**
-     * Set when a `BeforeEachable` plugin returns a cached success result.
-     * Checked in `__runTest` and `tearDown` to skip body + cleanup.
+     * True while this test is being replayed as a cached pass — set in
+     * `setUp()`, checked in `__runTest()` and `tearDown()` to skip the body
+     * and after-each cleanup.
      */
-    private bool $__cachedPass = false;
+    private bool $__replayingPass = false;
 
     /**
      * The test's test closure.
@@ -239,7 +240,7 @@ trait Testable
     {
         TestSuite::getInstance()->test = $this;
 
-        $this->__cachedPass = false;
+        $this->__replayingPass = false;
 
         $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
 
@@ -282,7 +283,7 @@ trait Testable
             assert($status !== null);
 
             match ($replay) {
-                Replay::Pass => $this->__shortCircuitCachedPass(),
+                Replay::Pass => $this->__replayPass(),
                 Replay::Skipped => $this->markTestSkipped($status->message()),
                 Replay::Incomplete => $this->markTestIncomplete($status->message()),
                 Replay::Failure => throw new AssertionFailedError($status->message() ?: 'Cached failure'),
@@ -312,9 +313,9 @@ trait Testable
         $this->__callClosure($beforeEach, $arguments);
     }
 
-    private function __shortCircuitCachedPass(): void
+    private function __replayPass(): void
     {
-        $this->__cachedPass = true;
+        $this->__replayingPass = true;
         $this->__ran = true;
     }
 
@@ -350,7 +351,7 @@ trait Testable
      */
     protected function tearDown(...$arguments): void
     {
-        if ($this->__cachedPass) {
+        if ($this->__replayingPass) {
             TestSuite::getInstance()->test = null;
 
             return;
@@ -381,7 +382,7 @@ trait Testable
      */
     private function __runTest(Closure $closure, ...$args): mixed
     {
-        if ($this->__cachedPass) {
+        if ($this->__replayingPass) {
             // Feed the exact assertion count captured during the recorded
             // run so Pest's "Tests: N passed (M assertions)" banner stays
             // accurate on replay instead of collapsing to 1-per-test.
