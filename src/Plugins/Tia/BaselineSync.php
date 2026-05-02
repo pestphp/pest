@@ -289,21 +289,7 @@ YAML;
     {
         $failureKind = null;
 
-        if (! $this->commandExists('gh')) {
-            Panic::with(new BaselineFetchFailed(
-                'GitHub CLI (gh) not found — cannot fetch baseline.',
-                'Install it from https://cli.github.com.',
-                $hasAnchor,
-            ));
-        }
-
-        if (! $this->ghAuthenticated()) {
-            Panic::with(new BaselineFetchFailed(
-                'GitHub CLI (gh) is not authenticated — cannot fetch baseline.',
-                'Run `gh auth login` and retry.',
-                $hasAnchor,
-            ));
-        }
+        $this->validateGhDependencies($hasAnchor);
 
         [$runId, $listError] = $this->latestSuccessfulRunIdWithError($repo);
 
@@ -350,6 +336,41 @@ YAML;
             return null;
         }
 
+        if (! $this->downloadArtifact($repo, $runId, $runCacheDir, $hasAnchor, $failureKind)) {
+            return null;
+        }
+
+        $payload = $this->validateDownloadedArtifact($runCacheDir, $hasAnchor);
+
+        $this->trimDownloadCache($projectRoot);
+
+        return $payload;
+    }
+
+    private function validateGhDependencies(bool $hasAnchor): void
+    {
+        if (! $this->commandExists('gh')) {
+            Panic::with(new BaselineFetchFailed(
+                'GitHub CLI (gh) not found — cannot fetch baseline.',
+                'Install it from https://cli.github.com.',
+                $hasAnchor,
+            ));
+        }
+
+        if (! $this->ghAuthenticated()) {
+            Panic::with(new BaselineFetchFailed(
+                'GitHub CLI (gh) is not authenticated — cannot fetch baseline.',
+                'Run `gh auth login` and retry.',
+                $hasAnchor,
+            ));
+        }
+    }
+
+    /**
+     * @param-out string|null $failureKind
+     */
+    private function downloadArtifact(string $repo, string $runId, string $runCacheDir, bool $hasAnchor, ?string &$failureKind): bool
+    {
         $artifactSize = $this->artifactSize($repo, $runId);
 
         $this->renderBadge('INFO', $artifactSize !== null
@@ -382,28 +403,36 @@ YAML;
         $process->wait();
         $this->clearProgressLine();
 
-        if (! $process->isSuccessful()) {
-            $this->cleanup($runCacheDir);
-
-            $diagnosis = $this->classifyGhError($process->getErrorOutput().$process->getOutput());
-            $failureKind = $diagnosis['kind'];
-
-            if (in_array($failureKind, ['forbidden', 'not-found'], true)) {
-                Panic::with(new BaselineFetchFailed(
-                    sprintf('Baseline download failed — %s', $diagnosis['message']),
-                    'Verify workflow tia-baseline.yml, artifact pest-tia-baseline, and gh token scope.',
-                    $hasAnchor,
-                ));
-            }
-
-            $this->renderBadge('WARN', sprintf(
-                'Baseline download failed — %s',
-                $diagnosis['message'],
-            ));
-
-            return null;
+        if ($process->isSuccessful()) {
+            return true;
         }
 
+        $this->cleanup($runCacheDir);
+
+        $diagnosis = $this->classifyGhError($process->getErrorOutput().$process->getOutput());
+        $failureKind = $diagnosis['kind'];
+
+        if (in_array($failureKind, ['forbidden', 'not-found'], true)) {
+            Panic::with(new BaselineFetchFailed(
+                sprintf('Baseline download failed — %s', $diagnosis['message']),
+                'Verify workflow tia-baseline.yml, artifact pest-tia-baseline, and gh token scope.',
+                $hasAnchor,
+            ));
+        }
+
+        $this->renderBadge('WARN', sprintf(
+            'Baseline download failed — %s',
+            $diagnosis['message'],
+        ));
+
+        return false;
+    }
+
+    /**
+     * @return array{graph: string, coverage: ?string, sizeOnDisk: int}
+     */
+    private function validateDownloadedArtifact(string $runCacheDir, bool $hasAnchor): array
+    {
         $payload = $this->readArtifact($runCacheDir);
 
         if ($payload === null) {
@@ -415,8 +444,6 @@ YAML;
                 $hasAnchor,
             ));
         }
-
-        $this->trimDownloadCache($projectRoot);
 
         return $payload;
     }

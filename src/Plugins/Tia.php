@@ -479,67 +479,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             $changedFiles->snapshotTree($changedFiles->since($currentSha) ?? []),
         );
 
-        $mergedFiles = [];
-        $mergedTables = [];
-        $mergedInertia = [];
-
-        foreach ($partialKeys as $key) {
-            $data = $this->readPartial($key);
-
-            if ($data === null) {
-                continue;
-            }
-
-            foreach ($data['files'] as $testFile => $sources) {
-                if (! isset($mergedFiles[$testFile])) {
-                    $mergedFiles[$testFile] = [];
-                }
-
-                foreach ($sources as $source) {
-                    $mergedFiles[$testFile][$source] = true;
-                }
-            }
-
-            foreach ($data['tables'] as $testFile => $tables) {
-                if (! isset($mergedTables[$testFile])) {
-                    $mergedTables[$testFile] = [];
-                }
-
-                foreach ($tables as $table) {
-                    $mergedTables[$testFile][$table] = true;
-                }
-            }
-
-            foreach ($data['inertia'] as $testFile => $components) {
-                if (! isset($mergedInertia[$testFile])) {
-                    $mergedInertia[$testFile] = [];
-                }
-
-                foreach ($components as $component) {
-                    $mergedInertia[$testFile][$component] = true;
-                }
-            }
-
-            $this->state->delete($key);
-        }
-
-        $finalised = [];
-
-        foreach ($mergedFiles as $testFile => $sourceSet) {
-            $finalised[$testFile] = array_keys($sourceSet);
-        }
-
-        $finalisedTables = [];
-
-        foreach ($mergedTables as $testFile => $tableSet) {
-            $finalisedTables[$testFile] = array_keys($tableSet);
-        }
-
-        $finalisedInertia = [];
-
-        foreach ($mergedInertia as $testFile => $componentSet) {
-            $finalisedInertia[$testFile] = array_keys($componentSet);
-        }
+        [$finalised, $finalisedTables, $finalisedInertia] = $this->consumePartials($partialKeys);
 
         if ($finalised === []) {
             if ($this->replayRan) {
@@ -1199,6 +1139,43 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         return $token;
+    }
+
+    /**
+     * @param  list<string>  $partialKeys
+     * @return array{0: array<string, list<string>>, 1: array<string, list<string>>, 2: array<string, list<string>>}
+     */
+    private function consumePartials(array $partialKeys): array
+    {
+        $merged = ['files' => [], 'tables' => [], 'inertia' => []];
+
+        foreach ($partialKeys as $key) {
+            $data = $this->readPartial($key);
+
+            if ($data === null) {
+                continue;
+            }
+
+            foreach (['files', 'tables', 'inertia'] as $section) {
+                foreach ($data[$section] as $testFile => $values) {
+                    if (! isset($merged[$section][$testFile])) {
+                        $merged[$section][$testFile] = [];
+                    }
+
+                    foreach ($values as $value) {
+                        $merged[$section][$testFile][$value] = true;
+                    }
+                }
+            }
+
+            $this->state->delete($key);
+        }
+
+        return [
+            array_map(array_keys(...), $merged['files']),
+            array_map(array_keys(...), $merged['tables']),
+            array_map(array_keys(...), $merged['inertia']),
+        ];
     }
 
     /**

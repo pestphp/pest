@@ -15,7 +15,6 @@ final class SourceScope
     /** @var array<string, bool> */
     private array $containsCache = [];
 
-
     private const array TOP_LEVEL_NOISE = [
         'vendor',
         'node_modules',

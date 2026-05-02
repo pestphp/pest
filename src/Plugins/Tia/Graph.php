@@ -86,37 +86,76 @@ final class Graph
      */
     public function affected(array $changedFiles): array
     {
-        $normalised = [];
+        [$migrationPaths, $nonMigrationPaths] = $this->partitionChangedPaths($changedFiles);
+
+        $affectedSet = [];
+
+        $unparseableMigrations = $this->applyMigrationChanges($migrationPaths, $affectedSet);
+
+        [$globalFrontendRuntimeFiles, $preciselyHandledPages, $sharedFilesResolved]
+            = $this->applyInertiaChanges($nonMigrationPaths, $affectedSet);
+
+        $unknownSourceDirs = $this->applyPhpEdgeChanges($nonMigrationPaths, $affectedSet);
+
+        $this->applyTestFileChanges($nonMigrationPaths, $affectedSet);
+
+        $staticallyHandledBlade = $this->applyBladeStaticChanges($nonMigrationPaths, $affectedSet);
+
+        $this->applyWatchPatternFallback(
+            $nonMigrationPaths,
+            $unparseableMigrations,
+            $preciselyHandledPages,
+            $sharedFilesResolved,
+            $staticallyHandledBlade,
+            $affectedSet,
+        );
+
+        $this->applyUnknownSourceDirs($unknownSourceDirs, $affectedSet);
+
+        return array_keys($affectedSet);
+    }
+
+    /**
+     * @param  array<int, string>  $changedFiles
+     * @return array{0: list<string>, 1: list<string>}
+     */
+    private function partitionChangedPaths(array $changedFiles): array
+    {
+        $migrations = [];
+        $nonMigrations = [];
 
         foreach ($changedFiles as $file) {
             $rel = $this->relative($file);
 
-            if ($rel !== null) {
-                $normalised[] = $rel;
+            if ($rel === null) {
+                continue;
             }
-        }
 
-        $affectedSet = [];
-
-        $migrationPaths = [];
-        $nonMigrationPaths = [];
-
-        foreach ($normalised as $rel) {
             if ($this->isMigrationPath($rel)) {
-                $migrationPaths[] = $rel;
+                $migrations[] = $rel;
             } else {
-                $nonMigrationPaths[] = $rel;
+                $nonMigrations[] = $rel;
             }
         }
 
+        return [$migrations, $nonMigrations];
+    }
+
+    /**
+     * @param  list<string>  $migrationPaths
+     * @param  array<string, true>  $affectedSet
+     * @return list<string> Unparseable migrations (caller treats as unknown-to-graph).
+     */
+    private function applyMigrationChanges(array $migrationPaths, array &$affectedSet): array
+    {
         $changedTables = [];
-        $unparseableMigrations = [];
+        $unparseable = [];
 
         foreach ($migrationPaths as $rel) {
             $tables = $this->tablesForMigration($rel);
 
             if ($tables === []) {
-                $unparseableMigrations[] = $rel;
+                $unparseable[] = $rel;
 
                 continue;
             }
@@ -142,6 +181,17 @@ final class Graph
             }
         }
 
+        return $unparseable;
+    }
+
+    /**
+     * @param  list<string>  $nonMigrationPaths
+     * @param  array<string, true>  $affectedSet
+     * @return array{0: array<string, true>, 1: array<string, true>, 2: array<string, true>}
+     *                                                                                       globalFrontendRuntimeFiles, preciselyHandledPages, sharedFilesResolved
+     */
+    private function applyInertiaChanges(array $nonMigrationPaths, array &$affectedSet): array
+    {
         $globalFrontendRuntimeFiles = [];
 
         foreach ($nonMigrationPaths as $rel) {
@@ -173,6 +223,7 @@ final class Graph
         }
 
         $sharedFilesResolved = [];
+
         foreach ($nonMigrationPaths as $rel) {
             if (isset($globalFrontendRuntimeFiles[$rel])) {
                 continue;
@@ -180,12 +231,12 @@ final class Graph
             if (isset($preciselyHandledPages[$rel])) {
                 continue;
             }
-
             if (! isset($this->jsFileToComponents[$rel])) {
                 continue;
             }
 
             $touchedAny = false;
+
             foreach ($this->jsFileToComponents[$rel] as $pageComponent) {
                 if ($this->anyTestUses($this->testInertiaComponents, $pageComponent)) {
                     $changedComponents[$pageComponent] = true;
@@ -199,6 +250,7 @@ final class Graph
         }
 
         $newJsFiles = [];
+
         foreach ($nonMigrationPaths as $rel) {
             if (isset($globalFrontendRuntimeFiles[$rel])) {
                 continue;
@@ -219,39 +271,7 @@ final class Graph
         }
 
         if ($newJsFiles !== []) {
-            $freshMap = JsModuleGraph::buildStrict($this->projectRoot);
-
-            if ($freshMap === null) {
-                View::render('components.badge', [
-                    'type' => 'WARN',
-                    'content' => sprintf(
-                        'Vite resolver unavailable — falling back to watch pattern for %d new JS file(s).',
-                        count($newJsFiles),
-                    ),
-                ]);
-            } else {
-                foreach ($newJsFiles as $rel) {
-                    $pages = $freshMap[$rel] ?? [];
-
-                    if ($pages === []) {
-                        $sharedFilesResolved[$rel] = true;
-
-                        continue;
-                    }
-
-                    $touchedAny = false;
-                    foreach ($pages as $pageComponent) {
-                        if ($this->anyTestUses($this->testInertiaComponents, $pageComponent)) {
-                            $changedComponents[$pageComponent] = true;
-                            $touchedAny = true;
-                        }
-                    }
-
-                    if ($touchedAny) {
-                        $sharedFilesResolved[$rel] = true;
-                    }
-                }
-            }
+            $this->resolveNewJsFiles($newJsFiles, $changedComponents, $sharedFilesResolved);
         }
 
         if ($changedComponents !== []) {
@@ -270,6 +290,61 @@ final class Graph
             }
         }
 
+        return [$globalFrontendRuntimeFiles, $preciselyHandledPages, $sharedFilesResolved];
+    }
+
+    /**
+     * @param  list<string>  $newJsFiles
+     * @param  array<string, true>  $changedComponents
+     * @param  array<string, true>  $sharedFilesResolved
+     */
+    private function resolveNewJsFiles(array $newJsFiles, array &$changedComponents, array &$sharedFilesResolved): void
+    {
+        $freshMap = JsModuleGraph::buildStrict($this->projectRoot);
+
+        if ($freshMap === null) {
+            View::render('components.badge', [
+                'type' => 'WARN',
+                'content' => sprintf(
+                    'Vite resolver unavailable — falling back to watch pattern for %d new JS file(s).',
+                    count($newJsFiles),
+                ),
+            ]);
+
+            return;
+        }
+
+        foreach ($newJsFiles as $rel) {
+            $pages = $freshMap[$rel] ?? [];
+
+            if ($pages === []) {
+                $sharedFilesResolved[$rel] = true;
+
+                continue;
+            }
+
+            $touchedAny = false;
+
+            foreach ($pages as $pageComponent) {
+                if ($this->anyTestUses($this->testInertiaComponents, $pageComponent)) {
+                    $changedComponents[$pageComponent] = true;
+                    $touchedAny = true;
+                }
+            }
+
+            if ($touchedAny) {
+                $sharedFilesResolved[$rel] = true;
+            }
+        }
+    }
+
+    /**
+     * @param  list<string>  $nonMigrationPaths
+     * @param  array<string, true>  $affectedSet
+     * @return array<string, true> Unknown source dirs (sibling-heuristic).
+     */
+    private function applyPhpEdgeChanges(array $nonMigrationPaths, array &$affectedSet): array
+    {
         $changedIds = [];
         $unknownSourceDirs = [];
         $sourcePhpChanged = false;
@@ -286,9 +361,7 @@ final class Graph
             }
 
             if (str_ends_with($rel, '.php') && ! str_starts_with($rel, 'tests/')) {
-                $absolute = $this->projectRoot.'/'.$rel;
-
-                if (! is_file($absolute)) {
+                if (! is_file($this->projectRoot.'/'.$rel)) {
                     continue;
                 }
 
@@ -320,8 +393,18 @@ final class Graph
             }
         }
 
-        // A changed file inside the configured test suites is itself the unit
-        // of work — always run it (new untracked tests, edited tests, renames).
+        return $unknownSourceDirs;
+    }
+
+    /**
+     * A changed file inside the configured test suites is itself the unit of
+     * work — always run it (new untracked tests, edited tests, renames).
+     *
+     * @param  list<string>  $nonMigrationPaths
+     * @param  array<string, true>  $affectedSet
+     */
+    private function applyTestFileChanges(array $nonMigrationPaths, array &$affectedSet): void
+    {
         $testPaths = TestPaths::fromProjectRoot($this->projectRoot);
 
         foreach ($nonMigrationPaths as $rel) {
@@ -336,9 +419,19 @@ final class Graph
             }
             $affectedSet[$rel] = true;
         }
+    }
 
-        // Unknown Blade files: walk static references (@include, @extends, <x-*>) up to rendered
-        $staticallyHandledBlade = [];
+    /**
+     * Unknown Blade files: walk static references (@include, @extends, <x-*>) up to rendered.
+     *
+     * @param  list<string>  $nonMigrationPaths
+     * @param  array<string, true>  $affectedSet
+     * @return array<string, true>
+     */
+    private function applyBladeStaticChanges(array $nonMigrationPaths, array &$affectedSet): array
+    {
+        $staticallyHandled = [];
+
         foreach ($nonMigrationPaths as $rel) {
             if (isset($this->fileIds[$rel])) {
                 continue;
@@ -357,13 +450,33 @@ final class Graph
                     $affectedSet[$testFile] = true;
                 }
 
-                $staticallyHandledBlade[$rel] = true;
+                $staticallyHandled[$rel] = true;
             } elseif ($this->isBladeComponentPath($rel)) {
-                $staticallyHandledBlade[$rel] = true;
+                $staticallyHandled[$rel] = true;
             }
         }
 
+        return $staticallyHandled;
+    }
+
+    /**
+     * @param  list<string>  $nonMigrationPaths
+     * @param  list<string>  $unparseableMigrations
+     * @param  array<string, true>  $preciselyHandledPages
+     * @param  array<string, true>  $sharedFilesResolved
+     * @param  array<string, true>  $staticallyHandledBlade
+     * @param  array<string, true>  $affectedSet
+     */
+    private function applyWatchPatternFallback(
+        array $nonMigrationPaths,
+        array $unparseableMigrations,
+        array $preciselyHandledPages,
+        array $sharedFilesResolved,
+        array $staticallyHandledBlade,
+        array &$affectedSet,
+    ): void {
         $unknownToGraph = $unparseableMigrations;
+
         foreach ($nonMigrationPaths as $rel) {
             if (isset($preciselyHandledPages[$rel])) {
                 continue;
@@ -392,30 +505,37 @@ final class Graph
         foreach ($watchPatterns->testsUnderDirectories($dirs, $allTestFiles) as $testFile) {
             $affectedSet[$testFile] = true;
         }
+    }
 
-        if ($unknownSourceDirs !== []) {
-            foreach ($this->edges as $testFile => $ids) {
-                if (isset($affectedSet[$testFile])) {
+    /**
+     * @param  array<string, true>  $unknownSourceDirs
+     * @param  array<string, true>  $affectedSet
+     */
+    private function applyUnknownSourceDirs(array $unknownSourceDirs, array &$affectedSet): void
+    {
+        if ($unknownSourceDirs === []) {
+            return;
+        }
+
+        foreach ($this->edges as $testFile => $ids) {
+            if (isset($affectedSet[$testFile])) {
+                continue;
+            }
+
+            foreach ($ids as $id) {
+                if (! isset($this->files[$id])) {
                     continue;
                 }
 
-                foreach ($ids as $id) {
-                    if (! isset($this->files[$id])) {
-                        continue;
-                    }
+                $depDir = dirname($this->files[$id]);
 
-                    $depDir = dirname($this->files[$id]);
+                if (isset($unknownSourceDirs[$depDir])) {
+                    $affectedSet[$testFile] = true;
 
-                    if (isset($unknownSourceDirs[$depDir])) {
-                        $affectedSet[$testFile] = true;
-
-                        break;
-                    }
+                    break;
                 }
             }
         }
-
-        return array_keys($affectedSet);
     }
 
     public function knowsTest(string $testFile): bool
@@ -1229,76 +1349,49 @@ final class Graph
         $graph->edges = is_array($data['edges'] ?? null) ? $data['edges'] : [];
         $graph->baselines = is_array($data['baselines'] ?? null) ? $data['baselines'] : [];
 
-        if (isset($data['test_tables']) && is_array($data['test_tables'])) {
-            foreach ($data['test_tables'] as $testRel => $tables) {
-                if (! is_string($testRel)) {
-                    continue;
-                }
-                if (! is_array($tables)) {
-                    continue;
-                }
-                $names = [];
-
-                foreach ($tables as $table) {
-                    if (is_string($table) && $table !== '') {
-                        $names[] = $table;
-                    }
-                }
-
-                if ($names !== []) {
-                    $graph->testTables[$testRel] = $names;
-                }
-            }
-        }
-
-        if (isset($data['test_inertia_components']) && is_array($data['test_inertia_components'])) {
-            foreach ($data['test_inertia_components'] as $testRel => $components) {
-                if (! is_string($testRel)) {
-                    continue;
-                }
-                if (! is_array($components)) {
-                    continue;
-                }
-                $names = [];
-
-                foreach ($components as $component) {
-                    if (is_string($component) && $component !== '') {
-                        $names[] = $component;
-                    }
-                }
-
-                if ($names !== []) {
-                    $graph->testInertiaComponents[$testRel] = $names;
-                }
-            }
-        }
-
-        if (isset($data['js_file_to_components']) && is_array($data['js_file_to_components'])) {
-            foreach ($data['js_file_to_components'] as $path => $components) {
-                if (! is_string($path)) {
-                    continue;
-                }
-                if ($path === '') {
-                    continue;
-                }
-                if (! is_array($components)) {
-                    continue;
-                }
-                $names = [];
-
-                foreach ($components as $component) {
-                    if (is_string($component) && $component !== '') {
-                        $names[] = $component;
-                    }
-                }
-
-                if ($names !== []) {
-                    $graph->jsFileToComponents[$path] = $names;
-                }
-            }
-        }
+        $graph->testTables = self::decodeStringMap($data['test_tables'] ?? null);
+        $graph->testInertiaComponents = self::decodeStringMap($data['test_inertia_components'] ?? null);
+        $graph->jsFileToComponents = self::decodeStringMap($data['js_file_to_components'] ?? null);
 
         return $graph;
+    }
+
+    /**
+     * @return array<string, list<string>>
+     */
+    private static function decodeStringMap(mixed $section): array
+    {
+        if (! is_array($section)) {
+            return [];
+        }
+
+        $out = [];
+
+        foreach ($section as $key => $values) {
+            if (! is_string($key)) {
+                continue;
+            }
+            if ($key === '') {
+                continue;
+            }
+            if (! is_array($values)) {
+                continue;
+            }
+
+            $names = [];
+
+            foreach ($values as $value) {
+                if (is_string($value) && $value !== '') {
+                    $names[] = $value;
+                }
+            }
+
+            if ($names !== []) {
+                $out[$key] = $names;
+            }
+        }
+
+        return $out;
     }
 
     public function encode(): ?string

@@ -64,30 +64,11 @@ final readonly class Fingerprint
      */
     public static function structuralDrift(array $stored, array $current): array
     {
-        $a = self::structuralOnly($stored);
-        $b = self::structuralOnly($current);
-
-        $drifts = [];
-
-        foreach ($a as $key => $value) {
-            if ($key === 'schema') {
-                continue;
-            }
-            if (($b[$key] ?? null) !== $value) {
-                $drifts[] = $key;
-            }
-        }
-
-        foreach ($b as $key => $value) {
-            if ($key === 'schema') {
-                continue;
-            }
-            if (! array_key_exists($key, $a) && $value !== null) {
-                $drifts[] = $key;
-            }
-        }
-
-        return array_values(array_unique($drifts));
+        return self::detectDrift(
+            self::structuralOnly($stored),
+            self::structuralOnly($current),
+            'schema',
+        );
     }
 
     /**
@@ -97,18 +78,34 @@ final readonly class Fingerprint
      */
     public static function environmentalDrift(array $stored, array $current): array
     {
-        $a = self::environmentalOnly($stored);
-        $b = self::environmentalOnly($current);
+        return self::detectDrift(
+            self::environmentalOnly($stored),
+            self::environmentalOnly($current),
+        );
+    }
 
+    /**
+     * @param  array<string, mixed>  $a
+     * @param  array<string, mixed>  $b
+     * @return list<string>
+     */
+    private static function detectDrift(array $a, array $b, ?string $skipKey = null): array
+    {
         $drifts = [];
 
         foreach ($a as $key => $value) {
+            if ($key === $skipKey) {
+                continue;
+            }
             if (($b[$key] ?? null) !== $value) {
                 $drifts[] = $key;
             }
         }
 
         foreach ($b as $key => $value) {
+            if ($key === $skipKey) {
+                continue;
+            }
             if (! array_key_exists($key, $a) && $value !== null) {
                 $drifts[] = $key;
             }
