@@ -912,9 +912,10 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             $reasons === [] ? '' : ' ('.implode(', ', $reasons).')',
         ));
 
-        $previewLimit = 10;
         $sorted = $affected;
         sort($sorted);
+
+        $previewLimit = $this->output->isVerbose() ? count($sorted) : 10;
         $preview = array_slice($sorted, 0, $previewLimit);
 
         foreach ($preview as $file) {
