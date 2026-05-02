@@ -10,6 +10,7 @@ use Pest\Support\View;
 use Pest\TestSuite;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestStatus\TestStatus;
+use PHPUnit\TextUI\Configuration\Registry;
 
 /**
  * @internal
@@ -566,17 +567,58 @@ final class Graph
     private function shouldRerun(int $status): bool
     {
         $testStatus = TestStatus::from($status);
-        if ($testStatus->isFailure()) {
-            return true;
-        }
-        if ($testStatus->isError()) {
-            return true;
-        }
-        if ($testStatus->isIncomplete()) {
+
+        if ($testStatus->isFailure() || $testStatus->isError()) {
             return true;
         }
 
-        return $testStatus->isRisky();
+        $configuration = Registry::get();
+
+        if ($testStatus->isRisky()) {
+            return $configuration->failOnRisky();
+        }
+
+        if ($testStatus->isWarning()) {
+            if ($configuration->failOnWarning()) {
+                return true;
+            }
+
+            return $configuration->displayDetailsOnTestsThatTriggerWarnings();
+        }
+
+        if ($testStatus->isNotice()) {
+            if ($configuration->failOnNotice()) {
+                return true;
+            }
+
+            return $configuration->displayDetailsOnTestsThatTriggerNotices();
+        }
+
+        if ($testStatus->isDeprecation()) {
+            if ($configuration->failOnDeprecation()) {
+                return true;
+            }
+
+            return $configuration->displayDetailsOnTestsThatTriggerDeprecations();
+        }
+
+        if ($testStatus->isIncomplete()) {
+            if ($configuration->failOnIncomplete()) {
+                return true;
+            }
+
+            return $configuration->displayDetailsOnIncompleteTests();
+        }
+
+        if ($testStatus->isSkipped()) {
+            if ($configuration->failOnSkipped()) {
+                return true;
+            }
+
+            return $configuration->displayDetailsOnSkippedTests();
+        }
+
+        return false;
     }
 
     /**

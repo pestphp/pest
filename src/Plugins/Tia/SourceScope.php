@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
+use PHPUnit\TextUI\Configuration\Registry;
+use Throwable;
+
 /**
  * @internal
  */
@@ -38,19 +41,21 @@ final readonly class SourceScope
 
     public static function fromProjectRoot(string $projectRoot): self
     {
-        $configPath = self::configPath($projectRoot);
-
         $phpunitIncludes = [];
         $phpunitExcludes = [];
 
-        if ($configPath !== null) {
-            $xml = @simplexml_load_file($configPath);
+        try {
+            $source = Registry::get()->source();
 
-            if ($xml !== false) {
-                $configDir = dirname($configPath);
-                $phpunitIncludes = self::extractDirectories($xml, 'source/include/directory', $configDir);
-                $phpunitExcludes = self::extractDirectories($xml, 'source/exclude/directory', $configDir);
+            foreach ($source->includeDirectories() as $dir) {
+                $phpunitIncludes[] = self::normalise($dir->path());
             }
+
+            foreach ($source->excludeDirectories() as $dir) {
+                $phpunitExcludes[] = self::normalise($dir->path());
+            }
+        } catch (Throwable) {
+            // Registry not initialized — fall back to project-root scanning.
         }
 
         $rootIncludes = self::topLevelProjectDirs($projectRoot);
@@ -71,26 +76,25 @@ final readonly class SourceScope
     /**
      * @return list<string> Absolute, normalised paths to testsuite directories and files declared in phpunit.xml.
      */
-    public static function testPaths(string $projectRoot): array
+    public static function testPaths(): array
     {
-        $configPath = self::configPath($projectRoot);
-
-        if ($configPath === null) {
+        try {
+            $suites = Registry::get()->testSuite();
+        } catch (Throwable) {
             return [];
         }
+        $out = [];
+        foreach ($suites as $suite) {
+            foreach ($suite->directories() as $directory) {
+                $out[] = self::normalise($directory->path());
+            }
 
-        $xml = @simplexml_load_file($configPath);
-
-        if ($xml === false) {
-            return [];
+            foreach ($suite->files() as $file) {
+                $out[] = self::normalise($file->path());
+            }
         }
 
-        $configDir = dirname($configPath);
-
-        return array_values(array_unique([
-            ...self::extractDirectories($xml, 'testsuites/testsuite/directory', $configDir),
-            ...self::extractDirectories($xml, 'testsuites/testsuite/file', $configDir),
-        ]));
+        return array_values(array_unique($out));
     }
 
     public function contains(string $absoluteFile): bool
@@ -120,45 +124,6 @@ final readonly class SourceScope
     public function includes(): array
     {
         return $this->includes;
-    }
-
-    private static function configPath(string $projectRoot): ?string
-    {
-        foreach (['phpunit.xml', 'phpunit.xml.dist'] as $name) {
-            $candidate = $projectRoot.DIRECTORY_SEPARATOR.$name;
-
-            if (is_file($candidate)) {
-                return $candidate;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * @return list<string>
-     */
-    private static function extractDirectories(\SimpleXMLElement $xml, string $xpath, string $configDir): array
-    {
-        $nodes = $xml->xpath($xpath);
-
-        if (! is_array($nodes)) {
-            return [];
-        }
-
-        $out = [];
-
-        foreach ($nodes as $node) {
-            $value = trim((string) $node);
-
-            if ($value === '') {
-                continue;
-            }
-
-            $out[] = self::resolveRelative($value, $configDir);
-        }
-
-        return array_values(array_unique($out));
     }
 
     /**
@@ -214,22 +179,6 @@ final readonly class SourceScope
         }
 
         return $out;
-    }
-
-    private static function resolveRelative(string $path, string $configDir): string
-    {
-        $isAbsolute = $path !== '' && ($path[0] === DIRECTORY_SEPARATOR || $path[0] === '/'
-            || (strlen($path) >= 2 && $path[1] === ':'));
-
-        $combined = $isAbsolute ? $path : $configDir.DIRECTORY_SEPARATOR.$path;
-
-        $real = @realpath($combined);
-
-        if ($real === false) {
-            return self::normalise($combined);
-        }
-
-        return self::normalise($real);
     }
 
     private static function normalise(string $path): string

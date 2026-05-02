@@ -584,7 +584,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         if (! Fingerprint::structuralMatches($stored, $current)) {
             $drift = Fingerprint::structuralDrift($stored, $current);
 
-            $this->renderBadge('INFO', sprintf(
+            $this->renderChild(sprintf(
                 'Graph structure outdated (%s).',
                 $this->formatStructuralDrift($drift),
             ));
@@ -1446,7 +1446,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         ];
 
         $projectRoot = TestSuite::getInstance()->rootPath;
-        $testPaths = SourceScope::testPaths($projectRoot);
+        $testPaths = SourceScope::testPaths();
 
         if ($testPaths === []) {
             return false;

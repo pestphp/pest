@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 use Pest\TestSuite;
+use PHPUnit\TextUI\Configuration\Registry;
+use Throwable;
 
 /**
  * Resolves the set of project-relative paths that are considered test files,
@@ -28,39 +30,48 @@ final readonly class TestPaths
 
     public static function fromProjectRoot(string $projectRoot): self
     {
-        $configPath = self::configPath($projectRoot);
-
         $directories = [];
         $files = [];
-        $suffixes = ['.php'];
+        $suffixes = [];
 
-        if ($configPath !== null) {
-            $xml = @simplexml_load_file($configPath);
+        try {
+            $configuration = Registry::get();
 
-            if ($xml !== false) {
-                $configDir = dirname($configPath);
-
-                foreach ($xml->xpath('testsuites/testsuite/directory') ?: [] as $node) {
-                    $rel = self::toRelative((string) $node, $configDir, $projectRoot);
+            foreach ($configuration->testSuite() as $suite) {
+                foreach ($suite->directories() as $directory) {
+                    $rel = self::toRelative($directory->path(), $projectRoot);
 
                     if ($rel !== null) {
                         $directories[] = $rel;
                     }
 
-                    $suffix = (string) ($node['suffix'] ?? '');
-                    if ($suffix !== '' && ! in_array($suffix, $suffixes, true)) {
+                    $suffix = $directory->suffix();
+
+                    if ($suffix !== '') {
                         $suffixes[] = str_starts_with($suffix, '.') ? $suffix : '.'.$suffix;
                     }
                 }
 
-                foreach ($xml->xpath('testsuites/testsuite/file') ?: [] as $node) {
-                    $rel = self::toRelative((string) $node, $configDir, $projectRoot);
+                foreach ($suite->files() as $file) {
+                    $rel = self::toRelative($file->path(), $projectRoot);
 
                     if ($rel !== null) {
                         $files[] = $rel;
                     }
                 }
             }
+
+            if ($suffixes === []) {
+                foreach ($configuration->testSuffixes() as $suffix) {
+                    $suffixes[] = str_starts_with($suffix, '.') ? $suffix : '.'.$suffix;
+                }
+            }
+        } catch (Throwable) {
+            // Registry not initialized — fall through to defaults.
+        }
+
+        if ($suffixes === []) {
+            $suffixes = ['.php'];
         }
 
         if ($directories === [] && $files === []) {
@@ -109,20 +120,7 @@ final readonly class TestPaths
         return false;
     }
 
-    private static function configPath(string $projectRoot): ?string
-    {
-        foreach (['phpunit.xml', 'phpunit.xml.dist'] as $name) {
-            $candidate = $projectRoot.DIRECTORY_SEPARATOR.$name;
-
-            if (is_file($candidate)) {
-                return $candidate;
-            }
-        }
-
-        return null;
-    }
-
-    private static function toRelative(string $value, string $configDir, string $projectRoot): ?string
+    private static function toRelative(string $value, string $projectRoot): ?string
     {
         $value = trim($value);
 
@@ -130,13 +128,8 @@ final readonly class TestPaths
             return null;
         }
 
-        $isAbsolute = $value[0] === '/' || $value[0] === DIRECTORY_SEPARATOR
-            || (strlen($value) >= 2 && $value[1] === ':');
-
-        $combined = $isAbsolute ? $value : $configDir.DIRECTORY_SEPARATOR.$value;
-
-        $real = @realpath($combined);
-        $resolved = $real === false ? $combined : $real;
+        $real = @realpath($value);
+        $resolved = $real === false ? $value : $real;
 
         $resolved = str_replace(DIRECTORY_SEPARATOR, '/', $resolved);
         $root = str_replace(DIRECTORY_SEPARATOR, '/', rtrim($projectRoot, '/\\')).'/';
@@ -152,7 +145,7 @@ final readonly class TestPaths
     {
         try {
             $testPath = TestSuite::getInstance()->testPath;
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return null;
         }
 
