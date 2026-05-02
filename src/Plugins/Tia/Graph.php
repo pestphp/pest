@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
+use Pest\Factories\Attribute;
 use Pest\Factories\TestCaseFactory;
+use Pest\Factories\TestCaseMethodFactory;
 use Pest\Support\Container;
 use Pest\Support\View;
 use Pest\TestSuite;
@@ -1003,27 +1005,14 @@ final class Graph
         return $this->archTestFiles;
     }
 
-    private function methodHasGroup(object $method, string $group): bool
+    private function methodHasGroup(TestCaseMethodFactory $method, string $group): bool
     {
-        if (property_exists($method, 'groups') && is_array($method->groups) && in_array($group, $method->groups, true)) {
+        if (in_array($group, $method->groups, true)) {
             return true;
         }
 
-        if (! property_exists($method, 'attributes') || ! is_array($method->attributes)) {
-            return false;
-        }
-
         foreach ($method->attributes as $attribute) {
-            if (! is_object($attribute)) {
-                continue;
-            }
-            if (! property_exists($attribute, 'name')) {
-                continue;
-            }
-            if ($attribute->name !== Group::class) {
-                continue;
-            }
-            if (! property_exists($attribute, 'arguments')) {
+            if (! $attribute instanceof Attribute || $attribute->name !== Group::class) {
                 continue;
             }
 
