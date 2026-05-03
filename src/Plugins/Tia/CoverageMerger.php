@@ -31,6 +31,7 @@ final class CoverageMerger
             $current = self::requireCoverage($reportPath);
 
             if ($current instanceof CodeCoverage) {
+                self::primeUncoveredFiles($current);
                 $state->write(Tia::KEY_COVERAGE_CACHE, self::compress(serialize($current)));
             }
 
@@ -52,6 +53,9 @@ final class CoverageMerger
             return;
         }
 
+        self::primeUncoveredFiles($cached);
+        self::primeUncoveredFiles($current);
+
         self::stripCurrentTestsFromCached($cached, $current);
 
         $cached->merge($current);
@@ -63,6 +67,11 @@ final class CoverageMerger
             '<?php return unserialize('.var_export($serialised, true).");\n",
         );
         $state->write(Tia::KEY_COVERAGE_CACHE, self::compress($serialised));
+    }
+
+    private static function primeUncoveredFiles(CodeCoverage $coverage): void
+    {
+        $coverage->getData(false);
     }
 
     private static function compress(string $bytes): string
