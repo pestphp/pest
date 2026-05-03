@@ -10,6 +10,7 @@ use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Contracts\Plugins\Terminable;
 use Pest\Exceptions\NoAffectedTestsFound;
 use Pest\Panic;
+use Pest\Plugins\Concerns\HandleArguments;
 use Pest\Plugins\Tia\BaselineSync;
 use Pest\Plugins\Tia\ChangedFiles;
 use Pest\Plugins\Tia\Contracts\State;
@@ -36,7 +37,7 @@ use Symfony\Component\Process\Process;
  */
 final class Tia implements AddsOutput, HandlesArguments, Terminable
 {
-    use Concerns\HandleArguments;
+    use HandleArguments;
 
     private const string OPTION = '--tia';
 
@@ -230,7 +231,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Mirrors {@see \Pest\Plugins\Concerns\HandleArguments::hasArgument()} for
+     * Mirrors {@see HandleArguments::hasArgument()} for
      * use from static contexts — matches both `--flag` and `--flag=value`.
      *
      * @param  array<int, string>  $arguments
