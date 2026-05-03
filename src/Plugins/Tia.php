@@ -139,6 +139,10 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
     private bool $filteredMode = false;
 
+    private ?string $driftLabel = null;
+
+    private ?string $driftDetails = null;
+
     public function __construct(
         private readonly OutputInterface $output,
         private readonly Recorder $recorder,
@@ -559,10 +563,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         if (! Fingerprint::structuralMatches($stored, $current)) {
             $drift = Fingerprint::structuralDrift($stored, $current);
 
-            $this->renderChild(sprintf(
-                'Graph structure outdated (%s).',
-                $this->formatStructuralDrift($drift),
-            ));
+            $this->driftLabel = $this->formatStructuralDrift($drift);
 
             if (in_array('composer_lock', $drift, true)) {
                 $branchSha = $graph->recordedAtSha($this->branch);
@@ -572,7 +573,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                         $branchSha,
                     );
                     if ($summary !== '') {
-                        $this->renderChild($summary);
+                        $this->driftDetails = $summary;
                     }
                 }
             }
@@ -921,7 +922,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         $this->renderChild(sprintf(
-            'TIA mode enabled / %d affected test file%s%s.',
+            'Experimental TIA mode enabled / %d affected test file%s%s.',
             count($affected),
             count($affected) === 1 ? '' : 's',
             $reasons === [] ? '' : ' ('.implode(', ', $reasons).')',
@@ -982,7 +983,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             }
 
             $this->output->writeln('');
-            $this->renderChild('TIA mode enabled / fresh graph.');
+            $this->renderFreshGraph();
 
             return $arguments;
         }
@@ -991,7 +992,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             $this->recordingActive = true;
 
             $this->output->writeln('');
-            $this->renderChild('TIA mode enabled / fresh graph.');
+            $this->renderFreshGraph();
 
             return $arguments;
         }
@@ -1002,6 +1003,25 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $this->renderChild('Running in TIA mode.');
 
         return $arguments;
+    }
+
+    private function renderFreshGraph(): void
+    {
+        $headline = 'Experimental TIA mode enabled / fresh graph';
+
+        if ($this->driftLabel !== null) {
+            $headline .= sprintf(' (%s changed)', $this->driftLabel);
+        } else {
+            $headline .= '.';
+        }
+
+        $this->renderChild($headline);
+
+        if ($this->driftDetails !== null) {
+            foreach (explode(', ', $this->driftDetails) as $detail) {
+                $this->output->writeln(sprintf('    <fg=gray>%s</>', $detail));
+            }
+        }
     }
 
     private function emitCoverageDriverMissing(): void
