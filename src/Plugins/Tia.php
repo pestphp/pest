@@ -323,7 +323,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             && (! $watchPatterns->isLocally() || Environment::name() === Environment::LOCAL);
         $enabled = ! $disabled && ($cliEnabled || $alwaysEnabled);
         $this->filteredMode = ($this->hasArgument(self::FILTERED_OPTION, $arguments) || self::envFlagEnabled(self::ENV_FILTERED) || $watchPatterns->isFiltered())
-            && ! $this->hasExplicitPathArgument($arguments);
+            && ! $this->hasExplicitPathArgument($arguments)
+            && ! $this->coverageReportActive();
         $freshRequested = $this->hasArgument(self::FRESH_OPTION, $arguments);
         $this->forceRefetch = $this->hasArgument(self::REFETCH_OPTION, $arguments);
 
