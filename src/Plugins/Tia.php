@@ -53,6 +53,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
     private const string BASELINED_OPTION = '--baselined';
 
+    private const string BASELINE_PATH_OPTION = '--tia-baseline-path';
+
     private const string ENV_TIA = 'PEST_TIA';
 
     private const string ENV_FILTERED = 'PEST_TIA_FILTERED';
@@ -316,6 +318,12 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      */
     public function handleArguments(array $arguments): array
     {
+        if ($this->hasArgument(self::BASELINE_PATH_OPTION, $arguments)) {
+            $this->output->writeln(Storage::tempDir(TestSuite::getInstance()->rootPath));
+
+            exit(0);
+        }
+
         $isWorker = Parallel::isWorker();
         $recordingGlobal = $isWorker && (string) Parallel::getGlobal(self::RECORDING_GLOBAL) === '1';
         $replayingGlobal = $isWorker && (string) Parallel::getGlobal(self::REPLAYING_GLOBAL) === '1';
