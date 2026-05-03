@@ -114,8 +114,6 @@ final readonly class BaselineSync
 
         $this->clearCooldown();
 
-        $this->renderChildContinuation('Baseline ready');
-
         return true;
     }
 
@@ -246,7 +244,7 @@ final readonly class BaselineSync
         if (is_file($runCacheDir.DIRECTORY_SEPARATOR.self::GRAPH_ASSET)) {
             @touch($runCacheDir);
 
-            $this->renderBadge('INFO', sprintf(
+            $this->renderChild(sprintf(
                 'Using cached baseline from %s (run %s).',
                 $repo,
                 $runId,
