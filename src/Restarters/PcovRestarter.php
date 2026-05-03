@@ -24,6 +24,9 @@ final class PcovRestarter implements Restarter
         }
 
         if (getenv(self::ENV_RESTARTED) === '1') {
+            putenv(self::ENV_RESTARTED);
+            unset($_ENV[self::ENV_RESTARTED]);
+
             return;
         }
 
