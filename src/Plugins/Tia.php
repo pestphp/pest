@@ -53,7 +53,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
     private const string BASELINED_OPTION = '--baselined';
 
-    private const string BASELINE_PATH_OPTION = '--tia-baseline-path';
+    private const string BASELINE_PATH_OPTION = '--baseline';
 
     private const string ENV_TIA = 'PEST_TIA';
 
