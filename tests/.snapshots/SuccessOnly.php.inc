@@ -1,5 +1,3 @@
-
-  [90m─ Running in TIA mode, however TIA as skipped as it needs Needs ext-pcov or Xdebug.[39m
 ##teamcity[testSuiteStarted name='Tests/tests/SuccessOnly' locationHint='pest_qn://tests/.tests/SuccessOnly.php' flowId='1234']
 ##teamcity[testCount count='4' flowId='1234']
 ##teamcity[testSuiteStarted name='Tests/tests/SuccessOnly' locationHint='pest_qn://tests/.tests/SuccessOnly.php' flowId='1234']

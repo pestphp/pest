@@ -258,23 +258,6 @@ final readonly class Fingerprint
         return $cache[$key] = $finder->hasResults();
     }
 
-    private static function sortRecursively(mixed &$value): void
-    {
-        if (! is_array($value)) {
-            return;
-        }
-
-        $isAssoc = ! array_is_list($value);
-
-        if ($isAssoc) {
-            ksort($value);
-        }
-
-        foreach ($value as &$child) {
-            self::sortRecursively($child);
-        }
-    }
-
     private static function contentHashOrNull(string $path): ?string
     {
         if (! is_file($path)) {

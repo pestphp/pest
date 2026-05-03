@@ -1,6 +1,4 @@
 
-  ─ Running in TIA mode, however TIA as skipped as it needs Needs ext-pcov or Xdebug.
-
    PASS  Tests\Arch
   ✓ preset → php → ignoring ['Pest\Expectation', 'debug_backtrace', 'var_export', …]
   ✓ preset → strict → ignoring ['Pest\Plugins\Tia\BaselineSync', 'usleep']

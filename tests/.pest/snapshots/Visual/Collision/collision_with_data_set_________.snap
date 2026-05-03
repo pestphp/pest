@@ -1,6 +1,4 @@
 
-  ─ Running in TIA mode, however TIA as skipped as it needs Needs ext-pcov or Xdebug.
-
    FAIL  Tests\Fixtures\CollisionTest
   ⨯ error
   ✓ success
