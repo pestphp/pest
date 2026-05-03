@@ -172,12 +172,6 @@ final class CoverageMerger
             return null;
         }
 
-        if (! $value instanceof CodeCoverage) {
-            return null;
-        }
-
-        $value->doNotCacheStaticAnalysis();
-
-        return $value;
+        return $value instanceof CodeCoverage ? $value : null;
     }
 }
