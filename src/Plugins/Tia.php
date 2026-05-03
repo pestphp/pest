@@ -1005,9 +1005,9 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
     private function emitCoverageDriverMissing(): void
     {
-        $this->renderBadge('WARN', 'No coverage driver is available — skipped.');
-        $this->renderChild('Needs ext-pcov or Xdebug with coverage mode enabled to record the dependency graph.');
-        $this->renderChild('Install or enable one and rerun with --tia.');
+        $this->output->writeln('');
+
+        $this->renderChild('Running in TIA mode, however TIA as skipped as it needs Needs ext-pcov or Xdebug.');
     }
 
     /**
