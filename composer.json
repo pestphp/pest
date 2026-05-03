@@ -19,18 +19,19 @@
     "require": {
         "php": "^8.3.0",
         "brianium/paratest": "^7.20.0",
-        "nunomaduro/collision": "^8.9.3",
+        "composer/xdebug-handler": "^3.0.5",
+        "nunomaduro/collision": "^8.9.4",
         "nunomaduro/termwind": "^2.4.0",
         "pestphp/pest-plugin": "^4.0.0",
         "pestphp/pest-plugin-arch": "^4.0.2",
         "pestphp/pest-plugin-mutate": "^4.0.1",
         "pestphp/pest-plugin-profanity": "^4.2.1",
-        "phpunit/phpunit": "^12.5.23",
+        "phpunit/phpunit": "^12.5.24",
         "symfony/process": "^7.4.8|^8.0.8"
     },
     "conflict": {
         "filp/whoops": "<2.18.3",
-        "phpunit/phpunit": ">12.5.23",
+        "phpunit/phpunit": ">12.5.24",
         "sebastian/exporter": "<7.0.0",
         "webmozart/assert": "<1.11.0"
     },
@@ -58,7 +59,7 @@
         ]
     },
     "require-dev": {
-        "mrpunyapal/peststan": "^0.2.5",
+        "mrpunyapal/peststan": "^0.2.9",
         "pestphp/pest-dev-tools": "^4.1.0",
         "pestphp/pest-plugin-browser": "^4.3.1",
         "pestphp/pest-plugin-type-coverage": "^4.0.4",
@@ -123,6 +124,7 @@
                 "Pest\\Plugins\\Verbose",
                 "Pest\\Plugins\\Version",
                 "Pest\\Plugins\\Shard",
+                "Pest\\Plugins\\Tia",
                 "Pest\\Plugins\\Parallel"
             ]
         },
