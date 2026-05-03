@@ -312,6 +312,7 @@ final readonly class BaselineSync
     {
         $artifactSize = $this->artifactSize($repo, $runId);
 
+        $this->output->writeln('');
         $this->renderChild($artifactSize !== null
             ? sprintf(
                 'Downloading TIA baseline (%s) from %s…',
@@ -333,10 +334,11 @@ final readonly class BaselineSync
         $process->start();
 
         $startedAt = microtime(true);
+        $tick = 0;
 
         while ($process->isRunning()) {
-            $this->renderDownloadProgress($runCacheDir, $artifactSize, $startedAt);
-            usleep(250_000);
+            $this->renderDownloadProgress($startedAt, $tick++);
+            usleep(120_000);
         }
 
         $process->wait();
@@ -402,30 +404,18 @@ final readonly class BaselineSync
         return is_numeric($size) ? (int) $size : null;
     }
 
-    private function renderDownloadProgress(string $dir, ?int $totalBytes, float $startedAt): void
+    private function renderDownloadProgress(float $startedAt, int $tick): void
     {
-        $current = $this->dirSize($dir);
-        $elapsed = max(0.001, microtime(true) - $startedAt);
-        $speed = (int) ($current / $elapsed);
+        static $frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 
-        if ($totalBytes !== null && $totalBytes > 0) {
-            $percent = min(99, (int) floor(($current / $totalBytes) * 100));
-            $message = sprintf(
-                '    <fg=gray>%s / %s (%d%%, %s/s)</>',
-                $this->formatSize($current),
-                $this->formatSize($totalBytes),
-                $percent,
-                $this->formatSize($speed),
-            );
-        } else {
-            $message = sprintf(
-                '    <fg=gray>%s (%s/s)</>',
-                $this->formatSize($current),
-                $this->formatSize($speed),
-            );
-        }
+        $elapsed = max(0.0, microtime(true) - $startedAt);
+        $frame = $frames[$tick % count($frames)];
 
-        $this->output->write("\r\033[K".$message);
+        $this->output->write(sprintf(
+            "\r\033[K    <fg=gray>%s %.1fs elapsed</>",
+            $frame,
+            $elapsed,
+        ));
     }
 
     private function clearProgressLine(): void

@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
+use Symfony\Component\Finder\Finder;
+
 /**
  * @internal
  */
 final readonly class Fingerprint
 {
-    private const int SCHEMA_VERSION = 15;
+    private const int SCHEMA_VERSION = 17;
 
     /**
      * @return array{
@@ -23,8 +25,8 @@ final readonly class Fingerprint
             'structural' => [
                 'schema' => self::SCHEMA_VERSION,
                 'composer_lock' => self::composerLockHash($projectRoot),
-                'phpunit_xml' => self::hashIfExists($projectRoot.'/phpunit.xml'),
-                'phpunit_xml_dist' => self::hashIfExists($projectRoot.'/phpunit.xml.dist'),
+                'phpunit_xml' => self::trackedHash($projectRoot, 'phpunit.xml'),
+                'phpunit_xml_dist' => self::trackedHash($projectRoot, 'phpunit.xml.dist'),
                 // 'pest_factory' => self::contentHashOrNull(__DIR__.'/../../Factories/TestCaseFactory.php'),
                 // 'pest_method_factory' => self::contentHashOrNull(__DIR__.'/../../Factories/TestCaseMethodFactory.php'),
                 'vite_config' => self::viteConfigHash($projectRoot),
@@ -160,6 +162,10 @@ final readonly class Fingerprint
         $parts = [];
 
         foreach (JsModuleGraph::VITE_CONFIG_NAMES as $name) {
+            if (! self::isTrackedByGit($projectRoot, $name)) {
+                continue;
+            }
+
             $hash = self::contentHashOrNull($projectRoot.'/'.$name);
 
             if ($hash !== null) {
@@ -175,6 +181,10 @@ final readonly class Fingerprint
         $parts = [];
 
         foreach (['tsconfig.json', 'tsconfig.app.json', 'jsconfig.json'] as $name) {
+            if (! self::isTrackedByGit($projectRoot, $name)) {
+                continue;
+            }
+
             $hash = self::hashIfExists($projectRoot.'/'.$name);
 
             if ($hash !== null) {
@@ -230,7 +240,7 @@ final readonly class Fingerprint
 
     private static function composerLockHash(string $projectRoot): ?string
     {
-        return self::hashIfExists($projectRoot.'/composer.lock');
+        return self::trackedHash($projectRoot, 'composer.lock');
     }
 
     private static function packageLockHash(string $projectRoot): ?string
@@ -238,7 +248,7 @@ final readonly class Fingerprint
         $parts = [];
 
         foreach (['package-lock.json', 'pnpm-lock.yaml', 'yarn.lock', 'bun.lock', 'bun.lockb'] as $name) {
-            $hash = self::hashIfExists($projectRoot.'/'.$name);
+            $hash = self::trackedHash($projectRoot, $name);
 
             if ($hash !== null) {
                 $parts[] = $name.':'.$hash;
@@ -246,6 +256,49 @@ final readonly class Fingerprint
         }
 
         return $parts === [] ? null : hash('xxh128', implode("\n", $parts));
+    }
+
+    private static function trackedHash(string $projectRoot, string $relativePath): ?string
+    {
+        if (! self::isTrackedByGit($projectRoot, $relativePath)) {
+            return null;
+        }
+
+        return self::hashIfExists($projectRoot.'/'.$relativePath);
+    }
+
+    /**
+     * Returns true when the file exists and is not gitignored.
+     *
+     * Gitignored lockfiles (e.g. `package-lock.json` excluded from the repo)
+     * regenerate per-machine with OS-specific optional deps, which would
+     * otherwise force a fingerprint mismatch on every fetched baseline.
+     */
+    private static function isTrackedByGit(string $projectRoot, string $relativePath): bool
+    {
+        if (! is_file($projectRoot.'/'.$relativePath)) {
+            return false;
+        }
+
+        static $cache = [];
+
+        $key = $projectRoot."\0".$relativePath;
+
+        if (isset($cache[$key])) {
+            return $cache[$key];
+        }
+
+        if (! is_dir($projectRoot.'/.git') && ! is_file($projectRoot.'/.git')) {
+            return $cache[$key] = true;
+        }
+
+        $finder = (new Finder())
+            ->in($projectRoot)
+            ->depth('== 0')
+            ->name($relativePath)
+            ->ignoreVCSIgnored(true);
+
+        return $cache[$key] = $finder->hasResults();
     }
 
     private static function composerJsonHash(string $projectRoot): ?string
