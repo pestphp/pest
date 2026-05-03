@@ -143,6 +143,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
     private ?string $driftDetails = null;
 
+    private ?string $freshGraphReason = null;
+
     public function __construct(
         private readonly OutputInterface $output,
         private readonly Recorder $recorder,
@@ -657,6 +659,10 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         if ($this->piggybackCoverage && ! $this->state->exists(self::KEY_COVERAGE_CACHE)) {
+            if ($graph instanceof Graph && $this->driftLabel === null) {
+                $this->freshGraphReason = 'recording coverage baseline';
+            }
+
             return $this->enterRecordMode($arguments);
         }
 
@@ -1011,6 +1017,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         if ($this->driftLabel !== null) {
             $headline .= sprintf(' (%s changed)', $this->driftLabel);
+        } elseif ($this->freshGraphReason !== null) {
+            $headline .= sprintf(' (%s)', $this->freshGraphReason);
         } else {
             $headline .= '.';
         }

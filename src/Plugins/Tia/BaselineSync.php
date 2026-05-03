@@ -312,14 +312,14 @@ final readonly class BaselineSync
     {
         $artifactSize = $this->artifactSize($repo, $runId);
 
-        $this->renderBadge('INFO', $artifactSize !== null
+        $this->renderChild($artifactSize !== null
             ? sprintf(
-                'Fetching baseline (%s) from %s…',
+                'Downloading TIA baseline (%s) from %s…',
                 $this->formatSize($artifactSize),
                 $repo,
             )
             : sprintf(
-                'Fetching baseline from %s…',
+                'Downloading TIA baseline from %s…',
                 $repo,
             ));
 
@@ -411,7 +411,7 @@ final readonly class BaselineSync
         if ($totalBytes !== null && $totalBytes > 0) {
             $percent = min(99, (int) floor(($current / $totalBytes) * 100));
             $message = sprintf(
-                '  <fg=cyan>Downloading</> %s / %s (%d%%, %s/s)',
+                '    <fg=gray>%s / %s (%d%%, %s/s)</>',
                 $this->formatSize($current),
                 $this->formatSize($totalBytes),
                 $percent,
@@ -419,7 +419,7 @@ final readonly class BaselineSync
             );
         } else {
             $message = sprintf(
-                '  <fg=cyan>Downloading</> %s (%s/s)',
+                '    <fg=gray>%s (%s/s)</>',
                 $this->formatSize($current),
                 $this->formatSize($speed),
             );
