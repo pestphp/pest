@@ -1579,7 +1579,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         if (! Fingerprint::structuralMatches($fetched->fingerprint(), $current)) {
-            $this->renderBadge('WARN', 'Fetched baseline still drifts — discarding.');
+            $this->output->writeln('  <fg=gray>  However, fetched baseline still drifts — discarding.</>');
 
             return null;
         }

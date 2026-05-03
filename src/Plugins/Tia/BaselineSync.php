@@ -69,6 +69,11 @@ final readonly class BaselineSync
         $this->output->writeln(sprintf('  <fg=gray>─ %s</>', $text));
     }
 
+    private function renderChildContinuation(string $text): void
+    {
+        $this->output->writeln(sprintf('  <fg=gray>  %s</>', $text));
+    }
+
     public function fetchIfAvailable(string $projectRoot, bool $force = false, bool $hasAnchor = false): bool
     {
         $repo = $this->detectGitHubRepo($projectRoot);
@@ -109,10 +114,7 @@ final readonly class BaselineSync
 
         $this->clearCooldown();
 
-        $this->renderBadge('INFO', sprintf(
-            'Baseline ready (%s).',
-            $this->formatSize($payload['sizeOnDisk']),
-        ));
+        $this->renderChildContinuation('Baseline ready');
 
         return true;
     }
