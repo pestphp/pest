@@ -1362,7 +1362,16 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         /** @var ResultCollector $collector */
         $collector = Container::getInstance()->get(ResultCollector::class);
 
-        foreach ($collector->all() as $testId => $result) {
+        $results = $collector->all();
+        $touchedFiles = [];
+
+        foreach ($results as $testId => $result) {
+            $file = $result['file'] ?? null;
+
+            if (is_string($file) && $file !== '') {
+                $touchedFiles[$file] = true;
+            }
+
             $graph->setResult(
                 $this->branch,
                 $testId,
@@ -1370,9 +1379,11 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                 $result['message'],
                 $result['time'],
                 $result['assertions'],
-                $result['file'] ?? null,
+                $file,
             );
         }
+
+        $graph->pruneStaleResults($this->branch, array_keys($touchedFiles), array_keys($results));
 
         $collector->reset();
     }
@@ -1396,11 +1407,17 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return;
         }
 
+        $touchedFiles = [];
+
         foreach ($results as $testId => $result) {
             $file = $result['file'] ?? null;
 
             if ($file === null || str_contains($file, "eval()'d")) {
                 $file = $this->resolveFailedTestFile($testId);
+            }
+
+            if (is_string($file) && $file !== '') {
+                $touchedFiles[$file] = true;
             }
 
             $graph->setResult(
@@ -1413,6 +1430,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                 $file,
             );
         }
+
+        $graph->pruneStaleResults($this->branch, array_keys($touchedFiles), array_keys($results));
 
         $this->saveGraph($graph);
         $collector->reset();

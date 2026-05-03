@@ -195,49 +195,6 @@ final readonly class Fingerprint
         return $parts === [] ? null : hash('xxh128', implode("\n", $parts));
     }
 
-    private static function packageJsonHash(string $projectRoot): ?string
-    {
-        $path = $projectRoot.'/package.json';
-
-        if (! is_file($path)) {
-            return null;
-        }
-
-        $raw = @file_get_contents($path);
-
-        if ($raw === false) {
-            return null;
-        }
-
-        $data = json_decode($raw, true);
-
-        if (! is_array($data)) {
-            $hash = @hash_file('xxh128', $path);
-
-            return $hash === false ? null : $hash;
-        }
-
-        $relevant = [
-            'type' => $data['type'] ?? null,
-            'packageManager' => $data['packageManager'] ?? null,
-            'dependencies' => $data['dependencies'] ?? null,
-            'devDependencies' => $data['devDependencies'] ?? null,
-            'optionalDependencies' => $data['optionalDependencies'] ?? null,
-            'peerDependencies' => $data['peerDependencies'] ?? null,
-            'overrides' => $data['overrides'] ?? null,
-            'resolutions' => $data['resolutions'] ?? null,
-            'imports' => $data['imports'] ?? null,
-            'exports' => $data['exports'] ?? null,
-            'browser' => $data['browser'] ?? null,
-        ];
-
-        self::sortRecursively($relevant);
-
-        $json = json_encode($relevant);
-
-        return $json === false ? null : hash('xxh128', $json);
-    }
-
     private static function composerLockHash(string $projectRoot): ?string
     {
         return self::trackedHash($projectRoot, 'composer.lock');
@@ -292,60 +249,13 @@ final readonly class Fingerprint
             return $cache[$key] = true;
         }
 
-        $finder = (new Finder())
+        $finder = (new Finder)
             ->in($projectRoot)
             ->depth('== 0')
             ->name($relativePath)
             ->ignoreVCSIgnored(true);
 
         return $cache[$key] = $finder->hasResults();
-    }
-
-    private static function composerJsonHash(string $projectRoot): ?string
-    {
-        $path = $projectRoot.'/composer.json';
-
-        if (! is_file($path)) {
-            return null;
-        }
-
-        $raw = @file_get_contents($path);
-
-        if ($raw === false) {
-            return null;
-        }
-
-        $data = json_decode($raw, true);
-
-        if (! is_array($data)) {
-            $hash = @hash_file('xxh128', $path);
-
-            return $hash === false ? null : $hash;
-        }
-
-        $config = is_array($data['config'] ?? null) ? $data['config'] : [];
-        $relevantConfig = array_intersect_key($config, [
-            'platform' => true,
-            'allow-plugins' => true,
-        ]);
-
-        $relevant = [
-            'autoload' => $data['autoload'] ?? null,
-            'autoload-dev' => $data['autoload-dev'] ?? null,
-            'require' => $data['require'] ?? null,
-            'require-dev' => $data['require-dev'] ?? null,
-            'extra' => $data['extra'] ?? null,
-            'repositories' => $data['repositories'] ?? null,
-            'minimum-stability' => $data['minimum-stability'] ?? null,
-            'prefer-stable' => $data['prefer-stable'] ?? null,
-            'config' => $relevantConfig === [] ? null : $relevantConfig,
-        ];
-
-        self::sortRecursively($relevant);
-
-        $json = json_encode($relevant);
-
-        return $json === false ? null : hash('xxh128', $json);
     }
 
     private static function sortRecursively(mixed &$value): void

@@ -1321,6 +1321,49 @@ final class Graph
         }
     }
 
+    /**
+     * Prune baseline result entries whose test files were just executed but whose
+     * test IDs are no longer present (e.g. the test method was removed or renamed).
+     *
+     * @param  array<int, string>  $touchedFiles  Absolute or project-relative paths.
+     * @param  array<int, string>  $keepTestIds   Test IDs that produced a result this run.
+     */
+    public function pruneStaleResults(string $branch, array $touchedFiles, array $keepTestIds): void
+    {
+        if (! isset($this->baselines[$branch]['results'])) {
+            return;
+        }
+
+        $touched = [];
+        foreach ($touchedFiles as $file) {
+            $rel = $this->relative($file);
+
+            if ($rel !== null) {
+                $touched[$rel] = true;
+            }
+        }
+
+        if ($touched === []) {
+            return;
+        }
+
+        $keep = array_fill_keys($keepTestIds, true);
+
+        foreach ($this->baselines[$branch]['results'] as $testId => $result) {
+            $file = $result['file'] ?? null;
+
+            if (! is_string($file) || ! isset($touched[$file])) {
+                continue;
+            }
+
+            if (isset($keep[$testId])) {
+                continue;
+            }
+
+            unset($this->baselines[$branch]['results'][$testId]);
+        }
+    }
+
     public static function decode(string $json, string $projectRoot): ?self
     {
         $data = json_decode($json, true);
