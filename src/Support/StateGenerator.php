@@ -11,6 +11,7 @@ use PHPUnit\Event\Code\TestDoxBuilder;
 use PHPUnit\Event\Code\TestMethod;
 use PHPUnit\Event\Code\ThrowableBuilder;
 use PHPUnit\Event\Test\Errored;
+use PHPUnit\Event\Test\Failed;
 use PHPUnit\Event\Test\PhpunitDeprecationTriggered;
 use PHPUnit\Event\Test\PhpunitErrorTriggered;
 use PHPUnit\Event\Test\PhpunitNoticeTriggered;
@@ -40,11 +41,16 @@ final class StateGenerator
         }
 
         foreach ($testResult->testFailedEvents() as $testResultEvent) {
-            $state->add(TestResult::fromPestParallelTestCase(
-                $testResultEvent->test(),
-                TestResult::FAIL,
-                $testResultEvent->throwable()
-            ));
+            if ($testResultEvent instanceof Failed) {
+                $state->add(TestResult::fromPestParallelTestCase(
+                    $testResultEvent->test(),
+                    TestResult::FAIL,
+                    $testResultEvent->throwable()
+                ));
+            } else {
+                // @phpstan-ignore-next-line
+                $state->add(TestResult::fromBeforeFirstTestMethodErrored($testResultEvent));
+            }
         }
 
         $this->addTriggeredPhpunitEvents($state, $testResult->testTriggeredPhpunitErrorEvents(), TestResult::FAIL);

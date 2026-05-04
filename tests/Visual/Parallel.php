@@ -16,6 +16,7 @@ $run = function () {
 
 test('parallel', function () use ($run) {
     $output = $run('--exclude-group=integration');
+    $output = implode("\n", array_slice(explode("\n", $output), -10));
 
     if (getenv('REBUILD_SNAPSHOTS')) {
         preg_match('/Tests:\s+(.+\(\d+ assertions\))/', $output, $matches);
@@ -23,13 +24,13 @@ test('parallel', function () use ($run) {
         $file = file_get_contents(__FILE__);
         $file = preg_replace(
             '/\$expected = \'.*?\';/',
-            "\$expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1280 passed (2925 assertions)';",
+            "\$expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 26 skipped, 1316 passed (2969 assertions)';",
             $file,
         );
         file_put_contents(__FILE__, $file);
     }
 
-    $expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1280 passed (2925 assertions)';
+    $expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 26 skipped, 1316 passed (2969 assertions)';
 
     expect($output)
         ->toContain("Tests:    {$expected}")

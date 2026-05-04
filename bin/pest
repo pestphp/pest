@@ -3,8 +3,10 @@
 
 declare(strict_types=1);
 
+use Pest\Contracts\Restarter;
 use Pest\Kernel;
 use Pest\Panic;
+use Pest\Support\Container;
 use Pest\TestCaseFilters\GitDirtyTestCaseFilter;
 use Pest\TestCaseMethodFilters\AssigneeTestCaseFilter;
 use Pest\TestCaseMethodFilters\IssueTestCaseFilter;
@@ -142,6 +144,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
     // Get $rootPath based on $autoloadPath
     $rootPath = dirname($autoloadPath, 2);
+
     $input = new ArgvInput;
 
     $testSuite = TestSuite::getInstance(
@@ -191,6 +194,15 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
     try {
         $kernel = Kernel::boot($testSuite, $input, $output);
+
+        $container = Container::getInstance();
+
+        foreach (Kernel::RESTARTERS as $restarterClass) {
+            $restarter = $container->get($restarterClass);
+            assert($restarter instanceof Restarter);
+
+            $restarter->maybeRestart($rootPath, $originalArguments);
+        }
 
         $result = $kernel->handle($originalArguments, $arguments);
 
