@@ -123,7 +123,7 @@ final class Expectation
      *
      * @return never
      */
-    public function dd(mixed ...$arguments): void
+    public function dd(mixed ...$arguments): never
     {
         if (function_exists('dd')) {
             dd($this->value, ...$arguments);
