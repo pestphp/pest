@@ -253,35 +253,17 @@ final class WatchPatterns
 
     private function patternTargetsDotfiles(string $pattern): bool
     {
-        foreach (explode('/', str_replace('\\', '/', $pattern)) as $segment) {
-            if ($segment !== '' && $segment[0] === '.') {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any(explode('/', str_replace('\\', '/', $pattern)), fn ($segment): bool => $segment !== '' && $segment[0] === '.');
     }
 
     private function touchesVcs(string $file): bool
     {
-        foreach (explode('/', $file) as $segment) {
-            if (in_array($segment, self::VCS_DIRS, true)) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any(explode('/', $file), fn ($segment): bool => in_array($segment, self::VCS_DIRS, true));
     }
 
     private function touchesDotfile(string $file): bool
     {
-        foreach (explode('/', $file) as $segment) {
-            if ($segment !== '' && $segment[0] === '.') {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any(explode('/', $file), fn ($segment): bool => $segment !== '' && $segment[0] === '.');
     }
 
     private function excludeMatches(string $exclude, string $file): bool

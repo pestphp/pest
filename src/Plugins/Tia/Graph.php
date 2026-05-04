@@ -1289,13 +1289,7 @@ final class Graph
     /** @param  array<string, array<int, string>>  $edges */
     private function anyTestUses(array $edges, string $component): bool
     {
-        foreach ($edges as $components) {
-            if (in_array($component, $components, true)) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($edges, fn ($components): bool => in_array($component, $components, true));
     }
 
     public function pruneMissingTests(): void

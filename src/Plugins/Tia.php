@@ -624,7 +624,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private function handleParent(array $arguments, string $projectRoot, bool $forceRebuild): array
     {
         $this->watchPatterns->useDefaults($projectRoot);
-        $this->branch = (new ChangedFiles($projectRoot))->currentBranch() ?? 'main';
+        $this->branch = new ChangedFiles($projectRoot)->currentBranch() ?? 'main';
 
         $fingerprint = Fingerprint::compute($projectRoot);
         $this->startFingerprint = $fingerprint;
@@ -687,7 +687,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      */
     private function handleWorker(array $arguments, string $projectRoot, bool $recordingGlobal, bool $replayingGlobal): array
     {
-        $this->branch = (new ChangedFiles($projectRoot))->currentBranch() ?? 'main';
+        $this->branch = new ChangedFiles($projectRoot)->currentBranch() ?? 'main';
 
         if ($replayingGlobal) {
             $this->installWorkerReplay($projectRoot);
