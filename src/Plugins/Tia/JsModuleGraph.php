@@ -386,6 +386,6 @@ final class JsModuleGraph
 
     private static function hasViteConfig(string $projectRoot): bool
     {
-        return array_any(self::VITE_CONFIG_NAMES, fn ($name): bool => is_file($projectRoot.DIRECTORY_SEPARATOR.$name));
+        return array_any(self::VITE_CONFIG_NAMES, fn (string $name): bool => is_file($projectRoot.DIRECTORY_SEPARATOR.$name));
     }
 }
