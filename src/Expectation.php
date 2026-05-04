@@ -112,7 +112,7 @@ final class Expectation
         if (function_exists('dump')) {
             dump($this->value, ...$arguments);
         } else {
-            var_dump($this->value);
+            var_dump($this->value, ...$arguments);
         }
 
         return $this;
@@ -129,7 +129,7 @@ final class Expectation
             dd($this->value, ...$arguments);
         }
 
-        var_dump($this->value);
+        var_dump($this->value, ...$arguments);
 
         exit(1);
     }
