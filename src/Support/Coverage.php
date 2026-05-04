@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Support;
 
 use Pest\Exceptions\ShouldNotHappen;
+use Pest\Plugins\Tia\CoverageMerger;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\Node\Directory;
 use SebastianBergmann\CodeCoverage\Node\File;
@@ -87,6 +88,8 @@ final class Coverage
 
             throw ShouldNotHappen::fromMessage(sprintf('Coverage not found in path: %s.', $reportPath));
         }
+
+        CoverageMerger::applyIfMarked($reportPath);
 
         /** @var CodeCoverage $codeCoverage */
         $codeCoverage = require $reportPath;

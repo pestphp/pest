@@ -27,8 +27,13 @@ use Whoops\Exception\Inspector;
 /**
  * @internal
  */
-final readonly class Kernel
+final class Kernel
 {
+    /**
+     * Either the kernel is terminated or not.
+     */
+    private bool $terminated = false;
+
     /**
      * The Kernel bootstrappers.
      *
@@ -36,6 +41,8 @@ final readonly class Kernel
      */
     private const array BOOTSTRAPPERS = [
         Bootstrappers\BootOverrides::class,
+        Bootstrappers\BootPhpUnitConfiguration::class,
+        Plugins\Tia\Bootstrapper::class,
         Bootstrappers\BootSubscribers::class,
         Bootstrappers\BootFiles::class,
         Bootstrappers\BootView::class,
@@ -44,14 +51,21 @@ final readonly class Kernel
     ];
 
     /**
+     * The Kernel restarters — resolved and invoked from `bin/pest`
+     * before any other Pest class is touched, so the list is exposed
+     * on the Kernel rather than driven from `bin/pest` directly.
+     *
+     * @var array<int, class-string<Contracts\Restarter>>
+     */
+    public const array RESTARTERS = [
+        Restarters\XdebugRestarter::class,
+        Restarters\PcovRestarter::class,
+    ];
+
+    /**
      * Creates a new Kernel instance.
      */
-    public function __construct(
-        private Application $application,
-        private OutputInterface $output,
-    ) {
-        //
-    }
+    public function __construct(private readonly Application $application, private readonly OutputInterface $output) {}
 
     /**
      * Boots the Kernel.
@@ -112,9 +126,13 @@ final readonly class Kernel
         $configuration = Registry::get();
         $result = Facade::result();
 
-        return CallsAddsOutput::execute(
+        $result = CallsAddsOutput::execute(
             Result::exitCode($configuration, $result),
         );
+
+        $this->terminate();
+
+        return $result;
     }
 
     /**
@@ -122,6 +140,12 @@ final readonly class Kernel
      */
     public function terminate(): void
     {
+        if ($this->terminated) {
+            return;
+        }
+
+        $this->terminated = true;
+
         $preBufferOutput = Container::getInstance()->get(KernelDump::class);
 
         assert($preBufferOutput instanceof KernelDump);

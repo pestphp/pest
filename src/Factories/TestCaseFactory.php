@@ -166,7 +166,7 @@ final class TestCaseFactory
             final class $className extends $baseClass implements $hasPrintableTestCaseClassFQN {
                 $traitsCode
 
-                private static \$__filename = '$filename';
+                public static \$__filename = '$filename';
 
                 $methodsCode
             }
