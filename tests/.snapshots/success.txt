@@ -1492,6 +1492,10 @@
   ✓ a test
   ✓ higher order message test
 
+   PASS  Tests\Features\TestCallExtend
+  ✓ it uses fooBar extension with ('foo')
+  ✓ it uses fooBar extension with ('bar')
+
    PASS  Tests\Features\ThrowsNoExceptions
   ✓ it allows access to the underlying expectNotToPerformAssertions method
   ✓ it allows performing no expectations without being risky
@@ -1938,4 +1942,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1329 passed (3010 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1331 passed (3012 assertions)
