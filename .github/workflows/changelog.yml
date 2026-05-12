@@ -17,10 +17,10 @@ jobs:
     if: github.repository == 'pestphp/pest'
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2
 
     - name: Checkout website repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2
       with:
         token: ${{ secrets.CHANGELOG_KEY }}
         repository: pestphp/docs
@@ -29,12 +29,12 @@ jobs:
 
     - name: Read CHANGELOG.md
       id: package
-      uses: juliangruber/read-file-action@v1
+      uses: juliangruber/read-file-action@271ff311a4947af354c6abcd696a306553b9ec18 # v1
       with:
         path: ./CHANGELOG.md
 
     - name: Add file headers
-      uses: DamianReeves/write-file-action@v1.0
+      uses: DamianReeves/write-file-action@e19fd875ed54f16fc583a3486e62547ce4a5dde8 # v1.0
       with:
         path: ./CHANGELOG.md
         contents: |
@@ -53,7 +53,7 @@ jobs:
       run: cp CHANGELOG.md pestphp-docs/changelog.md
 
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v3
+      uses: peter-evans/create-pull-request@18f7dc018cc2cd597073088f7c7591b9d1c02672 # v3
       with:
         token: ${{ secrets.CHANGELOG_KEY }}
         commit-message: Update changelog.md
