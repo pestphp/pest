@@ -2,6 +2,9 @@ name: Static Analysis
 
 on: ['push', 'pull_request']
 
+permissions:
+  contents: read
+
 jobs:
   cs:
     runs-on: ubuntu-latest
