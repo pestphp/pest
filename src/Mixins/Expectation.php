@@ -954,6 +954,7 @@ final class Expectation
         } catch (Throwable $e) {
 
             if ($exception instanceof Throwable) {
+                // @phpstan-ignore-next-line
                 expect($e)
                     ->toBeInstanceOf($exception::class, $message)
                     ->and($e->getMessage())->toBe($exceptionMessage ?? $exception->getMessage(), $message);
