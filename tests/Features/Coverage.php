@@ -19,6 +19,27 @@ it('adds coverage if --coverage exist', function () {
         ->and($plugin->coverage)->toBeTrue();
 })->skip(! Coverage::isAvailable() || ! function_exists('xdebug_info') || ! in_array('coverage', xdebug_info('mode'), true), 'Coverage is not available');
 
+it('strips --only-changed from arguments', function () {
+    $plugin = new CoveragePlugin(new ConsoleOutput);
+
+    expect($plugin->onlyChanged)->toBeFalse();
+
+    $arguments = $plugin->handleArguments(['pest', '--testsuite=unit', '--only-changed']);
+
+    expect($arguments)->toEqual(['pest', '--testsuite=unit'])
+        ->and($plugin->onlyChanged)->toBeTrue();
+});
+
+it('adds coverage with --only-changed', function () {
+    $plugin = new CoveragePlugin(new ConsoleOutput);
+
+    $arguments = $plugin->handleArguments(['--coverage', '--only-changed']);
+
+    expect($arguments)->toEqual(['--coverage-php', Coverage::getPath()])
+        ->and($plugin->coverage)->toBeTrue()
+        ->and($plugin->onlyChanged)->toBeTrue();
+})->skip(! Coverage::isAvailable() || ! function_exists('xdebug_info') || ! in_array('coverage', xdebug_info('mode'), true), 'Coverage is not available');
+
 it('adds coverage if --min exist', function () {
     $plugin = new CoveragePlugin(new ConsoleOutput);
     expect($plugin->coverageMin)->toEqual(0.0)
@@ -54,4 +75,39 @@ it('generates coverage based on file input', function () {
     }))->toEqual([
         '4..6', '102',
     ]);
+});
+
+it('limits missing coverage lines without merging across gaps in the source file', function () {
+    $file = new class
+    {
+        public function lineCoverageData(): array
+        {
+            return [
+                21 => [],
+                22 => ['hit'],
+                23 => ['hit'],
+                24 => ['hit'],
+                25 => [],
+            ];
+        }
+    };
+
+    expect(Coverage::getMissingCoverage($file))->toEqual(['21', '25'])
+        ->and(Coverage::getMissingCoverage($file, [21 => true, 25 => true]))->toEqual(['21', '25']);
+});
+
+it('still merges consecutive uncovered lines when all are in the limit set', function () {
+    $file = new class
+    {
+        public function lineCoverageData(): array
+        {
+            return [
+                10 => [],
+                11 => [],
+                12 => [],
+            ];
+        }
+    };
+
+    expect(Coverage::getMissingCoverage($file, [10 => true, 11 => true, 12 => true]))->toEqual(['10..12']);
 });

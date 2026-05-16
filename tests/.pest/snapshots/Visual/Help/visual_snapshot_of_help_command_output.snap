@@ -138,6 +138,7 @@
   --coverage --min  Set the minimum required coverage percentage, and fail if not met  
   --coverage --exactly  Set the exact required coverage percentage, and fail if not met  
   --coverage --only-covered  Hide files with 0% coverage from the code coverage report  
+  --coverage --only-changed  Generate code coverage report and output to standard output for changed PHP files  
   --coverage-clover [file]  Write code coverage report in Clover XML format to file  
   --coverage-openclover [file]  Write code coverage report in OpenClover XML format to file  
   --coverage-cobertura [file]  Write code coverage report in Cobertura XML format to file  

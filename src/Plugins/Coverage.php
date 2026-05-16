@@ -7,6 +7,7 @@ namespace Pest\Plugins;
 use Pest\Contracts\Plugins\AddsOutput;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Support\Str;
+use Pest\TestSuite;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
@@ -24,6 +25,8 @@ final class Coverage implements AddsOutput, HandlesArguments
     private const string EXACTLY_OPTION = 'exactly';
 
     private const string ONLY_COVERED_OPTION = 'only-covered';
+
+    private const string ONLY_CHANGED_OPTION = 'only-changed';
 
     /**
      * Whether it should show the coverage or not.
@@ -51,6 +54,11 @@ final class Coverage implements AddsOutput, HandlesArguments
     public bool $showOnlyCovered = false;
 
     /**
+     * Whether coverage should be limited to files changed on the current branch.
+     */
+    public bool $onlyChanged = false;
+
+    /**
      * Creates a new Plugin instance.
      */
     public function __construct(private readonly OutputInterface $output)
@@ -64,7 +72,7 @@ final class Coverage implements AddsOutput, HandlesArguments
     public function handleArguments(array $originals): array
     {
         $arguments = [...[''], ...array_values(array_filter($originals, function (string $original): bool {
-            foreach ([self::COVERAGE_OPTION, self::MIN_OPTION, self::EXACTLY_OPTION, self::ONLY_COVERED_OPTION] as $option) {
+            foreach ([self::COVERAGE_OPTION, self::MIN_OPTION, self::EXACTLY_OPTION, self::ONLY_COVERED_OPTION, self::ONLY_CHANGED_OPTION] as $option) {
                 if ($original === sprintf('--%s', $option)) {
                     return true;
                 }
@@ -88,6 +96,7 @@ final class Coverage implements AddsOutput, HandlesArguments
         $inputs[] = new InputOption(self::MIN_OPTION, null, InputOption::VALUE_REQUIRED);
         $inputs[] = new InputOption(self::EXACTLY_OPTION, null, InputOption::VALUE_REQUIRED);
         $inputs[] = new InputOption(self::ONLY_COVERED_OPTION, null, InputOption::VALUE_NONE);
+        $inputs[] = new InputOption(self::ONLY_CHANGED_OPTION, null, InputOption::VALUE_NONE);
 
         $input = new ArgvInput($arguments, new InputDefinition($inputs));
         if ((bool) $input->getOption(self::COVERAGE_OPTION)) {
@@ -132,6 +141,10 @@ final class Coverage implements AddsOutput, HandlesArguments
             $this->showOnlyCovered = true;
         }
 
+        if ((bool) $input->getOption(self::ONLY_CHANGED_OPTION)) {
+            $this->onlyChanged = true;
+        }
+
         if ($_SERVER['COLLISION_PRINTER_COMPACT'] ?? false) {
             $this->compact = true;
         }
@@ -156,7 +169,30 @@ final class Coverage implements AddsOutput, HandlesArguments
                 exit(1);
             }
 
-            $coverage = \Pest\Support\Coverage::report($this->output, $this->compact, $this->showOnlyCovered);
+            $onlyChangedPaths = null;
+            $onlyChangedLineSetsByNormalizedPath = null;
+
+            if ($this->onlyChanged) {
+                $changed = \Pest\Support\Coverage::resolveBranchChangedPhpPaths(TestSuite::getInstance()->rootPath);
+
+                if (! $changed['ok']) {
+                    if (file_exists($path = \Pest\Support\Coverage::getPath())) {
+                        @unlink($path);
+                    }
+
+                    $this->output->writeln([
+                        '',
+                        '  <fg=default;bg=red;options=bold> ERROR </> '.($changed['errorMessage'] ?? 'Branch-scoped coverage failed.'),
+                        '',
+                    ]);
+                    exit(1);
+                }
+
+                $onlyChangedPaths = $changed['absolutePhpPaths'];
+                $onlyChangedLineSetsByNormalizedPath = $changed['lineSetsByNormalizedPath'];
+            }
+
+            $coverage = \Pest\Support\Coverage::report($this->output, $this->compact, $this->showOnlyCovered, $onlyChangedPaths, $onlyChangedLineSetsByNormalizedPath);
             $exitCode = (int) ($coverage < $this->coverageMin);
 
             if ($exitCode === 0 && $this->coverageExactly !== null) {

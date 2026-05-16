@@ -180,6 +180,9 @@ final readonly class Help implements HandlesArguments
         ], [
             'arg' => '--coverage --only-covered',
             'desc' => 'Hide files with 0% coverage from the code coverage report',
+        ], [
+            'arg' => '--coverage --only-changed',
+            'desc' => 'Generate code coverage report and output to standard output for changed PHP files',
         ], ...$content['Code Coverage']];
 
         $content['Mutation Testing'] = [[

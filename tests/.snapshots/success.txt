@@ -77,8 +77,12 @@
    WARN  Tests\Features\Coverage
   ✓ it has plugin
   - it adds coverage if --coverage exist → Coverage is not available
+  ✓ it strips --only-changed from arguments
+  - it adds coverage with --only-changed → Coverage is not available
   ✓ it adds coverage if --min exist
   ✓ it generates coverage based on file input
+  ✓ it limits missing coverage lines without merging across gaps in the source file
+  ✓ it still merges consecutive uncovered lines when all are in the limit set
 
    PASS  Tests\Features\Covers\ClassCoverage
   ✓ it uses the correct PHPUnit attribute for class
@@ -1776,6 +1780,10 @@
   ✓ it can resolve builtin value types
   ✓ it cannot resolve a parameter without type
 
+   PASS  Tests\Unit\Support\CoverageChangedPaths
+  ✓ it fails when project is not a git repository
+  ✓ it parses unified diff -U0 into touched new-file line numbers
+
    PASS  Tests\Unit\Support\DatasetInfo
   ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/Datasets/project/tes…rs.php', true) #1
   ✓ it can check if dataset is defined inside a Datasets directory with ('/var/www/Datasets/project/tes…rs.php', true) #2
@@ -1938,4 +1946,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1329 passed (3010 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 36 skipped, 1334 passed (3025 assertions)
