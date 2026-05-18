@@ -1,121 +1,77 @@
 <?php
 
-$extractTests = function (string $listTestsOutput): array {
-    preg_match_all('/ - (?:P\\\\)?([^:]+)::/', $listTestsOutput, $matches);
+use Symfony\Component\Process\Process;
 
-    return array_values(array_unique($matches[1]));
+$pest = function (array $extraArgs = []): Process {
+    $process = new Process(
+        ['php', 'bin/pest', 'tests-external/Shard/', ...$extraArgs],
+        dirname(__DIR__, 2),
+    );
+    $process->run();
+
+    return $process;
 };
 
-$buildFilter = function (array $testsToRun): string {
-    return addslashes(implode('|', $testsToRun));
-};
+$shardsPath = dirname(__DIR__).'/.pest/shards.json';
 
-test('allTests regex captures standard Tests-namespaced identifiers', function () use ($extractTests) {
-    $output = <<<'OUTPUT'
-Available test(s):
- - P\Tests\Unit\ExampleTest::it_works
- - P\Tests\Feature\AuthTest::it_logs_in
- - P\Tests\Unit\ExampleTest::it_does_something_else
-OUTPUT;
-
-    $tests = $extractTests($output);
-
-    expect($tests)->toBe([
-        'Tests\Unit\ExampleTest',
-        'Tests\Feature\AuthTest',
-    ]);
+afterAll(function () use ($shardsPath) {
+    if (file_exists($shardsPath)) {
+        unlink($shardsPath);
+    }
 });
 
-test('allTests regex captures non-standard directory identifiers', function () use ($extractTests) {
-    $output = <<<'OUTPUT'
-Available test(s):
- - P\Appmodules\Billing\tests\InvoiceTest::it_creates_invoice
- - P\Appmodules\Billing\tests\InvoiceTest::it_sends_invoice
- - P\Modules\Auth\tests\LoginTest::it_authenticates
-OUTPUT;
+test('shard discovers tests in non-standard directories', function () use ($pest) {
+    $process = $pest(['--list-tests']);
 
-    $tests = $extractTests($output);
+    expect($process->getExitCode())->toBe(0);
 
-    expect($tests)->toBe([
-        'Appmodules\Billing\tests\InvoiceTest',
-        'Modules\Auth\tests\LoginTest',
-    ]);
-});
+    $output = $process->getOutput();
 
-test('allTests regex captures identifiers without P prefix', function () use ($extractTests) {
-    $output = <<<'OUTPUT'
-Available test(s):
- - Tests\Feature\BarTest::test_bar
- - App\Tests\BazTest::test_baz
-OUTPUT;
+    // Identifiers must NOT start with Tests\ since fixtures are in tests-external/
+    expect($output)->toContain('InvoiceTest::')
+        ->toContain('UnitTest::')
+        ->not->toContain(' - P\Tests\\');
+})->skipOnWindows();
 
-    $tests = $extractTests($output);
+test('shard includes non-standard directory tests in shard count', function () use ($pest) {
+    $process = $pest(['--shard=1/1']);
 
-    expect($tests)->toBe([
-        'Tests\Feature\BarTest',
-        'App\Tests\BazTest',
-    ]);
-});
+    expect($process->getExitCode())->toBe(0);
 
-test('allTests regex handles mixed standard and non-standard identifiers', function () use ($extractTests) {
-    $output = <<<'OUTPUT'
-Available test(s):
- - P\Tests\Unit\ExampleTest::it_works
- - P\Appmodules\Foo\tests\FooTest::it_works
- - Tests\Feature\BarTest::test_bar
- - P\Modules\Core\tests\CoreTest::it_boots
-OUTPUT;
+    $output = $process->getOutput();
 
-    $tests = $extractTests($output);
+    // Both test files must be discovered and sharded
+    expect($output)->toContain('2 files ran, out of 2');
+})->skipOnWindows();
 
-    expect($tests)->toBe([
-        'Tests\Unit\ExampleTest',
-        'Appmodules\Foo\tests\FooTest',
-        'Tests\Feature\BarTest',
-        'Modules\Core\tests\CoreTest',
-    ]);
-});
+test('shard distributes non-standard directory tests across shards', function () use ($pest) {
+    $process1 = $pest(['--shard=1/2']);
+    $process2 = $pest(['--shard=2/2']);
 
-test('allTests regex does not match non-test lines', function () use ($extractTests) {
-    $output = <<<'OUTPUT'
-Available test(s):
+    expect($process1->getExitCode())->toBe(0)
+        ->and($process2->getExitCode())->toBe(0);
 
- - P\Tests\Unit\ExampleTest::it_works
-Some random output line
-OUTPUT;
+    $output1 = $process1->getOutput();
+    $output2 = $process2->getOutput();
 
-    $tests = $extractTests($output);
+    // Each shard gets 1 file, total is 2
+    expect($output1)->toContain('1 file ran, out of 2')
+        ->and($output2)->toContain('1 file ran, out of 2');
+})->skipOnWindows();
 
-    expect($tests)->toBe([
-        'Tests\Unit\ExampleTest',
-    ]);
-});
+test('update-shards records timings for non-standard directory tests', function () use ($pest, $shardsPath) {
+    $process = $pest(['--update-shards']);
 
-test('buildFilterArgument correctly escapes non-standard identifiers', function () use ($buildFilter) {
-    $tests = [
-        'Appmodules\Billing\tests\InvoiceTest',
-        'Modules\Auth\tests\LoginTest',
-    ];
+    expect($process->getExitCode())->toBe(0);
 
-    $filter = $buildFilter($tests);
+    $output = $process->getOutput();
 
-    expect($filter)->toBe('Appmodules\\\\Billing\\\\tests\\\\InvoiceTest|Modules\\\\Auth\\\\tests\\\\LoginTest');
-});
+    expect($output)->toContain('shards.json updated with timings for 2 test class');
 
-test('sharding distributes non-standard identifiers across shards', function () use ($extractTests) {
-    $output = <<<'OUTPUT'
-Available test(s):
- - P\Tests\Unit\ATest::it_works
- - P\Appmodules\Foo\tests\BTest::it_works
- - P\Modules\Bar\tests\CTest::it_works
- - P\Tests\Feature\DTest::it_works
-OUTPUT;
+    // Verify the shards.json contains the non-standard identifiers
+    expect($shardsPath)->toBeFile();
+    $data = json_decode(file_get_contents($shardsPath), true);
+    $keys = array_keys($data['timings']);
 
-    $tests = $extractTests($output);
-    $total = 2;
-    $chunks = array_chunk($tests, max(1, (int) ceil(count($tests) / $total)));
-
-    expect($chunks)->toHaveCount(2)
-        ->and($chunks[0])->toBe(['Tests\Unit\ATest', 'Appmodules\Foo\tests\BTest'])
-        ->and($chunks[1])->toBe(['Modules\Bar\tests\CTest', 'Tests\Feature\DTest']);
-});
+    expect($keys)->each->not->toStartWith('Tests\\');
+})->skipOnWindows();
