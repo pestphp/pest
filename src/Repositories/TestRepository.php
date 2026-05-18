@@ -209,6 +209,18 @@ final class TestRepository
                     $method->groups = [...$groups, ...$method->groups];
                 }
 
+                if ($groups === []) {
+                    foreach ($testCase->methods as $method) {
+                        if ($method->groups === []) {
+                            $method->groups[] = 'default';
+                            $method->attributes[] = new Attribute(
+                                Group::class,
+                                ['default'],
+                            );
+                        }
+                    }
+                }
+
                 foreach (['__addBeforeAll', '__addBeforeEach', '__addAfterEach', '__addAfterAll'] as $index => $name) {
                     foreach ($hooks[$index] ?? [null] as $hook) {
                         $testCase->factoryProxies->add($testCase->filename, 0, $name, [$hook]);
