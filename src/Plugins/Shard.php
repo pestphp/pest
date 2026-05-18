@@ -94,8 +94,8 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
         if (Parallel::isWorker() && Parallel::getGlobal('UPDATE_SHARDS') === true) {
             self::$updateShards = true;
 
-            Event\Facade::instance()->registerSubscriber(new EnsureShardTimingStarted);
-            Event\Facade::instance()->registerSubscriber(new EnsureShardTimingFinished);
+            Event\Facade::instance()->registerSubscriber(new EnsureShardTimingStarted());
+            Event\Facade::instance()->registerSubscriber(new EnsureShardTimingFinished());
 
             return $arguments;
         }
@@ -172,8 +172,8 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             Parallel::setGlobal('UPDATE_SHARDS', true);
             Parallel::setGlobal('SHARD_RUN_ID', uniqid('pest-shard-', true));
         } else {
-            Event\Facade::instance()->registerSubscriber(new EnsureShardTimingStarted);
-            Event\Facade::instance()->registerSubscriber(new EnsureShardTimingFinished);
+            Event\Facade::instance()->registerSubscriber(new EnsureShardTimingStarted());
+            Event\Facade::instance()->registerSubscriber(new EnsureShardTimingFinished());
         }
 
         return $arguments;
