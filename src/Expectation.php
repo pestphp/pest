@@ -435,6 +435,39 @@ final class Expectation
     }
 
     /**
+     * Excludes files whose paths contain any of the given path fragments from arch analysis.
+     *
+     * @param  list<string>  $paths
+     */
+    public function ignorePaths(array $paths): PendingArchExpectation
+    {
+        $normalizedPaths = array_values(array_filter(array_map(
+            static fn (string $path): string => trim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path), DIRECTORY_SEPARATOR),
+            $paths,
+        ), static fn (string $path): bool => $path !== ''));
+
+        return new PendingArchExpectation($this, [
+            static function (ObjectDescription $object) use ($normalizedPaths): bool {
+                if (isset($object->path)) {
+                    $normalizedObjectPath = trim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $object->path), DIRECTORY_SEPARATOR);
+                } else {
+                    // Fallback for objects without an initialized path (e.g., vendor objects);
+                    // use the class name as a path approximation.
+                    $normalizedObjectPath = trim(str_replace('\\', DIRECTORY_SEPARATOR, $object->name), DIRECTORY_SEPARATOR);
+                }
+
+                foreach ($normalizedPaths as $path) {
+                    if (str_contains($normalizedObjectPath, $path)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            },
+        ]);
+    }
+
+    /**
      * Asserts that the given expectation target use the given dependencies.
      *
      * @param  array<int, string>|string  $targets
