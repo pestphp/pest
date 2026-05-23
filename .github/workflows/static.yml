@@ -53,6 +53,8 @@ jobs:
           static-php-8.3-composer-
 
     - name: Install Dependencies
+      env:
+          COMPOSER_ROOT_VERSION: 4.x-dev
       run: composer update --${{ matrix.dependency-version }} --no-interaction --no-progress --ansi
 
     - name: Profanity Check

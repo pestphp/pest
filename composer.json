@@ -1,7 +1,6 @@
 {
     "name": "pestphp/pest",
     "description": "The elegant PHP Testing Framework.",
-    "version": "4.7.0",
     "keywords": [
         "php",
         "framework",
