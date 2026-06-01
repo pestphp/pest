@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest;
 
+use Laravel\Pao\Execution;
 use Pest\Support\View;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -28,6 +29,10 @@ final class KernelDump
      */
     public function enable(): void
     {
+        if (class_exists(Execution::class) && Execution::running()) {
+            return;
+        }
+
         ob_start(function (string $message): string {
             $this->buffer .= $message;
 
