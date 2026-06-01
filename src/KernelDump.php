@@ -68,6 +68,10 @@ final class KernelDump
 
         $type = 'INFO';
 
+        if (is_array($error = error_get_last()) && in_array($error['type'], [E_ERROR, E_COMPILE_ERROR, E_CORE_ERROR], true)) {
+            return;
+        }
+
         if ($this->isInternalError($this->buffer)) {
             $type = 'ERROR';
             $this->buffer = str_replace(
@@ -107,7 +111,6 @@ final class KernelDump
      */
     private function isInternalError(string $output): bool
     {
-        return str_contains($output, 'An error occurred inside PHPUnit.')
-            || str_contains($output, 'Fatal error');
+        return str_contains($output, 'An error occurred inside PHPUnit.');
     }
 }
