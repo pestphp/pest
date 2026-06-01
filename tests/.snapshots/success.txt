@@ -4,7 +4,6 @@
   ✓ preset → strict → ignoring ['Pest\Plugins\Tia\BaselineSync', 'usleep']
   ✓ preset → security → ignoring ['eval', 'str_shuffle', 'exec', …]
   ✓ globals
-  ✓ contracts
 
    PASS  Tests\Environments\Windows
   ✓ global functions are loaded
@@ -1938,4 +1937,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1329 passed (3010 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1328 passed (3008 assertions)
