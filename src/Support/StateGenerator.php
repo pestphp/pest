@@ -10,6 +10,7 @@ use NunoMaduro\Collision\Exceptions\TestOutcome;
 use PHPUnit\Event\Code\TestDoxBuilder;
 use PHPUnit\Event\Code\TestMethod;
 use PHPUnit\Event\Code\ThrowableBuilder;
+use PHPUnit\Event\Test\BeforeFirstTestMethodErrored;
 use PHPUnit\Event\Test\Errored;
 use PHPUnit\Event\Test\Failed;
 use PHPUnit\Event\Test\PhpunitDeprecationTriggered;
@@ -34,8 +35,7 @@ final class StateGenerator
                     TestResult::FAIL,
                     $testResultEvent->throwable()
                 ));
-            } else {
-                // @phpstan-ignore-next-line
+            } elseif ($testResultEvent instanceof BeforeFirstTestMethodErrored) {
                 $state->add(TestResult::fromBeforeFirstTestMethodErrored($testResultEvent));
             }
         }
