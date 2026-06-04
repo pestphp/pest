@@ -146,7 +146,6 @@ final class WrapperRunner implements RunnerInterface
     public function run(): int
     {
         $directory = dirname(__DIR__);
-        assert($directory !== '');
         ExcludeList::addDirectory($directory);
         TestResultFacade::init();
         EventFacade::instance()->seal();

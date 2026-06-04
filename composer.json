@@ -26,12 +26,12 @@
         "pestphp/pest-plugin-arch": "^4.0.2",
         "pestphp/pest-plugin-mutate": "^4.0.1",
         "pestphp/pest-plugin-profanity": "^4.2.1",
-        "phpunit/phpunit": "^12.5.24",
-        "symfony/process": "^7.4.8|^8.0.8"
+        "phpunit/phpunit": "^12.5.28",
+        "symfony/process": "^7.4.13|^8.1.0"
     },
     "conflict": {
         "filp/whoops": "<2.18.3",
-        "phpunit/phpunit": ">12.5.24",
+        "phpunit/phpunit": ">12.5.28",
         "sebastian/exporter": "<7.0.0",
         "webmozart/assert": "<1.11.0"
     },
@@ -59,11 +59,11 @@
         ]
     },
     "require-dev": {
-        "mrpunyapal/peststan": "^0.2.9",
+        "mrpunyapal/peststan": "^0.2.10",
         "pestphp/pest-dev-tools": "^4.1.0",
         "pestphp/pest-plugin-browser": "^4.3.1",
         "pestphp/pest-plugin-type-coverage": "^4.0.4",
-        "psy/psysh": "^0.12.22"
+        "psy/psysh": "^0.12.23"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
