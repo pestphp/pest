@@ -59,12 +59,15 @@ final class Project
     /**
      * Sets the test project to GitLab.
      */
-    public function gitlab(string $project, string $host = 'gitlab.com'): self
+    public function gitlab(string $project, string $hostname = 'gitlab.com'): self
     {
-        $this->issues = "https://{$host}/{$project}/-/work_items/%s";
-        $this->prs = "https://{$host}/{$project}/-/merge_requests/%s";
+        // Simple way to ensure only the host is used
+        $hostname = parse_url($hostname, PHP_URL_HOST) ?? $hostname;
 
-        $this->assignees = "https://{$host}/%s";
+        $this->issues = "https://{$hostname}/{$project}/-/work_items/%s";
+        $this->prs = "https://{$hostname}/{$project}/-/merge_requests/%s";
+
+        $this->assignees = "https://{$hostname}/%s";
 
         return $this;
     }
