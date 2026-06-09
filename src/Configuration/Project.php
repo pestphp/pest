@@ -59,12 +59,12 @@ final class Project
     /**
      * Sets the test project to GitLab.
      */
-    public function gitlab(string $project): self
+    public function gitlab(string $project, string $host = 'gitlab.com'): self
     {
-        $this->issues = "https://gitlab.com/{$project}/issues/%s";
-        $this->prs = "https://gitlab.com/{$project}/merge_requests/%s";
+        $this->issues = "https://{$host}/{$project}/-/work_items/%s";
+        $this->prs = "https://{$host}/{$project}/-/merge_requests/%s";
 
-        $this->assignees = 'https://gitlab.com/%s';
+        $this->assignees = "https://{$host}/%s";
 
         return $this;
     }
