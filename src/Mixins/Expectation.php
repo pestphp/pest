@@ -1143,6 +1143,22 @@ final class Expectation
     }
 
     /**
+     * Asserts that the value is a ULID.
+     *
+     * @return self<TValue>
+     */
+    public function toBeUlid(string $message = ''): self
+    {
+        if (! is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
+        Assert::assertTrue(Str::isUlid($this->value), $message);
+
+        return $this;
+    }
+
+    /**
      * Asserts that the value is between 2 specified values
      *
      * @return self<TValue>
