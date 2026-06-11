@@ -120,8 +120,6 @@ final class Expectation
 
     /**
      * Dump the expectation value and end the script.
-     *
-     * @return never
      */
     public function dd(mixed ...$arguments): never
     {
