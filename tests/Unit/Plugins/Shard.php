@@ -50,6 +50,98 @@ describe('getShard', function () {
     ])->throws(InvalidOption::class);
 });
 
+describe('buildFilterArgument', function () {
+    it('generates compact filter for single test', function () {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('buildFilterArgument');
+
+        $filter = $method->invoke($shard, ['Tests\\Unit\\ExampleTest']);
+
+        expect($filter)->toBe('Tests\\\\Unit\\\\ExampleTest');
+    });
+
+    it('generates compact filter for multiple tests with common prefix', function () {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('buildFilterArgument');
+
+        $filter = $method->invoke($shard, [
+            'Tests\\Unit\\Foo\\BarTest',
+            'Tests\\Unit\\Foo\\BazTest',
+        ]);
+
+        expect($filter)->toBe('Tests\\\\Unit\\\\Foo\\\\(BarTest|BazTest)');
+    });
+
+    it('generates compact filter for tests with different namespaces', function () {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('buildFilterArgument');
+
+        $filter = $method->invoke($shard, [
+            'Tests\\Unit\\FooTest',
+            'Tests\\Feature\\BarTest',
+        ]);
+
+        expect($filter)->toBe('Tests\\\\(Unit\\\\FooTest|Feature\\\\BarTest)');
+    });
+
+    it('returns empty string for empty test list', function () {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('buildFilterArgument');
+
+        $filter = $method->invoke($shard, []);
+
+        expect($filter)->toBe('');
+    });
+
+    it('generates compact filter for deeply nested namespaces', function () {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('buildFilterArgument');
+
+        $filter = $method->invoke($shard, [
+            'Tests\\Unit\\Plugins\\Concerns\\Foo',
+            'Tests\\Unit\\Plugins\\Concerns\\Bar',
+            'Tests\\Unit\\Plugins\\Concerns\\Baz',
+        ]);
+
+        expect($filter)->toBe('Tests\\\\Unit\\\\Plugins\\\\Concerns\\\\(Foo|Bar|Baz)');
+    });
+
+    it('handles mix of nested and flat namespaces', function () {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('buildFilterArgument');
+
+        $tests = [
+            'Tests\\Unit\\SimpleTest',
+            'Tests\\Unit\\Plugins\\Concerns\\HandleArguments',
+            'Tests\\Unit\\Plugins\\Concerns\\Validation',
+            'Tests\\Unit\\Another\\Deep\\Nested\\Test',
+        ];
+
+        $filter = $method->invoke($shard, $tests);
+
+        expect($filter)
+            ->toBe(addslashes('Tests\\Unit\\(SimpleTest|Plugins\\Concerns\\(HandleArguments|Validation)|Another\\Deep\\Nested\\Test)'));
+    });
+});
+
 describe('ensureFilterLengthIsSafe', function () {
     it('accepts filter within length limit', function () {
         $output = new BufferedOutput;
