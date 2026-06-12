@@ -1744,6 +1744,12 @@
   ✓ getShard → it throws exception for invalid index or total values with (['test', '--shard', '1/0'])
   ✓ getShard → it throws exception for invalid index or total values with (['test', '--shard', '3/2'])
   ✓ getShard → it throws exception for invalid index or total values with (['test', '--shard', '5/4'])
+  ✓ buildFilterArgument → it generates compact filter for single test
+  ✓ buildFilterArgument → it generates compact filter for multiple tests with common prefix
+  ✓ buildFilterArgument → it generates compact filter for tests with different namespaces
+  ✓ buildFilterArgument → it returns empty string for empty test list
+  ✓ buildFilterArgument → it generates compact filter for deeply nested namespaces
+  ✓ buildFilterArgument → it handles mix of nested and flat namespaces
   ✓ ensureFilterLengthIsSafe → it accepts filter within length limit
   ✓ ensureFilterLengthIsSafe → it throws exception when filter exceeds default limit
   ✓ ensureFilterLengthIsSafe → it respects custom limit from environment variable
@@ -1977,4 +1983,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1364 passed (3062 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1370 passed (3068 assertions)
