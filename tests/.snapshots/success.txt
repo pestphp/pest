@@ -1726,6 +1726,34 @@
    PASS  Tests\Unit\Plugins\Retry
   ✓ it orders by defects and stop on defects if when --retry is used
 
+   PASS  Tests\Unit\Plugins\Shard
+  ✓ getShard → it parses valid shard format with ('1/2', 1, 2)
+  ✓ getShard → it parses valid shard format with ('2/2', 2, 2)
+  ✓ getShard → it parses valid shard format with ('1/4', 1, 4)
+  ✓ getShard → it parses valid shard format with ('4/4', 4, 4)
+  ✓ getShard → it parses valid shard format with ('1/10', 1, 10)
+  ✓ getShard → it parses valid shard format with ('10/10', 10, 10)
+  ✓ getShard → it parses valid shard format with ('5/100', 5, 100)
+  ✓ getShard → it throws exception for invalid format with (['test', '--shard', 'invalid'])
+  ✓ getShard → it throws exception for invalid format with (['test', '--shard', '1'])
+  ✓ getShard → it throws exception for invalid format with (['test', '--shard', '1/'])
+  ✓ getShard → it throws exception for invalid format with (['test', '--shard', '/2'])
+  ✓ getShard → it throws exception for invalid format with (['test', '--shard', 'a/b'])
+  ✓ getShard → it throws exception for invalid format with (['test', '--shard', '1.5/2'])
+  ✓ getShard → it throws exception for invalid index or total values with (['test', '--shard', '0/2'])
+  ✓ getShard → it throws exception for invalid index or total values with (['test', '--shard', '1/0'])
+  ✓ getShard → it throws exception for invalid index or total values with (['test', '--shard', '3/2'])
+  ✓ getShard → it throws exception for invalid index or total values with (['test', '--shard', '5/4'])
+  ✓ ensureFilterLengthIsSafe → it accepts filter within length limit
+  ✓ ensureFilterLengthIsSafe → it throws exception when filter exceeds default limit
+  ✓ ensureFilterLengthIsSafe → it respects custom limit from environment variable
+  ✓ ensureFilterLengthIsSafe → it accepts filter within custom limit
+  ✓ handleArguments → it returns original arguments when shard option is not present
+  ✓ handleArguments → it removes parallel arguments from test discovery
+  ✓ addOutput → it displays shard information after test execution
+  ✓ addOutput → it uses singular form for single test file
+  ✓ addOutput → it returns original exit code when shard is not set
+
    PASS  Tests\Unit\Plugins\Tia\ContentHash
   ✓ of() → it returns false when file does not exist
   ✓ of() → it hashes an existing file
@@ -1949,4 +1977,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1332 passed (3014 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1364 passed (3062 assertions)
