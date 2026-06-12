@@ -24,7 +24,7 @@ test('parallel', function () use ($run) {
         $file = file_get_contents(__FILE__);
         $file = preg_replace(
             '/\$expected = \'.*?\';/',
-            "\$expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1319 passed (2973 assertions)';",
+            "\$expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1315 passed (2961 assertions)';",
             $file,
         );
         file_put_contents(__FILE__, $file);
@@ -46,4 +46,15 @@ test('parallel reports invalid datasets as failures', function () use ($run) {
         ->toContain("A dataset with the name `missing.dataset` does not exist. You can create it using `dataset('missing.dataset', ['a', 'b']);`.")
         ->toContain('Tests:    1 failed, 1 passed (1 assertions)')
         ->toContain('Parallel: 3 processes');
+})->skipOnWindows();
+
+test('parallel can have multiple exclude-groups', function () use ($run) {
+    $singleExclude = $run('--exclude-group=integration');
+    $doubleExclude = $run('--exclude-group=integration', '--exclude-group=container');
+
+    preg_match('/(\d+) passed/', $singleExclude, $singleMatch);
+    preg_match('/(\d+) passed/', $doubleExclude, $doubleMatch);
+
+    expect((int) $doubleMatch[1])->toBeLessThan((int) $singleMatch[1]);
+    expect($doubleExclude)->toContain('Parallel: 3 processes');
 })->skipOnWindows();

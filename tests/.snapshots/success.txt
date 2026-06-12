@@ -1716,6 +1716,8 @@
   ✓ method hasArgument with ('someValue', true)
   ✓ method hasArgument with ('--a', false)
   ✓ method hasArgument with ('--undefined-argument', false)
+  ✓ popArgument preserves duplicate values when removing a missing argument
+  ✓ popArgument preserves duplicate values when removing an existing argument
 
    PASS  Tests\Unit\Plugins\Environment
   ✓ environment is set to CI when --ci option is used
@@ -1913,6 +1915,7 @@
   ✓ parallel
   ✓ a parallel test can extend another test with same name
   ✓ parallel reports invalid datasets as failures
+  ✓ parallel can have multiple exclude-groups
 
    PASS  Tests\Visual\ParallelNestedDatasets
   ✓ parallel loads nested datasets from nested directories
@@ -1946,4 +1949,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1335 passed (3024 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1332 passed (3014 assertions)
