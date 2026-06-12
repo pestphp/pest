@@ -137,7 +137,7 @@ final class Expectation
 
         var_dump($this->value, ...$arguments);
 
-        exit(0);
+        exit(1);
     }
 
     /**
