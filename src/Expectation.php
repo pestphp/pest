@@ -112,7 +112,7 @@ final class Expectation
         if (function_exists('dump')) {
             dump($this->value, ...$arguments);
         } else {
-            var_dump($this->value);
+            var_dump($this->value, ...$arguments);
         }
 
         return $this;
@@ -120,16 +120,22 @@ final class Expectation
 
     /**
      * Dump the expectation value and end the script.
-     *
-     * @return never
      */
-    public function dd(mixed ...$arguments): void
+    public function dd(mixed ...$arguments): never
     {
         if (function_exists('dd')) {
             dd($this->value, ...$arguments);
         }
 
-        var_dump($this->value);
+        if (getenv('PARATEST') !== false || isset($_SERVER['COLLISION_PRINTER'])) {
+            ob_start();
+            var_dump($this->value, ...$arguments);
+            $output = (string) ob_get_clean();
+
+            throw new ExpectationFailedException($output);
+        }
+
+        var_dump($this->value, ...$arguments);
 
         exit(1);
     }

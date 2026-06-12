@@ -435,6 +435,11 @@ trait Testable
 
                     if ($hasOutputExpectation) {
                         ob_clean();
+
+                        Closure::bind(function (): void {
+                            $this->outputExpectedString = null;
+                            $this->outputExpectedRegex = null;
+                        }, $this, TestCase::class)();
                     }
 
                     $this->setUp();
