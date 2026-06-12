@@ -139,8 +139,8 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             self::$timeBalanced = true;
             self::$shardsOutdated = $newTests !== [];
         } else {
-            $isInCurrentShard = fn (int $key) => $key % $total === ($index - 1);
-            $testsToRun = array_values(array_filter(array_values($tests), $isInCurrentShard, ARRAY_FILTER_USE_KEY));
+            $isInCurrentShard = fn (int $key): bool => $key % $total === ($index - 1);
+            $testsToRun = array_values(array_filter($tests, $isInCurrentShard, ARRAY_FILTER_USE_KEY));
         }
 
         self::$shard = [
