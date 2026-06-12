@@ -59,7 +59,7 @@
     },
     "require-dev": {
         "mrpunyapal/peststan": "^0.2.10",
-        "laravel/pao": "^1.1.0",
+        "laravel/pao": "^1.1.1",
         "pestphp/pest-dev-tools": "^5.0.0",
         "pestphp/pest-plugin-browser": "^5.0.0",
         "pestphp/pest-plugin-type-coverage": "^5.0.0",
