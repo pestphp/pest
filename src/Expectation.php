@@ -112,7 +112,7 @@ final class Expectation
         if (function_exists('dump')) {
             dump($this->value, ...$arguments);
         } else {
-            var_dump($this->value);
+            var_dump($this->value, ...$arguments);
         }
 
         return $this;
@@ -120,16 +120,22 @@ final class Expectation
 
     /**
      * Dump the expectation value and end the script.
-     *
-     * @return never
      */
-    public function dd(mixed ...$arguments): void
+    public function dd(mixed ...$arguments): never
     {
         if (function_exists('dd')) {
             dd($this->value, ...$arguments);
         }
 
-        var_dump($this->value);
+        if (getenv('PARATEST') !== false || isset($_SERVER['COLLISION_PRINTER'])) {
+            ob_start();
+            var_dump($this->value, ...$arguments);
+            $output = (string) ob_get_clean();
+
+            throw new ExpectationFailedException($output);
+        }
+
+        var_dump($this->value, ...$arguments);
 
         exit(1);
     }
@@ -238,7 +244,7 @@ final class Expectation
             if ($callbacks[$index] instanceof Closure) {
                 $callbacks[$index](new self($value), new self($key));
             } else {
-                (new self($value))->toEqual($callbacks[$index]);
+                new self($value)->toEqual($callbacks[$index]);
             }
 
             $index = isset($callbacks[$index + 1]) ? $index + 1 : 0;
@@ -915,15 +921,7 @@ final class Expectation
 
         return Targeted::make(
             $this,
-            function (ObjectDescription $object) use ($interfaces): bool {
-                foreach ($interfaces as $interface) {
-                    if (! isset($object->reflectionClass) || ! $object->reflectionClass->implementsInterface($interface)) {
-                        return false;
-                    }
-                }
-
-                return true;
-            },
+            fn (ObjectDescription $object): bool => array_all($interfaces, fn (string $interface): bool => isset($object->reflectionClass) && $object->reflectionClass->implementsInterface($interface)),
             "to implement '".implode("', '", $interfaces)."'",
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
@@ -1138,8 +1136,8 @@ final class Expectation
             $this,
             fn (ObjectDescription $object): bool => isset($object->reflectionClass)
                 && $object->reflectionClass->isEnum()
-                && (new ReflectionEnum($object->name))->isBacked() // @phpstan-ignore-line
-                && (string) (new ReflectionEnum($object->name))->getBackingType() === $backingType, // @phpstan-ignore-line
+                && new ReflectionEnum($object->name)->isBacked() // @phpstan-ignore-line
+                && (string) new ReflectionEnum($object->name)->getBackingType() === $backingType, // @phpstan-ignore-line
             'to be '.$backingType.' backed enum',
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );

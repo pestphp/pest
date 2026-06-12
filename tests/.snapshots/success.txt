@@ -4,7 +4,6 @@
   ✓ preset → strict → ignoring ['Pest\Plugins\Tia\BaselineSync', 'usleep']
   ✓ preset → security → ignoring ['eval', 'str_shuffle', 'exec', …]
   ✓ globals
-  ✓ contracts
 
    PASS  Tests\Environments\Windows
   ✓ global functions are loaded
@@ -753,6 +752,13 @@
   ✓ passes as not truthy with ('0')
   ✓ failures
   ✓ failures with custom message
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeUlid
+  ✓ failures with wrong type
+  ✓ pass
+  ✓ failures
+  ✓ failures with message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeUppercase
@@ -1697,6 +1703,8 @@
    PASS  Tests\Unit\Expectations\OppositeExpectation
   ✓ it throw expectation failed exception with string argument
   ✓ it throw expectation failed exception with array argument
+  ✓ it does not truncate long string arguments in error message
+  ✓ it does not truncate custom error message when using not()
 
    PASS  Tests\Unit\Overrides\ThrowableBuilder
   ✓ collision editor can be added to the stack trace

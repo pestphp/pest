@@ -7,7 +7,6 @@ namespace Pest\Plugins\Parallel\Paratest;
 use const DIRECTORY_SEPARATOR;
 
 use NunoMaduro\Collision\Adapters\Phpunit\Support\ResultReflection;
-use ParaTest\Coverage\CoverageMerger;
 use ParaTest\JUnit\LogMerger;
 use ParaTest\JUnit\Writer;
 use ParaTest\Options;
@@ -25,11 +24,17 @@ use PHPUnit\TestRunner\TestResult\Facade as TestResultFacade;
 use PHPUnit\TestRunner\TestResult\TestResult;
 use PHPUnit\TextUI\Configuration\CodeCoverageFilterRegistry;
 use PHPUnit\Util\ExcludeList;
+use ReflectionProperty;
+use SebastianBergmann\CodeCoverage\Node\Builder;
+use SebastianBergmann\CodeCoverage\Serialization\Merger;
+use SebastianBergmann\CodeCoverage\StaticAnalysis\FileAnalyser;
+use SebastianBergmann\CodeCoverage\StaticAnalysis\ParsingSourceAnalyser;
 use SebastianBergmann\Timer\Timer;
 use SplFileInfo;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
 
+use function array_filter;
 use function array_merge;
 use function array_merge_recursive;
 use function array_shift;
@@ -146,7 +151,6 @@ final class WrapperRunner implements RunnerInterface
     public function run(): int
     {
         $directory = dirname(__DIR__);
-        assert($directory !== '');
         ExcludeList::addDirectory($directory);
         TestResultFacade::init();
         EventFacade::instance()->seal();
@@ -448,10 +452,33 @@ final class WrapperRunner implements RunnerInterface
 
             return;
         }
-        $coverageMerger = new CoverageMerger($coverageManager->codeCoverage());
-        foreach ($this->coverageFiles as $coverageFile) {
-            $coverageMerger->addCoverageFromFile($coverageFile);
+        $coverageFiles = [];
+        foreach ($this->coverageFiles as $fileInfo) {
+            $realPath = $fileInfo->getRealPath();
+            if ($realPath !== false && $realPath !== '') {
+                $coverageFiles[] = $realPath;
+            }
         }
+        $serializedCoverage = (new Merger)->merge($coverageFiles);
+
+        $report = (new Builder(new FileAnalyser(new ParsingSourceAnalyser, false, false)))->build(
+            $serializedCoverage['codeCoverage'],
+            $serializedCoverage['testResults'],
+            $serializedCoverage['basePath'],
+        );
+        $codeCoverage = $coverageManager->codeCoverage();
+        $codeCoverage->excludeUncoveredFiles();
+
+        $mergedData = $serializedCoverage['codeCoverage'];
+        $basePath = $serializedCoverage['basePath'];
+        if ($basePath !== '') {
+            foreach ($mergedData->coveredFiles() as $relativePath) {
+                $mergedData->renameFile($relativePath, $basePath.DIRECTORY_SEPARATOR.$relativePath);
+            }
+        }
+        $codeCoverage->setData($mergedData);
+        $codeCoverage->setTests($serializedCoverage['testResults']);
+        (new ReflectionProperty(\SebastianBergmann\CodeCoverage\CodeCoverage::class, 'cachedReport'))->setValue($codeCoverage, $report);
 
         $coverageManager->generateReports(
             $this->printer->printer,

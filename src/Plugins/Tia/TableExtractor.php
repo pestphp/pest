@@ -23,15 +23,7 @@ final class TableExtractor
         }
 
         $prefix = strtolower(substr($trimmed, 0, 6));
-
-        $matched = false;
-        foreach (self::DML_PREFIXES as $dml) {
-            if (str_starts_with($prefix, $dml)) {
-                $matched = true;
-
-                break;
-            }
-        }
+        $matched = array_any(self::DML_PREFIXES, fn (string $dml): bool => str_starts_with($prefix, $dml));
 
         if (! $matched) {
             return [];

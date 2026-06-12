@@ -28,6 +28,13 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     private const string SHARD_OPTION = 'shard';
 
     /**
+     * The maximum length allowed for the filter argument.
+     * While ARG_MAX can be 2MB, individual arguments are often limited to 128KB (MAX_ARG_STRLEN).
+     * Practical limits in CI environments (like Docker or pipeline runners) can be even lower.
+     */
+    private const int MAX_FILTER_LENGTH = 32768;
+
+    /**
      * The shard index and total number of shards.
      *
      * @var array{
@@ -146,7 +153,11 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             return $arguments;
         }
 
-        return [...$arguments, '--filter', $this->buildFilterArgument($testsToRun)];
+        $filter = $this->buildFilterArgument($testsToRun);
+
+        $this->ensureFilterLengthIsSafe($filter);
+
+        return [...$arguments, '--filter', $filter];
     }
 
     /**
@@ -187,11 +198,11 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      */
     private function allTests(array $arguments): array
     {
-        $output = (new Process([
+        $output = new Process([
             'php',
             ...$this->removeParallelArguments($arguments),
             '--list-tests',
-        ]))->setTimeout(120)->mustRun()->getOutput();
+        ])->setTimeout(120)->mustRun()->getOutput();
 
         preg_match_all('/ - (?:P\\\\)?(Tests\\\\[^:]+)::/', $output, $matches);
 
@@ -209,10 +220,32 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
 
     /**
      * Builds the filter argument for the given tests to run.
+     *
+     * @param  array<int, string>  $testsToRun
      */
-    private function buildFilterArgument(mixed $testsToRun): string
+    private function buildFilterArgument(array $testsToRun): string
     {
         return addslashes(implode('|', $testsToRun));
+    }
+
+    /**
+     * Ensures that the filter length is safe for the current environment.
+     *
+     * @throws InvalidOption
+     */
+    private function ensureFilterLengthIsSafe(string $filter): void
+    {
+        $maxLength = (int) (getenv('PEST_SHARD_MAX_FILTER_LENGTH') ?: self::MAX_FILTER_LENGTH);
+
+        if (strlen($filter) > $maxLength) {
+            throw new InvalidOption(sprintf(
+                'The generated filter for this shard is too long (%d characters). '.
+                'This can cause issues with some environments (limit is %d characters). '.
+                'Please increase the number of shards (e.g., use 1/4 instead of 1/2) to reduce the filter length.',
+                strlen($filter),
+                $maxLength
+            ));
+        }
     }
 
     /**

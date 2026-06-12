@@ -53,9 +53,7 @@ final class UsesCall
         $this->targets = [$filename];
     }
 
-    /**
-     * @deprecated Use `pest()->printer()->compact()` instead.
-     */
+    #[\Deprecated(message: 'Use `pest()->printer()->compact()` instead.')]
     public function compact(): self
     {
         DefaultPrinter::compact(true);

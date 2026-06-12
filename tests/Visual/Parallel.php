@@ -30,7 +30,7 @@ test('parallel', function () use ($run) {
         file_put_contents(__FILE__, $file);
     }
 
-    $expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1315 passed (2961 assertions)';
+    $expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1319 passed (2973 assertions)';
 
     expect($output)
         ->toContain("Tests:    {$expected}")

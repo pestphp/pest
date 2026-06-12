@@ -178,13 +178,7 @@ final class Parallel implements HandlesArguments
     {
         $arguments = new ArgvInput;
 
-        foreach (self::UNSUPPORTED_ARGUMENTS as $unsupportedArgument) {
-            if ($arguments->hasParameterOption($unsupportedArgument)) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any(self::UNSUPPORTED_ARGUMENTS, fn (string|array $unsupportedArgument): bool => $arguments->hasParameterOption($unsupportedArgument));
     }
 
     /**

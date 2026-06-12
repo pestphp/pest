@@ -94,15 +94,7 @@ final readonly class TestPaths
         if (in_array($relativePath, $this->files, true)) {
             return true;
         }
-
-        $matchesSuffix = false;
-        foreach ($this->suffixes as $suffix) {
-            if (str_ends_with($relativePath, $suffix)) {
-                $matchesSuffix = true;
-
-                break;
-            }
-        }
+        $matchesSuffix = array_any($this->suffixes, fn (string $suffix): bool => str_ends_with($relativePath, $suffix));
 
         if (! $matchesSuffix) {
             return false;

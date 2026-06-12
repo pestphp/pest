@@ -37,7 +37,7 @@ final class XdebugRestarter implements Restarter
             return;
         }
 
-        (new XdebugHandler('pest'))->check();
+        new XdebugHandler('pest')->check();
     }
 
     private function xdebugIsCoverageOnly(): bool

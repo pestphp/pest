@@ -2,7 +2,7 @@ name: Tests
 
 on:
   push:
-    branches: [4.x]
+    branches: [5.x]
   pull_request:
   schedule:
     - cron: '0 9 * * *'
@@ -24,21 +24,18 @@ jobs:
       fail-fast: true
       matrix:
         os: [ubuntu-latest, macos-latest] # windows-latest
-        symfony: ['7.4', '8.0']
-        php: ['8.3', '8.4', '8.5']
+        symfony: ['8.0']
+        php: ['8.4', '8.5']
         dependency_version: [prefer-stable]
-        exclude:
-          - php: '8.3'
-            symfony: '8.0'
 
     name: PHP ${{ matrix.php }} - Symfony ^${{ matrix.symfony }} - ${{ matrix.os }} - ${{ matrix.dependency_version }}
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
     - name: Setup PHP
-      uses: shivammathur/setup-php@v2
+      uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
       with:
         php-version: ${{ matrix.php }}
         tools: composer:v2
@@ -51,7 +48,7 @@ jobs:
       run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
     - name: Cache Composer dependencies
-      uses: actions/cache@v5
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
       with:
         path: ${{ steps.composer-cache.outputs.dir }}
         key: ${{ matrix.os }}-php-${{ matrix.php }}-symfony-${{ matrix.symfony }}-composer-${{ hashFiles('**/composer.json', '**/composer.lock') }}
@@ -66,6 +63,8 @@ jobs:
 
     - name: Install PHP dependencies
       shell: bash
+      env:
+        COMPOSER_ROOT_VERSION: 5.x-dev
       run: composer update --${{ matrix.dependency_version }} --no-interaction --no-progress --ansi --with="symfony/console:^${{ matrix.symfony }}"
 
     - name: Unit Tests

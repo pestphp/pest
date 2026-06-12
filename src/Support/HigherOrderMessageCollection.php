@@ -31,7 +31,7 @@ final class HigherOrderMessageCollection
      */
     public function addWhen(callable $condition, string $filename, int $line, string $name, ?array $arguments): void
     {
-        $this->messages[] = (new HigherOrderMessage($filename, $line, $name, $arguments))->when($condition);
+        $this->messages[] = new HigherOrderMessage($filename, $line, $name, $arguments)->when($condition);
     }
 
     /**
