@@ -754,6 +754,13 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toBeUlid
+  ✓ failures with wrong type
+  ✓ pass
+  ✓ failures
+  ✓ failures with message
+  ✓ not failures
+
    PASS  Tests\Features\Expect\toBeUppercase
   ✓ pass
   ✓ failures
@@ -1939,4 +1946,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1330 passed (3013 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1335 passed (3024 assertions)
