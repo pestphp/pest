@@ -232,11 +232,209 @@ describe('handleArguments', function () {
         $reflection = new ReflectionClass($shard);
         $method = $reflection->getMethod('removeParallelArguments');
 
-        $arguments = ['bin/pest', '--parallel', 'tests/', '-p'];
+        $arguments = ['bin/pest', '--parallel', '--processes=4', 'tests/', '-p'];
 
         $result = $method->invoke($shard, $arguments);
 
-        expect($result)->toBe([0 => 'bin/pest', 2 => 'tests/']);
+        expect($result)->toBe(['bin/pest', 'tests/']);
+    });
+});
+
+describe('parseListTestsOutput', function () {
+    it('parses Tests\\ namespaced classes from --list-tests output', function () {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('parseListTestsOutput');
+
+        $listOutput = <<<'OUT'
+ INFO  Available tests:
+
+ - P\Tests\Features\After::__pest_evaluable_it_runs
+ - P\Tests\Features\After::__pest_evaluable_it_runs_twice
+ - P\Tests\Unit\Foo::test_bar
+OUT;
+
+        expect($method->invoke($shard, $listOutput))->toBe([
+            'Tests\\Features\\After',
+            'Tests\\Unit\\Foo',
+        ]);
+    });
+
+    it('deduplicates repeated class names from multiple test methods', function () {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('parseListTestsOutput');
+
+        $listOutput = <<<'OUT'
+ - P\Tests\Same::method_a
+ - P\Tests\Same::method_b
+ - P\Tests\Same::method_c
+OUT;
+
+        expect($method->invoke($shard, $listOutput))->toBe(['Tests\\Same']);
+    });
+
+    it('returns an empty list for output with no matching lines', function () {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('parseListTestsOutput');
+
+        expect($method->invoke($shard, ''))->toBe([])
+            ->and($method->invoke($shard, 'some random text'))->toBe([]);
+    });
+
+    it('parses non-Tests namespaced classes', function () {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('parseListTestsOutput');
+
+        $listOutput = <<<'OUT'
+ - P\Acme\Sharding\OneTest::test_foo
+ - P\Acme\Sharding\TwoTest::test_bar
+ - App\Suite\BazTest::test_qux
+OUT;
+
+        expect($method->invoke($shard, $listOutput))->toBe([
+            'Acme\\Sharding\\OneTest',
+            'Acme\\Sharding\\TwoTest',
+            'App\\Suite\\BazTest',
+        ]);
+    });
+
+    it('parses unnamespaced top-level classes', function () {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('parseListTestsOutput');
+
+        expect($method->invoke($shard, ' - P\FooTest::test_bar'))->toBe(['FooTest']);
+    });
+
+    it('strips the P\\ Pest prefix but keeps the rest of the FQCN', function () {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('parseListTestsOutput');
+
+        $listOutput = <<<'OUT'
+ - P\Acme\OneTest::a
+ - Acme\TwoTest::b
+OUT;
+
+        expect($method->invoke($shard, $listOutput))->toBe([
+            'Acme\\OneTest',
+            'Acme\\TwoTest',
+        ]);
+    });
+
+    it('ignores junk lines that lack the " - …::" framing', function () {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('parseListTestsOutput');
+
+        $listOutput = <<<'OUT'
+ INFO  Available tests:
+
+There were errors:
+garbage ::: not a test
+ - P\Acme\RealTest::method
+OUT;
+
+        expect($method->invoke($shard, $listOutput))->toBe(['Acme\\RealTest']);
+    });
+});
+
+describe('buildListTestsCommand', function () {
+    it('builds the list-tests command with the forwarded --test-directory', function () {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('buildListTestsCommand');
+
+        $command = $method->invoke($shard, ['bin/pest', '--update-shards'], 'custom/suite');
+
+        expect($command)->toBe([
+            'php',
+            'bin/pest',
+            '--update-shards',
+            '--test-directory=custom/suite',
+            '--list-tests',
+        ]);
+    });
+
+    it('strips --parallel and -p when building the list-tests command', function () {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('buildListTestsCommand');
+
+        $command = $method->invoke($shard, ['bin/pest', '--parallel', '--update-shards', '-p'], 'tests');
+
+        expect($command)->toBe([
+            'php',
+            'bin/pest',
+            '--update-shards',
+            '--test-directory=tests',
+            '--list-tests',
+        ]);
+    });
+
+    it('forwards --test-directory even when input arguments include one', function () {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('buildListTestsCommand');
+
+        $command = $method->invoke($shard, ['bin/pest'], 'suites');
+
+        expect($command)->toContain('--test-directory=suites');
+    });
+
+    it('strips --processes=N when building the list-tests command', function () {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('buildListTestsCommand');
+
+        $command = $method->invoke($shard, ['bin/pest', '--parallel', '--processes=4', '--update-shards'], 'tests');
+
+        expect($command)->toBe([
+            'php',
+            'bin/pest',
+            '--update-shards',
+            '--test-directory=tests',
+            '--list-tests',
+        ]);
+    });
+
+    it('strips --processes N (space-separated) when building the list-tests command', function () {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('buildListTestsCommand');
+
+        $command = $method->invoke($shard, ['bin/pest', '--parallel', '--processes', '4', '--update-shards'], 'tests');
+
+        expect($command)->not->toContain('--processes')
+            ->and($command)->toContain('--update-shards')
+            ->and($command)->toContain('--test-directory=tests');
     });
 });
 
