@@ -7,7 +7,7 @@
 
     <div>
         <span class="text-gray mr-1">- </span>
-        <span>composer require pestphp/pest-plugin-browser:^4.0 --dev</span>
+        <span>composer require pestphp/pest-plugin-browser:^5.0 --dev</span>
     </div>
 
     <div>

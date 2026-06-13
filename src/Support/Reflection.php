@@ -181,7 +181,7 @@ final class Reflection
      */
     public static function getFunctionArguments(Closure $function): array
     {
-        $parameters = (new ReflectionFunction($function))->getParameters();
+        $parameters = new ReflectionFunction($function)->getParameters();
         $arguments = [];
 
         foreach ($parameters as $parameter) {
@@ -207,7 +207,7 @@ final class Reflection
 
     public static function getFunctionVariable(Closure $function, string $key): mixed
     {
-        return (new ReflectionFunction($function))->getStaticVariables()[$key] ?? null;
+        return new ReflectionFunction($function)->getStaticVariables()[$key] ?? null;
     }
 
     /**

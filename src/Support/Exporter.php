@@ -86,4 +86,17 @@ final readonly class Exporter
 
         return (string) preg_replace(array_keys($map), array_values($map), $this->exporter->shortenedExport($value));
     }
+
+    /**
+     * Exports a value into a full single-line string without truncation.
+     */
+    public function export(mixed $value): string
+    {
+        $map = [
+            '#\\\n\s*#' => '',
+            '# Object \(\.{3}\)#' => '',
+        ];
+
+        return (string) preg_replace(array_keys($map), array_values($map), $this->exporter->export($value));
+    }
 }

@@ -936,7 +936,7 @@ final class Expectation
 
         if ($exception instanceof Closure) {
             $callback = $exception;
-            $parameters = (new ReflectionFunction($exception))->getParameters();
+            $parameters = new ReflectionFunction($exception)->getParameters();
 
             if (count($parameters) !== 1) {
                 throw new InvalidArgumentException('The given closure must have a single parameter type-hinted as the class string.');
@@ -1138,6 +1138,22 @@ final class Expectation
         }
 
         Assert::assertTrue(Str::isUuid($this->value), $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is a ULID.
+     *
+     * @return self<TValue>
+     */
+    public function toBeUlid(string $message = ''): self
+    {
+        if (! is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
+        Assert::assertTrue(Str::isUlid($this->value), $message);
 
         return $this;
     }

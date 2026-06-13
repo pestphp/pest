@@ -1,7 +1,7 @@
 <p align="center">
-    <img src="https://raw.githubusercontent.com/pestphp/art/master/v4/social.png" width="600" alt="PEST">
+    <img src="https://raw.githubusercontent.com/pestphp/art/master/v5/social.png" width="600" alt="PEST">
     <p align="center">
-        <a href="https://github.com/pestphp/pest/actions"><img alt="GitHub Workflow Status (master)" src="https://img.shields.io/github/actions/workflow/status/pestphp/pest/tests.yml?branch=4.x&label=Tests%204.x"></a>
+        <a href="https://github.com/pestphp/pest/actions"><img alt="GitHub Workflow Status (5.x)" src="https://img.shields.io/github/actions/workflow/status/pestphp/pest/tests.yml?branch=5.x&label=Tests%205.x"></a>
         <a href="https://packagist.org/packages/pestphp/pest"><img alt="Total Downloads" src="https://img.shields.io/packagist/dt/pestphp/pest"></a>
         <a href="https://packagist.org/packages/pestphp/pest"><img alt="Latest Version" src="https://img.shields.io/packagist/v/pestphp/pest"></a>
         <a href="https://packagist.org/packages/pestphp/pest"><img alt="License" src="https://img.shields.io/packagist/l/pestphp/pest"></a>
@@ -12,7 +12,7 @@
 
 ------
 
-> Pest v4 Now Available: **[Read the announcement »](https://pestphp.com/docs/pest-v4-is-here-now-with-browser-testing)**.
+> Pest v5 Now Available: **[Read the announcement »](https://pestphp.com/docs/pest-v5-is-here)**.
 
 **Pest** is an elegant PHP testing Framework with a focus on simplicity, meticulously designed to bring back the joy of testing in PHP.
 

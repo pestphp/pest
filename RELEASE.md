@@ -2,10 +2,10 @@
 
 When releasing a new version of Pest there are some checks and updates that need to be done:
 
-> **For Pest v3 you should use the `3.x` branch instead.**
+> **For Pest v4 you should use the `4.x` branch instead.**
 
-- Clear your local repository with: `git add . && git reset --hard && git checkout 4.x`
-- On the GitHub repository, check the contents of [github.com/pestphp/pest/compare/{latest_version}...4.x](https://github.com/pestphp/pest/compare/{latest_version}...4.x)
+- Clear your local repository with: `git add . && git reset --hard && git checkout 5.x`
+- On the GitHub repository, check the contents of [github.com/pestphp/pest/compare/{latest_version}...5.x](https://github.com/pestphp/pest/compare/{latest_version}...5.x)
 - Update the version number in [src/Pest.php](src/Pest.php)
 - Run the tests locally using: `composer test`
 - Commit the Pest file with the message: `git commit -m "release: vX.X.X"`

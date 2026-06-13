@@ -50,7 +50,7 @@ final class HigherOrderMessage
         }
 
         if ($this->hasHigherOrderCallable()) {
-            return (new HigherOrderCallables($target))->{$this->name}(...$this->arguments);
+            return new HigherOrderCallables($target)->{$this->name}(...$this->arguments);
         }
 
         try {

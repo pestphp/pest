@@ -17,21 +17,20 @@
         }
     ],
     "require": {
-        "php": "^8.3.0",
-        "brianium/paratest": "^7.20.0",
-        "composer/xdebug-handler": "^3.0.5",
+        "php": "^8.4",
+        "brianium/paratest": "^7.22.4",
         "nunomaduro/collision": "^8.9.4",
         "nunomaduro/termwind": "^2.4.0",
-        "pestphp/pest-plugin": "^4.0.0",
-        "pestphp/pest-plugin-arch": "^4.0.2",
-        "pestphp/pest-plugin-mutate": "^4.0.1",
-        "pestphp/pest-plugin-profanity": "^4.2.1",
-        "phpunit/phpunit": "^12.5.28",
-        "symfony/process": "^7.4.13|^8.1.0"
+        "pestphp/pest-plugin": "^5.0.0",
+        "pestphp/pest-plugin-arch": "^5.0.0",
+        "pestphp/pest-plugin-mutate": "^5.0.0",
+        "pestphp/pest-plugin-profanity": "^5.0.0",
+        "phpunit/phpunit": "^13.1.8",
+        "symfony/process": "^8.1.0"
     },
     "conflict": {
         "filp/whoops": "<2.18.3",
-        "phpunit/phpunit": ">12.5.28",
+        "phpunit/phpunit": ">13.1.8",
         "sebastian/exporter": "<7.0.0",
         "webmozart/assert": "<1.11.0"
     },
@@ -60,9 +59,10 @@
     },
     "require-dev": {
         "mrpunyapal/peststan": "^0.2.10",
-        "pestphp/pest-dev-tools": "^4.1.0",
-        "pestphp/pest-plugin-browser": "^4.3.1",
-        "pestphp/pest-plugin-type-coverage": "^4.0.4",
+        "laravel/pao": "^1.1.1",
+        "pestphp/pest-dev-tools": "^5.0.0",
+        "pestphp/pest-plugin-browser": "^5.0.0",
+        "pestphp/pest-plugin-type-coverage": "^5.0.0",
         "psy/psysh": "^0.12.23"
     },
     "minimum-stability": "dev",

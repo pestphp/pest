@@ -1,5 +1,5 @@
 
-  Pest Testing Framework 4.7.2.  
+  Pest Testing Framework 5.0.0-rc.10.  
 
   USAGE: pest <file> [options]  
 
@@ -45,6 +45,7 @@
   --filter [pattern] ............................... Filter which tests to run  
   --exclude-filter [pattern] .. Exclude tests for the specified filter pattern  
   --test-suffix [suffixes]  Only search for test in files with specified suffix(es). Default: Test.php,.phpt  
+  --test-files-file [file]  Only run test files listed in file (one file by line)  
 
   EXECUTION OPTIONS:
   --parallel ........................................... Run tests in parallel  
@@ -125,12 +126,12 @@
   LOGGING OPTIONS:
   --log-junit [file] .......... Write test results in JUnit XML format to file  
   --log-otr [file]  Write test results in Open Test Reporting XML format to file  
-  --include-git-information  Include Git information in Open Test Reporting XML logfile  
   --log-teamcity [file] ........ Write test results in TeamCity format to file  
   --testdox-html [file] .. Write test results in TestDox format (HTML) to file  
   --testdox-text [file]  Write test results in TestDox format (plain text) to file  
   --log-events-text [file] ............... Stream events as plain text to file  
   --log-events-verbose-text [file]  Stream events as plain text with extended information to file  
+  --include-git-information ..... Include Git information in supported formats  
   --no-logging ....... Ignore logging configured in the XML configuration file  
 
   CODE COVERAGE OPTIONS:
