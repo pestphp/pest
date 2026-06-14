@@ -199,15 +199,14 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      */
     private function allTests(array $arguments): array
     {
-        $output = new Process([
-            'php',
-            ...$this->removeParallelArguments($arguments),
-            '--list-tests',
-        ])->setTimeout(120)->mustRun()->getOutput();
+        $command = $this->buildListTestsCommand(
+            $arguments,
+            TestSuite::getInstance()->testPath,
+        );
 
-        preg_match_all('/ - (?:P\\\\)?(Tests\\\\[^:]+)::/', $output, $matches);
+        $output = (new Process($command))->setTimeout(120)->mustRun()->getOutput();
 
-        return array_values(array_unique($matches[1]));
+        return $this->parseListTestsOutput($output);
     }
 
     /**
@@ -216,7 +215,36 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      */
     private function removeParallelArguments(array $arguments): array
     {
-        return array_filter($arguments, fn (string $argument): bool => ! in_array($argument, ['--parallel', '-p'], strict: true));
+        return array_values(array_filter(
+            $arguments,
+            fn (string $argument): bool => ! in_array($argument, ['--parallel', '-p'], strict: true)
+                && ! str_starts_with($argument, '--processes'),
+        ));
+    }
+
+    /**
+     * Builds the subprocess command used to enumerate tests via `--list-tests`.
+     *
+     * @param  list<string>  $arguments
+     * @return list<string>
+     */
+    private function buildListTestsCommand(array $arguments, string $testPath): array
+    {
+        $filtered = $this->removeParallelArguments($arguments);
+
+        return ['php', ...$filtered, '--test-directory='.$testPath, '--list-tests'];
+    }
+
+    /**
+     * Parses `--list-tests` output into a unique list of test class FQCNs.
+     *
+     * @return list<string>
+     */
+    private function parseListTestsOutput(string $output): array
+    {
+        preg_match_all('/ - (?:P\\\\)?([A-Za-z_]\w*(?:\\\\[A-Za-z_]\w*)*)::/', $output, $matches);
+
+        return array_values(array_unique($matches[1]));
     }
 
     /**
