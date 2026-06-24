@@ -1172,6 +1172,22 @@ final class Expectation
     }
 
     /**
+     * Asserts that the value is an email address.
+     *
+     * @return self<TValue>
+     */
+    public function toBeEmail(string $message = ''): self
+    {
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is an email address.";
+        }
+
+        Assert::assertTrue(Str::isEmail((string) $this->value), $message);
+
+        return $this;
+    }
+
+    /**
      * Asserts that the value is a url
      *
      * @return self<TValue>
