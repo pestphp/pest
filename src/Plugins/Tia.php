@@ -251,7 +251,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                 return true;
             }
 
-            if (str_starts_with($arg, "$argument=")) {
+            if (str_starts_with((string) $arg, "$argument=")) { // @phpstan-ignore-line
                 return true;
             }
         }
@@ -1489,6 +1489,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         foreach ($arguments as $index => $arg) {
+            $arg = (string) $arg; // @phpstan-ignore-line
+
             if ($arg === '') {
                 continue;
             }
