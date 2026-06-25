@@ -519,6 +519,13 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toBeEmail
+  ✓ pass
+  ✓ failures
+  ✓ failures with custom message
+  ✓ failures with default message
+  ✓ not failures
+
    PASS  Tests\Features\Expect\toBeEmpty
   ✓ pass
   ✓ failures
@@ -1756,6 +1763,18 @@
   ✓ ensureFilterLengthIsSafe → it accepts filter within custom limit
   ✓ handleArguments → it returns original arguments when shard option is not present
   ✓ handleArguments → it removes parallel arguments from test discovery
+  ✓ parseListTestsOutput → it parses Tests\ namespaced classes from --list-tests output
+  ✓ parseListTestsOutput → it deduplicates repeated class names from multiple test methods
+  ✓ parseListTestsOutput → it returns an empty list for output with no matching lines
+  ✓ parseListTestsOutput → it parses non-Tests namespaced classes
+  ✓ parseListTestsOutput → it parses unnamespaced top-level classes
+  ✓ parseListTestsOutput → it strips the P\ Pest prefix but keeps the rest of the FQCN
+  ✓ parseListTestsOutput → it ignores junk lines that lack the " - …::" framing
+  ✓ buildListTestsCommand → it builds the list-tests command with the forwarded --test-directory
+  ✓ buildListTestsCommand → it strips --parallel and -p when building the list-tests command
+  ✓ buildListTestsCommand → it forwards --test-directory even when input arguments include one
+  ✓ buildListTestsCommand → it strips --processes=N when building the list-tests command
+  ✓ buildListTestsCommand → it strips --processes N (space-separated) when building the list-tests command
   ✓ addOutput → it displays shard information after test execution
   ✓ addOutput → it uses singular form for single test file
   ✓ addOutput → it returns original exit code when shard is not set
@@ -1796,6 +1815,10 @@
   ✓ unknown extensions → it hashes files with no extension as raw content
   ✓ output format → it returns a 32-character hex xxh128 hash
   ✓ output format → it returns a stable hash for empty content
+
+   PASS  Tests\Unit\Plugins\Tia\IsEnabledForRun
+  ✓ does not throw when an integer --random-order-seed is passed as a separate argv element
+  ✓ still detects --tia when an integer argument is present
 
    PASS  Tests\Unit\Preset
   ✓ preset invalid name
@@ -1983,4 +2006,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1370 passed (3068 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1389 passed (3097 assertions)
