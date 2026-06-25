@@ -204,7 +204,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             TestSuite::getInstance()->testPath,
         );
 
-        $output = (new Process($command))->setTimeout(120)->mustRun()->getOutput();
+        $output = new Process($command)->setTimeout(120)->mustRun()->getOutput();
 
         return $this->parseListTestsOutput($output);
     }
