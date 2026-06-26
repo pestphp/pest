@@ -118,6 +118,11 @@ trait Testable
     private static ?Closure $__afterAll = null;
 
     /**
+     * The test's after all closure, preserved for the class teardown.
+     */
+    private static ?Closure $__afterAllForClass = null;
+
+    /**
      * The list of snapshot changes, if any.
      */
     private array $__snapshotChanges = [];
@@ -214,6 +219,8 @@ trait Testable
             $beforeAll = ChainableClosure::boundStatically(self::$__beforeAll, $beforeAll);
         }
 
+        self::$__afterAllForClass = self::$__afterAll;
+
         try {
             call_user_func(Closure::bind($beforeAll, null, self::class));
         } catch (Throwable $e) {
@@ -228,8 +235,8 @@ trait Testable
     {
         $afterAll = TestSuite::getInstance()->afterAll->get(self::$__filename);
 
-        if (self::$__afterAll instanceof Closure) {
-            $afterAll = ChainableClosure::boundStatically(self::$__afterAll, $afterAll);
+        if (self::$__afterAllForClass instanceof Closure) {
+            $afterAll = ChainableClosure::boundStatically(self::$__afterAllForClass, $afterAll);
         }
 
         call_user_func(Closure::bind($afterAll, null, self::class));
