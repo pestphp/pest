@@ -619,6 +619,49 @@ final class Expectation
     }
 
     /**
+     * Asserts that the given expectation target has a specific method with a specific return type.
+     *
+     * When a string is given, the return type must match exactly (e.g. 'string|int' matches only 'string|int').
+     * When an array is given, the method's return type must contain all of the given types (e.g. ['string', 'int']
+     * matches 'string|int', 'string|int|null', etc.).
+     *
+     * @param  array<int, string>|string  $returnType
+     */
+    public function toHaveMethodWithReturnType(string $method, array|string $returnType): ArchExpectation
+    {
+        $returnTypes = is_array($returnType) ? $returnType : [$returnType];
+
+        return Targeted::make(
+            $this,
+            function (ObjectDescription $object) use ($method, $returnTypes, $returnType): bool {
+                if (! isset($object->reflectionClass) || ! $object->reflectionClass->hasMethod($method)) {
+                    return false;
+                }
+
+                $reflectionMethod = $object->reflectionClass->getMethod($method);
+
+                if (! $reflectionMethod->hasReturnType()) {
+                    return false;
+                }
+
+                $actualReturnType = (string) $reflectionMethod->getReturnType();
+
+                if (! is_array($returnType)) {
+                    return $actualReturnType === $returnType;
+                }
+
+                $actualTypes = str_starts_with($actualReturnType, '?')
+                    ? [substr($actualReturnType, 1), 'null']
+                    : explode('|', $actualReturnType);
+
+                return count(array_intersect($returnTypes, $actualTypes)) === count($returnTypes);
+            },
+            sprintf("to have method '%s' with return type%s", $method, is_array($returnType) ? sprintf(" containing '%s'", implode("', '", $returnTypes)) : sprintf(" '%s'", $returnType)),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
      * Asserts that the given expectation target has a specific methods.
      *
      * @param  array<int, string>  $methods
