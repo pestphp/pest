@@ -1200,20 +1200,20 @@ final class Expectation
         }
 
         $values = array_values($this->value);
+        $sorted = true;
 
         if (count($values) > 1) {
             $this->assertHomogeneousComparableArray($values);
 
-            $sorted = true;
             for ($i = 0, $max = count($values) - 1; $i < $max; $i++) {
                 if ($values[$i] > $values[$i + 1]) {
                     $sorted = false;
                     break;
                 }
             }
-
-            Assert::assertTrue($sorted, $message !== '' ? $message : 'Array is not sorted in ascending order.');
         }
+
+        Assert::assertTrue($sorted, $message !== '' ? $message : 'Array is not sorted in ascending order.');
 
         return $this;
     }
@@ -1230,20 +1230,20 @@ final class Expectation
         }
 
         $values = array_values($this->value);
+        $sorted = true;
 
         if (count($values) > 1) {
             $this->assertHomogeneousComparableArray($values);
 
-            $sorted = true;
             for ($i = 0, $max = count($values) - 1; $i < $max; $i++) {
                 if ($values[$i] < $values[$i + 1]) {
                     $sorted = false;
                     break;
                 }
             }
-
-            Assert::assertTrue($sorted, $message !== '' ? $message : 'Array is not sorted in descending order.');
         }
+
+        Assert::assertTrue($sorted, $message !== '' ? $message : 'Array is not sorted in descending order.');
 
         return $this;
     }
@@ -1286,23 +1286,21 @@ final class Expectation
             }
         }
 
-        if (count($extracted) <= 1) {
-            return $this;
-        }
-
-        $this->assertHomogeneousComparableArray($extracted);
-
         $dirLabel = $direction === 'asc' ? 'ascending' : 'descending';
         $defaultMessage = "Array is not sorted by [{$by}] in {$dirLabel} order.";
-
         $sorted = true;
-        for ($i = 0, $max = count($extracted) - 1; $i < $max; $i++) {
-            $failed = $direction === 'asc'
-                ? $extracted[$i] > $extracted[$i + 1]
-                : $extracted[$i] < $extracted[$i + 1];
-            if ($failed) {
-                $sorted = false;
-                break;
+
+        if (count($extracted) > 1) {
+            $this->assertHomogeneousComparableArray($extracted);
+
+            for ($i = 0, $max = count($extracted) - 1; $i < $max; $i++) {
+                $failed = $direction === 'asc'
+                    ? $extracted[$i] > $extracted[$i + 1]
+                    : $extracted[$i] < $extracted[$i + 1];
+                if ($failed) {
+                    $sorted = false;
+                    break;
+                }
             }
         }
 
