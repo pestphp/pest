@@ -323,9 +323,11 @@ final class WrapperRunner implements RunnerInterface
             /** @var list<AfterLastTestMethodFailed> $failedEvents */
             $failedEvents = array_merge_recursive($testResultSum->testFailedEvents(), $testResult->testFailedEvents());
 
+            $numberOfTestsRun = $testResultSum->numberOfTestsRun() + $testResult->numberOfTestsRun();
+
             $testResultSum = new TestResult(
-                (int) $testResultSum->hasTests() + (int) $testResult->hasTests(),
-                $testResultSum->numberOfTestsRun() + $testResult->numberOfTestsRun(),
+                $numberOfTestsRun,
+                $numberOfTestsRun,
                 $testResultSum->numberOfAssertions() + $testResult->numberOfAssertions(),
                 array_merge_recursive($testResultSum->testErroredEvents(), $testResult->testErroredEvents()),
                 $failedEvents,
