@@ -1187,4 +1187,153 @@ final class Expectation
 
         return $this;
     }
+
+    /**
+     * Asserts that the array is sorted in ascending order.
+     *
+     * @return self<TValue>
+     */
+    public function toBeAscending(string $message = ''): self
+    {
+        if (! is_array($this->value)) {
+            InvalidExpectationValue::expected('array');
+        }
+
+        $values = array_values($this->value);
+
+        if (count($values) > 1) {
+            $this->assertHomogeneousComparableArray($values);
+
+            $sorted = true;
+            for ($i = 0, $max = count($values) - 1; $i < $max; $i++) {
+                if ($values[$i] > $values[$i + 1]) {
+                    $sorted = false;
+                    break;
+                }
+            }
+
+            Assert::assertTrue($sorted, $message !== '' ? $message : 'Array is not sorted in ascending order.');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the array is sorted in descending order.
+     *
+     * @return self<TValue>
+     */
+    public function toBeDescending(string $message = ''): self
+    {
+        if (! is_array($this->value)) {
+            InvalidExpectationValue::expected('array');
+        }
+
+        $values = array_values($this->value);
+
+        if (count($values) > 1) {
+            $this->assertHomogeneousComparableArray($values);
+
+            $sorted = true;
+            for ($i = 0, $max = count($values) - 1; $i < $max; $i++) {
+                if ($values[$i] < $values[$i + 1]) {
+                    $sorted = false;
+                    break;
+                }
+            }
+
+            Assert::assertTrue($sorted, $message !== '' ? $message : 'Array is not sorted in descending order.');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the array is sorted by an optional key or property.
+     *
+     * @return self<TValue>
+     */
+    public function toBeSorted(?string $by = null, string $direction = 'asc', string $message = ''): self
+    {
+        if (! is_array($this->value)) {
+            InvalidExpectationValue::expected('array');
+        }
+
+        if ($direction !== 'asc' && $direction !== 'desc') {
+            throw new InvalidArgumentException(sprintf('Direction must be "asc" or "desc", got "%s".', $direction));
+        }
+
+        if ($by === null) {
+            return $direction === 'asc'
+                ? $this->toBeAscending($message)
+                : $this->toBeDescending($message);
+        }
+
+        $extracted = [];
+        foreach ($this->value as $item) {
+            if (is_array($item)) {
+                if (! array_key_exists($by, $item)) {
+                    throw new InvalidArgumentException(sprintf('Array key [%s] does not exist.', $by));
+                }
+                $extracted[] = $item[$by];
+            } elseif (is_object($item)) {
+                if (! property_exists($item, $by)) {
+                    throw new InvalidArgumentException(sprintf('Property [%s] does not exist.', $by));
+                }
+                $extracted[] = $item->{$by};
+            } else {
+                throw new InvalidArgumentException(sprintf('Cannot extract key [%s] from non-array, non-object value.', $by));
+            }
+        }
+
+        if (count($extracted) <= 1) {
+            return $this;
+        }
+
+        $this->assertHomogeneousComparableArray($extracted);
+
+        $dirLabel = $direction === 'asc' ? 'ascending' : 'descending';
+        $defaultMessage = "Array is not sorted by [{$by}] in {$dirLabel} order.";
+
+        $sorted = true;
+        for ($i = 0, $max = count($extracted) - 1; $i < $max; $i++) {
+            $failed = $direction === 'asc'
+                ? $extracted[$i] > $extracted[$i + 1]
+                : $extracted[$i] < $extracted[$i + 1];
+            if ($failed) {
+                $sorted = false;
+                break;
+            }
+        }
+
+        Assert::assertTrue($sorted, $message !== '' ? $message : $defaultMessage);
+
+        return $this;
+    }
+
+    /**
+     * @param  array<mixed>  $values
+     */
+    private function assertHomogeneousComparableArray(array $values): void
+    {
+        $typeGroup = static function (mixed $v): string {
+            if (is_int($v) || is_float($v)) {
+                return 'numeric';
+            }
+            if (is_string($v)) {
+                return 'string';
+            }
+            if ($v instanceof DateTimeInterface) {
+                return 'datetime';
+            }
+            throw new InvalidArgumentException(sprintf('Array values must be int, float, string, or DateTimeInterface. Got [%s].', get_debug_type($v)));
+        };
+
+        $first = $typeGroup($values[0]);
+        foreach (array_slice($values, 1) as $v) {
+            if ($typeGroup($v) !== $first) {
+                throw new InvalidArgumentException('Array values must all be of the same comparable type.');
+            }
+        }
+    }
 }
