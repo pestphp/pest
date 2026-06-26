@@ -41,6 +41,12 @@ test('a parallel test can extend another test with same name', function () use (
     expect($run('tests/Fixtures/Inheritance'))->toContain('Tests:    1 skipped, 1 passed (1 assertions)');
 })->skipOnWindows();
 
+test('a count-based shard runs in parallel when no shards file exists', function () use ($run) {
+    expect($run('tests/Fixtures/Inheritance', '--shard=1/1'))
+        ->toContain('Tests:    1 skipped, 1 passed (1 assertions)')
+        ->toContain('Parallel: 3 processes');
+})->skipOnWindows();
+
 test('parallel reports invalid datasets as failures', function () use ($run) {
     expect($run('tests/.tests/ParallelInvalidDataset'))
         ->toContain("A dataset with the name `missing.dataset` does not exist. You can create it using `dataset('missing.dataset', ['a', 'b']);`.")
