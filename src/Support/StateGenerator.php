@@ -10,6 +10,10 @@ use NunoMaduro\Collision\Exceptions\TestOutcome;
 use PHPUnit\Event\Code\TestDoxBuilder;
 use PHPUnit\Event\Code\TestMethod;
 use PHPUnit\Event\Code\ThrowableBuilder;
+use PHPUnit\Event\Test\AfterLastTestMethodErrored;
+use PHPUnit\Event\Test\AfterLastTestMethodFailed;
+use PHPUnit\Event\Test\BeforeFirstTestMethodErrored;
+use PHPUnit\Event\Test\BeforeFirstTestMethodFailed;
 use PHPUnit\Event\Test\ConsideredRisky;
 use PHPUnit\Event\Test\Errored;
 use PHPUnit\Event\Test\Failed;
@@ -33,31 +37,8 @@ final class StateGenerator
     {
         $state = new State;
 
-        foreach ($testResult->testErroredEvents() as $testResultEvent) {
-            if ($testResultEvent instanceof Errored) {
-                $state->add(TestResult::fromPestParallelTestCase(
-                    $testResultEvent->test(),
-                    TestResult::FAIL,
-                    $testResultEvent->throwable()
-                ));
-            } else {
-                // @phpstan-ignore-next-line
-                $state->add(TestResult::fromBeforeFirstTestMethodErrored($testResultEvent));
-            }
-        }
-
-        foreach ($testResult->testFailedEvents() as $testResultEvent) {
-            if ($testResultEvent instanceof Failed) {
-                $state->add(TestResult::fromPestParallelTestCase(
-                    $testResultEvent->test(),
-                    TestResult::FAIL,
-                    $testResultEvent->throwable()
-                ));
-            } else {
-                // @phpstan-ignore-next-line
-                $state->add(TestResult::fromBeforeFirstTestMethodErrored($testResultEvent));
-            }
-        }
+        $this->addErroredOrFailedEvents($state, $testResult->testErroredEvents());
+        $this->addErroredOrFailedEvents($state, $testResult->testFailedEvents());
 
         $this->addTriggeredPhpunitEvents($state, $testResult->testTriggeredPhpunitErrorEvents(), TestResult::FAIL);
 
@@ -126,6 +107,27 @@ final class StateGenerator
     }
 
     /**
+     * @param  list<AfterLastTestMethodErrored|AfterLastTestMethodFailed|BeforeFirstTestMethodErrored|BeforeFirstTestMethodFailed|Errored|Failed>  $events
+     */
+    private function addErroredOrFailedEvents(State $state, array $events): void
+    {
+        foreach ($events as $event) {
+            if ($event instanceof Errored || $event instanceof Failed) {
+                $state->add(TestResult::fromPestParallelTestCase(
+                    $event->test(),
+                    TestResult::FAIL,
+                    $event->throwable()
+                ));
+
+                continue;
+            }
+
+            // @phpstan-ignore-next-line
+            $state->add(TestResult::fromBeforeFirstTestMethodErrored($event));
+        }
+    }
+
+    /**
      * @param  list<Issue>  $issues
      */
     private function addIssueEvents(State $state, array $issues, string $type): void
@@ -142,7 +144,7 @@ final class StateGenerator
     }
 
     /**
-     * @param  list<Failed|MarkedIncomplete>  $events
+     * @param  list<MarkedIncomplete>  $events
      */
     private function addThrowableEvents(State $state, array $events, string $type): void
     {
