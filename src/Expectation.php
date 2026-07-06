@@ -130,7 +130,7 @@ final class Expectation
         if (getenv('PARATEST') !== false || isset($_SERVER['COLLISION_PRINTER'])) {
             ob_start();
             var_dump($this->value, ...$arguments);
-            $output = (string) ob_get_clean();
+            $output = ob_get_clean();
 
             throw new ExpectationFailedException($output);
         }
