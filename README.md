@@ -10,7 +10,7 @@
 
 ------
 
-> Pest v3 Now Available: **[Read the announcement »](https://pestphp.com/docs/pest3-now-available)**.
+> You are viewing the README for an outdated version of Pest; please refer to the current support policy: **[pestphp.com/docs/support-policy](https://pestphp.com/docs/support-policy)**
 
 **Pest** is an elegant PHP testing Framework with a focus on simplicity, meticulously designed to bring back the joy of testing in PHP.
 
