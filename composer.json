@@ -59,11 +59,11 @@
         ]
     },
     "require-dev": {
-        "mrpunyapal/peststan": "^0.2.10",
+        "mrpunyapal/peststan": "^0.2.11",
         "pestphp/pest-dev-tools": "^4.1.0",
         "pestphp/pest-plugin-browser": "^4.3.1",
         "pestphp/pest-plugin-type-coverage": "^4.0.4",
-        "psy/psysh": "^0.12.23"
+        "psy/psysh": "^0.12.24"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
