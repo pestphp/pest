@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 use Rector\CodingStyle\Rector\ArrowFunction\ArrowFunctionDelegatingCallToFirstClassCallableRector;
 use Rector\Config\RectorConfig;
+use Rector\DeadCode\Rector\ClassMethod\RemoveDuplicatedReturnSelfDocblockRector;
 use Rector\DeadCode\Rector\ClassMethod\RemoveParentDelegatingConstructorRector;
+use Rector\DeadCode\Rector\ClassMethod\RemoveUselessUnionReturnDocblockRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\NarrowObjectReturnTypeRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\ReturnNeverTypeRector;
 
@@ -18,6 +20,8 @@ return RectorConfig::configure()
         ArrowFunctionDelegatingCallToFirstClassCallableRector::class,
         NarrowObjectReturnTypeRector::class,
         RemoveParentDelegatingConstructorRector::class,
+        RemoveDuplicatedReturnSelfDocblockRector::class,
+        RemoveUselessUnionReturnDocblockRector::class,
     ])
     ->withPreparedSets(
         deadCode: true,

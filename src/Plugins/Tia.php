@@ -219,8 +219,11 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         if (! $watchPatterns->isEnabled()) {
             return false;
         }
+        if (! $watchPatterns->isLocally()) {
+            return true;
+        }
 
-        return ! ($watchPatterns->isLocally() && self::argumentPresent('--ci', $arguments));
+        return ! self::argumentPresent('--ci', $arguments);
     }
 
     /**
