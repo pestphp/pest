@@ -1912,6 +1912,9 @@
    PASS  Tests\Visual\ParallelNestedDatasets
   ✓ parallel loads nested datasets from nested directories
 
+   PASS  Tests\Visual\ParallelRunnerWarning
+  ✓ parallel bootstraps extensions that register subscribers the same way sequential does
+
    PASS  Tests\Visual\SingleTestOrDirectory
   ✓ allows to run a single test
   ✓ allows to run a directory
@@ -1941,4 +1944,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1330 passed (3010 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1331 passed (3015 assertions)

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/12.0/phpunit.xsd"
+         bootstrap="./bootstrap.php"
+         failOnPhpunitWarning="true"
+         colors="true"
+>
+  <testsuites>
+    <testsuite name="default">
+      <directory suffix="Test.php">.</directory>
+    </testsuite>
+  </testsuites>
+  <extensions>
+    <bootstrap class="Pest\Tests\ParallelRunnerWarning\SubscribingExtension"/>
+  </extensions>
+</phpunit>
