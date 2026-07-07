@@ -241,6 +241,12 @@ final class TeamCityLogger
                 $telemetry->memoryUsageSinceStart(),
                 $telemetry->durationSincePrevious(),
                 $telemetry->memoryUsageSincePrevious(),
+                $telemetry->userCpuTimeSinceStart(),
+                $telemetry->systemCpuTimeSinceStart(),
+                $telemetry->totalCpuTimeSinceStart(),
+                $telemetry->userCpuTimeSincePrevious(),
+                $telemetry->systemCpuTimeSincePrevious(),
+                $telemetry->totalCpuTimeSincePrevious(),
             );
         }
 

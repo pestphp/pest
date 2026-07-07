@@ -47,9 +47,7 @@ final readonly class TestPaths
 
                     $suffix = $directory->suffix();
 
-                    if ($suffix !== '') {
-                        $suffixes[] = str_starts_with($suffix, '.') ? $suffix : '.'.$suffix;
-                    }
+                    $suffixes[] = str_starts_with($suffix, '.') ? $suffix : '.'.$suffix;
                 }
 
                 foreach ($suite->files() as $file) {

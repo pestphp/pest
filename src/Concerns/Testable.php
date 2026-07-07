@@ -23,6 +23,8 @@ use PHPUnit\Framework\Attributes\PostCondition;
 use PHPUnit\Framework\IncompleteTest;
 use PHPUnit\Framework\SkippedTest;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\TestCase\ExceptionExpectation;
+use PHPUnit\Framework\TestCase\OutputBuffer;
 use ReflectionException;
 use ReflectionFunction;
 use ReflectionParameter;
@@ -431,15 +433,15 @@ trait Testable
                         unset($this->{$property});
                     }
 
-                    $hasOutputExpectation = Closure::bind(fn (): bool => is_string($this->outputExpectedString) || is_string($this->outputExpectedRegex), $this, TestCase::class)();
+                    $outputBuffer = Closure::bind(fn () => $this->outputBuffer, $this, TestCase::class)();
 
-                    if ($hasOutputExpectation) {
+                    if ($outputBuffer->hasExpectation()) {
                         ob_clean();
 
                         Closure::bind(function (): void {
-                            $this->outputExpectedString = null;
-                            $this->outputExpectedRegex = null;
-                        }, $this, TestCase::class)();
+                            $this->expectedString = null;
+                            $this->expectedRegularExpression = null;
+                        }, $outputBuffer, OutputBuffer::class)();
                     }
 
                     $this->setUp();
@@ -455,7 +457,9 @@ trait Testable
      */
     private function __isExpectedException(Throwable $e): bool
     {
-        $read = fn (string $property): mixed => Closure::bind(fn () => $this->{$property}, $this, TestCase::class)();
+        $expectation = Closure::bind(fn () => $this->exceptionExpectation, $this, TestCase::class)();
+
+        $read = fn (string $property): mixed => Closure::bind(fn () => $this->{$property}, $expectation, ExceptionExpectation::class)();
 
         $expectedClass = $read('expectedException');
 
@@ -463,13 +467,19 @@ trait Testable
             return $e instanceof $expectedClass;
         }
 
-        $expectedMessage = $read('expectedExceptionMessage');
+        $expectedMessage = $read('expectedMessage');
 
         if ($expectedMessage !== null) {
             return str_contains($e->getMessage(), (string) $expectedMessage);
         }
 
-        $expectedCode = $read('expectedExceptionCode');
+        $expectedMessageRegex = $read('expectedMessageRegularExpression');
+
+        if ($expectedMessageRegex !== null) {
+            return preg_match($expectedMessageRegex, $e->getMessage()) === 1;
+        }
+
+        $expectedCode = $read('expectedCode');
 
         if ($expectedCode !== null) {
             return $e->getCode() === $expectedCode;

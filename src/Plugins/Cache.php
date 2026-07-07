@@ -50,7 +50,7 @@ final class Cache implements HandlesArguments
             }
         }
 
-        if (! $this->hasArgument('--parallel', $arguments)) {
+        if (! $this->hasArgument('--parallel', $arguments) && ! $this->hasArgument('--do-not-cache-result', $arguments) && ! $this->hasArgument('--cache-result', $arguments)) {
             return $this->pushArgument('--cache-result', $arguments);
         }
 

@@ -349,6 +349,20 @@ final class WrapperRunner implements RunnerInterface
                 // @phpstan-ignore-next-line
                 array_merge_recursive($testResultSum->testRunnerTriggeredWarningEvents(), $testResult->testRunnerTriggeredWarningEvents()),
                 // @phpstan-ignore-next-line
+                array_merge_recursive($testResultSum->testRunnerTriggeredIssueDeprecationEvents(), $testResult->testRunnerTriggeredIssueDeprecationEvents()),
+                // @phpstan-ignore-next-line
+                array_merge_recursive($testResultSum->testRunnerTriggeredIssueErrorEvents(), $testResult->testRunnerTriggeredIssueErrorEvents()),
+                // @phpstan-ignore-next-line
+                array_merge_recursive($testResultSum->testRunnerTriggeredIssueNoticeEvents(), $testResult->testRunnerTriggeredIssueNoticeEvents()),
+                // @phpstan-ignore-next-line
+                array_merge_recursive($testResultSum->testRunnerTriggeredIssuePhpDeprecationEvents(), $testResult->testRunnerTriggeredIssuePhpDeprecationEvents()),
+                // @phpstan-ignore-next-line
+                array_merge_recursive($testResultSum->testRunnerTriggeredIssuePhpNoticeEvents(), $testResult->testRunnerTriggeredIssuePhpNoticeEvents()),
+                // @phpstan-ignore-next-line
+                array_merge_recursive($testResultSum->testRunnerTriggeredIssuePhpWarningEvents(), $testResult->testRunnerTriggeredIssuePhpWarningEvents()),
+                // @phpstan-ignore-next-line
+                array_merge_recursive($testResultSum->testRunnerTriggeredIssueWarningEvents(), $testResult->testRunnerTriggeredIssueWarningEvents()),
+                // @phpstan-ignore-next-line
                 array_merge_recursive($testResultSum->errors(), $testResult->errors()),
                 // @phpstan-ignore-next-line
                 array_merge_recursive($testResultSum->deprecations(), $testResult->deprecations()),
@@ -386,6 +400,13 @@ final class WrapperRunner implements RunnerInterface
                 $testResultSum->testRunnerTriggeredWarningEvents(),
                 fn (WarningTriggered $event): bool => ! str_contains($event->message(), 'No tests found')
             )),
+            $testResultSum->testRunnerTriggeredIssueDeprecationEvents(),
+            $testResultSum->testRunnerTriggeredIssueErrorEvents(),
+            $testResultSum->testRunnerTriggeredIssueNoticeEvents(),
+            $testResultSum->testRunnerTriggeredIssuePhpDeprecationEvents(),
+            $testResultSum->testRunnerTriggeredIssuePhpNoticeEvents(),
+            $testResultSum->testRunnerTriggeredIssuePhpWarningEvents(),
+            $testResultSum->testRunnerTriggeredIssueWarningEvents(),
             $testResultSum->errors(),
             $testResultSum->deprecations(),
             $testResultSum->notices(),
