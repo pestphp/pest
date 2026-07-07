@@ -120,6 +120,14 @@ final readonly class Configuration
     }
 
     /**
+     * Gets the evals configuration.
+     */
+    public function evals(): Evals\Configuration
+    {
+        return new Evals\Configuration;
+    }
+
+    /**
      * Gets the TIA (Test Impact Analysis) configuration.
      */
     public function tia(): Plugins\Tia\Configuration
