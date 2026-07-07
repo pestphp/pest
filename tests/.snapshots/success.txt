@@ -1908,6 +1908,23 @@
   ✓ parallel
   ✓ a parallel test can extend another test with same name
   ✓ parallel reports invalid datasets as failures
+  ✓ parallel stop-on-* fixture runs every case without a stop flag with ('fails')
+  ✓ parallel stop-on-* fixture runs every case without a stop flag with ('errors')
+  ✓ parallel stop-on-* fixture runs every case without a stop flag with ('is risky')
+  ✓ parallel stop-on-* fixture runs every case without a stop flag with ('is incomplete')
+  ✓ parallel stop-on-* fixture runs every case without a stop flag with ('warns')
+  ✓ parallel stop-on-* fixture runs every case without a stop flag with ('notices')
+  ✓ parallel stop-on-* fixture runs every case without a stop flag with ('deprecates')
+  ✓ parallel stop-on-* fixture runs every case without a stop flag with ('is skipped')
+  ✓ parallel honors --stop-on-* with dataset "failure"
+  ✓ parallel honors --stop-on-* with dataset "defect"
+  ✓ parallel honors --stop-on-* with dataset "error"
+  ✓ parallel honors --stop-on-* with dataset "risky"
+  ✓ parallel honors --stop-on-* with dataset "incomplete"
+  ✓ parallel honors --stop-on-* with dataset "warning"
+  ✓ parallel honors --stop-on-* with dataset "notice"
+  ✓ parallel honors --stop-on-* with dataset "deprecation"
+  ✓ parallel honors --stop-on-* with dataset "skipped"
 
    PASS  Tests\Visual\ParallelNestedDatasets
   ✓ parallel loads nested datasets from nested directories
@@ -1941,4 +1958,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1330 passed (3010 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1347 passed (3027 assertions)

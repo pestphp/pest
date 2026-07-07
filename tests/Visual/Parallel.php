@@ -47,3 +47,33 @@ test('parallel reports invalid datasets as failures', function () use ($run) {
         ->toContain('Tests:    1 failed, 1 passed (1 assertions)')
         ->toContain('Parallel: 3 processes');
 })->skipOnWindows();
+
+test('parallel stop-on-* fixture runs every case without a stop flag', function (string $testName) use ($run) {
+    $output = $run('--filter', "($testName|passes)", 'tests/.tests/ParallelStopOn');
+    expect($output)->toContain('10 passed');
+})->with([
+    'fails',
+    'errors',
+    'is risky',
+    'is incomplete',
+    'warns',
+    'notices',
+    'deprecates',
+    'is skipped',
+])->skipOnWindows();
+
+test('parallel honors --stop-on-*', function (string $flag, string $testName) use ($run) {
+    $output = $run('--filter', "($testName|passes)", $flag, 'tests/.tests/ParallelStopOn');
+    preg_match('/(\d+) passed/', $output, $matches);
+    expect((int) ($matches[1] ?? 0))->toBeLessThan(10);
+})->with([
+    'failure' => ['--stop-on-failure', 'fails'],
+    'defect' => ['--stop-on-defect', 'fails'],
+    'error' => ['--stop-on-error', 'errors'],
+    'risky' => ['--stop-on-risky', 'is risky'],
+    'incomplete' => ['--stop-on-incomplete', 'is incomplete'],
+    'warning' => ['--stop-on-warning', 'warns'],
+    'notice' => ['--stop-on-notice', 'notices'],
+    'deprecation' => ['--stop-on-deprecation', 'deprecates'],
+    'skipped' => ['--stop-on-skipped', 'is skipped'],
+])->skipOnWindows();
