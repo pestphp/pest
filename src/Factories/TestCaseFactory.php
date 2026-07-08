@@ -158,6 +158,7 @@ final class TestCaseFactory
             $classCode = <<<PHP
             namespace $namespace;
 
+            use Pest\Exceptions\DatasetProviderError as __PestDatasetProviderError;
             use Pest\Repositories\DatasetsRepository as __PestDatasets;
             use Pest\TestSuite as __PestTestSuite;
 
