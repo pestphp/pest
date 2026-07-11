@@ -142,21 +142,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
         $autoloadPath = $localPath;
     }
 
-    // Get $rootPath based on $autoloadPath
-    $rootPath = dirname($autoloadPath, 2);
-
-    // Worktree / symlinked vendor support
-    // If the CWD has a vendor symlink pointing to the same
-    // resolved vendor directory, use CWD as root so worktree
-    // tests find their own Pest.php, tests/, and phpunit.xml.
-    $cwd = getcwd();
-    if ($cwd !== false
-        && is_link($cwd . '/vendor')
-        && realpath($cwd . '/vendor') === dirname($autoloadPath, 1)) {
-        $rootPath = $cwd;
-    }
-
-    $_ENV['APP_BASE_PATH'] = $rootPath;
+    $rootPath = \Pest\Support\Worktree::resolveRoot($autoloadPath);
 
     $input = new ArgvInput;
 

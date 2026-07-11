@@ -312,3 +312,4 @@ if (! function_exists('visit')) {
         return test()->visit($url, $options);
     }
 }
+
