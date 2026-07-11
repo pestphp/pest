@@ -104,6 +104,9 @@
         ]
     },
     "extra": {
+        "branch-alias": {
+            "dev-feature/worktree-symlinked-vendor": "4.7.x-dev"
+        },
         "pest": {
             "plugins": [
                 "Pest\\Mutate\\Plugins\\Mutate",
