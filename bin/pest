@@ -14,6 +14,7 @@ use Pest\TestCaseMethodFilters\NotesTestCaseFilter;
 use Pest\TestCaseMethodFilters\PrTestCaseFilter;
 use Pest\TestCaseMethodFilters\FlakyTestCaseFilter;
 use Pest\TestCaseMethodFilters\TodoTestCaseFilter;
+use Pest\Support\Worktree;
 use Pest\TestSuite;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -142,7 +143,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
         $autoloadPath = $localPath;
     }
 
-    $rootPath = \Pest\Support\Worktree::resolveRoot($autoloadPath);
+    $rootPath = Worktree::resolveRoot($autoloadPath);
 
     $input = new ArgvInput;
 

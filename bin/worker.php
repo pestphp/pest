@@ -7,6 +7,7 @@ use ParaTest\WrapperRunner\WrapperWorker;
 use Pest\Kernel;
 use Pest\Plugins\Actions\CallsHandleArguments;
 use Pest\Support\Container;
+use Pest\Support\Worktree;
 use Pest\TestSuite;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -15,7 +16,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 $bootPest = (static function (): void {
     $workerArgv = new ArgvInput;
 
-    $rootPath = \Pest\Support\Worktree::resolveRoot(PHPUNIT_COMPOSER_INSTALL);
+    $rootPath = Worktree::resolveRoot(PHPUNIT_COMPOSER_INSTALL);
     $testSuite = TestSuite::getInstance($rootPath, $workerArgv->getParameterOption(
         '--test-directory',
         'tests'
@@ -60,7 +61,7 @@ $bootPest = (static function (): void {
     }
 
     $container = Container::getInstance();
-    $rootPath = \Pest\Support\Worktree::resolveRoot(PHPUNIT_COMPOSER_INSTALL);
+    $rootPath = Worktree::resolveRoot(PHPUNIT_COMPOSER_INSTALL);
 
     foreach (Kernel::RESTARTERS as $restarterClass) {
         $restarter = $container->get($restarterClass);
