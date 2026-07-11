@@ -27,6 +27,8 @@ function resolveWorktreeRoot(string $autoloadPath): string
         $rootPath = $cwd;
     }
 
+    $_ENV['APP_BASE_PATH'] = $rootPath;
+
     return $rootPath;
 }
 

@@ -156,6 +156,8 @@ use Symfony\Component\Console\Output\ConsoleOutput;
         $rootPath = $cwd;
     }
 
+    $_ENV['APP_BASE_PATH'] = $rootPath;
+
     $input = new ArgvInput;
 
     $testSuite = TestSuite::getInstance(
