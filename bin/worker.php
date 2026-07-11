@@ -12,10 +12,28 @@ use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Resolve the project root path, accounting for git worktrees
+ * where vendor is a symlink to another worktree's vendor directory.
+ */
+function resolveWorktreeRoot(string $autoloadPath): string
+{
+    $rootPath = dirname($autoloadPath, 2);
+
+    $cwd = getcwd();
+    if ($cwd !== false
+        && is_link($cwd . '/vendor')
+        && realpath($cwd . '/vendor') === dirname($autoloadPath, 1)) {
+        $rootPath = $cwd;
+    }
+
+    return $rootPath;
+}
+
 $bootPest = (static function (): void {
     $workerArgv = new ArgvInput;
 
-    $rootPath = dirname(PHPUNIT_COMPOSER_INSTALL, 2);
+    $rootPath = resolveWorktreeRoot(PHPUNIT_COMPOSER_INSTALL);
     $testSuite = TestSuite::getInstance($rootPath, $workerArgv->getParameterOption(
         '--test-directory',
         'tests'
@@ -60,7 +78,7 @@ $bootPest = (static function (): void {
     }
 
     $container = Container::getInstance();
-    $rootPath = dirname(PHPUNIT_COMPOSER_INSTALL, 2);
+    $rootPath = resolveWorktreeRoot(PHPUNIT_COMPOSER_INSTALL);
 
     foreach (Kernel::RESTARTERS as $restarterClass) {
         $restarter = $container->get($restarterClass);
