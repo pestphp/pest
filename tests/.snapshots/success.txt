@@ -1820,6 +1820,9 @@
   ✓ does not throw when an integer --random-order-seed is passed as a separate argv element
   ✓ still detects --tia when an integer argument is present
 
+   PASS  Tests\Unit\Plugins\Tia\ViteDepsHelper
+  ✓ loadAliasFromTsconfig() → it resolves an @/* alias from a commented tsconfig with glob includes
+
    PASS  Tests\Unit\Preset
   ✓ preset invalid name
   ✓ preset → myFramework
@@ -2006,4 +2009,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1389 passed (3097 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1390 passed (3099 assertions)

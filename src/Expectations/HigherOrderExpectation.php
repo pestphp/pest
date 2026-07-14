@@ -112,7 +112,7 @@ final class HigherOrderExpectation
      * Dynamically calls methods on the class with the given arguments.
      *
      * @param  array<int, mixed>  $arguments
-     * @return self<TOriginalValue, mixed>|self<TOriginalValue, TValue>
+     * @return self<TOriginalValue, mixed>
      */
     public function __call(string $name, array $arguments): self
     {
@@ -127,7 +127,7 @@ final class HigherOrderExpectation
     /**
      * Accesses properties in the value or in the expectation.
      *
-     * @return self<TOriginalValue, mixed>|self<TOriginalValue, TValue>
+     * @return self<TOriginalValue, mixed>
      */
     public function __get(string $name): self
     {

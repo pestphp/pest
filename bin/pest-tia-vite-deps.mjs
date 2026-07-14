@@ -29,22 +29,54 @@ async function loadRolldown() {
   return await import(pathToFileURL(path).href)
 }
 
-async function readJsonWithComments(path) {
-  const raw = await readFile(path, 'utf8')
-  const stripped = raw
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/(^|[^:])\/\/[^\n]*/g, '$1')
-  return JSON.parse(stripped)
+export function stripJsonComments(raw) {
+  let out = ''
+  let inString = false
+  let quote = ''
+  let inLine = false
+  let inBlock = false
+
+  for (let i = 0; i < raw.length; i++) {
+    const c = raw[i]
+    const n = raw[i + 1]
+
+    if (inLine) {
+      if (c === '\n') { inLine = false; out += c }
+      continue
+    }
+    if (inBlock) {
+      if (c === '*' && n === '/') { inBlock = false; i++ }
+      continue
+    }
+    if (inString) {
+      out += c
+      if (c === '\\') { out += n ?? ''; i++; continue }
+      if (c === quote) inString = false
+      continue
+    }
+    if (c === '"' || c === "'") { inString = true; quote = c; out += c; continue }
+    if (c === '/' && n === '/') { inLine = true; i++; continue }
+    if (c === '/' && n === '*') { inBlock = true; i++; continue }
+    if (c === '}' || c === ']') out = out.replace(/,\s*$/, '')
+    out += c
+  }
+
+  return out
 }
 
-async function loadAliasFromTsconfig() {
+async function readJsonWithComments(path) {
+  const raw = await readFile(path, 'utf8')
+  return JSON.parse(stripJsonComments(raw))
+}
+
+export async function loadAliasFromTsconfig(projectRoot = PROJECT_ROOT) {
   const alias = {}
   for (const name of ['tsconfig.json', 'jsconfig.json']) {
-    const p = join(PROJECT_ROOT, name)
+    const p = join(projectRoot, name)
     if (!existsSync(p)) continue
     let cfg
     try { cfg = await readJsonWithComments(p) } catch { continue }
-    const baseUrl = resolve(PROJECT_ROOT, cfg?.compilerOptions?.baseUrl ?? '.')
+    const baseUrl = resolve(projectRoot, cfg?.compilerOptions?.baseUrl ?? '.')
     const paths = cfg?.compilerOptions?.paths ?? {}
     for (const [key, targets] of Object.entries(paths)) {
       if (!key.endsWith('/*')) continue
@@ -230,10 +262,14 @@ async function main() {
   process.stdout.write(JSON.stringify(payload))
 }
 
-try {
-  void pathToFileURL
-  await main()
-} catch (err) {
-  process.stderr.write(String(err?.stack ?? err ?? 'unknown error'))
-  process.exit(1)
+const invokedDirectly = process.argv[1] !== undefined
+  && import.meta.url === pathToFileURL(process.argv[1]).href
+
+if (invokedDirectly) {
+  try {
+    await main()
+  } catch (err) {
+    process.stderr.write(String(err?.stack ?? err ?? 'unknown error'))
+    process.exit(1)
+  }
 }

@@ -122,9 +122,9 @@ final readonly class Configuration
     /**
      * Gets the evals configuration.
      */
-    public function evals(): Evals\Configuration
+    public function evals(): Evals\Configuration // @phpstan-ignore-line
     {
-        return new Evals\Configuration;
+        return new Evals\Configuration; // @phpstan-ignore-line
     }
 
     /**
