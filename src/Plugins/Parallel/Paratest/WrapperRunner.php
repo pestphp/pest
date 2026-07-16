@@ -323,8 +323,18 @@ final class WrapperRunner implements RunnerInterface
             /** @var list<AfterLastTestMethodFailed> $failedEvents */
             $failedEvents = array_merge_recursive($testResultSum->testFailedEvents(), $testResult->testFailedEvents());
 
+            // A worker's `hasTests()` only reflects the *last* file it executed:
+            // PHPUnit's Collector overwrites `numberOfTests` on every
+            // `executionStarted` event. When a worker's final file has all of
+            // its tests excluded by `--group`/`--exclude-group`, that worker
+            // reports `hasTests() === false` even though it ran plenty of
+            // tests. If every worker happens to end on such a file, the merged
+            // result claims the whole suite was empty and the run exits 1
+            // (PHPUnit enables `failOnEmptyTestSuite` implicitly for explicit
+            // test selections) — despite a fully green summary. Treating a
+            // worker with executed tests as "has tests" restores the truth.
             $testResultSum = new TestResult(
-                (int) $testResultSum->hasTests() + (int) $testResult->hasTests(),
+                (int) ($testResultSum->hasTests() || $testResult->hasTests() || $testResult->numberOfTestsRun() > 0),
                 $testResultSum->numberOfTestsRun() + $testResult->numberOfTestsRun(),
                 $testResultSum->numberOfAssertions() + $testResult->numberOfAssertions(),
                 array_merge_recursive($testResultSum->testErroredEvents(), $testResult->testErroredEvents()),
