@@ -80,8 +80,8 @@
   ✓ it adds coverage if --exactly exist
   ✓ it adds coverage if --only-covered exist
   - it routes --coverage-php to .pest/coverage/{n}.cov when --shard is used → Coverage is not available
-   - it strips blocked report flags and warns when --shard is used → Coverage is not available
-   ✓ it generates coverage based on file input
+  - it strips blocked report flags and warns when --shard is used → Coverage is not available
+  ✓ it generates coverage based on file input
 
    PASS  Tests\Features\Covers\ClassCoverage
   ✓ it uses the correct PHPUnit attribute for class
@@ -1696,7 +1696,6 @@
   ✓ strip shard blocked report flags removes --coverage-html
   ✓ strip shard blocked report flags removes --coverage-clover as separate arg
   ✓ strip shard blocked report flags keeps non-blocked flags without warning
-  ✓ coverage error flag prevents coverage from being enabled
   ✓ getCoverageDir returns path under .pest/coverage
   ✓ mergeAndReportShardsCoverage returns -1 when coverage directory is empty
 
@@ -1970,33 +1969,5 @@
    PASS  Testsexternal\Features\Expect\toMatchSnapshot
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
-  ────────────────────────────────────────────────────────────────────────────
-   FAILED  Tests\Visual\Parallel > parallel
-  Expected: \n
-    .......ss...s...............................sssssss.s...ss..................\n
-    ............................................................................\n
-    ....................................................................s.......\n
-    .............................s.ssss.........!!..............................\n
-    ............................................................................\n
-    ............................................................................\n
-    ............................................................................\n
-    ............................................................................\n
-    ............................................................................\n
-    ............................................................................\n
-    ............................................................................\n
-    ...............................!!.............!!!!...!..............!!......\n
-    ..........s......s..........................................................\n
-    ............................................................................\n
-    ..................................................s.ssss.ssssss.ss.s..s...s.\n
-    ......sss.sssssssssssss.s..ssssssssss.ss!!!......ss..s......................\n
-    ............................................................................\n
-    ............................................................................\n
-    ..................\n
-  \n
-    Tests:    2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 29 skipped, 1303 passed (2962 assertions)\n
-    Duration: 2.87s\n
-  \n
-    Parallel: 3 processes\n
-  \n
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1330 passed (3010 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1357 passed (3055 assertions)
