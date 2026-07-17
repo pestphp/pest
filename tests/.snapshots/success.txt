@@ -136,6 +136,11 @@
   ✓ describe()->with() preserves depends → first with (9)
   ✓ describe()->with() preserves depends → second with (9)
 
+   PASS  Tests\Features\DatasetProviderErrors
+  ✓ reports missing datasets as errors for a single file run
+  ✓ reports missing datasets as errors alongside passing tests
+  ✓ reports dataset closure exceptions as errors
+
    PASS  Tests\Features\DatasetsTests - 1 todo
   ✓ it throws exception if dataset does not exist
   ✓ it throws exception if dataset already exist
@@ -2068,4 +2073,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1449 passed (3199 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1452 passed (3209 assertions)

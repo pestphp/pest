@@ -6,6 +6,7 @@ use Rector\CodingStyle\Rector\ArrowFunction\ArrowFunctionDelegatingCallToFirstCl
 use Rector\Config\RectorConfig;
 use Rector\DeadCode\Rector\ClassMethod\RemoveDuplicatedReturnSelfDocblockRector;
 use Rector\DeadCode\Rector\ClassMethod\RemoveParentDelegatingConstructorRector;
+use Rector\DeadCode\Rector\ClassMethod\RemoveReturnTagIncompatibleWithNativeTypeRector;
 use Rector\DeadCode\Rector\ClassMethod\RemoveUselessUnionReturnDocblockRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\NarrowObjectReturnTypeRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\ReturnNeverTypeRector;
@@ -22,6 +23,9 @@ return RectorConfig::configure()
         RemoveParentDelegatingConstructorRector::class,
         RemoveDuplicatedReturnSelfDocblockRector::class,
         RemoveUselessUnionReturnDocblockRector::class,
+        RemoveReturnTagIncompatibleWithNativeTypeRector::class => [
+            __DIR__.'/src/Expectations/HigherOrderExpectation.php',
+        ],
     ])
     ->withPreparedSets(
         deadCode: true,
