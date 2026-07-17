@@ -80,8 +80,8 @@
   ✓ it adds coverage if --exactly exist
   ✓ it adds coverage if --only-covered exist
   - it routes --coverage-php to .pest/coverage/{n}.cov when --shard is used → Coverage is not available
-  - it strips blocked report flags and warns when --shard is used → Coverage is not available
-  ✓ it generates coverage based on file input
+   - it strips blocked report flags and warns when --shard is used → Coverage is not available
+   ✓ it generates coverage based on file input
 
    PASS  Tests\Features\Covers\ClassCoverage
   ✓ it uses the correct PHPUnit attribute for class
@@ -1696,6 +1696,9 @@
   ✓ strip shard blocked report flags removes --coverage-html
   ✓ strip shard blocked report flags removes --coverage-clover as separate arg
   ✓ strip shard blocked report flags keeps non-blocked flags without warning
+  ✓ coverage error flag prevents coverage from being enabled
+  ✓ getCoverageDir returns path under .pest/coverage
+  ✓ mergeAndReportShardsCoverage returns -1 when coverage directory is empty
 
    PASS  Tests\Plugins\Traits
   ✓ it allows global uses
