@@ -202,3 +202,21 @@ test('strip shard blocked report flags keeps non-blocked flags without warning',
     expect($filtered)->toBe(['--compact', '--stop-on-failure'])
         ->and($output->fetch())->toBe('');
 });
+
+test('getCoverageDir returns path under .pest/coverage', function () {
+    $plugin = new Coverage(new NullOutput);
+
+    $path = (fn () => $this->getCoverageDir())->call($plugin);
+
+    expect($path)->toEndWith('.pest'.DIRECTORY_SEPARATOR.'coverage');
+});
+
+test('mergeAndReportShardsCoverage returns -1 when coverage directory is empty', function () {
+    $output = new BufferedOutput;
+    $plugin = new Coverage($output);
+
+    $result = (fn () => $this->mergeAndReportShardsCoverage())->call($plugin);
+
+    expect($result)->toBe(-1.0)
+        ->and($output->fetch())->toContain('ERROR');
+});

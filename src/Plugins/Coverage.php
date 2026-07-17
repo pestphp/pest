@@ -106,12 +106,7 @@ final class Coverage implements AddsOutput, HandlesArguments
             $originals = $this->popShardsCoverageFlags($originals);
             $this->parseThresholdOptions($originals);
 
-            $coverage = $this->mergeAndReportShardsCoverage();
-            $exitCode = $this->applyThresholds($coverage);
-
-            $this->output->writeln(['']);
-
-            exit($exitCode);
+            $this->handleShardsCoverageMerge();
         }
 
         $arguments = [...[''], ...array_values(array_filter($originals, function (string $original): bool {
@@ -148,8 +143,15 @@ final class Coverage implements AddsOutput, HandlesArguments
                 [$this->shardIndex, $this->shardTotal] = $shard;
 
                 $coverageDir = $this->getCoverageDir();
-                if (! is_dir($coverageDir)) {
-                    mkdir($coverageDir, 0755, true);
+                if (! is_dir($coverageDir) && ! mkdir($coverageDir, 0755, true) && ! is_dir($coverageDir)) {
+                    $this->output->writeln([
+                        '',
+                        sprintf(
+                            '  <fg=yellow;options=bold> WARN </> Could not create coverage directory: %s',
+                            $coverageDir,
+                        ),
+                        '',
+                    ]);
                 }
 
                 $originals = $this->stripShardBlockedReportFlags($originals);
@@ -218,6 +220,7 @@ final class Coverage implements AddsOutput, HandlesArguments
                 $this->output->writeln(
                     "\n  <fg=white;bg=red;options=bold> ERROR </> No code coverage driver is available.</>",
                 );
+
                 exit(1);
             }
 
@@ -433,22 +436,45 @@ final class Coverage implements AddsOutput, HandlesArguments
     }
 
     /**
+     * Handles the --shards-coverage command: merges shard .cov files,
+     * applies thresholds, and terminates the process with the appropriate exit code.
+     */
+    private function handleShardsCoverageMerge(): never
+    {
+        $coverage = $this->mergeAndReportShardsCoverage();
+
+        if ($coverage < 0) {
+            exit(1);
+        }
+
+        $exitCode = $this->applyThresholds($coverage);
+
+        $this->output->writeln(['']);
+
+        exit($exitCode);
+    }
+
+    /**
      * Merges all shard .cov files and generates the requested coverage reports.
+     *
+     * @return float The total coverage percentage, or -1.0 on failure.
      */
     private function mergeAndReportShardsCoverage(): float
     {
         $coverageDir = $this->getCoverageDir();
-        $files = glob($coverageDir.DIRECTORY_SEPARATOR.'*.cov');
+        $pattern = $coverageDir.DIRECTORY_SEPARATOR.'*.cov';
+        $files = glob($pattern);
 
         if ($files === false || $files === []) {
             $this->output->writeln([
                 '',
-                '  <fg=white;bg=red;options=bold> ERROR </> No coverage files found in .pest/coverage.',
+                '  <fg=white;bg=red;options=bold> ERROR </> No coverage files found.',
+                sprintf('  Expected .cov files in: %s', $coverageDir),
                 '  Run tests with --shard=X/Y --coverage first.',
                 '',
             ]);
 
-            exit(1);
+            return -1.0;
         }
 
         $count = count($files);
@@ -460,6 +486,9 @@ final class Coverage implements AddsOutput, HandlesArguments
                 $count === 1 ? '' : 's',
             ),
         ]);
+
+        /** @var list<string> $files */
+        sort($files);
 
         $merged = null;
         foreach ($files as $file) {
@@ -487,14 +516,19 @@ final class Coverage implements AddsOutput, HandlesArguments
                 '',
             ]);
 
-            exit(1);
+            return -1.0;
         }
 
         $result = \Pest\Support\Coverage::render($merged, $this->output, $this->compact, $this->showOnlyCovered);
 
         if ($this->shardsCoverageClean) {
             foreach ($files as $file) {
-                @unlink($file);
+                if (file_exists($file) && ! unlink($file)) {
+                    $this->output->writeln(sprintf(
+                        '  <fg=yellow;options=bold> WARN </> Could not delete coverage file: %s',
+                        basename($file),
+                    ));
+                }
             }
             $this->output->writeln('  <fg=gray>Coverage files cleaned.</>');
         }
