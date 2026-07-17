@@ -235,6 +235,10 @@ final class TestCaseMethodFactory
             $attributesCode
                 public function $methodName(...\$arguments)
                 {
+                    if (count(\$arguments) === 1 && \$arguments[0] instanceof __PestDatasetProviderError) {
+                        throw \$arguments[0]->getPrevious() ?? \$arguments[0];
+                    }
+
                     return \$this->__runTest(
                         \$this->__test,
                         ...\$arguments,
@@ -261,7 +265,11 @@ final class TestCaseMethodFactory
 
                 public static function $dataProviderName()
                 {
-                    return __PestDatasets::get(self::\$__filename, "$methodName");
+                    try {
+                        return __PestDatasets::get(self::\$__filename, "$methodName");
+                    } catch (\Throwable \$throwable) {
+                        return [[new __PestDatasetProviderError(\$throwable)]];
+                    }
                 }
 
         EOF;
