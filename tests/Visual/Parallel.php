@@ -24,13 +24,13 @@ test('parallel', function () use ($run): void {
         $file = file_get_contents(__FILE__);
         $file = preg_replace(
             '/\$expected = \'.*?\';/',
-            "\$expected = '1 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1487 passed (3228 assertions)';",
+            "\$expected = '1 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 97 skipped, 1446 passed (3163 assertions)';",
             $file,
         );
         file_put_contents(__FILE__, $file);
     }
 
-    $expected = '1 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1487 passed (3228 assertions)';
+    $expected = '1 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 97 skipped, 1446 passed (3163 assertions)';
 
     expect($output)
         ->toContain("Tests:    {$expected}")
