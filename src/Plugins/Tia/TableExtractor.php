@@ -9,7 +9,12 @@ namespace Pest\Plugins\Tia;
  */
 final class TableExtractor
 {
-    private const array DML_PREFIXES = ['select', 'insert', 'update', 'delete'];
+    private const array DML_PREFIXES = ['select', 'insert', 'update', 'delete', 'with', 'replace'];
+
+    /**
+     * A single (optionally quoted) identifier segment.
+     */
+    private const string IDENTIFIER = '(?:"[^"]+"|`[^`]+`|\[[^\]]+\]|\w+)';
 
     /**
      * @return list<string> Sorted, deduped table names referenced by the
@@ -22,14 +27,15 @@ final class TableExtractor
             return [];
         }
 
-        $prefix = strtolower(substr($trimmed, 0, 6));
-        $matched = array_any(self::DML_PREFIXES, fn (string $dml): bool => str_starts_with($prefix, $dml));
-
-        if (! $matched) {
+        if (preg_match('/^[a-zA-Z]+/', $trimmed, $prefixMatch) !== 1) {
             return [];
         }
 
-        $pattern = '/(?:\bfrom|\binto|\bupdate|\bjoin)\s+(?:"([^"]+)"|`([^`]+)`|\[([^\]]+)\]|(\w+))/i';
+        if (! in_array(strtolower($prefixMatch[0]), self::DML_PREFIXES, true)) {
+            return [];
+        }
+
+        $pattern = '/\b(?:from|into|update|join)\s+('.self::IDENTIFIER.'(?:\s*\.\s*'.self::IDENTIFIER.')*)/i';
 
         if (preg_match_all($pattern, $sql, $matches) === false) {
             return [];
@@ -37,14 +43,9 @@ final class TableExtractor
 
         $tables = [];
 
-        for ($i = 0, $n = count($matches[0]); $i < $n; $i++) {
-            $name = $matches[1][$i] !== ''
-                ? $matches[1][$i]
-                : ($matches[2][$i] !== ''
-                    ? $matches[2][$i]
-                    : ($matches[3][$i] !== ''
-                        ? $matches[3][$i]
-                        : $matches[4][$i]));
+        foreach ($matches[1] as $qualified) {
+            $name = self::unqualified($qualified);
+
             if ($name === '') {
                 continue;
             }
@@ -72,40 +73,40 @@ final class TableExtractor
 
         if (preg_match_all($schemaPattern, $php, $matches) !== false) {
             foreach ($matches[1] as $i => $primary) {
-                $tables[strtolower($primary)] = true;
+                $tables[strtolower(self::lastDottedSegment($primary))] = true;
 
                 $secondary = $matches[2][$i] ?? '';
                 if ($secondary !== '') {
-                    $tables[strtolower($secondary)] = true;
+                    $tables[strtolower(self::lastDottedSegment($secondary))] = true;
                 }
             }
         }
 
-        $ddlPattern = '/(?:CREATE|ALTER|DROP|TRUNCATE|RENAME)\s+TABLE(?:\s+IF\s+(?:NOT\s+)?EXISTS)?\s+["`\[]?(\w+)["`\]]?/i';
+        $qualified = '('.self::IDENTIFIER.'(?:\s*\.\s*'.self::IDENTIFIER.')*)';
 
-        if (preg_match_all($ddlPattern, $php, $matches) !== false) {
-            foreach ($matches[1] as $primary) {
-                $lower = strtolower($primary);
-                if (! self::isSchemaMeta($lower)) {
+        $sqlPatterns = [
+            '/(?:CREATE|ALTER|DROP|TRUNCATE|RENAME)\s+TABLE(?:\s+IF\s+(?:NOT\s+)?EXISTS)?\s+'.$qualified.'/i',
+            '/INSERT\s+(?:IGNORE\s+)?INTO\s+'.$qualified.'/i',
+            '/UPDATE\s+'.$qualified.'\s+SET\b/i',
+            '/DELETE\s+FROM\s+'.$qualified.'/i',
+        ];
+
+        foreach ($sqlPatterns as $pattern) {
+            if (preg_match_all($pattern, $php, $matches) === false) {
+                continue;
+            }
+            foreach ($matches[1] as $name) {
+                $lower = strtolower(self::unqualified($name));
+                if ($lower !== '' && ! self::isSchemaMeta($lower)) {
                     $tables[$lower] = true;
                 }
             }
         }
 
-        $dmlPatterns = [
-            '/INSERT\s+(?:IGNORE\s+)?INTO\s+["`\[]?(\w+)["`\]]?/i',
-            '/UPDATE\s+["`\[]?(\w+)["`\]]?\s+SET\b/i',
-            '/DELETE\s+FROM\s+["`\[]?(\w+)["`\]]?/i',
-            '/DB::table\(\s*[\'"]([^\'"]+)[\'"]\s*\)/',
-        ];
-
-        foreach ($dmlPatterns as $pattern) {
-            if (preg_match_all($pattern, $php, $matches) === false) {
-                continue;
-            }
+        if (preg_match_all('/DB::table\(\s*[\'"]([^\'"]+)[\'"]\s*\)/', $php, $matches) !== false) {
             foreach ($matches[1] as $name) {
-                $lower = strtolower($name);
-                if (! self::isSchemaMeta($lower)) {
+                $lower = strtolower(self::lastDottedSegment($name));
+                if ($lower !== '' && ! self::isSchemaMeta($lower)) {
                     $tables[$lower] = true;
                 }
             }
@@ -115,6 +116,39 @@ final class TableExtractor
         sort($out);
 
         return $out;
+    }
+
+    /**
+     * The table segment of a possibly schema-qualified identifier chain,
+     * e.g. `"public"."users"` or `analytics.events` yield `users` / `events`.
+     * Empty when any segment is schema metadata (`information_schema.tables`, ...).
+     */
+    private static function unqualified(string $qualified): string
+    {
+        $name = '';
+
+        foreach (explode('.', $qualified) as $segment) {
+            $segment = trim($segment, " \t\n\r\"`[]");
+
+            if ($segment === '') {
+                continue;
+            }
+
+            if (self::isSchemaMeta($segment)) {
+                return '';
+            }
+
+            $name = $segment;
+        }
+
+        return $name;
+    }
+
+    private static function lastDottedSegment(string $name): string
+    {
+        $position = strrpos($name, '.');
+
+        return $position === false ? $name : substr($name, $position + 1);
     }
 
     private static function isSchemaMeta(string $name): bool

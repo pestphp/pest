@@ -259,6 +259,104 @@ function tiaAliasResults(): array
     return $cache = ['roots' => $roots, 'aliases' => $aliases];
 }
 
+function tiaViteAliasFixtures(): array
+{
+    return [
+        'root-slash-literal' => [
+            ['vite.config.js' => "export default { resolve: { alias: { '@': '/resources/js' } } }"],
+            ['@' => 'resources/js'],
+        ],
+        'path-resolve' => [
+            ['vite.config.ts' => "export default { resolve: { alias: { '@': path.resolve(__dirname, 'resources/js') } } }"],
+            ['@' => 'resources/js'],
+        ],
+        'file-url' => [
+            ['vite.config.mjs' => "export default { resolve: { alias: { '@': fileURLToPath(new URL('./resources/js', import.meta.url)) } } }"],
+            ['@' => 'resources/js'],
+        ],
+        'tilde-alias' => [
+            ['vite.config.js' => "export default { resolve: { alias: { '~': path.resolve(__dirname, 'resources') } } }"],
+            ['~' => 'resources'],
+        ],
+        'multiple-aliases' => [
+            ['vite.config.js' => "export default { resolve: { alias: { '@': '/resources/js', '@css': '/resources/css' } } }"],
+            ['@' => 'resources/js', '@css' => 'resources/css'],
+        ],
+        'laravel-plugin-default' => [
+            [
+                'vite.config.js' => "import laravel from 'laravel-vite-plugin'\nexport default { plugins: [laravel({ input: ['resources/js/app.ts'] })] }",
+                'package.json' => tiaJson(['devDependencies' => ['laravel-vite-plugin' => '^1.0']]),
+            ],
+            ['@' => 'resources/js'],
+        ],
+        'no-alias-no-plugin' => [
+            [
+                'vite.config.js' => 'export default { plugins: [] }',
+                'package.json' => tiaJson(['devDependencies' => ['vue' => '^3.0']]),
+            ],
+            [],
+        ],
+        'no-config' => [
+            [],
+            [],
+        ],
+    ];
+}
+
+function tiaViteAliasResults(): array
+{
+    static $cache = null;
+    if ($cache !== null) {
+        return $cache;
+    }
+
+    $roots = [];
+    $written = [];
+    $payload = [];
+
+    foreach (tiaViteAliasFixtures() as $name => [$files]) {
+        $root = sys_get_temp_dir().'/pest-tia-vite-'.bin2hex(random_bytes(6));
+        mkdir($root, 0755, true);
+        foreach ($files as $fname => $content) {
+            file_put_contents($root.'/'.$fname, $content);
+            $written[] = $root.'/'.$fname;
+        }
+        $root = str_replace('\\', '/', $root);
+        $roots[$name] = $root;
+        $payload[] = ['name' => $name, 'root' => $root];
+    }
+
+    $inputFile = tempnam(sys_get_temp_dir(), 'tia-vite-alias-');
+    file_put_contents($inputFile, json_encode($payload));
+
+    $helper = str_replace('\\', '/', tiaViteHelperPath());
+    $input = str_replace('\\', '/', $inputFile);
+
+    $script = <<<JS
+    import { loadAliasFromViteConfig } from '{$helper}'
+    import { readFileSync } from 'node:fs'
+    const cases = JSON.parse(readFileSync('{$input}', 'utf8'))
+    const out = {}
+    for (const c of cases) out[c.name] = await loadAliasFromViteConfig(c.root)
+    process.stdout.write(JSON.stringify(out))
+    JS;
+
+    $process = new Process(['node', '--input-type=module', '-e', $script]);
+    $process->mustRun();
+
+    $aliases = json_decode($process->getOutput(), true, flags: JSON_THROW_ON_ERROR);
+
+    @unlink($inputFile);
+    foreach ($written as $f) {
+        @unlink($f);
+    }
+    foreach ($roots as $r) {
+        @rmdir($r);
+    }
+
+    return $cache = ['roots' => $roots, 'aliases' => $aliases];
+}
+
 beforeEach(function (): void {
     if ((new ExecutableFinder)->find('node') === null) {
         $this->markTestSkipped('node is not available.');
@@ -298,3 +396,16 @@ it('builds the expected alias map from a tsconfig', function (string $name): voi
 
     expect($results['aliases'][$name])->toEqual($expected);
 })->with(array_keys(tiaAliasFixtures()));
+
+it('builds the expected alias map from a vite config', function (string $name): void {
+    $results = tiaViteAliasResults();
+    [, $expectedRelative] = tiaViteAliasFixtures()[$name];
+
+    $root = $results['roots'][$name];
+    $expected = [];
+    foreach ($expectedRelative as $key => $relative) {
+        $expected[$key] = $root.'/'.$relative;
+    }
+
+    expect($results['aliases'][$name])->toEqual($expected);
+})->with(array_keys(tiaViteAliasFixtures()));

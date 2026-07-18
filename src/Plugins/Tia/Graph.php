@@ -149,6 +149,13 @@ final class Graph
      */
     private function applyMigrationChanges(array $migrationPaths, array &$affectedSet): array
     {
+        // With no recorded table usage at all, table intersection can never
+        // select anything — route every migration change through the
+        // watch-pattern fallback instead of silently skipping tests.
+        if ($this->testTables === []) {
+            return $migrationPaths;
+        }
+
         $changedTables = [];
         $unparseable = [];
 
@@ -446,13 +453,14 @@ final class Graph
 
             $bladeAffected = $this->affectedByStaticBladeUsage($rel);
 
+            // Only a walk that actually selected tests counts as handled — a
+            // component whose usage the static walk missed must still reach
+            // the watch-pattern fallback instead of being silently swallowed.
             if ($bladeAffected !== []) {
                 foreach ($bladeAffected as $testFile) {
                     $affectedSet[$testFile] = true;
                 }
 
-                $staticallyHandled[$rel] = true;
-            } elseif ($this->isBladeComponentPath($rel)) {
                 $staticallyHandled[$rel] = true;
             }
         }
@@ -690,8 +698,16 @@ final class Graph
 
     private function shouldRerun(int $status): bool
     {
-        $testStatus = TestStatus::from($status);
+        return $this->shouldRerunStatus(TestStatus::from($status));
+    }
 
+    /**
+     * Whether a cached result with this status must be re-executed rather
+     * than replayed, honouring the configured failOn* / displayDetailsOn*
+     * policies.
+     */
+    public function shouldRerunStatus(TestStatus $testStatus): bool
+    {
         if ($testStatus->isFailure() || $testStatus->isError()) {
             return true;
         }
@@ -1249,7 +1265,21 @@ final class Graph
         $tail = substr($tail, 0, -strlen('.blade.php'));
         $name = str_replace('/', '.', $tail);
 
-        return $name === '' ? [] : [$name, str_replace('_', '-', $name)];
+        if ($name === '') {
+            return [];
+        }
+
+        $names = [$name, str_replace('_', '-', $name)];
+
+        // Anonymous index components: components/card/index.blade.php resolves as <x-card>.
+        if (str_ends_with($name, '.index') && $name !== '.index') {
+            $base = substr($name, 0, -strlen('.index'));
+
+            $names[] = $base;
+            $names[] = str_replace('_', '-', $base);
+        }
+
+        return array_values(array_unique($names));
     }
 
     /** @return list<string> */

@@ -296,7 +296,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $result = $this->replayGraph->getResult($this->branch, $testId);
 
         if ($result instanceof TestStatus) {
-            if ($result->isFailure() || $result->isError()) {
+            if ($this->replayGraph->shouldRerunStatus($result)) {
                 $this->executedCount++;
 
                 return null;
@@ -402,7 +402,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         $projectRoot = TestSuite::getInstance()->rootPath;
         $perTest = $this->piggybackCoverage
-            ? $this->coverageCollector->perTestFiles()
+            ? $this->mergePerTestFiles($this->coverageCollector->perTestFiles(), $recorder->perTestFiles())
             : $recorder->perTestFiles();
 
         if ($perTest === []) {
@@ -715,6 +715,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         if ($this->piggybackCoverage) {
+            $this->recorder->activateLinkTracking();
             $this->recordingActive = true;
 
             return $arguments;
@@ -782,6 +783,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private function activateWorkerRecorderForReplay(array $arguments): array
     {
         if ($this->piggybackCoverage) {
+            $this->recorder->activateLinkTracking();
             $this->recordingActive = true;
 
             return $arguments;
@@ -833,6 +835,13 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         $affectedFromChanges = $changed === [] ? [] : $graph->affected($changed);
         $rerunFromCache = [];
+
+        if ($this->filteredMode && $graph->hasUnlocatedTestsToRerun($this->branch)) {
+            $this->filteredMode = false;
+
+            $this->renderBadge('WARN', 'Some cached tests due a re-run could not be located on disk.');
+            $this->renderChild('Running the full suite with replay instead of a filtered run.');
+        }
 
         if ($this->filteredMode) {
             $rerunFromCache = $graph->testFilesToRerun($this->branch);
@@ -1014,6 +1023,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         if ($this->piggybackCoverage) {
+            $recorder->activateLinkTracking();
             $this->recordingActive = true;
 
             $this->output->writeln('');
@@ -1235,6 +1245,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             $data = $this->readPartial($key);
 
             if ($data === null) {
+                $this->state->delete($key);
+
                 continue;
             }
 
@@ -1368,6 +1380,26 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $this->saveGraph($graph);
     }
 
+    /**
+     * Union of two per-test edge maps — piggybacked line-coverage edges plus
+     * the recorder's link-tracked edges (rendered Blade views, ...), which
+     * never appear in line coverage.
+     *
+     * @param  array<string, array<int, string>>  $coverage
+     * @param  array<string, array<int, string>>  $linked
+     * @return array<string, array<int, string>>
+     */
+    private function mergePerTestFiles(array $coverage, array $linked): array
+    {
+        foreach ($linked as $testFile => $sources) {
+            $existing = $coverage[$testFile] ?? [];
+
+            $coverage[$testFile] = array_values(array_unique([...$existing, ...$sources]));
+        }
+
+        return $coverage;
+    }
+
     private function seedResultsInto(Graph $graph): void
     {
         /** @var ResultCollector $collector */
@@ -1378,6 +1410,10 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         foreach ($results as $testId => $result) {
             $file = $result['file'] ?? null;
+
+            if ($file === null || str_contains($file, "eval()'d")) {
+                $file = $this->resolveFailedTestFile($testId);
+            }
 
             if (is_string($file) && $file !== '') {
                 $touchedFiles[$file] = true;

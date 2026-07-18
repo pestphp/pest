@@ -34,6 +34,8 @@ final class Recorder
 
     private bool $active = false;
 
+    private bool $captureCoverage = false;
+
     private bool $driverChecked = false;
 
     private bool $driverAvailable = false;
@@ -43,6 +45,17 @@ final class Recorder
     private ?SourceScope $sourceScope = null;
 
     public function activate(): void
+    {
+        $this->active = true;
+        $this->captureCoverage = true;
+    }
+
+    /**
+     * Enable per-test link tracking (tables, Inertia components, database
+     * usage, rendered views) without driving pcov/xdebug — for runs where
+     * coverage edges are piggybacked from an existing PHPUnit coverage session.
+     */
+    public function activateLinkTracking(): void
     {
         $this->active = true;
     }
@@ -75,7 +88,11 @@ final class Recorder
 
     public function beginTest(string $className, string $methodName, string $fallbackFile): void
     {
-        if (! $this->active || ! $this->driverAvailable()) {
+        if (! $this->active) {
+            return;
+        }
+
+        if ($this->captureCoverage && ! $this->driverAvailable()) {
             return;
         }
 
@@ -95,6 +112,10 @@ final class Recorder
             $this->perTestUsesDatabase[$file] = true;
         }
 
+        if (! $this->captureCoverage) {
+            return;
+        }
+
         if ($this->driver === 'pcov') {
             \pcov\clear();
             \pcov\start();
@@ -107,7 +128,13 @@ final class Recorder
 
     public function endTest(): void
     {
-        if (! $this->active || ! $this->driverAvailable() || $this->currentTestFile === null) {
+        if (! $this->active || $this->currentTestFile === null) {
+            return;
+        }
+
+        if (! $this->captureCoverage || ! $this->driverAvailable()) {
+            $this->currentTestFile = null;
+
             return;
         }
 
@@ -132,7 +159,15 @@ final class Recorder
             $data = \xdebug_get_code_coverage();
             \xdebug_stop_code_coverage(true);
 
-            $coveredFiles = array_keys($data);
+            $scope = $this->sourceScope();
+
+            foreach (array_keys($data) as $file) {
+                if (! $scope->contains($file)) {
+                    unset($data[$file]);
+                }
+            }
+
+            $coveredFiles = $this->filesWithExecutedLines($data);
         }
 
         foreach ($coveredFiles as $sourceFile) {
@@ -351,5 +386,6 @@ final class Recorder
         $this->classUsesDatabaseCache = [];
         $this->sourceScope = null;
         $this->active = false;
+        $this->captureCoverage = false;
     }
 }

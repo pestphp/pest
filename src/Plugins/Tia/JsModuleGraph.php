@@ -163,7 +163,9 @@ final class JsModuleGraph
             return null;
         }
 
-        if (! is_dir($projectRoot.DIRECTORY_SEPARATOR.'node_modules'.DIRECTORY_SEPARATOR.'vite')) {
+        $nodeModules = $projectRoot.DIRECTORY_SEPARATOR.'node_modules';
+
+        if (! is_dir($nodeModules.DIRECTORY_SEPARATOR.'vite') && ! is_dir($nodeModules.DIRECTORY_SEPARATOR.'rolldown')) {
             return null;
         }
 
