@@ -180,6 +180,12 @@ final readonly class Help implements HandlesArguments
         ], [
             'arg' => '--coverage --only-covered',
             'desc' => 'Hide files with 0% coverage from the code coverage report',
+        ], [
+            'arg' => '--shards-coverage',
+            'desc' => 'Merge .cov files from .pest/coverage/ and generate a combined coverage report',
+        ], [
+            'arg' => '--shards-coverage --clean',
+            'desc' => 'Delete .cov files after generating the combined coverage report',
         ], ...$content['Code Coverage']];
 
         $content['Mutation Testing'] = [[

@@ -146,6 +146,8 @@
   --coverage --min  Set the minimum required coverage percentage, and fail if not met  
   --coverage --exactly  Set the exact required coverage percentage, and fail if not met  
   --coverage --only-covered  Hide files with 0% coverage from the code coverage report  
+  --shards-coverage  Merge .cov files from .pest/coverage/ and generate a combined coverage report  
+  --shards-coverage --clean  Delete .cov files after generating the combined coverage report  
   --coverage-clover [file]  Write code coverage report in Clover XML format to file  
   --coverage-openclover [file]  Write code coverage report in OpenClover XML format to file  
   --coverage-cobertura [file]  Write code coverage report in Cobertura XML format to file  

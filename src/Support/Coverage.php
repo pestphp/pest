@@ -96,6 +96,14 @@ final class Coverage
         $codeCoverage = require $reportPath;
         unlink($reportPath);
 
+        return self::render($codeCoverage, $output, $compact, $showOnlyCovered);
+    }
+
+    /**
+     * Renders the coverage report to the console and returns the total coverage as float.
+     */
+    public static function render(CodeCoverage $codeCoverage, OutputInterface $output, bool $compact = false, bool $showOnlyCovered = false): float
+    {
         // @phpstan-ignore-next-line
         if (is_array($codeCoverage)) {
             $facade = Facade::fromSerializedData($codeCoverage);

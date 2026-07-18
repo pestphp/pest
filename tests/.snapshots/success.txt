@@ -77,6 +77,10 @@
   ✓ it has plugin
   - it adds coverage if --coverage exist → Coverage is not available
   ✓ it adds coverage if --min exist
+  ✓ it adds coverage if --exactly exist
+  ✓ it adds coverage if --only-covered exist
+  - it routes --coverage-php to .pest/coverage/{n}.cov when --shard is used → Coverage is not available
+  - it strips blocked report flags and warns when --shard is used → Coverage is not available
   ✓ it generates coverage based on file input
 
    PASS  Tests\Features\Covers\ClassCoverage
@@ -1688,6 +1692,31 @@
   ✓ compute comparable coverage with (32.53333333333333, 32.5)
   ✓ compute comparable coverage with (32.57777771232132, 32.5)
   ✓ compute comparable coverage with (100.0, 100.0)
+  ✓ apply thresholds with dataset "min pass"
+  ✓ apply thresholds with dataset "min fail"
+  ✓ apply thresholds with dataset "exactly pass"
+  ✓ apply thresholds with dataset "exactly fail"
+  ✓ strip shard blocked report flags with dataset "inline value flag"
+  ✓ strip shard blocked report flags with dataset "space-separated flag"
+  ✓ strip shard blocked report flags with dataset "no blocked flags"
+  ✓ apply thresholds returns 0 when coverage meets min
+  ✓ apply thresholds returns 1 and writes FAIL when coverage is below min
+  ✓ apply thresholds returns 0 when coverage matches exactly
+  ✓ apply thresholds returns 1 and writes FAIL when coverage does not match exactly
+  ✓ parse threshold options sets coverageMin
+  ✓ parse threshold options sets coverageExactly
+  ✓ parse threshold options sets showOnlyCovered
+  ✓ parse threshold options ignores unrelated flags
+  ✓ detect shard parses equals format
+  ✓ detect shard parses space format
+  ✓ detect shard returns null when absent
+  ✓ has shards coverage flag detects --shards-coverage
+  ✓ pop shards coverage flags removes --shards-coverage and --clean
+  ✓ strip shard blocked report flags removes --coverage-html
+  ✓ strip shard blocked report flags removes --coverage-clover as separate arg
+  ✓ strip shard blocked report flags keeps non-blocked flags without warning
+  ✓ getCoverageDir returns path under .pest/coverage
+  ✓ mergeAndReportShardsCoverage returns -1 when coverage directory is empty
 
    PASS  Tests\Plugins\Traits
   ✓ it allows global uses
@@ -1880,75 +1909,75 @@
   ✓ isTestFile() → it honours a bare .php suffix
   ✓ isTestFile() → it does not require a dot before the suffix
 
-   PASS  Tests\Unit\Plugins\Tia\ViteDepsHelper
-  ✓ it strips JSONC down to something JSON.parse accepts with ('plain-object')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('plain-array')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('nested')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('empty-object')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('empty-array')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('line-comment-own-line')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('line-comment-trailing')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('leading-line-comments')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('line-comment-eof-no-newline')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('block-comment-leading')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('block-comment-inline')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('block-comment-multiline')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('block-comment-eof')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('jsdoc-style-block')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('block-contains-double-slash')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('line-then-block')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('comment-with-quotes')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('comment-with-braces-commas')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('trailing-comma-object')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('trailing-comma-array')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('trailing-comma-nested')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('trailing-comma-newline')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('trailing-comma-then-block')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('trailing-comma-then-line')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('crlf-line-comment')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('tabs-whitespace')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('url-in-string')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('glob-in-string')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('path-alias-in-string')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('block-open-in-string')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('block-close-in-string')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('block-both-in-string')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('star-in-string')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('single-slashes-in-string')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('escaped-quote-in-string')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('escaped-backslash-in-string')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('backslash-then-slash')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('newline-escape-in-string')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('unicode-in-string')
-  ✓ it strips JSONC down to something JSON.parse accepts with ('block-secret')
-  ✓ it never touches comment-looking sequences inside string values
-  ✓ it removes the comment body entirely
-  ✓ it builds the expected alias map from a tsconfig with ('basic')
-  ✓ it builds the expected alias map from a tsconfig with ('multiple-aliases')
-  ✓ it builds the expected alias map from a tsconfig with ('default-baseUrl')
-  ✓ it builds the expected alias map from a tsconfig with ('baseUrl-subdir')
-  ✓ it builds the expected alias map from a tsconfig with ('jsconfig-fallback')
-  ✓ it builds the expected alias map from a tsconfig with ('first-target-wins')
-  ✓ it builds the expected alias map from a tsconfig with ('multiple-keys-mixed')
-  ✓ it builds the expected alias map from a tsconfig with ('no-paths')
-  ✓ it builds the expected alias map from a tsconfig with ('no-compiler-options')
-  ✓ it builds the expected alias map from a tsconfig with ('key-without-glob')
-  ✓ it builds the expected alias map from a tsconfig with ('target-without-glob')
-  ✓ it builds the expected alias map from a tsconfig with ('target-not-array')
-  ✓ it builds the expected alias map from a tsconfig with ('target-empty-array')
-  ✓ it builds the expected alias map from a tsconfig with ('commented-tsconfig')
-  ✓ it builds the expected alias map from a tsconfig with ('trailing-comma-paths')
-  ✓ it builds the expected alias map from a tsconfig with ('malformed-json')
-  ✓ it builds the expected alias map from a tsconfig with ('missing-config')
-  ✓ it builds the expected alias map from a tsconfig with ('tsconfig-precedence')
-  ✓ it builds the expected alias map from a vite config with ('root-slash-literal')
-  ✓ it builds the expected alias map from a vite config with ('path-resolve')
-  ✓ it builds the expected alias map from a vite config with ('file-url')
-  ✓ it builds the expected alias map from a vite config with ('tilde-alias')
-  ✓ it builds the expected alias map from a vite config with ('multiple-aliases')
-  ✓ it builds the expected alias map from a vite config with ('laravel-plugin-default')
-  ✓ it builds the expected alias map from a vite config with ('no-alias-no-plugin')
-  ✓ it builds the expected alias map from a vite config with ('no-config')
+   WARN  Tests\Unit\Plugins\Tia\ViteDepsHelper
+  - it strips JSONC down to something JSON.parse accepts with ('plain-object') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('plain-array') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('nested') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('empty-object') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('empty-array') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('line-comment-own-line') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('line-comment-trailing') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('leading-line-comments') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('line-comment-eof-no-newline') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('block-comment-leading') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('block-comment-inline') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('block-comment-multiline') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('block-comment-eof') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('jsdoc-style-block') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('block-contains-double-slash') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('line-then-block') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('comment-with-quotes') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('comment-with-braces-commas') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('trailing-comma-object') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('trailing-comma-array') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('trailing-comma-nested') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('trailing-comma-newline') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('trailing-comma-then-block') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('trailing-comma-then-line') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('crlf-line-comment') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('tabs-whitespace') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('url-in-string') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('glob-in-string') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('path-alias-in-string') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('block-open-in-string') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('block-close-in-string') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('block-both-in-string') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('star-in-string') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('single-slashes-in-string') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('escaped-quote-in-string') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('escaped-backslash-in-string') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('backslash-then-slash') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('newline-escape-in-string') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('unicode-in-string') → node is not available.
+  - it strips JSONC down to something JSON.parse accepts with ('block-secret') → node is not available.
+  - it never touches comment-looking sequences inside string values → node is not available.
+  - it removes the comment body entirely → node is not available.
+  - it builds the expected alias map from a tsconfig with ('basic') → node is not available.
+  - it builds the expected alias map from a tsconfig with ('multiple-aliases') → node is not available.
+  - it builds the expected alias map from a tsconfig with ('default-baseUrl') → node is not available.
+  - it builds the expected alias map from a tsconfig with ('baseUrl-subdir') → node is not available.
+  - it builds the expected alias map from a tsconfig with ('jsconfig-fallback') → node is not available.
+  - it builds the expected alias map from a tsconfig with ('first-target-wins') → node is not available.
+  - it builds the expected alias map from a tsconfig with ('multiple-keys-mixed') → node is not available.
+  - it builds the expected alias map from a tsconfig with ('no-paths') → node is not available.
+  - it builds the expected alias map from a tsconfig with ('no-compiler-options') → node is not available.
+  - it builds the expected alias map from a tsconfig with ('key-without-glob') → node is not available.
+  - it builds the expected alias map from a tsconfig with ('target-without-glob') → node is not available.
+  - it builds the expected alias map from a tsconfig with ('target-not-array') → node is not available.
+  - it builds the expected alias map from a tsconfig with ('target-empty-array') → node is not available.
+  - it builds the expected alias map from a tsconfig with ('commented-tsconfig') → node is not available.
+  - it builds the expected alias map from a tsconfig with ('trailing-comma-paths') → node is not available.
+  - it builds the expected alias map from a tsconfig with ('malformed-json') → node is not available.
+  - it builds the expected alias map from a tsconfig with ('missing-config') → node is not available.
+  - it builds the expected alias map from a tsconfig with ('tsconfig-precedence') → node is not available.
+  - it builds the expected alias map from a vite config with ('root-slash-literal') → node is not available.
+  - it builds the expected alias map from a vite config with ('path-resolve') → node is not available.
+  - it builds the expected alias map from a vite config with ('file-url') → node is not available.
+  - it builds the expected alias map from a vite config with ('tilde-alias') → node is not available.
+  - it builds the expected alias map from a vite config with ('multiple-aliases') → node is not available.
+  - it builds the expected alias map from a vite config with ('laravel-plugin-default') → node is not available.
+  - it builds the expected alias map from a vite config with ('no-alias-no-plugin') → node is not available.
+  - it builds the expected alias map from a vite config with ('no-config') → node is not available.
 
    PASS  Tests\Unit\Preset
   ✓ preset invalid name
@@ -2136,4 +2165,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1504 passed (3281 assertions)
+  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 105 skipped, 1463 passed (3216 assertions)
