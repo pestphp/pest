@@ -562,7 +562,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return $exitCode;
         }
 
-        $this->snapshotTestResults();
+        $this->snapshotTestResults(markKnownTestFiles: true);
 
         return $exitCode;
     }
@@ -1394,12 +1394,13 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             );
         }
 
+        $graph->markKnownTestFiles(array_keys($touchedFiles));
         $graph->pruneStaleResults($this->branch, array_keys($touchedFiles), array_keys($results));
 
         $collector->reset();
     }
 
-    private function snapshotTestResults(): void
+    private function snapshotTestResults(bool $markKnownTestFiles = false): void
     {
         /** @var ResultCollector $collector */
         $collector = Container::getInstance()->get(ResultCollector::class);
@@ -1440,6 +1441,10 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                 $result['assertions'],
                 $file,
             );
+        }
+
+        if ($markKnownTestFiles) {
+            $graph->markKnownTestFiles(array_keys($touchedFiles));
         }
 
         $graph->pruneStaleResults($this->branch, array_keys($touchedFiles), array_keys($results));

@@ -45,9 +45,7 @@ final readonly class TestPaths
                         $directories[] = $rel;
                     }
 
-                    $suffix = $directory->suffix();
-
-                    $suffixes[] = str_starts_with($suffix, '.') ? $suffix : '.'.$suffix;
+                    $suffixes[] = $directory->suffix();
                 }
 
                 foreach ($suite->files() as $file) {
@@ -61,7 +59,7 @@ final readonly class TestPaths
 
             if ($suffixes === []) {
                 foreach ($configuration->testSuffixes() as $suffix) {
-                    $suffixes[] = str_starts_with($suffix, '.') ? $suffix : '.'.$suffix;
+                    $suffixes[] = $suffix;
                 }
             }
         } catch (Throwable) {

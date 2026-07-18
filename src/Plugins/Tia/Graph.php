@@ -814,6 +814,38 @@ final class Graph
     }
 
     /**
+     * Mark test files that executed under a recorded coverage session as "known",
+     * seeding an empty edge set for any that produced zero project-source edges.
+     *
+     * Without this, a test that covers no application source (e.g. a pure unit
+     * test asserting on language primitives) never becomes an edge key, so
+     * {@see self::knowsTest()} reports it as unknown and it re-runs on every TIA
+     * run. Recording it with an empty edge set lets it be replayed/skipped while
+     * unchanged; it is still re-run whenever its own file changes, via
+     * {@see self::applyTestFileChanges()}.
+     *
+     * Must only be called from the recording path, where coverage was actually
+     * collected — otherwise a missing edge set could mean "coverage was off",
+     * not "genuinely covered nothing".
+     *
+     * @param  array<int, string>  $testFiles  Absolute or project-relative test file paths.
+     */
+    public function markKnownTestFiles(array $testFiles): void
+    {
+        foreach ($testFiles as $testFile) {
+            $rel = $this->relative($testFile);
+
+            if ($rel === null) {
+                continue;
+            }
+
+            if (! isset($this->edges[$rel])) {
+                $this->edges[$rel] = [];
+            }
+        }
+    }
+
+    /**
      * @param  array<string, array<int, string>>  $testToTables
      */
     public function replaceTestTables(array $testToTables): void
