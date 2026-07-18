@@ -28,6 +28,13 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     private const string SHARD_OPTION = 'shard';
 
     /**
+     * The maximum length allowed for the filter argument.
+     * While ARG_MAX can be 2MB, individual arguments are often limited to 128KB (MAX_ARG_STRLEN).
+     * Practical limits in CI environments (like Docker or pipeline runners) can be even lower.
+     */
+    private const int MAX_FILTER_LENGTH = 32768;
+
+    /**
      * The shard index and total number of shards.
      *
      * @var array{
@@ -132,7 +139,8 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             self::$timeBalanced = true;
             self::$shardsOutdated = $newTests !== [];
         } else {
-            $testsToRun = (array_chunk($tests, max(1, (int) ceil(count($tests) / $total))))[$index - 1] ?? [];
+            $isInCurrentShard = fn (int $key): bool => $key % $total === ($index - 1);
+            $testsToRun = array_values(array_filter($tests, $isInCurrentShard, ARRAY_FILTER_USE_KEY));
         }
 
         self::$shard = [
@@ -146,7 +154,11 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             return $arguments;
         }
 
-        return [...$arguments, '--filter', $this->buildFilterArgument($testsToRun)];
+        $filter = $this->buildFilterArgument($testsToRun);
+
+        $this->ensureFilterLengthIsSafe($filter);
+
+        return [...$arguments, '--filter', $filter];
     }
 
     /**
@@ -187,15 +199,14 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      */
     private function allTests(array $arguments): array
     {
-        $output = (new Process([
-            'php',
-            ...$this->removeParallelArguments($arguments),
-            '--list-tests',
-        ]))->setTimeout(120)->mustRun()->getOutput();
+        $command = $this->buildListTestsCommand(
+            $arguments,
+            TestSuite::getInstance()->testPath,
+        );
 
-        preg_match_all('/ - (?:P\\\\)?(Tests\\\\[^:]+)::/', $output, $matches);
+        $output = new Process($command)->setTimeout(120)->mustRun()->getOutput();
 
-        return array_values(array_unique($matches[1]));
+        return $this->parseListTestsOutput($output);
     }
 
     /**
@@ -204,15 +215,97 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      */
     private function removeParallelArguments(array $arguments): array
     {
-        return array_filter($arguments, fn (string $argument): bool => ! in_array($argument, ['--parallel', '-p'], strict: true));
+        return array_values(array_filter(
+            $arguments,
+            fn (string $argument): bool => ! in_array($argument, ['--parallel', '-p'], strict: true)
+                && ! str_starts_with($argument, '--processes'),
+        ));
+    }
+
+    /**
+     * Builds the subprocess command used to enumerate tests via `--list-tests`.
+     *
+     * @param  list<string>  $arguments
+     * @return list<string>
+     */
+    private function buildListTestsCommand(array $arguments, string $testPath): array
+    {
+        $filtered = $this->removeParallelArguments($arguments);
+
+        return ['php', ...$filtered, '--test-directory='.$testPath, '--list-tests'];
+    }
+
+    /**
+     * Parses `--list-tests` output into a unique list of test class FQCNs.
+     *
+     * @return list<string>
+     */
+    private function parseListTestsOutput(string $output): array
+    {
+        preg_match_all('/ - (?:P\\\\)?([A-Za-z_]\w*(?:\\\\[A-Za-z_]\w*)*)::/', $output, $matches);
+
+        return array_values(array_unique($matches[1]));
     }
 
     /**
      * Builds the filter argument for the given tests to run.
+     *
+     * @param  array<int, string>  $testsToRun
      */
-    private function buildFilterArgument(mixed $testsToRun): string
+    private function buildFilterArgument(array $testsToRun): string
     {
-        return addslashes(implode('|', $testsToRun));
+        if ($testsToRun === []) {
+            return '';
+        }
+
+        /** @var array<string, mixed> $tree */
+        $tree = [];
+        foreach ($testsToRun as $class) {
+            $parts = explode('\\', $class);
+            $current = &$tree;
+            foreach ($parts as $part) {
+                if (! isset($current[$part])) {
+                    $current[$part] = [];
+                }
+                $current = &$current[$part];
+            }
+        }
+
+        $buildRegex = function (array $tree) use (&$buildRegex): string {
+            $parts = [];
+            foreach ($tree as $key => $sub) {
+                $subRegex = $buildRegex($sub);
+                if ($subRegex === '') {
+                    $parts[] = preg_quote($key, '/');
+                } else {
+                    $parts[] = preg_quote($key, '/').'\\\\'.(count($sub) > 1 ? '('.$subRegex.')' : $subRegex);
+                }
+            }
+
+            return implode('|', $parts);
+        };
+
+        return $buildRegex($tree);
+    }
+
+    /**
+     * Ensures that the filter length is safe for the current environment.
+     *
+     * @throws InvalidOption
+     */
+    private function ensureFilterLengthIsSafe(string $filter): void
+    {
+        $maxLength = (int) (getenv('PEST_SHARD_MAX_FILTER_LENGTH') ?: self::MAX_FILTER_LENGTH);
+
+        if (strlen($filter) > $maxLength) {
+            throw new InvalidOption(sprintf(
+                'The generated filter for this shard is too long (%d characters). '.
+                'This can cause issues with some environments (limit is %d characters). '.
+                'Please increase the number of shards (e.g., use 1/4 instead of 1/2) to reduce the filter length.',
+                strlen($filter),
+                $maxLength
+            ));
+        }
     }
 
     /**

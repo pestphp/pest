@@ -45,11 +45,7 @@ final readonly class TestPaths
                         $directories[] = $rel;
                     }
 
-                    $suffix = $directory->suffix();
-
-                    if ($suffix !== '') {
-                        $suffixes[] = str_starts_with($suffix, '.') ? $suffix : '.'.$suffix;
-                    }
+                    $suffixes[] = $directory->suffix();
                 }
 
                 foreach ($suite->files() as $file) {
@@ -63,7 +59,7 @@ final readonly class TestPaths
 
             if ($suffixes === []) {
                 foreach ($configuration->testSuffixes() as $suffix) {
-                    $suffixes[] = str_starts_with($suffix, '.') ? $suffix : '.'.$suffix;
+                    $suffixes[] = $suffix;
                 }
             }
         } catch (Throwable) {
@@ -94,15 +90,7 @@ final readonly class TestPaths
         if (in_array($relativePath, $this->files, true)) {
             return true;
         }
-
-        $matchesSuffix = false;
-        foreach ($this->suffixes as $suffix) {
-            if (str_ends_with($relativePath, $suffix)) {
-                $matchesSuffix = true;
-
-                break;
-            }
-        }
+        $matchesSuffix = array_any($this->suffixes, fn (string $suffix): bool => str_ends_with($relativePath, $suffix));
 
         if (! $matchesSuffix) {
             return false;

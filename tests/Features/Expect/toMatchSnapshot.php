@@ -3,7 +3,7 @@
 use Pest\TestSuite;
 use PHPUnit\Framework\ExpectationFailedException;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->snapshotable = <<<'HTML'
         <div class="container">
             <div class="row">
@@ -15,7 +15,7 @@ beforeEach(function () {
     HTML;
 });
 
-test('pass', function () {
+test('pass', function (): void {
     TestSuite::getInstance()->snapshots->save($this->snapshotable);
 
     expect($this->snapshotable)->toMatchSnapshot();
@@ -33,19 +33,19 @@ expect()->pipe('toMatchSnapshot', function (Closure $next) {
     return $next();
 });
 
-test('pass using pipes', function () {
+test('pass using pipes', function (): void {
     expect('<input type="hidden" name="_token" value="'.random_int(1, 999).'" />')
         ->toMatchSnapshot();
 });
 
-test('pass with `__toString`', function () {
+test('pass with `__toString`', function (): void {
     TestSuite::getInstance()->snapshots->save($this->snapshotable);
 
     $object = new class($this->snapshotable)
     {
         public function __construct(protected string $snapshotable) {}
 
-        public function __toString()
+        public function __toString(): string
         {
             return $this->snapshotable;
         }
@@ -54,14 +54,14 @@ test('pass with `__toString`', function () {
     expect($object)->toMatchSnapshot();
 });
 
-test('pass with `toString`', function () {
+test('pass with `toString`', function (): void {
     TestSuite::getInstance()->snapshots->save($this->snapshotable);
 
     $object = new class($this->snapshotable)
     {
         public function __construct(protected string $snapshotable) {}
 
-        public function toString()
+        public function toString(): string
         {
             return $this->snapshotable;
         }
@@ -70,7 +70,7 @@ test('pass with `toString`', function () {
     expect($object)->toMatchSnapshot();
 });
 
-test('pass with dataset', function ($data) {
+test('pass with dataset', function ($data): void {
     TestSuite::getInstance()->snapshots->save($this->snapshotable);
     [$filename] = TestSuite::getInstance()->snapshots->get();
 
@@ -79,8 +79,8 @@ test('pass with dataset', function ($data) {
         ->and($this->snapshotable)->toMatchSnapshot();
 })->with(['my-datas-set-value']);
 
-describe('within describe', function () {
-    test('pass with dataset', function ($data) {
+describe('within describe', function (): void {
+    test('pass with dataset', function ($data): void {
         TestSuite::getInstance()->snapshots->save($this->snapshotable);
         [$filename] = TestSuite::getInstance()->snapshots->get();
 
@@ -90,14 +90,14 @@ describe('within describe', function () {
     });
 })->with(['my-datas-set-value']);
 
-test('pass with `toArray`', function () {
+test('pass with `toArray`', function (): void {
     TestSuite::getInstance()->snapshots->save(json_encode(['key' => $this->snapshotable], JSON_PRETTY_PRINT));
 
     $object = new class($this->snapshotable)
     {
         public function __construct(protected string $snapshotable) {}
 
-        public function toArray()
+        public function toArray(): array
         {
             return [
                 'key' => $this->snapshotable,
@@ -108,7 +108,7 @@ test('pass with `toArray`', function () {
     expect($object)->toMatchSnapshot();
 });
 
-test('pass with array', function () {
+test('pass with array', function (): void {
     TestSuite::getInstance()->snapshots->save(json_encode(['key' => $this->snapshotable], JSON_PRETTY_PRINT));
 
     expect([
@@ -116,14 +116,14 @@ test('pass with array', function () {
     ])->toMatchSnapshot();
 });
 
-test('pass with `toSnapshot`', function () {
+test('pass with `toSnapshot`', function (): void {
     TestSuite::getInstance()->snapshots->save(json_encode(['key' => $this->snapshotable], JSON_PRETTY_PRINT));
 
     $object = new class($this->snapshotable)
     {
         public function __construct(protected string $snapshotable) {}
 
-        public function toSnapshot()
+        public function toSnapshot(): string|false
         {
             return json_encode([
                 'key' => $this->snapshotable,
@@ -134,34 +134,30 @@ test('pass with `toSnapshot`', function () {
     expect($object)->toMatchSnapshot();
 });
 
-test('not failures', function () {
+test('not failures', function (): void {
     TestSuite::getInstance()->snapshots->save($this->snapshotable);
 
     expect($this->snapshotable)->not->toMatchSnapshot();
 })->throws(ExpectationFailedException::class);
 
-test('multiple snapshot expectations', function () {
-    expect('foo bar 1')->toMatchSnapshot();
-
-    expect('foo bar 2')->toMatchSnapshot();
+test('multiple snapshot expectations', function (): void {
+    expect('foo bar 1')->toMatchSnapshot()
+        ->and('foo bar 2')->toMatchSnapshot();
 });
 
-test('multiple snapshot expectations with datasets', function () {
-    expect('foo bar 1')->toMatchSnapshot();
-
-    expect('foo bar 2')->toMatchSnapshot();
+test('multiple snapshot expectations with datasets', function (): void {
+    expect('foo bar 1')->toMatchSnapshot()
+        ->and('foo bar 2')->toMatchSnapshot();
 })->with([1, 'foo', 'bar', 'baz']);
 
-describe('describable', function () {
-    test('multiple snapshot expectations with describe', function () {
-        expect('foo bar 1')->toMatchSnapshot();
-
-        expect('foo bar 2')->toMatchSnapshot();
+describe('describable', function (): void {
+    test('multiple snapshot expectations with describe', function (): void {
+        expect('foo bar 1')->toMatchSnapshot()
+            ->and('foo bar 2')->toMatchSnapshot();
     });
 });
 
-test('multiple snapshot expectations with repeat', function () {
-    expect('foo bar 1')->toMatchSnapshot();
-
-    expect('foo bar 2')->toMatchSnapshot();
+test('multiple snapshot expectations with repeat', function (): void {
+    expect('foo bar 1')->toMatchSnapshot()
+        ->and('foo bar 2')->toMatchSnapshot();
 })->repeat(10);

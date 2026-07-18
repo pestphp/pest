@@ -149,6 +149,13 @@ final class Graph
      */
     private function applyMigrationChanges(array $migrationPaths, array &$affectedSet): array
     {
+        // With no recorded table usage at all, table intersection can never
+        // select anything — route every migration change through the
+        // watch-pattern fallback instead of silently skipping tests.
+        if ($this->testTables === []) {
+            return $migrationPaths;
+        }
+
         $changedTables = [];
         $unparseable = [];
 
@@ -446,13 +453,14 @@ final class Graph
 
             $bladeAffected = $this->affectedByStaticBladeUsage($rel);
 
+            // Only a walk that actually selected tests counts as handled — a
+            // component whose usage the static walk missed must still reach
+            // the watch-pattern fallback instead of being silently swallowed.
             if ($bladeAffected !== []) {
                 foreach ($bladeAffected as $testFile) {
                     $affectedSet[$testFile] = true;
                 }
 
-                $staticallyHandled[$rel] = true;
-            } elseif ($this->isBladeComponentPath($rel)) {
                 $staticallyHandled[$rel] = true;
             }
         }
@@ -690,8 +698,16 @@ final class Graph
 
     private function shouldRerun(int $status): bool
     {
-        $testStatus = TestStatus::from($status);
+        return $this->shouldRerunStatus(TestStatus::from($status));
+    }
 
+    /**
+     * Whether a cached result with this status must be re-executed rather
+     * than replayed, honouring the configured failOn* / displayDetailsOn*
+     * policies.
+     */
+    public function shouldRerunStatus(TestStatus $testStatus): bool
+    {
         if ($testStatus->isFailure() || $testStatus->isError()) {
             return true;
         }
@@ -810,6 +826,38 @@ final class Graph
             }
 
             $this->edges[$testRel] = array_values(array_unique($this->edges[$testRel]));
+        }
+    }
+
+    /**
+     * Mark test files that executed under a recorded coverage session as "known",
+     * seeding an empty edge set for any that produced zero project-source edges.
+     *
+     * Without this, a test that covers no application source (e.g. a pure unit
+     * test asserting on language primitives) never becomes an edge key, so
+     * {@see self::knowsTest()} reports it as unknown and it re-runs on every TIA
+     * run. Recording it with an empty edge set lets it be replayed/skipped while
+     * unchanged; it is still re-run whenever its own file changes, via
+     * {@see self::applyTestFileChanges()}.
+     *
+     * Must only be called from the recording path, where coverage was actually
+     * collected — otherwise a missing edge set could mean "coverage was off",
+     * not "genuinely covered nothing".
+     *
+     * @param  array<int, string>  $testFiles  Absolute or project-relative test file paths.
+     */
+    public function markKnownTestFiles(array $testFiles): void
+    {
+        foreach ($testFiles as $testFile) {
+            $rel = $this->relative($testFile);
+
+            if ($rel === null) {
+                continue;
+            }
+
+            if (! isset($this->edges[$rel])) {
+                $this->edges[$rel] = [];
+            }
         }
     }
 
@@ -1217,7 +1265,21 @@ final class Graph
         $tail = substr($tail, 0, -strlen('.blade.php'));
         $name = str_replace('/', '.', $tail);
 
-        return $name === '' ? [] : [$name, str_replace('_', '-', $name)];
+        if ($name === '') {
+            return [];
+        }
+
+        $names = [$name, str_replace('_', '-', $name)];
+
+        // Anonymous index components: components/card/index.blade.php resolves as <x-card>.
+        if (str_ends_with($name, '.index') && $name !== '.index') {
+            $base = substr($name, 0, -strlen('.index'));
+
+            $names[] = $base;
+            $names[] = str_replace('_', '-', $base);
+        }
+
+        return array_values(array_unique($names));
     }
 
     /** @return list<string> */
@@ -1289,13 +1351,7 @@ final class Graph
     /** @param  array<string, array<int, string>>  $edges */
     private function anyTestUses(array $edges, string $component): bool
     {
-        foreach ($edges as $components) {
-            if (in_array($component, $components, true)) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($edges, fn (array $components): bool => in_array($component, $components, true));
     }
 
     public function pruneMissingTests(): void

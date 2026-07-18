@@ -1,5 +1,5 @@
 
-  Pest Testing Framework 4.7.5.  
+  Pest Testing Framework 5.0.0-beta.1.  
 
   USAGE: pest <file> [options]  
 
@@ -15,6 +15,7 @@
   --cache-directory [dir] ............................ Specify cache directory  
   --generate-configuration  Generate configuration file with suggested settings  
   --migrate-configuration ....... Migrate configuration file to current format  
+  --validate-configuration ................... Validate XML configuration file  
   --generate-baseline [file] .................... Generate baseline for issues  
   --use-baseline [file] ........................ Use baseline to ignore issues  
   --ignore-baseline ..................... Do not use baseline to ignore issues  
@@ -40,11 +41,15 @@
   --uses [name] ..................... Only run tests that intend to use [name]  
   --requires-php-extension [name]  Only run tests that require PHP extension [name]  
   --list-test-files ................................ List available test files  
+  --list-test-ids ........................... List available tests as test IDs  
   --list-tests .......................................... List available tests  
   --list-tests-xml [file] ................. List available tests in XML format  
   --filter [pattern] ............................... Filter which tests to run  
   --exclude-filter [pattern] .. Exclude tests for the specified filter pattern  
   --test-suffix [suffixes]  Only search for test in files with specified suffix(es). Default: Test.php,.phpt  
+  --test-files-file [file]  Only run test files listed in file (one file by line)  
+  --run-test-id [test-id]  Only run the test identified by the specified test ID  
+  --test-id-filter-file [file]  Only run tests listed by test ID in file (one test ID per line)  
 
   EXECUTION OPTIONS:
   --parallel ........................................... Run tests in parallel  
@@ -53,20 +58,21 @@
   --globals-backup ................. Backup and restore $GLOBALS for each test  
   --static-backup ......... Backup and restore static properties for each test  
   --strict-coverage ................... Be strict about code coverage metadata  
+  --require-coverage-contribution  Be strict about tests that do not contribute to code coverage  
   --strict-global-state .............. Be strict about changes to global state  
   --disallow-test-output ................. Be strict about output during tests  
   --enforce-time-limit ................. Enforce time limit based on test size  
   --default-time-limit [sec]  Timeout in seconds for tests that have no declared size  
   --do-not-report-useless-tests  Do not report tests that do not test anything  
-  --stop-on-defect ... Stop after first error, failure, warning, or risky test  
-  --stop-on-error ..................................... Stop after first error  
-  --stop-on-failure ................................. Stop after first failure  
-  --stop-on-warning ................................. Stop after first warning  
-  --stop-on-risky ................................ Stop after first risky test  
-  --stop-on-deprecation ... Stop after first test that triggered a deprecation  
-  --stop-on-notice ............. Stop after first test that triggered a notice  
-  --stop-on-skipped ............................ Stop after first skipped test  
-  --stop-on-incomplete ...................... Stop after first incomplete test  
+  --stop-on-defect[=[n]]  Stop after first (or n-th) error, failure, warning, or risky test  
+  --stop-on-error[=[n]] ..................... Stop after first (or n-th) error  
+  --stop-on-failure[=[n]] ................. Stop after first (or n-th) failure  
+  --stop-on-warning[=[n]] ................. Stop after first (or n-th) warning  
+  --stop-on-risky[=[n]] ................ Stop after first (or n-th) risky test  
+  --stop-on-deprecation[=[n]]  Stop after first (or n-th) test that triggered a deprecation  
+  --stop-on-notice[=[n]]  Stop after first (or n-th) test that triggered a notice  
+  --stop-on-skipped[=[n]] ............ Stop after first (or n-th) skipped test  
+  --stop-on-incomplete[=[n]] ...... Stop after first (or n-th) incomplete test  
   --fail-on-empty-test-suite  Signal failure using shell exit code when no tests were run  
   --fail-on-warning  Signal failure using shell exit code when a warning was triggered  
   --fail-on-risky  Signal failure using shell exit code when a test was considered risky  
@@ -90,7 +96,7 @@
   --do-not-fail-on-incomplete  Do not signal failure using shell exit code when a test was marked incomplete  
   --cache-result ............................ Write test results to cache file  
   --do-not-cache-result .............. Do not write test results to cache file  
-  --order-by [order]  Run tests in order: default|defects|depends|duration|no-depends|random|reverse|size  
+  --order-by [order]  Run tests in order: default|defects|depends|duration-ascending|duration-descending|no-depends|random|reverse|size-ascending|size-descending  
   --resolve-dependencies ...................... Alias for "--order-by depends"  
   --ignore-dependencies .................... Alias for "--order-by no-depends"  
   --random-order ............................... Alias for "--order-by random"  
@@ -101,6 +107,7 @@
   --colors=[flag] ......... Use colors in output ("never", "auto" or "always")  
   --columns [n] ................. Number of columns to use for progress output  
   --columns max ............ Use maximum number of columns for progress output  
+  --diff-context [n]  Number of context lines shown around changes in diffs (default: 3)  
   --stderr ................................. Write to STDERR instead of STDOUT  
   --no-progress .................... Disable output of test execution progress  
   --no-results ................................ Disable output of test results  
@@ -115,6 +122,7 @@
   --display-warnings ......... Display details for warnings triggered by tests  
   --display-all-issues ..... Display details for all issues that are triggered  
   --reverse-list .............................. Print defects in reverse order  
+  --compact ... Replace default progress and result output with compact format  
   --teamcity . Replace default progress and result output with TeamCity format  
   --testdox ................ Replace default result output with TestDox format  
   --testdox-summary  Repeat TestDox output for tests with errors, failures, or issues  
@@ -125,12 +133,12 @@
   LOGGING OPTIONS:
   --log-junit [file] .......... Write test results in JUnit XML format to file  
   --log-otr [file]  Write test results in Open Test Reporting XML format to file  
-  --include-git-information  Include Git information in Open Test Reporting XML logfile  
   --log-teamcity [file] ........ Write test results in TeamCity format to file  
   --testdox-html [file] .. Write test results in TestDox format (HTML) to file  
   --testdox-text [file]  Write test results in TestDox format (plain text) to file  
   --log-events-text [file] ............... Stream events as plain text to file  
   --log-events-verbose-text [file]  Stream events as plain text with extended information to file  
+  --include-git-information ..... Include Git information in supported formats  
   --no-logging ....... Ignore logging configured in the XML configuration file  
 
   CODE COVERAGE OPTIONS:
@@ -153,8 +161,10 @@
   --exclude-source-from-xml-coverage  Exclude [source] element from code coverage report in XML format  
   --warm-coverage-cache ........................... Warm static analysis cache  
   --coverage-filter [dir] ........... Include [dir] in code coverage reporting  
-  --path-coverage .......... Report path coverage in addition to line coverage  
+  --branch-coverage ...... Report branch coverage in addition to line coverage  
+  --path-coverage ... Report path coverage in addition to line/branch coverage  
   --disable-coverage-ignore ...... Disable metadata for ignoring code coverage  
+  --disable-coverage-targeting .. Disable metadata for code coverage targeting  
   --no-coverage  Ignore code coverage reporting configured in the XML configuration file  
 
   AI OPTIONS:

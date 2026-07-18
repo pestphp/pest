@@ -1,21 +1,23 @@
 <?php
 
 use Pest\Arch\Exceptions\ArchExpectationFailedException;
+use Tests\Fixtures\Arch\ToUseStrictEquality\NotStrictEquality;
+use Tests\Fixtures\Arch\ToUseStrictEquality\StrictEquality;
 
 test('missing strict equality')
     ->throws(ArchExpectationFailedException::class)
-    ->expect('Tests\\Fixtures\\Arch\\ToUseStrictEquality\\NotStrictEquality')
+    ->expect(NotStrictEquality::class)
     ->toUseStrictEquality();
 
 test('has strict equality')
-    ->expect('Tests\\Fixtures\\Arch\\ToUseStrictEquality\\StrictEquality')
+    ->expect(StrictEquality::class)
     ->toUseStrictEquality();
 
 test('opposite missing strict equality')
     ->throws(ArchExpectationFailedException::class)
-    ->expect('Tests\\Fixtures\\Arch\\ToUseStrictEquality\\StrictEquality')
+    ->expect(StrictEquality::class)
     ->not->toUseStrictEquality();
 
 test('opposite has strict equality')
-    ->expect('Tests\\Fixtures\\Arch\\ToUseStrictEquality\\NotStrictEquality')
+    ->expect(NotStrictEquality::class)
     ->not->toUseStrictEquality();

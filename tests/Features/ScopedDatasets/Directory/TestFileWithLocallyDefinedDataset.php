@@ -6,11 +6,11 @@ dataset('numbers.array', [
 
 $state = new stdClass;
 $state->text = '';
-test('uses dataset', function ($value) use ($state) {
+test('uses dataset', function ($value) use ($state): void {
     $state->text .= $value;
-    expect(true)->toBe(true);
+    expect(true)->toBeTrue();
 })->with('numbers.array');
 
-test('the right dataset is taken', function () use ($state) {
+test('the right dataset is taken', function () use ($state): void {
     expect($state->text)->toBe('12345ScopedDatasets/ScopedDatasets.php');
 });

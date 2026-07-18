@@ -9,7 +9,7 @@ function normalize_windows_os_output(string $text): string
     return str_replace('\\', '/', $text);
 }
 
-test('visual snapshot of team city', function (string $testFile) {
+test('visual snapshot of team city', function (string $testFile): void {
     $testsPath = dirname(__DIR__)."/.tests/$testFile";
 
     $snapshot = implode(DIRECTORY_SEPARATOR, [
@@ -18,7 +18,7 @@ test('visual snapshot of team city', function (string $testFile) {
         "$testFile.inc",
     ]);
 
-    $output = function () use ($testsPath) {
+    $output = function () use ($testsPath): string {
         $process = (new Process(
             ['php', 'bin/pest', '--teamcity', $testsPath],
             dirname(__DIR__, levels: 2),
@@ -28,6 +28,7 @@ test('visual snapshot of team city', function (string $testFile) {
                 'PARATEST' => 0,
                 'COLLISION_IGNORE_DURATION' => 'true',
                 'FLOW_ID' => '1234',
+                'PAO_DISABLE' => '1',
             ],
         ));
 

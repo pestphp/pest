@@ -1,23 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 use PHPUnit\Framework\ExpectationFailedException;
 
-test('pass', function () {
-    expect('abc')->toBeKebabCase();
-    expect('abc-def')->toBeKebabCase();
-    expect('abc_def')->not->toBeKebabCase();
-    expect('abcDef')->not->toBeKebabCase();
-    expect('AbcDef')->not->toBeKebabCase();
+test('pass', function (): void {
+    expect('abc')->toBeKebabCase()
+        ->and('abc-def')->toBeKebabCase()
+        ->and('abc_def')->not->toBeKebabCase()
+        ->and('abcDef')->not->toBeKebabCase()
+        ->and('AbcDef')->not->toBeKebabCase();
 });
 
-test('failures', function () {
+test('failures', function (): void {
     expect('Abc')->toBeKebabCase();
 })->throws(ExpectationFailedException::class);
 
-test('failures with custom message', function () {
+test('failures with custom message', function (): void {
     expect('Abc')->toBeKebabCase('oh no!');
 })->throws(ExpectationFailedException::class, 'oh no!');
 
-test('not failures', function () {
+test('not failures', function (): void {
     expect('abc-def')->not->toBeKebabCase();
 })->throws(ExpectationFailedException::class);

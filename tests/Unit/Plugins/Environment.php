@@ -2,7 +2,7 @@
 
 use Pest\Plugins\Environment;
 
-test('environment is set to CI when --ci option is used', function () {
+test('environment is set to CI when --ci option is used', function (): void {
     $previousName = Environment::name();
 
     $plugin = new Environment;
@@ -14,7 +14,7 @@ test('environment is set to CI when --ci option is used', function () {
     Environment::name($previousName);
 });
 
-test('environment is set to Local when --ci option is not used', function () {
+test('environment is set to Local when --ci option is not used', function (): void {
     $plugin = new Environment;
 
     $plugin->handleArguments(['foo', 'bar', 'baz']);

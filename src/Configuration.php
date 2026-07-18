@@ -33,7 +33,7 @@ final readonly class Configuration
      */
     public function in(string ...$targets): UsesCall
     {
-        return (new UsesCall($this->filename, []))->in(...$targets);
+        return new UsesCall($this->filename, [])->in(...$targets);
     }
 
     /**
@@ -60,7 +60,7 @@ final readonly class Configuration
      */
     public function group(string ...$groups): UsesCall
     {
-        return (new UsesCall($this->filename, []))->group(...$groups);
+        return new UsesCall($this->filename, [])->group(...$groups);
     }
 
     /**
@@ -68,7 +68,7 @@ final readonly class Configuration
      */
     public function only(): void
     {
-        (new BeforeEachCall(TestSuite::getInstance(), $this->filename))->only();
+        new BeforeEachCall(TestSuite::getInstance(), $this->filename)->only();
     }
 
     /**
@@ -117,6 +117,14 @@ final readonly class Configuration
     public function browser(): Browser\Configuration
     {
         return new Browser\Configuration;
+    }
+
+    /**
+     * Gets the evals configuration.
+     */
+    public function evals(): Evals\Configuration // @phpstan-ignore-line
+    {
+        return new Evals\Configuration; // @phpstan-ignore-line
     }
 
     /**

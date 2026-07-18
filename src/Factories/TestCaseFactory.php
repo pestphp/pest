@@ -161,6 +161,7 @@ final class TestCaseFactory
             $classCode = <<<PHP
             namespace $namespace;
 
+            use Pest\Exceptions\DatasetProviderError as __PestDatasetProviderError;
             use Pest\Repositories\DatasetsRepository as __PestDatasets;
             use Pest\TestSuite as __PestTestSuite;
 
@@ -200,7 +201,7 @@ final class TestCaseFactory
 
         if (
             $method->closure instanceof \Closure &&
-            (new \ReflectionFunction($method->closure))->isStatic()
+            new \ReflectionFunction($method->closure)->isStatic()
         ) {
 
             throw new TestClosureMustNotBeStatic($method);

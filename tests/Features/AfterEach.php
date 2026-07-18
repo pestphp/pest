@@ -2,99 +2,99 @@
 
 $state = new stdClass;
 
-beforeEach(function () use ($state) {
+beforeEach(function () use ($state): void {
     $this->state = $state;
 });
 
-afterEach(function () {
+afterEach(function (): void {
     $this->state->bar = 1;
 });
 
-afterEach(function () {
+afterEach(function (): void {
     unset($this->state->bar);
 });
 
-it('does not get executed before the test', function () {
+it('does not get executed before the test', function (): void {
     expect($this->state)->not->toHaveProperty('bar');
 });
 
-it('gets executed after the test', function () {
-    expect($this->state)->toHaveProperty('bar');
-    expect($this->state->bar)->toBe(2);
+it('gets executed after the test', function (): void {
+    expect($this->state)->toHaveProperty('bar')
+        ->and($this->state->bar)->toBe(2);
 });
 
-afterEach(function () {
+afterEach(function (): void {
     $this->state->bar = 2;
 });
 
-describe('outer', function () {
-    afterEach(function () {
+describe('outer', function (): void {
+    afterEach(function (): void {
         $this->state->bar++;
     });
 
-    describe('inner', function () {
-        afterEach(function () {
+    describe('inner', function (): void {
+        afterEach(function (): void {
             $this->state->bar++;
         });
 
-        it('does not get executed before the test', function () {
-            expect($this->state)->toHaveProperty('bar');
-            expect($this->state->bar)->toBe(2);
+        it('does not get executed before the test', function (): void {
+            expect($this->state)->toHaveProperty('bar')
+                ->and($this->state->bar)->toBe(2);
         });
 
-        it('should call all parent afterEach functions', function () {
-            expect($this->state)->toHaveProperty('bar');
-            expect($this->state->bar)->toBe(4);
+        it('should call all parent afterEach functions', function (): void {
+            expect($this->state)->toHaveProperty('bar')
+                ->and($this->state->bar)->toBe(4);
         });
     });
 });
 
-describe('matching describe block names', function () {
-    afterEach(function () {
+describe('matching describe block names', function (): void {
+    afterEach(function (): void {
         $this->state->foo = 1;
     });
 
-    describe('outer', function () {
-        afterEach(function () {
+    describe('outer', function (): void {
+        afterEach(function (): void {
             $this->state->foo++;
         });
 
-        describe('middle', function () {
-            afterEach(function () {
+        describe('middle', function (): void {
+            afterEach(function (): void {
                 $this->state->foo++;
             });
 
-            describe('inner', function () {
-                afterEach(function () {
+            describe('inner', function (): void {
+                afterEach(function (): void {
                     $this->state->foo++;
                 });
 
-                it('does not get executed before the test', function () {
+                it('does not get executed before the test', function (): void {
                     expect($this)->not->toHaveProperty('foo');
                 });
 
-                it('should call all parent afterEach functions', function () {
+                it('should call all parent afterEach functions', function (): void {
                     expect($this->state->foo)->toBe(4);
                 });
             });
         });
 
-        describe('middle', function () {
-            it('does not get executed before the test', function () {
+        describe('middle', function (): void {
+            it('does not get executed before the test', function (): void {
                 expect($this)->not->toHaveProperty('foo');
             });
 
-            it('should not call afterEach functions for sibling describe blocks with the same name', function () {
+            it('should not call afterEach functions for sibling describe blocks with the same name', function (): void {
                 expect($this)->not->toHaveProperty('foo');
             });
         });
 
-        describe('inner', function () {
-            it('does not get executed before the test', function () {
+        describe('inner', function (): void {
+            it('does not get executed before the test', function (): void {
                 expect($this)->not->toHaveProperty('foo');
             });
 
-            it('should not call afterEach functions for descendent of sibling describe blocks with the same name', function () {
+            it('should not call afterEach functions for descendent of sibling describe blocks with the same name', function (): void {
                 expect($this)->not->toHaveProperty('foo');
             });
         });

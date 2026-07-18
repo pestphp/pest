@@ -7,6 +7,7 @@ namespace Pest\Plugins\Parallel\Support;
 use NunoMaduro\Collision\Adapters\Phpunit\State;
 use NunoMaduro\Collision\Adapters\Phpunit\Style;
 use ParaTest\Options;
+use PHPUnit\Event\Telemetry\CpuTime;
 use PHPUnit\Event\Telemetry\GarbageCollectorStatus;
 use PHPUnit\Event\Telemetry\HRTime;
 use PHPUnit\Event\Telemetry\Info;
@@ -147,11 +148,20 @@ final class CompactPrinter
                 MemoryUsage::fromBytes(0),
                 MemoryUsage::fromBytes(0),
                 $garbageCollectorStatus,
+                CpuTime::fromSecondsAndNanoseconds(0, 0),
+                CpuTime::fromSecondsAndNanoseconds(0, 0),
+                CpuTime::fromSecondsAndNanoseconds(0, 0),
             ),
             $telemetryDuration,
             MemoryUsage::fromBytes(0),
             \PHPUnit\Event\Telemetry\Duration::fromSecondsAndNanoseconds(0, 0),
             MemoryUsage::fromBytes(0),
+            CpuTime::fromSecondsAndNanoseconds(0, 0),
+            CpuTime::fromSecondsAndNanoseconds(0, 0),
+            CpuTime::fromSecondsAndNanoseconds(0, 0),
+            CpuTime::fromSecondsAndNanoseconds(0, 0),
+            CpuTime::fromSecondsAndNanoseconds(0, 0),
+            CpuTime::fromSecondsAndNanoseconds(0, 0),
         );
 
         $this->style->writeRecap($state, $telemetry, $testResult);

@@ -21,7 +21,7 @@ trait SecondPluginTrait
 Plugin::uses(PluginTrait::class);
 Plugin::uses(SecondPluginTrait::class);
 
-function _assertThat()
+function _assertThat(): void
 {
     expect(true)->toBeTrue();
 }

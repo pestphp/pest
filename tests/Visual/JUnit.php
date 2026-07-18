@@ -8,7 +8,7 @@ $run = function () {
     $process = new Process(
         array_merge(['php', 'bin/pest', '--log-junit', $junitLogFile], func_get_args()),
         dirname(__DIR__, 2),
-        ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true'],
+        ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
     );
 
     $process->run();
@@ -26,11 +26,9 @@ $run = function () {
     }
 };
 
-$normalizedPath = function (string $path) {
-    return str_replace('/', DIRECTORY_SEPARATOR, $path);
-};
+$normalizedPath = (fn (string $path): string => str_replace('/', DIRECTORY_SEPARATOR, $path));
 
-test('junit output', function () use ($normalizedPath, $run) {
+test('junit output', function () use ($normalizedPath, $run): void {
     $result = $run('tests/.tests/SuccessOnly.php');
 
     expect($result['testsuite']['@attributes'])
@@ -40,21 +38,12 @@ test('junit output', function () use ($normalizedPath, $run) {
         ->assertions->toBe('4')
         ->errors->toBe('0')
         ->failures->toBe('0')
-        ->skipped->toBe('0');
-
-    expect($result['testsuite']['testcase'])
-        ->toHaveCount(2);
-
-    expect($result['testsuite']['testcase'][0]['@attributes'])
-        ->name->toBe('it can pass with comparison')
-        ->file->toBe($normalizedPath('tests/.tests/SuccessOnly.php::it can pass with comparison'))
-        ->class->toBe('Tests\tests\SuccessOnly')
-        ->classname->toBe('Tests.tests.SuccessOnly')
-        ->assertions->toBe('1')
-        ->time->toStartWith('0.0');
+        ->skipped->toBe('0')
+        ->and($result['testsuite']['testcase'])->toHaveCount(2)
+        ->and($result['testsuite']['testcase'][0]['@attributes'])->name->toBe('it can pass with comparison')->file->toBe($normalizedPath('tests/.tests/SuccessOnly.php::it can pass with comparison'))->class->toBe('Tests\tests\SuccessOnly')->classname->toBe('Tests.tests.SuccessOnly')->assertions->toBe('1')->time->toStartWith('0.0');
 });
 
-test('junit with parallel', function () use ($normalizedPath, $run) {
+test('junit with parallel', function () use ($normalizedPath, $run): void {
     $result = $run('tests/.tests/SuccessOnly.php', '--parallel', '--processes=1', '--filter', 'can pass with comparison');
 
     expect($result['testsuite']['@attributes'])
@@ -64,13 +53,6 @@ test('junit with parallel', function () use ($normalizedPath, $run) {
         ->assertions->toBe('1')
         ->errors->toBe('0')
         ->failures->toBe('0')
-        ->skipped->toBe('0');
-
-    expect($result['testsuite']['testcase']['@attributes'])
-        ->name->toBe('it can pass with comparison')
-        ->file->toBe($normalizedPath('tests/.tests/SuccessOnly.php::it can pass with comparison'))
-        ->class->toBe('Tests\tests\SuccessOnly')
-        ->classname->toBe('Tests.tests.SuccessOnly')
-        ->assertions->toBe('1')
-        ->time->toStartWith('0.0');
+        ->skipped->toBe('0')
+        ->and($result['testsuite']['testcase']['@attributes'])->name->toBe('it can pass with comparison')->file->toBe($normalizedPath('tests/.tests/SuccessOnly.php::it can pass with comparison'))->class->toBe('Tests\tests\SuccessOnly')->classname->toBe('Tests.tests.SuccessOnly')->assertions->toBe('1')->time->toStartWith('0.0');
 });

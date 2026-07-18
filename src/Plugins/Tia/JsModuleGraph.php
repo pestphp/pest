@@ -163,7 +163,9 @@ final class JsModuleGraph
             return null;
         }
 
-        if (! is_dir($projectRoot.DIRECTORY_SEPARATOR.'node_modules'.DIRECTORY_SEPARATOR.'vite')) {
+        $nodeModules = $projectRoot.DIRECTORY_SEPARATOR.'node_modules';
+
+        if (! is_dir($nodeModules.DIRECTORY_SEPARATOR.'vite') && ! is_dir($nodeModules.DIRECTORY_SEPARATOR.'rolldown')) {
             return null;
         }
 
@@ -386,12 +388,6 @@ final class JsModuleGraph
 
     private static function hasViteConfig(string $projectRoot): bool
     {
-        foreach (self::VITE_CONFIG_NAMES as $name) {
-            if (is_file($projectRoot.DIRECTORY_SEPARATOR.$name)) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any(self::VITE_CONFIG_NAMES, fn (string $name): bool => is_file($projectRoot.DIRECTORY_SEPARATOR.$name));
     }
 }

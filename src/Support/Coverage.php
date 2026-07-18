@@ -9,6 +9,7 @@ use Pest\Plugins\Tia\CoverageMerger;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\Node\Directory;
 use SebastianBergmann\CodeCoverage\Node\File;
+use SebastianBergmann\CodeCoverage\Report\Facade;
 use SebastianBergmann\Environment\Runtime;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -103,10 +104,18 @@ final class Coverage
      */
     public static function render(CodeCoverage $codeCoverage, OutputInterface $output, bool $compact = false, bool $showOnlyCovered = false): float
     {
-        $totalCoverage = $codeCoverage->getReport()->percentageOfExecutedLines();
+        // @phpstan-ignore-next-line
+        if (is_array($codeCoverage)) {
+            $facade = Facade::fromSerializedData($codeCoverage);
 
-        /** @var Directory<File|Directory> $report */
-        $report = $codeCoverage->getReport();
+            /** @var Directory<File|Directory> $report */
+            $report = (fn (): Directory => $this->report)->call($facade);
+        } else {
+            /** @var Directory<File|Directory> $report */
+            $report = $codeCoverage->getReport();
+        }
+
+        $totalCoverage = $report->percentageOfExecutedLines();
 
         foreach ($report->getIterator() as $file) {
             if (! $file instanceof File) {

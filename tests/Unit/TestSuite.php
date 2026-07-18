@@ -6,7 +6,7 @@ use Pest\Exceptions\TestClosureMustNotBeStatic;
 use Pest\Factories\TestCaseMethodFactory;
 use Pest\TestSuite;
 
-it('does not allow to add the same test description twice', function () {
+it('does not allow to add the same test description twice', function (): void {
     $testSuite = new TestSuite(getcwd(), 'tests');
     $method = new TestCaseMethodFactory('foo', null);
     $method->description = 'bar';
@@ -18,10 +18,10 @@ it('does not allow to add the same test description twice', function () {
     sprintf('A test with the description `%s` already exists in the filename `%s`.', 'bar', 'foo'),
 );
 
-it('does not allow static closures', function () {
+it('does not allow static closures', function (): void {
     $testSuite = new TestSuite(getcwd(), 'tests');
 
-    $method = new TestCaseMethodFactory('foo', static function () {});
+    $method = new TestCaseMethodFactory('foo', static function (): void {});
     $method->description = 'bar';
 
     $testSuite->tests->set($method);
@@ -30,10 +30,10 @@ it('does not allow static closures', function () {
     'Test closure must not be static. Please remove the [static] keyword from the [bar] method in [foo].',
 );
 
-it('alerts users about tests with arguments but no input', function () {
+it('alerts users about tests with arguments but no input', function (): void {
     $testSuite = new TestSuite(getcwd(), 'tests');
 
-    $method = new TestCaseMethodFactory('foo', function (int $arg) {});
+    $method = new TestCaseMethodFactory('foo', function (int $arg): void {});
 
     $method->description = 'bar';
 
@@ -43,7 +43,7 @@ it('alerts users about tests with arguments but no input', function () {
     sprintf('A test with the description [%s] has [%d] argument(s) ([%s]) and no dataset(s) provided in [%s]', 'bar', 1, 'int $arg', 'foo'),
 );
 
-it('can return an array of all test suite filenames', function () {
+it('can return an array of all test suite filenames', function (): void {
     $testSuite = new TestSuite(getcwd(), 'tests');
 
     $method = new TestCaseMethodFactory('a', null);

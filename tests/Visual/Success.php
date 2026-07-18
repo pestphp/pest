@@ -2,7 +2,7 @@
 
 use Symfony\Component\Process\Process;
 
-test('visual snapshot of test suite on success', function () {
+test('visual snapshot of test suite on success', function (): void {
     $testsPath = dirname(__DIR__);
     $snapshot = implode(DIRECTORY_SEPARATOR, [
         $testsPath,
@@ -10,11 +10,11 @@ test('visual snapshot of test suite on success', function () {
         'success.txt',
     ]);
 
-    $output = function () use ($testsPath) {
+    $output = function () use ($testsPath): ?string {
         $process = (new Process(
-            ['php', '-d', 'memory_limit=256M', 'bin/pest'],
+            ['php', '-d', 'memory_limit=-1', 'bin/pest'],
             dirname($testsPath),
-            ['EXCLUDE' => 'integration', '--exclude-group' => 'integration', 'REBUILD_SNAPSHOTS' => false, 'PARATEST' => 0, 'COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true'],
+            ['EXCLUDE' => 'integration', '--exclude-group' => 'integration', 'REBUILD_SNAPSHOTS' => false, 'PARATEST' => 0, 'COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
         ));
 
         $process->run();
@@ -31,14 +31,14 @@ test('visual snapshot of test suite on success', function () {
     };
 
     if (getenv('REBUILD_SNAPSHOTS')) {
-        $outputContent = explode("\n", $output());
+        $outputContent = explode("\n", (string) $output());
         array_pop($outputContent);
         array_pop($outputContent);
         array_pop($outputContent);
 
         file_put_contents($snapshot, implode("\n", $outputContent));
     } elseif (! getenv('EXCLUDE')) {
-        $output = explode("\n", $output());
+        $output = explode("\n", (string) $output());
         array_pop($output);
         array_pop($output);
 

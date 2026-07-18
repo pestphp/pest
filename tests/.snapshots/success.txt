@@ -140,6 +140,11 @@
   ✓ describe()->with() preserves depends → first with (9)
   ✓ describe()->with() preserves depends → second with (9)
 
+   PASS  Tests\Features\DatasetProviderErrors
+  ✓ reports missing datasets as errors for a single file run
+  ✓ reports missing datasets as errors alongside passing tests
+  ✓ reports dataset closure exceptions as errors
+
    PASS  Tests\Features\DatasetsTests - 1 todo
   ✓ it throws exception if dataset does not exist
   ✓ it throws exception if dataset already exist
@@ -297,8 +302,8 @@
   ✓ it uses correct parent class
 
    DEPR  Tests\Features\Deprecated
-  ! deprecated → str_contains(): Passing null to parameter #1 ($haystack) of type string is deprecated // tests/Features/Deprecated.php:4
-  ! user deprecated → Since foo 1.0: This is a deprecation description // tests/Features/Deprecated.php:10
+  ✓ deprecated
+  ! user deprecated → Since foo 1.0: This is a deprecation description // tests/Features/Deprecated.php:12
 
    PASS  Tests\Features\Describe - 5 todos
   ✓ before each
@@ -521,6 +526,13 @@
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeEmail
+  ✓ pass
+  ✓ failures
+  ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeEmpty
@@ -756,6 +768,13 @@
   ✓ passes as not truthy with ('0')
   ✓ failures
   ✓ failures with custom message
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeUlid
+  ✓ failures with wrong type
+  ✓ pass
+  ✓ failures
+  ✓ failures with message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeUppercase
@@ -1264,8 +1283,8 @@
   // This is another runtime note
 
    NOTI  Tests\Features\Notices
-  ! notice → This is a notice description // tests/Features/Notices.php:4
-  ! a "describe" group of tests → notice → This is a notice description // tests/Features/Notices.php:11
+  ! notice → This is a notice description // tests/Features/Notices.php:6
+  ! a "describe" group of tests → notice → This is a notice description // tests/Features/Notices.php:13
 
    PASS  Tests\Features\Pr
   ✓ it may be associated with an pr #1, #2
@@ -1725,6 +1744,8 @@
    PASS  Tests\Unit\Expectations\OppositeExpectation
   ✓ it throw expectation failed exception with string argument
   ✓ it throw expectation failed exception with array argument
+  ✓ it does not truncate long string arguments in error message
+  ✓ it does not truncate custom error message when using not()
 
    PASS  Tests\Unit\Overrides\ThrowableBuilder
   ✓ collision editor can be added to the stack trace
@@ -1736,6 +1757,8 @@
   ✓ method hasArgument with ('someValue', true)
   ✓ method hasArgument with ('--a', false)
   ✓ method hasArgument with ('--undefined-argument', false)
+  ✓ popArgument preserves duplicate values when removing a missing argument
+  ✓ popArgument preserves duplicate values when removing an existing argument
 
    PASS  Tests\Unit\Plugins\Environment
   ✓ environment is set to CI when --ci option is used
@@ -1743,6 +1766,52 @@
 
    PASS  Tests\Unit\Plugins\Retry
   ✓ it orders by defects and stop on defects if when --retry is used
+
+   PASS  Tests\Unit\Plugins\Shard
+  ✓ getShard → it parses valid shard format with ('1/2', 1, 2)
+  ✓ getShard → it parses valid shard format with ('2/2', 2, 2)
+  ✓ getShard → it parses valid shard format with ('1/4', 1, 4)
+  ✓ getShard → it parses valid shard format with ('4/4', 4, 4)
+  ✓ getShard → it parses valid shard format with ('1/10', 1, 10)
+  ✓ getShard → it parses valid shard format with ('10/10', 10, 10)
+  ✓ getShard → it parses valid shard format with ('5/100', 5, 100)
+  ✓ getShard → it throws exception for invalid format with (['test', '--shard', 'invalid'])
+  ✓ getShard → it throws exception for invalid format with (['test', '--shard', '1'])
+  ✓ getShard → it throws exception for invalid format with (['test', '--shard', '1/'])
+  ✓ getShard → it throws exception for invalid format with (['test', '--shard', '/2'])
+  ✓ getShard → it throws exception for invalid format with (['test', '--shard', 'a/b'])
+  ✓ getShard → it throws exception for invalid format with (['test', '--shard', '1.5/2'])
+  ✓ getShard → it throws exception for invalid index or total values with (['test', '--shard', '0/2'])
+  ✓ getShard → it throws exception for invalid index or total values with (['test', '--shard', '1/0'])
+  ✓ getShard → it throws exception for invalid index or total values with (['test', '--shard', '3/2'])
+  ✓ getShard → it throws exception for invalid index or total values with (['test', '--shard', '5/4'])
+  ✓ buildFilterArgument → it generates compact filter for single test
+  ✓ buildFilterArgument → it generates compact filter for multiple tests with common prefix
+  ✓ buildFilterArgument → it generates compact filter for tests with different namespaces
+  ✓ buildFilterArgument → it returns empty string for empty test list
+  ✓ buildFilterArgument → it generates compact filter for deeply nested namespaces
+  ✓ buildFilterArgument → it handles mix of nested and flat namespaces
+  ✓ ensureFilterLengthIsSafe → it accepts filter within length limit
+  ✓ ensureFilterLengthIsSafe → it throws exception when filter exceeds default limit
+  ✓ ensureFilterLengthIsSafe → it respects custom limit from environment variable
+  ✓ ensureFilterLengthIsSafe → it accepts filter within custom limit
+  ✓ handleArguments → it returns original arguments when shard option is not present
+  ✓ handleArguments → it removes parallel arguments from test discovery
+  ✓ parseListTestsOutput → it parses Tests\ namespaced classes from --list-tests output
+  ✓ parseListTestsOutput → it deduplicates repeated class names from multiple test methods
+  ✓ parseListTestsOutput → it returns an empty list for output with no matching lines
+  ✓ parseListTestsOutput → it parses non-Tests namespaced classes
+  ✓ parseListTestsOutput → it parses unnamespaced top-level classes
+  ✓ parseListTestsOutput → it strips the P\ Pest prefix but keeps the rest of the FQCN
+  ✓ parseListTestsOutput → it ignores junk lines that lack the " - …::" framing
+  ✓ buildListTestsCommand → it builds the list-tests command with the forwarded --test-directory
+  ✓ buildListTestsCommand → it strips --parallel and -p when building the list-tests command
+  ✓ buildListTestsCommand → it forwards --test-directory even when input arguments include one
+  ✓ buildListTestsCommand → it strips --processes=N when building the list-tests command
+  ✓ buildListTestsCommand → it strips --processes N (space-separated) when building the list-tests command
+  ✓ addOutput → it displays shard information after test execution
+  ✓ addOutput → it uses singular form for single test file
+  ✓ addOutput → it returns original exit code when shard is not set
 
    PASS  Tests\Unit\Plugins\Tia\ContentHash
   ✓ of() → it returns false when file does not exist
@@ -1781,9 +1850,134 @@
   ✓ output format → it returns a 32-character hex xxh128 hash
   ✓ output format → it returns a stable hash for empty content
 
+   PASS  Tests\Unit\Plugins\Tia\FileState
+  ✓ keysWithPrefix() → it lists keys matching the prefix
+  ✓ keysWithPrefix() → it ignores in-flight temporary files from concurrent writes
+
+   PASS  Tests\Unit\Plugins\Tia\Graph
+  ✓ shouldRerunStatus() → it re-runs failures and errors, replays successes
+  ✓ applyMigrationChanges() → it selects tests whose recorded tables intersect the changed migration
+  ✓ applyMigrationChanges() → it falls back to watch patterns when no table usage was recorded at all
+  ✓ rerun tracking → it reruns cached failures via their file
+  ✓ rerun tracking → it flags cached failures whose file is unknown
+  ✓ applyBladeStaticChanges() → it maps an anonymous index component to the views that render it
+  ✓ applyBladeStaticChanges() → it falls back to watch patterns for components with no matched usage
+  ✓ markKnownTestFiles() → it makes a test file with no edges known
+  ✓ markKnownTestFiles() → it does not clobber edges of an already-known test file
+  ✓ markKnownTestFiles() → it ignores paths outside the project root
+
    PASS  Tests\Unit\Plugins\Tia\IsEnabledForRun
   ✓ does not throw when an integer --random-order-seed is passed as a separate argv element
   ✓ still detects --tia when an integer argument is present
+
+   PASS  Tests\Unit\Plugins\Tia\Lockfiles\PackageLock
+  ✓ it applies only to package-lock.json
+  ✓ it returns null for contents that are not an npm lockfile
+  ✓ it is stable when the directory-derived top-level name changes
+  ✓ it ignores platform-specific native binaries added or dropped per OS
+  ✓ it ignores libc-constrained variants
+  ✓ it ignores runtime deps bundled beneath a platform-specific package
+  ✓ it detects a real dependency version change
+  ✓ it detects an added or removed non-platform dependency
+  ✓ it is independent of package ordering
+
+   PASS  Tests\Unit\Plugins\Tia\Recorder
+  ✓ activateLinkTracking() → it tracks tables without a coverage driver
+  ✓ activateLinkTracking() → it tracks inertia components without a coverage driver
+  ✓ activateLinkTracking() → it tracks linked sources across consecutive tests
+  ✓ activateLinkTracking() → it records nothing while inactive
+
+   PASS  Tests\Unit\Plugins\Tia\TableExtractor
+  ✓ fromSql() → it extracts tables from plain DML
+  ✓ fromSql() → it extracts tables from joins
+  ✓ fromSql() → it extracts tables from CTE queries
+  ✓ fromSql() → it extracts tables from REPLACE INTO
+  ✓ fromSql() → it records the table, not the schema, for qualified identifiers
+  ✓ fromSql() → it handles quoted identifiers
+  ✓ fromSql() → it ignores schema metadata tables
+  ✓ fromSql() → it returns nothing for non-DML statements
+  ✓ fromMigrationSource() → it extracts tables from Schema builder calls
+  ✓ fromMigrationSource() → it extracts tables from raw DDL statements
+  ✓ fromMigrationSource() → it records the table, not the schema, in qualified DDL and DML
+  ✓ fromMigrationSource() → it extracts tables from DB::table calls
+
+   PASS  Tests\Unit\Plugins\Tia\TestPaths
+  ✓ isTestFile() → it matches a standard test file under a configured directory
+  ✓ isTestFile() → it does not match a non-test file that shares the directory
+  ✓ isTestFile() → it does not match files outside the configured directories
+  ✓ isTestFile() → it matches an explicitly listed file
+  ✓ isTestFile() → it honours a bare .php suffix
+  ✓ isTestFile() → it does not require a dot before the suffix
+
+   PASS  Tests\Unit\Plugins\Tia\ViteDepsHelper
+  ✓ it strips JSONC down to something JSON.parse accepts with ('plain-object')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('plain-array')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('nested')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('empty-object')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('empty-array')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('line-comment-own-line')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('line-comment-trailing')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('leading-line-comments')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('line-comment-eof-no-newline')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('block-comment-leading')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('block-comment-inline')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('block-comment-multiline')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('block-comment-eof')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('jsdoc-style-block')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('block-contains-double-slash')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('line-then-block')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('comment-with-quotes')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('comment-with-braces-commas')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('trailing-comma-object')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('trailing-comma-array')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('trailing-comma-nested')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('trailing-comma-newline')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('trailing-comma-then-block')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('trailing-comma-then-line')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('crlf-line-comment')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('tabs-whitespace')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('url-in-string')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('glob-in-string')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('path-alias-in-string')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('block-open-in-string')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('block-close-in-string')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('block-both-in-string')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('star-in-string')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('single-slashes-in-string')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('escaped-quote-in-string')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('escaped-backslash-in-string')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('backslash-then-slash')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('newline-escape-in-string')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('unicode-in-string')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('block-secret')
+  ✓ it never touches comment-looking sequences inside string values
+  ✓ it removes the comment body entirely
+  ✓ it builds the expected alias map from a tsconfig with ('basic')
+  ✓ it builds the expected alias map from a tsconfig with ('multiple-aliases')
+  ✓ it builds the expected alias map from a tsconfig with ('default-baseUrl')
+  ✓ it builds the expected alias map from a tsconfig with ('baseUrl-subdir')
+  ✓ it builds the expected alias map from a tsconfig with ('jsconfig-fallback')
+  ✓ it builds the expected alias map from a tsconfig with ('first-target-wins')
+  ✓ it builds the expected alias map from a tsconfig with ('multiple-keys-mixed')
+  ✓ it builds the expected alias map from a tsconfig with ('no-paths')
+  ✓ it builds the expected alias map from a tsconfig with ('no-compiler-options')
+  ✓ it builds the expected alias map from a tsconfig with ('key-without-glob')
+  ✓ it builds the expected alias map from a tsconfig with ('target-without-glob')
+  ✓ it builds the expected alias map from a tsconfig with ('target-not-array')
+  ✓ it builds the expected alias map from a tsconfig with ('target-empty-array')
+  ✓ it builds the expected alias map from a tsconfig with ('commented-tsconfig')
+  ✓ it builds the expected alias map from a tsconfig with ('trailing-comma-paths')
+  ✓ it builds the expected alias map from a tsconfig with ('malformed-json')
+  ✓ it builds the expected alias map from a tsconfig with ('missing-config')
+  ✓ it builds the expected alias map from a tsconfig with ('tsconfig-precedence')
+  ✓ it builds the expected alias map from a vite config with ('root-slash-literal')
+  ✓ it builds the expected alias map from a vite config with ('path-resolve')
+  ✓ it builds the expected alias map from a vite config with ('file-url')
+  ✓ it builds the expected alias map from a vite config with ('tilde-alias')
+  ✓ it builds the expected alias map from a vite config with ('multiple-aliases')
+  ✓ it builds the expected alias map from a vite config with ('laravel-plugin-default')
+  ✓ it builds the expected alias map from a vite config with ('no-alias-no-plugin')
+  ✓ it builds the expected alias map from a vite config with ('no-config')
 
    PASS  Tests\Unit\Preset
   ✓ preset invalid name
@@ -1937,6 +2131,7 @@
   ✓ parallel
   ✓ a parallel test can extend another test with same name
   ✓ parallel reports invalid datasets as failures
+  ✓ parallel can have multiple exclude-groups
 
    PASS  Tests\Visual\ParallelNestedDatasets
   ✓ parallel loads nested datasets from nested directories
@@ -1970,4 +2165,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1357 passed (3055 assertions)
+  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1504 passed (3281 assertions)

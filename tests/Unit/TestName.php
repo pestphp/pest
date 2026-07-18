@@ -1,6 +1,6 @@
 <?php
 
-it('may start with P', function (string $real, string $toBePrinted) {
+it('may start with P', function (string $real, string $toBePrinted): void {
     $printed = preg_replace('/P\\\/', '', $real, 1);
 
     expect($printed)->toBe($toBePrinted);

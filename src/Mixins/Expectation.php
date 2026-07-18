@@ -936,7 +936,7 @@ final class Expectation
 
         if ($exception instanceof Closure) {
             $callback = $exception;
-            $parameters = (new ReflectionFunction($exception))->getParameters();
+            $parameters = new ReflectionFunction($exception)->getParameters();
 
             if (count($parameters) !== 1) {
                 throw new InvalidArgumentException('The given closure must have a single parameter type-hinted as the class string.');
@@ -1143,6 +1143,22 @@ final class Expectation
     }
 
     /**
+     * Asserts that the value is a ULID.
+     *
+     * @return self<TValue>
+     */
+    public function toBeUlid(string $message = ''): self
+    {
+        if (! is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
+        Assert::assertTrue(Str::isUlid($this->value), $message);
+
+        return $this;
+    }
+
+    /**
      * Asserts that the value is between 2 specified values
      *
      * @return self<TValue>
@@ -1151,6 +1167,22 @@ final class Expectation
     {
         Assert::assertGreaterThanOrEqual($lowestValue, $this->value, $message);
         Assert::assertLessThanOrEqual($highestValue, $this->value, $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is an email address.
+     *
+     * @return self<TValue>
+     */
+    public function toBeEmail(string $message = ''): self
+    {
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is an email address.";
+        }
+
+        Assert::assertTrue(Str::isEmail((string) $this->value), $message);
 
         return $this;
     }

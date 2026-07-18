@@ -25,26 +25,72 @@ const PAGE_DIR_CANDIDATES = [
 
 async function loadRolldown() {
   const projectRequire = createRequire(join(PROJECT_ROOT, 'package.json'))
-  const path = projectRequire.resolve('rolldown')
+  let path = null
+
+  try { path = projectRequire.resolve('rolldown') } catch {}
+
+  if (path === null) {
+    // rolldown-vite installs (vite@npm:rolldown-vite) ship rolldown as a
+    // dependency of the vite package rather than a top-level install.
+    try {
+      const viteRequire = createRequire(projectRequire.resolve('vite/package.json'))
+      path = viteRequire.resolve('rolldown')
+    } catch {}
+  }
+
+  if (path === null) return null
+
   return await import(pathToFileURL(path).href)
+}
+
+export function stripJsonComments(raw) {
+  let out = ''
+  let inString = false
+  let quote = ''
+  let inLine = false
+  let inBlock = false
+
+  for (let i = 0; i < raw.length; i++) {
+    const c = raw[i]
+    const n = raw[i + 1]
+
+    if (inLine) {
+      if (c === '\n') { inLine = false; out += c }
+      continue
+    }
+    if (inBlock) {
+      if (c === '*' && n === '/') { inBlock = false; i++ }
+      continue
+    }
+    if (inString) {
+      out += c
+      if (c === '\\') { out += n ?? ''; i++; continue }
+      if (c === quote) inString = false
+      continue
+    }
+    if (c === '"' || c === "'") { inString = true; quote = c; out += c; continue }
+    if (c === '/' && n === '/') { inLine = true; i++; continue }
+    if (c === '/' && n === '*') { inBlock = true; i++; continue }
+    if (c === '}' || c === ']') out = out.replace(/,\s*$/, '')
+    out += c
+  }
+
+  return out
 }
 
 async function readJsonWithComments(path) {
   const raw = await readFile(path, 'utf8')
-  const stripped = raw
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/(^|[^:])\/\/[^\n]*/g, '$1')
-  return JSON.parse(stripped)
+  return JSON.parse(stripJsonComments(raw))
 }
 
-async function loadAliasFromTsconfig() {
+export async function loadAliasFromTsconfig(projectRoot = PROJECT_ROOT) {
   const alias = {}
   for (const name of ['tsconfig.json', 'jsconfig.json']) {
-    const p = join(PROJECT_ROOT, name)
+    const p = join(projectRoot, name)
     if (!existsSync(p)) continue
     let cfg
     try { cfg = await readJsonWithComments(p) } catch { continue }
-    const baseUrl = resolve(PROJECT_ROOT, cfg?.compilerOptions?.baseUrl ?? '.')
+    const baseUrl = resolve(projectRoot, cfg?.compilerOptions?.baseUrl ?? '.')
     const paths = cfg?.compilerOptions?.paths ?? {}
     for (const [key, targets] of Object.entries(paths)) {
       if (!key.endsWith('/*')) continue
@@ -55,6 +101,74 @@ async function loadAliasFromTsconfig() {
       alias[aliasKey] = resolve(baseUrl, t0.slice(0, -2))
     }
   }
+  return alias
+}
+
+const VITE_CONFIG_FILES = [
+  'vite.config.ts',
+  'vite.config.js',
+  'vite.config.mjs',
+  'vite.config.cjs',
+  'vite.config.mts',
+  'vite.config.cts',
+]
+
+function resolveAliasTarget(projectRoot, target) {
+  if (target.startsWith('/')) {
+    // Vite resolves a leading slash against the project root, unless the
+    // config author used a genuinely absolute path.
+    return existsSync(target) ? target : resolve(projectRoot, '.' + target)
+  }
+
+  return resolve(projectRoot, target)
+}
+
+async function usesLaravelVitePlugin(projectRoot) {
+  const p = join(projectRoot, 'package.json')
+  if (!existsSync(p)) return false
+
+  try {
+    const pkg = JSON.parse(await readFile(p, 'utf8'))
+    return Boolean(pkg.dependencies?.['laravel-vite-plugin'] ?? pkg.devDependencies?.['laravel-vite-plugin'])
+  } catch {
+    return false
+  }
+}
+
+export async function loadAliasFromViteConfig(projectRoot = PROJECT_ROOT) {
+  const alias = {}
+  let source = null
+
+  for (const name of VITE_CONFIG_FILES) {
+    const p = join(projectRoot, name)
+    if (!existsSync(p)) continue
+    try { source = await readFile(p, 'utf8') } catch { continue }
+    break
+  }
+
+  if (source !== null) {
+    // The config is executable code we cannot import safely, so extract alias
+    // entries textually: a quoted `@…`/`~…` key, then the last quoted path in
+    // the value expression — covers `'@': '/resources/js'` as well as
+    // `'@': path.resolve(__dirname, 'resources/js')`. The value stops at a
+    // top-level comma; call arguments are kept via the paren group.
+    for (const m of source.matchAll(/['"`]([@~][\w./-]*)['"`]\s*:\s*((?:\([^)\n]*\)|[^,\n])*)/g)) {
+      const key = m[1]
+      if (alias[key] !== undefined) continue
+
+      const paths = [...m[2].matchAll(/['"`]([^'"`]+)['"`]/g)].map((p) => p[1])
+      const target = paths.length > 0 ? paths[paths.length - 1] : null
+      if (!target || target.includes('*')) continue
+
+      alias[key] = resolveAliasTarget(projectRoot, target)
+    }
+  }
+
+  // laravel-vite-plugin registers '@' → resources/js by default.
+  if (alias['@'] === undefined && (await usesLaravelVitePlugin(projectRoot))) {
+    alias['@'] = resolve(projectRoot, 'resources/js')
+  }
+
   return alias
 }
 
@@ -121,8 +235,16 @@ async function main() {
     return
   }
 
-  const { rolldown } = await loadRolldown()
-  const alias = await loadAliasFromTsconfig()
+  const loaded = await loadRolldown()
+
+  if (loaded === null) {
+    process.stdout.write('{}')
+    return
+  }
+
+  const { rolldown } = loaded
+  // The vite config is what the dev server actually resolves with — let it win.
+  const alias = { ...(await loadAliasFromTsconfig()), ...(await loadAliasFromViteConfig()) }
   const aliasKeys = Object.keys(alias)
 
   const graph = new Map()
@@ -167,7 +289,7 @@ async function main() {
     cwd: PROJECT_ROOT,
     resolve: {
       alias,
-      extensions: ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.cjs', '.json'],
+      extensions: ['.tsx', '.ts', '.jsx', '.js', '.mts', '.cts', '.mjs', '.cjs', '.json', '.vue', '.svelte'],
     },
     transform: { jsx: 'preserve' },
     treeshake: false,
@@ -192,6 +314,11 @@ async function main() {
 
     stack.add(id)
     const acc = new Set()
+    // A set computed while skipping an in-stack (cyclic) dependency is missing
+    // that dependency's subtree and must not be memoized — the ancestor call
+    // completes it for the current traversal, but a cached copy would leak the
+    // incomplete set into other pages' traversals.
+    let complete = true
     const deps = graph.get(id)
     if (deps) {
       for (const dep of deps) {
@@ -200,13 +327,17 @@ async function main() {
           const rel = relative(PROJECT_ROOT, dep).split(sep).join('/')
           acc.add(rel)
         }
-        if (stack.has(dep)) continue
+        if (stack.has(dep)) {
+          complete = false
+          continue
+        }
         const child = computeTransitive(dep, stack)
         if (child) for (const r of child) acc.add(r)
+        if (!transitiveCache.has(dep)) complete = false
       }
     }
     stack.delete(id)
-    transitiveCache.set(id, acc)
+    if (complete) transitiveCache.set(id, acc)
     return acc
   }
 
@@ -230,10 +361,14 @@ async function main() {
   process.stdout.write(JSON.stringify(payload))
 }
 
-try {
-  void pathToFileURL
-  await main()
-} catch (err) {
-  process.stderr.write(String(err?.stack ?? err ?? 'unknown error'))
-  process.exit(1)
+const invokedDirectly = process.argv[1] !== undefined
+  && import.meta.url === pathToFileURL(process.argv[1]).href
+
+if (invokedDirectly) {
+  try {
+    await main()
+  } catch (err) {
+    process.stderr.write(String(err?.stack ?? err ?? 'unknown error'))
+    process.exit(1)
+  }
 }

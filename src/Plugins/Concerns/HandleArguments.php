@@ -50,11 +50,14 @@ trait HandleArguments
      */
     public function popArgument(string $argument, array $arguments): array
     {
-        $arguments = array_flip($arguments);
+        $key = array_search($argument, $arguments, true);
 
-        unset($arguments[$argument]);
+        while ($key !== false) {
+            unset($arguments[$key]);
+            $key = array_search($argument, $arguments, true);
+        }
 
-        return array_values(array_flip($arguments));
+        return array_values($arguments);
     }
 
     /**

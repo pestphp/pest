@@ -89,6 +89,10 @@ final class FileState implements State
         $keys = [];
 
         foreach ($matches as $path) {
+            if (str_ends_with($path, '.tmp')) {
+                continue;
+            }
+
             $keys[] = basename($path);
         }
 

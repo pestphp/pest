@@ -1,7 +1,7 @@
 includes:
     - phpstan-baseline.neon
     - phpstan-pest-extension.neon
-    - vendor/mrpunyapal/peststan/extension.neon
+    - vendor/pestphp/pest-plugin-phpstan/extension.neon
 
 parameters:
     level: 7

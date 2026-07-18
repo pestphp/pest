@@ -4,7 +4,7 @@ use PHPUnit\Framework\TestCase;
 
 trait MyCustomTrait
 {
-    public function assertFalseIsFalse()
+    public function assertFalseIsFalse(): void
     {
         assertFalse(false);
     }
@@ -12,7 +12,7 @@ trait MyCustomTrait
 
 abstract class MyCustomClass extends TestCase
 {
-    public function assertTrueIsTrue()
+    public function assertTrueIsTrue(): void
     {
         $this->assertTrue(true);
     }
@@ -20,7 +20,7 @@ abstract class MyCustomClass extends TestCase
 
 pest()->extend(MyCustomClass::class)->use(MyCustomTrait::class);
 
-test('custom traits can be used', function () {
+test('custom traits can be used', function (): void {
     $this->assertTrueIsTrue();
 });
 

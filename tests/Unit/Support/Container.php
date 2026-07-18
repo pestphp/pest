@@ -6,37 +6,37 @@ use Pest\TestSuite;
 
 pest()->group('container');
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->container = new Container;
 });
 
 it('exists')
     ->assertTrue(class_exists(Container::class));
 
-it('gets an instance', function () {
+it('gets an instance', function (): void {
     $this->container->add(Container::class, $this->container);
     expect($this->container->get(Container::class))->toBe($this->container);
 });
 
-test('autowire', function () {
+test('autowire', function (): void {
     expect($this->container->get(Container::class))->toBeInstanceOf(Container::class);
 });
 
-it('creates an instance and resolves parameters', function () {
+it('creates an instance and resolves parameters', function (): void {
     $this->container->add(Container::class, $this->container);
     $instance = $this->container->get(ClassWithDependency::class);
 
     expect($instance)->toBeInstanceOf(ClassWithDependency::class);
 });
 
-it('creates an instance and resolves also sub parameters', function () {
+it('creates an instance and resolves also sub parameters', function (): void {
     $this->container->add(Container::class, $this->container);
     $instance = $this->container->get(ClassWithSubDependency::class);
 
     expect($instance)->toBeInstanceOf(ClassWithSubDependency::class);
 });
 
-it('can resolve builtin value types', function () {
+it('can resolve builtin value types', function (): void {
     $this->container->add('rootPath', getcwd());
     $this->container->add('testPath', 'tests');
 
@@ -44,7 +44,7 @@ it('can resolve builtin value types', function () {
     expect($instance)->toBeInstanceOf(TestSuite::class);
 });
 
-it('cannot resolve a parameter without type', function () {
+it('cannot resolve a parameter without type', function (): void {
     $this->container->get(ClassWithoutTypeParameter::class);
 })->throws(ShouldNotHappen::class);
 

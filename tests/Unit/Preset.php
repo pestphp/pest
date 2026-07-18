@@ -1,12 +1,10 @@
 <?php
 
-pest()->presets()->custom('myFramework', function (array $userNamespaces) {
-    return [
-        expect($userNamespaces)->toBe(['Pest']),
-    ];
-});
+pest()->presets()->custom('myFramework', fn (array $userNamespaces): array => [
+    expect($userNamespaces)->toBe(['Pest']),
+]);
 
-test('preset invalid name', function () {
+test('preset invalid name', function (): void {
     $this->preset()->myAnotherFramework();
 })->throws(InvalidArgumentException::class, 'The preset [myAnotherFramework] does not exist. The available presets are [php, laravel, strict, security, relaxed, myFramework].');
 

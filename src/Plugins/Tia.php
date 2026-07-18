@@ -9,6 +9,7 @@ use Pest\Contracts\Plugins\AddsOutput;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Contracts\Plugins\Terminable;
 use Pest\Exceptions\NoAffectedTestsFound;
+use Pest\Exceptions\TiaRequiresRepositoryRoot;
 use Pest\Panic;
 use Pest\Plugins\Concerns\HandleArguments;
 use Pest\Plugins\Tia\BaselineSync;
@@ -295,7 +296,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $result = $this->replayGraph->getResult($this->branch, $testId);
 
         if ($result instanceof TestStatus) {
-            if ($result->isFailure() || $result->isError()) {
+            if ($this->replayGraph->shouldRerunStatus($result)) {
                 $this->executedCount++;
 
                 return null;
@@ -401,7 +402,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         $projectRoot = TestSuite::getInstance()->rootPath;
         $perTest = $this->piggybackCoverage
-            ? $this->coverageCollector->perTestFiles()
+            ? $this->mergePerTestFiles($this->coverageCollector->perTestFiles(), $recorder->perTestFiles())
             : $recorder->perTestFiles();
 
         if ($perTest === []) {
@@ -561,7 +562,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return $exitCode;
         }
 
-        $this->snapshotTestResults();
+        $this->snapshotTestResults(markKnownTestFiles: true);
 
         return $exitCode;
     }
@@ -627,7 +628,14 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private function handleParent(array $arguments, string $projectRoot, bool $forceRebuild): array
     {
         $this->watchPatterns->useDefaults($projectRoot);
-        $this->branch = (new ChangedFiles($projectRoot))->currentBranch() ?? 'main';
+
+        $subdirectoryPrefix = $this->gitSubdirectoryPrefix($projectRoot);
+
+        if ($subdirectoryPrefix !== null) {
+            Panic::with(new TiaRequiresRepositoryRoot($subdirectoryPrefix));
+        }
+
+        $this->branch = new ChangedFiles($projectRoot)->currentBranch() ?? 'main';
 
         $fingerprint = Fingerprint::compute($projectRoot);
         $this->startFingerprint = $fingerprint;
@@ -690,7 +698,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      */
     private function handleWorker(array $arguments, string $projectRoot, bool $recordingGlobal, bool $replayingGlobal): array
     {
-        $this->branch = (new ChangedFiles($projectRoot))->currentBranch() ?? 'main';
+        $this->branch = new ChangedFiles($projectRoot)->currentBranch() ?? 'main';
 
         if ($replayingGlobal) {
             $this->installWorkerReplay($projectRoot);
@@ -707,6 +715,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         if ($this->piggybackCoverage) {
+            $this->recorder->activateLinkTracking();
             $this->recordingActive = true;
 
             return $arguments;
@@ -774,6 +783,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private function activateWorkerRecorderForReplay(array $arguments): array
     {
         if ($this->piggybackCoverage) {
+            $this->recorder->activateLinkTracking();
             $this->recordingActive = true;
 
             return $arguments;
@@ -825,6 +835,13 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         $affectedFromChanges = $changed === [] ? [] : $graph->affected($changed);
         $rerunFromCache = [];
+
+        if ($this->filteredMode && $graph->hasUnlocatedTestsToRerun($this->branch)) {
+            $this->filteredMode = false;
+
+            $this->renderBadge('WARN', 'Some cached tests due a re-run could not be located on disk.');
+            $this->renderChild('Running the full suite with replay instead of a filtered run.');
+        }
 
         if ($this->filteredMode) {
             $rerunFromCache = $graph->testFilesToRerun($this->branch);
@@ -1006,6 +1023,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         if ($this->piggybackCoverage) {
+            $recorder->activateLinkTracking();
             $this->recordingActive = true;
 
             $this->output->writeln('');
@@ -1227,6 +1245,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             $data = $this->readPartial($key);
 
             if ($data === null) {
+                $this->state->delete($key);
+
                 continue;
             }
 
@@ -1360,6 +1380,26 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $this->saveGraph($graph);
     }
 
+    /**
+     * Union of two per-test edge maps — piggybacked line-coverage edges plus
+     * the recorder's link-tracked edges (rendered Blade views, ...), which
+     * never appear in line coverage.
+     *
+     * @param  array<string, array<int, string>>  $coverage
+     * @param  array<string, array<int, string>>  $linked
+     * @return array<string, array<int, string>>
+     */
+    private function mergePerTestFiles(array $coverage, array $linked): array
+    {
+        foreach ($linked as $testFile => $sources) {
+            $existing = $coverage[$testFile] ?? [];
+
+            $coverage[$testFile] = array_values(array_unique([...$existing, ...$sources]));
+        }
+
+        return $coverage;
+    }
+
     private function seedResultsInto(Graph $graph): void
     {
         /** @var ResultCollector $collector */
@@ -1370,6 +1410,10 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         foreach ($results as $testId => $result) {
             $file = $result['file'] ?? null;
+
+            if ($file === null || str_contains($file, "eval()'d")) {
+                $file = $this->resolveFailedTestFile($testId);
+            }
 
             if (is_string($file) && $file !== '') {
                 $touchedFiles[$file] = true;
@@ -1386,12 +1430,13 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             );
         }
 
+        $graph->markKnownTestFiles(array_keys($touchedFiles));
         $graph->pruneStaleResults($this->branch, array_keys($touchedFiles), array_keys($results));
 
         $collector->reset();
     }
 
-    private function snapshotTestResults(): void
+    private function snapshotTestResults(bool $markKnownTestFiles = false): void
     {
         /** @var ResultCollector $collector */
         $collector = Container::getInstance()->get(ResultCollector::class);
@@ -1432,6 +1477,10 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
                 $result['assertions'],
                 $file,
             );
+        }
+
+        if ($markKnownTestFiles) {
+            $graph->markKnownTestFiles(array_keys($touchedFiles));
         }
 
         $graph->pruneStaleResults($this->branch, array_keys($touchedFiles), array_keys($results));
@@ -1641,6 +1690,27 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         return implode(', ', array_keys($seen));
+    }
+
+    /**
+     * The path from the git repository root down to $projectRoot (e.g.
+     * `laravel-app`) when the project is nested inside a larger repo, or `null`
+     * when the project root is itself the repo root (or git is unavailable).
+     * TIA requires the two to coincide: git reports and addresses paths
+     * relative to the repo root, while the dependency graph is project-relative.
+     */
+    private function gitSubdirectoryPrefix(string $projectRoot): ?string
+    {
+        $process = new Process(['git', 'rev-parse', '--show-prefix'], $projectRoot);
+        $process->run();
+
+        if (! $process->isSuccessful()) {
+            return null;
+        }
+
+        $prefix = trim($process->getOutput());
+
+        return $prefix === '' ? null : rtrim(str_replace(DIRECTORY_SEPARATOR, '/', $prefix), '/');
     }
 
     private function composerLockDelta(string $projectRoot, string $sha): string

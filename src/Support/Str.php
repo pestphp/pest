@@ -99,6 +99,14 @@ final class Str
     }
 
     /**
+     * Determine if a given value is a valid ULID.
+     */
+    public static function isUlid(string $value): bool
+    {
+        return preg_match('/^[0-9A-HJKMNP-TV-Z]{26}$/', $value) > 0;
+    }
+
+    /**
      * Creates a describe block as `$describeDescription` → `$testDescription` format.
      *
      * @param  array<int, Description>  $describeDescriptions
@@ -108,6 +116,14 @@ final class Str
         $descriptionComponents = [...$describeDescriptions, $testDescription];
 
         return sprintf(str_repeat('`%s` → ', count($describeDescriptions)).'%s', ...$descriptionComponents);
+    }
+
+    /**
+     * Determine if a given value is a valid email address.
+     */
+    public static function isEmail(string $value): bool
+    {
+        return (bool) filter_var($value, FILTER_VALIDATE_EMAIL);
     }
 
     /**
