@@ -35,7 +35,7 @@ it('adds coverage if --min exist', function (): void {
     expect($plugin->coverageMin)->toEqual(2.4);
 });
 
-it('adds coverage if --exactly exist', function () {
+it('adds coverage if --exactly exist', function (): void {
     $plugin = new CoveragePlugin(new ConsoleOutput);
 
     $plugin->handleArguments(['--exactly=50']);
@@ -45,26 +45,26 @@ it('adds coverage if --exactly exist', function () {
     expect($plugin->coverageExactly)->toEqual(50.5);
 });
 
-it('adds coverage if --only-covered exist', function () {
+it('adds coverage if --only-covered exist', function (): void {
     $plugin = new CoveragePlugin(new ConsoleOutput);
 
     $plugin->handleArguments(['--only-covered']);
     expect($plugin->showOnlyCovered)->toBeTrue();
 });
 
-it('routes --coverage-php to .pest/coverage/{n}.cov when --shard is used', function () {
+it('routes --coverage-php to .pest/coverage/{n}.cov when --shard is used', function (): void {
     $plugin = new CoveragePlugin(new ConsoleOutput);
 
     $arguments = $plugin->handleArguments(['--coverage', '--shard=1/3']);
 
     $phpIdx = array_search('--coverage-php', $arguments, true);
-    expect($phpIdx)->not->toBeFalse();
+    expect($phpIdx)->toBeTrue();
 
     $covPath = $arguments[$phpIdx + 1];
     expect($covPath)->toEndWith('.pest'.DIRECTORY_SEPARATOR.'coverage'.DIRECTORY_SEPARATOR.'1.cov');
 })->skip(! Coverage::isAvailable() || ! function_exists('xdebug_info') || ! in_array('coverage', xdebug_info('mode'), true), 'Coverage is not available');
 
-it('strips blocked report flags and warns when --shard is used', function () {
+it('strips blocked report flags and warns when --shard is used', function (): void {
     $output = new BufferedOutput;
     $plugin = new CoveragePlugin($output);
 

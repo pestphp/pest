@@ -21,7 +21,7 @@ test('compute comparable coverage', function (float $givenValue, float $expected
     [100.0, 100.0],
 ]);
 
-test('apply thresholds', function (float $coverage, ?float $min, ?float $exactly, int $expectedExitCode) {
+test('apply thresholds', function (float $coverage, ?float $min, ?float $exactly, int $expectedExitCode): void {
     $output = new BufferedOutput;
     $plugin = new Coverage($output);
     $plugin->coverageMin = $min ?? 0.0;
@@ -41,7 +41,7 @@ test('apply thresholds', function (float $coverage, ?float $min, ?float $exactly
     'exactly fail' => [91.5, null, 95.0, 1],
 ]);
 
-test('strip shard blocked report flags', function (array $args, array $expected, bool $expectWarn) {
+test('strip shard blocked report flags', function (array $args, array $expected, bool $expectWarn): void {
     $output = new BufferedOutput;
     $plugin = new Coverage($output);
 
@@ -51,14 +51,14 @@ test('strip shard blocked report flags', function (array $args, array $expected,
 
     $expectWarn
         ? expect($output->fetch())->toContain('WARN')
-        : expect($output->fetch())->toBe('');
+        : expect($output->fetch())->toBeEmpty();
 })->with([
     'inline value flag' => [['--coverage-html=out', '--compact'], ['--compact'], true],
     'space-separated flag' => [['--compact', '--coverage-clover', 'clover.xml'], ['--compact'], true],
     'no blocked flags' => [['--compact', '--stop-on-failure'], ['--compact', '--stop-on-failure'], false],
 ]);
 
-test('apply thresholds returns 0 when coverage meets min', function () {
+test('apply thresholds returns 0 when coverage meets min', function (): void {
     $plugin = new Coverage(new NullOutput);
     $plugin->coverageMin = 80.0;
 
@@ -67,7 +67,7 @@ test('apply thresholds returns 0 when coverage meets min', function () {
     expect($exitCode)->toBe(0);
 });
 
-test('apply thresholds returns 1 and writes FAIL when coverage is below min', function () {
+test('apply thresholds returns 1 and writes FAIL when coverage is below min', function (): void {
     $output = new BufferedOutput;
     $plugin = new Coverage($output);
     $plugin->coverageMin = 95.0;
@@ -78,7 +78,7 @@ test('apply thresholds returns 1 and writes FAIL when coverage is below min', fu
         ->and($output->fetch())->toContain('95.0')->toContain('91.5');
 });
 
-test('apply thresholds returns 0 when coverage matches exactly', function () {
+test('apply thresholds returns 0 when coverage matches exactly', function (): void {
     $plugin = new Coverage(new NullOutput);
     $plugin->coverageExactly = 91.5;
 
@@ -87,7 +87,7 @@ test('apply thresholds returns 0 when coverage matches exactly', function () {
     expect($exitCode)->toBe(0);
 });
 
-test('apply thresholds returns 1 and writes FAIL when coverage does not match exactly', function () {
+test('apply thresholds returns 1 and writes FAIL when coverage does not match exactly', function (): void {
     $output = new BufferedOutput;
     $plugin = new Coverage($output);
     $plugin->coverageExactly = 95.0;
@@ -98,7 +98,7 @@ test('apply thresholds returns 1 and writes FAIL when coverage does not match ex
         ->and($output->fetch())->toContain('95.0')->toContain('91.5');
 });
 
-test('parse threshold options sets coverageMin', function () {
+test('parse threshold options sets coverageMin', function (): void {
     $plugin = new Coverage(new NullOutput);
 
     (fn () => $this->parseThresholdOptions(['--min=42.5']))->call($plugin);
@@ -106,7 +106,7 @@ test('parse threshold options sets coverageMin', function () {
     expect($plugin->coverageMin)->toBe(42.5);
 });
 
-test('parse threshold options sets coverageExactly', function () {
+test('parse threshold options sets coverageExactly', function (): void {
     $plugin = new Coverage(new NullOutput);
 
     (fn () => $this->parseThresholdOptions(['--exactly=75.0']))->call($plugin);
@@ -114,7 +114,7 @@ test('parse threshold options sets coverageExactly', function () {
     expect($plugin->coverageExactly)->toBe(75.0);
 });
 
-test('parse threshold options sets showOnlyCovered', function () {
+test('parse threshold options sets showOnlyCovered', function (): void {
     $plugin = new Coverage(new NullOutput);
 
     (fn () => $this->parseThresholdOptions(['--only-covered']))->call($plugin);
@@ -122,7 +122,7 @@ test('parse threshold options sets showOnlyCovered', function () {
     expect($plugin->showOnlyCovered)->toBeTrue();
 });
 
-test('parse threshold options ignores unrelated flags', function () {
+test('parse threshold options ignores unrelated flags', function (): void {
     $plugin = new Coverage(new NullOutput);
 
     (fn () => $this->parseThresholdOptions(['--compact', '--verbose']))->call($plugin);
@@ -132,7 +132,7 @@ test('parse threshold options ignores unrelated flags', function () {
         ->and($plugin->showOnlyCovered)->toBeFalse();
 });
 
-test('detect shard parses equals format', function () {
+test('detect shard parses equals format', function (): void {
     $plugin = new Coverage(new NullOutput);
 
     $result = (fn () => $this->detectShard(['--shard=2/5']))->call($plugin);
@@ -140,7 +140,7 @@ test('detect shard parses equals format', function () {
     expect($result)->toBe([2, 5]);
 });
 
-test('detect shard parses space format', function () {
+test('detect shard parses space format', function (): void {
     $plugin = new Coverage(new NullOutput);
 
     $result = (fn () => $this->detectShard(['--shard', '3/4']))->call($plugin);
@@ -148,7 +148,7 @@ test('detect shard parses space format', function () {
     expect($result)->toBe([3, 4]);
 });
 
-test('detect shard returns null when absent', function () {
+test('detect shard returns null when absent', function (): void {
     $plugin = new Coverage(new NullOutput);
 
     $result = (fn () => $this->detectShard(['--compact', '--coverage']))->call($plugin);
@@ -156,14 +156,14 @@ test('detect shard returns null when absent', function () {
     expect($result)->toBeNull();
 });
 
-test('has shards coverage flag detects --shards-coverage', function () {
+test('has shards coverage flag detects --shards-coverage', function (): void {
     $plugin = new Coverage(new NullOutput);
 
     expect((fn () => $this->hasShardsCoverageFlag(['--shards-coverage']))->call($plugin))->toBeTrue()
         ->and((fn () => $this->hasShardsCoverageFlag(['--coverage']))->call($plugin))->toBeFalse();
 });
 
-test('pop shards coverage flags removes --shards-coverage and --clean', function () {
+test('pop shards coverage flags removes --shards-coverage and --clean', function (): void {
     $plugin = new Coverage(new NullOutput);
 
     $remaining = (fn () => $this->popShardsCoverageFlags(['--shards-coverage', '--min=80', '--clean']))->call($plugin);
@@ -173,7 +173,7 @@ test('pop shards coverage flags removes --shards-coverage and --clean', function
         ->and($isClean)->toBeTrue();
 });
 
-test('strip shard blocked report flags removes --coverage-html', function () {
+test('strip shard blocked report flags removes --coverage-html', function (): void {
     $output = new BufferedOutput;
     $plugin = new Coverage($output);
 
@@ -183,7 +183,7 @@ test('strip shard blocked report flags removes --coverage-html', function () {
         ->and($output->fetch())->toContain('WARN');
 });
 
-test('strip shard blocked report flags removes --coverage-clover as separate arg', function () {
+test('strip shard blocked report flags removes --coverage-clover as separate arg', function (): void {
     $output = new BufferedOutput;
     $plugin = new Coverage($output);
 
@@ -193,17 +193,17 @@ test('strip shard blocked report flags removes --coverage-clover as separate arg
         ->and($output->fetch())->toContain('WARN');
 });
 
-test('strip shard blocked report flags keeps non-blocked flags without warning', function () {
+test('strip shard blocked report flags keeps non-blocked flags without warning', function (): void {
     $output = new BufferedOutput;
     $plugin = new Coverage($output);
 
     $filtered = (fn () => $this->stripShardBlockedReportFlags(['--compact', '--stop-on-failure']))->call($plugin);
 
     expect($filtered)->toBe(['--compact', '--stop-on-failure'])
-        ->and($output->fetch())->toBe('');
+        ->and($output->fetch())->toBeEmpty();
 });
 
-test('getCoverageDir returns path under .pest/coverage', function () {
+test('getCoverageDir returns path under .pest/coverage', function (): void {
     $plugin = new Coverage(new NullOutput);
 
     $path = (fn () => $this->getCoverageDir())->call($plugin);
@@ -211,7 +211,7 @@ test('getCoverageDir returns path under .pest/coverage', function () {
     expect($path)->toEndWith('.pest'.DIRECTORY_SEPARATOR.'coverage');
 });
 
-test('mergeAndReportShardsCoverage returns -1 when coverage directory is empty', function () {
+test('mergeAndReportShardsCoverage returns -1 when coverage directory is empty', function (): void {
     $output = new BufferedOutput;
     $plugin = new Coverage($output);
 
