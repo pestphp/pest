@@ -298,8 +298,8 @@
   ✓ it uses correct parent class
 
    DEPR  Tests\Features\Deprecated
-  ! deprecated → str_contains(): Passing null to parameter #1 ($haystack) of type string is deprecated // tests/Features/Deprecated.php:4
-  ! user deprecated → Since foo 1.0: This is a deprecation description // tests/Features/Deprecated.php:10
+  ✓ deprecated
+  ! user deprecated → Since foo 1.0: This is a deprecation description // tests/Features/Deprecated.php:12
 
    PASS  Tests\Features\Describe - 5 todos
   ✓ before each
@@ -1279,8 +1279,8 @@
   // This is another runtime note
 
    NOTI  Tests\Features\Notices
-  ! notice → This is a notice description // tests/Features/Notices.php:4
-  ! a "describe" group of tests → notice → This is a notice description // tests/Features/Notices.php:11
+  ! notice → This is a notice description // tests/Features/Notices.php:6
+  ! a "describe" group of tests → notice → This is a notice description // tests/Features/Notices.php:13
 
    PASS  Tests\Features\Pr
   ✓ it may be associated with an pr #1, #2
@@ -1825,6 +1825,17 @@
   ✓ does not throw when an integer --random-order-seed is passed as a separate argv element
   ✓ still detects --tia when an integer argument is present
 
+   PASS  Tests\Unit\Plugins\Tia\Lockfiles\PackageLock
+  ✓ it applies only to package-lock.json
+  ✓ it returns null for contents that are not an npm lockfile
+  ✓ it is stable when the directory-derived top-level name changes
+  ✓ it ignores platform-specific native binaries added or dropped per OS
+  ✓ it ignores libc-constrained variants
+  ✓ it ignores runtime deps bundled beneath a platform-specific package
+  ✓ it detects a real dependency version change
+  ✓ it detects an added or removed non-platform dependency
+  ✓ it is independent of package ordering
+
    PASS  Tests\Unit\Plugins\Tia\ViteDepsHelper
   ✓ it strips JSONC down to something JSON.parse accepts with ('plain-object')
   ✓ it strips JSONC down to something JSON.parse accepts with ('plain-array')
@@ -2073,4 +2084,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1452 passed (3209 assertions)
+  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1462 passed (3220 assertions)

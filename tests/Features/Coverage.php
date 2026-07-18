@@ -6,12 +6,12 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
 it('has plugin')->assertTrue(class_exists(CoveragePlugin::class));
 
-it('adds coverage if --coverage exist', function () {
+it('adds coverage if --coverage exist', function (): void {
     $plugin = new CoveragePlugin(new ConsoleOutput);
 
     expect($plugin->coverage)->toBeFalse();
     $arguments = $plugin->handleArguments([]);
-    expect($arguments)->toEqual([])
+    expect($arguments)->toBeEmpty()
         ->and($plugin->coverage)->toBeFalse();
 
     $arguments = $plugin->handleArguments(['--coverage']);
@@ -19,7 +19,7 @@ it('adds coverage if --coverage exist', function () {
         ->and($plugin->coverage)->toBeTrue();
 })->skip(! Coverage::isAvailable() || ! function_exists('xdebug_info') || ! in_array('coverage', xdebug_info('mode'), true), 'Coverage is not available');
 
-it('adds coverage if --min exist', function () {
+it('adds coverage if --min exist', function (): void {
     $plugin = new CoveragePlugin(new ConsoleOutput);
     expect($plugin->coverageMin)->toEqual(0.0)
         ->and($plugin->coverage)->toBeFalse();
@@ -34,7 +34,7 @@ it('adds coverage if --min exist', function () {
     expect($plugin->coverageMin)->toEqual(2.4);
 });
 
-it('generates coverage based on file input', function () {
+it('generates coverage based on file input', function (): void {
     expect(Coverage::getMissingCoverage(new class
     {
         public function lineCoverageData(): array

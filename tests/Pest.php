@@ -24,13 +24,13 @@ $_SERVER['globalHook'] = (object) ['calls' => (object) ['beforeAll' => 0, 'after
 
 pest()
     ->in('Hooks')
-    ->beforeEach(function () {
+    ->beforeEach(function (): void {
         $this->baz = 0;
     })
-    ->beforeAll(function () {
+    ->beforeAll(function (): void {
         $_SERVER['globalHook']->beforeAll = 0;
     })
-    ->afterEach(function () {
+    ->afterEach(function (): void {
         if (! isset($this->ith)) {
             return;
         }
@@ -38,13 +38,13 @@ pest()
         assert($this->ith === 1, 'Expected $this->ith to be 1, but got '.$this->ith);
         $this->ith++;
     })
-    ->afterAll(function () {
+    ->afterAll(function (): void {
         $_SERVER['globalHook']->afterAll = 0;
         $_SERVER['globalHook']->calls->afterAll++;
     });
 
 pest()->in('Hooks')
-    ->beforeEach(function () {
+    ->beforeEach(function (): void {
         expect($this)
             ->toHaveProperty('baz')
             ->and($this->baz)
@@ -52,7 +52,7 @@ pest()->in('Hooks')
 
         $this->baz = 1;
     })
-    ->beforeAll(function () {
+    ->beforeAll(function (): void {
         expect($_SERVER['globalHook'])
             ->toHaveProperty('beforeAll')
             ->and($_SERVER['globalHook']->beforeAll)
@@ -60,7 +60,7 @@ pest()->in('Hooks')
 
         $_SERVER['globalHook']->beforeAll = 1;
     })
-    ->afterEach(function () {
+    ->afterEach(function (): void {
         if (! isset($this->ith)) {
             return;
         }
@@ -68,7 +68,7 @@ pest()->in('Hooks')
         assert($this->ith === 2, 'Expected $this->ith to be 1, but got '.$this->ith);
         $this->ith++;
     })
-    ->afterAll(function () {
+    ->afterAll(function (): void {
         expect($_SERVER['globalHook'])
             ->toHaveProperty('afterAll')
             ->and($_SERVER['globalHook']->afterAll)
@@ -77,7 +77,7 @@ pest()->in('Hooks')
         $_SERVER['globalHook']->afterAll = 1;
     });
 
-function helper_returns_string()
+function helper_returns_string(): string
 {
     return 'string';
 }

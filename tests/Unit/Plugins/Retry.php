@@ -2,7 +2,7 @@
 
 use Pest\Plugins\Retry;
 
-it('orders by defects and stop on defects if when --retry is used ', function () {
+it('orders by defects and stop on defects if when --retry is used ', function (): void {
     $retry = new Retry;
 
     $arguments = $retry->handleArguments(['--retry']);

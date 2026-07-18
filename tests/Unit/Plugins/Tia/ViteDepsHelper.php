@@ -259,34 +259,34 @@ function tiaAliasResults(): array
     return $cache = ['roots' => $roots, 'aliases' => $aliases];
 }
 
-beforeEach(function () {
+beforeEach(function (): void {
     if ((new ExecutableFinder)->find('node') === null) {
         $this->markTestSkipped('node is not available.');
     }
 });
 
-it('strips JSONC down to something JSON.parse accepts', function (string $name) {
+it('strips JSONC down to something JSON.parse accepts', function (string $name): void {
     $result = tiaStripResults()[$name];
     [, $expected] = tiaStripFixtures()[$name];
 
     expect($result['ok'])->toBeTrue(
         "[{$name}] did not parse after stripping: ".($result['error'] ?? 'unknown').PHP_EOL.
         'stripped: '.$result['stripped'],
-    );
-    expect($result['parsed'])->toEqual($expected);
+    )
+        ->and($result['parsed'])->toEqual($expected);
 })->with(array_keys(tiaStripFixtures()));
 
-it('never touches comment-looking sequences inside string values', function () {
+it('never touches comment-looking sequences inside string values', function (): void {
     expect(tiaStripResults()['url-in-string']['stripped'])->toContain('https://example.com//x')
         ->and(tiaStripResults()['glob-in-string']['stripped'])->toContain('resources/js/**/*.ts')
         ->and(tiaStripResults()['block-both-in-string']['stripped'])->toContain('x/*y*/z');
 });
 
-it('removes the comment body entirely', function () {
+it('removes the comment body entirely', function (): void {
     expect(tiaStripResults()['block-secret']['stripped'])->not->toContain('SECRET');
 });
 
-it('builds the expected alias map from a tsconfig', function (string $name) {
+it('builds the expected alias map from a tsconfig', function (string $name): void {
     $results = tiaAliasResults();
     [, $expectedRelative] = tiaAliasFixtures()[$name];
 

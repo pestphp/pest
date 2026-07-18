@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 dataset('numbers.closure', function () {
     yield [1];
     yield [2];

@@ -1,11 +1,13 @@
 <?php
 
+use Pest\PendingCalls\TestCall;
+use Pest\Support\HigherOrderTapProxy;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @return TestCase
  */
-function myAssertTrue($value)
+function myAssertTrue($value): HigherOrderTapProxy|TestCall
 {
     test()->assertTrue($value);
 

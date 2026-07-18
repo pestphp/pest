@@ -1,24 +1,24 @@
 <?php
 
-it('can access methods and properties', function () {
+it('can access methods and properties', function (): void {
     expect(new HasMethodsAndProperties)
         ->name->toEqual('Has Methods and Properties')->not()->toEqual('bar')
         ->multiply(3, 4)->not->toBeString->toEqual(12)
-        ->posts->each(function ($post) {
+        ->posts->each(function ($post): void {
             $post->is_published->toBeTrue;
         })->books()->toBeArray()
         ->posts->toBeArray->each->not->toBeEmpty
         ->books()->sequence(
-            function ($book) {
+            function ($book): void {
                 $book->title->toEqual('Foo')->cost->toEqual(20);
             },
-            function ($book) {
+            function ($book): void {
                 $book->title->toEqual('Bar')->cost->toEqual(30);
             },
         );
 });
 
-it('can handle nested methods and properties', function () {
+it('can handle nested methods and properties', function (): void {
     expect(new HasMethodsAndProperties)
         ->meta->foo->bar->toBeString()->toEqual('baz')->not->toBeInt
         ->newInstance()->meta->foo->toBeArray()
@@ -33,15 +33,14 @@ it('works with higher order tests')
     ->newInstance()->multiply(2, 2)->toEqual(4)->not->toEqual(5)
     ->newInstance()->books()->toBeArray();
 
-it('can start a new higher order expectation using the and syntax', function () {
+it('can start a new higher order expectation using the and syntax', function (): void {
     expect(new HasMethodsAndProperties)
         ->toBeInstanceOf(HasMethodsAndProperties::class)
         ->meta->toBeArray
         ->and(['foo' => 'bar'])
         ->toBeArray()
-        ->foo->toEqual('bar');
-
-    expect(static::getCount())->toEqual(4);
+        ->foo->toEqual('bar')
+        ->and(static::getCount())->toEqual(4);
 });
 
 it('can start a new higher order expectation using the and syntax in higher order tests')
@@ -52,12 +51,12 @@ it('can start a new higher order expectation using the and syntax in higher orde
     ->toBeArray()
     ->foo->toEqual('bar');
 
-it('can start a new higher order expectation using the and syntax without nesting expectations', function () {
+it('can start a new higher order expectation using the and syntax without nesting expectations', function (): void {
     expect(new HasMethodsAndProperties)
         ->toBeInstanceOf(HasMethodsAndProperties::class)
         ->meta
         ->sequence(
-            function ($value, $key) {
+            function ($value, $key): void {
                 $value->toBeArray()->and($key)->toBe('foo');
             },
         );
@@ -80,7 +79,7 @@ class HasMethodsAndProperties
         ],
     ];
 
-    public function books()
+    public function books(): array
     {
         return [
             [
@@ -94,12 +93,12 @@ class HasMethodsAndProperties
         ];
     }
 
-    public function multiply($x, $y)
+    public function multiply($x, $y): int|float
     {
         return $x * $y;
     }
 
-    public function newInstance()
+    public function newInstance(): static
     {
         return new static;
     }

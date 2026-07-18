@@ -2,50 +2,42 @@
 
 use PHPUnit\Framework\ExpectationFailedException;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->unlessObject = new stdClass;
     $this->unlessObject->trueValue = true;
     $this->unlessObject->foo = 'foo';
 });
 
-it('pass', function () {
+it('pass', function (): void {
     expect('foo')
         ->unless(
             true,
-            function ($value) {
-                return $value->toEqual('bar');
-            }
+            fn ($value) => $value->toEqual('bar')
         )
-        ->toEqual('foo');
-
-    expect(static::getCount())->toBe(1);
+        ->toEqual('foo')
+        ->and(static::getCount())->toBe(1);
 });
 
-it('failures', function () {
+it('failures', function (): void {
     expect('foo')
         ->unless(
             false,
-            function ($value) {
-                return $value->toBeTrue();
-            }
+            fn ($value) => $value->toBeTrue()
         )
         ->toEqual('foo');
 })->throws(ExpectationFailedException::class, 'is true');
 
-it('runs with truthy', function () {
+it('runs with truthy', function (): void {
     expect($this->unlessObject)
         ->unless(
             0,
-            function ($value) {
-                return $value->trueValue->toBeTrue();
-            }
+            fn ($value) => $value->trueValue->toBeTrue()
         )
-        ->foo->toEqual('foo');
-
-    expect(static::getCount())->toBe(2);
+        ->foo->toEqual('foo')
+        ->and(static::getCount())->toBe(2);
 });
 
-it('skips with falsy', function () {
+it('skips with falsy', function (): void {
     expect($this->unlessObject)
         ->unless(
             1,
@@ -59,49 +51,36 @@ it('skips with falsy', function () {
                 return $value->trueValue->toBeFalse(); // fails
             }
         )
-        ->foo->toEqual('foo');
-
-    expect(static::getCount())->toBe(1);
+        ->foo->toEqual('foo')
+        ->and(static::getCount())->toBe(1);
 });
 
-it('runs with truthy closure condition', function () {
+it('runs with truthy closure condition', function (): void {
     expect($this->unlessObject)
         ->unless(
-            function () {
-                return '0';
-            },
-            function ($value) {
-                return $value->trueValue->toBeTrue();
-            }
+            fn (): string => '0',
+            fn ($value) => $value->trueValue->toBeTrue()
         )
-        ->foo->toEqual('foo');
-
-    expect(static::getCount())->toBe(2);
+        ->foo->toEqual('foo')
+        ->and(static::getCount())->toBe(2);
 });
 
-it('skips with falsy closure condition', function () {
+it('skips with falsy closure condition', function (): void {
     expect($this->unlessObject)
         ->unless(
-            function () {
-                return '1';
-            },
+            fn (): string => '1',
             function ($value) {
                 return $value->trueValue->toBeFalse(); // fails
             }
         )
-        ->foo->toEqual('foo');
-
-    expect(static::getCount())->toBe(1);
+        ->foo->toEqual('foo')
+        ->and(static::getCount())->toBe(1);
 });
 
 it('can be used in higher order tests')
     ->expect(true)
     ->unless(
-        function () {
-            return false;
-        },
-        function ($value) {
-            return $value->toBeFalse();
-        }
+        fn (): false => false,
+        fn ($value) => $value->toBeFalse()
     )
     ->throws(ExpectationFailedException::class, 'true is false');

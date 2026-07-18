@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
+use Pest\Plugins\Tia\Contracts\Lockfile;
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -11,7 +12,14 @@ use Symfony\Component\Finder\Finder;
  */
 final readonly class Fingerprint
 {
-    private const int SCHEMA_VERSION = 17;
+    private const int SCHEMA_VERSION = 18;
+
+    /**
+     * @var array<int, class-string<Lockfile>>
+     */
+    private const array LOCKFILES = [
+        Lockfiles\PackageLock::class,
+    ];
 
     /**
      * @return array{
@@ -205,7 +213,11 @@ final readonly class Fingerprint
         $parts = [];
 
         foreach (['package-lock.json', 'pnpm-lock.yaml', 'yarn.lock', 'bun.lock', 'bun.lockb'] as $name) {
-            $hash = self::trackedHash($projectRoot, $name);
+            if (! self::isTrackedByGit($projectRoot, $name)) {
+                continue;
+            }
+
+            $hash = self::lockfileHash($projectRoot.'/'.$name, $name);
 
             if ($hash !== null) {
                 $parts[] = $name.':'.$hash;
@@ -213,6 +225,37 @@ final readonly class Fingerprint
         }
 
         return $parts === [] ? null : hash('xxh128', implode("\n", $parts));
+    }
+
+    private static function lockfileHash(string $path, string $name): ?string
+    {
+        if (! is_file($path)) {
+            return null;
+        }
+
+        $contents = @file_get_contents($path);
+
+        if ($contents === false) {
+            return null;
+        }
+
+        foreach (self::LOCKFILES as $class) {
+            $handler = new $class;
+
+            if (! $handler->applies($name)) {
+                continue;
+            }
+
+            $fingerprint = $handler->fingerprint($contents);
+
+            if ($fingerprint !== null) {
+                return $fingerprint;
+            }
+
+            break;
+        }
+
+        return hash('xxh128', $contents);
     }
 
     private static function trackedHash(string $projectRoot, string $relativePath): ?string

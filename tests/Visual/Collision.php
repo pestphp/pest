@@ -2,12 +2,12 @@
 
 use Symfony\Component\Process\Process;
 
-test('collision', function (array $arguments) {
-    $output = function () use ($arguments) {
+test('collision', function (array $arguments): void {
+    $output = function () use ($arguments): ?string {
         $process = (new Process(
             array_merge(['php', 'bin/pest', 'tests/Fixtures/CollisionTest.php'], $arguments),
             null,
-            ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'COLLISION_TEST' => true]
+            ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'COLLISION_TEST' => true, 'PAO_DISABLE' => '1']
         ));
 
         $process->run();
@@ -15,7 +15,7 @@ test('collision', function (array $arguments) {
         return removeAnsiEscapeSequences($process->getOutput());
     };
 
-    $outputContent = explode("\n", $output());
+    $outputContent = explode("\n", (string) $output());
     array_pop($outputContent);
     array_pop($outputContent);
     array_pop($outputContent);

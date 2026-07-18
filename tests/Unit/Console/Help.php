@@ -3,7 +3,7 @@
 use Pest\Console\Help;
 use Symfony\Component\Console\Output\BufferedOutput;
 
-it('outputs the help information when --help is used', function () {
+it('outputs the help information when --help is used', function (): void {
     $output = new BufferedOutput;
     $plugin = new Help($output);
 

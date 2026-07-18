@@ -1,9 +1,12 @@
 <?php
 
+use Tests\Fixtures\Arch\ToHaveConstructor\HasConstructor\HasConstructor;
+use Tests\Fixtures\Arch\ToHaveConstructor\HasNoConstructor\HasNoConstructor;
+
 test('class has constructor')
-    ->expect('Tests\Fixtures\Arch\ToHaveConstructor\HasConstructor\HasConstructor')
+    ->expect(HasConstructor::class)
     ->toHaveConstructor();
 
 test('class has no constructor')
-    ->expect('Tests\Fixtures\Arch\ToHaveConstructor\HasNoConstructor\HasNoConstructor')
+    ->expect(HasNoConstructor::class)
     ->not->toHaveConstructor();

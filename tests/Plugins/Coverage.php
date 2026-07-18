@@ -3,7 +3,7 @@
 use Pest\Plugins\Coverage;
 use Symfony\Component\Console\Output\NullOutput;
 
-test('compute comparable coverage', function (float $givenValue, float $expectedValue) {
+test('compute comparable coverage', function (float $givenValue, float $expectedValue): void {
     $output = new NullOutput;
 
     $plugin = new Coverage($output);

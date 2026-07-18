@@ -4,7 +4,7 @@ use NunoMaduro\Collision\Contracts\RenderableOnCollisionEditor;
 use PHPUnit\Event\Code\ThrowableBuilder;
 use Whoops\Exception\Frame;
 
-test('collision editor can be added to the stack trace', function () {
+test('collision editor can be added to the stack trace', function (): void {
     $exception = new class extends Exception implements RenderableOnCollisionEditor
     {
         public function __construct()

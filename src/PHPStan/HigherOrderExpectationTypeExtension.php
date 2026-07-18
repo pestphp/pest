@@ -19,7 +19,7 @@ use PHPStan\Type\Type;
  * $expectation, $opposite, $shouldReset) from being incorrectly resolved as
  * higher-order value property accesses by downstream ExpressionTypeResolverExtensions.
  *
- * This extension must be registered BEFORE the peststan HigherOrderExpectationTypeExtension.
+ * This extension must be registered BEFORE the pest-plugin-phpstan HigherOrderExpectationTypeExtension.
  *
  * @internal
  */

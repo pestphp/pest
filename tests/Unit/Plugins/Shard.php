@@ -5,8 +5,8 @@ use Pest\Plugins\Shard;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 
-describe('getShard', function () {
-    it('parses valid shard format', function (string $format, int $expectedIndex, int $expectedTotal) {
+describe('getShard', function (): void {
+    it('parses valid shard format', function (string $format, int $expectedIndex, int $expectedTotal): void {
         $input = new ArgvInput(['test', '--shard', $format]);
 
         $result = Shard::getShard($input);
@@ -25,7 +25,7 @@ describe('getShard', function () {
         ['5/100', 5, 100],
     ]);
 
-    it('throws exception for invalid format', function (array $arguments) {
+    it('throws exception for invalid format', function (array $arguments): void {
         $input = new ArgvInput($arguments);
 
         Shard::getShard($input);
@@ -38,7 +38,7 @@ describe('getShard', function () {
         [['test', '--shard', '1.5/2']],
     ])->throws(InvalidOption::class);
 
-    it('throws exception for invalid index or total values', function (array $arguments) {
+    it('throws exception for invalid index or total values', function (array $arguments): void {
         $input = new ArgvInput($arguments);
 
         Shard::getShard($input);
@@ -50,8 +50,8 @@ describe('getShard', function () {
     ])->throws(InvalidOption::class);
 });
 
-describe('buildFilterArgument', function () {
-    it('generates compact filter for single test', function () {
+describe('buildFilterArgument', function (): void {
+    it('generates compact filter for single test', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -63,7 +63,7 @@ describe('buildFilterArgument', function () {
         expect($filter)->toBe('Tests\\\\Unit\\\\ExampleTest');
     });
 
-    it('generates compact filter for multiple tests with common prefix', function () {
+    it('generates compact filter for multiple tests with common prefix', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -78,7 +78,7 @@ describe('buildFilterArgument', function () {
         expect($filter)->toBe('Tests\\\\Unit\\\\Foo\\\\(BarTest|BazTest)');
     });
 
-    it('generates compact filter for tests with different namespaces', function () {
+    it('generates compact filter for tests with different namespaces', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -93,7 +93,7 @@ describe('buildFilterArgument', function () {
         expect($filter)->toBe('Tests\\\\(Unit\\\\FooTest|Feature\\\\BarTest)');
     });
 
-    it('returns empty string for empty test list', function () {
+    it('returns empty string for empty test list', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -102,10 +102,10 @@ describe('buildFilterArgument', function () {
 
         $filter = $method->invoke($shard, []);
 
-        expect($filter)->toBe('');
+        expect($filter)->toBeEmpty();
     });
 
-    it('generates compact filter for deeply nested namespaces', function () {
+    it('generates compact filter for deeply nested namespaces', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -121,7 +121,7 @@ describe('buildFilterArgument', function () {
         expect($filter)->toBe('Tests\\\\Unit\\\\Plugins\\\\Concerns\\\\(Foo|Bar|Baz)');
     });
 
-    it('handles mix of nested and flat namespaces', function () {
+    it('handles mix of nested and flat namespaces', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -142,8 +142,8 @@ describe('buildFilterArgument', function () {
     });
 });
 
-describe('ensureFilterLengthIsSafe', function () {
-    it('accepts filter within length limit', function () {
+describe('ensureFilterLengthIsSafe', function (): void {
+    it('accepts filter within length limit', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -157,7 +157,7 @@ describe('ensureFilterLengthIsSafe', function () {
         expect(true)->toBeTrue();
     });
 
-    it('throws exception when filter exceeds default limit', function () {
+    it('throws exception when filter exceeds default limit', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -169,7 +169,7 @@ describe('ensureFilterLengthIsSafe', function () {
         $method->invoke($shard, $filter);
     })->throws(InvalidOption::class, 'The generated filter for this shard is too long');
 
-    it('respects custom limit from environment variable', function () {
+    it('respects custom limit from environment variable', function (): void {
         putenv('PEST_SHARD_MAX_FILTER_LENGTH=1000');
 
         $output = new BufferedOutput;
@@ -191,7 +191,7 @@ describe('ensureFilterLengthIsSafe', function () {
         }
     });
 
-    it('accepts filter within custom limit', function () {
+    it('accepts filter within custom limit', function (): void {
         putenv('PEST_SHARD_MAX_FILTER_LENGTH=1000');
 
         $output = new BufferedOutput;
@@ -213,8 +213,8 @@ describe('ensureFilterLengthIsSafe', function () {
     });
 });
 
-describe('handleArguments', function () {
-    it('returns original arguments when shard option is not present', function () {
+describe('handleArguments', function (): void {
+    it('returns original arguments when shard option is not present', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -225,7 +225,7 @@ describe('handleArguments', function () {
         expect($result)->toBe($arguments);
     });
 
-    it('removes parallel arguments from test discovery', function () {
+    it('removes parallel arguments from test discovery', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -240,8 +240,8 @@ describe('handleArguments', function () {
     });
 });
 
-describe('parseListTestsOutput', function () {
-    it('parses Tests\\ namespaced classes from --list-tests output', function () {
+describe('parseListTestsOutput', function (): void {
+    it('parses Tests\\ namespaced classes from --list-tests output', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -262,7 +262,7 @@ OUT;
         ]);
     });
 
-    it('deduplicates repeated class names from multiple test methods', function () {
+    it('deduplicates repeated class names from multiple test methods', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -278,18 +278,18 @@ OUT;
         expect($method->invoke($shard, $listOutput))->toBe(['Tests\\Same']);
     });
 
-    it('returns an empty list for output with no matching lines', function () {
+    it('returns an empty list for output with no matching lines', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
         $reflection = new ReflectionClass($shard);
         $method = $reflection->getMethod('parseListTestsOutput');
 
-        expect($method->invoke($shard, ''))->toBe([])
-            ->and($method->invoke($shard, 'some random text'))->toBe([]);
+        expect($method->invoke($shard, ''))->toBeEmpty()
+            ->and($method->invoke($shard, 'some random text'))->toBeEmpty();
     });
 
-    it('parses non-Tests namespaced classes', function () {
+    it('parses non-Tests namespaced classes', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -309,7 +309,7 @@ OUT;
         ]);
     });
 
-    it('parses unnamespaced top-level classes', function () {
+    it('parses unnamespaced top-level classes', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -319,7 +319,7 @@ OUT;
         expect($method->invoke($shard, ' - P\FooTest::test_bar'))->toBe(['FooTest']);
     });
 
-    it('strips the P\\ Pest prefix but keeps the rest of the FQCN', function () {
+    it('strips the P\\ Pest prefix but keeps the rest of the FQCN', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -337,7 +337,7 @@ OUT;
         ]);
     });
 
-    it('ignores junk lines that lack the " - …::" framing', function () {
+    it('ignores junk lines that lack the " - …::" framing', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -356,8 +356,8 @@ OUT;
     });
 });
 
-describe('buildListTestsCommand', function () {
-    it('builds the list-tests command with the forwarded --test-directory', function () {
+describe('buildListTestsCommand', function (): void {
+    it('builds the list-tests command with the forwarded --test-directory', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -375,7 +375,7 @@ describe('buildListTestsCommand', function () {
         ]);
     });
 
-    it('strips --parallel and -p when building the list-tests command', function () {
+    it('strips --parallel and -p when building the list-tests command', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -393,7 +393,7 @@ describe('buildListTestsCommand', function () {
         ]);
     });
 
-    it('forwards --test-directory even when input arguments include one', function () {
+    it('forwards --test-directory even when input arguments include one', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -405,7 +405,7 @@ describe('buildListTestsCommand', function () {
         expect($command)->toContain('--test-directory=suites');
     });
 
-    it('strips --processes=N when building the list-tests command', function () {
+    it('strips --processes=N when building the list-tests command', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -423,7 +423,7 @@ describe('buildListTestsCommand', function () {
         ]);
     });
 
-    it('strips --processes N (space-separated) when building the list-tests command', function () {
+    it('strips --processes N (space-separated) when building the list-tests command', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -438,8 +438,8 @@ describe('buildListTestsCommand', function () {
     });
 });
 
-describe('addOutput', function () {
-    it('displays shard information after test execution', function () {
+describe('addOutput', function (): void {
+    it('displays shard information after test execution', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -462,7 +462,7 @@ describe('addOutput', function () {
             ->and($outputText)->toContain('out of 100');
     });
 
-    it('uses singular form for single test file', function () {
+    it('uses singular form for single test file', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -482,7 +482,7 @@ describe('addOutput', function () {
             ->and($outputText)->not->toContain('1 files');
     });
 
-    it('returns original exit code when shard is not set', function () {
+    it('returns original exit code when shard is not set', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 

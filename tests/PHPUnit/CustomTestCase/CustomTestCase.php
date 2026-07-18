@@ -10,7 +10,7 @@ use function PHPUnit\Framework\assertTrue;
 
 abstract class CustomTestCase extends TestCase
 {
-    public function assertCustomTrue()
+    public function assertCustomTrue(): void
     {
         assertTrue(true);
     }

@@ -12,10 +12,10 @@ it('is not incompleted because of expect')->expect(true)->toBeTrue();
 
 it('is not incompleted because of assert')->assertTrue(true);
 
-it('is not incompleted because of test with assertions', function () {
+it('is not incompleted because of test with assertions', function (): void {
     expect(true)->toBeTrue();
 });
 
-describe('a "describe" group of tests', function () {
+describe('a "describe" group of tests', function (): void {
     it('is incompleted');
 });

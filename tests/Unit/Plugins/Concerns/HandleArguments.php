@@ -2,7 +2,7 @@
 
 use Pest\Plugins\Concerns\HandleArguments;
 
-test('method hasArgument', function (string $argument, bool $expectedResult) {
+test('method hasArgument', function (string $argument, bool $expectedResult): void {
     $obj = new class
     {
         use HandleArguments;
@@ -25,7 +25,7 @@ test('method hasArgument', function (string $argument, bool $expectedResult) {
     ['--undefined-argument', false],
 ]);
 
-test('popArgument preserves duplicate values when removing a missing argument', function () {
+test('popArgument preserves duplicate values when removing a missing argument', function (): void {
     $obj = new class
     {
         use HandleArguments;
@@ -37,7 +37,7 @@ test('popArgument preserves duplicate values when removing a missing argument', 
     expect($result)->toBe($arguments);
 });
 
-test('popArgument preserves duplicate values when removing an existing argument', function () {
+test('popArgument preserves duplicate values when removing an existing argument', function (): void {
     $obj = new class
     {
         use HandleArguments;

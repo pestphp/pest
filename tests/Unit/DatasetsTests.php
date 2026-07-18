@@ -2,7 +2,7 @@
 
 use Pest\Repositories\DatasetsRepository;
 
-it('show only the names of named datasets in their description', function () {
+it('show only the names of named datasets in their description', function (): void {
     $descriptions = array_keys(DatasetsRepository::resolve([
         [
             'one' => [1],
@@ -14,7 +14,7 @@ it('show only the names of named datasets in their description', function () {
         ->and($descriptions[1])->toBe('dataset "two"');
 });
 
-it('show the actual dataset of non-named datasets in their description', function () {
+it('show the actual dataset of non-named datasets in their description', function (): void {
     $descriptions = array_keys(DatasetsRepository::resolve([
         [
             [1],
@@ -22,11 +22,11 @@ it('show the actual dataset of non-named datasets in their description', functio
         ],
     ], __FILE__));
 
-    expect($descriptions[0])->toBe('(1)');
-    expect($descriptions[1])->toBe('([2])');
+    expect($descriptions[0])->toBe('(1)')
+        ->and($descriptions[1])->toBe('([2])');
 });
 
-it('show only the names of multiple named datasets in their description', function () {
+it('show only the names of multiple named datasets in their description', function (): void {
     $descriptions = array_keys(DatasetsRepository::resolve([
         [
             'one' => [1],
@@ -38,13 +38,13 @@ it('show only the names of multiple named datasets in their description', functi
         ],
     ], __FILE__));
 
-    expect($descriptions[0])->toBe('dataset "one" / dataset "three"');
-    expect($descriptions[1])->toBe('dataset "one" / dataset "four"');
-    expect($descriptions[2])->toBe('dataset "two" / dataset "three"');
-    expect($descriptions[3])->toBe('dataset "two" / dataset "four"');
+    expect($descriptions[0])->toBe('dataset "one" / dataset "three"')
+        ->and($descriptions[1])->toBe('dataset "one" / dataset "four"')
+        ->and($descriptions[2])->toBe('dataset "two" / dataset "three"')
+        ->and($descriptions[3])->toBe('dataset "two" / dataset "four"');
 });
 
-it('show the actual dataset of multiple non-named datasets in their description', function () {
+it('show the actual dataset of multiple non-named datasets in their description', function (): void {
     $descriptions = array_keys(DatasetsRepository::resolve([
         [
             [1],
@@ -56,13 +56,13 @@ it('show the actual dataset of multiple non-named datasets in their description'
         ],
     ], __FILE__));
 
-    expect($descriptions[0])->toBe('(1) / (3)');
-    expect($descriptions[1])->toBe('(1) / ([4])');
-    expect($descriptions[2])->toBe('([2]) / (3)');
-    expect($descriptions[3])->toBe('([2]) / ([4])');
+    expect($descriptions[0])->toBe('(1) / (3)')
+        ->and($descriptions[1])->toBe('(1) / ([4])')
+        ->and($descriptions[2])->toBe('([2]) / (3)')
+        ->and($descriptions[3])->toBe('([2]) / ([4])');
 });
 
-it('show the correct description for mixed named and not-named datasets', function () {
+it('show the correct description for mixed named and not-named datasets', function (): void {
     $descriptions = array_keys(DatasetsRepository::resolve([
         [
             'one' => [1],
@@ -74,13 +74,13 @@ it('show the correct description for mixed named and not-named datasets', functi
         ],
     ], __FILE__));
 
-    expect($descriptions[0])->toBe('dataset "one" / (3)');
-    expect($descriptions[1])->toBe('dataset "one" / dataset "four"');
-    expect($descriptions[2])->toBe('([2]) / (3)');
-    expect($descriptions[3])->toBe('([2]) / dataset "four"');
+    expect($descriptions[0])->toBe('dataset "one" / (3)')
+        ->and($descriptions[1])->toBe('dataset "one" / dataset "four"')
+        ->and($descriptions[2])->toBe('([2]) / (3)')
+        ->and($descriptions[3])->toBe('([2]) / dataset "four"');
 });
 
-it('shows the correct description for long texts with newlines', function () {
+it('shows the correct description for long texts with newlines', function (): void {
     $descriptions = array_keys(DatasetsRepository::resolve([
         [
             ['some very \nlong text with \n     newlines'],
@@ -90,7 +90,7 @@ it('shows the correct description for long texts with newlines', function () {
     expect($descriptions[0])->toBe('(\'some very long text with …wlines\')');
 });
 
-it('shows the correct description for arrays with many elements', function () {
+it('shows the correct description for arrays with many elements', function (): void {
     $descriptions = array_keys(DatasetsRepository::resolve([
         [
             [[1, 2, 3, 4, 5]],
@@ -100,7 +100,7 @@ it('shows the correct description for arrays with many elements', function () {
     expect($descriptions[0])->toBe('([1, 2, 3, …])');
 });
 
-it('shows the correct description of datasets with html', function () {
+it('shows the correct description of datasets with html', function (): void {
     $descriptions = array_keys(DatasetsRepository::resolve([
         [
             '<div class="flex items-center"></div>',

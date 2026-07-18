@@ -1,6 +1,6 @@
 <?php
 
-pest()->beforeEach(function () {
+pest()->beforeEach(function (): void {
     expect($this)
         ->toHaveProperty('baz')
         ->and($this->baz)
@@ -9,7 +9,7 @@ pest()->beforeEach(function () {
     $this->baz = 2;
 });
 
-beforeEach(function () {
+beforeEach(function (): void {
     expect($this)
         ->toHaveProperty('baz')
         ->and($this->baz)
@@ -18,7 +18,7 @@ beforeEach(function () {
     $this->baz = 3;
 });
 
-test('global beforeEach execution order', function () {
+test('global beforeEach execution order', function (): void {
     expect($this)
         ->toHaveProperty('baz')
         ->and($this->baz)
