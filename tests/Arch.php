@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Pest\Expectation;
 use Pest\Plugins\Tia\BaselineSync;
 

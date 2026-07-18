@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 it('may fail', function (): void {
     $this->fail();
 })->fails();

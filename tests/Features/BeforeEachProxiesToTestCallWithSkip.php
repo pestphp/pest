@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 beforeEach()->skip();
 
 test('does not run 1', function (): void {

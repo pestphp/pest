@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use PHPUnit\Framework\AssertionFailedError;
 
 it('may fail', function (): void {

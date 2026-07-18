@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Pest\Arch\Exceptions\ArchExpectationFailedException;
 use Tests\Fixtures\Arch\ToHaveAttribute\Attributes\AsAttribute;
 

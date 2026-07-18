@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 $file = __DIR__.DIRECTORY_SEPARATOR.'after-all-test';
 
 beforeAll(function () use ($file): void {
