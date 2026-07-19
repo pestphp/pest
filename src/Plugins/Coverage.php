@@ -490,15 +490,23 @@ final class Coverage implements AddsOutput, HandlesArguments
         /** @var list<string> $files */
         sort($files);
 
-        $merged = null;
+        $mergedCoverage = null;
+        $mergedTestResults = [];
+        $mergedBuildInfo = null;
+        $mergedBasePath = null;
         foreach ($files as $file) {
             try {
-                /** @var CodeCoverage $coverage */
-                $coverage = require $file;
-                if ($merged === null) {
-                    $merged = $coverage;
+                /** @var array{buildInformation: array, basePath: string, codeCoverage: \SebastianBergmann\CodeCoverage\Data\ProcessedCodeCoverageData, testResults: array} $data */
+                $data = require $file;
+
+                if ($mergedCoverage === null) {
+                    $mergedCoverage = clone $data['codeCoverage'];
+                    $mergedTestResults = $data['testResults'];
+                    $mergedBuildInfo = $data['buildInformation'];
+                    $mergedBasePath = $data['basePath'];
                 } else {
-                    $merged->merge($coverage);
+                    $mergedCoverage->merge($data['codeCoverage']);
+                    $mergedTestResults = array_merge($mergedTestResults, $data['testResults']);
                 }
             } catch (Throwable $e) {
                 $this->output->writeln(sprintf(
@@ -509,7 +517,7 @@ final class Coverage implements AddsOutput, HandlesArguments
             }
         }
 
-        if ($merged === null) {
+        if ($mergedCoverage === null) {
             $this->output->writeln([
                 '',
                 '  <fg=white;bg=red;options=bold> ERROR </> No valid coverage files could be loaded.',
@@ -518,6 +526,13 @@ final class Coverage implements AddsOutput, HandlesArguments
 
             return -1.0;
         }
+
+        $merged = [
+            'buildInformation' => $mergedBuildInfo,
+            'basePath' => $mergedBasePath,
+            'codeCoverage' => $mergedCoverage,
+            'testResults' => $mergedTestResults,
+        ];
 
         $result = \Pest\Support\Coverage::render($merged, $this->output, $this->compact, $this->showOnlyCovered);
 
