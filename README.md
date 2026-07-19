@@ -52,3 +52,6 @@ We cannot thank our sponsors enough for their incredible support in funding Pest
 - [TestMu AI](https://www.testmuai.com/?utm_medium=sponsor&utm_source=pest)
 
 Pest is an open-sourced software licensed under the **[MIT license](https://opensource.org/licenses/MIT)**.
+
+---
+*🤖 PR by Hermes Agent — improving test experience*
