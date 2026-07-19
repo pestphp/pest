@@ -11,6 +11,7 @@ use ParaTest\JUnit\LogMerger;
 use ParaTest\JUnit\Writer;
 use ParaTest\Options;
 use ParaTest\RunnerInterface;
+use ParaTest\WrapperRunner\MissingResultsException;
 use ParaTest\WrapperRunner\SuiteLoader;
 use ParaTest\WrapperRunner\WrapperWorker;
 use Pest\Result;
@@ -42,6 +43,8 @@ use function assert;
 use function count;
 use function dirname;
 use function file_get_contents;
+use function filesize;
+use function is_file;
 use function max;
 use function realpath;
 use function str_starts_with;
@@ -55,13 +58,13 @@ use function usleep;
 final class WrapperRunner implements RunnerInterface
 {
     /**
-     * The time to sleep between cycles.
-     */
-    /**
      * The merged test result from the parallel run.
      */
     public static ?TestResult $result = null;
 
+    /**
+     * The time to sleep between cycles.
+     */
     private const int CYCLE_SLEEP = 10000;
 
     /**
@@ -87,6 +90,18 @@ final class WrapperRunner implements RunnerInterface
 
     /** @var array<int,int> */
     private array $batches = [];
+
+    /** @var array<non-empty-string,true> */
+    private array $requiredTestResultFiles = [];
+
+    /** @var array<non-empty-string,true> */
+    private array $requiredCoverageFiles = [];
+
+    /** @var list<SplFileInfo> */
+    private array $statusFiles = [];
+
+    /** @var list<SplFileInfo> */
+    private array $progressFiles = [];
 
     /** @var list<SplFileInfo> */
     private array $unexpectedOutputFiles = [];
@@ -217,7 +232,7 @@ final class WrapperRunner implements RunnerInterface
 
                 if (
                     $this->exitcode > 0
-                    && $this->options->configuration->stopOnFailure()
+                    && $this->options->configuration->stopOnFailureThreshold() > 0
                 ) {
                     $this->pending = [];
                 } elseif (($pending = array_shift($this->pending)) !== null) {
@@ -232,6 +247,18 @@ final class WrapperRunner implements RunnerInterface
 
     private function flushWorker(WrapperWorker $worker): void
     {
+        if ($worker->hasExecutedTests()) {
+            $testResultFile = $worker->testResultFile->getPathname();
+
+            if ($testResultFile !== '') {
+                $this->requiredTestResultFiles[$testResultFile] = true;
+            }
+
+            if (isset($worker->coverageFile) && $worker->coverageFile->getPathname() !== '') {
+                $this->requiredCoverageFiles[$worker->coverageFile->getPathname()] = true;
+            }
+        }
+
         $this->exitcode = max($this->exitcode, $worker->getExitCode());
         $this->printer->printFeedback(
             $worker->progressFile,
@@ -279,9 +306,14 @@ final class WrapperRunner implements RunnerInterface
         $worker->start();
         $this->batches[$token] = 0;
 
-        $this->unexpectedOutputFiles[] = $worker->unexpectedOutputFile;
+        $this->statusFiles[] = $worker->statusFile;
+        $this->progressFiles[] = $worker->progressFile;
         $this->unexpectedOutputFiles[] = $worker->unexpectedOutputFile;
         $this->testResultFiles[] = $worker->testResultFile;
+
+        if (isset($worker->resultCacheFile)) {
+            $this->resultCacheFiles[] = $worker->resultCacheFile;
+        }
 
         if (isset($worker->junitFile)) {
             $this->junitFiles[] = $worker->junitFile;
@@ -315,6 +347,20 @@ final class WrapperRunner implements RunnerInterface
 
     private function complete(TestResult $testResultSum): int
     {
+        $missingTestResultFiles = [];
+
+        foreach ($this->requiredTestResultFiles as $filePath => $true) {
+            if (is_file($filePath)) {
+                continue;
+            }
+
+            $missingTestResultFiles[] = $filePath;
+        }
+
+        if ($missingTestResultFiles !== []) {
+            throw MissingResultsException::create($missingTestResultFiles, 'test_result');
+        }
+
         foreach ($this->testResultFiles as $testResultFile) {
             if (! $testResultFile->isFile()) {
                 continue;
@@ -398,7 +444,7 @@ final class WrapperRunner implements RunnerInterface
             $testResultSum->testRunnerTriggeredNoticeEvents(),
             array_values(array_filter(
                 $testResultSum->testRunnerTriggeredWarningEvents(),
-                fn (WarningTriggered $event): bool => ! str_contains($event->message(), 'No tests found')
+                fn (WarningTriggered $event): bool => ! str_contains($event->message(), 'No tests found in class')
             )),
             $testResultSum->testRunnerTriggeredIssueDeprecationEvents(),
             $testResultSum->testRunnerTriggeredIssueErrorEvents(),
@@ -442,8 +488,11 @@ final class WrapperRunner implements RunnerInterface
 
         $exitcode = Result::exitCode($this->options->configuration, $testResultSum);
 
+        $this->clearFiles($this->statusFiles);
+        $this->clearFiles($this->progressFiles);
         $this->clearFiles($this->unexpectedOutputFiles);
         $this->clearFiles($this->testResultFiles);
+        $this->clearFiles($this->resultCacheFiles);
         $this->clearFiles($this->coverageFiles);
         $this->clearFiles($this->junitFiles);
         $this->clearFiles($this->teamcityFiles);
@@ -456,6 +505,20 @@ final class WrapperRunner implements RunnerInterface
     {
         if ($this->coverageFiles === []) {
             return;
+        }
+
+        $missingCoverageFiles = [];
+
+        foreach ($this->requiredCoverageFiles as $filePath => $true) {
+            if (is_file($filePath) && filesize($filePath) !== 0) {
+                continue;
+            }
+
+            $missingCoverageFiles[] = $filePath;
+        }
+
+        if ($missingCoverageFiles !== []) {
+            throw MissingResultsException::create($missingCoverageFiles, 'coverage');
         }
 
         $coverageManager = new CodeCoverage;
