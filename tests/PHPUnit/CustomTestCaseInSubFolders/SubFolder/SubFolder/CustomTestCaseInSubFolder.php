@@ -10,6 +10,6 @@ class CustomTestCaseInSubFolder extends TestCase
 {
     public function assertCustomInSubFolderTrue(): void
     {
-        $this->assertTrue(true);
+        expect(true)->toBeTrue();
     }
 }

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 test('a test', function (): void {
-    $this->assertArrayHasKey('key', ['key' => 'foo']);
+    expect(['key' => 'foo'])->toHaveKey('key');
 });
 
 test('higher order message test')->expect(true)->toBeTrue();

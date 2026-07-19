@@ -1,9 +1,7 @@
 <?php
 
 it('gives access the the underlying expectException', function (): void {
-    $this->expectException(InvalidArgumentException::class);
-
-    throw new InvalidArgumentException;
+    expect(fn () => throw new InvalidArgumentException)->toThrow(InvalidArgumentException::class);
 });
 
 it('catch exceptions', function (): void {
@@ -27,7 +25,7 @@ it('can just define the code', function (): void {
 })->throws(1);
 
 it('not catch exceptions if given condition is false', function (): void {
-    $this->assertTrue(true);
+    expect(true)->toBeTrue();
 })->throwsIf(false, Exception::class);
 
 it('catch exceptions if given condition is true', function (): void {
@@ -59,7 +57,7 @@ it('can just define the code if given condition is 1', function (): void {
 })->throwsIf(1, 1);
 
 it('not catch exceptions if given condition is true', function (): void {
-    $this->assertTrue(true);
+    expect(true)->toBeTrue();
 })->throwsUnless(true, Exception::class);
 
 it('catch exceptions if given condition is false', function (): void {

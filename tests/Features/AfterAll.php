@@ -14,7 +14,7 @@ afterAll(function () use ($file): void {
 
 test('deletes file after all', function () use ($file): void {
     file_put_contents($file, 'foo');
-    $this->assertFileExists($file);
+    expect($file)->toBeFile();
     register_shutdown_function(function (): void {
         // $this->assertFileDoesNotExist($file);
     });

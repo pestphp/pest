@@ -7,7 +7,7 @@ class MyCustomClassTest extends TestCase
 {
     public function assertTrueIsTrue(): void
     {
-        $this->assertTrue(true);
+        expect(true)->toBeTrue();
     }
 }
 

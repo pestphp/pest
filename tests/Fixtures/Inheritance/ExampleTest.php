@@ -11,6 +11,6 @@ class ExampleTest extends Base\ExampleTest
     #[\Override]
     public function test_example(): void
     {
-        $this->assertTrue(true);
+        expect(true)->toBeTrue();
     }
 }

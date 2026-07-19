@@ -10,17 +10,12 @@ beforeEach(function (): void {
 });
 
 it('throws exception if dataset does not exist', function (): void {
-    $this->expectException(DatasetDoesNotExist::class);
-    $this->expectExceptionMessage("A dataset with the name `first` does not exist. You can create it using `dataset('first', ['a', 'b']);`.");
-
-    DatasetsRepository::resolve(['first'], __FILE__);
+    expect(fn () => DatasetsRepository::resolve(['first'], __FILE__))->toThrow(DatasetDoesNotExist::class, "A dataset with the name `first` does not exist. You can create it using `dataset('first', ['a', 'b']);`.");
 });
 
 it('throws exception if dataset already exist', function (): void {
     DatasetsRepository::set('second', [[]], __DIR__);
-    $this->expectException(DatasetAlreadyExists::class);
-    $this->expectExceptionMessage('A dataset with the name `second` already exists in scope ['.__DIR__.'].');
-    DatasetsRepository::set('second', [[]], __DIR__);
+    expect(fn () => DatasetsRepository::set('second', [[]], __DIR__))->toThrow(DatasetAlreadyExists::class, 'A dataset with the name `second` already exists in scope ['.__DIR__.'].');
 });
 
 it('sets closures', function (): void {
@@ -38,7 +33,7 @@ it('sets arrays', function (): void {
 });
 
 it('gets bound to test case object', function ($value): void {
-    $this->assertTrue(true);
+    expect(true)->toBeTrue();
 })->with([['a'], ['b']]);
 
 test('it truncates the description', function (): void {

@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 use Pest\Plugin;
 
 trait PluginTrait
 {
     public function assertPluginTraitGotRegistered(): void
     {
-        $this->assertTrue(true);
+        expect(true)->toBeTrue();
     }
 }
 
@@ -14,7 +16,7 @@ trait SecondPluginTrait
 {
     public function assertSecondPluginTraitGotRegistered(): void
     {
-        $this->assertTrue(true);
+        expect(true)->toBeTrue();
     }
 }
 
