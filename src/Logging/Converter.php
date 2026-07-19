@@ -15,11 +15,6 @@ use PHPUnit\Event\Test\AfterLastTestMethodErrored;
 use PHPUnit\Event\Test\AfterLastTestMethodFailed;
 use PHPUnit\Event\Test\BeforeFirstTestMethodErrored;
 use PHPUnit\Event\Test\BeforeFirstTestMethodFailed;
-use PHPUnit\Event\Test\ConsideredRisky;
-use PHPUnit\Event\Test\Errored;
-use PHPUnit\Event\Test\Failed;
-use PHPUnit\Event\Test\MarkedIncomplete;
-use PHPUnit\Event\Test\Skipped;
 use PHPUnit\Event\TestSuite\TestSuite;
 use PHPUnit\Event\TestSuite\TestSuiteForTestMethodWithDataProvider;
 use PHPUnit\Framework\Exception as FrameworkException;
@@ -254,25 +249,29 @@ final readonly class Converter
             ...$result->testMarkedIncompleteEvents(),
         ];
 
-        $numberOfNotPassedTests = count(
-            array_unique(
-                array_map(
-                    function (AfterLastTestMethodErrored|AfterLastTestMethodFailed|BeforeFirstTestMethodErrored|BeforeFirstTestMethodFailed|Errored|Failed|Skipped|ConsideredRisky|MarkedIncomplete $event): string {
-                        if ($event instanceof BeforeFirstTestMethodErrored
-                            || $event instanceof AfterLastTestMethodErrored
-                            || $event instanceof BeforeFirstTestMethodFailed
-                            || $event instanceof AfterLastTestMethodFailed) {
-                            return $event->testClassName();
-                        }
+        $notPassedTests = [];
 
-                        return $this->getTestCaseLocation($event->test());
-                    },
-                    $events
-                )
-            )
-        );
+        foreach ($events as $event) {
+            if ($event instanceof AfterLastTestMethodErrored) {
+                // PHPUnit's collector does not count these towards `numberOfTestsRun`...
+                continue;
+            }
+            if ($event instanceof AfterLastTestMethodFailed) {
+                // PHPUnit's collector does not count these towards `numberOfTestsRun`...
+                continue;
+            }
+            if ($event instanceof BeforeFirstTestMethodErrored || $event instanceof BeforeFirstTestMethodFailed) {
+                $notPassedTests[] = $event->testClassName();
 
-        $numberOfPassedTests = $result->numberOfTestsRun() - $numberOfNotPassedTests;
+                continue;
+            }
+
+            $notPassedTests[] = $this->getTestCaseLocation($event->test());
+        }
+
+        $numberOfPassedTests = $result->numberOfTestsRun()
+            - count(array_unique($notPassedTests))
+            - $result->numberOfTestSkippedByTestSuiteSkippedEvents();
 
         return $this->stateGenerator->fromPhpUnitTestResult($numberOfPassedTests, $result);
     }

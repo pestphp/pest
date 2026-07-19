@@ -43,7 +43,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Pest\Logging\TeamCity\Subscriber;
+namespace PHPUnit\TextUI\Output\Default\ProgressPrinter;
 
 use PHPUnit\Event\Test\Skipped;
 use PHPUnit\Event\Test\SkippedSubscriber;
@@ -51,16 +51,20 @@ use ReflectionClass;
 
 /**
  * @internal This class is not covered by the backward compatibility promise for PHPUnit
+ *
+ * This file is overridden so PHPUnit's progress output emits a "T" before the
+ * regular "S" for "todo" tests — Pest's parallel result printer consumes the
+ * "T" and swallows the "S" that follows it.
  */
-final class TestSkippedSubscriber extends Subscriber implements SkippedSubscriber
+final readonly class TestSkippedSubscriber extends Subscriber implements SkippedSubscriber
 {
     public function notify(Skipped $event): void
     {
-        if (str_contains($event->message(), '__TODO__')) {
+        if ($event->message() === '__TODO__') {
             $this->printTodoItem();
         }
 
-        $this->logger()->testSkipped($event);
+        $this->printer()->testSkipped();
     }
 
     /**
@@ -69,7 +73,7 @@ final class TestSkippedSubscriber extends Subscriber implements SkippedSubscribe
     private function printTodoItem(): void
     {
         $mirror = new ReflectionClass($this->printer());
-        $printerMirror = $mirror->getMethod('printProgress');
-        $printerMirror->invoke($this->printer(), 'T');
+        $printProgress = $mirror->getMethod('printProgress');
+        $printProgress->invoke($this->printer(), 'T');
     }
 }

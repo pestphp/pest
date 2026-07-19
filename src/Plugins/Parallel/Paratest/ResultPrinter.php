@@ -120,10 +120,6 @@ final class ResultPrinter
 
         $unexpectedOutput = $this->tail($outputFile);
         if ($unexpectedOutput !== '') {
-            if (preg_match('/^T+$/', $unexpectedOutput) > 0) {
-                return;
-            }
-
             $this->output->write($unexpectedOutput);
         }
 
