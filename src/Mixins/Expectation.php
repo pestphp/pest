@@ -364,6 +364,38 @@ final class Expectation
     }
 
     /**
+     * Asserts that every element in the value is unique.
+     *
+     * @return self<TValue>
+     */
+    public function toHaveUniqueItems(string $message = ''): self
+    {
+        if (! is_array($this->value)) {
+            InvalidExpectationValue::expected('array');
+        }
+
+        Assert::assertTrue(count(array_unique($this->value, SORT_REGULAR)) === count($this->value), $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value contains at least one duplicate.
+     *
+     * @return self<TValue>
+     */
+    public function toHaveDuplicates(string $message = ''): self
+    {
+        if (! is_array($this->value)) {
+            InvalidExpectationValue::expected('array');
+        }
+
+        Assert::assertTrue(count(array_unique($this->value, SORT_REGULAR)) < count($this->value), $message);
+
+        return $this;
+    }
+
+    /**
      * Asserts that the value contains the property $name.
      *
      * @return self<TValue>
@@ -511,6 +543,20 @@ final class Expectation
     public function toBeList(string $message = ''): self
     {
         Assert::assertIsList($this->value, $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is an associative array.
+     *
+     * @return self<TValue>
+     */
+    public function toBeAssociative(string $message = ''): self
+    {
+        $this->toBeArray($message);
+
+        Assert::assertFalse(array_is_list($this->value), $message);
 
         return $this;
     }
