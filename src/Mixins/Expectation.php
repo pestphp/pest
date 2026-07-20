@@ -1247,7 +1247,7 @@ final class Expectation
             InvalidExpectationValue::expected('string');
         }
 
-        Assert::assertTrue((bool) preg_match('/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/', $this->value), $message);
+        Assert::assertTrue((bool) filter_var($this->value, FILTER_VALIDATE_MAC), $message);
 
         return $this;
     }

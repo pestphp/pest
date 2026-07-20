@@ -6,14 +6,27 @@ use Pest\Exceptions\InvalidExpectationValue;
 use PHPUnit\Framework\ExpectationFailedException;
 
 test('pass', function (): void {
-    expect('abcdef')->toBeHexadecimal()
-        ->and('ABCDEF')->toBeHexadecimal()
-        ->and('1234567890')->toBeHexadecimal()
-        ->and('aBcDeF')->toBeHexadecimal();
+    expect('abcdef')->toBeHexadecimal() // lowercase
+        ->and('ABCDEF')->toBeHexadecimal() // uppercase
+        ->and('aBcDeF')->toBeHexadecimal() // mixed case
+        ->and('1234567890')->toBeHexadecimal() // numeric
+        ->and('deadbeef')->toBeHexadecimal(); // alphanumeric
 });
 
 test('failures', function (): void {
     expect('xyz')->toBeHexadecimal();
+})->throws(ExpectationFailedException::class);
+
+test('failures with invalid characters', function (): void {
+    expect('ghijkl')->toBeHexadecimal();
+})->throws(ExpectationFailedException::class);
+
+test('failures with zero-x prefix', function (): void {
+    expect('0x1a')->toBeHexadecimal();
+})->throws(ExpectationFailedException::class);
+
+test('failures with empty string', function (): void {
+    expect('')->toBeHexadecimal();
 })->throws(ExpectationFailedException::class);
 
 test('failures with invalid type', function (): void {

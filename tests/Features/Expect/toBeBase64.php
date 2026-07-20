@@ -6,13 +6,23 @@ use Pest\Exceptions\InvalidExpectationValue;
 use PHPUnit\Framework\ExpectationFailedException;
 
 test('pass', function (): void {
-    expect('Zm9v')->toBeBase64() // 'foo'
-        ->and('')->toBeBase64()
-        ->and('dGVzdA==')->toBeBase64(); // 'test'
+    expect('Zm9v')->toBeBase64() // 'foo' (no padding)
+        ->and('Zm9vYg==')->toBeBase64() // 'foob' (with padding)
+        ->and('Zm9vYmE=')->toBeBase64() // 'fooba' (with padding)
+        ->and('Zm9vYmFy')->toBeBase64() // 'foobar' (no padding)
+        ->and('')->toBeBase64(); // empty string
 });
 
 test('failures', function (): void {
     expect('not-base64!')->toBeBase64();
+})->throws(ExpectationFailedException::class);
+
+test('failures with invalid padding', function (): void {
+    expect('AAA')->toBeBase64();
+})->throws(ExpectationFailedException::class);
+
+test('failures with malformed input', function (): void {
+    expect('!!invalid!!')->toBeBase64();
 })->throws(ExpectationFailedException::class);
 
 test('failures with invalid type', function (): void {
