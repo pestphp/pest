@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Pest\Exceptions\InvalidExpectationValue;
 use PHPUnit\Framework\ExpectationFailedException;
 
 test('pass', function (): void {
@@ -18,6 +19,10 @@ test('failures', function (): void {
 test('failures with custom message', function (): void {
     expect(2)->toBeOdd('oh no!');
 })->throws(ExpectationFailedException::class, 'oh no!');
+
+test('failures with invalid type', function (): void {
+    expect([])->toBeOdd();
+})->throws(InvalidExpectationValue::class, 'Invalid expectation value type. Expected [int].');
 
 test('not failures', function (): void {
     expect(7)->not->toBeOdd();

@@ -16,6 +16,10 @@ test('failures', function (): void {
     expect([1, 2, 3])->toBeAssociative();
 })->throws(ExpectationFailedException::class);
 
+test('failures with invalid type', function (): void {
+    expect('foo')->toBeAssociative();
+})->throws(ExpectationFailedException::class);
+
 test('failures with custom message', function (): void {
     expect([1, 2, 3])->toBeAssociative('oh no!');
 })->throws(ExpectationFailedException::class, 'oh no!');

@@ -505,6 +505,10 @@ final class Expectation
      */
     public function toBeFinite(string $message = ''): self
     {
+        if (! is_int($this->value) && ! is_float($this->value)) {
+            InvalidExpectationValue::expected('int|float');
+        }
+
         Assert::assertFinite($this->value, $message);
 
         return $this;
@@ -640,6 +644,10 @@ final class Expectation
      */
     public function toBePositive(string $message = ''): self
     {
+        if (! is_int($this->value) && ! is_float($this->value)) {
+            InvalidExpectationValue::expected('int|float');
+        }
+
         Assert::assertGreaterThan(0, $this->value, $message);
 
         return $this;
@@ -652,6 +660,10 @@ final class Expectation
      */
     public function toBeNegative(string $message = ''): self
     {
+        if (! is_int($this->value) && ! is_float($this->value)) {
+            InvalidExpectationValue::expected('int|float');
+        }
+
         Assert::assertLessThan(0, $this->value, $message);
 
         return $this;
@@ -664,7 +676,11 @@ final class Expectation
      */
     public function toBeEven(string $message = ''): self
     {
-        Assert::assertTrue(is_int($this->value) && $this->value % 2 === 0, $message);
+        if (! is_int($this->value)) {
+            InvalidExpectationValue::expected('int');
+        }
+
+        Assert::assertTrue($this->value % 2 === 0, $message);
 
         return $this;
     }
@@ -676,7 +692,11 @@ final class Expectation
      */
     public function toBeOdd(string $message = ''): self
     {
-        Assert::assertTrue(is_int($this->value) && $this->value % 2 !== 0, $message);
+        if (! is_int($this->value)) {
+            InvalidExpectationValue::expected('int');
+        }
+
+        Assert::assertTrue($this->value % 2 !== 0, $message);
 
         return $this;
     }

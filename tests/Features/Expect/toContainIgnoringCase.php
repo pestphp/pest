@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Pest\Exceptions\InvalidExpectationValue;
 use PHPUnit\Framework\ExpectationFailedException;
 
 test('pass', function (): void {
@@ -14,6 +15,10 @@ test('pass', function (): void {
 test('failures', function (): void {
     expect('Hello World')->toContainIgnoringCase('Symfony');
 })->throws(ExpectationFailedException::class);
+
+test('failures with invalid type', function (): void {
+    expect([])->toContainIgnoringCase('world');
+})->throws(InvalidExpectationValue::class, 'Invalid expectation value type. Expected [string].');
 
 test('failures with custom message', function (): void {
     expect('Hello World')->toContainIgnoringCase('Symfony', 'oh no!');
