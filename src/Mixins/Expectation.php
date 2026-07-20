@@ -198,6 +198,22 @@ final class Expectation
     }
 
     /**
+     * Asserts that the value contains $needle, ignoring case.
+     *
+     * @return self<TValue>
+     */
+    public function toContainIgnoringCase(string $needle, string $message = ''): self
+    {
+        if (! is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
+        Assert::assertStringContainsStringIgnoringCase($needle, $this->value, $message);
+
+        return $this;
+    }
+
+    /**
      * Asserts that $needle equal an element of the value.
      *
      * @return self<TValue>
@@ -233,6 +249,23 @@ final class Expectation
     }
 
     /**
+     * Asserts that the value starts with $expected, ignoring case.
+     *
+     * @param  non-empty-string  $expected
+     * @return self<TValue>
+     */
+    public function toStartWithIgnoringCase(string $expected, string $message = ''): self
+    {
+        if (! is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
+        Assert::assertTrue(stripos($this->value, $expected) === 0, $message);
+
+        return $this;
+    }
+
+    /**
      * Asserts that the value ends with $expected.
      *
      * @param  non-empty-string  $expected
@@ -245,6 +278,26 @@ final class Expectation
         }
 
         Assert::assertStringEndsWith($expected, $this->value, $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value ends with $expected, ignoring case.
+     *
+     * @param  non-empty-string  $expected
+     * @return self<TValue>
+     */
+    public function toEndWithIgnoringCase(string $expected, string $message = ''): self
+    {
+        if (! is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
+        Assert::assertTrue(
+            substr_compare($this->value, $expected, -strlen($expected), strlen($expected), true) === 0,
+            $message
+        );
 
         return $this;
     }
@@ -590,6 +643,22 @@ final class Expectation
     public function toBeDigits(string $message = ''): self
     {
         Assert::assertTrue(ctype_digit((string) $this->value), $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is blank.
+     *
+     * @return self<TValue>
+     */
+    public function toBeBlank(string $message = ''): self
+    {
+        if (! is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
+        Assert::assertTrue(trim($this->value) === '', $message);
 
         return $this;
     }
