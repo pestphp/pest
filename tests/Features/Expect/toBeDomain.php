@@ -16,8 +16,8 @@ test('failures', function (): void {
     expect('example')->toBeDomain();
 })->throws(ExpectationFailedException::class);
 
-test('failures with missing TLD', function (): void {
-    expect('example')->toBeDomain();
+test('failures with leading dot', function (): void {
+    expect('.example.com')->toBeDomain();
 })->throws(ExpectationFailedException::class);
 
 test('failures with invalid type', function (): void {

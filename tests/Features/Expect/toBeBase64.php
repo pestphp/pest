@@ -21,6 +21,10 @@ test('failures with invalid padding', function (): void {
     expect('AAA')->toBeBase64();
 })->throws(ExpectationFailedException::class);
 
+test('failures with padding only', function (): void {
+    expect('====')->toBeBase64();
+})->throws(ExpectationFailedException::class);
+
 test('failures with malformed input', function (): void {
     expect('!!invalid!!')->toBeBase64();
 })->throws(ExpectationFailedException::class);
