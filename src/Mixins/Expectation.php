@@ -558,7 +558,9 @@ final class Expectation
      */
     public function toBeAssociative(string $message = ''): self
     {
-        $this->toBeArray($message);
+        if (! is_array($this->value)) {
+            InvalidExpectationValue::expected('array');
+        }
 
         Assert::assertFalse(array_is_list($this->value), $message);
 
