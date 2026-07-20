@@ -1219,4 +1219,104 @@ final class Expectation
 
         return $this;
     }
+
+    /**
+     * Asserts that the value is an IP address.
+     *
+     * @return self<TValue>
+     */
+    public function toBeIpAddress(string $message = ''): self
+    {
+        if (! is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
+        Assert::assertTrue((bool) filter_var($this->value, FILTER_VALIDATE_IP), $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is a MAC address.
+     *
+     * @return self<TValue>
+     */
+    public function toBeMacAddress(string $message = ''): self
+    {
+        if (! is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
+        Assert::assertTrue((bool) filter_var($this->value, FILTER_VALIDATE_MAC), $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is a hostname.
+     *
+     * @return self<TValue>
+     */
+    public function toBeHostname(string $message = ''): self
+    {
+        if (! is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
+        Assert::assertTrue((bool) filter_var($this->value, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME), $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is a domain name.
+     *
+     * @return self<TValue>
+     */
+    public function toBeDomain(string $message = ''): self
+    {
+        if (! is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
+        $isValid = filter_var($this->value, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) !== false
+            && str_contains($this->value, '.');
+
+        Assert::assertTrue($isValid, $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is a base64-encoded string.
+     *
+     * @return self<TValue>
+     */
+    public function toBeBase64(string $message = ''): self
+    {
+        if (! is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
+        $decoded = base64_decode($this->value, true);
+        Assert::assertTrue($decoded !== false && base64_encode($decoded) === $this->value, $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is a hexadecimal string.
+     *
+     * @return self<TValue>
+     */
+    public function toBeHexadecimal(string $message = ''): self
+    {
+        if (! is_string($this->value)) {
+            InvalidExpectationValue::expected('string');
+        }
+
+        Assert::assertTrue(ctype_xdigit($this->value), $message);
+
+        return $this;
+    }
 }
