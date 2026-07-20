@@ -414,6 +414,18 @@ final class Expectation
     }
 
     /**
+     * Asserts that the value is finite.
+     *
+     * @return self<TValue>
+     */
+    public function toBeFinite(string $message = ''): self
+    {
+        Assert::assertFinite($this->value, $message);
+
+        return $this;
+    }
+
+    /**
      * Asserts that the value is an instance of $class.
      *
      * @param  class-string  $class
@@ -518,6 +530,54 @@ final class Expectation
     public function toBeNumeric(string $message = ''): self
     {
         Assert::assertIsNumeric($this->value, $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is positive.
+     *
+     * @return self<TValue>
+     */
+    public function toBePositive(string $message = ''): self
+    {
+        Assert::assertGreaterThan(0, $this->value, $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is negative.
+     *
+     * @return self<TValue>
+     */
+    public function toBeNegative(string $message = ''): self
+    {
+        Assert::assertLessThan(0, $this->value, $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is even.
+     *
+     * @return self<TValue>
+     */
+    public function toBeEven(string $message = ''): self
+    {
+        Assert::assertTrue(is_int($this->value) && $this->value % 2 === 0, $message);
+
+        return $this;
+    }
+
+    /**
+     * Asserts that the value is odd.
+     *
+     * @return self<TValue>
+     */
+    public function toBeOdd(string $message = ''): self
+    {
+        Assert::assertTrue(is_int($this->value) && $this->value % 2 !== 0, $message);
 
         return $this;
     }
