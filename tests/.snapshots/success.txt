@@ -478,6 +478,16 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toBeBase64
+  ✓ pass
+  ✓ failures
+  ✓ failures with invalid padding
+  ✓ failures with padding only
+  ✓ failures with malformed input
+  ✓ failures with invalid type
+  ✓ failures with custom message
+  ✓ not failures
+
    PASS  Tests\Features\Expect\toBeBetween
   ✓ passes with int
   ✓ passes with float
@@ -521,6 +531,14 @@
    PASS  Tests\Features\Expect\toBeDirectory
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeDomain
+  ✓ pass
+  ✓ failures
+  ✓ failures with leading dot
+  ✓ failures with invalid type
   ✓ failures with custom message
   ✓ not failures
 
@@ -586,6 +604,24 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toBeHexadecimal
+  ✓ pass
+  ✓ failures
+  ✓ failures with invalid characters
+  ✓ failures with zero-x prefix
+  ✓ failures with empty string
+  ✓ failures with invalid type
+  ✓ failures with custom message
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeHostname
+  ✓ pass
+  ✓ failures
+  ✓ failures with trailing hyphen
+  ✓ failures with invalid type
+  ✓ failures with custom message
+  ✓ not failures
+
    PASS  Tests\Features\Expect\toBeIn
   ✓ passes
   ✓ failures
@@ -621,6 +657,13 @@
   ✓ class is invokable via a trait
   ✓ failure when the class is not invokable
   ✓ class is not invokable
+
+   PASS  Tests\Features\Expect\toBeIpAddress
+  ✓ pass
+  ✓ failures
+  ✓ failures with invalid type
+  ✓ failures with custom message
+  ✓ not failures
 
    PASS  Tests\Features\Expect\toBeIterable
   ✓ pass
@@ -665,6 +708,13 @@
    PASS  Tests\Features\Expect\toBeLowercase
   ✓ pass
   ✓ failures
+  ✓ failures with custom message
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeMacAddress
+  ✓ pass
+  ✓ failures
+  ✓ failures with invalid type
   ✓ failures with custom message
   ✓ not failures
 
@@ -2136,4 +2186,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1504 passed (3281 assertions)
+  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1542 passed (3375 assertions)
