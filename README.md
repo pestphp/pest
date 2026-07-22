@@ -14,7 +14,7 @@
 
 > Pest v5 Now Available: **[Read the announcement »](https://pestphp.com/docs/pest-v5-is-here)**.
 
-**Pest** is an elegant PHP testing Framework with a focus on simplicity, meticulously designed to bring back the joy of testing in PHP.
+**Pest** is an elegant testing framework for PHP developers and AI agents.
 
 - Explore our docs at **[pestphp.com »](https://pestphp.com)**
 - Follow the creator Nuno Maduro:
