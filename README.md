@@ -29,26 +29,11 @@
 
 We cannot thank our sponsors enough for their incredible support in funding Pest's development. Their contributions have been instrumental in making Pest the best it can be. For those who are interested in becoming a sponsor, please visit Nuno Maduro's Sponsor page at **[github.com/sponsors/nunomaduro](https://github.com/sponsors/nunomaduro)**.
 
-
-### Platinum Sponsors
-
-- **[CodeRabbit](https://coderabbit.ai/?ref=pestphp)**
-- **[Mailtrap](https://l.rw.rw/pestphp)**
-- **[SerpApi](https://serpapi.com/?ref=nunomaduro)**
-- **[Tighten](https://tighten.com/?ref=nunomaduro)**
-- **[Redberry](https://redberry.international/laravel-development/?utm_source=pest&utm_medium=banner&utm_campaign=pest_sponsorship)**
-
-### Gold Sponsors
-
 - **[CMS Max](https://cmsmax.com/?ref=pestphp)**
-
-### Premium Sponsors
-
-- [Zapiet](https://zapiet.com/?ref=pestphp)
-- [Load Forge](https://loadforge.com/?ref=pestphp)
-- [Route4Me](https://route4me.com/pt?ref=pestphp)
-- [Nerdify](https://getnerdify.com/?ref=pestphp)
-- [Akaunting](https://akaunting.com/?ref=pestphp)
-- [TestMu AI](https://www.testmuai.com/?utm_medium=sponsor&utm_source=pest)
+- **[PhpStorm](https://jb.gg/nuno)**
+- **[CodeRabbit](https://coderabbit.link/nunomaduro)**
+- **[SerpApi](https://serpapi.com/?ref=nunomaduro)**
+- **[Bento](https://bentonow.com/?ref=nunomaduro)**
+- **[Redberry](https://redberry.international/laravel-development/)**
 
 Pest is an open-sourced software licensed under the **[MIT license](https://opensource.org/licenses/MIT)**.
