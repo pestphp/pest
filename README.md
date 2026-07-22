@@ -33,6 +33,7 @@ We cannot thank our sponsors enough for their incredible support in funding Pest
 - **[PhpStorm](https://jb.gg/nuno)**
 - **[CodeRabbit](https://coderabbit.link/nunomaduro)**
 - **[SerpApi](https://serpapi.com/?ref=nunomaduro)**
+- **[Typesense](https://typesense.org/?ref=nunomaduro)**
 - **[Bento](https://bentonow.com/?ref=nunomaduro)**
 - **[Redberry](https://redberry.international/laravel-development/)**
 
