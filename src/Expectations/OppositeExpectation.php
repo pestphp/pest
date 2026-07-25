@@ -12,7 +12,6 @@ use Pest\Arch\Expectations\ToBeUsedInNothing;
 use Pest\Arch\Expectations\ToUse;
 use Pest\Arch\GroupArchExpectation;
 use Pest\Arch\PendingArchExpectation;
-use Pest\Arch\SingleArchExpectation;
 use Pest\Arch\Support\FileLineFinder;
 use Pest\Exceptions\InvalidExpectation;
 use Pest\Exceptions\MissingDependency;
@@ -79,9 +78,24 @@ final readonly class OppositeExpectation
         /** @var Expectation<array<int, string>|string> $original */
         $original = $this->original;
 
-        return GroupArchExpectation::fromExpectations($original, array_map(fn (string $target): SingleArchExpectation => ToUse::make($original, $target)->opposite(
-            fn () => $this->throwExpectationFailedException('toUse', $target),
-        ), is_string($targets) ? [$targets] : $targets));
+        $targets = is_string($targets) ? [$targets] : $targets;
+
+        $values = is_array($original->value) ? $original->value : [$original->value];
+
+        $expectations = [];
+
+        foreach ($values as $value) {
+            /** @var Expectation<array<int, string>|string> $expectation */
+            $expectation = new Expectation($value);
+
+            foreach ($targets as $target) {
+                $expectations[] = ToUse::make($expectation, $target)->opposite(
+                    fn () => $this->throwExpectationFailedException('toUse', $target),
+                );
+            }
+        }
+
+        return GroupArchExpectation::fromExpectations($original, $expectations);
     }
 
     /**
