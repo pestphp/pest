@@ -68,7 +68,7 @@ final class Recorder
     public function driverAvailable(): bool
     {
         if (! $this->driverChecked) {
-            if (function_exists('pcov\\start')) {
+            if (function_exists('pcov\\start') && filter_var((string) ini_get('pcov.enabled'), FILTER_VALIDATE_BOOL)) {
                 $this->driver = 'pcov';
                 $this->driverAvailable = true;
             } elseif (function_exists('xdebug_start_code_coverage') && function_exists('xdebug_info')) {
