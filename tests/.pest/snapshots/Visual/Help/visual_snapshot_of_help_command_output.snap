@@ -168,6 +168,16 @@
   AI OPTIONS:
   --ai ..... Run a code snippet as a fully scaffolded test for AI verification  
 
+  TIA OPTIONS:
+  --tia  Re-run only the tests affected by your changes, replaying the rest from cache  
+  --no-tia ......................... Disable test impact analysis for this run  
+  --tia --fresh .... Discard the recorded dependency graph and record it again  
+  --tia --filtered ............ Narrow the run to the affected test files only  
+  --tia --locally ......... Enable test impact analysis on local machines only  
+  --tia --baselined  Fetch the shared dependency graph recorded by the CI baseline  
+  --tia --refetch ......... Force a fresh fetch of the shared dependency graph  
+  --baseline  Output to standard output the test impact analysis storage directory  
+
   MUTATION TESTING OPTIONS:
   --mutate .... Runs mutation testing, to understand the quality of your tests  
   --mutate --parallel ...................... Runs mutation testing in parallel  
