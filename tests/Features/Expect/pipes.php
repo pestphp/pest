@@ -38,7 +38,7 @@ class State
 {
     public array $runCount = [];
 
-    public array $appliedCount = [];
+    public array $appliedCount;
 
     public function __construct()
     {
