@@ -14,6 +14,16 @@ final class Configuration
     /**
      * @return $this
      */
+    public function directory(string $directory): self
+    {
+        Storage::useDirectory($directory);
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
     public function always(): self
     {
         /** @var WatchPatterns $watchPatterns */
