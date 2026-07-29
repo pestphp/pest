@@ -12,7 +12,7 @@
 
 ------
 
-> Pest v5 Now Available: **[Read the announcement »](https://pestphp.com/docs/pest-v5-is-here)**.
+> Pest v5 Now Available: **[Read the announcement »](https://pestphp.com/docs/pest5-now-available)**.
 
 **Pest** is an elegant testing framework for PHP developers and AI agents.
 
