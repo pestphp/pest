@@ -20,7 +20,7 @@ it('uses a project-relative configured directory', function (): void {
     $container->add(TestSuite::class, $testSuite);
 
     (new Configuration)->directory('.pest/tia');
-    (new Bootstrapper($container))->boot();
+    new Bootstrapper($container)->boot();
 
     $state = $container->get(State::class);
 
