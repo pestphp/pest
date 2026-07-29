@@ -78,9 +78,13 @@ final class TestSuiteSorter
 
     public const int ORDER_DEFECTS_FIRST = 3;
 
-    public const int ORDER_DURATION = 4;
+    public const int ORDER_DURATION_ASCENDING = 4;
 
-    public const int ORDER_SIZE = 5;
+    public const int ORDER_SIZE_ASCENDING = 5;
+
+    public const int ORDER_DURATION_DESCENDING = 6;
+
+    public const int ORDER_SIZE_DESCENDING = 7;
 
     /**
      * @var non-empty-array<non-empty-string, positive-int>
@@ -113,8 +117,10 @@ final class TestSuiteSorter
             self::ORDER_DEFAULT,
             self::ORDER_REVERSED,
             self::ORDER_RANDOMIZED,
-            self::ORDER_DURATION,
-            self::ORDER_SIZE,
+            self::ORDER_DURATION_ASCENDING,
+            self::ORDER_SIZE_ASCENDING,
+            self::ORDER_DURATION_DESCENDING,
+            self::ORDER_SIZE_DESCENDING,
         ];
 
         if (! in_array($order, $allowedOrders, true)) {
@@ -157,10 +163,14 @@ final class TestSuiteSorter
             $suite->setTests($this->reverse($suite->tests()));
         } elseif ($order === self::ORDER_RANDOMIZED) {
             $suite->setTests($this->randomize($suite->tests()));
-        } elseif ($order === self::ORDER_DURATION) {
+        } elseif ($order === self::ORDER_DURATION_ASCENDING) {
             $suite->setTests($this->sortByDuration($suite->tests()));
-        } elseif ($order === self::ORDER_SIZE) {
+        } elseif ($order === self::ORDER_DURATION_DESCENDING) {
+            $suite->setTests($this->sortByDurationDescending($suite->tests()));
+        } elseif ($order === self::ORDER_SIZE_ASCENDING) {
             $suite->setTests($this->sortBySize($suite->tests()));
+        } elseif ($order === self::ORDER_SIZE_DESCENDING) {
+            $suite->setTests($this->sortBySizeDescending($suite->tests()));
         }
 
         if ($orderDefects === self::ORDER_DEFECTS_FIRST) {
@@ -246,11 +256,39 @@ final class TestSuiteSorter
      * @param  list<Test>  $tests
      * @return list<Test>
      */
+    private function sortByDurationDescending(array $tests): array
+    {
+        usort(
+            $tests,
+            fn (Test $left, Test $right) => $this->cmpDuration($right, $left),
+        );
+
+        return $tests;
+    }
+
+    /**
+     * @param  list<Test>  $tests
+     * @return list<Test>
+     */
     private function sortBySize(array $tests): array
     {
         usort(
             $tests,
             fn (Test $left, Test $right) => $this->cmpSize($left, $right),
+        );
+
+        return $tests;
+    }
+
+    /**
+     * @param  list<Test>  $tests
+     * @return list<Test>
+     */
+    private function sortBySizeDescending(array $tests): array
+    {
+        usort(
+            $tests,
+            fn (Test $left, Test $right) => $this->cmpSize($right, $left),
         );
 
         return $tests;
