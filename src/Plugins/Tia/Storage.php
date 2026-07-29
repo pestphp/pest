@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
-use InvalidArgumentException;
-
 /**
  * @internal
  */
@@ -16,18 +14,10 @@ final class Storage
     public static function tempDir(string $projectRoot): string
     {
         if (self::$directory !== null) {
-            $directory = rtrim(self::$directory, '/\\');
-            $directory = $directory === '' ? DIRECTORY_SEPARATOR : $directory;
-            $directory = strlen($directory) === 2 && $directory[1] === ':'
-                ? $directory.DIRECTORY_SEPARATOR
-                : $directory;
-            $isAbsolute = str_starts_with($directory, '/')
-                || str_starts_with($directory, '\\')
-                || (strlen($directory) >= 2 && $directory[1] === ':');
+            $isAbsolute = str_starts_with(self::$directory, DIRECTORY_SEPARATOR)
+                || preg_match('/^[a-z]:[\\\\\/]/i', self::$directory) === 1;
 
-            return $isAbsolute
-                ? $directory
-                : rtrim($projectRoot, '/\\').DIRECTORY_SEPARATOR.$directory;
+            return $isAbsolute ? self::$directory : $projectRoot.DIRECTORY_SEPARATOR.self::$directory;
         }
 
         $home = self::homeDir();
@@ -46,10 +36,6 @@ final class Storage
 
     public static function useDirectory(?string $directory): void
     {
-        if ($directory !== null && trim($directory) === '') {
-            throw new InvalidArgumentException('The TIA directory cannot be empty.');
-        }
-
         self::$directory = $directory;
     }
 
