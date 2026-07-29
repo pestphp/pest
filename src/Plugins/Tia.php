@@ -122,7 +122,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
     private ?Graph $replayGraph = null;
 
-    private string $branch = 'main';
+    private string $branch;
 
     private string $fallbackBranch = 'main';
 
@@ -337,6 +337,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         /** @var WatchPatterns $watchPatterns */
         $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
         $this->fallbackBranch = $watchPatterns->fallbackBranch();
+        $this->branch = $this->fallbackBranch;
         self::applyWatchPatternMarks($arguments, $watchPatterns);
         $disabled = $this->hasArgument(self::NO_OPTION, $arguments);
         $cliEnabled = $this->hasArgument(self::OPTION, $arguments) || self::envFlagEnabled(self::ENV_TIA);
