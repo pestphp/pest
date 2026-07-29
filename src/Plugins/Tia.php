@@ -124,6 +124,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
     private string $branch = 'main';
 
+    private string $fallbackBranch = 'main';
+
     /** @var array<string, true> */
     private array $affectedFiles = [];
 
@@ -293,7 +295,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return null;
         }
 
-        $result = $this->replayGraph->getResult($this->branch, $testId);
+        $result = $this->replayGraph->getResult($this->branch, $testId, $this->fallbackBranch);
 
         if ($result instanceof TestStatus) {
             if ($this->replayGraph->shouldRerunStatus($result)) {
@@ -303,7 +305,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             }
 
             $this->replayedCount++;
-            $assertions = $this->replayGraph->getAssertions($this->branch, $testId);
+            $assertions = $this->replayGraph->getAssertions($this->branch, $testId, $this->fallbackBranch);
             $this->cachedAssertionsByTestId[$testId] = $assertions ?? 0;
         } else {
             $this->executedCount++;
@@ -334,6 +336,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         /** @var WatchPatterns $watchPatterns */
         $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
+        $this->fallbackBranch = $watchPatterns->fallbackBranch();
         self::applyWatchPatternMarks($arguments, $watchPatterns);
         $disabled = $this->hasArgument(self::NO_OPTION, $arguments);
         $cliEnabled = $this->hasArgument(self::OPTION, $arguments) || self::envFlagEnabled(self::ENV_TIA);
@@ -580,7 +583,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             $this->driftLabel = $this->formatStructuralDrift($drift);
 
             if (in_array('composer_lock', $drift, true)) {
-                $branchSha = $graph->recordedAtSha($this->branch);
+                $branchSha = $graph->recordedAtSha($this->branch, $this->fallbackBranch);
                 if ($branchSha !== null) {
                     $summary = $this->composerLockDelta(
                         TestSuite::getInstance()->rootPath,
@@ -635,7 +638,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             Panic::with(new TiaRequiresRepositoryRoot($subdirectoryPrefix));
         }
 
-        $this->branch = new ChangedFiles($projectRoot)->currentBranch() ?? 'main';
+        $this->branch = new ChangedFiles($projectRoot)->currentBranch() ?? $this->fallbackBranch;
 
         $fingerprint = Fingerprint::compute($projectRoot);
         $this->startFingerprint = $fingerprint;
@@ -652,7 +655,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         if ($graph instanceof Graph) {
             $changedFiles = new ChangedFiles($projectRoot);
-            $branchSha = $graph->recordedAtSha($this->branch);
+            $branchSha = $graph->recordedAtSha($this->branch, $this->fallbackBranch);
 
             if ($branchSha !== null
                 && $changedFiles->since($branchSha) === null) {
@@ -698,7 +701,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      */
     private function handleWorker(array $arguments, string $projectRoot, bool $recordingGlobal, bool $replayingGlobal): array
     {
-        $this->branch = new ChangedFiles($projectRoot)->currentBranch() ?? 'main';
+        $this->branch = new ChangedFiles($projectRoot)->currentBranch() ?? $this->fallbackBranch;
 
         if ($replayingGlobal) {
             $this->installWorkerReplay($projectRoot);
@@ -814,12 +817,12 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     {
         $changedFiles = new ChangedFiles($projectRoot);
 
-        $branchSha = $graph->recordedAtSha($this->branch);
+        $branchSha = $graph->recordedAtSha($this->branch, $this->fallbackBranch);
         $changed = $changedFiles->since($branchSha) ?? [];
 
         $changed = $changedFiles->filterUnchangedSinceLastRun(
             $changed,
-            $graph->lastRunTree($this->branch),
+            $graph->lastRunTree($this->branch, $this->fallbackBranch),
         );
 
         $hasProjectPhpSourceChanges = $this->hasProjectPhpSourceChanges($changed);
@@ -836,7 +839,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $affectedFromChanges = $changed === [] ? [] : $graph->affected($changed);
         $rerunFromCache = [];
 
-        if ($this->filteredMode && $graph->hasUnlocatedTestsToRerun($this->branch)) {
+        if ($this->filteredMode && $graph->hasUnlocatedTestsToRerun($this->branch, $this->fallbackBranch)) {
             $this->filteredMode = false;
 
             $this->renderBadge('WARN', 'Some cached tests due a re-run could not be located on disk.');
@@ -844,7 +847,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         }
 
         if ($this->filteredMode) {
-            $rerunFromCache = $graph->testFilesToRerun($this->branch);
+            $rerunFromCache = $graph->testFilesToRerun($this->branch, $this->fallbackBranch);
         }
 
         $affected = array_values(array_unique([

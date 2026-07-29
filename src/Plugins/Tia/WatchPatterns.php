@@ -44,6 +44,8 @@ final class WatchPatterns
 
     private bool $baselined = false;
 
+    private string $fallbackBranch = 'main';
+
     public function useDefaults(string $projectRoot): void
     {
         $testPath = TestSuite::getInstance()->testPath;
@@ -177,6 +179,16 @@ final class WatchPatterns
         return $this->baselined;
     }
 
+    public function setFallbackBranch(string $branch): void
+    {
+        $this->fallbackBranch = $branch;
+    }
+
+    public function fallbackBranch(): string
+    {
+        return $this->fallbackBranch;
+    }
+
     public function reset(): void
     {
         $this->patterns = [];
@@ -185,6 +197,7 @@ final class WatchPatterns
         $this->locally = false;
         $this->filtered = false;
         $this->baselined = false;
+        $this->fallbackBranch = 'main';
     }
 
     private function keyMatches(string $key, string $file): bool
