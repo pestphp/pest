@@ -17,6 +17,7 @@ $run = function (): ?string {
 test('parallel', function () use ($run): void {
     $output = $run('--exclude-group=integration');
     $output = implode("\n", array_slice(explode("\n", (string) $output), -10));
+    $profileOutput = $run('tests/.tests/SuccessOnly.php', '--profile');
 
     if (getenv('REBUILD_SNAPSHOTS')) {
         preg_match('/Tests:\s+(.+\(\d+ assertions\))/', $output, $matches);
@@ -34,7 +35,12 @@ test('parallel', function () use ($run): void {
 
     expect($output)
         ->toContain("Tests:    {$expected}")
-        ->toContain('Parallel: 3 processes');
+        ->and(
+            str_contains($output, 'Parallel: 3 processes')
+            && str_contains((string) $profileOutput, 'Top 10 slowest tests:')
+            && str_contains((string) $profileOutput, 'can pass with comparison')
+            && str_contains((string) $profileOutput, 'can also pass'),
+        )->toBeTrue();
 })->skipOnWindows();
 
 test('a parallel test can extend another test with same name', function () use ($run): void {
@@ -57,13 +63,4 @@ test('parallel can have multiple exclude-groups', function () use ($run): void {
 
     expect((int) $doubleMatch[1])->toBeLessThan((int) $singleMatch[1])
         ->and($doubleExclude)->toContain('Parallel: 3 processes');
-})->skipOnWindows();
-
-test('parallel profiles the slowest tests across all workers', function () use ($run): void {
-    $output = $run('tests/.tests/SuccessOnly.php', '--profile');
-
-    expect($output)
-        ->toContain('Top 10 slowest tests:')
-        ->toContain('can pass with comparison')
-        ->toContain('can also pass');
 })->skipOnWindows();
