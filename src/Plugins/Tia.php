@@ -78,6 +78,8 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
     public const string KEY_COVERAGE_MARKER = 'coverage.marker';
 
+    public const string KEY_COVERAGE_CHANGED = 'coverage.changed.json';
+
     public const string KEY_FETCH_COOLDOWN = 'fetch-cooldown.json';
 
     private const string RECORDING_GLOBAL = 'TIA_RECORDING';
@@ -675,6 +677,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         if ($this->piggybackCoverage) {
             $this->state->write(self::KEY_COVERAGE_MARKER, '');
+            $this->state->delete(self::KEY_COVERAGE_CHANGED);
         }
 
         if ($this->piggybackCoverage && ! $this->state->exists(self::KEY_COVERAGE_CACHE)) {
@@ -821,6 +824,13 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             $changed,
             $graph->lastRunTree($this->branch),
         );
+
+        if ($this->piggybackCoverage && $changed !== []) {
+            $this->state->write(self::KEY_COVERAGE_CHANGED, (string) json_encode(array_map(
+                fn (string $file): string => $projectRoot.DIRECTORY_SEPARATOR.$file,
+                $changed,
+            )));
+        }
 
         $hasProjectPhpSourceChanges = $this->hasProjectPhpSourceChanges($changed);
         $coverageAvailable = $this->piggybackCoverage || $this->recorder->driverAvailable();

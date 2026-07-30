@@ -28,6 +28,8 @@ final class CoverageMerger
 
         $state->delete(Tia::KEY_COVERAGE_MARKER);
 
+        $changedFiles = self::consumeChangedFiles($state);
+
         $cachedBytes = $state->read(Tia::KEY_COVERAGE_CACHE);
 
         if ($cachedBytes === null) {
@@ -59,6 +61,7 @@ final class CoverageMerger
         self::primeUncoveredFiles($cached);
         self::primeUncoveredFiles($current);
 
+        self::dropChangedFilesFromCached($cached, $changedFiles);
         self::stripCurrentTestsFromCached($cached, $current);
 
         $cached->merge($current);
@@ -89,6 +92,56 @@ final class CoverageMerger
         $decoded = @gzdecode($bytes);
 
         return $decoded === false ? null : $decoded;
+    }
+
+    /**
+     * Cached coverage of a changed file was measured against old file contents,
+     * so its line numbers no longer match the source on disk. Every test that
+     * covered the file is part of the affected set and has just been re-run,
+     * meaning the current report already carries the file's entire coverage —
+     * anything cached for it is stale and must not survive the merge.
+     *
+     * @param  array<int, string>  $changedFiles
+     */
+    private static function dropChangedFilesFromCached(CodeCoverage $cached, array $changedFiles): void
+    {
+        if ($changedFiles === []) {
+            return;
+        }
+
+        $data = $cached->getData();
+
+        $lineCoverage = $data->lineCoverage();
+        $functionCoverage = $data->functionCoverage();
+
+        foreach ($changedFiles as $file) {
+            unset($lineCoverage[$file], $functionCoverage[$file]);
+        }
+
+        $data->setLineCoverage($lineCoverage);
+        $data->setFunctionCoverage($functionCoverage);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private static function consumeChangedFiles(State $state): array
+    {
+        $encoded = $state->read(Tia::KEY_COVERAGE_CHANGED);
+
+        if ($encoded === null) {
+            return [];
+        }
+
+        $state->delete(Tia::KEY_COVERAGE_CHANGED);
+
+        $decoded = json_decode($encoded, true);
+
+        if (! is_array($decoded)) {
+            return [];
+        }
+
+        return array_values(array_filter($decoded, is_string(...)));
     }
 
     private static function stripCurrentTestsFromCached(CodeCoverage $cached, CodeCoverage $current): void
