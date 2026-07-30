@@ -35,6 +35,7 @@ We cannot thank our sponsors enough for their incredible support in funding Pest
 - **[SerpApi](https://serpapi.com/?ref=nunomaduro)**
 - **[Typesense](https://typesense.org/?ref=nunomaduro)**
 - **[Bento](https://bentonow.com/?ref=nunomaduro)**
-- **[Redberry](https://redberry.international/laravel-development/)**
+- **[Pixel](https://wearepixel.com.au/?ref=nunomaduro)**
+- **[Redberry](https://redberry.international/laravel-development/?ref=nunomaduro)**
 
 Pest is an open-sourced software licensed under the **[MIT license](https://opensource.org/licenses/MIT)**.
