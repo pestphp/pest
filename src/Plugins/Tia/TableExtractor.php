@@ -56,7 +56,7 @@ final class TableExtractor
             $tables[strtolower($name)] = true;
         }
 
-        $out = array_keys($tables);
+        $out = array_map(strval(...), array_keys($tables));
         sort($out);
 
         return $out;
@@ -112,7 +112,7 @@ final class TableExtractor
             }
         }
 
-        $out = array_keys($tables);
+        $out = array_map(strval(...), array_keys($tables));
         sort($out);
 
         return $out;
