@@ -280,7 +280,7 @@ trait Testable
 
         /** @var Tia $tia */
         $tia = Container::getInstance()->get(Tia::class);
-        $status = $tia->getStatus(self::$__filename, $this::class.'::'.$this->name());
+        $status = $tia->getStatus(self::$__filename, $this->valueObjectForEvents()->id());
         $replay = ReplayType::fromStatus($status);
 
         if ($replay !== ReplayType::None) {
@@ -319,7 +319,7 @@ trait Testable
     private function __beginReplay(ReplayType $replay, Tia $tia): void
     {
         $this->__replay = $replay;
-        $this->__replayAssertions = $tia->getAssertionCount($this::class.'::'.$this->name());
+        $this->__replayAssertions = $tia->getAssertionCount($this->valueObjectForEvents()->id());
         $this->__ran = true;
     }
 
