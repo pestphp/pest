@@ -58,3 +58,12 @@ test('parallel can have multiple exclude-groups', function () use ($run): void {
     expect((int) $doubleMatch[1])->toBeLessThan((int) $singleMatch[1])
         ->and($doubleExclude)->toContain('Parallel: 3 processes');
 })->skipOnWindows();
+
+test('parallel profiles the slowest tests across all workers', function () use ($run): void {
+    $output = $run('tests/.tests/ParallelProfile.php', '--profile');
+
+    expect($output)
+        ->toContain('Top 10 slowest tests:')
+        ->toContain('the slowest parallel test')
+        ->toContain('the fastest parallel test');
+})->skipOnWindows();
