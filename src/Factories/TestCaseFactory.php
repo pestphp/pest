@@ -136,7 +136,9 @@ final class TestCaseFactory
         $namespace = $this->namespace ?? implode('\\', $partsFQN);
         $baseClass = sprintf('\%s', $this->class);
 
-        if (trim($className) === '') {
+        $classNameToken = token_get_all('<?php '.$className)[1] ?? null;
+
+        if (trim($className) === '' || ! is_array($classNameToken) || $classNameToken[0] !== T_STRING) {
             $className = 'InvalidTestName'.Str::random();
         }
 
