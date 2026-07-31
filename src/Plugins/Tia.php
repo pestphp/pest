@@ -9,7 +9,6 @@ use Pest\Contracts\Plugins\AddsOutput;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Contracts\Plugins\Terminable;
 use Pest\Exceptions\NoAffectedTestsFound;
-use Pest\Exceptions\TiaRequiresRepositoryRoot;
 use Pest\Panic;
 use Pest\Plugins\Concerns\HandleArguments;
 use Pest\Plugins\Tia\BaselineSync;
@@ -628,12 +627,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private function handleParent(array $arguments, string $projectRoot, bool $forceRebuild): array
     {
         $this->watchPatterns->useDefaults($projectRoot);
-
-        $subdirectoryPrefix = $this->gitSubdirectoryPrefix($projectRoot);
-
-        if ($subdirectoryPrefix !== null) {
-            Panic::with(new TiaRequiresRepositoryRoot($subdirectoryPrefix));
-        }
 
         $this->branch = new ChangedFiles($projectRoot)->currentBranch() ?? 'main';
 
@@ -1692,27 +1685,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         return implode(', ', array_keys($seen));
     }
 
-    /**
-     * The path from the git repository root down to $projectRoot (e.g.
-     * `laravel-app`) when the project is nested inside a larger repo, or `null`
-     * when the project root is itself the repo root (or git is unavailable).
-     * TIA requires the two to coincide: git reports and addresses paths
-     * relative to the repo root, while the dependency graph is project-relative.
-     */
-    private function gitSubdirectoryPrefix(string $projectRoot): ?string
-    {
-        $process = new Process(['git', 'rev-parse', '--show-prefix'], $projectRoot);
-        $process->run();
-
-        if (! $process->isSuccessful()) {
-            return null;
-        }
-
-        $prefix = trim($process->getOutput());
-
-        return $prefix === '' ? null : rtrim(str_replace(DIRECTORY_SEPARATOR, '/', $prefix), '/');
-    }
-
     private function composerLockDelta(string $projectRoot, string $sha): string
     {
         $current = @file_get_contents($projectRoot.'/composer.lock');
@@ -1720,7 +1692,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return '';
         }
 
-        $process = new Process(['git', 'show', $sha.':composer.lock'], $projectRoot);
+        $process = new Process(['git', 'show', $sha.':'.new ChangedFiles($projectRoot)->gitPrefix().'composer.lock'], $projectRoot);
         $process->setTimeout(5.0);
         $process->run();
 
