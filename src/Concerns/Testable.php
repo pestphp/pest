@@ -286,8 +286,10 @@ trait Testable
         if ($replay !== ReplayType::None) {
             assert($status !== null);
 
+            $this->__beginReplay($replay, $tia);
+
             match ($replay) {
-                ReplayType::Pass, ReplayType::Risky => $this->__beginReplay($replay, $tia),
+                ReplayType::Pass, ReplayType::Risky => null,
                 ReplayType::Skipped => $this->markTestSkipped($status->message()),
                 ReplayType::Incomplete => $this->markTestIncomplete($status->message()),
                 ReplayType::Failure => throw new AssertionFailedError($status->message() ?: 'Cached failure'),
