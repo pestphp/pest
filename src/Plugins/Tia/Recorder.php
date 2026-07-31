@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
+use Closure;
 use Pest\TestSuite;
 use ReflectionClass;
 
@@ -43,6 +44,33 @@ final class Recorder
     private string $driver = 'none';
 
     private ?SourceScope $sourceScope = null;
+
+    private ?Closure $warmup = null;
+
+    /** @var array<string, array<int, true>>|null */
+    private ?array $warmupBaseline = null;
+
+    /**
+     * Register a callback whose executed lines form the "warm-up baseline":
+     * before the first test of the process, the callback runs under the
+     * coverage driver, and every line it executes is subtracted from each
+     * test's recorded coverage before dependency edges are derived.
+     *
+     * Frameworks that boot inside every test's setUp() re-execute the same
+     * bootstrap lines in every test window (service providers, route
+     * registration, per-panel resource registration, …), which otherwise links
+     * every test to every bootstrap-executed file. Booting the framework once
+     * in the callback removes those edges while keeping any coverage a test
+     * adds beyond the baseline.
+     *
+     * The callback is responsible for cleaning up global state it mutates
+     * (container instances, facades, environment variables, error handlers) —
+     * it runs in the test process, immediately before the first test.
+     */
+    public function warmupUsing(?Closure $callback): void
+    {
+        $this->warmup = $callback;
+    }
 
     public function activate(): void
     {
@@ -116,6 +144,10 @@ final class Recorder
             return;
         }
 
+        if ($this->warmupBaseline === null) {
+            $this->warmupBaseline = $this->collectWarmupBaseline();
+        }
+
         if ($this->driver === 'pcov') {
             \pcov\clear();
             \pcov\start();
@@ -124,6 +156,71 @@ final class Recorder
         }
 
         \xdebug_start_code_coverage();
+    }
+
+    /**
+     * Run the registered warm-up callback under the coverage driver and
+     * collect the lines it executes, scoped to project sources.
+     *
+     * @return array<string, array<int, true>>
+     */
+    private function collectWarmupBaseline(): array
+    {
+        if (! $this->warmup instanceof Closure) {
+            return [];
+        }
+
+        $scope = $this->sourceScope();
+
+        if ($this->driver === 'pcov') {
+            \pcov\clear();
+            \pcov\start();
+
+            ($this->warmup)();
+
+            \pcov\stop();
+
+            $filesToCollectCoverageFor = [];
+
+            foreach (\pcov\waiting() as $file) {
+                if (is_string($file) && $scope->contains($file)) {
+                    $filesToCollectCoverageFor[] = $file;
+                }
+            }
+
+            /** @var array<string, mixed> $data */
+            $data = \pcov\collect(\pcov\inclusive, $filesToCollectCoverageFor);
+        } else {
+            \xdebug_start_code_coverage();
+
+            ($this->warmup)();
+
+            /** @var array<string, mixed> $data */
+            $data = \xdebug_get_code_coverage();
+            \xdebug_stop_code_coverage(true);
+
+            foreach (array_keys($data) as $file) {
+                if (! $scope->contains($file)) {
+                    unset($data[$file]);
+                }
+            }
+        }
+
+        $baseline = [];
+
+        foreach ($data as $file => $lines) {
+            if (! is_array($lines)) {
+                continue;
+            }
+
+            foreach ($lines as $line => $count) {
+                if (is_int($count) && $count > 0) {
+                    $baseline[$file][$line] = true;
+                }
+            }
+        }
+
+        return $baseline;
     }
 
     public function endTest(): void
@@ -348,9 +445,10 @@ final class Recorder
             if (! is_array($lines)) {
                 continue;
             }
+            $baseline = $this->warmupBaseline[$file] ?? [];
             $covered = [];
             foreach ($lines as $line => $count) {
-                if (is_int($count) && $count > 0) {
+                if (is_int($count) && $count > 0 && ! isset($baseline[$line])) {
                     $covered[] = $line;
                 }
             }
@@ -387,5 +485,6 @@ final class Recorder
         $this->sourceScope = null;
         $this->active = false;
         $this->captureCoverage = false;
+        $this->warmupBaseline = null;
     }
 }
