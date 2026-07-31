@@ -177,9 +177,9 @@ final readonly class BaselineSync
 
     private function detectGitHubRepo(string $projectRoot): ?string
     {
-        $gitConfig = $projectRoot.DIRECTORY_SEPARATOR.'.git'.DIRECTORY_SEPARATOR.'config';
+        $gitConfig = GitRepository::configPath($projectRoot);
 
-        if (! is_file($gitConfig)) {
+        if ($gitConfig === null) {
             return null;
         }
 

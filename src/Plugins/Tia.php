@@ -9,7 +9,6 @@ use Pest\Contracts\Plugins\AddsOutput;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Contracts\Plugins\Terminable;
 use Pest\Exceptions\NoAffectedTestsFound;
-use Pest\Exceptions\TiaRequiresRepositoryRoot;
 use Pest\Panic;
 use Pest\Plugins\Concerns\HandleArguments;
 use Pest\Plugins\Tia\BaselineSync;
@@ -31,7 +30,6 @@ use Pest\TestCaseFilters\TiaTestCaseFilter;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestStatus\TestStatus;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Process\Process;
 
 /**
  * @internal
@@ -628,12 +626,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private function handleParent(array $arguments, string $projectRoot, bool $forceRebuild): array
     {
         $this->watchPatterns->useDefaults($projectRoot);
-
-        $subdirectoryPrefix = $this->gitSubdirectoryPrefix($projectRoot);
-
-        if ($subdirectoryPrefix !== null) {
-            Panic::with(new TiaRequiresRepositoryRoot($subdirectoryPrefix));
-        }
 
         $this->branch = new ChangedFiles($projectRoot)->currentBranch() ?? 'main';
 
@@ -1699,20 +1691,6 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
      * TIA requires the two to coincide: git reports and addresses paths
      * relative to the repo root, while the dependency graph is project-relative.
      */
-    private function gitSubdirectoryPrefix(string $projectRoot): ?string
-    {
-        $process = new Process(['git', 'rev-parse', '--show-prefix'], $projectRoot);
-        $process->run();
-
-        if (! $process->isSuccessful()) {
-            return null;
-        }
-
-        $prefix = trim($process->getOutput());
-
-        return $prefix === '' ? null : rtrim(str_replace(DIRECTORY_SEPARATOR, '/', $prefix), '/');
-    }
-
     private function composerLockDelta(string $projectRoot, string $sha): string
     {
         $current = @file_get_contents($projectRoot.'/composer.lock');
@@ -1720,15 +1698,13 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return '';
         }
 
-        $process = new Process(['git', 'show', $sha.':composer.lock'], $projectRoot);
-        $process->setTimeout(5.0);
-        $process->run();
+        $baseline = new ChangedFiles($projectRoot)->contentAtSha($sha, 'composer.lock');
 
-        if (! $process->isSuccessful()) {
+        if ($baseline === null) {
             return '';
         }
 
-        $oldVersions = $this->lockVersions($process->getOutput());
+        $oldVersions = $this->lockVersions($baseline);
         $newVersions = $this->lockVersions($current);
 
         if ($oldVersions === [] && $newVersions === []) {

@@ -1834,6 +1834,21 @@
   ✓ addOutput → it uses singular form for single test file
   ✓ addOutput → it returns original exit code when shard is not set
 
+   PASS  Tests\Unit\Plugins\Tia\ChangedFiles
+  ✓ repoPrefix() → it is empty at the repository root
+  ✓ repoPrefix() → it is the slash-terminated subdirectory path for a monorepo project
+  ✓ repoPrefix() → it is empty outside a git repository
+  ✓ since() in a monorepo subdirectory → it reports project files as project-relative paths
+  ✓ since() in a monorepo subdirectory → it includes untracked project files
+  ✓ since() in a monorepo subdirectory → it ignores changes in sibling projects and at the repository root
+  ✓ since() in a monorepo subdirectory → it detects committed changes to files git would C-quote (non-ASCII names)
+  ✓ since() in a monorepo subdirectory → it sees committed changes since the baseline sha
+  ✓ since() in a monorepo subdirectory → it reports a file renamed OUT of the project subtree as a change to the old path
+  ✓ since() in a monorepo subdirectory → it drops cosmetic-only changes, comparing against the baseline blob through the prefix
+  ✓ since() at the repository root → it keeps the existing root-level behaviour
+  ✓ contentAtSha() → it resolves project-relative paths through the subdirectory prefix
+  ✓ contentAtSha() → it returns null for paths missing from the commit
+
    PASS  Tests\Unit\Plugins\Tia\ContentHash
   ✓ of() → it returns false when file does not exist
   ✓ of() → it hashes an existing file
@@ -1874,6 +1889,17 @@
    PASS  Tests\Unit\Plugins\Tia\FileState
   ✓ keysWithPrefix() → it lists keys matching the prefix
   ✓ keysWithPrefix() → it ignores in-flight temporary files from concurrent writes
+
+   PASS  Tests\Unit\Plugins\Tia\GitRepository
+  ✓ locate() → it finds .git in the path itself
+  ✓ locate() → it walks up to an ancestor .git for subdirectory projects
+  ✓ locate() → it stops at a nested repository boundary
+  ✓ locate() → it treats a .git FILE (worktree, submodule) as the governing entry
+  ✓ configPath() → it resolves the governing repository config for subdirectory projects
+  ✓ configPath() → it returns null for a .git FILE, matching the previous degradation
+  ✓ subdirectoryPrefix() → it is empty at the repository root
+  ✓ subdirectoryPrefix() → it is the slash-terminated project location inside the repository
+  ✓ storage keys → it gives same-basename sibling projects distinct stores
 
    PASS  Tests\Unit\Plugins\Tia\Graph
   ✓ shouldRerunStatus() → it re-runs failures and errors, replays successes
@@ -2186,4 +2212,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1542 passed (3375 assertions)
+  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1564 passed (3397 assertions)

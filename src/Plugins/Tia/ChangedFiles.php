@@ -12,7 +12,26 @@ use Symfony\Component\Process\Process;
  */
 final readonly class ChangedFiles
 {
-    public function __construct(private string $projectRoot) {}
+    /**
+     * The project root's path relative to the git repository root, with a
+     * trailing slash (e.g. `apps/api/`), or an empty string when the project
+     * root is the repository root.
+     */
+    private string $repoPrefix;
+
+    public function __construct(private string $projectRoot)
+    {
+        $this->repoPrefix = $this->detectRepoPrefix();
+    }
+
+    /**
+     * The project root's location inside the repository (`apps/api/`), or an
+     * empty string when the project root is the repository root.
+     */
+    public function repoPrefix(): string
+    {
+        return $this->repoPrefix;
+    }
 
     /**
      * @param  array<int, string>  $files  project-relative paths.
@@ -153,9 +172,13 @@ final readonly class ChangedFiles
         return $remaining;
     }
 
-    private function contentAtSha(string $sha, string $path): ?string
+    /**
+     * The content of a project-relative path at the given commit, or `null`
+     * when the path did not exist there.
+     */
+    public function contentAtSha(string $sha, string $path): ?string
     {
-        $process = new Process(['git', 'show', $sha.':'.$path], $this->projectRoot);
+        $process = new Process(['git', 'show', $sha.':'.$this->repoPrefix.$path], $this->projectRoot);
         $process->setTimeout(5.0);
         $process->run();
 
@@ -236,7 +259,7 @@ final readonly class ChangedFiles
     private function diffSinceSha(string $sha): array
     {
         $process = new Process(
-            ['git', 'diff', '--name-only', $sha.'..HEAD'],
+            ['git', 'diff', '--name-only', '-z', '--no-renames', $sha.'..HEAD'],
             $this->projectRoot,
         );
         $process->run();
@@ -245,7 +268,9 @@ final readonly class ChangedFiles
             throw new MissingDependency('Tia mode', 'git');
         }
 
-        return $this->splitLines($process->getOutput());
+        $paths = explode("\x00", rtrim($process->getOutput(), "\x00"));
+
+        return $this->toProjectRelative(array_values(array_filter($paths, static fn (string $path): bool => $path !== '')));
     }
 
     /**
@@ -297,7 +322,7 @@ final readonly class ChangedFiles
             $files[] = $path;
         }
 
-        return $files;
+        return $this->toProjectRelative($files);
     }
 
     public function currentSha(): ?string
@@ -315,12 +340,50 @@ final readonly class ChangedFiles
     }
 
     /**
+     * Translates git's repository-root-relative paths into project-relative
+     * ones, dropping paths outside the project subtree.
+     *
+     * @param  array<int, string>  $repoRelativePaths
      * @return array<int, string>
      */
-    private function splitLines(string $output): array
+    private function toProjectRelative(array $repoRelativePaths): array
     {
-        $lines = preg_split('/\R+/', trim($output), flags: PREG_SPLIT_NO_EMPTY);
+        if ($this->repoPrefix === '') {
+            return $repoRelativePaths;
+        }
 
-        return $lines === false ? [] : $lines;
+        $projectRelative = [];
+
+        foreach ($repoRelativePaths as $path) {
+            if (str_starts_with($path, $this->repoPrefix)) {
+                $projectRelative[] = substr($path, strlen($this->repoPrefix));
+            }
+        }
+
+        return $projectRelative;
+    }
+
+    private function detectRepoPrefix(): string
+    {
+        static $cache = [];
+
+        if (isset($cache[$this->projectRoot])) {
+            return $cache[$this->projectRoot];
+        }
+
+        $process = new Process(['git', 'rev-parse', '--show-prefix'], $this->projectRoot);
+        $process->run();
+
+        if (! $process->isSuccessful()) {
+            return $cache[$this->projectRoot] = '';
+        }
+
+        $prefix = trim($process->getOutput());
+
+        if ($prefix === '') {
+            return $cache[$this->projectRoot] = '';
+        }
+
+        return $cache[$this->projectRoot] = rtrim(str_replace(DIRECTORY_SEPARATOR, '/', $prefix), '/').'/';
     }
 }
