@@ -1146,6 +1146,12 @@
   ✓ it can handle a non-defined exception
   ✓ it can handle a class not found Error
 
+   PASS  Tests\Features\Expect\toUse
+  ✓ single target fails when it uses the dependency
+  ✓ multi target fails when any target uses the dependency
+  ✓ multi target fails regardless of the violating target position
+  ✓ multi target passes when no target uses the dependency
+
    PASS  Tests\Features\Expect\toUseStrictEquality
   ✓ missing strict equality
   ✓ has strict equality
@@ -2186,4 +2192,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1542 passed (3375 assertions)
+  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1546 passed (3387 assertions)
