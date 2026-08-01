@@ -100,14 +100,15 @@ final class Graph
 
         $this->applyTestFileChanges($nonMigrationPaths, $affectedSet);
 
-        $staticallyHandledBlade = $this->applyBladeStaticChanges($nonMigrationPaths, $affectedSet);
+        $handledBlade = $this->applyBladeStaticChanges($nonMigrationPaths, $affectedSet)
+            + $this->applyLivewireViewChanges($nonMigrationPaths, $affectedSet);
 
         $this->applyWatchPatternFallback(
             $nonMigrationPaths,
             $unparseableMigrations,
             $preciselyHandledPages,
             $sharedFilesResolved,
-            $staticallyHandledBlade,
+            $handledBlade,
             $affectedSet,
         );
 
@@ -470,10 +471,64 @@ final class Graph
 
     /**
      * @param  list<string>  $nonMigrationPaths
+     * @param  array<string, true>  $affectedSet
+     * @return array<string, true>
+     */
+    private function applyLivewireViewChanges(array $nonMigrationPaths, array &$affectedSet): array
+    {
+        $handled = [];
+
+        foreach ($nonMigrationPaths as $rel) {
+            $sourcePaths = $this->livewireSourcePaths($rel);
+
+            if ($sourcePaths === []) {
+                continue;
+            }
+            if (! is_file($this->projectRoot.'/'.$rel)) {
+                continue;
+            }
+
+            $generatedViewIds = [];
+
+            foreach ($sourcePaths as $sourcePath) {
+                $nativeSourcePath = DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $sourcePath);
+                $hash = substr(md5($nativeSourcePath), 0, 8);
+                $generatedViewSuffix = '/livewire/views/'.$hash.'.blade.php';
+
+                foreach ($this->fileIds as $path => $id) {
+                    if (str_ends_with('/'.ltrim($path, '/'), $generatedViewSuffix)) {
+                        $generatedViewIds[$id] = true;
+                    }
+                }
+            }
+
+            if ($generatedViewIds === []) {
+                continue;
+            }
+
+            foreach ($this->edges as $testFile => $ids) {
+                foreach ($ids as $id) {
+                    if (! isset($generatedViewIds[$id])) {
+                        continue;
+                    }
+
+                    $affectedSet[$testFile] = true;
+                    $handled[$rel] = true;
+
+                    break;
+                }
+            }
+        }
+
+        return $handled;
+    }
+
+    /**
+     * @param  list<string>  $nonMigrationPaths
      * @param  list<string>  $unparseableMigrations
      * @param  array<string, true>  $preciselyHandledPages
      * @param  array<string, true>  $sharedFilesResolved
-     * @param  array<string, true>  $staticallyHandledBlade
+     * @param  array<string, true>  $handledBlade
      * @param  array<string, true>  $affectedSet
      */
     private function applyWatchPatternFallback(
@@ -481,7 +536,7 @@ final class Graph
         array $unparseableMigrations,
         array $preciselyHandledPages,
         array $sharedFilesResolved,
-        array $staticallyHandledBlade,
+        array $handledBlade,
         array &$affectedSet,
     ): void {
         $unknownToGraph = $unparseableMigrations;
@@ -493,7 +548,7 @@ final class Graph
             if (isset($sharedFilesResolved[$rel])) {
                 continue;
             }
-            if (isset($staticallyHandledBlade[$rel])) {
+            if (isset($handledBlade[$rel])) {
                 continue;
             }
             if (! isset($this->fileIds[$rel])) {
@@ -1089,6 +1144,30 @@ final class Graph
     private function isBladePath(string $rel): bool
     {
         return str_starts_with($rel, 'resources/views/') && str_ends_with($rel, '.blade.php');
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function livewireSourcePaths(string $rel): array
+    {
+        if (! str_ends_with($rel, '.blade.php')) {
+            return [];
+        }
+
+        $sourcePaths = [$rel];
+        $componentDirectory = dirname($rel);
+        $componentName = preg_replace('/^⚡[\x{FE0E}\x{FE0F}]?/u', '', basename($componentDirectory));
+
+        if ($componentName === null || basename($rel) !== $componentName.'.blade.php') {
+            return $sourcePaths;
+        }
+
+        if (is_file($this->projectRoot.'/'.$componentDirectory.'/'.$componentName.'.php')) {
+            $sourcePaths[] = $componentDirectory;
+        }
+
+        return $sourcePaths;
     }
 
     private function isBladeComponentPath(string $rel): bool
