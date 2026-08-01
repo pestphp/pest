@@ -1,7 +1,7 @@
 
    PASS  Tests\Arch
   ✓ preset → php → ignoring ['Pest\Expectation', 'debug_backtrace', 'var_export', …]
-  ✓ preset → strict → ignoring ['Pest\Plugins\Tia\BaselineSync', 'usleep']
+  ✓ preset → strict → ignoring ['usleep']
   ✓ preset → security → ignoring ['eval', 'str_shuffle', 'exec', …]
   ✓ globals
 
@@ -1720,47 +1720,6 @@
    PASS  Tests\Unit\Plugins\Retry
   ✓ it orders by defects and stop on defects if when --retry is used
 
-   PASS  Tests\Unit\Plugins\Tia\ContentHash
-  ✓ of() → it returns false when file does not exist
-  ✓ of() → it hashes an existing file
-  ✓ PHP files → it produces the same hash regardless of whitespace differences
-  ✓ PHP files → it ignores single-line comments
-  ✓ PHP files → it ignores hash-style comments
-  ✓ PHP files → it ignores multi-line comments
-  ✓ PHP files → it ignores doc comments
-  ✓ PHP files → it detects code changes
-  ✓ PHP files → it preserves whitespace inside string literals
-  ✓ PHP files → it treats variable renames as a change
-  ✓ PHP files → it falls back to a raw hash for unparseable PHP
-  ✓ PHP files → it is case-insensitive on the file extension
-  ✓ Blade files → it strips blade comments
-  ✓ Blade files → it strips multi-line blade comments
-  ✓ Blade files → it collapses whitespace
-  ✓ Blade files → it detects content changes
-  ✓ Blade files → it keeps blade directives intact
-  ✓ Blade files → it does not use the PHP tokenizer for blade files
-  ✓ JavaScript-like files → it strips line comments
-  ✓ JavaScript-like files → it strips block comments on their own lines
-  ✓ JavaScript-like files → it collapses whitespace
-  ✓ JavaScript-like files → it detects code changes
-  ✓ JavaScript-like files → it does not strip inline trailing comments
-  ✓ JavaScript-like files → it applies the same rules to .ts files
-  ✓ JavaScript-like files → it applies the same rules to .tsx files
-  ✓ JavaScript-like files → it applies the same rules to .jsx files
-  ✓ JavaScript-like files → it applies the same rules to .vue files
-  ✓ JavaScript-like files → it applies the same rules to .svelte files
-  ✓ JavaScript-like files → it applies the same rules to .mjs, .cjs, and .mts files
-  ✓ unknown extensions → it hashes the raw content for unknown extensions
-  ✓ unknown extensions → it does not normalise whitespace for unknown extensions
-  ✓ unknown extensions → it does not strip comments for unknown extensions
-  ✓ unknown extensions → it hashes files with no extension as raw content
-  ✓ output format → it returns a 32-character hex xxh128 hash
-  ✓ output format → it returns a stable hash for empty content
-
-   PASS  Tests\Unit\Plugins\Tia\IsEnabledForRun
-  ✓ does not throw when an integer --random-order-seed is passed as a separate argv element
-  ✓ still detects --tia when an integer argument is present
-
    PASS  Tests\Unit\Preset
   ✓ preset invalid name
   ✓ preset → myFramework
@@ -1946,4 +1905,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1333 passed (3020 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1296 passed (2979 assertions)

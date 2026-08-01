@@ -120,14 +120,6 @@ final readonly class Configuration
     }
 
     /**
-     * Gets the TIA (Test Impact Analysis) configuration.
-     */
-    public function tia(): Plugins\Tia\Configuration
-    {
-        return new Plugins\Tia\Configuration;
-    }
-
-    /**
      * Proxies calls to the uses method.
      *
      * @param  array<array-key, mixed>  $arguments
