@@ -90,12 +90,12 @@ it('keys a result per dataset row rather than per method', function (): void {
 it('records assertions against the same per-dataset key', function (): void {
     $collector = new ResultCollector;
 
-    (new EnsureTiaResultsAreCollected($collector))->notify(
+    new EnsureTiaResultsAreCollected($collector)->notify(
         new PreparationStarted(tiaResultKeyTelemetryInfo(), tiaResultKeyTestMethod('opp')),
     );
     $collector->testPassed();
 
-    (new EnsureTiaAssertionsAreRecordedOnFinished($collector))->notify(
+    new EnsureTiaAssertionsAreRecordedOnFinished($collector)->notify(
         new Finished(tiaResultKeyTelemetryInfo(), tiaResultKeyTestMethod('opp'), 7),
     );
 
@@ -105,7 +105,7 @@ it('records assertions against the same per-dataset key', function (): void {
 it('leaves a test without a dataset keyed by class and method', function (): void {
     $collector = new ResultCollector;
 
-    (new EnsureTiaResultsAreCollected($collector))->notify(
+    new EnsureTiaResultsAreCollected($collector)->notify(
         new PreparationStarted(tiaResultKeyTelemetryInfo(), tiaResultKeyTestMethod(null)),
     );
     $collector->testPassed();
