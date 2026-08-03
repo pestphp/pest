@@ -235,7 +235,7 @@ final class TestCaseMethodFactory
             $attributesCode
                 public function $methodName(...\$arguments)
                 {
-                    if (count(\$arguments) === 1 && \$arguments[0] instanceof __PestDatasetProviderError) {
+                    if (count(\$arguments) === 1 && isset(\$arguments[0]) && \$arguments[0] instanceof __PestDatasetProviderError) {
                         throw \$arguments[0]->getPrevious() ?? \$arguments[0];
                     }
 
