@@ -1908,6 +1908,11 @@
   ✓ activateLinkTracking() → it tracks linked sources across consecutive tests
   ✓ activateLinkTracking() → it records nothing while inactive
 
+   PASS  Tests\Unit\Plugins\Tia\ResultKey
+  ✓ it keys a result per dataset row rather than per method
+  ✓ it records assertions against the same per-dataset key
+  ✓ it leaves a test without a dataset keyed by class and method
+
    PASS  Tests\Unit\Plugins\Tia\TableExtractor
   ✓ fromSql() → it extracts tables from plain DML
   ✓ fromSql() → it extracts tables from joins
@@ -2186,4 +2191,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1542 passed (3375 assertions)
+  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1545 passed (3378 assertions)
