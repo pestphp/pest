@@ -1065,7 +1065,7 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     {
         $this->output->writeln('');
 
-        $this->renderChild('Running in TIA mode, however TIA is skipped as it needs Needs ext-pcov or Xdebug.');
+        $this->renderChild('Running in TIA mode, however TIA is skipped as it needs ext-pcov or Xdebug.');
     }
 
     /**
