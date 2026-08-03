@@ -177,23 +177,11 @@ final readonly class BaselineSync
 
     private function detectGitHubRepo(string $projectRoot): ?string
     {
-        $gitConfig = $projectRoot.DIRECTORY_SEPARATOR.'.git'.DIRECTORY_SEPARATOR.'config';
+        $url = $this->originUrl($projectRoot);
 
-        if (! is_file($gitConfig)) {
+        if ($url === null) {
             return null;
         }
-
-        $content = @file_get_contents($gitConfig);
-
-        if ($content === false) {
-            return null;
-        }
-
-        if (preg_match('/\[remote "origin"\][^\[]*?url\s*=\s*(\S+)/s', $content, $match) !== 1) {
-            return null;
-        }
-
-        $url = $match[1];
 
         if (preg_match('#^git@github\.com:([\w.-]+/[\w.-]+?)(?:\.git)?$#', $url, $m) === 1) {
             return $m[1];
@@ -208,6 +196,48 @@ final readonly class BaselineSync
         }
 
         return null;
+    }
+
+    private function originUrl(string $projectRoot): ?string
+    {
+        $gitConfig = $projectRoot.DIRECTORY_SEPARATOR.'.git'.DIRECTORY_SEPARATOR.'config';
+
+        if (is_file($gitConfig)) {
+            $content = @file_get_contents($gitConfig);
+
+            if ($content === false) {
+                return null;
+            }
+
+            if (preg_match('/\[remote "origin"\][^\[]*?url\s*=\s*(\S+)/s', $content, $match) !== 1) {
+                return null;
+            }
+
+            return $match[1];
+        }
+
+        // Linked worktree: `.git` is a file pointing at the real git dir, so
+        // the config cannot be read directly — ask git itself instead.
+        if (! file_exists($projectRoot.DIRECTORY_SEPARATOR.'.git')) {
+            return null;
+        }
+
+        $process = new Process(['git', 'config', '--get', 'remote.origin.url'], $projectRoot);
+        $process->setTimeout(5.0);
+
+        try {
+            $process->run();
+        } catch (\Throwable) {
+            return null;
+        }
+
+        if (! $process->isSuccessful()) {
+            return null;
+        }
+
+        $url = trim($process->getOutput());
+
+        return $url === '' ? null : $url;
     }
 
     /**
