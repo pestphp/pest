@@ -21,7 +21,7 @@ final readonly class EnsureTiaResultsAreCollected implements PreparationStartedS
         $test = $event->test();
 
         if ($test instanceof TestMethod) {
-            $this->collector->testPrepared($test->className().'::'.$test->methodName(), $test->file());
+            $this->collector->testPrepared($test->id(), $test->file());
         }
     }
 }
