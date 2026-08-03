@@ -49,13 +49,14 @@ final class Configuration
     }
 
     /**
+     * @param  string|null  $workflow  Baseline workflow filename, defaults to `tia-baseline.yml`.
      * @return $this
      */
-    public function baselined(): self
+    public function baselined(?string $workflow = null): self
     {
         /** @var WatchPatterns $watchPatterns */
         $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
-        $watchPatterns->markBaselined();
+        $watchPatterns->markBaselined($workflow);
 
         return $this;
     }

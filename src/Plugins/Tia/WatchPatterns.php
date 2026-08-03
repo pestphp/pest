@@ -44,6 +44,8 @@ final class WatchPatterns
 
     private bool $baselined = false;
 
+    private ?string $baselineWorkflow = null;
+
     public function useDefaults(string $projectRoot): void
     {
         $testPath = TestSuite::getInstance()->testPath;
@@ -167,14 +169,25 @@ final class WatchPatterns
         return $this->filtered;
     }
 
-    public function markBaselined(): void
+    public function markBaselined(?string $workflow = null): void
     {
         $this->baselined = true;
+
+        $workflow = $workflow === null ? null : trim($workflow);
+
+        if ($workflow !== null && $workflow !== '') {
+            $this->baselineWorkflow = $workflow;
+        }
     }
 
     public function isBaselined(): bool
     {
         return $this->baselined;
+    }
+
+    public function baselineWorkflow(): ?string
+    {
+        return $this->baselineWorkflow;
     }
 
     public function reset(): void
@@ -185,6 +198,7 @@ final class WatchPatterns
         $this->locally = false;
         $this->filtered = false;
         $this->baselined = false;
+        $this->baselineWorkflow = null;
     }
 
     private function keyMatches(string $key, string $file): bool
