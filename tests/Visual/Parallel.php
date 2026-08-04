@@ -24,13 +24,13 @@ test('parallel', function () use ($run): void {
         $file = file_get_contents(__FILE__);
         $file = preg_replace(
             '/\$expected = \'.*?\';/',
-            "\$expected = '1 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1530 passed (3328 assertions)';",
+            "\$expected = '1 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1531 passed (3334 assertions)';",
             $file,
         );
         file_put_contents(__FILE__, $file);
     }
 
-    $expected = '1 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1530 passed (3328 assertions)';
+    $expected = '1 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1531 passed (3334 assertions)';
 
     expect($output)
         ->toContain("Tests:    {$expected}")
@@ -42,7 +42,7 @@ test('a parallel test can extend another test with same name', function () use (
 })->skipOnWindows();
 
 test('parallel reports invalid datasets as failures', function () use ($run): void {
-    expect($run('tests/.tests/ParallelInvalidDataset'))
+    expect($run('tests/Fixtures/Suites/ParallelInvalidDataset'))
         ->toContain("A dataset with the name `missing.dataset` does not exist. You can create it using `dataset('missing.dataset', ['a', 'b']);`.")
         ->toContain('Tests:    1 failed, 1 passed (1 assertions)')
         ->toContain('Parallel: 3 processes');
@@ -60,7 +60,7 @@ test('parallel can have multiple exclude-groups', function () use ($run): void {
 })->skipOnWindows();
 
 test('parallel can have multiple groups', function () use ($run): void {
-    $output = $run('tests/.tests/MultipleGroups', '--group=one', '--group=two');
+    $output = $run('tests/Fixtures/Suites/MultipleGroups', '--group=one', '--group=two');
 
     expect($output)
         ->toContain('Tests:    2 passed (2 assertions)')

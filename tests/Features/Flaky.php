@@ -142,7 +142,7 @@ it('works as higher order test')
 
 it('fails after exhausting all retries', function (): void {
     $process = new Process(
-        ['php', 'bin/pest', 'tests/.tests/FlakyFailure.php'],
+        ['php', 'bin/pest', 'tests/Fixtures/Suites/FlakyFailure.php'],
         dirname(__DIR__, 2),
         ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
     );

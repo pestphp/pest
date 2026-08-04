@@ -1565,6 +1565,9 @@
   ✓ it allows performing no expectations without being risky
   ✓ a "describe" group of tests → it allows performing no expectations without being risky
 
+   PASS  Tests\Features\Tia
+  ✓ it does not run user hooks when replaying cached skipped and incomplete results
+
    PASS  Tests\Features\Ticket
   ✓ it may be associated with an ticket #1, #2
   ✓ nested → it may be associated with an ticket #1, #4, #5, #6, #3
@@ -2194,4 +2197,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1548 passed (3383 assertions)
+  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1549 passed (3389 assertions)

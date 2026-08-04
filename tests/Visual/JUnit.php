@@ -29,30 +29,30 @@ $run = function () {
 $normalizedPath = (fn (string $path): string => str_replace('/', DIRECTORY_SEPARATOR, $path));
 
 test('junit output', function () use ($normalizedPath, $run): void {
-    $result = $run('tests/.tests/SuccessOnly.php');
+    $result = $run('tests/Fixtures/Suites/SuccessOnly.php');
 
     expect($result['testsuite']['@attributes'])
-        ->name->toBe('Tests\tests\SuccessOnly')
-        ->file->toBe($normalizedPath('tests/.tests/SuccessOnly.php'))
+        ->name->toBe('Tests\Fixtures\Suites\SuccessOnly')
+        ->file->toBe($normalizedPath('tests/Fixtures/Suites/SuccessOnly.php'))
         ->tests->toBe('4')
         ->assertions->toBe('4')
         ->errors->toBe('0')
         ->failures->toBe('0')
         ->skipped->toBe('0')
         ->and($result['testsuite']['testcase'])->toHaveCount(2)
-        ->and($result['testsuite']['testcase'][0]['@attributes'])->name->toBe('it can pass with comparison')->file->toBe($normalizedPath('tests/.tests/SuccessOnly.php::it can pass with comparison'))->class->toBe('Tests\tests\SuccessOnly')->classname->toBe('Tests.tests.SuccessOnly')->assertions->toBe('1')->time->toStartWith('0.0');
+        ->and($result['testsuite']['testcase'][0]['@attributes'])->name->toBe('it can pass with comparison')->file->toBe($normalizedPath('tests/Fixtures/Suites/SuccessOnly.php::it can pass with comparison'))->class->toBe('Tests\Fixtures\Suites\SuccessOnly')->classname->toBe('Tests.Fixtures.Suites.SuccessOnly')->assertions->toBe('1')->time->toStartWith('0.0');
 });
 
 test('junit with parallel', function () use ($normalizedPath, $run): void {
-    $result = $run('tests/.tests/SuccessOnly.php', '--parallel', '--processes=1', '--filter', 'can pass with comparison');
+    $result = $run('tests/Fixtures/Suites/SuccessOnly.php', '--parallel', '--processes=1', '--filter', 'can pass with comparison');
 
     expect($result['testsuite']['@attributes'])
-        ->name->toBe('Tests\tests\SuccessOnly')
-        ->file->toBe($normalizedPath('tests/.tests/SuccessOnly.php'))
+        ->name->toBe('Tests\Fixtures\Suites\SuccessOnly')
+        ->file->toBe($normalizedPath('tests/Fixtures/Suites/SuccessOnly.php'))
         ->tests->toBe('1')
         ->assertions->toBe('1')
         ->errors->toBe('0')
         ->failures->toBe('0')
         ->skipped->toBe('0')
-        ->and($result['testsuite']['testcase']['@attributes'])->name->toBe('it can pass with comparison')->file->toBe($normalizedPath('tests/.tests/SuccessOnly.php::it can pass with comparison'))->class->toBe('Tests\tests\SuccessOnly')->classname->toBe('Tests.tests.SuccessOnly')->assertions->toBe('1')->time->toStartWith('0.0');
+        ->and($result['testsuite']['testcase']['@attributes'])->name->toBe('it can pass with comparison')->file->toBe($normalizedPath('tests/Fixtures/Suites/SuccessOnly.php::it can pass with comparison'))->class->toBe('Tests\Fixtures\Suites\SuccessOnly')->classname->toBe('Tests.Fixtures.Suites.SuccessOnly')->assertions->toBe('1')->time->toStartWith('0.0');
 });
