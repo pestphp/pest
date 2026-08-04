@@ -10,9 +10,58 @@ use Symfony\Component\Process\Process;
 /**
  * @internal
  */
-final readonly class ChangedFiles
+final class ChangedFiles
 {
-    public function __construct(private string $projectRoot) {}
+    private ?string $gitPrefix = null;
+
+    public function __construct(private readonly string $projectRoot) {}
+
+    /**
+     * The project root's path prefix inside the git repository, with a
+     * trailing slash (e.g. `backend/`), or an empty string when the project
+     * root is the repository root itself or git is unavailable. Git prints
+     * and addresses paths relative to the repository root, while the
+     * dependency graph is keyed on project-relative paths — the git
+     * boundaries below translate between the two using this prefix.
+     */
+    public function gitPrefix(): string
+    {
+        if ($this->gitPrefix !== null) {
+            return $this->gitPrefix;
+        }
+
+        $process = new Process(['git', 'rev-parse', '--show-prefix'], $this->projectRoot);
+        $process->run();
+
+        if (! $process->isSuccessful()) {
+            return $this->gitPrefix = '';
+        }
+
+        return $this->gitPrefix = str_replace(DIRECTORY_SEPARATOR, '/', trim($process->getOutput()));
+    }
+
+    /**
+     * @param  array<int, string>  $files  repository-relative paths as printed by git.
+     * @return array<int, string> project-relative paths; files outside the project are dropped.
+     */
+    private function toProjectRelative(array $files): array
+    {
+        $prefix = $this->gitPrefix();
+
+        if ($prefix === '') {
+            return $files;
+        }
+
+        $projectFiles = [];
+
+        foreach ($files as $file) {
+            if (str_starts_with($file, $prefix)) {
+                $projectFiles[] = substr($file, strlen($prefix));
+            }
+        }
+
+        return $projectFiles;
+    }
 
     /**
      * @param  array<int, string>  $files  project-relative paths.
@@ -155,7 +204,7 @@ final readonly class ChangedFiles
 
     private function contentAtSha(string $sha, string $path): ?string
     {
-        $process = new Process(['git', 'show', $sha.':'.$path], $this->projectRoot);
+        $process = new Process(['git', 'show', $sha.':'.$this->gitPrefix().$path], $this->projectRoot);
         $process->setTimeout(5.0);
         $process->run();
 
@@ -245,7 +294,7 @@ final readonly class ChangedFiles
             throw new MissingDependency('Tia mode', 'git');
         }
 
-        return $this->splitLines($process->getOutput());
+        return $this->toProjectRelative($this->splitLines($process->getOutput()));
     }
 
     /**
@@ -297,7 +346,7 @@ final readonly class ChangedFiles
             $files[] = $path;
         }
 
-        return $files;
+        return $this->toProjectRelative($files);
     }
 
     public function currentSha(): ?string
