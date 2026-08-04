@@ -47,3 +47,19 @@ test('parallel reports invalid datasets as failures', function () use ($run) {
         ->toContain('Tests:    1 failed, 1 passed (1 assertions)')
         ->toContain('Parallel: 3 processes');
 })->skipOnWindows();
+
+test('parallel honors multiple --group flags', function () use ($run) {
+    $output = $run('tests/Fixtures/MultipleGroups', '--group=one', '--group=two');
+
+    expect($output)
+        ->toContain('Tests:    2 passed (2 assertions)')
+        ->toContain('Parallel: 3 processes');
+})->skipOnWindows();
+
+test('parallel honors multiple --exclude-group flags', function () use ($run) {
+    $output = $run('tests/Fixtures/MultipleGroups', '--exclude-group=one', '--exclude-group=two');
+
+    expect($output)
+        ->toContain('Tests:    1 passed (1 assertions)')
+        ->toContain('Parallel: 3 processes');
+})->skipOnWindows();
