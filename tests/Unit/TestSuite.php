@@ -15,7 +15,7 @@ it('does not allow to add the same test description twice', function (): void {
     $testSuite->tests->set($method);
 })->throws(
     TestAlreadyExist::class,
-    sprintf('A test with the description `%s` already exists in the filename `%s`.', 'bar', 'foo'),
+    sprintf('A test with the description [%s] already exists in the filename [%s].', 'bar', 'foo'),
 );
 
 it('does not allow static closures', function (): void {

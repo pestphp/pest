@@ -90,11 +90,11 @@ final class TestSuiteLoader
         (static function () use ($suiteClassFile) {
             try {
                 include_once $suiteClassFile;
+
+                TestSuite::getInstance()->tests->makeIfNeeded($suiteClassFile);
             } catch (Throwable $e) {
                 Panic::with($e);
             }
-
-            TestSuite::getInstance()->tests->makeIfNeeded($suiteClassFile);
         })();
 
         $loadedClasses = array_values(

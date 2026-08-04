@@ -19,6 +19,6 @@ final class BeforeAllWithinDescribe extends InvalidArgumentException implements 
      */
     public function __construct(string $filename)
     {
-        parent::__construct(sprintf('The beforeAll method can not be used within describe functions. Filename `%s`.', $filename));
+        parent::__construct(sprintf('The beforeAll method can not be used within describe functions. Filename [%s].', $filename));
     }
 }

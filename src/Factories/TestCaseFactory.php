@@ -9,6 +9,7 @@ use Pest\Concerns;
 use Pest\Contracts\HasPrintableTestCaseName;
 use Pest\Evaluators\Attributes;
 use Pest\Exceptions\DatasetMissing;
+use Pest\Exceptions\InvalidTestClassName;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\Exceptions\TestAlreadyExist;
 use Pest\Exceptions\TestClosureMustNotBeStatic;
@@ -138,6 +139,16 @@ final class TestCaseFactory
 
         if (trim($className) === '') {
             $className = 'InvalidTestName'.Str::random();
+        } elseif (! Str::isValidClassName($className)) {
+            throw InvalidTestClassName::fromClassName($this->filename, $className);
+        }
+
+        if ($this->namespace === null) {
+            foreach ($partsFQN as $partFQN) {
+                if (! Str::isValidIdentifier($partFQN)) {
+                    throw InvalidTestClassName::fromNamespace($this->filename, $namespace, $partFQN);
+                }
+            }
         }
 
         $this->attributes = [

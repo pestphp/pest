@@ -18,6 +18,33 @@ final class Str
     private const string PREFIX = '__pest_evaluable_';
 
     /**
+     * The list of names PHP reserves, and therefore refuses, as class names.
+     *
+     * @see https://github.com/php/php-src/blob/master/Zend/zend_compile.c
+     *
+     * @var array<int, string>
+     */
+    private const array RESERVED_CLASS_NAMES = [
+        'array',
+        'bool',
+        'callable',
+        'false',
+        'float',
+        'int',
+        'iterable',
+        'mixed',
+        'never',
+        'null',
+        'object',
+        'parent',
+        'self',
+        'static',
+        'string',
+        'true',
+        'void',
+    ];
+
+    /**
      * Create a (unsecure & non-cryptographically safe) random alpha-numeric
      * string value.
      *
@@ -62,6 +89,35 @@ final class Str
 
         // sticks to PHP8.2 function naming rules https://www.php.net/manual/en/functions.user-defined.php
         return (string) preg_replace('/[^a-zA-Z0-9_\x80-\xff]/', '_', $code);
+    }
+
+    /**
+     * Determine if the given name is a valid PHP identifier, and therefore may
+     * be used as a single namespace name.
+     */
+    public static function isValidIdentifier(string $name): bool
+    {
+        return preg_match('/^[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*$/', $name) === 1;
+    }
+
+    /**
+     * Determine if the given name may be declared as a class name by an `eval`.
+     */
+    public static function isValidClassName(string $name): bool
+    {
+        if (! self::isValidIdentifier($name)) {
+            return false;
+        }
+
+        if (in_array(strtolower($name), self::RESERVED_CLASS_NAMES, true)) {
+            return false;
+        }
+
+        $tokens = token_get_all(sprintf('<?php %s;', $name));
+
+        // Anything the lexer sees as a keyword, like `list` or `match`, may not
+        // be used as a class name.
+        return is_array($tokens[1] ?? null) && $tokens[1][0] === T_STRING;
     }
 
     /**

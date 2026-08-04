@@ -19,6 +19,6 @@ final class DatasetDoesNotExist extends InvalidArgumentException implements Exce
      */
     public function __construct(string $name)
     {
-        parent::__construct(sprintf("A dataset with the name `%s` does not exist. You can create it using `dataset('%s', ['a', 'b']);`.", $name, $name));
+        parent::__construct(sprintf("A dataset with the name [%s] does not exist. You can create it using `dataset('%s', ['a', 'b']);`.", $name, $name));
     }
 }

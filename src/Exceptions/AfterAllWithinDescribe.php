@@ -19,6 +19,6 @@ final class AfterAllWithinDescribe extends InvalidArgumentException implements E
      */
     public function __construct(string $filename)
     {
-        parent::__construct(sprintf('The afterAll method can not be used within describe functions. Filename `%s`.', $filename));
+        parent::__construct(sprintf('The afterAll method can not be used within describe functions. Filename [%s].', $filename));
     }
 }

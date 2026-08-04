@@ -43,7 +43,7 @@ test('a parallel test can extend another test with same name', function () use (
 
 test('parallel reports invalid datasets as failures', function () use ($run): void {
     expect($run('tests/Fixtures/Suites/ParallelInvalidDataset'))
-        ->toContain("A dataset with the name `missing.dataset` does not exist. You can create it using `dataset('missing.dataset', ['a', 'b']);`.")
+        ->toContain("A dataset with the name [missing.dataset] does not exist. You can create it using `dataset('missing.dataset', ['a', 'b']);`.")
         ->toContain('Tests:    1 failed, 1 passed (1 assertions)')
         ->toContain('Parallel: 3 processes');
 })->skipOnWindows();
