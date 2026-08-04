@@ -1921,10 +1921,12 @@
   ✓ fromSql() → it records the table, not the schema, for qualified identifiers
   ✓ fromSql() → it handles quoted identifiers
   ✓ fromSql() → it ignores schema metadata tables
+  ✓ fromSql() → it does not leak int keys for numeric identifiers
   ✓ fromSql() → it returns nothing for non-DML statements
   ✓ fromMigrationSource() → it extracts tables from Schema builder calls
   ✓ fromMigrationSource() → it extracts tables from raw DDL statements
   ✓ fromMigrationSource() → it records the table, not the schema, in qualified DDL and DML
+  ✓ fromMigrationSource() → it does not leak int keys for numeric table names
   ✓ fromMigrationSource() → it extracts tables from DB::table calls
 
    PASS  Tests\Unit\Plugins\Tia\TestPaths
@@ -2191,4 +2193,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1545 passed (3378 assertions)
+  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1547 passed (3381 assertions)
