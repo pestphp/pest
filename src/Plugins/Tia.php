@@ -7,6 +7,7 @@ namespace Pest\Plugins;
 use NunoMaduro\Collision\Adapters\Phpunit\Printers\DefaultPrinter;
 use Pest\Contracts\Plugins\AddsOutput;
 use Pest\Contracts\Plugins\HandlesArguments;
+use Pest\Contracts\Plugins\HandlesOriginalArguments;
 use Pest\Contracts\Plugins\Terminable;
 use Pest\Exceptions\NoAffectedTestsFound;
 use Pest\Exceptions\TiaRequiresRepositoryRoot;
@@ -36,7 +37,7 @@ use Symfony\Component\Process\Process;
 /**
  * @internal
  */
-final class Tia implements AddsOutput, HandlesArguments, Terminable
+final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArguments, Terminable
 {
     use HandleArguments;
 
@@ -107,6 +108,29 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         '--compact', '--ci-build-id', '--min',
     ];
 
+    /**
+     * Flags that narrow this run to a subset of the suite.
+     *
+     * Only user-supplied, per-run narrowing belongs here. A filter that is
+     * always in force — `<groups>` in phpunit.xml, or a plugin registering a
+     * test case filter from `boot()` — applies equally to the runs that build
+     * the baseline, so it does not make this run narrower than the baseline
+     * and must not disable baseline writes.
+     *
+     * `--shard` is rewritten to `--filter` before this plugin sees the
+     * arguments, so it is covered here too. The `bin/pest`-only flags are
+     * stripped from the handled arguments, so they are matched against the
+     * original argv instead.
+     *
+     * @var list<string>
+     */
+    private const array PARTIAL_SELECTION_FLAGS = [
+        '--filter', '--exclude-filter', '--group', '--exclude-group',
+        '--covers', '--uses', '--testsuite', '--exclude-testsuite', '--test-suffix',
+        '--dirty', '--todo', '--todos', '--flaky', '--notes',
+        '--assignee', '--issue', '--ticket', '--pr', '--pull-request',
+    ];
+
     private bool $graphWritten = false;
 
     private bool $replayRan = false;
@@ -141,6 +165,11 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     private bool $freshRebuild = false;
 
     private bool $filteredMode = false;
+
+    private bool $writesSuppressed = false;
+
+    /** @var array<int, string> */
+    private array $originalArguments = [];
 
     private ?string $driftLabel = null;
 
@@ -320,6 +349,14 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
     /**
      * {@inheritDoc}
      */
+    public function handleOriginalArguments(array $arguments): void
+    {
+        $this->originalArguments = $arguments;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function handleArguments(array $arguments): array
     {
         if ($this->hasArgument(self::BASELINE_PATH_OPTION, $arguments)) {
@@ -339,9 +376,12 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $cliEnabled = $this->hasArgument(self::OPTION, $arguments) || self::envFlagEnabled(self::ENV_TIA);
         $alwaysEnabled = $watchPatterns->isEnabled()
             && (! $watchPatterns->isLocally() || Environment::name() === Environment::LOCAL);
+        $hasExplicitPath = $this->hasExplicitPathArgument($arguments);
+        $partial = ! $isWorker && ($hasExplicitPath || $this->hasPartialSelection($arguments));
+        $disabled = $disabled || $partial;
         $enabled = ! $disabled && ($cliEnabled || $alwaysEnabled);
         $this->filteredMode = ($this->hasArgument(self::FILTERED_OPTION, $arguments) || self::envFlagEnabled(self::ENV_FILTERED) || $watchPatterns->isFiltered())
-            && ! $this->hasExplicitPathArgument($arguments)
+            && ! $hasExplicitPath
             && ! $this->coverageReportActive();
         $freshRequested = $this->hasArgument(self::FRESH_OPTION, $arguments);
         $this->forceRefetch = $this->hasArgument(self::REFETCH_OPTION, $arguments);
@@ -355,6 +395,22 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         $arguments = $this->popArgument(self::BASELINED_OPTION, $arguments);
 
         if ($disabled) {
+            if ($partial) {
+                // Test results are collected unconditionally, and addOutput()
+                // folds them into an existing graph even when TIA took no part
+                // in the run. Left alone that would prune the cached results of
+                // every sibling test the selection excluded, so the writes have
+                // to be suppressed explicitly rather than merely skipped.
+                // `--no-tia` deliberately keeps writing: it still runs the whole
+                // suite, so its results remain valid for the baseline.
+                $this->writesSuppressed = true;
+
+                if ($cliEnabled || $freshRequested || $this->forceRefetch) {
+                    $this->output->writeln('');
+                    $this->renderChild('TIA does not apply to partial runs — running the selected tests directly.');
+                }
+            }
+
             $this->forceRefetch = false;
             $this->filteredMode = false;
             $this->freshRebuild = false;
@@ -390,6 +446,16 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
 
         if (Parallel::isWorker() && ($this->replayGraph instanceof Graph || $this->recordingActive)) {
             $this->flushWorkerReplay();
+        }
+
+        // Only ever set for the parent — addOutput() returns early in workers,
+        // whose partials are ephemeral and only reach the baseline if the
+        // parent consumes them, which it no longer does.
+        if ($this->writesSuppressed) {
+            $this->recorder->reset();
+            $this->coverageCollector->reset();
+
+            return;
         }
 
         $recorder = $this->recorder;
@@ -481,10 +547,23 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
             return $exitCode;
         }
 
+        // `->only()` narrows the executed set exactly like `--filter` does, but
+        // is only knowable once the suite has been collected — too late to turn
+        // TIA off up front, so instead every write is suppressed here. Sampled
+        // in addOutput() because Only's lock file is already gone by the time
+        // terminate() runs (its plugin terminates first).
+        if (Only::isEnabled()) {
+            $this->writesSuppressed = true;
+        }
+
         $this->reportMissingWorkerDrivers();
 
         if (Parallel::isEnabled()) {
             $this->mergeWorkerReplayPartials();
+        }
+
+        if ($this->writesSuppressed) {
+            return $exitCode;
         }
 
         if ($this->replayRan) {
@@ -1526,6 +1605,29 @@ final class Tia implements AddsOutput, HandlesArguments, Terminable
         assert($coverage instanceof Coverage);
 
         return $coverage->coverage;
+    }
+
+    /**
+     * Whether a selection-narrowing flag was given, either among the arguments
+     * PHPUnit receives or — for the flags `bin/pest` consumes itself — among
+     * the original argv. Explicit path arguments and `->only()` are detected
+     * separately.
+     *
+     * @param  array<int, string>  $arguments
+     */
+    private function hasPartialSelection(array $arguments): bool
+    {
+        foreach (self::PARTIAL_SELECTION_FLAGS as $flag) {
+            if ($this->hasArgument($flag, $arguments)) {
+                return true;
+            }
+
+            if ($this->hasArgument($flag, $this->originalArguments)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
