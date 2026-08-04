@@ -58,3 +58,11 @@ test('parallel can have multiple exclude-groups', function () use ($run): void {
     expect((int) $doubleMatch[1])->toBeLessThan((int) $singleMatch[1])
         ->and($doubleExclude)->toContain('Parallel: 3 processes');
 })->skipOnWindows();
+
+test('parallel can have multiple groups', function () use ($run): void {
+    $output = $run('tests/.tests/MultipleGroups', '--group=one', '--group=two');
+
+    expect($output)
+        ->toContain('Tests:    2 passed (2 assertions)')
+        ->toContain('Parallel: 3 processes');
+})->skipOnWindows();
