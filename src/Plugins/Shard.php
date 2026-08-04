@@ -132,7 +132,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             self::$timeBalanced = true;
             self::$shardsOutdated = $newTests !== [];
         } else {
-            $testsToRun = (array_chunk($tests, max(1, (int) ceil(count($tests) / $total))))[$index - 1] ?? [];
+            $testsToRun = self::distribute($tests, $index, $total);
         }
 
         self::$shard = [
@@ -213,6 +213,30 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     private function buildFilterArgument(mixed $testsToRun): string
     {
         return addslashes(implode('|', $testsToRun));
+    }
+
+    /**
+     * Distributes the given tests across the shards round-robin, returning the
+     * slice for the requested shard.
+     *
+     * Interleaving rather than chunking contiguously matters: --list-tests
+     * returns classes sorted, so a contiguous chunk clusters classes that share
+     * long common prefixes. Joined into one unanchored --filter alternation,
+     * that trips PCRE's backtrack limit on large suites and the shard then
+     * matches nothing. Scattering the prefixes keeps the filter within limits.
+     *
+     * @param  list<string>  $tests
+     * @return list<string>
+     */
+    public static function distribute(array $tests, int $index, int $total): array
+    {
+        $partitions = array_fill(0, $total, []);
+
+        foreach ($tests as $i => $test) {
+            $partitions[$i % $total][] = $test;
+        }
+
+        return $partitions[$index - 1] ?? [];
     }
 
     /**
