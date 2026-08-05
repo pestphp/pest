@@ -9,6 +9,7 @@ use Pest\Contracts\Plugins\AddsOutput;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Contracts\Plugins\HandlesOriginalArguments;
 use Pest\Contracts\Plugins\Terminable;
+use Pest\Exceptions\MissingDependency;
 use Pest\Exceptions\NoAffectedTestsFound;
 use Pest\Exceptions\TiaRequiresRepositoryRoot;
 use Pest\Panic;
@@ -31,6 +32,7 @@ use Pest\Support\View;
 use Pest\TestCaseFilters\TiaTestCaseFilter;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestStatus\TestStatus;
+use PHPUnit\TestRunner\TestResult\Facade as TestResultFacade;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 
@@ -56,6 +58,13 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     private const string BASELINED_OPTION = '--baselined';
 
     private const string BASELINE_PATH_OPTION = '--baseline';
+
+    /**
+     * Set by the mutation plugin on the subprocess running a single mutant,
+     * and nowhere else. Its own `--mutate` flag is popped before the argv is
+     * handed to that subprocess, so the flag cannot be matched instead.
+     */
+    private const string ENV_MUTATION_TESTING = 'PEST_MUTATION_TESTING';
 
     private const string ENV_TIA = 'PEST_TIA';
 
@@ -122,6 +131,11 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
      * stripped from the handled arguments, so they are matched against the
      * original argv instead.
      *
+     * Flags that cut a run short instead of narrowing it — `--bail`, `--retry`,
+     * `--stop-on-*` — do not belong here either. They only narrow the run when
+     * something actually fails, and that is not known until it is over, so they
+     * are handled by stoppedEarly() from addOutput().
+     *
      * @var list<string>
      */
     private const array PARTIAL_SELECTION_FLAGS = [
@@ -146,7 +160,18 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     private ?Graph $replayGraph = null;
 
+    /**
+     * The baseline this run reads from and writes to.
+     *
+     * `main` is only the fallback for a repository whose branch cannot be read
+     * — it is also the branch every other baseline falls back to reading, so
+     * writing there by accident corrupts the shared baseline. Resolved through
+     * resolveBranch() rather than at every use site, because the git call it
+     * needs is not free.
+     */
     private string $branch = 'main';
+
+    private bool $branchResolved = false;
 
     /** @var array<string, true> */
     private array $affectedFiles = [];
@@ -166,7 +191,23 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     private bool $filteredMode = false;
 
+    /**
+     * Bars this run from touching the graph at all, results included.
+     *
+     * Reserved for runs whose results describe something other than the code
+     * in the working tree, which is nothing the baseline can ever use.
+     */
     private bool $writesSuppressed = false;
+
+    /**
+     * Narrows this run's writes to the results of the tests it actually ran.
+     *
+     * A run that covered only part of the suite still learns something true
+     * about the tests it did reach. What it cannot do is speak for the rest:
+     * pruning results, advancing the recorded sha and replacing the edge map
+     * all claim the whole suite reported, so they stay behind a complete run.
+     */
+    private bool $resultsOnlyWrites = false;
 
     /** @var array<int, string> */
     private array $originalArguments = [];
@@ -379,6 +420,15 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $hasExplicitPath = $this->hasExplicitPathArgument($arguments);
         $partial = ! $isWorker && ($hasExplicitPath || $this->hasPartialSelection($arguments));
         $disabled = $disabled || $partial;
+
+        // A mutation subprocess runs the suite against source the mutation
+        // plugin has deliberately broken. Its failures describe the mutant, not
+        // the working tree, so unlike every other narrowed run there is nothing
+        // in its results worth keeping. The parent `--mutate` run is untouched
+        // by this: it runs the whole suite against real source.
+        if (getenv(self::ENV_MUTATION_TESTING) !== false) {
+            $this->writesSuppressed = true;
+        }
         $enabled = ! $disabled && ($cliEnabled || $alwaysEnabled);
         $this->filteredMode = ($this->hasArgument(self::FILTERED_OPTION, $arguments) || self::envFlagEnabled(self::ENV_FILTERED) || $watchPatterns->isFiltered())
             && ! $hasExplicitPath
@@ -396,16 +446,19 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         if ($disabled) {
             if ($partial) {
-                // Test results are collected unconditionally, and addOutput()
-                // folds them into an existing graph even when TIA took no part
-                // in the run. Left alone that would prune the cached results of
-                // every sibling test the selection excluded, so the writes have
-                // to be suppressed explicitly rather than merely skipped.
-                // `--no-tia` deliberately keeps writing: it still runs the whole
-                // suite, so its results remain valid for the baseline.
-                $this->writesSuppressed = true;
+                // TIA cannot choose what runs here — the user already did — but
+                // the tests they picked still report honestly, so their results
+                // are kept and everything that would speak for the excluded ones
+                // is not. `--no-tia` needs none of this: it still runs the whole
+                // suite, so it remains a complete run.
+                $this->resultsOnlyWrites = true;
 
-                if ($cliEnabled || $freshRequested || $this->forceRefetch) {
+                // `$this->filteredMode` counts as asking for it: reaching here
+                // means the narrowing came from the command line while filtered
+                // mode came from the environment or the config, and a run that
+                // silently declines what the config asked for is the one most
+                // in need of the explanation.
+                if ($cliEnabled || $freshRequested || $this->forceRefetch || $this->filteredMode) {
                     $this->output->writeln('');
                     $this->renderChild('TIA does not apply to partial runs — running the selected tests directly.');
                 }
@@ -448,10 +501,12 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             $this->flushWorkerReplay();
         }
 
-        // Only ever set for the parent — addOutput() returns early in workers,
-        // whose partials are ephemeral and only reach the baseline if the
-        // parent consumes them, which it no longer does.
-        if ($this->writesSuppressed) {
+        // Both only ever set for the parent — addOutput() returns early in
+        // workers, whose partials are ephemeral and only reach the baseline if
+        // the parent consumes them. Everything this method goes on to write is
+        // whole-suite by nature — the edge map above all — so a narrowed run
+        // stops here too, its results already persisted by addOutput().
+        if ($this->writesSuppressed || $this->resultsOnlyWrites) {
             $this->recorder->reset();
             $this->coverageCollector->reset();
 
@@ -549,20 +604,29 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         // `->only()` narrows the executed set exactly like `--filter` does, but
         // is only knowable once the suite has been collected — too late to turn
-        // TIA off up front, so instead every write is suppressed here. Sampled
-        // in addOutput() because Only's lock file is already gone by the time
-        // terminate() runs (its plugin terminates first).
-        if (Only::isEnabled()) {
-            $this->writesSuppressed = true;
+        // TIA off up front. Sampled in addOutput() because Only's lock file is
+        // already gone by the time terminate() runs (its plugin terminates
+        // first). Whether the run was cut short is likewise only knowable now.
+        if (Only::isEnabled() || $this->stoppedEarly()) {
+            $this->resultsOnlyWrites = true;
         }
 
         $this->reportMissingWorkerDrivers();
 
+        // Runs before the checks below: it is what fills the parent's result
+        // collector in parallel, and a worker that stopped early narrows the
+        // whole run.
         if (Parallel::isEnabled()) {
             $this->mergeWorkerReplayPartials();
         }
 
         if ($this->writesSuppressed) {
+            return $exitCode;
+        }
+
+        if ($this->resultsOnlyWrites) {
+            $this->snapshotTestResults(complete: false);
+
             return $exitCode;
         }
 
@@ -714,7 +778,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             Panic::with(new TiaRequiresRepositoryRoot($subdirectoryPrefix));
         }
 
-        $this->branch = new ChangedFiles($projectRoot)->currentBranch() ?? 'main';
+        $this->resolveBranch($projectRoot);
 
         $fingerprint = Fingerprint::compute($projectRoot);
         $this->startFingerprint = $fingerprint;
@@ -777,7 +841,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
      */
     private function handleWorker(array $arguments, string $projectRoot, bool $recordingGlobal, bool $replayingGlobal): array
     {
-        $this->branch = new ChangedFiles($projectRoot)->currentBranch() ?? 'main';
+        $this->resolveBranch($projectRoot);
 
         if ($replayingGlobal) {
             $this->installWorkerReplay($projectRoot);
@@ -1220,6 +1284,9 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             'replayed' => $this->replayedCount,
             'affected' => $this->affectedCount,
             'executed' => $this->executedCount,
+            // Only the worker knows it stopped early — the parent runs no tests
+            // of its own, so its own check would always come back clean.
+            'truncated' => $this->stoppedEarly(),
         ], JSON_UNESCAPED_SLASHES);
 
         if ($json === false) {
@@ -1254,6 +1321,13 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
             if (! is_array($decoded)) {
                 continue;
+            }
+
+            // One worker stopping early leaves the whole suite incomplete: the
+            // tests it never reached are missing from the merged result set just
+            // as if they had been filtered out.
+            if (($decoded['truncated'] ?? false) === true) {
+                $this->resultsOnlyWrites = true;
             }
 
             if (isset($decoded['replayed']) && is_int($decoded['replayed'])) {
@@ -1515,7 +1589,14 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $collector->reset();
     }
 
-    private function snapshotTestResults(bool $markKnownTestFiles = false): void
+    /**
+     * Folds the run's results into the existing graph.
+     *
+     * An incomplete run passes `$complete: false`, which keeps the additive
+     * half — the results of the tests it did run — and drops the half that
+     * speaks for the suite as a whole.
+     */
+    private function snapshotTestResults(bool $markKnownTestFiles = false, bool $complete = true): void
     {
         /** @var ResultCollector $collector */
         $collector = Container::getInstance()->get(ResultCollector::class);
@@ -1534,6 +1615,14 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return;
         }
 
+        try {
+            $this->resolveBranch($projectRoot);
+        } catch (MissingDependency) {
+            // This run never asked for TIA, so a missing git must not turn it
+            // into a failure the way it does on the TIA path. Writing to the
+            // fallback baseline is the lesser of the two evils.
+        }
+
         $touchedFiles = [];
 
         foreach ($results as $testId => $result) {
@@ -1545,6 +1634,16 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
             if (is_string($file) && $file !== '') {
                 $touchedFiles[$file] = true;
+            }
+
+            // A result is only ever invalidated through the edges of the test
+            // that produced it, so one recorded for a test the graph has no
+            // edges for could never be invalidated again — it would be replayed
+            // as settled however far the code around it moved. Only a complete
+            // run records the edges that would close that gap, so until one
+            // does, the test stays unknown.
+            if (! $complete && (! is_string($file) || ! $graph->knowsTest($file))) {
+                continue;
             }
 
             $graph->setResult(
@@ -1562,7 +1661,11 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             $graph->markKnownTestFiles(array_keys($touchedFiles));
         }
 
-        $graph->pruneStaleResults($this->branch, array_keys($touchedFiles), array_keys($results));
+        // Pruning reads the absence of a test from this run as the test being
+        // gone. That only holds if every test was invited to report.
+        if ($complete) {
+            $graph->pruneStaleResults($this->branch, array_keys($touchedFiles), array_keys($results));
+        }
 
         $this->saveGraph($graph);
         $collector->reset();
@@ -1628,6 +1731,47 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         }
 
         return false;
+    }
+
+    /**
+     * Whether the run stopped before reaching every test it had queued.
+     *
+     * Covers `--bail`, `--retry` and every `--stop-on-*` flag, the equivalent
+     * `phpunit.xml` attributes, and an interrupted run — none of which narrow
+     * the selection up front, so hasPartialSelection() cannot see them. The
+     * tests queued behind the defect that halted the run never reported, and
+     * folding what did report into the baseline prunes the cached results of
+     * their siblings in every file the run had already entered.
+     *
+     * Deliberately unguarded. Both callers run only once PHPUnit's
+     * configuration is registered — the kernel reads it unguarded itself just
+     * before dispatching addOutput(), and flushWorkerReplay() bails out unless
+     * the worker actually executed something. Swallowing a failure here would
+     * report every truncated run as complete, which is the corruption this
+     * guards against in the first place.
+     */
+    private function stoppedEarly(): bool
+    {
+        return TestResultFacade::shouldStop();
+    }
+
+    /**
+     * Resolves the baseline this run reads from and writes to, once.
+     *
+     * Results are written on runs where TIA itself took no part, and those
+     * never reach handleParent(). Without this the default would stand and
+     * every such run would write its results to `main`, whatever branch it
+     * actually ran on.
+     */
+    private function resolveBranch(string $projectRoot): void
+    {
+        if ($this->branchResolved) {
+            return;
+        }
+
+        $this->branchResolved = true;
+
+        $this->branch = new ChangedFiles($projectRoot)->currentBranch() ?? $this->branch;
     }
 
     /**
