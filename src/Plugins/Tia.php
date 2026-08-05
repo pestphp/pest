@@ -1401,6 +1401,16 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return;
         }
 
+        // A replayed result carries the duration PHPUnit measured for a test
+        // that never ran — near zero. Unlike the assertion count, which the
+        // replay injects into the result itself, the cached duration lives only
+        // in this process: the parent replayed nothing of its own, so once the
+        // partial is written the real value is unrecoverable. Launder it here
+        // and the parent's verbatim read is correct by construction.
+        foreach ($results as $testId => $result) {
+            $results[$testId]['time'] = $this->resultTime($testId, $result['time']);
+        }
+
         $json = json_encode([
             'results' => $results,
             'replayed' => $this->replayedCount,
