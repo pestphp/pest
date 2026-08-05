@@ -20,6 +20,7 @@
       <exclude>./tests/.snapshots</exclude>
       <exclude>./tests/Fixtures/Inheritance</exclude>
       <exclude>./tests/Fixtures/Suites</exclude>
+      <exclude>./tests/Fixtures/Tia</exclude>
     </testsuite>
   </testsuites>
   <source>

@@ -1568,6 +1568,34 @@
    PASS  Tests\Features\Tia
   ✓ it does not run user hooks when replaying cached skipped and incomplete results
 
+   PASS  Tests\Features\Tia\DefaultBranchReplay
+  ✓ replays the default branch baseline on a new branch
+  ✓ replays whatever the default branch is called with ('main')
+  ✓ replays whatever the default branch is called with ('master')
+  ✓ replays whatever the default branch is called with ('trunk')
+  ✓ replays whatever the default branch is called with ('develop')
+  ✓ replays on a second new branch too
+  ✓ writes nothing on a second run on the same branch
+  ✓ replays on a branch whose name contains slashes
+  ✓ replays inside a worktree on a new branch
+
+   PASS  Tests\Features\Tia\DefaultBranchResolution
+  ✓ a declared default branch beats autodetection
+  ✓ a declared default branch that does not exist degrades to a full run
+  ✓ a repository with no remote is refused rather than silently re-run
+  ✓ a declared default branch stands in for a missing remote
+  ✓ tia still requires git
+  ✓ a plain run outside a repository creates no baseline
+  ✓ the default branch is resolved once per run, not once per test
+
+   PASS  Tests\Features\Tia\DefaultBranchWriteTier
+  ✓ narrows to the affected tests on a new branch
+  ✓ filtered mode reads the fallback too
+  ✓ filtered mode finds nothing to do on a clean green feature branch
+  ✓ a detached HEAD replays without minting a branch key
+  ✓ the branch that ran gets its own key and the default branch keeps its baseline
+  ✓ the fallback reaches parallel workers
+
    PASS  Tests\Features\Ticket
   ✓ it may be associated with an ticket #1, #2
   ✓ nested → it may be associated with an ticket #1, #4, #5, #6, #3
@@ -2197,4 +2225,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1549 passed (3389 assertions)
+  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1571 passed (3446 assertions)

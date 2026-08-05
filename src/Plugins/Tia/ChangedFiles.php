@@ -245,6 +245,17 @@ final readonly class ChangedFiles
     }
 
     /**
+     * Whether the repository has any remote configured.
+     *
+     * Advisory like {@see self::defaultBranch()} — a `git` that cannot answer
+     * is reported as "no remote", and the caller decides what that means.
+     */
+    public function hasRemote(): bool
+    {
+        return $this->gitOutput(['git', 'remote']) !== null;
+    }
+
+    /**
      * @param  array<int, string>  $command
      */
     private function gitOutput(array $command): ?string

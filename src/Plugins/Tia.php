@@ -9,8 +9,10 @@ use Pest\Contracts\Plugins\AddsOutput;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Contracts\Plugins\HandlesOriginalArguments;
 use Pest\Contracts\Plugins\Terminable;
+use Pest\Exceptions\InvalidOption;
 use Pest\Exceptions\MissingDependency;
 use Pest\Exceptions\NoAffectedTestsFound;
+use Pest\Exceptions\TiaRequiresRemote;
 use Pest\Exceptions\TiaRequiresRepositoryRoot;
 use Pest\Panic;
 use Pest\Plugins\Concerns\HandleArguments;
@@ -181,6 +183,19 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         '--covers', '--uses', '--testsuite', '--exclude-testsuite', '--test-suffix',
         '--dirty', '--todo', '--todos', '--flaky', '--notes',
         '--assignee', '--issue', '--ticket', '--pr', '--pull-request',
+    ];
+
+    /**
+     * Options that cannot be combined with Tia mode.
+     *
+     * `--covers` and `--uses` select on coverage metadata Tia does not model,
+     * so they resolve to no tests at all rather than to the ones the user meant.
+     * `--random-order-seed` exits non-zero on its own, with or without Tia.
+     * Either way the run cannot honour both things it was asked for, so it says
+     * so instead of silently dropping Tia and running something else.
+     */
+    private const array UNSUPPORTED_OPTIONS = [
+        '--covers', '--uses', '--random-order-seed',
     ];
 
     private bool $graphWritten = false;
@@ -506,6 +521,10 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $cliEnabled = $this->hasArgument(self::OPTION, $arguments) || self::envFlagEnabled(self::ENV_TIA);
         $alwaysEnabled = $watchPatterns->isEnabled()
             && (! $watchPatterns->isLocally() || Environment::name() === Environment::LOCAL);
+        if (! $isWorker && ! $disabled && ($cliEnabled || $alwaysEnabled)) {
+            $this->guardUnsupportedOptions($arguments);
+        }
+
         $hasExplicitPath = $this->hasExplicitPathArgument($arguments);
         $partial = ! $isWorker && ($hasExplicitPath || $this->hasPartialSelection($arguments));
         $disabled = $disabled || $partial;
@@ -868,6 +887,14 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         }
 
         $this->resolveBranch($projectRoot);
+
+        // After resolveBranch(), so a directory that is no repository at all
+        // still reports the missing git dependency rather than a missing remote.
+        // Skipped once the default branch is configured by hand: there is then
+        // nothing left for a remote to answer.
+        if ($this->watchPatterns->defaultBranch() === null && ! new ChangedFiles($projectRoot)->hasRemote()) {
+            Panic::with(new TiaRequiresRemote);
+        }
 
         $fingerprint = Fingerprint::compute($projectRoot);
         $this->startFingerprint = $fingerprint;
@@ -1870,13 +1897,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return true;
         }
 
-        foreach (self::COVERAGE_REPORT_FLAGS as $flag) {
-            if ($this->hasArgument($flag, $this->originalArguments)) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any(self::COVERAGE_REPORT_FLAGS, fn (string $flag): bool => $this->hasArgument($flag, $this->originalArguments));
     }
 
     /**
@@ -1889,6 +1910,29 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         assert($coverage instanceof Coverage);
 
         return $coverage->coverage;
+    }
+
+    /**
+     * Panics when the run asks for Tia alongside an option Tia cannot honour.
+     *
+     * Checked against the original argv as well, because `bin/pest` consumes
+     * some of these itself before PHPUnit ever sees them.
+     *
+     * @param  array<int, string>  $arguments
+     */
+    private function guardUnsupportedOptions(array $arguments): void
+    {
+        foreach (self::UNSUPPORTED_OPTIONS as $option) {
+            if (! $this->hasArgument($option, $arguments) && ! $this->hasArgument($option, $this->originalArguments)) {
+                continue;
+            }
+
+            Panic::with(new InvalidOption(sprintf(
+                'The [%s] option cannot be combined with [%s].',
+                $option,
+                self::OPTION,
+            )));
+        }
     }
 
     /**

@@ -66,8 +66,26 @@ describe('applyMigrationChanges()', function (): void {
 });
 
 describe('rerun tracking', function (): void {
+    beforeEach(function (): void {
+        // `hasUnlocatedTestsToRerun()` stats each recorded file to tell a
+        // deleted test apart from a live one, so the files have to exist.
+        $this->projectRoot = sys_get_temp_dir().'/pest-tia-rerun-'.bin2hex(random_bytes(4));
+        mkdir($this->projectRoot.'/tests/Feature', 0755, true);
+
+        touch($this->projectRoot.'/tests/Feature/FooTest.php');
+        touch($this->projectRoot.'/tests/Feature/BarTest.php');
+    });
+
+    afterEach(function (): void {
+        @unlink($this->projectRoot.'/tests/Feature/FooTest.php');
+        @unlink($this->projectRoot.'/tests/Feature/BarTest.php');
+        @rmdir($this->projectRoot.'/tests/Feature');
+        @rmdir($this->projectRoot.'/tests');
+        @rmdir($this->projectRoot);
+    });
+
     it('reruns cached failures via their file', function (): void {
-        $graph = new Graph(sys_get_temp_dir());
+        $graph = new Graph($this->projectRoot);
         $graph->setResult('main', 'Tests\FooTest::it fails', 7, 'boom', 0.1, 1, 'tests/Feature/FooTest.php');
         $graph->setResult('main', 'Tests\BarTest::it passes', 0, '', 0.1, 1, 'tests/Feature/BarTest.php');
 
@@ -76,7 +94,7 @@ describe('rerun tracking', function (): void {
     });
 
     it('flags cached failures whose file is unknown', function (): void {
-        $graph = new Graph(sys_get_temp_dir());
+        $graph = new Graph($this->projectRoot);
         $graph->setResult('main', 'Tests\EvalTest::it fails', 7, 'boom', 0.1, 1);
 
         expect($graph->testFilesToRerun('main'))->toBeEmpty()

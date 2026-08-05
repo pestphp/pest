@@ -48,6 +48,7 @@
             "Tests\\Fixtures\\Covers\\": "tests/Fixtures/Covers",
             "Tests\\Fixtures\\Inheritance\\": "tests/Fixtures/Inheritance",
             "Tests\\Fixtures\\Arch\\": "tests/Fixtures/Arch",
+            "Tests\\Fixtures\\Tia\\": "tests/Fixtures/Tia",
             "Tests\\": "tests/PHPUnit/"
         },
         "classmap": [
