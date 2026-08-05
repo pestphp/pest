@@ -241,7 +241,20 @@ final readonly class ChangedFiles
             }
         }
 
-        return $this->gitOutput(['git', 'config', '--get', 'init.defaultBranch']);
+        // `init.defaultBranch` is a setting of the machine, not of the
+        // repository — it names what `git init` would have called the first
+        // branch here, which is worth nothing once the repository disagrees.
+        // Taken only when a branch by that name actually exists.
+        $configured = $this->gitOutput(['git', 'config', '--get', 'init.defaultBranch']);
+
+        if ($configured === null) {
+            return null;
+        }
+
+        $exists = $this->gitOutput(['git', 'rev-parse', '--verify', '--quiet', 'refs/heads/'.$configured]) !== null
+            || $this->gitOutput(['git', 'rev-parse', '--verify', '--quiet', 'refs/remotes/origin/'.$configured]) !== null;
+
+        return $exists ? $configured : null;
     }
 
     /**

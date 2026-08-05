@@ -222,6 +222,13 @@ final class Project
                 'PARATEST' => '0',
                 'PAO_DISABLE' => '1',
                 'HOME' => $this->home(),
+                // Blanked for the same reason `GitRepo::ENV` blanks git's own
+                // config: the default branch a CI provider reports is the one
+                // *its* build is for. Pest's suite runs on GitHub Actions, so
+                // without this every scenario would autodetect Pest's default
+                // branch instead of the fixture's.
+                'GITHUB_EVENT_PATH' => '',
+                'CI_DEFAULT_BRANCH' => '',
                 ...$environment,
             ],
         );

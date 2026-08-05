@@ -1482,6 +1482,35 @@ final class Graph
         }
     }
 
+    /**
+     * The branches a recorded graph holds baselines for, read straight from the
+     * encoded form.
+     *
+     * Answerable before the graph is hydrated because the default branch has to
+     * be resolved first: the fallback is what every hydrated graph reads its
+     * baselines through.
+     *
+     * @return list<string>
+     */
+    public static function branchesIn(string $json): array
+    {
+        $data = json_decode($json, true);
+
+        if (! is_array($data) || ! is_array($data['baselines'] ?? null)) {
+            return [];
+        }
+
+        $branches = [];
+
+        foreach (array_keys($data['baselines']) as $branch) {
+            if (is_string($branch) && $branch !== '') {
+                $branches[] = $branch;
+            }
+        }
+
+        return $branches;
+    }
+
     public static function decode(string $json, string $projectRoot): ?self
     {
         $data = json_decode($json, true);

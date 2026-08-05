@@ -96,6 +96,17 @@ final readonly class GitRepo
         $this->run(['symbolic-ref', 'refs/remotes/origin/HEAD', 'refs/remotes/origin/'.$branch]);
     }
 
+    /**
+     * Drops `refs/remotes/origin/HEAD` while keeping the remote-tracking branch
+     * — what a CI checkout looks like. `actions/checkout` builds its working
+     * copy with `git init` plus a single-ref `fetch` rather than a `clone`, and
+     * only a `clone` writes that symbolic ref.
+     */
+    public function unsetOriginHead(): void
+    {
+        $this->run(['symbolic-ref', '--delete', 'refs/remotes/origin/HEAD']);
+    }
+
     public function config(string $key, string $value): void
     {
         $this->run(['config', '--local', $key, $value]);

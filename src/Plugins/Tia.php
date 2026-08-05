@@ -12,12 +12,14 @@ use Pest\Contracts\Plugins\Terminable;
 use Pest\Exceptions\InvalidOption;
 use Pest\Exceptions\MissingDependency;
 use Pest\Exceptions\NoAffectedTestsFound;
+use Pest\Exceptions\TiaRequiresDefaultBranch;
 use Pest\Exceptions\TiaRequiresRemote;
 use Pest\Exceptions\TiaRequiresRepositoryRoot;
 use Pest\Panic;
 use Pest\Plugins\Concerns\HandleArguments;
 use Pest\Plugins\Tia\BaselineSync;
 use Pest\Plugins\Tia\ChangedFiles;
+use Pest\Plugins\Tia\CiDefaultBranch;
 use Pest\Plugins\Tia\Contracts\State;
 use Pest\Plugins\Tia\CoverageCollector;
 use Pest\Plugins\Tia\Fingerprint;
@@ -243,6 +245,16 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
      * already holds.
      */
     private string $fallbackBranch = self::DEFAULT_BRANCH;
+
+    /**
+     * Whether anything actually named the branch above.
+     *
+     * When nothing did, the value is a guess, and a guess is what the TIA path
+     * refuses to run on: an unresolved fallback reads no baseline at all, which
+     * looks exactly like a hit in the output. Runs that never asked for TIA
+     * still have to write somewhere, so the guess stands for them.
+     */
+    private bool $fallbackBranchResolved = false;
 
     private bool $branchResolved = false;
 
@@ -889,11 +901,15 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $this->resolveBranch($projectRoot);
 
         // After resolveBranch(), so a directory that is no repository at all
-        // still reports the missing git dependency rather than a missing remote.
-        // Skipped once the default branch is configured by hand: there is then
-        // nothing left for a remote to answer.
-        if ($this->watchPatterns->defaultBranch() === null && ! new ChangedFiles($projectRoot)->hasRemote()) {
-            Panic::with(new TiaRequiresRemote);
+        // still reports the missing git dependency rather than an unresolved
+        // default branch. Nothing named the branch every other baseline reads
+        // through, so every new branch would re-run the whole suite while the
+        // output called it a hit. A repository with no remote is the likeliest
+        // reason and gets said out loud.
+        if (! $this->fallbackBranchResolved) {
+            Panic::with(new ChangedFiles($projectRoot)->hasRemote()
+                ? new TiaRequiresDefaultBranch
+                : new TiaRequiresRemote);
         }
 
         $fingerprint = Fingerprint::compute($projectRoot);
@@ -2001,7 +2017,10 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         // Resolved before the current branch, which throws where git is
         // missing: the fallback is advisory, so a run that cannot name its
         // branch at all should still carry the best answer available.
-        $this->fallbackBranch = $this->resolveFallbackBranch($changedFiles);
+        $resolved = $this->resolveFallbackBranch($changedFiles);
+
+        $this->fallbackBranchResolved = $resolved !== null;
+        $this->fallbackBranch = $resolved ?? self::DEFAULT_BRANCH;
 
         Parallel::setGlobal(self::FALLBACK_BRANCH_GLOBAL, $this->fallbackBranch);
 
@@ -2012,7 +2031,18 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $this->branch = $changedFiles->currentBranch() ?? $this->fallbackBranch;
     }
 
-    private function resolveFallbackBranch(ChangedFiles $changedFiles): string
+    /**
+     * The branch every other baseline falls back to reading, or null when
+     * nothing in the checkout can name it.
+     *
+     * Ordered by how much the source actually knows. Configuration first: it is
+     * the escape hatch for a repository whose git-side answers disagree with its
+     * branches. Then the CI provider, which states the answer outright where git
+     * is at its least informed. Then git itself. Then the recorded graph, whose
+     * single baseline can only have come from the branch this repository
+     * integrates on.
+     */
+    private function resolveFallbackBranch(ChangedFiles $changedFiles): ?string
     {
         $inherited = Parallel::getGlobal(self::FALLBACK_BRANCH_GLOBAL);
 
@@ -2020,12 +2050,31 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return $inherited;
         }
 
-        // Configuration wins over autodetection: it is the escape hatch for a
-        // repository whose `origin/HEAD` is unset and whose `init.defaultBranch`
-        // says something else than its branches do.
         return $this->watchPatterns->defaultBranch()
+            ?? CiDefaultBranch::detect()
             ?? $changedFiles->defaultBranch()
-            ?? self::DEFAULT_BRANCH;
+            ?? $this->soleRecordedBranch();
+    }
+
+    /**
+     * The one branch a recorded graph holds a baseline for.
+     *
+     * Last in the chain and deliberately narrow: with a single baseline on disk
+     * there is only one branch whose results can be read at all, so naming it is
+     * strictly better than resolving to a branch that holds nothing. Two or more
+     * baselines carry no such implication and are left alone.
+     */
+    private function soleRecordedBranch(): ?string
+    {
+        $json = $this->state->read(self::KEY_GRAPH);
+
+        if ($json === null) {
+            return null;
+        }
+
+        $branches = Graph::branchesIn($json);
+
+        return count($branches) === 1 ? $branches[0] : null;
     }
 
     /**
