@@ -61,6 +61,24 @@ final class Configuration
     }
 
     /**
+     * The branch whose baseline every other branch falls back to reading.
+     *
+     * Autodetected from the repository when left unset; declare it here when
+     * the repository cannot answer for itself — no `origin/HEAD`, or an
+     * `init.defaultBranch` that disagrees with reality.
+     *
+     * @return $this
+     */
+    public function defaultBranch(string $branch): self
+    {
+        /** @var WatchPatterns $watchPatterns */
+        $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
+        $watchPatterns->setDefaultBranch($branch);
+
+        return $this;
+    }
+
+    /**
      * @param  array<string, string>  $patterns  glob → project-relative test dir
      * @return $this
      */

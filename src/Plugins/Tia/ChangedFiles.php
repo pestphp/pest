@@ -219,6 +219,49 @@ final readonly class ChangedFiles
         return $branch === '' || $branch === 'HEAD' ? null : $branch;
     }
 
+    /**
+     * The repository's default branch — the one every other branch's baseline
+     * falls back to reading.
+     *
+     * Advisory, unlike {@see self::currentBranch()}: a repository that cannot
+     * answer the question is not a broken repository. A remote-less checkout
+     * has no `origin/HEAD`, and plenty of CI checkouts never run
+     * `git remote set-head`, so every step here fails soft and the caller is
+     * left to pick its own default.
+     */
+    public function defaultBranch(): ?string
+    {
+        $head = $this->gitOutput(['git', 'symbolic-ref', '--short', 'refs/remotes/origin/HEAD']);
+
+        if ($head !== null) {
+            $branch = preg_replace('#^origin/#', '', $head);
+
+            if (is_string($branch) && $branch !== '') {
+                return $branch;
+            }
+        }
+
+        return $this->gitOutput(['git', 'config', '--get', 'init.defaultBranch']);
+    }
+
+    /**
+     * @param  array<int, string>  $command
+     */
+    private function gitOutput(array $command): ?string
+    {
+        $process = new Process($command, $this->projectRoot);
+        $process->setTimeout(5.0);
+        $process->run();
+
+        if (! $process->isSuccessful()) {
+            return null;
+        }
+
+        $output = trim($process->getOutput());
+
+        return $output === '' ? null : $output;
+    }
+
     private function shaIsReachable(string $sha): bool
     {
         $process = new Process(

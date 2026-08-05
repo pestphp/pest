@@ -48,6 +48,17 @@ final class Graph
      */
     private array $baselines = [];
 
+    /**
+     * The baseline a branch with none of its own reads from.
+     *
+     * Only ever read from: a branch writes to its own key, so a fallback that
+     * leaked into the write path would corrupt the baseline every other branch
+     * depends on. Resolved once per run by the plugin — see
+     * {@see self::setFallbackBranch()} — because the git calls it takes are not
+     * free and the read path runs per test.
+     */
+    private string $fallbackBranch = 'main';
+
     private readonly string $projectRoot;
 
     /** @var array<string, true>|null */
@@ -576,7 +587,12 @@ final class Graph
         return $this->fingerprint;
     }
 
-    public function recordedAtSha(string $branch, string $fallbackBranch = 'main'): ?string
+    public function setFallbackBranch(string $branch): void
+    {
+        $this->fallbackBranch = $branch;
+    }
+
+    public function recordedAtSha(string $branch, ?string $fallbackBranch = null): ?string
     {
         $baseline = $this->baselineFor($branch, $fallbackBranch);
 
@@ -611,7 +627,7 @@ final class Graph
         $this->baselines[$branch]['results'][$testId] = $entry;
     }
 
-    public function getAssertions(string $branch, string $testId, string $fallbackBranch = 'main'): ?int
+    public function getAssertions(string $branch, string $testId, ?string $fallbackBranch = null): ?int
     {
         $baseline = $this->baselineFor($branch, $fallbackBranch);
 
@@ -622,7 +638,7 @@ final class Graph
         return $baseline['results'][$testId]['assertions'];
     }
 
-    public function getTime(string $branch, string $testId, string $fallbackBranch = 'main'): ?float
+    public function getTime(string $branch, string $testId, ?string $fallbackBranch = null): ?float
     {
         $baseline = $this->baselineFor($branch, $fallbackBranch);
 
@@ -633,7 +649,7 @@ final class Graph
         return $baseline['results'][$testId]['time'];
     }
 
-    public function getResult(string $branch, string $testId, string $fallbackBranch = 'main'): ?TestStatus
+    public function getResult(string $branch, string $testId, ?string $fallbackBranch = null): ?TestStatus
     {
         $baseline = $this->baselineFor($branch, $fallbackBranch);
 
@@ -660,7 +676,7 @@ final class Graph
     /**
      * @return array<int, string>
      */
-    public function testFilesToRerun(string $branch, string $fallbackBranch = 'main'): array
+    public function testFilesToRerun(string $branch, ?string $fallbackBranch = null): array
     {
         $baseline = $this->baselineFor($branch, $fallbackBranch);
         $files = [];
@@ -697,7 +713,7 @@ final class Graph
      * collects no tests, so the run reports green without ever re-running the
      * failure — and does so again on every subsequent invocation.
      */
-    public function hasUnlocatedTestsToRerun(string $branch, string $fallbackBranch = 'main'): bool
+    public function hasUnlocatedTestsToRerun(string $branch, ?string $fallbackBranch = null): bool
     {
         $baseline = $this->baselineFor($branch, $fallbackBranch);
 
@@ -808,7 +824,7 @@ final class Graph
     /**
      * @return array<string, string>
      */
-    public function lastRunTree(string $branch, string $fallbackBranch = 'main'): array
+    public function lastRunTree(string $branch, ?string $fallbackBranch = null): array
     {
         return $this->baselineFor($branch, $fallbackBranch)['tree'];
     }
@@ -816,8 +832,10 @@ final class Graph
     /**
      * @return array{sha: ?string, tree: array<string, string>, results: array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>}
      */
-    private function baselineFor(string $branch, string $fallbackBranch): array
+    private function baselineFor(string $branch, ?string $fallbackBranch): array
     {
+        $fallbackBranch ??= $this->fallbackBranch;
+
         if (isset($this->baselines[$branch])) {
             return $this->baselines[$branch];
         }

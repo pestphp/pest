@@ -99,6 +99,21 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     private const string PIGGYBACK_COVERAGE_GLOBAL = 'TIA_PIGGYBACK_COVERAGE';
 
     /**
+     * The parent's resolved fallback branch, handed to the workers.
+     *
+     * A worker cannot resolve it for itself: the restarters run before
+     * `tests/Pest.php` is loaded, so a `defaultBranch()` declared there is
+     * invisible to it — and autodetecting again would spend a git call per
+     * worker to reach the answer the parent already has.
+     */
+    private const string FALLBACK_BRANCH_GLOBAL = 'TIA_FALLBACK_BRANCH';
+
+    /**
+     * The branch assumed when a repository cannot name its own default.
+     */
+    private const string DEFAULT_BRANCH = 'main';
+
+    /**
      * PHPUnit/Pest CLI flags whose subsequent argument is a value, not a path.
      *
      * @var list<string>
@@ -197,13 +212,22 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     /**
      * The baseline this run reads from and writes to.
      *
-     * `main` is only the fallback for a repository whose branch cannot be read
-     * — it is also the branch every other baseline falls back to reading, so
-     * writing there by accident corrupts the shared baseline. Resolved through
-     * resolveBranch() rather than at every use site, because the git call it
-     * needs is not free.
+     * The repository's default branch is only the fallback for a checkout whose
+     * branch cannot be read — a detached HEAD. It is also the branch every
+     * other baseline falls back to reading, so writing there by accident
+     * corrupts the shared baseline. Resolved through resolveBranch() rather
+     * than at every use site, because the git call it needs is not free.
      */
-    private string $branch = 'main';
+    private string $branch = self::DEFAULT_BRANCH;
+
+    /**
+     * The baseline branches with none of their own read from.
+     *
+     * Read-only, and the whole point of the exercise: without it the first run
+     * on every new branch re-runs a suite whose results the default branch
+     * already holds.
+     */
+    private string $fallbackBranch = self::DEFAULT_BRANCH;
 
     private bool $branchResolved = false;
 
@@ -289,7 +313,13 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return null;
         }
 
-        return Graph::decode($json, $projectRoot);
+        $graph = Graph::decode($json, $projectRoot);
+
+        // Every read of a baseline goes through a graph loaded here, so this is
+        // the one place the resolved fallback has to reach.
+        $graph?->setFallbackBranch($this->fallbackBranch);
+
+        return $graph;
     }
 
     private function saveGraph(Graph $graph): bool
@@ -1724,6 +1754,11 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             // fallback baseline is the lesser of the two evils.
         }
 
+        // The graph above was loaded before the branch was known — this path
+        // only writes, but a graph carrying an unresolved fallback is the exact
+        // bug this whole change is about.
+        $graph->setFallbackBranch($this->fallbackBranch);
+
         $touchedFiles = [];
 
         // Whether this run is the one that records the edges its results will be
@@ -1892,7 +1927,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     }
 
     /**
-     * Resolves the baseline this run reads from and writes to, once.
+     * Resolves the baselines this run reads from and writes to, once.
      *
      * Results are written on runs where TIA itself took no part, and those
      * never reach handleParent(). Without this the default would stand and
@@ -1907,7 +1942,36 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         $this->branchResolved = true;
 
-        $this->branch = new ChangedFiles($projectRoot)->currentBranch() ?? $this->branch;
+        $changedFiles = new ChangedFiles($projectRoot);
+
+        // Resolved before the current branch, which throws where git is
+        // missing: the fallback is advisory, so a run that cannot name its
+        // branch at all should still carry the best answer available.
+        $this->fallbackBranch = $this->resolveFallbackBranch($changedFiles);
+
+        Parallel::setGlobal(self::FALLBACK_BRANCH_GLOBAL, $this->fallbackBranch);
+
+        // A detached HEAD has no branch of its own to write to. The default
+        // branch is the honest key there — it is the commit the checkout most
+        // likely sits on, and it keeps a phantom baseline from being minted
+        // under a branch name the repository never had.
+        $this->branch = $changedFiles->currentBranch() ?? $this->fallbackBranch;
+    }
+
+    private function resolveFallbackBranch(ChangedFiles $changedFiles): string
+    {
+        $inherited = Parallel::getGlobal(self::FALLBACK_BRANCH_GLOBAL);
+
+        if (is_string($inherited) && $inherited !== '') {
+            return $inherited;
+        }
+
+        // Configuration wins over autodetection: it is the escape hatch for a
+        // repository whose `origin/HEAD` is unset and whose `init.defaultBranch`
+        // says something else than its branches do.
+        return $this->watchPatterns->defaultBranch()
+            ?? $changedFiles->defaultBranch()
+            ?? self::DEFAULT_BRANCH;
     }
 
     /**
