@@ -215,7 +215,11 @@ trait Testable
             $afterAll = ChainableClosure::boundStatically(self::$__afterAll, $afterAll);
         }
 
-        call_user_func(Closure::bind($afterAll, null, self::class));
+        try {
+            call_user_func(Closure::bind($afterAll, null, self::class));
+        } finally {
+            self::flush();
+        }
 
         parent::tearDownAfterClass();
     }
@@ -314,9 +318,6 @@ trait Testable
             parent::tearDown();
 
             TestSuite::getInstance()->test = null;
-
-            $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
-            $method->tearDown($this);
         }
     }
 

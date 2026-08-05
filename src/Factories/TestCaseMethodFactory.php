@@ -147,14 +147,6 @@ final class TestCaseMethodFactory
     }
 
     /**
-     * Flushes the test case.
-     */
-    public function tearDown(TestCase $concrete): void
-    {
-        $concrete::flush(); // @phpstan-ignore-line
-    }
-
-    /**
      * Creates the test's closure.
      */
     public function getClosure(): Closure
