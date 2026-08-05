@@ -622,6 +622,17 @@ final class Graph
         return $baseline['results'][$testId]['assertions'];
     }
 
+    public function getTime(string $branch, string $testId, string $fallbackBranch = 'main'): ?float
+    {
+        $baseline = $this->baselineFor($branch, $fallbackBranch);
+
+        if (! isset($baseline['results'][$testId]['time'])) {
+            return null;
+        }
+
+        return $baseline['results'][$testId]['time'];
+    }
+
     public function getResult(string $branch, string $testId, string $fallbackBranch = 'main'): ?TestStatus
     {
         $baseline = $this->baselineFor($branch, $fallbackBranch);
@@ -677,6 +688,15 @@ final class Graph
         return array_keys($files);
     }
 
+    /**
+     * Whether any cached result due a re-run points at a test file that is not
+     * on disk — deleted, or never locatable in the first place (`eval()`'d code,
+     * a path outside the project).
+     *
+     * A filtered run cannot honour such an entry: it would select a file that
+     * collects no tests, so the run reports green without ever re-running the
+     * failure — and does so again on every subsequent invocation.
+     */
     public function hasUnlocatedTestsToRerun(string $branch, string $fallbackBranch = 'main'): bool
     {
         $baseline = $this->baselineFor($branch, $fallbackBranch);
@@ -688,7 +708,16 @@ final class Graph
 
             $file = $result['file'] ?? null;
 
-            if ($file === null || $file === '' || $this->relative($file) === null) {
+            if ($file === null || $file === '') {
+                return true;
+            }
+
+            $rel = $this->relative($file);
+
+            // Results are stored relative, so `relative()` answers "is this
+            // inside the project" without ever touching the filesystem. The
+            // stat is what tells a deleted test file apart from a live one.
+            if ($rel === null || ! is_file($this->projectRoot.'/'.$rel)) {
                 return true;
             }
         }
@@ -809,13 +838,26 @@ final class Graph
 
     /**
      * @param  array<string, array<int, string>>  $testToFiles
+     * @param  bool  $keepExisting  Leave already-recorded edge sets alone. For runs
+     *                              whose edges are piggybacked off a PHPUnit coverage
+     *                              session: that data is scoped by `<source>`, so it
+     *                              can only ever be narrower than what the TIA
+     *                              recorder sees — it never contains the test's own
+     *                              file, for one — and a narrower edge set silently
+     *                              stops selecting the tests it used to select.
      */
-    public function replaceEdges(array $testToFiles): void
+    public function replaceEdges(array $testToFiles, bool $keepExisting = false): void
     {
         foreach ($testToFiles as $testFile => $sources) {
             $testRel = $this->relative($testFile);
 
             if ($testRel === null) {
+                continue;
+            }
+
+            // An empty set means "known, covers nothing", so piggyback data is
+            // still an improvement there — only a populated set is protected.
+            if ($keepExisting && ($this->edges[$testRel] ?? []) !== []) {
                 continue;
             }
 

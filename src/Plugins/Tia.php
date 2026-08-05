@@ -111,10 +111,33 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         '--include-path', '--whitelist',
         '--log-junit', '--log-teamcity', '--testdox-html', '--testdox-text',
         '--coverage-clover', '--coverage-cobertura', '--coverage-crap4j',
-        '--coverage-html', '--coverage-php', '--coverage-text', '--coverage-xml',
+        '--coverage-html', '--coverage-openclover', '--coverage-php',
+        '--coverage-text', '--coverage-xml',
         '--coverage-filter', '--path-coverage',
         '--repeat', '--retry-times', '--memory-limit', '--seed',
         '--compact', '--ci-build-id', '--min',
+    ];
+
+    /**
+     * PHPUnit flags that make this run produce a coverage report.
+     *
+     * Pest's own `--coverage` is tracked by the Coverage plugin, but a raw
+     * PHPUnit report flag never reaches it. A run that reports coverage must
+     * not be narrowed to the affected tests — the report would then describe a
+     * subset of the suite — and must let PHPUnit own the coverage driver rather
+     * than have the TIA recorder clear it mid-collection.
+     *
+     * Flags that only shape collection or an existing report — `--coverage-filter`,
+     * `--path-coverage`, `--warm-coverage-cache`, `--only-summary-for-coverage-text`,
+     * `--show-uncovered-for-coverage-text`, `--disable-coverage-ignore` — produce no
+     * report on their own, so they are deliberately absent.
+     *
+     * @var list<string>
+     */
+    private const array COVERAGE_REPORT_FLAGS = [
+        '--coverage-clover', '--coverage-cobertura', '--coverage-crap4j',
+        '--coverage-html', '--coverage-openclover', '--coverage-php',
+        '--coverage-text', '--coverage-xml',
     ];
 
     /**
@@ -157,6 +180,17 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     /** @var array<string, int> */
     private array $cachedAssertionsByTestId = [];
+
+    /**
+     * Recorded durations of the tests this run replayed rather than executed.
+     *
+     * A replayed test never runs, so the duration PHPUnit reports for it is the
+     * cost of replaying it — near zero. Writing that back would decay every
+     * cached timing toward zero one run at a time.
+     *
+     * @var array<string, float>
+     */
+    private array $cachedTimeByTestId = [];
 
     private ?Graph $replayGraph = null;
 
@@ -298,6 +332,25 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     }
 
     /**
+     * Whether the workers of this run record their own coverage edges.
+     *
+     * Stamped by the parent before paratest spawns anything, because a worker
+     * cannot tell on its own: its argv carries no `--tia`, and the restarters
+     * run before `tests/Pest.php` is loaded, so {@see self::isEnabledForRun()}
+     * sees an empty {@see WatchPatterns} too. Left unanswered, pcov keeps its
+     * default scope — a single auto-detected source directory — and every edge
+     * outside it, test self-edges included, is silently dropped.
+     *
+     * Piggyback runs are excluded: their edges come from PHPUnit's own coverage
+     * session, so widening pcov there costs time and buys nothing.
+     */
+    public static function recordsEdgesInWorkers(): bool
+    {
+        return (string) Parallel::getGlobal(self::RECORDING_GLOBAL) === '1'
+            && (string) Parallel::getGlobal(self::PIGGYBACK_COVERAGE_GLOBAL) !== '1';
+    }
+
+    /**
      * @param  array<int, string>  $arguments
      */
     private static function applyWatchPatternMarks(array $arguments, WatchPatterns $watchPatterns): void
@@ -375,6 +428,12 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             $this->replayedCount++;
             $assertions = $this->replayGraph->getAssertions($this->branch, $testId);
             $this->cachedAssertionsByTestId[$testId] = $assertions ?? 0;
+
+            $time = $this->replayGraph->getTime($this->branch, $testId);
+
+            if ($time !== null) {
+                $this->cachedTimeByTestId[$testId] = $time;
+            }
         } else {
             $this->executedCount++;
         }
@@ -574,7 +633,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             $this->branch,
             $changedFiles->snapshotTree($changedFiles->since($currentSha) ?? []),
         );
-        $graph->replaceEdges($perTest);
+        $graph->replaceEdges($perTest, keepExisting: $this->piggybackCoverage);
         $graph->replaceTestTables($perTestTables);
         $graph->replaceTestInertiaComponents($perTestInertia);
         $graph->replaceJsFileToComponents(JsModuleGraph::build($projectRoot));
@@ -690,7 +749,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return $exitCode;
         }
 
-        $graph->replaceEdges($finalised);
+        $graph->replaceEdges($finalised, keepExisting: $this->piggybackCoverage);
         $graph->replaceTestTables($finalisedTables);
         $graph->replaceTestInertiaComponents($finalisedInertia);
         $graph->replaceJsFileToComponents(JsModuleGraph::build($projectRoot));
@@ -816,13 +875,20 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             }
         }
 
-        if ($this->piggybackCoverage) {
+        // Both of these belong to the coverage cache, which only Pest's own
+        // `--coverage` ever writes or merges. A raw PHPUnit report flag takes
+        // the piggyback path — it must not drive the driver itself — but must
+        // not leave a marker behind, nor force a recording run to prime a cache
+        // that nothing on its path will fill.
+        $coverageCacheOwned = $this->piggybackCoverage && $this->pestCoverageActive();
+
+        if ($coverageCacheOwned) {
             $this->state->write(self::KEY_COVERAGE_MARKER, '');
         }
 
-        if ($this->piggybackCoverage && ! $this->state->exists(self::KEY_COVERAGE_CACHE)) {
+        if ($coverageCacheOwned && ! $this->state->exists(self::KEY_COVERAGE_CACHE)) {
             if ($graph instanceof Graph && $this->driftLabel === null) {
-                $this->freshGraphReason = 'recording coverage baseline';
+                $this->freshGraphReason = 'recording a coverage baseline';
             }
 
             return $this->enterRecordMode($arguments);
@@ -1018,7 +1084,15 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         if (! Parallel::isEnabled()) {
             if ($canRefreshReplayEdges) {
-                $this->recorder->activate();
+                // Piggyback runs read PHPUnit's own coverage session. Driving
+                // the driver alongside it would clear the data PHPUnit is about
+                // to read, so only link tracking may run here.
+                if ($this->piggybackCoverage) {
+                    $this->recorder->activateLinkTracking();
+                } else {
+                    $this->recorder->activate();
+                }
+
                 $this->recordingActive = true;
             }
 
@@ -1037,6 +1111,10 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         if ($canRefreshReplayEdges) {
             Parallel::setGlobal(self::RECORDING_GLOBAL, '1');
+
+            if ($this->piggybackCoverage) {
+                Parallel::setGlobal(self::PIGGYBACK_COVERAGE_GLOBAL, '1');
+            }
         }
 
         if ($this->filteredMode) {
@@ -1178,6 +1256,16 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $recorder->activate();
         $this->recordingActive = true;
 
+        // Why this run is rebuilding is worth saying whenever there is a reason
+        // for it — the parallel and piggyback branches above already do. Runs
+        // that are simply recording for the first time have nothing to explain.
+        if ($this->driftLabel !== null || $this->freshGraphReason !== null) {
+            $this->output->writeln('');
+            $this->renderFreshGraph();
+
+            return $arguments;
+        }
+
         $this->renderChild('Running in TIA mode.');
 
         return $arguments;
@@ -1185,14 +1273,18 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     private function renderFreshGraph(): void
     {
-        $headline = 'Experimental TIA mode enabled / fresh graph';
-
-        if ($this->driftLabel !== null) {
-            $headline .= sprintf(' (%s changed)', $this->driftLabel);
-        } elseif ($this->freshGraphReason !== null) {
-            $headline .= sprintf(' (%s)', $this->freshGraphReason);
+        if ($this->driftLabel === null && $this->freshGraphReason !== null) {
+            // The reason is only ever set for a run that keeps its graph and
+            // records alongside it, so "fresh graph" would be a lie here.
+            $headline = sprintf('Experimental TIA mode enabled / %s.', $this->freshGraphReason);
         } else {
-            $headline .= '.';
+            $headline = 'Experimental TIA mode enabled / fresh graph';
+
+            if ($this->driftLabel !== null) {
+                $headline .= sprintf(' (%s changed)', $this->driftLabel);
+            } else {
+                $headline .= '.';
+            }
         }
 
         $this->renderChild($headline);
@@ -1553,6 +1645,15 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         return $coverage;
     }
 
+    /**
+     * The duration to record for a test: its own, unless it was replayed rather
+     * than executed, in which case the duration it was recorded with stands.
+     */
+    private function resultTime(string $testId, float $time): float
+    {
+        return $this->cachedTimeByTestId[$testId] ?? $time;
+    }
+
     private function seedResultsInto(Graph $graph): void
     {
         /** @var ResultCollector $collector */
@@ -1577,7 +1678,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
                 $testId,
                 $result['status'],
                 $result['message'],
-                $result['time'],
+                $this->resultTime($testId, $result['time']),
                 $result['assertions'],
                 $file,
             );
@@ -1639,10 +1740,11 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             // A result is only ever invalidated through the edges of the test
             // that produced it, so one recorded for a test the graph has no
             // edges for could never be invalidated again — it would be replayed
-            // as settled however far the code around it moved. Only a complete
-            // run records the edges that would close that gap, so until one
-            // does, the test stays unknown.
-            if (! $complete && (! is_string($file) || ! $graph->knowsTest($file))) {
+            // as settled however far the code around it moved. Only a run that
+            // records edges closes that gap, and marking known test files is
+            // what says this run did; a complete run that recorded none leaves
+            // the test just as unknown as a partial one does.
+            if ((! $complete || ! $markKnownTestFiles) && (! is_string($file) || ! $graph->knowsTest($file))) {
                 continue;
             }
 
@@ -1651,7 +1753,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
                 $testId,
                 $result['status'],
                 $result['message'],
-                $result['time'],
+                $this->resultTime($testId, $result['time']),
                 $result['assertions'],
                 $file,
             );
@@ -1702,7 +1804,35 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         return null;
     }
 
+    /**
+     * Whether this run produces a coverage report, however it was asked for.
+     *
+     * The original argv, not the handled arguments: Pest's own Coverage plugin
+     * appends `--coverage-php <path>` to those and runs before this one, and a
+     * paratest worker's arguments always carry it too. `bin/worker.php` never
+     * hands over the original argv, so a worker sees `[]` here and keeps taking
+     * this from {@see self::PIGGYBACK_COVERAGE_GLOBAL} instead.
+     */
     private function coverageReportActive(): bool
+    {
+        if ($this->pestCoverageActive()) {
+            return true;
+        }
+
+        foreach (self::COVERAGE_REPORT_FLAGS as $flag) {
+            if ($this->hasArgument($flag, $this->originalArguments)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Whether Pest's own `--coverage` was given — the only entry point that
+     * writes the coverage cache these two flags read and clean up.
+     */
+    private function pestCoverageActive(): bool
     {
         $coverage = Container::getInstance()->get(Coverage::class);
         assert($coverage instanceof Coverage);

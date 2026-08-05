@@ -14,6 +14,7 @@ use ParaTest\RunnerInterface;
 use ParaTest\WrapperRunner\MissingResultsException;
 use ParaTest\WrapperRunner\SuiteLoader;
 use ParaTest\WrapperRunner\WrapperWorker;
+use Pest\Plugins\Tia;
 use Pest\Result;
 use Pest\TestSuite;
 use PHPUnit\Event\Facade as EventFacade;
@@ -155,6 +156,7 @@ final class WrapperRunner implements RunnerInterface
 
         /** @var array<int, non-empty-string> $parameters */
         $parameters = $this->handleLaravelHerd($parameters);
+        $parameters = $this->handleTia($parameters);
 
         $parameters[] = $wrapper;
         $parameters[] = '--test-directory='.TestSuite::getInstance()->testPath;
@@ -200,6 +202,28 @@ final class WrapperRunner implements RunnerInterface
         }
 
         return $parameters;
+    }
+
+    /**
+     * Widens pcov's instrumentation scope to the whole project for workers that
+     * record TIA edges.
+     *
+     * pcov's default scope is a single source directory it auto-detects, so
+     * `config/`, `routes/`, `bootstrap/` and every test's own file never reach
+     * the recorder — a worker-recorded graph selects a fraction of what a
+     * sequential one does. `pcov.directory` is only settable at startup, hence
+     * the command line rather than an `ini_set()` inside the worker.
+     *
+     * @param  array<int, non-empty-string>  $parameters
+     * @return array<int, non-empty-string>
+     */
+    private function handleTia(array $parameters): array
+    {
+        if (! Tia::recordsEdgesInWorkers()) {
+            return $parameters;
+        }
+
+        return array_merge($parameters, ['-d', 'pcov.directory='.TestSuite::getInstance()->rootPath]);
     }
 
     private function startWorkers(): void
