@@ -1726,6 +1726,13 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         $touchedFiles = [];
 
+        // Whether this run is the one that records the edges its results will be
+        // invalidated through. A recording run's edges are written after this
+        // (terminate() runs last), and a parallel one's arrive with the worker
+        // partials that ask for $markKnownTestFiles — either way the graph on
+        // disk cannot be asked yet, so the run is taken at its word.
+        $recordsEdges = $complete && ($markKnownTestFiles || $this->recordingActive);
+
         foreach ($results as $testId => $result) {
             $file = $result['file'] ?? null;
 
@@ -1740,11 +1747,10 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             // A result is only ever invalidated through the edges of the test
             // that produced it, so one recorded for a test the graph has no
             // edges for could never be invalidated again — it would be replayed
-            // as settled however far the code around it moved. Only a run that
-            // records edges closes that gap, and marking known test files is
-            // what says this run did; a complete run that recorded none leaves
-            // the test just as unknown as a partial one does.
-            if ((! $complete || ! $markKnownTestFiles) && (! is_string($file) || ! $graph->knowsTest($file))) {
+            // as settled however far the code around it moved. A run that
+            // records no edges leaves such a test exactly as unknown as it
+            // found it, whether or not it ran the whole suite.
+            if (! $recordsEdges && (! is_string($file) || ! $graph->knowsTest($file))) {
                 continue;
             }
 
