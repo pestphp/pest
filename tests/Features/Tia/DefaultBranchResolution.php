@@ -34,6 +34,22 @@ test('a declared default branch that does not exist degrades to a full run', fun
         ->and($project->branchKeys())->toBe(['master', 'feature-x']);
 })->skipOnWindows();
 
+test('a renamed default branch replays and writes under its new name', function (): void {
+    $project = Project::make('master');
+    $project->seed('master');
+
+    $project->git()->rename('master', 'main');
+
+    $result = $project->pest('--tia');
+    $delta = $project->delta();
+
+    expect($result->replayed())->toBe(Project::TOTAL_TESTS, $result->describe())
+        ->and($result->uncached())->toBe(0, $result->describe())
+        ->and($project->branchKeys())->toBe(['master', 'main'])
+        ->and($delta->baselineUntouched('master'))->toBeTrue($delta->summary())
+        ->and($delta->writtenCount())->toBe(0, $delta->summary());
+})->skipOnWindows();
+
 test('the CI provider names the default branch where the checkout cannot', function (): void {
     $project = Project::make('master');
     $project->git()->unsetOriginHead();

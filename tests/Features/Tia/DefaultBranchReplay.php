@@ -78,6 +78,38 @@ test('replays on a branch whose name contains slashes', function (): void {
         ->and($project->branchKeys())->toContain('feature/x/y');
 })->skipOnWindows();
 
+test('replays again once back on the default branch', function (): void {
+    $project = Project::make('master');
+    $project->seed('master');
+
+    $project->git()->switchTo('feature-x', new: true);
+    $project->pest('--tia');
+
+    $project->git()->switchTo('master');
+
+    $project->snapshot();
+    $result = $project->pest('--tia');
+    $delta = $project->delta();
+
+    expect($result->replayed())->toBe(Project::TOTAL_TESTS, $result->describe())
+        ->and($result->uncached())->toBe(0, $result->describe())
+        ->and($delta->writtenCount())->toBe(0, $delta->summary())
+        ->and($delta->isResultsOnly())->toBeTrue($delta->summary());
+})->skipOnWindows();
+
+test('replays on a new branch when tia is enabled by configuration', function (): void {
+    $project = Project::make('master', overlay: 'always-enabled');
+    $project->seed('master');
+
+    $project->git()->switchTo('feature-x', new: true);
+
+    $result = $project->pest();
+
+    expect($result->replayed())->toBe(Project::TOTAL_TESTS, $result->describe())
+        ->and($result->uncached())->toBe(0, $result->describe())
+        ->and($project->branchKeys())->toBe(['master', 'feature-x']);
+})->skipOnWindows();
+
 test('replays inside a worktree on a new branch', function (): void {
     $project = Project::make('master');
     $worktree = $project->worktree('feature-worktree');

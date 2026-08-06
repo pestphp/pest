@@ -244,23 +244,33 @@ final class Project
 
     public function sentinel(): void
     {
+        $this->mutateGraph(function (array $graph): array {
+            foreach ($graph['baselines'] ?? [] as $branch => $baseline) {
+                foreach (array_keys($baseline['results'] ?? []) as $testId) {
+                    $graph['baselines'][$branch]['results'][$testId]['time'] = 9.999;
+
+                    if ((int) ($baseline['results'][$testId]['assertions'] ?? 0) > 0) {
+                        $graph['baselines'][$branch]['results'][$testId]['assertions'] = 42;
+                    }
+                }
+            }
+
+            return $graph;
+        });
+    }
+
+    /**
+     * @param  callable(array<string, mixed>): array<string, mixed>  $callback
+     */
+    public function mutateGraph(callable $callback): void
+    {
         $graph = $this->graph();
 
         if ($graph === null) {
-            throw new RuntimeException('There is no graph to sentinel.');
+            throw new RuntimeException('There is no graph to mutate.');
         }
 
-        foreach ($graph['baselines'] ?? [] as $branch => $baseline) {
-            foreach (array_keys($baseline['results'] ?? []) as $testId) {
-                $graph['baselines'][$branch]['results'][$testId]['time'] = 9.999;
-
-                if ((int) ($baseline['results'][$testId]['assertions'] ?? 0) > 0) {
-                    $graph['baselines'][$branch]['results'][$testId]['assertions'] = 42;
-                }
-            }
-        }
-
-        $this->state()->write(Tia::KEY_GRAPH, (string) json_encode($graph, JSON_UNESCAPED_SLASHES));
+        $this->state()->write(Tia::KEY_GRAPH, (string) json_encode($callback($graph), JSON_UNESCAPED_SLASHES));
 
         $this->snapshot();
     }
