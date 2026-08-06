@@ -90,9 +90,9 @@ these are one fix or two.
 | Complete non-TIA runs write edge-less results | `src/Plugins/Tia.php:1645`, `:638` | Guard is `! $complete && ! knowsTest()`; complete bypasses it and `markKnownTestFiles` stays false. Inert — replay guards on the same predicate at `:360` — but inflates `n` |
 | SIGINT never reaches the suite | `PcovRestarter` re-exec | Parent ignores it; the child holds PHPUnit's handler. CI `timeout`/Ctrl-C will not stop a run |
 | Structural drift never announced sequentially | `src/Plugins/Tia.php:1178-1181` | `enterRecordMode()` prints a bare `Running in TIA mode.`; `renderFreshGraph()` (`fresh graph (composer.lock changed)`) only runs under `--parallel` or coverage piggyback |
-| Replay clobbers cached `time` | write path | `0.058` → `0.001`; timing data degrades toward zero across runs |
-| `pest --parallel` without `--tia` writes nothing | G3, G6 | Sequential `pest --filter=…` does record. Parallel CI contributes nothing to the cached-failure replay path |
-| `--tia --parallel --filter`/`--shard` record nothing | G2, G8 | More conservative than the results-only contract requires |
+| ~~Replay clobbers cached `time`~~ | write path | **Struck in phase four — does not reproduce**, sequentially or in parallel. Both write paths route through `resultTime()`; a replay with every cached `time` sentinelled writes nothing |
+| ~~`pest --parallel` without `--tia` writes nothing~~ | G3, G6 | **Closed in phase four.** Workers flush their results through `requestWorkerResults()`, so a parallel run refreshes and prunes exactly like the sequential run of the same command |
+| ~~`--tia --parallel --filter`/`--shard` record nothing~~ | G2, G8 | **Closed in phase four** (partial parity landed first, complete parity with the row above) |
 | `--min=50` without `--coverage` is a silent no-op | — | — |
 | `pest --repeat=2` is not a Pest option | J11 | Case unrunnable as written; drop it or add the option |
 

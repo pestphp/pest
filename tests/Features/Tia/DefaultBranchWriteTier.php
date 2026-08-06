@@ -117,6 +117,22 @@ test('a detached HEAD replays without minting a branch key', function (): void {
         ->and($project->branchKeys())->toBe(['master']);
 })->skipOnWindows();
 
+test('a detached HEAD does not write into the default branch baseline', function (array $arguments): void {
+    $project = Project::make('master');
+    $project->seed('master');
+
+    $project->git()->detach();
+    $project->pest(...$arguments);
+
+    $delta = $project->delta();
+
+    expect($delta->baselineUntouched('master'))->toBeTrue($delta->summary())
+        ->and($project->branchKeys())->toBe(['master']);
+})->with([
+    'sequential' => [['--filter=adds two numbers']],
+    'parallel' => [['--parallel', '--processes=2', '--filter=adds two numbers']],
+])->skipOnWindows();
+
 test('the branch that ran gets its own key and the default branch keeps its baseline', function (): void {
     $project = Project::make('master');
     $project->seed('master');

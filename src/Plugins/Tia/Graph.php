@@ -809,21 +809,35 @@ final class Graph
     }
 
     /**
+     * The baseline a read sees for this branch: its own entries layered over the
+     * default branch's, so a key minted by a narrowed run — which only holds the
+     * handful of tests that ran — does not shadow the fallback for everything else.
+     *
+     * Read-only: the layering never reaches `$this->baselines`, so writes stay on
+     * the branch that ran.
+     *
      * @return array{sha: ?string, tree: array<string, string>, results: array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>}
      */
     private function baselineFor(string $branch, ?string $fallbackBranch): array
     {
         $fallbackBranch ??= $this->fallbackBranch;
 
-        if (isset($this->baselines[$branch])) {
-            return $this->baselines[$branch];
+        $fallback = $branch !== $fallbackBranch ? ($this->baselines[$fallbackBranch] ?? null) : null;
+        $own = $this->baselines[$branch] ?? null;
+
+        if ($own === null) {
+            return $fallback ?? ['sha' => null, 'tree' => [], 'results' => []];
         }
 
-        if ($branch !== $fallbackBranch && isset($this->baselines[$fallbackBranch])) {
-            return $this->baselines[$fallbackBranch];
+        if ($fallback === null) {
+            return $own;
         }
 
-        return ['sha' => null, 'tree' => [], 'results' => []];
+        return [
+            'sha' => $own['sha'] ?? $fallback['sha'],
+            'tree' => $own['tree'] !== [] ? $own['tree'] : $fallback['tree'],
+            'results' => array_replace($fallback['results'], $own['results']),
+        ];
     }
 
     private function ensureBaseline(string $branch): void

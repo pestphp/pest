@@ -36,7 +36,7 @@ test('an explicit path turns filtered mode off', function (): void {
         ->and($delta->isResultsOnly())->toBeTrue($delta->summary());
 })->skipOnWindows();
 
-test('filtered mode records a baseline when there is none', function (): void {
+test('filtered mode runs the whole suite when there is no baseline', function (): void {
     $project = Project::make('master');
 
     $result = $project->pest('--tia', '--filtered');
@@ -58,16 +58,20 @@ test('filtered mode finds nothing to do in parallel either', function (): void {
         ->and($delta->isHardSuppressed())->toBeTrue($delta->summary());
 })->skipOnWindows();
 
-test('a corrupt graph is rebuilt rather than crashing the run', function (): void {
+test('a corrupt graph is reported and does not crash the run', function (): void {
     $project = Project::make('master');
     $project->seed('master');
 
-    file_put_contents($project->graphDir().'/graph.json', '{not json');
+    $graph = $project->graphDir().'/graph.json';
+
+    file_put_contents($graph, '{not json');
 
     $result = $project->pest('--tia');
 
     expect($result->exitCode)->toBe(0, $result->describe())
-        ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed');
+        ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed')
+        ->and($result->output)->toContain('The dependency graph could not be read')
+        ->and(is_file($graph) ? file_get_contents($graph) : null)->not->toBe('{not json');
 })->skipOnWindows();
 
 test('--parallel --retry is refused and leaves the graph alone', function (): void {

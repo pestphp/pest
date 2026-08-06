@@ -43,6 +43,17 @@ final class Project
     public const int TOTAL_TESTS = 6;
 
     /**
+     * A dataset for the rule that TIA must reach the same outcome sequentially
+     * and in parallel: the same command, run both ways, must leave the same graph.
+     *
+     * @var array<string, array<int, array<int, string>>>
+     */
+    public const array SEQUENTIAL_AND_PARALLEL = [
+        'sequential' => [[]],
+        'parallel' => [['--parallel', '--processes=2']],
+    ];
+
+    /**
      * @var array<int, self>
      */
     private static array $created = [];

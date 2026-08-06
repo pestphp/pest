@@ -156,7 +156,7 @@ test('a shard is a partial run', function (): void {
         ->and($delta->isResultsOnly())->toBeTrue($delta->summary());
 })->skipOnWindows();
 
-test('a parallel partial run writes nothing at all', function (): void {
+test('a parallel partial run records the test that ran, like a sequential one', function (): void {
     $project = Project::make('master');
     $project->seed('master');
 
@@ -164,6 +164,7 @@ test('a parallel partial run writes nothing at all', function (): void {
     $delta = $project->delta();
 
     expect($result->output)->toContain('TIA does not apply to partial runs')
-        ->and($delta->writtenCount())->toBe(0, $delta->summary())
+        ->and($result->tally())->toContain('1 passed')
+        ->and($delta->writtenCount())->toBe(1, $delta->summary())
         ->and($delta->isResultsOnly())->toBeTrue($delta->summary());
 })->skipOnWindows();

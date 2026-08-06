@@ -110,6 +110,22 @@ test('replays on a new branch when tia is enabled by configuration', function ()
         ->and($project->branchKeys())->toBe(['master', 'feature-x']);
 })->skipOnWindows();
 
+test('a narrowed run on a new branch does not cost the fallback', function (array $arguments): void {
+    $project = Project::make('master');
+    $project->seed('master');
+
+    $project->git()->switchTo('feature-x', new: true);
+    $project->pest(...$arguments);
+
+    $result = $project->pest('--tia');
+
+    expect($result->replayed())->toBe(Project::TOTAL_TESTS, $result->describe())
+        ->and($result->uncached())->toBe(0, $result->describe());
+})->with([
+    'sequential' => [['--filter=adds two numbers']],
+    'parallel' => [['--parallel', '--processes=2', '--filter=adds two numbers']],
+])->skipOnWindows();
+
 test('replays inside a worktree on a new branch', function (): void {
     $project = Project::make('master');
     $worktree = $project->worktree('feature-worktree');

@@ -95,6 +95,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     private const string FILTERED_GLOBAL = 'TIA_FILTERED';
 
+    private const string WORKER_RESULTS_GLOBAL = 'TIA_WORKER_RESULTS';
+
     private const string PIGGYBACK_COVERAGE_GLOBAL = 'TIA_PIGGYBACK_COVERAGE';
 
     private const string FALLBACK_BRANCH_GLOBAL = 'TIA_FALLBACK_BRANCH';
@@ -194,6 +196,12 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     private bool $resultsOnlyWrites = false;
 
+    private bool $flushesWorkerResults = false;
+
+    private bool $unreadableGraphReported = false;
+
+    private bool $detachedHead = false;
+
     /** @var array<int, string> */
     private array $originalArguments = [];
 
@@ -242,13 +250,49 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         $graph = Graph::decode($json, $projectRoot);
 
-        $graph?->setFallbackBranch($this->fallbackBranch);
+        if (! $graph instanceof Graph) {
+            $this->discardUnreadableGraph();
+
+            return null;
+        }
+
+        $graph->setFallbackBranch($this->fallbackBranch);
 
         return $graph;
     }
 
+    /**
+     * Drop a graph that will not decode, so the next run that can record starts
+     * clean instead of tripping over the same file forever — rebuilding needs a
+     * coverage driver, and without one the file would stay corrupt for good.
+     */
+    private function discardUnreadableGraph(): void
+    {
+        if (Parallel::isWorker()) {
+            return;
+        }
+
+        $this->state->delete(self::KEY_GRAPH);
+
+        if ($this->unreadableGraphReported) {
+            return;
+        }
+
+        $this->unreadableGraphReported = true;
+
+        $this->output->writeln('');
+        $this->renderBadge('WARN', 'The dependency graph could not be read — it will be rebuilt.');
+    }
+
     private function saveGraph(Graph $graph): bool
     {
+        // A detached HEAD names no branch of its own, so `$this->branch` is the
+        // fallback — writing here would land this checkout's results in the
+        // default branch's baseline. Leave the graph exactly as it was.
+        if ($this->detachedHead) {
+            return true;
+        }
+
         $json = $graph->encode();
 
         if ($json === null) {
@@ -445,6 +489,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $arguments = $this->popArgument(self::BASELINED_OPTION, $arguments);
 
         if ($disabled) {
+            $this->requestWorkerResults();
+
             if ($partial) {
                 $this->resultsOnlyWrites = true;
 
@@ -461,10 +507,19 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return $arguments;
         }
 
+        if ($isWorker && (string) Parallel::getGlobal(self::WORKER_RESULTS_GLOBAL) === '1') {
+            $this->flushesWorkerResults = true;
+            $this->resultsOnlyWrites = true;
+
+            return $arguments;
+        }
+
         $forceRebuild = $freshRequested && ($enabled || $recordingGlobal || $replayingGlobal);
         $this->freshRebuild = $forceRebuild;
 
         if (! $enabled && ! $this->forceRefetch && ! $recordingGlobal && ! $replayingGlobal) {
+            $this->requestWorkerResults();
+
             return $arguments;
         }
 
@@ -487,7 +542,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return;
         }
 
-        if (Parallel::isWorker() && ($this->replayGraph instanceof Graph || $this->recordingActive)) {
+        if (Parallel::isWorker() && ($this->replayGraph instanceof Graph || $this->recordingActive || $this->flushesWorkerResults)) {
             $this->flushWorkerReplay();
         }
 
@@ -1261,6 +1316,30 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $this->renderChild('Install / enable pcov or xdebug (mode: coverage) in the worker PHP and rerun.');
     }
 
+    /**
+     * A parallel run keeps its results in the workers, so the parent's collector
+     * is empty and nothing would ever reach the graph. Ask the workers to flush
+     * what they ran, so a parallel run refreshes — and prunes — exactly like the
+     * sequential run of the same command.
+     *
+     * Gated on a graph already existing: a project that has never run TIA must
+     * not gain a baseline from a plain `--parallel` run.
+     */
+    private function requestWorkerResults(): void
+    {
+        if (Parallel::isWorker() || ! Parallel::isEnabled() || $this->writesSuppressed) {
+            return;
+        }
+
+        if ($this->state->read(self::KEY_GRAPH) === null) {
+            return;
+        }
+
+        $this->purgeWorkerPartials();
+
+        Parallel::setGlobal(self::WORKER_RESULTS_GLOBAL, '1');
+    }
+
     private function purgeWorkerPartials(): void
     {
         foreach ($this->collectWorkerEdgesPartials() as $key) {
@@ -1770,7 +1849,10 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         Parallel::setGlobal(self::FALLBACK_BRANCH_GLOBAL, $this->fallbackBranch);
 
-        $this->branch = $changedFiles->currentBranch() ?? $this->fallbackBranch;
+        $currentBranch = $changedFiles->currentBranch();
+
+        $this->detachedHead = $currentBranch === null;
+        $this->branch = $currentBranch ?? $this->fallbackBranch;
     }
 
     private function resolveFallbackBranch(ChangedFiles $changedFiles): ?string

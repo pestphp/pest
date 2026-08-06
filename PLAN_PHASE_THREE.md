@@ -430,7 +430,7 @@ Most rows batch cheaply — phase two ran C1–C20 in one call at roughly one li
 
 | item | status |
 |---|---|
-| **G4 / G4b** — parallel replay clobbers cached `time` on all non-executed tests. `mergeWorkerReplayPartials()` takes `$result['time']` verbatim at `Tia.php:1451`, never routing through `resultTime()` as the sequential sites (1681, 1762) do. Assertions survive because workers replay those themselves. | Pre-existing (pre-fix had no preservation at all), **out of scope for phase three**. Report it as still-present; do not fix it unless Nuno asks. |
+| ~~**G4 / G4b** — parallel replay clobbers cached `time` on all non-executed tests.~~ | **Struck in phase four — does not reproduce.** `flushWorkerReplay()` applies `resultTime()` worker-side before writing the partial, so the parent's verbatim read of `$result['time']` is reading values that were already corrected. Pinned by `a parallel replay keeps the recorded time of tests that did not run` (`tests/Features/Tia/CompleteRunWriteTier.php`), which sentinels every cached `time` and asserts a parallel replay writes nothing. |
 | **C19** — `--tia --uses=…` cannot be fixtured. TIA hard-errors on PHPUnit classes (`EnsureTiaIsRunningPestTestsOnly`), and Pest has no chainable `->uses()`. | **Expected behaviour per Nuno.** Verify the tier (`w=0`, RO, notice) and move on. Not a defect. |
 | **J11** — `--repeat` is not a Pest option (`Unknown option "--repeat"`). | **Don't care per Nuno.** Mark SKIP. |
 | **J10** — `--random-order-seed` alone exits 1 with a WARN. Identical without `--tia`. | Pre-existing Pest behaviour, unrelated. Tier still holds. |

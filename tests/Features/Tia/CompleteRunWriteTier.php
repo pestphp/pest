@@ -8,7 +8,7 @@ afterEach(function (): void {
     Project::destroyAll();
 });
 
-test('a complete run prunes a deleted test', function (): void {
+test('a complete run prunes a deleted test', function (array $arguments): void {
     $project = Project::make('master');
     $project->seed('master');
 
@@ -24,14 +24,14 @@ test('a complete run prunes a deleted test', function (): void {
         });
         PHP);
 
-    $result = $project->pest();
+    $result = $project->pest(...$arguments);
     $delta = $project->delta();
 
     expect($result->tally())->toContain('5 passed')
         ->and($delta->removed())->toBe(1, $delta->summary())
         ->and($delta->added())->toBe(0, $delta->summary())
         ->and($delta->structureMoved())->toBeFalse($delta->summary());
-})->skipOnWindows();
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
 
 test('a complete run records nothing for a test file the graph does not know', function (): void {
     $project = Project::make('master');
@@ -79,7 +79,7 @@ test('a partial run records nothing for a test file the graph does not know', fu
         ->and($delta->isResultsOnly())->toBeTrue($delta->summary());
 })->skipOnWindows();
 
-test('a truncated run does not prune', function (): void {
+test('a truncated run does not prune', function (array $arguments): void {
     $project = Project::make('master');
     $project->seed('master');
 
@@ -99,14 +99,14 @@ test('a truncated run does not prune', function (): void {
         });
         PHP);
 
-    $result = $project->pest('--bail');
+    $result = $project->pest('--bail', ...$arguments);
     $delta = $project->delta();
 
     expect($result->exitCode)->toBe(1, $result->describe())
         ->and($result->tally())->toContain('1 failed')
         ->and($delta->removed())->toBe(0, $delta->summary())
         ->and($delta->structureMoved())->toBeFalse($delta->summary());
-})->skipOnWindows();
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
 
 test('a green bail run is complete', function (): void {
     $project = Project::make('master');
@@ -121,16 +121,40 @@ test('a green bail run is complete', function (): void {
         ->and($delta->isResultsOnly())->toBeTrue($delta->summary());
 })->skipOnWindows();
 
-test('--no-tia refreshes results without enabling tia', function (): void {
+test('--no-tia refreshes results without enabling tia', function (array $arguments): void {
     $project = Project::make('master');
     $project->seed('master');
 
-    $result = $project->pest('--tia', '--no-tia');
+    $result = $project->pest('--tia', '--no-tia', ...$arguments);
     $delta = $project->delta();
 
     expect($result->output)->not->toContain('Experimental TIA mode enabled')
         ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed')
         ->and($delta->writtenCount())->toBe(Project::TOTAL_TESTS, $delta->summary())
+        ->and($delta->isResultsOnly())->toBeTrue($delta->summary());
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
+
+test('a plain run refreshes the results it executed', function (array $arguments): void {
+    $project = Project::make('master');
+    $project->seed('master');
+
+    $result = $project->pest(...$arguments);
+    $delta = $project->delta();
+
+    expect($result->tally())->toContain(Project::TOTAL_TESTS.' passed')
+        ->and($delta->writtenCount())->toBe(Project::TOTAL_TESTS, $delta->summary())
+        ->and($delta->isResultsOnly())->toBeTrue($delta->summary());
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
+
+test('a parallel replay keeps the recorded time of tests that did not run', function (): void {
+    $project = Project::make('master');
+    $project->seed('master');
+
+    $project->pest('--tia', '--parallel', '--processes=2');
+
+    $delta = $project->delta();
+
+    expect($delta->writtenCount())->toBe(0, $delta->summary())
         ->and($delta->isResultsOnly())->toBeTrue($delta->summary());
 })->skipOnWindows();
 
@@ -144,6 +168,7 @@ test('a run that never enables tia creates no graph', function (array $arguments
 })->with([
     'plain' => [[]],
     'filtered' => [['--filter=adds two numbers']],
+    'parallel filtered' => [['--parallel', '--processes=2', '--filter=adds two numbers']],
 ])->skipOnWindows();
 
 test('a test edit narrows to the affected file and replays the rest', function (): void {
