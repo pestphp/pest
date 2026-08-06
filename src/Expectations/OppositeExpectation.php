@@ -281,6 +281,48 @@ final readonly class OppositeExpectation
     }
 
     /**
+     * Asserts that the given expectation target does not have a specific method with a specific return type.
+     *
+     * @param  array<int, string>|string  $returnType
+     */
+    public function toHaveMethodWithReturnType(string $method, array|string $returnType): ArchExpectation
+    {
+        $returnTypes = is_array($returnType) ? $returnType : [$returnType];
+
+        /** @var Expectation<array<int, string>|string> $original */
+        $original = $this->original;
+
+        return Targeted::make(
+            $original,
+            function (ObjectDescription $object) use ($method, $returnTypes, $returnType): bool {
+                if (! isset($object->reflectionClass) || ! $object->reflectionClass->hasMethod($method)) {
+                    return true;
+                }
+
+                $reflectionMethod = $object->reflectionClass->getMethod($method);
+
+                if (! $reflectionMethod->hasReturnType()) {
+                    return true;
+                }
+
+                $actualReturnType = (string) $reflectionMethod->getReturnType();
+
+                if (! is_array($returnType)) {
+                    return $actualReturnType !== $returnType;
+                }
+
+                $actualTypes = str_starts_with($actualReturnType, '?')
+                    ? [substr($actualReturnType, 1), 'null']
+                    : explode('|', $actualReturnType);
+
+                return count(array_intersect($returnTypes, $actualTypes)) !== count($returnTypes);
+            },
+            sprintf("to not have method '%s' with return type%s", $method, is_array($returnType) ? sprintf(" containing '%s'", implode("', '", $returnTypes)) : sprintf(" '%s'", $returnType)),
+            FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+        );
+    }
+
+    /**
      * Asserts that the given expectation target does not have suspicious characters.
      */
     public function toHaveSuspiciousCharacters(): ArchExpectation
