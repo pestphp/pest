@@ -322,7 +322,8 @@ final class Project
     {
         $baselines = $this->graph()['baselines'] ?? [];
 
-        return is_array($baselines) ? array_keys($baselines) : [];
+        // A branch named `12345` comes back from json_decode as an integer key.
+        return is_array($baselines) ? array_map(strval(...), array_keys($baselines)) : [];
     }
 
     public function graphDir(): string

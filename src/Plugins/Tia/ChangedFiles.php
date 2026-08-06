@@ -243,6 +243,56 @@ final readonly class ChangedFiles
         return $exists ? $configured : null;
     }
 
+    /**
+     * Every branch name this checkout knows, local and remote alike. Remotes
+     * count: a branch that only lives on the origin is still a branch someone
+     * will check out, and its baseline must survive.
+     *
+     * @return list<string>|null `null` when git cannot answer.
+     */
+    public function branchNames(): ?array
+    {
+        $process = new Process(
+            ['git', 'for-each-ref', '--format=%(refname)', 'refs/heads', 'refs/remotes'],
+            $this->projectRoot,
+        );
+        $process->setTimeout(5.0);
+        $process->run();
+
+        if (! $process->isSuccessful()) {
+            return null;
+        }
+
+        $names = [];
+
+        foreach ($this->splitLines($process->getOutput()) as $ref) {
+            if (str_starts_with($ref, 'refs/heads/')) {
+                $names[substr($ref, strlen('refs/heads/'))] = true;
+
+                continue;
+            }
+
+            if (! str_starts_with($ref, 'refs/remotes/')) {
+                continue;
+            }
+
+            $tail = substr($ref, strlen('refs/remotes/'));
+            $slash = strpos($tail, '/');
+
+            if ($slash === false) {
+                continue;
+            }
+
+            $branch = substr($tail, $slash + 1);
+
+            if ($branch !== '' && $branch !== 'HEAD') {
+                $names[$branch] = true;
+            }
+        }
+
+        return array_keys($names);
+    }
+
     public function hasRemote(): bool
     {
         return $this->gitOutput(['git', 'remote']) !== null;

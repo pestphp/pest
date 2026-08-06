@@ -87,7 +87,7 @@ final readonly class GraphDelta
      */
     public function branchKeys(): array
     {
-        return array_keys($this->baselines($this->after));
+        return array_map(strval(...), array_keys($this->baselines($this->after)));
     }
 
     /**
@@ -95,7 +95,7 @@ final readonly class GraphDelta
      */
     public function branchKeysBefore(): array
     {
-        return array_keys($this->baselines($this->before));
+        return array_map(strval(...), array_keys($this->baselines($this->before)));
     }
 
     public function branchKeysMoved(): bool
@@ -254,9 +254,7 @@ final readonly class GraphDelta
         $baselines = [];
 
         foreach ($this->section($graph, 'baselines') as $branch => $baseline) {
-            if (is_string($branch)) {
-                $baselines[$branch] = $baseline;
-            }
+            $baselines[(string) $branch] = $baseline;
         }
 
         return $baselines;

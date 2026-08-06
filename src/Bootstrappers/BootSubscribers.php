@@ -35,6 +35,12 @@ final readonly class BootSubscribers implements Bootstrapper
         Subscribers\EnsureTiaResultIsRecordedOnSkipped::class,
         Subscribers\EnsureTiaResultIsRecordedOnIncomplete::class,
         Subscribers\EnsureTiaResultIsRecordedOnRisky::class,
+        Subscribers\EnsureTiaResultIsRecordedOnNoticeTriggered::class,
+        Subscribers\EnsureTiaResultIsRecordedOnPhpNoticeTriggered::class,
+        Subscribers\EnsureTiaResultIsRecordedOnDeprecationTriggered::class,
+        Subscribers\EnsureTiaResultIsRecordedOnPhpDeprecationTriggered::class,
+        Subscribers\EnsureTiaResultIsRecordedOnWarningTriggered::class,
+        Subscribers\EnsureTiaResultIsRecordedOnPhpWarningTriggered::class,
         Subscribers\EnsureTiaAssertionsAreRecordedOnFinished::class,
     ];
 

@@ -29,7 +29,13 @@ enum ReplayType
             $status->isRisky() => self::Risky,
             $status->isSkipped() => self::Skipped,
             $status->isIncomplete() => self::Incomplete,
-            default => self::Failure,
+            // A recorded notice, deprecation or warning only reaches replay when
+            // the configured failOn* / displayDetailsOn* policies say it is not
+            // worth re-running — which means the test passed. Folding it into
+            // Failure below would turn a green run red on cache alone.
+            $status->isNotice(), $status->isDeprecation(), $status->isWarning() => self::Pass,
+            $status->isFailure(), $status->isError() => self::Failure,
+            default => self::None,
         };
     }
 }

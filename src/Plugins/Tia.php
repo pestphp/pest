@@ -160,6 +160,16 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     private array $cachedAssertionsByTestId = [];
 
     /**
+     * The status a replayed test was replayed *as*, so the write-back records
+     * what was cached rather than what the replay looked like from the
+     * outside. A cached deprecation replays as a pass — recording that pass
+     * would erase the deprecation from the baseline on the very next run.
+     *
+     * @var array<string, array{status: int, message: string}>
+     */
+    private array $cachedStatusByTestId = [];
+
+    /**
      * @var array<string, float>
      */
     private array $cachedTimeByTestId = [];
@@ -187,8 +197,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     private bool $forceRefetch = false;
 
     private bool $baselineFetchAttemptedForDrift = false;
-
-    private bool $freshRebuild = false;
 
     private bool $filteredMode = false;
 
@@ -272,7 +280,9 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return;
         }
 
-        $this->state->delete(self::KEY_GRAPH);
+        if (! $this->deleteState(self::KEY_GRAPH)) {
+            return;
+        }
 
         if ($this->unreadableGraphReported) {
             return;
@@ -282,6 +292,25 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         $this->output->writeln('');
         $this->renderBadge('WARN', 'The dependency graph could not be read — it will be rebuilt.');
+    }
+
+    /**
+     * Delete a state file, unless this checkout may not write.
+     *
+     * A detached HEAD names no branch, so {@see self::saveGraph()} refuses to
+     * write — which means anything deleted here could never be rebuilt from
+     * this checkout. Read-only has to mean deletes too, or a drifted
+     * `composer.lock` on a detached CI checkout wipes the whole team's baseline.
+     *
+     * @return bool Whether the delete happened.
+     */
+    private function deleteState(string $key): bool
+    {
+        if ($this->detachedHead) {
+            return false;
+        }
+
+        return $this->state->delete($key);
     }
 
     private function saveGraph(Graph $graph): bool
@@ -412,6 +441,10 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             }
 
             $this->replayedCount++;
+            $this->cachedStatusByTestId[$testId] = [
+                'status' => $result->asInt(),
+                'message' => $result->message(),
+            ];
             $assertions = $this->replayGraph->getAssertions($this->branch, $testId);
             $this->cachedAssertionsByTestId[$testId] = $assertions ?? 0;
 
@@ -502,7 +535,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
             $this->forceRefetch = false;
             $this->filteredMode = false;
-            $this->freshRebuild = false;
 
             return $arguments;
         }
@@ -515,7 +547,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         }
 
         $forceRebuild = $freshRequested && ($enabled || $recordingGlobal || $replayingGlobal);
-        $this->freshRebuild = $forceRebuild;
 
         if (! $enabled && ! $this->forceRefetch && ! $recordingGlobal && ! $replayingGlobal) {
             $this->requestWorkerResults();
@@ -546,7 +577,10 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             $this->flushWorkerReplay();
         }
 
-        if ($this->writesSuppressed || $this->resultsOnlyWrites) {
+        // `terminate()` also runs from the shutdown handler, which is how a run
+        // that `exit()`s inside a test gets here — with a test prepared and
+        // never finished, and so with no right to a complete write.
+        if ($this->writesSuppressed || $this->resultsOnlyWrites || $this->hasUnfinishedTest()) {
             $this->recorder->reset();
             $this->coverageCollector->reset();
 
@@ -619,10 +653,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $graph->replaceTestInertiaComponents($perTestInertia);
         $graph->replaceJsFileToComponents(JsModuleGraph::build($projectRoot));
 
-        if ($this->freshRebuild) {
-            $graph->pruneMissingTests();
-        }
-
         $this->seedResultsInto($graph);
 
         if (! $this->saveGraph($graph)) {
@@ -642,7 +672,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return $exitCode;
         }
 
-        if (Only::isEnabled() || $this->stoppedEarly()) {
+        if (Only::isEnabled() || $this->stoppedEarly() || $this->hasUnfinishedTest()) {
             $this->resultsOnlyWrites = true;
         }
 
@@ -727,10 +757,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $graph->replaceTestInertiaComponents($finalisedInertia);
         $graph->replaceJsFileToComponents(JsModuleGraph::build($projectRoot));
 
-        if ($this->freshRebuild) {
-            $graph->pruneMissingTests();
-        }
-
         if (! $this->saveGraph($graph)) {
             $this->renderBadge('ERROR', 'Could not write the dependency graph.');
 
@@ -773,8 +799,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
                 return $this->reconcileFingerprint($rebuilt, $current);
             }
 
-            $this->state->delete(self::KEY_GRAPH);
-            $this->state->delete(self::KEY_COVERAGE_CACHE);
+            $this->deleteState(self::KEY_GRAPH);
+            $this->deleteState(self::KEY_COVERAGE_CACHE);
 
             return null;
         }
@@ -790,7 +816,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             $graph->clearResults($this->branch);
             $graph->setFingerprint($current);
             $this->saveGraph($graph);
-            $this->state->delete(self::KEY_COVERAGE_CACHE);
+            $this->deleteState(self::KEY_COVERAGE_CACHE);
         }
 
         return $graph;
@@ -821,7 +847,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $fingerprint = Fingerprint::compute($projectRoot);
         $this->startFingerprint = $fingerprint;
 
-        if ($forceRebuild) {
+        if ($forceRebuild && ! $this->detachedHead) {
             Storage::purge($projectRoot);
         }
 
@@ -1362,7 +1388,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         }
 
         foreach ($results as $testId => $result) {
-            $results[$testId]['time'] = $this->resultTime($testId, $result['time']);
+            $results[$testId] = $this->replayedAsRecorded($testId, $result);
         }
 
         $json = json_encode([
@@ -1370,7 +1396,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             'replayed' => $this->replayedCount,
             'affected' => $this->affectedCount,
             'executed' => $this->executedCount,
-            'truncated' => $this->stoppedEarly(),
+            'truncated' => $this->stoppedEarly() || $collector->hasUnfinishedTest(),
         ], JSON_UNESCAPED_SLASHES);
 
         if ($json === false) {
@@ -1639,6 +1665,24 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         return $this->cachedTimeByTestId[$testId] ?? $time;
     }
 
+    /**
+     * @param  array{status: int, message: string, time: float, assertions: int, file?: string}  $result
+     * @return array{status: int, message: string, time: float, assertions: int, file?: string}
+     */
+    private function replayedAsRecorded(string $testId, array $result): array
+    {
+        $result['time'] = $this->resultTime($testId, $result['time']);
+
+        $cached = $this->cachedStatusByTestId[$testId] ?? null;
+
+        if ($cached !== null) {
+            $result['status'] = $cached['status'];
+            $result['message'] = $cached['message'];
+        }
+
+        return $result;
+    }
+
     private function seedResultsInto(Graph $graph): void
     {
         /** @var ResultCollector $collector */
@@ -1658,12 +1702,14 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
                 $touchedFiles[$file] = true;
             }
 
+            $result = $this->replayedAsRecorded($testId, $result);
+
             $graph->setResult(
                 $this->branch,
                 $testId,
                 $result['status'],
                 $result['message'],
-                $this->resultTime($testId, $result['time']),
+                $result['time'],
                 $result['assertions'],
                 $file,
             );
@@ -1671,8 +1717,43 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         $graph->markKnownTestFiles(array_keys($touchedFiles));
         $graph->pruneStaleResults($this->branch, array_keys($touchedFiles), array_keys($results));
+        $this->reclaim($graph);
 
         $collector->reset();
+    }
+
+    /**
+     * Give back what the graph no longer needs. Only ever called from a
+     * complete write — the RESULTS-ONLY and HARD-SUPPRESSED tiers may not
+     * remove an entry, and a narrowed run has not seen enough to judge.
+     */
+    private function reclaim(Graph $graph): void
+    {
+        // The fallback branch never layers under itself, so marking it would
+        // write the graph for no reader's benefit — and cost a clean green run
+        // its "wrote nothing at all".
+        if ($this->branch !== $this->fallbackBranch) {
+            $graph->markBaselineComplete($this->branch);
+        }
+
+        $graph->pruneMissingTests();
+        $graph->pruneResultsForMissingFiles($this->branch);
+
+        $branches = new ChangedFiles(TestSuite::getInstance()->rootPath)->branchNames();
+
+        if ($branches === null) {
+            return;
+        }
+
+        // A shallow, single-branch CI checkout can see almost no refs, and
+        // "git has never heard of it" would then mean "this clone is narrow",
+        // not "that branch is gone". Only reclaim from a checkout that can at
+        // least see the branch everything else falls back to.
+        if (! in_array($this->fallbackBranch, $branches, true)) {
+            return;
+        }
+
+        $graph->pruneMissingBranches([...$branches, $this->branch, $this->fallbackBranch]);
     }
 
     private function snapshotTestResults(bool $markKnownTestFiles = false, bool $complete = true): void
@@ -1720,12 +1801,14 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
                 continue;
             }
 
+            $result = $this->replayedAsRecorded($testId, $result);
+
             $graph->setResult(
                 $this->branch,
                 $testId,
                 $result['status'],
                 $result['message'],
-                $this->resultTime($testId, $result['time']),
+                $result['time'],
                 $result['assertions'],
                 $file,
             );
@@ -1737,6 +1820,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         if ($complete) {
             $graph->pruneStaleResults($this->branch, array_keys($touchedFiles), array_keys($results));
+            $this->reclaim($graph);
         }
 
         $this->saveGraph($graph);
@@ -1830,6 +1914,18 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     private function stoppedEarly(): bool
     {
         return TestResultFacade::shouldStop();
+    }
+
+    /**
+     * A test that was prepared and never finished means this process is being
+     * torn down mid-file, so it has not seen enough of that file to prune it.
+     */
+    private function hasUnfinishedTest(): bool
+    {
+        $collector = Container::getInstance()->get(ResultCollector::class);
+        assert($collector instanceof ResultCollector);
+
+        return $collector->hasUnfinishedTest();
     }
 
     private function resolveBranch(string $projectRoot): void

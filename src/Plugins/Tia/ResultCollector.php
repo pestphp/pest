@@ -16,6 +16,9 @@ final class ResultCollector
      */
     private array $results = [];
 
+    /** @var array<string, true> */
+    private array $triggered = [];
+
     private ?string $currentTestId = null;
 
     private ?string $currentTestFile = null;
@@ -35,7 +38,33 @@ final class ResultCollector
             return;
         }
 
+        // PHPUnit reports a test that triggered a notice, deprecation or
+        // warning as passed, and emits Passed for it. Recording success here
+        // would erase the issue from the baseline, and a later replay under
+        // --fail-on-deprecation (and friends) would come back green where a
+        // fresh run fails. Keep the issue; only refresh what it cannot know.
+        if (isset($this->triggered[$this->currentTestId])) {
+            $this->refreshTime();
+
+            return;
+        }
+
         $this->record(TestStatus::success());
+    }
+
+    public function testTriggeredNotice(string $message): void
+    {
+        $this->recordIssue(TestStatus::notice($message));
+    }
+
+    public function testTriggeredDeprecation(string $message): void
+    {
+        $this->recordIssue(TestStatus::deprecation($message));
+    }
+
+    public function testTriggeredWarning(string $message): void
+    {
+        $this->recordIssue(TestStatus::warning($message));
     }
 
     public function testFailed(string $message): void
@@ -91,6 +120,17 @@ final class ResultCollector
         return $this->results;
     }
 
+    /**
+     * Whether a test was prepared but never finished — the process is being
+     * torn down in the middle of it (an `exit()` inside a test, a killed
+     * worker). What it collected is therefore a partial view of that test
+     * file, and must not license pruning the siblings it never reached.
+     */
+    public function hasUnfinishedTest(): bool
+    {
+        return $this->currentTestId !== null;
+    }
+
     public function recordAssertions(string $testId, int $assertions): void
     {
         if (isset($this->results[$testId])) {
@@ -111,6 +151,7 @@ final class ResultCollector
     public function reset(): void
     {
         $this->results = [];
+        $this->triggered = [];
         $this->currentTestId = null;
         $this->currentTestFile = null;
         $this->startTime = null;
@@ -121,6 +162,43 @@ final class ResultCollector
         $this->currentTestId = null;
         $this->currentTestFile = null;
         $this->startTime = null;
+    }
+
+    /**
+     * Record an issue raised while the test was running. The most important
+     * one wins, exactly as PHPUnit ranks them, so a deprecation does not
+     * shadow the warning that followed it — or the failure.
+     */
+    private function recordIssue(TestStatus $status): void
+    {
+        if ($this->currentTestId === null) {
+            return;
+        }
+
+        $existing = $this->results[$this->currentTestId]['status'] ?? null;
+
+        if (is_int($existing) && $existing >= $status->asInt()) {
+            return;
+        }
+
+        $this->triggered[$this->currentTestId] = true;
+
+        $this->record($status);
+    }
+
+    private function refreshTime(): void
+    {
+        if ($this->currentTestId === null) {
+            return;
+        }
+        if (! isset($this->results[$this->currentTestId])) {
+            return;
+        }
+        if ($this->startTime === null) {
+            return;
+        }
+
+        $this->results[$this->currentTestId]['time'] = round(microtime(true) - $this->startTime, 3);
     }
 
     private function record(TestStatus $status): void

@@ -43,6 +43,7 @@ final class Graph
      * @var array<string, array{
      *     sha: ?string,
      *     tree: array<string, string>,
+     *     complete?: bool,
      *     results: array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>
      * }>
      */
@@ -650,6 +651,9 @@ final class Graph
 
         $r = $baseline['results'][$testId];
 
+        // A status this build does not know — a graph written by a newer Pest,
+        // or a corrupt one — is not a result. Returning null re-executes the
+        // test rather than replaying an outcome nobody can interpret.
         return match ($r['status']) {
             0 => TestStatus::success(),
             1 => TestStatus::skipped($r['message']),
@@ -660,7 +664,7 @@ final class Graph
             6 => TestStatus::warning($r['message']),
             7 => TestStatus::failure($r['message']),
             8 => TestStatus::error($r['message']),
-            default => TestStatus::unknown(),
+            default => null,
         };
     }
 
@@ -687,7 +691,9 @@ final class Graph
 
             $rel = $this->relative($file);
 
-            if ($rel !== null) {
+            // A test file that is no longer on disk cannot be re-run by anyone,
+            // so selecting it would only widen the run for nothing.
+            if ($rel !== null && is_file($this->projectRoot.'/'.$rel)) {
                 $files[$rel] = true;
             }
         }
@@ -695,6 +701,15 @@ final class Graph
         return array_keys($files);
     }
 
+    /**
+     * Whether a cached result due a re-run names a test file this project
+     * cannot address — an empty path, or one that resolves outside the project
+     * root. Those are genuinely lost, so the caller widens to the full suite.
+     *
+     * A path that resolves fine but is simply absent is *deleted*, not lost:
+     * widening would not run it either, and treating it as unlocated used to
+     * strand `--filtered` on a full replay for good.
+     */
     public function hasUnlocatedTestsToRerun(string $branch, ?string $fallbackBranch = null): bool
     {
         $baseline = $this->baselineFor($branch, $fallbackBranch);
@@ -710,9 +725,7 @@ final class Graph
                 return true;
             }
 
-            $rel = $this->relative($file);
-
-            if ($rel === null || ! is_file($this->projectRoot.'/'.$rel)) {
+            if ($this->relative($file) === null) {
                 return true;
             }
         }
@@ -733,6 +746,10 @@ final class Graph
     public function shouldRerunStatus(TestStatus $testStatus): bool
     {
         if ($testStatus->isFailure() || $testStatus->isError()) {
+            return true;
+        }
+
+        if ($testStatus->isUnknown()) {
             return true;
         }
 
@@ -813,10 +830,21 @@ final class Graph
      * default branch's, so a key minted by a narrowed run — which only holds the
      * handful of tests that ran — does not shadow the fallback for everything else.
      *
+     * Once this branch has had a complete run, the layering becomes per *file*
+     * rather than per test id: the branch's entries for a file it executed are
+     * the whole truth, so the fallback's entries for that same file are dropped
+     * rather than merged. Without that, a test the branch renamed or removed —
+     * and {@see self::pruneStaleResults()} therefore unset — is resurrected by
+     * the default branch on the very next read, and never stops coming back.
+     *
+     * A branch whose key was minted by a *narrowed* run holds only the handful
+     * of tests that ran, and has no business speaking for the rest of their
+     * file, so it keeps the per-test-id merge.
+     *
      * Read-only: the layering never reaches `$this->baselines`, so writes stay on
      * the branch that ran.
      *
-     * @return array{sha: ?string, tree: array<string, string>, results: array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>}
+     * @return array{sha: ?string, tree: array<string, string>, complete?: bool, results: array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>}
      */
     private function baselineFor(string $branch, ?string $fallbackBranch): array
     {
@@ -833,11 +861,47 @@ final class Graph
             return $own;
         }
 
+        $under = ($own['complete'] ?? false) === true
+            ? $this->withoutFilesCoveredBy($fallback['results'], $own['results'])
+            : $fallback['results'];
+
         return [
             'sha' => $own['sha'] ?? $fallback['sha'],
             'tree' => $own['tree'] !== [] ? $own['tree'] : $fallback['tree'],
-            'results' => array_replace($fallback['results'], $own['results']),
+            'results' => array_replace($under, $own['results']),
         ];
+    }
+
+    /**
+     * @param  array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>  $results
+     * @param  array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>  $authoritative
+     * @return array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>
+     */
+    private function withoutFilesCoveredBy(array $results, array $authoritative): array
+    {
+        $covered = [];
+
+        foreach ($authoritative as $entry) {
+            $file = $entry['file'] ?? null;
+
+            if (is_string($file) && $file !== '') {
+                $covered[$file] = true;
+            }
+        }
+
+        if ($covered === []) {
+            return $results;
+        }
+
+        foreach ($results as $testId => $entry) {
+            $file = $entry['file'] ?? null;
+
+            if (is_string($file) && isset($covered[$file])) {
+                unset($results[$testId]);
+            }
+        }
+
+        return $results;
     }
 
     private function ensureBaseline(string $branch): void
@@ -1423,6 +1487,67 @@ final class Graph
     }
 
     /**
+     * Record that this branch has run the whole suite at least once, which is
+     * what lets {@see self::baselineFor()} treat its entries as authoritative
+     * for the files they cover. Never mints a key: a run that recorded nothing
+     * has nothing to be authoritative about.
+     */
+    public function markBaselineComplete(string $branch): void
+    {
+        if (isset($this->baselines[$branch])) {
+            $this->baselines[$branch]['complete'] = true;
+        }
+    }
+
+    /**
+     * Drop this branch's result entries whose test file is no longer on disk.
+     *
+     * Without this nothing but `--fresh` ever reclaims them, and a *failing*
+     * one keeps `--filtered` widened to a full replay on every later run.
+     */
+    public function pruneResultsForMissingFiles(string $branch): void
+    {
+        if (! isset($this->baselines[$branch]['results'])) {
+            return;
+        }
+
+        $root = rtrim($this->projectRoot, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
+
+        foreach ($this->baselines[$branch]['results'] as $testId => $result) {
+            $file = $result['file'] ?? null;
+
+            if (! is_string($file) || $file === '') {
+                continue;
+            }
+
+            $rel = $this->relative($file);
+
+            if ($rel === null || is_file($root.$rel)) {
+                continue;
+            }
+
+            unset($this->baselines[$branch]['results'][$testId]);
+        }
+    }
+
+    /**
+     * Drop baselines for branches git no longer knows, so the graph does not
+     * carry one full copy of the suite per branch ever created.
+     *
+     * @param  array<int, string>  $keep  Branch names that must survive.
+     */
+    public function pruneMissingBranches(array $keep): void
+    {
+        $survivors = array_fill_keys($keep, true);
+
+        foreach (array_keys($this->baselines) as $branch) {
+            if (! isset($survivors[$branch])) {
+                unset($this->baselines[$branch]);
+            }
+        }
+    }
+
+    /**
      * Prune baseline result entries whose test files were just executed but whose
      * test IDs are no longer present (e.g. the test method was removed or renamed).
      *
@@ -1499,16 +1624,170 @@ final class Graph
 
         $graph = new self($projectRoot);
         $graph->fingerprint = is_array($data['fingerprint'] ?? null) ? $data['fingerprint'] : [];
-        $graph->files = is_array($data['files'] ?? null) ? array_values($data['files']) : [];
+        $graph->files = self::decodeFiles($data['files'] ?? null);
         $graph->fileIds = array_flip($graph->files);
-        $graph->edges = is_array($data['edges'] ?? null) ? $data['edges'] : [];
-        $graph->baselines = is_array($data['baselines'] ?? null) ? $data['baselines'] : [];
+        $graph->edges = self::decodeEdges($data['edges'] ?? null);
+        $graph->baselines = self::decodeBaselines($data['baselines'] ?? null);
 
         $graph->testTables = self::decodeStringMap($data['test_tables'] ?? null);
         $graph->testInertiaComponents = self::decodeStringMap($data['test_inertia_components'] ?? null);
         $graph->jsFileToComponents = self::decodeStringMap($data['js_file_to_components'] ?? null);
 
         return $graph;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private static function decodeFiles(mixed $section): array
+    {
+        if (! is_array($section)) {
+            return [];
+        }
+
+        $files = [];
+
+        foreach ($section as $path) {
+            if (is_string($path) && $path !== '') {
+                $files[] = $path;
+            }
+        }
+
+        return $files;
+    }
+
+    /**
+     * @return array<string, array<int, int>>
+     */
+    private static function decodeEdges(mixed $section): array
+    {
+        if (! is_array($section)) {
+            return [];
+        }
+
+        $edges = [];
+
+        foreach ($section as $key => $ids) {
+            $testFile = (string) $key;
+
+            if ($testFile === '') {
+                continue;
+            }
+            if (! is_array($ids)) {
+                continue;
+            }
+
+            $clean = [];
+
+            foreach ($ids as $id) {
+                if (is_int($id)) {
+                    $clean[] = $id;
+                }
+            }
+
+            $edges[$testFile] = $clean;
+        }
+
+        return $edges;
+    }
+
+    /**
+     * A graph is state on disk that any process may have written: a newer Pest,
+     * a half-finished write, a hand edit. Every branch, every entry and every
+     * field is checked here so that a malformed one is dropped rather than
+     * reaching a read path and taking the run down with it.
+     *
+     * @return array<string, array{sha: ?string, tree: array<string, string>, complete?: bool, results: array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>}>
+     */
+    private static function decodeBaselines(mixed $section): array
+    {
+        if (! is_array($section)) {
+            return [];
+        }
+
+        $baselines = [];
+
+        foreach ($section as $key => $baseline) {
+            // A branch named `12345` decodes as an integer key, and must not be
+            // mistaken for a malformed one.
+            $branch = (string) $key;
+
+            if ($branch === '') {
+                continue;
+            }
+            if (! is_array($baseline)) {
+                continue;
+            }
+
+            $sha = $baseline['sha'] ?? null;
+            $tree = [];
+
+            if (is_array($baseline['tree'] ?? null)) {
+                foreach ($baseline['tree'] as $path => $hash) {
+                    if (is_string($path) && is_string($hash)) {
+                        $tree[$path] = $hash;
+                    }
+                }
+            }
+
+            $baselines[$branch] = [
+                'sha' => is_string($sha) ? $sha : null,
+                'tree' => $tree,
+                'results' => self::decodeResults($baseline['results'] ?? null),
+            ];
+
+            if (($baseline['complete'] ?? null) === true) {
+                $baselines[$branch]['complete'] = true;
+            }
+        }
+
+        return $baselines;
+    }
+
+    /**
+     * @return array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>
+     */
+    private static function decodeResults(mixed $section): array
+    {
+        if (! is_array($section)) {
+            return [];
+        }
+
+        $results = [];
+
+        foreach ($section as $key => $entry) {
+            $testId = (string) $key;
+
+            if ($testId === '') {
+                continue;
+            }
+            if (! is_array($entry)) {
+                continue;
+            }
+            if (! is_int($entry['status'] ?? null)) {
+                continue;
+            }
+
+            $time = $entry['time'] ?? null;
+
+            $result = [
+                'status' => $entry['status'],
+                'message' => is_string($entry['message'] ?? null) ? $entry['message'] : '',
+                'time' => is_int($time) || is_float($time) ? (float) $time : 0.0,
+            ];
+
+            if (is_int($entry['assertions'] ?? null)) {
+                $result['assertions'] = $entry['assertions'];
+            }
+
+            if (is_string($entry['file'] ?? null) && $entry['file'] !== '') {
+                $result['file'] = $entry['file'];
+            }
+
+            $results[$testId] = $result;
+        }
+
+        return $results;
     }
 
     /**
