@@ -5,20 +5,6 @@ declare(strict_types=1);
 namespace Tests\Fixtures\Tia;
 
 /**
- * What one run did to the graph.
- *
- * The three tiers a run may respect, from the conformance matrix:
- *
- * - COMPLETE — may change everything.
- * - RESULTS-ONLY — may change only `baselines[<branch>].results` for tests that
- *   actually ran. It may never remove an entry, nor move `sha`, `tree`,
- *   `edges`, `files` or `fingerprint`.
- * - HARD-SUPPRESSED — may change nothing at all.
- *
- * {@see self::writtenCount()} is the load-bearing measurement, and the reason
- * {@see Project::sentinel()} exists: without falsified cached values there is no
- * way to tell "wrote the same values back" from "wrote nothing".
- *
  * @internal
  */
 final readonly class GraphDelta
@@ -42,9 +28,6 @@ final readonly class GraphDelta
         return $this->before !== null && $this->after === null;
     }
 
-    /**
-     * Result entries whose stored values actually moved.
-     */
     public function writtenCount(): int
     {
         $written = 0;
@@ -71,9 +54,6 @@ final readonly class GraphDelta
         return $written;
     }
 
-    /**
-     * Result entries that appeared.
-     */
     public function added(): int
     {
         $added = 0;
@@ -88,9 +68,6 @@ final readonly class GraphDelta
         return $added;
     }
 
-    /**
-     * Result entries that were pruned.
-     */
     public function removed(): int
     {
         $removed = 0;
@@ -106,9 +83,6 @@ final readonly class GraphDelta
     }
 
     /**
-     * The baseline keys after the run — the headline signal for the
-     * default-branch rows, where a phantom key is the defect.
-     *
      * @return array<int, string>
      */
     public function branchKeys(): array
@@ -129,10 +103,6 @@ final readonly class GraphDelta
         return $this->branchKeysBefore() !== $this->branchKeys();
     }
 
-    /**
-     * Whether the named branch's baseline is byte-identical — how a row proves
-     * the fallback is read-only.
-     */
     public function baselineUntouched(string $branch): bool
     {
         return ($this->baselines($this->before)[$branch] ?? null)
@@ -149,11 +119,6 @@ final readonly class GraphDelta
         return array_any($this->branchKeys(), fn (string $branch) => $this->baselineField($branch, 'tree', $this->before) !== $this->baselineField($branch, 'tree', $this->after));
     }
 
-    /**
-     * Compares edges by the file paths they resolve to, not by file id: ids are
-     * an implementation detail that shifts whenever `files` is rebuilt in a
-     * different order.
-     */
     public function edgesMoved(): bool
     {
         return $this->edgeSets($this->before) !== $this->edgeSets($this->after);
@@ -184,17 +149,11 @@ final readonly class GraphDelta
         return $this->branchKeysMoved();
     }
 
-    /**
-     * Nothing moved at all.
-     */
     public function isHardSuppressed(): bool
     {
         return $this->before === $this->after;
     }
 
-    /**
-     * Results may have moved for tests that ran; nothing structural did.
-     */
     public function isResultsOnly(): bool
     {
         return ! $this->graphWasCreated()
@@ -206,9 +165,6 @@ final readonly class GraphDelta
             && $this->added() === 0;
     }
 
-    /**
-     * A one-line verdict, for failure messages.
-     */
     public function summary(): string
     {
         if ($this->graphWasCreated()) {

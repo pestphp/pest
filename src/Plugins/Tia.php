@@ -63,11 +63,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     private const string BASELINE_PATH_OPTION = '--baseline';
 
-    /**
-     * Set by the mutation plugin on the subprocess running a single mutant,
-     * and nowhere else. Its own `--mutate` flag is popped before the argv is
-     * handed to that subprocess, so the flag cannot be matched instead.
-     */
     private const string ENV_MUTATION_TESTING = 'PEST_MUTATION_TESTING';
 
     private const string ENV_TIA = 'PEST_TIA';
@@ -102,19 +97,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     private const string PIGGYBACK_COVERAGE_GLOBAL = 'TIA_PIGGYBACK_COVERAGE';
 
-    /**
-     * The parent's resolved fallback branch, handed to the workers.
-     *
-     * A worker cannot resolve it for itself: the restarters run before
-     * `tests/Pest.php` is loaded, so a `defaultBranch()` declared there is
-     * invisible to it — and autodetecting again would spend a git call per
-     * worker to reach the answer the parent already has.
-     */
     private const string FALLBACK_BRANCH_GLOBAL = 'TIA_FALLBACK_BRANCH';
 
-    /**
-     * The branch assumed when a repository cannot name its own default.
-     */
     private const string DEFAULT_BRANCH = 'main';
 
     /**
@@ -138,19 +122,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     ];
 
     /**
-     * PHPUnit flags that make this run produce a coverage report.
-     *
-     * Pest's own `--coverage` is tracked by the Coverage plugin, but a raw
-     * PHPUnit report flag never reaches it. A run that reports coverage must
-     * not be narrowed to the affected tests — the report would then describe a
-     * subset of the suite — and must let PHPUnit own the coverage driver rather
-     * than have the TIA recorder clear it mid-collection.
-     *
-     * Flags that only shape collection or an existing report — `--coverage-filter`,
-     * `--path-coverage`, `--warm-coverage-cache`, `--only-summary-for-coverage-text`,
-     * `--show-uncovered-for-coverage-text`, `--disable-coverage-ignore` — produce no
-     * report on their own, so they are deliberately absent.
-     *
      * @var list<string>
      */
     private const array COVERAGE_REPORT_FLAGS = [
@@ -160,24 +131,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     ];
 
     /**
-     * Flags that narrow this run to a subset of the suite.
-     *
-     * Only user-supplied, per-run narrowing belongs here. A filter that is
-     * always in force — `<groups>` in phpunit.xml, or a plugin registering a
-     * test case filter from `boot()` — applies equally to the runs that build
-     * the baseline, so it does not make this run narrower than the baseline
-     * and must not disable baseline writes.
-     *
-     * `--shard` is rewritten to `--filter` before this plugin sees the
-     * arguments, so it is covered here too. The `bin/pest`-only flags are
-     * stripped from the handled arguments, so they are matched against the
-     * original argv instead.
-     *
-     * Flags that cut a run short instead of narrowing it — `--bail`, `--retry`,
-     * `--stop-on-*` — do not belong here either. They only narrow the run when
-     * something actually fails, and that is not known until it is over, so they
-     * are handled by stoppedEarly() from addOutput().
-     *
      * @var list<string>
      */
     private const array PARTIAL_SELECTION_FLAGS = [
@@ -187,15 +140,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         '--assignee', '--issue', '--ticket', '--pr', '--pull-request',
     ];
 
-    /**
-     * Options that cannot be combined with Tia mode.
-     *
-     * `--covers` and `--uses` select on coverage metadata Tia does not model,
-     * so they resolve to no tests at all rather than to the ones the user meant.
-     * `--random-order-seed` exits non-zero on its own, with or without Tia.
-     * Either way the run cannot honour both things it was asked for, so it says
-     * so instead of silently dropping Tia and running something else.
-     */
     private const array UNSUPPORTED_OPTIONS = [
         '--covers', '--uses', '--random-order-seed',
     ];
@@ -214,46 +158,16 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     private array $cachedAssertionsByTestId = [];
 
     /**
-     * Recorded durations of the tests this run replayed rather than executed.
-     *
-     * A replayed test never runs, so the duration PHPUnit reports for it is the
-     * cost of replaying it — near zero. Writing that back would decay every
-     * cached timing toward zero one run at a time.
-     *
      * @var array<string, float>
      */
     private array $cachedTimeByTestId = [];
 
     private ?Graph $replayGraph = null;
 
-    /**
-     * The baseline this run reads from and writes to.
-     *
-     * The repository's default branch is only the fallback for a checkout whose
-     * branch cannot be read — a detached HEAD. It is also the branch every
-     * other baseline falls back to reading, so writing there by accident
-     * corrupts the shared baseline. Resolved through resolveBranch() rather
-     * than at every use site, because the git call it needs is not free.
-     */
     private string $branch = self::DEFAULT_BRANCH;
 
-    /**
-     * The baseline branches with none of their own read from.
-     *
-     * Read-only, and the whole point of the exercise: without it the first run
-     * on every new branch re-runs a suite whose results the default branch
-     * already holds.
-     */
     private string $fallbackBranch = self::DEFAULT_BRANCH;
 
-    /**
-     * Whether anything actually named the branch above.
-     *
-     * When nothing did, the value is a guess, and a guess is what the TIA path
-     * refuses to run on: an unresolved fallback reads no baseline at all, which
-     * looks exactly like a hit in the output. Runs that never asked for TIA
-     * still have to write somewhere, so the guess stands for them.
-     */
     private bool $fallbackBranchResolved = false;
 
     private bool $branchResolved = false;
@@ -276,22 +190,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     private bool $filteredMode = false;
 
-    /**
-     * Bars this run from touching the graph at all, results included.
-     *
-     * Reserved for runs whose results describe something other than the code
-     * in the working tree, which is nothing the baseline can ever use.
-     */
     private bool $writesSuppressed = false;
 
-    /**
-     * Narrows this run's writes to the results of the tests it actually ran.
-     *
-     * A run that covered only part of the suite still learns something true
-     * about the tests it did reach. What it cannot do is speak for the rest:
-     * pruning results, advancing the recorded sha and replacing the edge map
-     * all claim the whole suite reported, so they stay behind a complete run.
-     */
     private bool $resultsOnlyWrites = false;
 
     /** @var array<int, string> */
@@ -342,8 +242,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         $graph = Graph::decode($json, $projectRoot);
 
-        // Every read of a baseline goes through a graph loaded here, so this is
-        // the one place the resolved fallback has to reach.
         $graph?->setFallbackBranch($this->fallbackBranch);
 
         return $graph;
@@ -388,19 +286,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         return ! self::argumentPresent('--ci', $arguments);
     }
 
-    /**
-     * Whether the workers of this run record their own coverage edges.
-     *
-     * Stamped by the parent before paratest spawns anything, because a worker
-     * cannot tell on its own: its argv carries no `--tia`, and the restarters
-     * run before `tests/Pest.php` is loaded, so {@see self::isEnabledForRun()}
-     * sees an empty {@see WatchPatterns} too. Left unanswered, pcov keeps its
-     * default scope — a single auto-detected source directory — and every edge
-     * outside it, test self-edges included, is silently dropped.
-     *
-     * Piggyback runs are excluded: their edges come from PHPUnit's own coverage
-     * session, so widening pcov there costs time and buys nothing.
-     */
     public static function recordsEdgesInWorkers(): bool
     {
         return (string) Parallel::getGlobal(self::RECORDING_GLOBAL) === '1'
@@ -541,11 +426,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $partial = ! $isWorker && ($hasExplicitPath || $this->hasPartialSelection($arguments));
         $disabled = $disabled || $partial;
 
-        // A mutation subprocess runs the suite against source the mutation
-        // plugin has deliberately broken. Its failures describe the mutant, not
-        // the working tree, so unlike every other narrowed run there is nothing
-        // in its results worth keeping. The parent `--mutate` run is untouched
-        // by this: it runs the whole suite against real source.
         if (getenv(self::ENV_MUTATION_TESTING) !== false) {
             $this->writesSuppressed = true;
         }
@@ -566,18 +446,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         if ($disabled) {
             if ($partial) {
-                // TIA cannot choose what runs here — the user already did — but
-                // the tests they picked still report honestly, so their results
-                // are kept and everything that would speak for the excluded ones
-                // is not. `--no-tia` needs none of this: it still runs the whole
-                // suite, so it remains a complete run.
                 $this->resultsOnlyWrites = true;
 
-                // `$this->filteredMode` counts as asking for it: reaching here
-                // means the narrowing came from the command line while filtered
-                // mode came from the environment or the config, and a run that
-                // silently declines what the config asked for is the one most
-                // in need of the explanation.
                 if ($cliEnabled || $freshRequested || $this->forceRefetch || $this->filteredMode) {
                     $this->output->writeln('');
                     $this->renderChild('TIA does not apply to partial runs — running the selected tests directly.');
@@ -621,11 +491,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             $this->flushWorkerReplay();
         }
 
-        // Both only ever set for the parent — addOutput() returns early in
-        // workers, whose partials are ephemeral and only reach the baseline if
-        // the parent consumes them. Everything this method goes on to write is
-        // whole-suite by nature — the edge map above all — so a narrowed run
-        // stops here too, its results already persisted by addOutput().
         if ($this->writesSuppressed || $this->resultsOnlyWrites) {
             $this->recorder->reset();
             $this->coverageCollector->reset();
@@ -722,20 +587,12 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return $exitCode;
         }
 
-        // `->only()` narrows the executed set exactly like `--filter` does, but
-        // is only knowable once the suite has been collected — too late to turn
-        // TIA off up front. Sampled in addOutput() because Only's lock file is
-        // already gone by the time terminate() runs (its plugin terminates
-        // first). Whether the run was cut short is likewise only knowable now.
         if (Only::isEnabled() || $this->stoppedEarly()) {
             $this->resultsOnlyWrites = true;
         }
 
         $this->reportMissingWorkerDrivers();
 
-        // Runs before the checks below: it is what fills the parent's result
-        // collector in parallel, and a worker that stopped early narrows the
-        // whole run.
         if (Parallel::isEnabled()) {
             $this->mergeWorkerReplayPartials();
         }
@@ -900,12 +757,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         $this->resolveBranch($projectRoot);
 
-        // After resolveBranch(), so a directory that is no repository at all
-        // still reports the missing git dependency rather than an unresolved
-        // default branch. Nothing named the branch every other baseline reads
-        // through, so every new branch would re-run the whole suite while the
-        // output called it a hit. A repository with no remote is the likeliest
-        // reason and gets said out loud.
         if (! $this->fallbackBranchResolved) {
             Panic::with(new ChangedFiles($projectRoot)->hasRemote()
                 ? new TiaRequiresDefaultBranch
@@ -948,11 +799,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             }
         }
 
-        // Both of these belong to the coverage cache, which only Pest's own
-        // `--coverage` ever writes or merges. A raw PHPUnit report flag takes
-        // the piggyback path — it must not drive the driver itself — but must
-        // not leave a marker behind, nor force a recording run to prime a cache
-        // that nothing on its path will fill.
         $coverageCacheOwned = $this->piggybackCoverage && $this->pestCoverageActive();
 
         if ($coverageCacheOwned) {
@@ -1157,9 +1003,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         if (! Parallel::isEnabled()) {
             if ($canRefreshReplayEdges) {
-                // Piggyback runs read PHPUnit's own coverage session. Driving
-                // the driver alongside it would clear the data PHPUnit is about
-                // to read, so only link tracking may run here.
                 if ($this->piggybackCoverage) {
                     $this->recorder->activateLinkTracking();
                 } else {
@@ -1329,9 +1172,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $recorder->activate();
         $this->recordingActive = true;
 
-        // Why this run is rebuilding is worth saying whenever there is a reason
-        // for it — the parallel and piggyback branches above already do. Runs
-        // that are simply recording for the first time have nothing to explain.
         if ($this->driftLabel !== null || $this->freshGraphReason !== null) {
             $this->output->writeln('');
             $this->renderFreshGraph();
@@ -1347,8 +1187,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     private function renderFreshGraph(): void
     {
         if ($this->driftLabel === null && $this->freshGraphReason !== null) {
-            // The reason is only ever set for a run that keeps its graph and
-            // records alongside it, so "fresh graph" would be a lie here.
             $headline = sprintf('Experimental TIA mode enabled / %s.', $this->freshGraphReason);
         } else {
             $headline = 'Experimental TIA mode enabled / fresh graph';
@@ -1444,12 +1282,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return;
         }
 
-        // A replayed result carries the duration PHPUnit measured for a test
-        // that never ran — near zero. Unlike the assertion count, which the
-        // replay injects into the result itself, the cached duration lives only
-        // in this process: the parent replayed nothing of its own, so once the
-        // partial is written the real value is unrecoverable. Launder it here
-        // and the parent's verbatim read is correct by construction.
         foreach ($results as $testId => $result) {
             $results[$testId]['time'] = $this->resultTime($testId, $result['time']);
         }
@@ -1459,8 +1291,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             'replayed' => $this->replayedCount,
             'affected' => $this->affectedCount,
             'executed' => $this->executedCount,
-            // Only the worker knows it stopped early — the parent runs no tests
-            // of its own, so its own check would always come back clean.
             'truncated' => $this->stoppedEarly(),
         ], JSON_UNESCAPED_SLASHES);
 
@@ -1498,9 +1328,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
                 continue;
             }
 
-            // One worker stopping early leaves the whole suite incomplete: the
-            // tests it never reached are missing from the merged result set just
-            // as if they had been filtered out.
             if (($decoded['truncated'] ?? false) === true) {
                 $this->resultsOnlyWrites = true;
             }
@@ -1728,10 +1555,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         return $coverage;
     }
 
-    /**
-     * The duration to record for a test: its own, unless it was replayed rather
-     * than executed, in which case the duration it was recorded with stands.
-     */
     private function resultTime(string $testId, float $time): float
     {
         return $this->cachedTimeByTestId[$testId] ?? $time;
@@ -1773,13 +1596,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $collector->reset();
     }
 
-    /**
-     * Folds the run's results into the existing graph.
-     *
-     * An incomplete run passes `$complete: false`, which keeps the additive
-     * half — the results of the tests it did run — and drops the half that
-     * speaks for the suite as a whole.
-     */
     private function snapshotTestResults(bool $markKnownTestFiles = false, bool $complete = true): void
     {
         /** @var ResultCollector $collector */
@@ -1802,23 +1618,12 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         try {
             $this->resolveBranch($projectRoot);
         } catch (MissingDependency) {
-            // This run never asked for TIA, so a missing git must not turn it
-            // into a failure the way it does on the TIA path. Writing to the
-            // fallback baseline is the lesser of the two evils.
         }
 
-        // The graph above was loaded before the branch was known — this path
-        // only writes, but a graph carrying an unresolved fallback is the exact
-        // bug this whole change is about.
         $graph->setFallbackBranch($this->fallbackBranch);
 
         $touchedFiles = [];
 
-        // Whether this run is the one that records the edges its results will be
-        // invalidated through. A recording run's edges are written after this
-        // (terminate() runs last), and a parallel one's arrive with the worker
-        // partials that ask for $markKnownTestFiles — either way the graph on
-        // disk cannot be asked yet, so the run is taken at its word.
         $recordsEdges = $complete && ($markKnownTestFiles || $this->recordingActive);
 
         foreach ($results as $testId => $result) {
@@ -1832,12 +1637,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
                 $touchedFiles[$file] = true;
             }
 
-            // A result is only ever invalidated through the edges of the test
-            // that produced it, so one recorded for a test the graph has no
-            // edges for could never be invalidated again — it would be replayed
-            // as settled however far the code around it moved. A run that
-            // records no edges leaves such a test exactly as unknown as it
-            // found it, whether or not it ran the whole suite.
             if (! $recordsEdges && (! is_string($file) || ! $graph->knowsTest($file))) {
                 continue;
             }
@@ -1857,8 +1656,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             $graph->markKnownTestFiles(array_keys($touchedFiles));
         }
 
-        // Pruning reads the absence of a test from this run as the test being
-        // gone. That only holds if every test was invited to report.
         if ($complete) {
             $graph->pruneStaleResults($this->branch, array_keys($touchedFiles), array_keys($results));
         }
@@ -1898,15 +1695,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         return null;
     }
 
-    /**
-     * Whether this run produces a coverage report, however it was asked for.
-     *
-     * The original argv, not the handled arguments: Pest's own Coverage plugin
-     * appends `--coverage-php <path>` to those and runs before this one, and a
-     * paratest worker's arguments always carry it too. `bin/worker.php` never
-     * hands over the original argv, so a worker sees `[]` here and keeps taking
-     * this from {@see self::PIGGYBACK_COVERAGE_GLOBAL} instead.
-     */
     private function coverageReportActive(): bool
     {
         if ($this->pestCoverageActive()) {
@@ -1916,10 +1704,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         return array_any(self::COVERAGE_REPORT_FLAGS, fn (string $flag): bool => $this->hasArgument($flag, $this->originalArguments));
     }
 
-    /**
-     * Whether Pest's own `--coverage` was given — the only entry point that
-     * writes the coverage cache these two flags read and clean up.
-     */
     private function pestCoverageActive(): bool
     {
         $coverage = Container::getInstance()->get(Coverage::class);
@@ -1929,11 +1713,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     }
 
     /**
-     * Panics when the run asks for Tia alongside an option Tia cannot honour.
-     *
-     * Checked against the original argv as well, because `bin/pest` consumes
-     * some of these itself before PHPUnit ever sees them.
-     *
      * @param  array<int, string>  $arguments
      */
     private function guardUnsupportedOptions(array $arguments): void
@@ -1952,11 +1731,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     }
 
     /**
-     * Whether a selection-narrowing flag was given, either among the arguments
-     * PHPUnit receives or — for the flags `bin/pest` consumes itself — among
-     * the original argv. Explicit path arguments and `->only()` are detected
-     * separately.
-     *
      * @param  array<int, string>  $arguments
      */
     private function hasPartialSelection(array $arguments): bool
@@ -1974,36 +1748,11 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         return false;
     }
 
-    /**
-     * Whether the run stopped before reaching every test it had queued.
-     *
-     * Covers `--bail`, `--retry` and every `--stop-on-*` flag, the equivalent
-     * `phpunit.xml` attributes, and an interrupted run — none of which narrow
-     * the selection up front, so hasPartialSelection() cannot see them. The
-     * tests queued behind the defect that halted the run never reported, and
-     * folding what did report into the baseline prunes the cached results of
-     * their siblings in every file the run had already entered.
-     *
-     * Deliberately unguarded. Both callers run only once PHPUnit's
-     * configuration is registered — the kernel reads it unguarded itself just
-     * before dispatching addOutput(), and flushWorkerReplay() bails out unless
-     * the worker actually executed something. Swallowing a failure here would
-     * report every truncated run as complete, which is the corruption this
-     * guards against in the first place.
-     */
     private function stoppedEarly(): bool
     {
         return TestResultFacade::shouldStop();
     }
 
-    /**
-     * Resolves the baselines this run reads from and writes to, once.
-     *
-     * Results are written on runs where TIA itself took no part, and those
-     * never reach handleParent(). Without this the default would stand and
-     * every such run would write its results to `main`, whatever branch it
-     * actually ran on.
-     */
     private function resolveBranch(string $projectRoot): void
     {
         if ($this->branchResolved) {
@@ -2014,9 +1763,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         $changedFiles = new ChangedFiles($projectRoot);
 
-        // Resolved before the current branch, which throws where git is
-        // missing: the fallback is advisory, so a run that cannot name its
-        // branch at all should still carry the best answer available.
         $resolved = $this->resolveFallbackBranch($changedFiles);
 
         $this->fallbackBranchResolved = $resolved !== null;
@@ -2024,24 +1770,9 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         Parallel::setGlobal(self::FALLBACK_BRANCH_GLOBAL, $this->fallbackBranch);
 
-        // A detached HEAD has no branch of its own to write to. The default
-        // branch is the honest key there — it is the commit the checkout most
-        // likely sits on, and it keeps a phantom baseline from being minted
-        // under a branch name the repository never had.
         $this->branch = $changedFiles->currentBranch() ?? $this->fallbackBranch;
     }
 
-    /**
-     * The branch every other baseline falls back to reading, or null when
-     * nothing in the checkout can name it.
-     *
-     * Ordered by how much the source actually knows. Configuration first: it is
-     * the escape hatch for a repository whose git-side answers disagree with its
-     * branches. Then the CI provider, which states the answer outright where git
-     * is at its least informed. Then git itself. Then the recorded graph, whose
-     * single baseline can only have come from the branch this repository
-     * integrates on.
-     */
     private function resolveFallbackBranch(ChangedFiles $changedFiles): ?string
     {
         $inherited = Parallel::getGlobal(self::FALLBACK_BRANCH_GLOBAL);
@@ -2056,14 +1787,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             ?? $this->soleRecordedBranch();
     }
 
-    /**
-     * The one branch a recorded graph holds a baseline for.
-     *
-     * Last in the chain and deliberately narrow: with a single baseline on disk
-     * there is only one branch whose results can be read at all, so naming it is
-     * strictly better than resolving to a branch that holds nothing. Two or more
-     * baselines carry no such implication and are left alone.
-     */
     private function soleRecordedBranch(): ?string
     {
         $json = $this->state->read(self::KEY_GRAPH);
@@ -2098,11 +1821,15 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             if (str_starts_with($arg, '-')) {
                 continue;
             }
-            if ($index > 0) {
-                $previous = $arguments[$index - 1] ?? '';
-                if (in_array($previous, self::VALUE_TAKING_FLAGS, true)) {
-                    continue;
-                }
+
+            if ($index === 0) {
+                continue;
+            }
+
+            $previous = $arguments[$index - 1] ?? '';
+
+            if (in_array($previous, self::VALUE_TAKING_FLAGS, true)) {
+                continue;
             }
 
             $candidate = $this->resolveArgumentPath($arg, $projectRoot);
@@ -2111,14 +1838,32 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
                 continue;
             }
 
-            foreach ($testPaths as $testPath) {
-                if ($candidate === $testPath || str_starts_with($candidate, $testPath.DIRECTORY_SEPARATOR)) {
-                    return true;
-                }
+            if ($this->narrowsSuite($candidate, $testPaths)) {
+                return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * @param  array<int, string>  $testPaths
+     */
+    private function narrowsSuite(string $candidate, array $testPaths): bool
+    {
+        foreach ($testPaths as $testPath) {
+            if ($candidate === $testPath || str_starts_with($candidate, $testPath.DIRECTORY_SEPARATOR)) {
+                return true;
+            }
+        }
+
+        foreach ($testPaths as $testPath) {
+            if (str_starts_with($testPath, $candidate.DIRECTORY_SEPARATOR)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function resolveArgumentPath(string $arg, string $projectRoot): ?string

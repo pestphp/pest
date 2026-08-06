@@ -219,16 +219,6 @@ final readonly class ChangedFiles
         return $branch === '' || $branch === 'HEAD' ? null : $branch;
     }
 
-    /**
-     * The repository's default branch — the one every other branch's baseline
-     * falls back to reading.
-     *
-     * Advisory, unlike {@see self::currentBranch()}: a repository that cannot
-     * answer the question is not a broken repository. A remote-less checkout
-     * has no `origin/HEAD`, and plenty of CI checkouts never run
-     * `git remote set-head`, so every step here fails soft and the caller is
-     * left to pick its own default.
-     */
     public function defaultBranch(): ?string
     {
         $head = $this->gitOutput(['git', 'symbolic-ref', '--short', 'refs/remotes/origin/HEAD']);
@@ -241,10 +231,6 @@ final readonly class ChangedFiles
             }
         }
 
-        // `init.defaultBranch` is a setting of the machine, not of the
-        // repository — it names what `git init` would have called the first
-        // branch here, which is worth nothing once the repository disagrees.
-        // Taken only when a branch by that name actually exists.
         $configured = $this->gitOutput(['git', 'config', '--get', 'init.defaultBranch']);
 
         if ($configured === null) {
@@ -257,12 +243,6 @@ final readonly class ChangedFiles
         return $exists ? $configured : null;
     }
 
-    /**
-     * Whether the repository has any remote configured.
-     *
-     * Advisory like {@see self::defaultBranch()} — a `git` that cannot answer
-     * is reported as "no remote", and the caller decides what that means.
-     */
     public function hasRemote(): bool
     {
         return $this->gitOutput(['git', 'remote']) !== null;

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Fixtures\Tia;
 
 use FilesystemIterator;
-use Pest\Factories\TestCaseFactory;
 use Pest\Plugins\Tia;
 use Pest\Plugins\Tia\ChangedFiles;
 use Pest\Plugins\Tia\FileState;
@@ -19,28 +18,11 @@ use RuntimeException;
 use Symfony\Component\Process\Process;
 
 /**
- * A throwaway Pest project the TIA scenario tests drive.
- *
- * Two facts about Pest shape everything here:
- *
- * 1. `bin/pest` derives the project root from **the autoloader it finds**, not
- *    from the working directory — `dirname($autoloadPath, 2)`. So the project
- *    owns a real `vendor/autoload.php` and a real copy of `bin/pest` at the path
- *    a composer install would have put them. A symlinked `vendor` would resolve
- *    `__DIR__` straight back to the Pest repository, and every scenario would
- *    silently measure the wrong project.
- * 2. TIA cannot *record* without pcov or Xdebug, and CI has neither. So a
- *    scenario never records: {@see self::seed()} writes the graph a recording
- *    run would have written, and the run under test exercises the read path.
- *
  * @internal
  */
 final class Project
 {
     /**
-     * Test file → the source files a recording run would have linked it to. The
-     * self-edge every test file gets is added on top of these.
-     *
      * @var array<string, array<int, string>>
      */
     public const array EDGES = [
@@ -50,8 +32,6 @@ final class Project
     ];
 
     /**
-     * Test file → the descriptions it declares, in declaration order.
-     *
      * @var array<string, array<int, string>>
      */
     public const array TESTS = [
@@ -60,15 +40,9 @@ final class Project
         'tests/Feature/CoversCalculatorTest.php' => ['adds within a feature test', 'subtracts within a feature test'],
     ];
 
-    /**
-     * Every test in the fixture suite.
-     */
     public const int TOTAL_TESTS = 6;
 
     /**
-     * Every project scaffolded so far, so a row cannot leak one by failing
-     * before its own cleanup.
-     *
      * @var array<int, self>
      */
     private static array $created = [];
@@ -85,13 +59,6 @@ final class Project
      */
     private array $extraPaths = [];
 
-    /**
-     * The root whose graph this project reads and writes.
-     *
-     * Its own, except where a row seeds a worktree: a worktree's `.git` is a
-     * file rather than a directory, so {@see Storage} cannot read the remote
-     * from it and resolves a storage key of its own.
-     */
     private string $graphRoot;
 
     private function __construct(public readonly string $path)
@@ -99,14 +66,6 @@ final class Project
         $this->graphRoot = $path;
     }
 
-    /**
-     * Scaffolds a project whose default branch is `$branch`, and hands it back
-     * checked out there.
-     *
-     * The repository is realistic on purpose: it has an `origin`, and an
-     * `origin/HEAD` naming `$branch`, which is what a checkout of a real project
-     * looks like and what the default branch is autodetected from.
-     */
     public static function make(string $branch = 'master', ?string $overlay = null): self
     {
         $project = self::scaffold($overlay);
@@ -118,9 +77,6 @@ final class Project
         return $project;
     }
 
-    /**
-     * Destroys every project scaffolded so far. Belongs in an `afterEach`.
-     */
     public static function destroyAll(): void
     {
         while (self::$created !== []) {
@@ -128,14 +84,6 @@ final class Project
         }
     }
 
-    /**
-     * A project that is not a git repository at all — for the rows that assert
-     * TIA still demands git, and that a plain run does not care.
-     *
-     * Lives in the system temp directory, so it is outside any enclosing
-     * repository, and owns a real `vendor` rather than a symlinked one, so its
-     * baseline key cannot collide with another fixture's.
-     */
     public static function withoutGit(?string $overlay = null): self
     {
         return self::scaffold($overlay);
@@ -151,12 +99,6 @@ final class Project
         return $relative === '' ? $this->path : $this->path.DIRECTORY_SEPARATOR.$relative;
     }
 
-    /**
-     * Overwrites a file in the project.
-     *
-     * Edits must be semantic: TIA hashes PHP at the AST level, so a
-     * comment-only change is not a change at all.
-     */
     public function write(string $relative, string $contents): void
     {
         $path = $this->path($relative);
@@ -171,14 +113,6 @@ final class Project
         }
     }
 
-    /**
-     * Adds a worktree for a new branch, scaffolded so `pest` can run in it, and
-     * returns its path.
-     *
-     * The graph is shared with the main checkout, which is the whole point: both
-     * resolve the same storage key, because {@see Storage} prefers the `origin`
-     * identity over the path.
-     */
     public function worktree(string $branch): string
     {
         $path = $this->path.'-worktree-'.preg_replace('/[^a-z0-9]+/i', '-', $branch);
@@ -190,18 +124,11 @@ final class Project
         return $path;
     }
 
-    /**
-     * Runs `pest` in the project and returns what happened.
-     */
     public function pest(string ...$arguments): PestResult
     {
         return $this->pestIn($this->path, ...$arguments);
     }
 
-    /**
-     * Runs `pest` in `$directory` — a worktree, say — against this project's
-     * graph.
-     */
     public function pestIn(string $directory, string ...$arguments): PestResult
     {
         return $this->pestWithEnvironment($directory, [], ...$arguments);
@@ -222,11 +149,6 @@ final class Project
                 'PARATEST' => '0',
                 'PAO_DISABLE' => '1',
                 'HOME' => $this->home(),
-                // Blanked for the same reason `GitRepo::ENV` blanks git's own
-                // config: the default branch a CI provider reports is the one
-                // *its* build is for. Pest's suite runs on GitHub Actions, so
-                // without this every scenario would autodetect Pest's default
-                // branch instead of the fixture's.
                 'GITHUB_EVENT_PATH' => '',
                 'CI_DEFAULT_BRANCH' => '',
                 ...$environment,
@@ -244,17 +166,6 @@ final class Project
     }
 
     /**
-     * Writes the graph a clean, green recording run on `$branch` would have
-     * written, and remembers it as the snapshot the next {@see self::delta()}
-     * compares against.
-     *
-     * Sentinelled by default: a row almost always wants to know which entries
-     * were written, and only a real recording run's values can answer that.
-     *
-     * `$failing` names descriptions to record as failures — a clean green run
-     * can never cache one, so a row that needs a cached failure to re-run has to
-     * be handed it.
-     *
      * @param  array<int, string>  $failing
      */
     public function seed(string $branch, bool $sentinel = true, array $failing = []): void
@@ -263,9 +174,6 @@ final class Project
     }
 
     /**
-     * Seeds the graph belonging to `$root` — a worktree, say, which resolves a
-     * storage key of its own.
-     *
      * @param  array<int, string>  $failing
      */
     public function seedFor(string $root, string $branch, bool $sentinel = true, array $failing = []): void
@@ -279,8 +187,6 @@ final class Project
         $graph->setFingerprint(Fingerprint::compute($root));
         $graph->setRecordedAtSha($branch, $sha);
 
-        // Hashes the tree as it stands, so the run under test sees nothing as
-        // changed — the same call the recording path makes.
         $graph->setLastRunTree($branch, $changedFiles->snapshotTree($changedFiles->since($sha) ?? []));
 
         $graph->markKnownTestFiles(array_keys(self::EDGES));
@@ -322,13 +228,6 @@ final class Project
         $sentinel ? $this->sentinel() : $this->snapshot();
     }
 
-    /**
-     * The id PHPUnit reports for a test in the fixture suite.
-     *
-     * Mirrors how Pest names generated test classes
-     * ({@see TestCaseFactory}): a wrong id here shows up as
-     * `0 replayed`, which every scenario asserts against.
-     */
     public static function testId(string $testFile, string $description): string
     {
         $basename = basename($testFile, '.php');
@@ -343,15 +242,6 @@ final class Project
         return 'P\\'.str_replace(DIRECTORY_SEPARATOR, '\\', $relative).'::'.Str::evaluable($description);
     }
 
-    /**
-     * Falsifies every cached value, so the next {@see self::delta()} can tell
-     * "wrote the same values back" from "wrote nothing".
-     *
-     * `assertions` is only ever falsified where it is already non-zero: risky,
-     * skipped and incomplete statuses are *derived* from "performed no
-     * assertions", so patching those would rewrite the status on replay and
-     * destroy the very discriminator this exists to provide.
-     */
     public function sentinel(): void
     {
         $graph = $this->graph();
@@ -376,8 +266,6 @@ final class Project
     }
 
     /**
-     * The decoded graph, or `null` when there is none.
-     *
      * @return array<string, mixed>|null
      */
     public function graph(): ?array
@@ -413,43 +301,21 @@ final class Project
         return is_file($this->graphDir().DIRECTORY_SEPARATOR.Tia::KEY_GRAPH);
     }
 
-    /**
-     * Remembers the graph as it stands now.
-     */
     public function snapshot(): void
     {
         $this->snapshot = $this->graph();
     }
 
-    /**
-     * What has happened to the graph since the last snapshot.
-     */
     public function delta(): GraphDelta
     {
         return new GraphDelta($this->snapshot, $this->graph());
     }
 
-    /**
-     * Writes the `vendor` a composer install would have produced.
-     *
-     * Pest is mirrored in at `vendor/pestphp/pest` rather than pointed at,
-     * because Pest locates things from where its own files sit:
-     * `bin/pest` finds the project root by walking up from the autoloader it
-     * loads, and a parallel run picks its worker binary — and with it the
-     * worker's project root — from the directory the runner class was loaded
-     * from. Deferring to the repository's copy would resolve both back to the
-     * Pest repository, and every scenario would quietly measure that instead.
-     *
-     * Hardlinked where the filesystem allows it, so the mirror costs almost
-     * nothing and can never drift from the working tree.
-     */
     public function scaffoldVendor(string $directory): void
     {
         $pestRoot = dirname(__DIR__, 3);
         $pest = $directory.'/vendor/pestphp/pest';
 
-        // `overrides`, `resources` and `stubs` come along because Pest loads
-        // them relative to `src` — the same list `BootExcludeList` walks.
         foreach (['src', 'overrides', 'resources', 'stubs'] as $tree) {
             self::mirror($pestRoot.'/'.$tree, $pest.'/'.$tree);
         }
@@ -460,21 +326,11 @@ final class Project
 
         self::mirror($pestRoot.'/composer.json', $pest.'/composer.json');
 
-        // Pest's own autoloader, with the mirrored copy taking precedence: the
-        // repository's `vendor` supplies PHPUnit, Symfony and the plugin
-        // packages, none of which care where they are loaded from.
         file_put_contents($directory.'/vendor/autoload.php', sprintf(
             "<?php\n\n\$loader = require %s;\n\$loader->addPsr4('Pest\\\\', __DIR__.'/pestphp/pest/src', true);\n\nreturn \$loader;\n",
             var_export($pestRoot.'/vendor/autoload.php', true),
         ));
 
-        // Invoking the binary directly skips composer's bin proxy, which is
-        // what would otherwise define `$GLOBALS['_composer_bin_dir']`. Without
-        // it `Pest\Plugin\Loader` looks for `vendor/bin/../pest-plugins.json`
-        // relative to the working directory — so that is where the plugin list
-        // goes, and mirroring the repository's keeps it in step with
-        // composer.json. `vendor/bin` has to exist for the `..` in that path to
-        // resolve, empty though it is.
         if (! is_dir($directory.'/vendor/bin') && ! @mkdir($directory.'/vendor/bin', 0755, true)) {
             throw new RuntimeException(sprintf('Unable to create [%s].', $directory.'/vendor/bin'));
         }
@@ -500,9 +356,6 @@ final class Project
     }
 
     /**
-     * `Storage` reads `HOME` from the environment, so the graph lands inside the
-     * throwaway project instead of the developer's real `~/.pest`.
-     *
      * @template TReturn
      *
      * @param  callable(): TReturn  $callback
@@ -529,8 +382,6 @@ final class Project
             throw new RuntimeException(sprintf('Unable to create [%s].', $path));
         }
 
-        // Realpathed because Pest realpaths its own project root, and macOS
-        // hands out a symlinked temp directory.
         $real = realpath($path);
 
         $project = new self($real === false ? $path : $real);
@@ -543,8 +394,6 @@ final class Project
             self::copy(__DIR__.'/overlays/'.$overlay, $project->path);
         }
 
-        // `ChangedFiles` asks git what changed, so anything the scaffold writes
-        // but the project does not own has to be invisible to it.
         $project->write('.gitignore', implode("\n", ['/vendor/', '/.home/', '/.phpunit.cache/', '']));
 
         $project->scaffoldVendor($project->path);
@@ -553,10 +402,6 @@ final class Project
         return $project;
     }
 
-    /**
-     * Mirrors a file or directory, hardlinking where the filesystem allows it
-     * and copying where it does not.
-     */
     private static function mirror(string $from, string $to): void
     {
         if (is_dir($from)) {

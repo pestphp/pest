@@ -4,12 +4,6 @@ declare(strict_types=1);
 
 use Tests\Fixtures\Tia\Project;
 
-/**
- * What the fallback is allowed to touch.
- *
- * Reading another branch's baseline must stay a read: writes belong to the
- * branch that ran, and a branch that has no name of its own must not mint one.
- */
 afterEach(function (): void {
     Project::destroyAll();
 });
@@ -20,8 +14,6 @@ test('narrows to the affected tests on a new branch', function (): void {
 
     $project->git()->switchTo('feature-x', new: true);
 
-    // Semantic, not cosmetic: PHP is hashed at the AST level, so a comment
-    // would not register as a change at all.
     $project->write('app/Calculator.php', <<<'PHP'
         <?php
 
@@ -50,8 +42,6 @@ test('narrows to the affected tests on a new branch', function (): void {
 
     $result = $project->pest('--tia');
 
-    // Two of the three test files cover `Calculator`; the third replays from the
-    // default branch's baseline.
     expect($result->affected())->toBe(4, $result->describe())
         ->and($result->replayed())->toBe(2, $result->describe())
         ->and($result->exitCode)->toBe(0, $result->describe());
@@ -60,18 +50,12 @@ test('narrows to the affected tests on a new branch', function (): void {
 test('filtered mode reads the fallback too', function (): void {
     $project = Project::make('master');
 
-    // A failure cached on the default branch. Filtered mode asks the graph which
-    // test files are due a re-run, and that read has to reach the fallback as
-    // well: without it a new branch sees nothing to do, reports green, and never
-    // re-runs the failure — on every subsequent invocation.
     $project->seed('master', failing: ['adds two numbers']);
 
     $project->git()->switchTo('feature-x', new: true);
 
     $result = $project->pest('--tia', '--filtered');
 
-    // Selection is by file, so the failure's two siblings in `CalculatorTest`
-    // come along; the other two test files stay out of the run entirely.
     expect($result->output)->toContain('from 1 previously unsuccessful test')
         ->and($result->output)->not->toContain('No affected tests found')
         ->and($result->tally())->toContain('2 passed');
@@ -99,8 +83,6 @@ test('a detached HEAD replays without minting a branch key', function (): void {
 
     $result = $project->pest('--tia');
 
-    // A detached HEAD has no branch of its own. The default branch is the
-    // honest key, and no phantom one appears beside it.
     expect($result->replayed())->toBe(Project::TOTAL_TESTS, $result->describe())
         ->and($result->uncached())->toBe(0, $result->describe())
         ->and($project->branchKeys())->toBe(['master']);

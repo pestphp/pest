@@ -205,15 +205,6 @@ final class WrapperRunner implements RunnerInterface
     }
 
     /**
-     * Widens pcov's instrumentation scope to the whole project for workers that
-     * record TIA edges.
-     *
-     * pcov's default scope is a single source directory it auto-detects, so
-     * `config/`, `routes/`, `bootstrap/` and every test's own file never reach
-     * the recorder — a worker-recorded graph selects a fraction of what a
-     * sequential one does. `pcov.directory` is only settable at startup, hence
-     * the command line rather than an `ini_set()` inside the worker.
-     *
      * @param  array<int, non-empty-string>  $parameters
      * @return array<int, non-empty-string>
      */

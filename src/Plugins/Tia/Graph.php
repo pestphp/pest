@@ -48,15 +48,6 @@ final class Graph
      */
     private array $baselines = [];
 
-    /**
-     * The baseline a branch with none of its own reads from.
-     *
-     * Only ever read from: a branch writes to its own key, so a fallback that
-     * leaked into the write path would corrupt the baseline every other branch
-     * depends on. Resolved once per run by the plugin — see
-     * {@see self::setFallbackBranch()} — because the git calls it takes are not
-     * free and the read path runs per test.
-     */
     private string $fallbackBranch = 'main';
 
     private readonly string $projectRoot;
@@ -704,15 +695,6 @@ final class Graph
         return array_keys($files);
     }
 
-    /**
-     * Whether any cached result due a re-run points at a test file that is not
-     * on disk — deleted, or never locatable in the first place (`eval()`'d code,
-     * a path outside the project).
-     *
-     * A filtered run cannot honour such an entry: it would select a file that
-     * collects no tests, so the run reports green without ever re-running the
-     * failure — and does so again on every subsequent invocation.
-     */
     public function hasUnlocatedTestsToRerun(string $branch, ?string $fallbackBranch = null): bool
     {
         $baseline = $this->baselineFor($branch, $fallbackBranch);
@@ -730,9 +712,6 @@ final class Graph
 
             $rel = $this->relative($file);
 
-            // Results are stored relative, so `relative()` answers "is this
-            // inside the project" without ever touching the filesystem. The
-            // stat is what tells a deleted test file apart from a live one.
             if ($rel === null || ! is_file($this->projectRoot.'/'.$rel)) {
                 return true;
             }
@@ -856,13 +835,7 @@ final class Graph
 
     /**
      * @param  array<string, array<int, string>>  $testToFiles
-     * @param  bool  $keepExisting  Leave already-recorded edge sets alone. For runs
-     *                              whose edges are piggybacked off a PHPUnit coverage
-     *                              session: that data is scoped by `<source>`, so it
-     *                              can only ever be narrower than what the TIA
-     *                              recorder sees — it never contains the test's own
-     *                              file, for one — and a narrower edge set silently
-     *                              stops selecting the tests it used to select.
+     * @param  bool  $keepExisting  Leave already-recorded edge sets alone.
      */
     public function replaceEdges(array $testToFiles, bool $keepExisting = false): void
     {
@@ -873,8 +846,6 @@ final class Graph
                 continue;
             }
 
-            // An empty set means "known, covers nothing", so piggyback data is
-            // still an improvement there — only a populated set is protected.
             if ($keepExisting && ($this->edges[$testRel] ?? []) !== []) {
                 continue;
             }
@@ -1483,13 +1454,6 @@ final class Graph
     }
 
     /**
-     * The branches a recorded graph holds baselines for, read straight from the
-     * encoded form.
-     *
-     * Answerable before the graph is hydrated because the default branch has to
-     * be resolved first: the fallback is what every hydrated graph reads its
-     * baselines through.
-     *
      * @return list<string>
      */
     public static function branchesIn(string $json): array

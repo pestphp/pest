@@ -67,8 +67,6 @@ describe('applyMigrationChanges()', function (): void {
 
 describe('rerun tracking', function (): void {
     beforeEach(function (): void {
-        // `hasUnlocatedTestsToRerun()` stats each recorded file to tell a
-        // deleted test apart from a live one, so the files have to exist.
         $this->projectRoot = sys_get_temp_dir().'/pest-tia-rerun-'.bin2hex(random_bytes(4));
         mkdir($this->projectRoot.'/tests/Feature', 0755, true);
 

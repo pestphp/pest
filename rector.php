@@ -28,8 +28,6 @@ return RectorConfig::configure()
     ->withSkip([
         __DIR__.'/src/Plugins/Parallel/Paratest/WrapperRunner.php',
         __DIR__.'/tests/Fixtures/Arch',
-        // Fixture suites are pinned by the TeamCity / JUnit snapshots, down to
-        // the line numbers — rewriting their source would break them.
         __DIR__.'/tests/Fixtures/Suites',
         ReturnNeverTypeRector::class,
         ArrowFunctionDelegatingCallToFirstClassCallableRector::class,

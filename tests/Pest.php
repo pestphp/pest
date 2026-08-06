@@ -19,8 +19,6 @@ pest()->in('PHPUnit/GlobPatternTests/SubFolder2/*AsPattern.php')->use(CustomTest
 
 pest()->in('Visual')->group('integration');
 
-// Every row scaffolds a throwaway project and runs `pest` in it as a
-// subprocess, which is far too slow for the unit suite.
 pest()->in('Features/Tia')->group('integration');
 
 // NOTE: global test value container to be mutated and checked across files, as needed

@@ -49,7 +49,7 @@ it('does not run user hooks when replaying cached skipped and incomplete results
         expect($storage->write(Tia::KEY_GRAPH, (string) $json))->toBeTrue();
 
         $process = new Process(
-            ['php', 'bin/pest', $fixture, '--tia'],
+            ['php', 'bin/pest', '--configuration', 'tests/Fixtures/Suites/TiaReplayHooks.xml', '--tia'],
             $projectRoot,
             [
                 'COLLISION_PRINTER' => 'DefaultPrinter',

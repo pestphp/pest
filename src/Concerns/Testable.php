@@ -286,9 +286,6 @@ trait Testable
         if ($replay !== ReplayType::None) {
             assert($status !== null);
 
-            // Marks the replay before the branches below throw, so `tearDown`
-            // short-circuits for every replayed result — the throwing branches
-            // never reach `parent::setUp`, so no user hook may run after them.
             $this->__replay = $replay;
 
             match ($replay) {

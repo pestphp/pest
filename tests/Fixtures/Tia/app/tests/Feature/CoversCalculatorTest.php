@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 use Fixture\App\Calculator;
 
-// A second test file over the same source file, so a `Calculator` edit narrows
-// to two of the three test files rather than to one.
 test('adds within a feature test', function (): void {
     expect((new Calculator)->add(10, 5))->toBe(15);
 });

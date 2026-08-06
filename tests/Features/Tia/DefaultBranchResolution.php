@@ -5,17 +5,11 @@ declare(strict_types=1);
 use Symfony\Component\Process\ExecutableFinder;
 use Tests\Fixtures\Tia\Project;
 
-/**
- * How the default branch gets named: declared in `tests/Pest.php`, autodetected
- * from the repository, or not answerable at all.
- */
 afterEach(function (): void {
     Project::destroyAll();
 });
 
 test('a declared default branch beats autodetection', function (): void {
-    // The repository autodetects `develop`, which holds no baseline. Only the
-    // declaration in `tests/Pest.php` can reach the `master` one.
     $project = Project::make('develop', overlay: 'configured-default-branch');
     $project->seed('master');
 
@@ -35,17 +29,12 @@ test('a declared default branch that does not exist degrades to a full run', fun
 
     $result = $project->pest('--tia');
 
-    // Nothing to fall back to, so everything runs — and no baseline is minted
-    // under the name that resolved to nothing.
     expect($result->uncached())->toBe(Project::TOTAL_TESTS, $result->describe())
         ->and($result->exitCode)->toBe(0, $result->describe())
         ->and($project->branchKeys())->toBe(['master', 'feature-x']);
 })->skipOnWindows();
 
 test('the CI provider names the default branch where the checkout cannot', function (): void {
-    // A CI checkout: `actions/checkout` fetches a single ref instead of cloning,
-    // so there is no `origin/HEAD` for git to read the default branch from. The
-    // event payload GitHub hands the job says it outright.
     $project = Project::make('master');
     $project->git()->unsetOriginHead();
     $project->seed('master');
@@ -80,10 +69,6 @@ test('GitLab names the default branch through its own variable', function (): vo
 })->skipOnWindows();
 
 test('a lone recorded baseline names the default branch', function (): void {
-    // Nothing left to ask: no `origin/HEAD`, no CI provider, and an
-    // `init.defaultBranch` that names a branch this repository does not have.
-    // The graph holds exactly one baseline, and it is the only one any branch
-    // could read — so it is the answer.
     $project = Project::make('master');
     $project->git()->unsetOriginHead();
     $project->git()->config('init.defaultBranch', 'main');
@@ -98,9 +83,6 @@ test('a lone recorded baseline names the default branch', function (): void {
 })->skipOnWindows();
 
 test('a default branch nothing can name is refused rather than guessed', function (): void {
-    // Same checkout as above, without the graph that answered it. Guessing here
-    // is what made this bug expensive: the guess reads no baseline at all, and
-    // the output calls that a hit.
     $project = Project::make('master');
     $project->git()->unsetOriginHead();
     $project->git()->config('init.defaultBranch', 'main');
@@ -116,9 +98,6 @@ test('a default branch nothing can name is refused rather than guessed', functio
 })->skipOnWindows();
 
 test('an init.defaultBranch naming a branch that exists is still trusted', function (): void {
-    // The setting is the machine's, not the repository's — worth taking only
-    // where the repository has a branch by that name. It does here, and with no
-    // graph on disk it is the only source left, so the run must not be refused.
     $project = Project::make('master');
     $project->git()->unsetOriginHead();
     $project->git()->config('init.defaultBranch', 'master');
@@ -141,16 +120,11 @@ test('a repository with no remote is refused rather than silently re-run', funct
 
     $result = $project->pest('--tia');
 
-    // Nothing can name the default branch, so every new branch would re-run the
-    // whole suite with no explanation. Saying so beats doing that quietly. The
-    // missing remote is the likeliest reason and gets named as such.
     expect($result->output)->toContain('Tia mode requires a repository with a remote.')
         ->and($result->exitCode)->toBe(1, $result->describe());
 })->skipOnWindows();
 
 test('a remote-less repository holding one baseline is not refused', function (): void {
-    // The refusal above exists to stop a guess, not to demand a remote for its
-    // own sake. With a baseline on disk there is nothing left to guess at.
     $project = Project::make('master');
 
     $project->git()->removeOrigin();
@@ -165,8 +139,6 @@ test('a remote-less repository holding one baseline is not refused', function ()
 })->skipOnWindows();
 
 test('a declared default branch stands in for a missing remote', function (): void {
-    // The escape hatch the refusal above points at: with the branch named by
-    // hand there is nothing left for a remote to answer.
     $project = Project::make('master', overlay: 'configured-default-branch');
 
     $project->git()->removeOrigin();
@@ -185,8 +157,6 @@ test('tia still requires git', function (): void {
 
     $result = $project->pest('--tia');
 
-    // The soft default-branch resolver runs before the branch is named, and it
-    // must not swallow this.
     expect($result->output)->toContain('The feature "Tia mode" requires "git".')
         ->and($result->exitCode)->not->toBe(0);
 })->skipOnWindows();
@@ -212,8 +182,6 @@ test('the default branch is resolved once per run, not once per test', function 
 
     expect($git)->not->toBeNull();
 
-    // A `git` first on `PATH` that records what it was asked before handing over
-    // to the real one.
     $log = $project->path('git-calls.log');
     $project->write('shim/git', implode("\n", [
         '#!/bin/sh',
