@@ -14,37 +14,32 @@ test('narrows to the affected tests on a new branch', function (): void {
 
     $project->git()->switchTo('feature-x', new: true);
 
-    $project->write('app/Calculator.php', <<<'PHP'
+    $project->write('tests/Unit/GreeterTest.php', <<<'PHP'
         <?php
 
         declare(strict_types=1);
 
-        namespace Fixture\App;
+        use Fixture\App\Greeter;
 
-        final class Calculator
-        {
-            public function add(int $a, int $b): int
-            {
-                return $a + $b;
-            }
+        test('greets a person', function (): void {
+            expect((new Greeter)->greet('Nuno'))->toBe('Hello, Nuno!');
+            expect((new Greeter)->greet('Nuno'))->toBeString();
+        });
 
-            public function subtract(int $a, int $b): int
-            {
-                return $a - $b;
-            }
-
-            public function multiply(int $a, int $b): int
-            {
-                return $a * $b;
-            }
-        }
+        test('greets the world', function (): void {
+            expect((new Greeter)->greet('world'))->toBe('Hello, world!');
+        });
         PHP);
 
     $result = $project->pest('--tia');
+    $delta = $project->delta();
 
-    expect($result->affected())->toBe(4, $result->describe())
-        ->and($result->replayed())->toBe(2, $result->describe())
-        ->and($result->exitCode)->toBe(0, $result->describe());
+    expect($result->affected())->toBe(2, $result->describe())
+        ->and($result->replayed())->toBe(4, $result->describe())
+        ->and($result->exitCode)->toBe(0, $result->describe())
+        ->and($project->branchKeys())->toBe(['master', 'feature-x'])
+        ->and($delta->baselineUntouched('master'))->toBeTrue($delta->summary())
+        ->and($delta->edgesMoved())->toBeFalse($delta->summary());
 })->skipOnWindows();
 
 test('filtered mode reads the fallback too', function (): void {

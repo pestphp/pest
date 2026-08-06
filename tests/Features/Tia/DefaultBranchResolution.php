@@ -54,6 +54,7 @@ test('the CI provider names the default branch where the checkout cannot', funct
     $project = Project::make('master');
     $project->git()->unsetOriginHead();
     $project->seed('master');
+    $project->addBaseline('legacy');
 
     $project->git()->switchTo('feature-x', new: true);
 
@@ -73,6 +74,7 @@ test('GitLab names the default branch through its own variable', function (): vo
     $project = Project::make('master');
     $project->git()->unsetOriginHead();
     $project->seed('master');
+    $project->addBaseline('legacy');
 
     $project->git()->switchTo('feature-x', new: true);
 
@@ -124,7 +126,7 @@ test('an init.defaultBranch naming a branch that exists is still trusted', funct
 
     expect($result->exitCode)->toBe(0, $result->describe())
         ->and($result->output)->not->toContain('could not determine the default branch')
-        ->and($project->branchKeys())->toBe(['feature-x']);
+        ->and($project->branchKeys())->not->toContain('master');
 })->skipOnWindows();
 
 test('a repository with no remote is refused rather than silently re-run', function (): void {

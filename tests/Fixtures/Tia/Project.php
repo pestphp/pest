@@ -260,6 +260,19 @@ final class Project
     }
 
     /**
+     * Adds a second, empty baseline key, so a lone recorded baseline can no
+     * longer stand in for the default branch.
+     */
+    public function addBaseline(string $branch): void
+    {
+        $this->mutateGraph(function (array $graph) use ($branch): array {
+            $graph['baselines'][$branch] = ['sha' => null, 'tree' => [], 'results' => []];
+
+            return $graph;
+        });
+    }
+
+    /**
      * @param  callable(array<string, mixed>): array<string, mixed>  $callback
      */
     public function mutateGraph(callable $callback): void
