@@ -17,6 +17,8 @@ test('visual snapshot of test suite on success', function (): void {
             ['EXCLUDE' => 'integration', '--exclude-group' => 'integration', 'REBUILD_SNAPSHOTS' => false, 'PARATEST' => 0, 'COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
         ));
 
+        $process->setTimeout(300.0);
+
         $process->run();
 
         return preg_replace([

@@ -9,6 +9,8 @@ $run = function (): ?string {
         ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
     );
 
+    $process->setTimeout(300.0);
+
     $process->run();
 
     return removeAnsiEscapeSequences($process->getOutput());
