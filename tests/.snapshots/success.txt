@@ -1707,6 +1707,12 @@
   ✓ a skip outranks an issue triggered on the way to it
   ✓ a suppressed issue is not recorded
 
+   PASS  Tests\Features\Tia\LivewireComponents
+  ✓ a changed single-file component selects only the tests that rendered it, across workers
+  ✓ a changed multi-file component class selects the tests that rendered the component
+  ✓ a deleted single-file component selects the tests that rendered it
+  ✓ a Blade file with no generated view still falls back to the watch pattern
+
    PASS  Tests\Features\Tia\PartialRunWriteTier
   ✓ a filtered run rewrites only the test that ran
   ✓ a filtered run under --tia announces that tia does not apply
@@ -2106,6 +2112,15 @@
   ✓ rerun tracking → it flags cached failures whose file is unknown
   ✓ applyBladeStaticChanges() → it maps an anonymous index component to the views that render it
   ✓ applyBladeStaticChanges() → it falls back to watch patterns for components with no matched usage
+  ✓ Livewire component views → it maps a changed component to generated views from different workers
+  ✓ Livewire component views → it maps documented SFC locations with dataset "default pages namespace"
+  ✓ Livewire component views → it maps documented SFC locations with dataset "default layouts namespace without emoji"
+  ✓ Livewire component views → it maps documented SFC locations with dataset "additional component location"
+  ✓ Livewire component views → it maps documented MFC locations using the component directory hash with dataset "default component location"
+  ✓ Livewire component views → it maps documented MFC locations using the component directory hash with dataset "default component location without emoji"
+  ✓ Livewire component views → it maps documented MFC locations using the component directory hash with dataset "index convention"
+  ✓ Livewire component views → it preserves direct view edges for class-based components
+  ✓ Livewire component views → it falls back to watch patterns when no generated view matches
   ✓ markKnownTestFiles() → it makes a test file with no edges known
   ✓ markKnownTestFiles() → it does not clobber edges of an already-known test file
   ✓ markKnownTestFiles() → it ignores paths outside the project root
@@ -2417,4 +2432,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1743 passed (3953 assertions)
+  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1756 passed (3974 assertions)

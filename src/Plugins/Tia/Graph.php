@@ -18,6 +18,19 @@ use PHPUnit\TextUI\Configuration\Registry;
  */
 final class Graph
 {
+    /**
+     * Livewire's generated-file directories, relative to its cache directory,
+     * mapped to the extension each one writes. Only these three land in the
+     * graph — scripts and styles are never rendered or executed by PHP.
+     *
+     * @var array<string, string>
+     */
+    private const array LIVEWIRE_GENERATED_PATHS = [
+        '/livewire/views/' => '.blade.php',
+        '/livewire/placeholders/' => '.blade.php',
+        '/livewire/classes/' => '.php',
+    ];
+
     /** @var array<int, string> */
     private array $files = [];
 
@@ -103,14 +116,15 @@ final class Graph
 
         $this->applyTestFileChanges($nonMigrationPaths, $affectedSet);
 
-        $staticallyHandledBlade = $this->applyBladeStaticChanges($nonMigrationPaths, $affectedSet);
+        $handledBlade = $this->applyBladeStaticChanges($nonMigrationPaths, $affectedSet)
+            + $this->applyLivewireComponentChanges($nonMigrationPaths, $affectedSet);
 
         $this->applyWatchPatternFallback(
             $nonMigrationPaths,
             $unparseableMigrations,
             $preciselyHandledPages,
             $sharedFilesResolved,
-            $staticallyHandledBlade,
+            $handledBlade,
             $affectedSet,
         );
 
@@ -490,11 +504,170 @@ final class Graph
     }
 
     /**
+     * Livewire compiles single- and multi-file components into generated files
+     * under the (per-worker) compiled view directory, so the graph only ever
+     * holds those generated paths — never the component source the developer
+     * edited. Reproduce Livewire's hash to walk that mapping backwards.
+     *
+     * @param  list<string>  $nonMigrationPaths
+     * @param  array<string, true>  $affectedSet
+     * @return array<string, true>
+     */
+    private function applyLivewireComponentChanges(array $nonMigrationPaths, array &$affectedSet): array
+    {
+        $generatedIds = $this->livewireGeneratedFileIds();
+
+        if ($generatedIds === []) {
+            return [];
+        }
+
+        /** @var array<int, array<string, true>> $sourcesByGeneratedId */
+        $sourcesByGeneratedId = [];
+
+        foreach ($nonMigrationPaths as $rel) {
+            foreach ($this->livewireSourcePaths($rel) as $sourcePath) {
+                foreach ($generatedIds[$this->livewireHash($sourcePath)] ?? [] as $id) {
+                    $sourcesByGeneratedId[$id][$rel] = true;
+                }
+            }
+        }
+
+        if ($sourcesByGeneratedId === []) {
+            return [];
+        }
+
+        $handled = [];
+
+        foreach ($this->edges as $testFile => $ids) {
+            foreach ($ids as $id) {
+                if (! isset($sourcesByGeneratedId[$id])) {
+                    continue;
+                }
+
+                $affectedSet[$testFile] = true;
+                $handled += $sourcesByGeneratedId[$id];
+            }
+        }
+
+        return $handled;
+    }
+
+    /**
+     * The component sources whose Livewire hash a changed file could carry: the
+     * file itself when it is a single-file component, and its directory when it
+     * sits inside a multi-file component — a class or asset sibling of the view
+     * is compiled under the directory's hash, not its own.
+     *
+     * @return list<string>
+     */
+    private function livewireSourcePaths(string $rel): array
+    {
+        $sourcePaths = [];
+
+        if (str_ends_with($rel, '.blade.php')) {
+            $sourcePaths[] = $rel;
+        }
+
+        $componentDirectory = dirname($rel);
+
+        if ($this->isLivewireMultiFileDirectory($componentDirectory)) {
+            $sourcePaths[] = $componentDirectory;
+        }
+
+        return $sourcePaths;
+    }
+
+    /**
+     * Mirrors Livewire\Finder\Finder::hasValidMultiFileComponentSource(): a
+     * multi-file component is a directory holding both "<name>.php" and
+     * "<name>.blade.php", where "<name>" is the directory name with the ⚡
+     * marker stripped, collapsed to "index" for the index convention.
+     */
+    private function isLivewireMultiFileDirectory(string $componentDirectory): bool
+    {
+        $directoryName = basename($componentDirectory);
+
+        if (str_contains($directoryName, 'index')) {
+            $directoryName = 'index';
+        }
+
+        $componentName = preg_replace('/⚡[\x{FE0E}\x{FE0F}]?/u', '', $directoryName);
+
+        if ($componentName === null || $componentName === '') {
+            return false;
+        }
+
+        $source = $this->projectRoot.'/'.$componentDirectory.'/'.$componentName;
+
+        return is_file($source.'.php') && is_file($source.'.blade.php');
+    }
+
+    /**
+     * Mirrors Livewire\Compiler\CacheManager::getHash(): the first eight hex
+     * digits of md5() over the source path relative to base_path(), leading
+     * separator included. Should Livewire ever change that scheme, nothing
+     * matches and the watch-pattern fallback takes over again.
+     */
+    private function livewireHash(string $sourcePath): string
+    {
+        return substr(md5(DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $sourcePath)), 0, 8);
+    }
+
+    /**
+     * Index every Livewire-generated file already in the graph by its hash. The
+     * same component yields one entry per parallel worker, so a hash maps to a
+     * list of ids rather than a single one.
+     *
+     * @return array<string, list<int>>
+     */
+    private function livewireGeneratedFileIds(): array
+    {
+        $generated = [];
+
+        foreach ($this->fileIds as $path => $id) {
+            $hash = $this->livewireGeneratedHash($path);
+
+            if ($hash === null) {
+                continue;
+            }
+
+            $generated[$hash][] = $id;
+        }
+
+        return $generated;
+    }
+
+    private function livewireGeneratedHash(string $path): ?string
+    {
+        $normalized = '/'.ltrim($path, '/');
+
+        foreach (self::LIVEWIRE_GENERATED_PATHS as $directory => $extension) {
+            if (! str_ends_with($normalized, $extension)) {
+                continue;
+            }
+
+            $position = strrpos($normalized, $directory);
+
+            if ($position === false) {
+                continue;
+            }
+
+            $hash = substr($normalized, $position + strlen($directory), -strlen($extension));
+
+            if (preg_match('/^[0-9a-f]{8}$/', $hash) === 1) {
+                return $hash;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * @param  list<string>  $nonMigrationPaths
      * @param  list<string>  $unparseableMigrations
      * @param  array<string, true>  $preciselyHandledPages
      * @param  array<string, true>  $sharedFilesResolved
-     * @param  array<string, true>  $staticallyHandledBlade
+     * @param  array<string, true>  $handledBlade
      * @param  array<string, true>  $affectedSet
      */
     private function applyWatchPatternFallback(
@@ -502,7 +675,7 @@ final class Graph
         array $unparseableMigrations,
         array $preciselyHandledPages,
         array $sharedFilesResolved,
-        array $staticallyHandledBlade,
+        array $handledBlade,
         array &$affectedSet,
     ): void {
         $unknownToGraph = $unparseableMigrations;
@@ -514,7 +687,7 @@ final class Graph
             if (isset($sharedFilesResolved[$rel])) {
                 continue;
             }
-            if (isset($staticallyHandledBlade[$rel])) {
+            if (isset($handledBlade[$rel])) {
                 continue;
             }
             if (! isset($this->fileIds[$rel])) {
