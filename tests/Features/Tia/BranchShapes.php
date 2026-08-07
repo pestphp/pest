@@ -192,6 +192,6 @@ test('a directory with no repository at all still asks for git', function (): vo
     $result = $project->pest('--tia');
 
     expect($result->exitCode)->toBe(1, $result->describe())
-        ->and($result->output)->toContain('requires "git"')
+        ->and($result->output)->toContain('requires [git]')
         ->and($project->graphExists())->toBeFalse();
 })->skipOnWindows();

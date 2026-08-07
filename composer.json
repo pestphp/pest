@@ -71,6 +71,7 @@
     "config": {
         "sort-packages": true,
         "preferred-install": "dist",
+        "process-timeout": 0,
         "allow-plugins": {
             "pestphp/pest-plugin": true
         }
