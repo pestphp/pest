@@ -301,7 +301,7 @@ final class Project
         $this->write('payload/graph.json', $payload);
 
         return [
-            'PATH' => $this->path('stub').PATH_SEPARATOR.(string) getenv('PATH'),
+            'PATH' => $this->path('stub').PATH_SEPARATOR.getenv('PATH'),
             'GH_STUB_MODE' => $mode,
             'GH_STUB_PAYLOAD' => $this->path('payload/graph.json'),
         ];

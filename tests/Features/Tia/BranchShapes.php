@@ -170,8 +170,8 @@ test('a project below the git repository root refuses to run and writes nothing'
 
     expect($result->exitCode)->toBe(1, $result->describe())
         ->and($result->output)->toContain('Tia mode requires the git repository root')
-        ->and(is_dir($project->path('.home/.pest')))->toBeFalse()
-        ->and(is_dir($nested.DIRECTORY_SEPARATOR.'.pest'))->toBeFalse();
+        ->and($project->path('.home/.pest'))->not->toBeDirectory()
+        ->and($nested.DIRECTORY_SEPARATOR.'.pest')->not->toBeDirectory();
 })->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
 
 test('a repository with no commits says so, and leaves plain runs alone', function (): void {

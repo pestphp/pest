@@ -1541,14 +1541,18 @@ final class Graph
 
         foreach ($this->baselines[$branch]['results'] as $testId => $result) {
             $file = $result['file'] ?? null;
-
-            if (! is_string($file) || $file === '') {
+            if (! is_string($file)) {
+                continue;
+            }
+            if ($file === '') {
                 continue;
             }
 
             $rel = $this->relative($file);
-
-            if ($rel === null || is_file($root.$rel)) {
+            if ($rel === null) {
+                continue;
+            }
+            if (is_file($root.$rel)) {
                 continue;
             }
 

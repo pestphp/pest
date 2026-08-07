@@ -133,7 +133,7 @@ test('no published baseline yet starts a cooldown, and a corrupt cooldown does n
 
     expect($first->exitCode)->toBe(0, $first->describe())
         ->and($first->output)->toContain('No baseline published yet')
-        ->and(is_file($project->graphDir().DIRECTORY_SEPARATOR.'fetch-cooldown.json'))->toBeTrue();
+        ->and($project->graphDir().DIRECTORY_SEPARATOR.'fetch-cooldown.json')->toBeFile();
 
     $discardGraph();
 

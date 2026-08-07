@@ -1583,6 +1583,10 @@
   ✓ a narrowed run does not reclaim anything
   ✓ a detached HEAD does not reclaim anything either
   ✓ the default branch baseline survives every branch that comes and goes
+  ✓ a project below the git repository root refuses to run and writes nothing with dataset "sequential"
+  ✓ a project below the git repository root refuses to run and writes nothing with dataset "parallel"
+  ✓ a repository with no commits says so, and leaves plain runs alone
+  ✓ a directory with no repository at all still asks for git
 
    PASS  Tests\Features\Tia\CompleteRunWriteTier
   ✓ a complete run prunes a deleted test with dataset "sequential"
@@ -1602,6 +1606,13 @@
   ✓ a run that never enables tia creates no graph with dataset "parallel filtered"
   ✓ a test edit narrows to the affected file and replays the rest
   ✓ a parallel run merges worker results into the parent baseline
+
+   PASS  Tests\Features\Tia\CoveragePiggyback
+  ✓ a coverage report does not found a dependency graph with dataset "pest coverage"
+  ✓ a coverage report does not found a dependency graph with dataset "phpunit coverage report"
+  ✓ a coverage report does not found a dependency graph with dataset "parallel"
+  ✓ a plain run after a coverage run records the whole project scope
+  ✓ a coverage report leaves the edges of an existing graph alone
 
    PASS  Tests\Features\Tia\DefaultBranchReplay
   ✓ replays the default branch baseline on a new branch
@@ -1710,6 +1721,32 @@
   ✓ a shard is a partial run
   ✓ a parallel partial run records the test that ran, like a sequential one
 
+   PASS  Tests\Features\Tia\RemoteBaseline
+  ✓ a published baseline is fetched instead of recorded locally
+  ✓ a fetched baseline that will not decode is discarded rather than trusted
+  ✓ a fetched baseline recorded against another tree is not used
+  ✓ an artifact without a graph in it fails loudly
+  ✓ a baseline that cannot be authenticated for fails loudly
+  ✓ a workflow or artifact that is not there fails loudly
+  ✓ a network failure warns and lets the suite run with dataset "querying the runs"
+  ✓ a network failure warns and lets the suite run with dataset "downloading the artifact"
+  ✓ no published baseline yet starts a cooldown, and a corrupt cooldown does not break the run
+
+   PASS  Tests\Features\Tia\SelectionPaths
+  ✓ a committed rename selects the tests that depended on the old path with dataset "sequential"
+  ✓ a committed rename selects the tests that depended on the old path with dataset "parallel"
+  ✓ an affected test file that is gone does not strand a filtered run with dataset "sequential"
+  ✓ an affected test file that is gone does not strand a filtered run with dataset "parallel"
+  ✓ a plain run reclaims the edge of a test file that is gone
+  ✓ a changed view selects the test that rendered it
+  ✓ a changed partial selects the test that rendered its ancestor with dataset "direct @include"
+  ✓ a changed partial selects the test that rendered its ancestor with dataset "transitive @include"
+  ✓ a changed partial selects the test that rendered its ancestor with dataset "x- component"
+  ✓ a changed partial selects the test that rendered its ancestor with dataset "include cycle"
+  ✓ a changed Inertia page selects the test that rendered its component
+  ✓ a changed shared JS module selects the tests of the pages that import it
+  ✓ a changed frontend runtime file selects every Inertia test
+
    PASS  Tests\Features\Tia\StateReclamation
   ✓ a detached HEAD does not purge the graph on structural drift with dataset "sequential"
   ✓ a detached HEAD does not purge the graph on structural drift with dataset "parallel"
@@ -1748,6 +1785,8 @@
   ✓ --fresh on a partial run neither purges nor prunes with dataset "parallel"
   ✓ a second green run on a feature branch writes nothing at all with dataset "sequential"
   ✓ a second green run on a feature branch writes nothing at all with dataset "parallel"
+  ✓ a graph whose recorded commit is gone is re-anchored, not warned about forever with dataset "sequential"
+  ✓ a graph whose recorded commit is gone is re-anchored, not warned about forever with dataset "parallel"
 
    PASS  Tests\Features\Ticket
   ✓ it may be associated with an ticket #1, #2
@@ -2378,4 +2417,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1710 passed (3845 assertions)
+  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1743 passed (3953 assertions)

@@ -2085,13 +2085,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             }
         }
 
-        foreach ($testPaths as $testPath) {
-            if (str_starts_with($testPath, $candidate.DIRECTORY_SEPARATOR)) {
-                return false;
-            }
-        }
-
-        return true;
+        return array_all($testPaths, fn (string $testPath): bool => ! str_starts_with($testPath, $candidate.DIRECTORY_SEPARATOR));
     }
 
     private function resolveArgumentPath(string $arg, string $projectRoot): ?string
