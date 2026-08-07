@@ -38,7 +38,6 @@ it('gets bound to test case object', function ($value): void {
 
 test('it truncates the description', function (): void {
     expect(true)->toBeTrue();
-    // it gets tested by the integration test
 })->with([str_repeat('Fooo', 10)]);
 
 $state = new stdClass;
@@ -294,7 +293,7 @@ it('resolves a potential bound dataset logically', function ($foo, $bar): void {
     [
         'foo',
         fn (): string => 'bar',
-    ], // This should be passed as a closure because we've passed multiple arguments
+    ],
 ]);
 
 it('resolves a potential bound dataset logically even when the closure comes first', function ($foo, $bar): void {
@@ -303,7 +302,7 @@ it('resolves a potential bound dataset logically even when the closure comes fir
 })->with([
     [
         fn (): string => 'foo', 'bar',
-    ], // This should be passed as a closure because we've passed multiple arguments
+    ],
 ]);
 
 it('will not resolve a closure if it is type hinted as a closure', function (Closure $data): void {

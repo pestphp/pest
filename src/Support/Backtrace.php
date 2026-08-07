@@ -15,9 +15,6 @@ final class Backtrace
 
     private const int BACKTRACE_OPTIONS = DEBUG_BACKTRACE_IGNORE_ARGS;
 
-    /**
-     * Returns the current test file.
-     */
     public static function testFile(): string
     {
         $current = null;
@@ -46,9 +43,6 @@ final class Backtrace
         return $current[self::FILE];
     }
 
-    /**
-     * Returns the current datasets file.
-     */
     public static function datasetsFile(): string
     {
         $current = null;
@@ -72,9 +66,6 @@ final class Backtrace
         return $current[self::FILE];
     }
 
-    /**
-     * Returns the filename that called the current function/method.
-     */
     public static function file(): string
     {
         $trace = self::backtrace();
@@ -82,9 +73,6 @@ final class Backtrace
         return $trace[self::FILE];
     }
 
-    /**
-     * Returns the dirname that called the current function/method.
-     */
     public static function dirname(): string
     {
         $trace = self::backtrace();
@@ -92,9 +80,6 @@ final class Backtrace
         return dirname($trace[self::FILE]);
     }
 
-    /**
-     * Returns the line that called the current function/method.
-     */
     public static function line(): int
     {
         $trace = self::backtrace();

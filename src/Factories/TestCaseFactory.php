@@ -30,29 +30,21 @@ final class TestCaseFactory
     use HigherOrderable;
 
     /**
-     * The list of attributes.
-     *
      * @var array<int, Attribute>
      */
     public array $attributes = [];
 
     /**
-     * The FQN of the Test Case class.
-     *
      * @var class-string
      */
     public string $class = TestCase::class;
 
     /**
-     * The list of class methods.
-     *
      * @var array<string, TestCaseMethodFactory>
      */
     public array $methods = [];
 
     /**
-     * The list of class traits.
-     *
      * @var array <int, class-string>
      */
     public array $traits = [
@@ -60,14 +52,8 @@ final class TestCaseFactory
         Concerns\Expectable::class,
     ];
 
-    /**
-     * The namespace for the test case, overrides the path-based namespace when set.
-     */
     public ?string $namespace = null;
 
-    /**
-     * Creates a new Factory instance.
-     */
     public function __construct(
         public string $filename
     ) {
@@ -84,14 +70,11 @@ final class TestCaseFactory
     }
 
     /**
-     * Creates a Test Case class using a runtime evaluate.
-     *
      * @param  array<string, TestCaseMethodFactory>  $methods
      */
     public function evaluate(string $filename, array $methods): void
     {
         if ('\\' === DIRECTORY_SEPARATOR) {
-            // In case Windows, strtolower drive name, like in UsesCall.
             $filename = (string) preg_replace_callback('~^(?P<drive>[a-z]+:\\\)~i', static fn (array $match): string => strtolower($match['drive']), $filename);
         }
 
@@ -114,11 +97,8 @@ final class TestCaseFactory
 
         $relativePath = str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath);
 
-        // Strip out any %-encoded octets.
         $relativePath = (string) preg_replace('|%[a-fA-F0-9][a-fA-F0-9]|', '', $relativePath);
-        // Remove escaped quote sequences (maintain namespace)
         $relativePath = str_replace(array_map(fn (string $quote): string => sprintf('\\%s', $quote), ['\'', '"']), '', $relativePath);
-        // Limit to Unicode letters and numbers.
         $relativePath = (string) preg_replace('/[^\p{L}\p{N}\\\\]/u', '', $relativePath);
 
         $classFQN = 'P\\'.$relativePath;
@@ -197,9 +177,6 @@ final class TestCaseFactory
         }
     }
 
-    /**
-     * Adds the given Method to the Test Case.
-     */
     public function addMethod(TestCaseMethodFactory $method): void
     {
         if ($method->description === null) {
@@ -233,9 +210,6 @@ final class TestCaseFactory
         $this->methods[$method->description] = $method;
     }
 
-    /**
-     * Checks if a test case has a method.
-     */
     public function hasMethod(string $methodName): bool
     {
         foreach ($this->methods as $method) {
@@ -251,9 +225,6 @@ final class TestCaseFactory
         return false;
     }
 
-    /**
-     * Gets a Method by the given name.
-     */
     public function getMethod(string $methodName): TestCaseMethodFactory
     {
         foreach ($this->methods as $method) {

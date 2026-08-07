@@ -164,15 +164,10 @@ final class CoverageMerger
             return null;
         }
 
-        // Legacy `--coverage-php` format: a serialized `CodeCoverage` object.
         if ($value instanceof CodeCoverage) {
             return $value;
         }
 
-        // Since phpunit/php-code-coverage 14, `--coverage-php` writes the report
-        // as a serialized array (`['codeCoverage' => ..., 'testResults' => ...,
-        // 'basePath' => ...]`) rather than a `CodeCoverage` object, so it has to
-        // be rebuilt into one before it can be merged.
         return self::coverageFromSerializedData($reportPath);
     }
 

@@ -232,6 +232,26 @@ describe('Livewire component views', function (): void {
         'index convention' => ['resources/views/components/post/⚡index', 'resources/views/components/post/⚡index/index.blade.php'],
     ]);
 
+    it('maps a changed MFC sibling through the component directory hash', function (string $sibling, string $generated): void {
+        $componentDirectory = 'resources/views/components/post/⚡create';
+        $hash = substr(md5(DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $componentDirectory)), 0, 8);
+
+        mkdir($this->projectRoot.'/'.$componentDirectory, 0755, true);
+        file_put_contents($this->projectRoot.'/'.$componentDirectory.'/create.blade.php', '<div>Component</div>');
+        file_put_contents($this->projectRoot.'/'.$componentDirectory.'/create.php', '<?php');
+        file_put_contents($this->projectRoot.'/'.$componentDirectory.'/create.js', '// js');
+
+        $graph = new Graph($this->projectRoot);
+        $graph->link('tests/Feature/ComponentTest.php', 'storage/framework/views/test_7/livewire/'.str_replace('{hash}', $hash, $generated));
+        $graph->link('tests/Feature/UnrelatedTest.php', 'storage/framework/views/test_8/livewire/views/deadbeef.blade.php');
+
+        expect($graph->affected([$componentDirectory.'/'.$sibling]))->toBe(['tests/Feature/ComponentTest.php']);
+    })->with([
+        'class sibling via the generated class' => ['create.php', 'classes/{hash}.php'],
+        'class sibling via the generated view' => ['create.php', 'views/{hash}.blade.php'],
+        'asset sibling via the generated view' => ['create.js', 'views/{hash}.blade.php'],
+    ]);
+
     it('preserves direct view edges for class-based components', function (): void {
         $viewPath = 'resources/views/livewire/create-post.blade.php';
 
@@ -279,7 +299,6 @@ describe('markKnownTestFiles()', function (): void {
 
         $graph->markKnownTestFiles(['tests/Feature/UserTest.php']);
 
-        // The pre-existing edge survives — the test still depends on the source file.
         $affected = $graph->affected(['app/Models/User.php']);
 
         expect($affected)->toContain('tests/Feature/UserTest.php');

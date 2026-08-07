@@ -105,8 +105,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     private const string DEFAULT_BRANCH = 'main';
 
     /**
-     * PHPUnit/Pest CLI flags whose subsequent argument is a value, not a path.
-     *
      * @var list<string>
      */
     private const array VALUE_TAKING_FLAGS = [
@@ -354,7 +352,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     /**
      * Mirrors {@see HandleArguments::hasArgument()} for
-     * use from static contexts — matches both `--flag` and `--flag=value`.
      *
      * @param  array<int, string>  $arguments
      */
@@ -1626,10 +1623,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     }
 
     /**
-     * Union of two per-test edge maps — piggybacked line-coverage edges plus
-     * the recorder's link-tracked edges (rendered Blade views, ...), which
-     * never appear in line coverage.
-     *
      * @param  array<string, array<int, string>>  $coverage
      * @param  array<string, array<int, string>>  $linked
      * @return array<string, array<int, string>>
@@ -2127,13 +2120,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         return implode(', ', array_keys($seen));
     }
 
-    /**
-     * The path from the git repository root down to $projectRoot (e.g.
-     * `laravel-app`) when the project is nested inside a larger repo, or `null`
-     * when the project root is itself the repo root (or git is unavailable).
-     * TIA requires the two to coincide: git reports and addresses paths
-     * relative to the repo root, while the dependency graph is project-relative.
-     */
     private function gitSubdirectoryPrefix(string $projectRoot): ?string
     {
         return new Git($projectRoot)->subdirectoryPrefix();

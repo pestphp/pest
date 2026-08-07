@@ -14,15 +14,11 @@ use Closure;
 trait Extendable
 {
     /**
-     * The list of extends.
-     *
      * @var array<string, Closure>
      */
     private static array $extends = [];
 
     /**
-     * Register a new extend.
-     *
      * @param-closure-this T $extend
      */
     public function extend(string $name, Closure $extend): void
@@ -30,9 +26,6 @@ trait Extendable
         static::$extends[$name] = $extend;
     }
 
-    /**
-     * Checks if given extend name is registered.
-     */
     public static function hasExtend(string $name): bool
     {
         return array_key_exists($name, static::$extends);

@@ -48,10 +48,6 @@ describe('fromSql()', function (): void {
     });
 
     it('does not leak int keys for numeric identifiers', function (): void {
-        // `substring(x FROM 1 FOR 3)` is standard SQL, and the `1` matches the
-        // FROM pattern. Collecting names as array keys makes PHP coerce the
-        // numeric string to an int, which then violates the declared
-        // list<string> and blows up Recorder::linkTable(string).
         expect(TableExtractor::fromSql('select substring(name from 1 for 3) from users'))
             ->each->toBeString();
     });
@@ -99,9 +95,6 @@ describe('fromMigrationSource()', function (): void {
     });
 
     it('does not leak int keys for numeric table names', function (): void {
-        // A table named `123` is a legal quoted identifier. Collecting names as
-        // array keys makes PHP coerce it to an int, breaking the declared
-        // list<string>, so it must survive as a string rather than be dropped.
         expect(TableExtractor::fromMigrationSource("DB::table('123')->insert([]);"))
             ->toBe(['123']);
     });

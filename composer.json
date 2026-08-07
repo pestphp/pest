@@ -62,7 +62,7 @@
         "pestphp/pest-dev-tools": "^5.0.0",
         "pestphp/pest-plugin-browser": "^5.0.0",
         "pestphp/pest-plugin-phpstan": "^5.0.0",
-        "pestphp/pest-plugin-rector": "^5.0.2",
+        "pestphp/pest-plugin-rector": "^5.0.3",
         "pestphp/pest-plugin-type-coverage": "^5.0.2",
         "psy/psysh": "^0.12.24"
     },

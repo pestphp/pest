@@ -73,9 +73,9 @@
   ↓ is marked as todo 3
   ↓ shouldBeMarkedAsTodo
 
-   WARN  Tests\Features\Coverage
+   PASS  Tests\Features\Coverage
   ✓ it has plugin
-  - it adds coverage if --coverage exist → Coverage is not available
+  ✓ it adds coverage if --coverage exist
   ✓ it adds coverage if --min exist
   ✓ it generates coverage based on file input
 
@@ -1709,7 +1709,7 @@
 
    PASS  Tests\Features\Tia\LivewireComponents
   ✓ a changed single-file component selects only the tests that rendered it, across workers
-  ✓ a changed multi-file component class selects the tests that rendered the component
+  ✓ a changed multi-file component asset selects the tests that rendered the component
   ✓ a deleted single-file component selects the tests that rendered it
   ✓ a Blade file with no generated view still falls back to the watch pattern
 
@@ -2119,6 +2119,9 @@
   ✓ Livewire component views → it maps documented MFC locations using the component directory hash with dataset "default component location"
   ✓ Livewire component views → it maps documented MFC locations using the component directory hash with dataset "default component location without emoji"
   ✓ Livewire component views → it maps documented MFC locations using the component directory hash with dataset "index convention"
+  ✓ Livewire component views → it maps a changed MFC sibling through the component directory hash with dataset "class sibling via the generated class"
+  ✓ Livewire component views → it maps a changed MFC sibling through the component directory hash with dataset "class sibling via the generated view"
+  ✓ Livewire component views → it maps a changed MFC sibling through the component directory hash with dataset "asset sibling via the generated view"
   ✓ Livewire component views → it preserves direct view edges for class-based components
   ✓ Livewire component views → it falls back to watch patterns when no generated view matches
   ✓ markKnownTestFiles() → it makes a test file with no edges known
@@ -2432,4 +2435,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1756 passed (3974 assertions)
+  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 34 skipped, 1760 passed (3983 assertions)

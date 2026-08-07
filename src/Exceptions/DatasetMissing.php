@@ -15,8 +15,6 @@ use Symfony\Component\Console\Exception\ExceptionInterface;
 final class DatasetMissing extends BadFunctionCallException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
 {
     /**
-     * Creates a new Exception instance.
-     *
      * @param  array<string, string>  $arguments
      */
     public function __construct(string $file, string $name, array $arguments)

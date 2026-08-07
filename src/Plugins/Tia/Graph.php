@@ -19,10 +19,6 @@ use PHPUnit\TextUI\Configuration\Registry;
 final class Graph
 {
     /**
-     * Livewire's generated-file directories, relative to its cache directory,
-     * mapped to the extension each one writes. Only these three land in the
-     * graph — scripts and styles are never rendered or executed by PHP.
-     *
      * @var array<string, string>
      */
     private const array LIVEWIRE_GENERATED_PATHS = [
@@ -184,9 +180,6 @@ final class Graph
      */
     private function applyMigrationChanges(array $migrationPaths, array &$affectedSet): array
     {
-        // With no recorded table usage at all, table intersection can never
-        // select anything — route every migration change through the
-        // watch-pattern fallback instead of silently skipping tests.
         if ($this->testTables === []) {
             return $migrationPaths;
         }
@@ -231,7 +224,6 @@ final class Graph
      * @param  list<string>  $nonMigrationPaths
      * @param  array<string, true>  $affectedSet
      * @return array{0: array<string, true>, 1: array<string, true>, 2: array<string, true>}
-     *                                                                                       globalFrontendRuntimeFiles, preciselyHandledPages, sharedFilesResolved
      */
     private function applyInertiaChanges(array $nonMigrationPaths, array &$affectedSet): array
     {
@@ -440,9 +432,6 @@ final class Graph
     }
 
     /**
-     * A changed file inside the configured test suites is itself the unit of
-     * work — always run it (new untracked tests, edited tests, renames).
-     *
      * @param  list<string>  $nonMigrationPaths
      * @param  array<string, true>  $affectedSet
      */
@@ -488,9 +477,6 @@ final class Graph
 
             $bladeAffected = $this->affectedByStaticBladeUsage($rel);
 
-            // Only a walk that actually selected tests counts as handled — a
-            // component whose usage the static walk missed must still reach
-            // the watch-pattern fallback instead of being silently swallowed.
             if ($bladeAffected !== []) {
                 foreach ($bladeAffected as $testFile) {
                     $affectedSet[$testFile] = true;
@@ -504,11 +490,6 @@ final class Graph
     }
 
     /**
-     * Livewire compiles single- and multi-file components into generated files
-     * under the (per-worker) compiled view directory, so the graph only ever
-     * holds those generated paths — never the component source the developer
-     * edited. Reproduce Livewire's hash to walk that mapping backwards.
-     *
      * @param  list<string>  $nonMigrationPaths
      * @param  array<string, true>  $affectedSet
      * @return array<string, true>
@@ -553,11 +534,6 @@ final class Graph
     }
 
     /**
-     * The component sources whose Livewire hash a changed file could carry: the
-     * file itself when it is a single-file component, and its directory when it
-     * sits inside a multi-file component — a class or asset sibling of the view
-     * is compiled under the directory's hash, not its own.
-     *
      * @return list<string>
      */
     private function livewireSourcePaths(string $rel): array
@@ -577,12 +553,6 @@ final class Graph
         return $sourcePaths;
     }
 
-    /**
-     * Mirrors Livewire\Finder\Finder::hasValidMultiFileComponentSource(): a
-     * multi-file component is a directory holding both "<name>.php" and
-     * "<name>.blade.php", where "<name>" is the directory name with the ⚡
-     * marker stripped, collapsed to "index" for the index convention.
-     */
     private function isLivewireMultiFileDirectory(string $componentDirectory): bool
     {
         $directoryName = basename($componentDirectory);
@@ -602,22 +572,12 @@ final class Graph
         return is_file($source.'.php') && is_file($source.'.blade.php');
     }
 
-    /**
-     * Mirrors Livewire\Compiler\CacheManager::getHash(): the first eight hex
-     * digits of md5() over the source path relative to base_path(), leading
-     * separator included. Should Livewire ever change that scheme, nothing
-     * matches and the watch-pattern fallback takes over again.
-     */
     private function livewireHash(string $sourcePath): string
     {
         return substr(md5(DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $sourcePath)), 0, 8);
     }
 
     /**
-     * Index every Livewire-generated file already in the graph by its hash. The
-     * same component yields one entry per parallel worker, so a hash maps to a
-     * list of ids rather than a single one.
-     *
      * @return array<string, list<int>>
      */
     private function livewireGeneratedFileIds(): array
@@ -915,11 +875,6 @@ final class Graph
         return $this->shouldRerunStatus(TestStatus::from($status));
     }
 
-    /**
-     * Whether a cached result with this status must be re-executed rather
-     * than replayed, honouring the configured failOn* / displayDetailsOn*
-     * policies.
-     */
     public function shouldRerunStatus(TestStatus $testStatus): bool
     {
         if ($testStatus->isFailure() || $testStatus->isError()) {
@@ -1098,19 +1053,8 @@ final class Graph
     }
 
     /**
-     * Mark test files that executed under a recorded coverage session as "known",
-     * seeding an empty edge set for any that produced zero project-source edges.
-     *
-     * Without this, a test that covers no application source (e.g. a pure unit
-     * test asserting on language primitives) never becomes an edge key, so
      * {@see self::knowsTest()} reports it as unknown and it re-runs on every TIA
-     * run. Recording it with an empty edge set lets it be replayed/skipped while
-     * unchanged; it is still re-run whenever its own file changes, via
      * {@see self::applyTestFileChanges()}.
-     *
-     * Must only be called from the recording path, where coverage was actually
-     * collected — otherwise a missing edge set could mean "coverage was off",
-     * not "genuinely covered nothing".
      *
      * @param  array<int, string>  $testFiles  Absolute or project-relative test file paths.
      */
@@ -1539,7 +1483,6 @@ final class Graph
 
         $names = [$name, str_replace('_', '-', $name)];
 
-        // Anonymous index components: components/card/index.blade.php resolves as <x-card>.
         if (str_ends_with($name, '.index') && $name !== '.index') {
             $base = substr($name, 0, -strlen('.index'));
 
@@ -1696,9 +1639,6 @@ final class Graph
     }
 
     /**
-     * Prune baseline result entries whose test files were just executed but whose
-     * test IDs are no longer present (e.g. the test method was removed or renamed).
-     *
      * @param  array<int, string>  $touchedFiles  Absolute or project-relative paths.
      * @param  array<int, string>  $keepTestIds  Test IDs that produced a result this run.
      */

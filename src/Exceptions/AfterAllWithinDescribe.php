@@ -14,9 +14,6 @@ use Symfony\Component\Console\Exception\ExceptionInterface;
  */
 final class AfterAllWithinDescribe extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
 {
-    /**
-     * Creates a new Exception instance.
-     */
     public function __construct(string $filename)
     {
         parent::__construct(sprintf('The afterAll method can not be used within describe functions. Filename [%s].', $filename));

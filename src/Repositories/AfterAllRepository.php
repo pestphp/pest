@@ -19,9 +19,6 @@ final class AfterAllRepository
      */
     private array $state = [];
 
-    /**
-     * Runs the given closure for each after all.
-     */
     public function each(callable $each): void
     {
         foreach ($this->state as $filename => $closure) {
@@ -29,9 +26,6 @@ final class AfterAllRepository
         }
     }
 
-    /**
-     * Sets a after all closure.
-     */
     public function set(Closure $closure): void
     {
         $filename = Reflection::getFileNameFromClosure($closure);
@@ -43,9 +37,6 @@ final class AfterAllRepository
         $this->state[$filename] = $closure;
     }
 
-    /**
-     * Gets a after all closure by the given filename.
-     */
     public function get(string $filename): Closure
     {
         return $this->state[$filename] ?? NullClosure::create();

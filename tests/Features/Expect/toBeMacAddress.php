@@ -6,8 +6,8 @@ use Pest\Exceptions\InvalidExpectationValue;
 use PHPUnit\Framework\ExpectationFailedException;
 
 test('pass', function (): void {
-    expect('00:1a:2b:3c:4d:5e')->toBeMacAddress() // colon-separated
-        ->and('00-1a-2b-3c-4d-5e')->toBeMacAddress() // hyphen-separated
+    expect('00:1a:2b:3c:4d:5e')->toBeMacAddress()
+        ->and('00-1a-2b-3c-4d-5e')->toBeMacAddress()
         ->and('ff:ff:ff:ff:ff:ff')->toBeMacAddress();
 });
 

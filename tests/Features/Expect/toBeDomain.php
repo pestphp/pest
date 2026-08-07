@@ -6,10 +6,10 @@ use Pest\Exceptions\InvalidExpectationValue;
 use PHPUnit\Framework\ExpectationFailedException;
 
 test('pass', function (): void {
-    expect('example.com')->toBeDomain() // standard domain
-        ->and('sub.example.com')->toBeDomain() // subdomain
-        ->and('my-host.io')->toBeDomain() // with hyphen
-        ->and('example.co.uk')->toBeDomain(); // multi-level TLD
+    expect('example.com')->toBeDomain()
+        ->and('sub.example.com')->toBeDomain()
+        ->and('my-host.io')->toBeDomain()
+        ->and('example.co.uk')->toBeDomain();
 });
 
 test('failures', function (): void {

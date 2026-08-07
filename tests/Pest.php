@@ -11,17 +11,14 @@ pest()->project()->github('pestphp/pest');
 
 pest()->in('PHPUnit/CustomTestCaseInSubFolders/SubFolder/SubFolder')->use(CustomTestCaseInSubFolder::class);
 
-// test case for all the directories inside PHPUnit/GlobPatternTests/SubFolder/
 pest()->in('PHPUnit/GlobPatternTests/SubFolder/*')->extend(CustomTestCase::class);
 
-// test case for all the files that end with AsPattern.php inside PHPUnit/GlobPatternTests/SubFolder2/
 pest()->in('PHPUnit/GlobPatternTests/SubFolder2/*AsPattern.php')->use(CustomTestCase::class);
 
 pest()->in('Visual')->group('integration');
 
 pest()->in('Features/Tia')->group('integration', 'tia');
 
-// NOTE: global test value container to be mutated and checked across files, as needed
 $_SERVER['globalHook'] = (object) ['calls' => (object) ['beforeAll' => 0, 'afterAll' => 0]];
 
 pest()
@@ -90,8 +87,8 @@ function removeAnsiEscapeSequences(string $input): ?string
 {
     return preg_replace(
         [
-            '#\\x1b[[][^A-Za-z]*[A-Za-z]#',       // CSI (colors, cursor, etc.)
-            '#\\x1b\\]8;[^\\x1b\\x07]*(?:\\x1b\\\\|\\x07)#', // OSC 8 hyperlinks
+            '#\\x1b[[][^A-Za-z]*[A-Za-z]#',
+            '#\\x1b\\]8;[^\\x1b\\x07]*(?:\\x1b\\\\|\\x07)#',
         ],
         '',
         $input,

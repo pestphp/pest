@@ -16,15 +16,11 @@ final class HigherOrderMessage
     public const string UNDEFINED_METHOD = 'Method %s does not exist';
 
     /**
-     * An optional condition that will determine if the message will be executed.
-     *
      * @var (Closure(): bool)|null
      */
     public ?Closure $condition = null;
 
     /**
-     * Creates a new higher order message.
-     *
      * @param  array<int, mixed>|null  $arguments
      */
     public function __construct(
@@ -33,12 +29,10 @@ final class HigherOrderMessage
         public string $name,
         public ?array $arguments
     ) {
-        // ..
+        //
     }
 
     /**
-     * Re-throws the given `$throwable` with the good line and filename.
-     *
      * @template TValue of object
      *
      * @param  TValue  $target
@@ -73,8 +67,6 @@ final class HigherOrderMessage
     }
 
     /**
-     * Indicates that this message should only be called when the given condition is true.
-     *
      * @param  callable(): bool  $condition
      */
     public function when(callable $condition): self
@@ -84,9 +76,6 @@ final class HigherOrderMessage
         return $this;
     }
 
-    /**
-     * Determines whether or not there exists a higher order callable with the message name.
-     */
     private function hasHigherOrderCallable(): bool
     {
         return in_array($this->name, get_class_methods(HigherOrderCallables::class), true);

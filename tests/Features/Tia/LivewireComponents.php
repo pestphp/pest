@@ -8,12 +8,6 @@ afterEach(function (): void {
     Project::destroyAll();
 });
 
-/**
- * Livewire never renders a single- or multi-file component source directly: it
- * compiles it into `<compiled views>/livewire/{views,classes}/<hash>.<ext>` and
- * renders that, so the recorded graph only ever holds the generated path. These
- * helpers seed the graph the way a real recording run would leave it.
- */
 function tiaLivewireHash(string $sourcePath): string
 {
     return substr(md5(DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $sourcePath)), 0, 8);
@@ -44,7 +38,6 @@ test('a changed single-file component selects only the tests that rendered it, a
 
     $hash = tiaLivewireHash('resources/views/pages/⚡orders.blade.php');
 
-    // The same component, compiled once per parallel worker.
     tiaSeedWithGeneratedViews($project, [
         'storage/framework/views/test_1/livewire/views/'.$hash.'.blade.php' => 'tests/Unit/GreeterTest.php',
         'storage/framework/views/test_2/livewire/views/'.$hash.'.blade.php' => 'tests/Unit/CalculatorTest.php',
@@ -60,20 +53,18 @@ test('a changed single-file component selects only the tests that rendered it, a
         ->and($result->replayed())->toBe(2, $result->describe());
 })->skipOnWindows();
 
-test('a changed multi-file component class selects the tests that rendered the component', function (): void {
+test('a changed multi-file component asset selects the tests that rendered the component', function (): void {
     $project = Project::make('master', 'livewire-watch');
     $project->write('resources/views/components/⚡counter/counter.blade.php', "<div>{{ \$count }}</div>\n");
     $project->write('resources/views/components/⚡counter/counter.php', "<?php\n\nreturn 1;\n");
+    $project->write('resources/views/components/⚡counter/counter.js', "export default 1\n");
     $project->git()->commit('add the component');
 
-    // A multi-file component is compiled under the hash of its *directory*, and
-    // its class is what PHP executes — so the class sibling, not the view, is
-    // what the graph can be reached through.
     tiaSeedWithGeneratedViews($project, [
         'storage/framework/views/livewire/classes/'.tiaLivewireHash('resources/views/components/⚡counter').'.php' => 'tests/Unit/GreeterTest.php',
     ]);
 
-    $project->write('resources/views/components/⚡counter/counter.php', "<?php\n\nreturn 2;\n");
+    $project->write('resources/views/components/⚡counter/counter.js', "export default 2\n");
     $project->snapshot();
 
     $result = $project->pest('--tia');

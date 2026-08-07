@@ -178,7 +178,6 @@ final readonly class ChangedFiles
             implode("\x00", array_keys($candidates)),
         );
 
-        // `check-ignore` exits 1 when nothing matched — that is not a failure.
         if ($result['exitCode'] !== 0 && $result['exitCode'] !== 1) {
             throw new MissingDependency('Tia mode', 'git');
         }
@@ -291,10 +290,6 @@ final readonly class ChangedFiles
         return $this->git->hasCommits();
     }
 
-    /**
-     * Working-tree scans get a longer leash than metadata queries — on a large
-     * repository with a cold cache, `status` and `diff` are not instant.
-     */
     private function scan(): Git
     {
         return $this->git->withTimeout(60.0);

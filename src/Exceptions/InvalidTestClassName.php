@@ -14,9 +14,6 @@ use Symfony\Component\Console\Exception\ExceptionInterface;
  */
 final class InvalidTestClassName extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
 {
-    /**
-     * Creates a new Exception instance for the given class name.
-     */
     public static function fromClassName(string $filename, string $className): self
     {
         return new self(sprintf(
@@ -26,9 +23,6 @@ final class InvalidTestClassName extends InvalidArgumentException implements Exc
         ));
     }
 
-    /**
-     * Creates a new Exception instance for the given namespace.
-     */
     public static function fromNamespace(string $filename, string $namespace, string $part): self
     {
         return new self(sprintf(

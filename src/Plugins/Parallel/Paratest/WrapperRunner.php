@@ -58,32 +58,17 @@ use function usleep;
  */
 final class WrapperRunner implements RunnerInterface
 {
-    /**
-     * The merged test result from the parallel run.
-     */
     public static ?TestResult $result = null;
 
-    /**
-     * The time to sleep between cycles.
-     */
     private const int CYCLE_SLEEP = 10000;
 
-    /**
-     * The result printer.
-     */
     private readonly ResultPrinter $printer;
 
-    /**
-     * The timer.
-     */
     private readonly Timer $timer;
 
     /** @var list<non-empty-string> */
     private array $pending = [];
 
-    /**
-     * The exit code.
-     */
     private int $exitcode = -1;
 
     /** @var array<positive-int,WrapperWorker> */
@@ -128,9 +113,6 @@ final class WrapperRunner implements RunnerInterface
     /** @var non-empty-string[] */
     private readonly array $parameters;
 
-    /**
-     * The code coverage filter registry.
-     */
     private CodeCoverageFilterRegistry $codeCoverageFilterRegistry;
 
     public function __construct(
@@ -190,8 +172,6 @@ final class WrapperRunner implements RunnerInterface
     }
 
     /**
-     * Handles Laravel Herd's debug and coverage modes.
-     *
      * @param  array<string>  $parameters
      * @return array<string>
      */
@@ -352,7 +332,6 @@ final class WrapperRunner implements RunnerInterface
     private function destroyWorker(int $token): void
     {
         $this->workers[$token]->stop();
-        // We need to wait for ApplicationForWrapperWorker::end to end
         while ($this->workers[$token]->isRunning()) {
             usleep(self::CYCLE_SLEEP);
         }
@@ -612,8 +591,6 @@ final class WrapperRunner implements RunnerInterface
     }
 
     /**
-     * Returns the test files to be executed.
-     *
      * @return array<int, non-empty-string>
      */
     private function getTestFiles(SuiteLoader $suiteLoader): array

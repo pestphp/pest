@@ -6,11 +6,11 @@ use Pest\Exceptions\InvalidExpectationValue;
 use PHPUnit\Framework\ExpectationFailedException;
 
 test('pass', function (): void {
-    expect('Zm9v')->toBeBase64() // 'foo' (no padding)
-        ->and('Zm9vYg==')->toBeBase64() // 'foob' (with padding)
-        ->and('Zm9vYmE=')->toBeBase64() // 'fooba' (with padding)
-        ->and('Zm9vYmFy')->toBeBase64() // 'foobar' (no padding)
-        ->and('')->toBeBase64(); // empty string
+    expect('Zm9v')->toBeBase64()
+        ->and('Zm9vYg==')->toBeBase64()
+        ->and('Zm9vYmE=')->toBeBase64()
+        ->and('Zm9vYmFy')->toBeBase64()
+        ->and('')->toBeBase64();
 });
 
 test('failures', function (): void {

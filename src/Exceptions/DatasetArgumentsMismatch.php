@@ -16,6 +16,4 @@ final class DatasetArgumentsMismatch extends Exception
             parent::__construct(sprintf('Test expects %d arguments but dataset only provides %d', $requiredCount, $suppliedCount));
         }
     }
-
-    //
 }

@@ -9,8 +9,5 @@ namespace Pest\Contracts\Plugins;
  */
 interface Terminable
 {
-    /**
-     * Terminates the plugin.
-     */
     public function terminate(): void;
 }

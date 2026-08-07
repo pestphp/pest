@@ -14,9 +14,6 @@ use Symfony\Component\Console\Exception\ExceptionInterface;
  */
 final class InvalidPestCommand extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
 {
-    /**
-     * Creates a new Exception instance.
-     */
     public function __construct()
     {
         parent::__construct('Please run [./vendor/bin/pest] instead.');

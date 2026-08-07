@@ -78,9 +78,6 @@ it('keys a result per dataset row rather than per method', function (): void {
     $collector->testSkipped('the fake driver does not report balances');
     $collector->finishTest();
 
-    // Without the dataset in the key both rows write to `Class::method`, so the
-    // second one overwrites the first and a replay hands every row the same
-    // status — a passing row reported as skipped, or a failing one as passed.
     expect(array_keys($collector->all()))->toBe([
         'Tests\Feature\OrderTest::it prices an order#opp',
         'Tests\Feature\OrderTest::it prices an order#fake',

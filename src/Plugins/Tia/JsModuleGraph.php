@@ -28,9 +28,6 @@ final class JsModuleGraph
     ];
 
     /**
-     * Candidate page directories, in priority order. Must stay in sync with
-     * `PAGE_DIR_CANDIDATES` in bin/pest-tia-vite-deps.mjs.
-     *
      * @var list<string>
      */
     private const array PAGE_DIR_CANDIDATES = [

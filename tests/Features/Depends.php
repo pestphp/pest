@@ -33,7 +33,6 @@ test('depends run test only once', function () use (&$runCounter): void {
     expect($runCounter)->toBe(2);
 })->depends('first', 'second');
 
-// Regression tests. See https://github.com/pestphp/pest/pull/216
 it('asserts true is true')->assertTrue(true);
 test('depends works with the correct test name')->assertTrue(true)->depends('it asserts true is true');
 

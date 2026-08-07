@@ -18,12 +18,9 @@ final class GitDirtyTestCaseFilter implements TestCaseFilter
      */
     private ?array $changedFiles = null;
 
-    /**
-     * Creates a new instance of the filter.
-     */
     public function __construct(private readonly string $projectRoot)
     {
-        // ...
+        //
     }
 
     /**
@@ -47,9 +44,6 @@ final class GitDirtyTestCaseFilter implements TestCaseFilter
         return in_array($relativePath, $this->changedFiles, true);
     }
 
-    /**
-     * Loads the changed files.
-     */
     private function loadChangedFiles(): void
     {
         $status = new Git(timeout: 60.0)->raw(['status', '--short', '--', '*.php']);

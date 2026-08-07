@@ -16,8 +16,6 @@ use PHPUnit\Event\Subscriber;
 final readonly class BootSubscribers implements Bootstrapper
 {
     /**
-     * The list of Subscribers.
-     *
      * @var array<int, class-string<Subscriber>>
      */
     private const array SUBSCRIBERS = [
@@ -44,16 +42,10 @@ final readonly class BootSubscribers implements Bootstrapper
         Subscribers\EnsureTiaAssertionsAreRecordedOnFinished::class,
     ];
 
-    /**
-     * Creates a new instance of the Boot Subscribers.
-     */
     public function __construct(
         private Container $container,
     ) {}
 
-    /**
-     * Boots the list of Subscribers.
-     */
     public function boot(): void
     {
         foreach (self::SUBSCRIBERS as $subscriber) {

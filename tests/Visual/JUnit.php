@@ -16,7 +16,6 @@ $run = function () {
     $rawXmlContent = file_get_contents($junitLogFile);
     unlink($junitLogFile);
 
-    // convert xml to array
     try {
         $xml = new SimpleXMLElement(preg_replace("/(<\/?)(\w+):([^>]*>)/", '$1$2$3', $rawXmlContent));
 
