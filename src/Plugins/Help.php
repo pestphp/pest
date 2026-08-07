@@ -154,7 +154,7 @@ final readonly class Help implements HandlesArguments
             ],
             [
                 'arg' => '--update-shards',
-                'desc' => 'Update shards.json with test timing data for time-balanced sharding',
+                'desc' => 'Update the shards file with timing data for time-balanced sharding',
             ],
         ], ...$content['Execution']];
 

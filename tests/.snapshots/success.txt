@@ -1836,6 +1836,15 @@
   ✓ addOutput → it displays shard information after test execution
   ✓ addOutput → it uses singular form for single test file
   ✓ addOutput → it returns original exit code when shard is not set
+  ✓ timings file → it reads and writes shards.json until a plugin overrides the filename
+  ✓ timings file → it prefers timings supplied by a plugin over the ones collected from the test run
+  ✓ timings file → it records known tests without supplied timings as zero
+  ✓ timings file → it keeps timings supplied by a plugin even when the test suite did not pass
+  ✓ timings file → it strips coverage arguments when building the list-tests command
+  ✓ units → it treats a bare timing as a unit bundling only its own test class
+  ✓ units → it keeps the test classes a unit bundles together in one shard
+  ✓ units → it collects every test class the given units bundle
+  ✓ units → it writes bundled units, and reads back both shapes
 
    PASS  Tests\Unit\Plugins\Tia\ContentHash
   ✓ of() → it returns false when file does not exist
@@ -2221,4 +2230,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1570 passed (3410 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1579 passed (3423 assertions)
