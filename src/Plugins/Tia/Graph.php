@@ -120,6 +120,32 @@ final class Graph
     }
 
     /**
+     * Keep only the test files this checkout actually has.
+     *
+     * A stale edge key — a test file a fetched baseline knew, or one another
+     * branch deleted — cannot be run by anyone, and selecting it strands
+     * `--filtered` on a run that matches nothing and reports success on a
+     * change no test looked at. {@see self::testFilesToRerun()} has always
+     * dropped these; the change-driven half of selection must agree.
+     *
+     * @param  array<int, string>  $testFiles  Project-relative paths.
+     * @return list<string>
+     */
+    public function testFilesOnDisk(array $testFiles): array
+    {
+        $root = rtrim($this->projectRoot, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
+        $onDisk = [];
+
+        foreach ($testFiles as $testFile) {
+            if (is_file($root.$testFile)) {
+                $onDisk[] = $testFile;
+            }
+        }
+
+        return $onDisk;
+    }
+
+    /**
      * @param  array<int, string>  $changedFiles
      * @return array{0: list<string>, 1: list<string>}
      */

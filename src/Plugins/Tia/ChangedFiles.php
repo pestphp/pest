@@ -298,6 +298,31 @@ final readonly class ChangedFiles
         return $this->gitOutput(['git', 'remote']) !== null;
     }
 
+    public function isRepository(): bool
+    {
+        $process = new Process(['git', 'rev-parse', '--git-dir'], $this->projectRoot);
+        $process->setTimeout(5.0);
+        $process->run();
+
+        return $process->getExitCode() === 0;
+    }
+
+    /**
+     * Whether this repository has a revision to anchor a baseline to.
+     *
+     * A freshly initialised repository has none, and every other git call TIA
+     * makes — {@see self::currentBranch()}, {@see self::currentSha()} — fails on
+     * `HEAD` there and reports git as missing, which it is not.
+     */
+    public function hasCommits(): bool
+    {
+        $process = new Process(['git', 'rev-parse', '--verify', '--quiet', 'HEAD'], $this->projectRoot);
+        $process->setTimeout(5.0);
+        $process->run();
+
+        return $process->getExitCode() === 0;
+    }
+
     /**
      * @param  array<int, string>  $command
      */
@@ -332,8 +357,12 @@ final readonly class ChangedFiles
      */
     private function diffSinceSha(string $sha): array
     {
+        // `--no-renames` matters: with rename detection on, git reports only the
+        // destination of a moved file, so the path the graph has edges for — the
+        // one that is gone — never reaches selection, and every test that
+        // depended on it replays its recorded pass.
         $process = new Process(
-            ['git', 'diff', '--name-only', $sha.'..HEAD'],
+            ['git', 'diff', '--name-only', '--no-renames', $sha.'..HEAD'],
             $this->projectRoot,
         );
         $process->run();

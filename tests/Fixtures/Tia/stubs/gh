@@ -1,0 +1,50 @@
+#!/bin/sh
+# A stand-in for the GitHub CLI, so the remote-baseline path can be exercised
+# without a network. `GH_STUB_MODE` picks the failure to serve; `GH_STUB_PAYLOAD`
+# names the graph.json the fake artifact carries.
+
+if [ "$1" = "auth" ]; then
+  [ "$GH_STUB_MODE" = "unauthenticated" ] && exit 1
+  exit 0
+fi
+
+if [ "$1" = "run" ] && [ "$2" = "list" ]; then
+  case "$GH_STUB_MODE" in
+    no-runs) exit 0 ;;
+    list-404) echo "HTTP 404: Not Found" >&2; exit 1 ;;
+    list-network) echo "could not resolve host: api.github.com" >&2; exit 1 ;;
+  esac
+  echo 987654321
+  exit 0
+fi
+
+if [ "$1" = "api" ]; then
+  echo 2048
+  exit 0
+fi
+
+if [ "$1" = "run" ] && [ "$2" = "download" ]; then
+  case "$GH_STUB_MODE" in
+    download-403) echo "HTTP 403: Forbidden" >&2; exit 1 ;;
+    download-network) echo "connection refused" >&2; exit 1 ;;
+  esac
+
+  dir=""
+  previous=""
+  for argument in "$@"; do
+    [ "$previous" = "-D" ] && dir="$argument"
+    previous="$argument"
+  done
+
+  [ -z "$dir" ] && exit 1
+
+  case "$GH_STUB_MODE" in
+    missing-asset) echo "{}" > "$dir/other.json" ;;
+    corrupt) printf 'not json at all' > "$dir/graph.json" ;;
+    *) cp "$GH_STUB_PAYLOAD" "$dir/graph.json" ;;
+  esac
+
+  exit 0
+fi
+
+exit 1

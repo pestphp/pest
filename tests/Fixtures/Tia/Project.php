@@ -124,6 +124,26 @@ final class Project
         }
     }
 
+    /**
+     * A second copy of the fixture app in a subdirectory of this project, so a
+     * run can be started from a root that sits *below* the git repository root.
+     *
+     * @return string The nested project's absolute path.
+     */
+    public function nested(string $directory = 'nested'): string
+    {
+        $path = $this->path($directory);
+
+        if (! is_dir($path) && ! @mkdir($path, 0755, true) && ! is_dir($path)) {
+            throw new RuntimeException(sprintf('Unable to create [%s].', $path));
+        }
+
+        self::copy(__DIR__.'/app', $path);
+        $this->scaffoldVendor($path);
+
+        return $path;
+    }
+
     public function worktree(string $branch): string
     {
         $path = $this->path.'-worktree-'.preg_replace('/[^a-z0-9]+/i', '-', $branch);
@@ -159,6 +179,12 @@ final class Project
                 'COLLISION_IGNORE_DURATION' => 'true',
                 'PARATEST' => '0',
                 'PAO_DISABLE' => '1',
+                // Recording is what needs a driver, and recording happens here,
+                // in the subprocess — never in the process running these rows.
+                // Asking for coverage mode only here lets a CI job leave xdebug
+                // off for the suite it is running (whose collection under xdebug
+                // costs more than every scenario put together) and still record.
+                'XDEBUG_MODE' => 'coverage',
                 'HOME' => $this->home(),
                 'GITHUB_EVENT_PATH' => '',
                 'CI_DEFAULT_BRANCH' => '',
@@ -237,6 +263,48 @@ final class Project
         }
 
         $sentinel ? $this->sentinel() : $this->snapshot();
+    }
+
+    /**
+     * Take the graph out of the state dir and hand back its JSON, so it can be
+     * served as the artifact a remote baseline fetch downloads.
+     */
+    public function detachGraph(): string
+    {
+        $json = $this->state()->read(Tia::KEY_GRAPH);
+
+        if ($json === null) {
+            throw new RuntimeException('There is no graph to detach.');
+        }
+
+        if (! $this->state()->delete(Tia::KEY_GRAPH)) {
+            throw new RuntimeException('Unable to remove the detached graph.');
+        }
+
+        $this->snapshot();
+
+        return $json;
+    }
+
+    /**
+     * Install a stand-in for the GitHub CLI and return the environment that
+     * points a run at it. `$mode` names the failure it should serve (see
+     * `stubs/gh`); `$payload` is the graph.json its artifact carries.
+     *
+     * @return array<string, string>
+     */
+    public function gh(string $mode = 'ok', string $payload = '{}'): array
+    {
+        self::mirror(__DIR__.'/stubs/gh', $this->path('stub/gh'));
+        chmod($this->path('stub/gh'), 0755);
+
+        $this->write('payload/graph.json', $payload);
+
+        return [
+            'PATH' => $this->path('stub').PATH_SEPARATOR.(string) getenv('PATH'),
+            'GH_STUB_MODE' => $mode,
+            'GH_STUB_PAYLOAD' => $this->path('payload/graph.json'),
+        ];
     }
 
     public static function testId(string $testFile, string $description): string

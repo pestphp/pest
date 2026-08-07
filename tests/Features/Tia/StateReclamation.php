@@ -343,3 +343,35 @@ test('a second green run on a feature branch writes nothing at all', function (a
     expect($result->replayed())->toBe(Project::TOTAL_TESTS, $result->describe())
         ->and($delta->isHardSuppressed())->toBeTrue($delta->summary());
 })->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
+
+test('a graph whose recorded commit is gone is re-anchored, not warned about forever', function (array $arguments): void {
+    $project = Project::make('master');
+    $project->git()->commit('second');
+    $project->seed('master');
+
+    $recordedSha = $project->graph()['baselines']['master']['sha'];
+
+    // A rebase, a force-push, a reset: the commit the baseline was recorded at
+    // is no longer an ancestor of HEAD, so nothing can be diffed against it.
+    $project->git()->run(['reset', '--quiet', '--hard', 'HEAD~1']);
+    $project->snapshot();
+
+    $first = $project->pest('--tia', ...$arguments);
+
+    // The whole suite runs, and its results are the truth at HEAD — so the
+    // recorded revision has to move, whether or not a coverage driver was
+    // around to refresh the edges. Without that, the run below repeats forever.
+    expect($first->exitCode)->toBe(0, $first->describe())
+        ->and($first->output)->toContain('no longer reachable')
+        ->and($first->tally())->toContain(Project::TOTAL_TESTS.' passed')
+        ->and($project->graph()['baselines']['master']['sha'])->not->toBe($recordedSha)
+        ->and($project->graph()['baselines']['master']['sha'])->toBe($project->git()->sha());
+
+    $project->snapshot();
+    $second = $project->pest('--tia', ...$arguments);
+    $delta = $project->delta();
+
+    expect($second->output)->not->toContain('no longer reachable')
+        ->and($second->replayed())->toBe(Project::TOTAL_TESTS, $second->describe())
+        ->and($delta->writtenCount())->toBe(0, $delta->summary());
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();

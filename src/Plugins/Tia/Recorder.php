@@ -359,8 +359,19 @@ final class Recorder
                 continue;
             }
 
+            // A file whose *only* executed line is its last one was included,
+            // not used — the trailing line of an include is all that ran.
+            //
+            // That reading only holds for a driver that reports unexecuted
+            // lines too: pcov returns every executable line (`-1` for the ones
+            // that did not run), so "the single covered line is the highest
+            // line reported" means something. Xdebug reports executed lines
+            // only, where it is true of *any* file that ran a single line —
+            // which is most of them, and dropping those loses the edge.
             $lineKeys = array_keys($lines);
-            if ($lineKeys !== [] && count($covered) === 1 && $covered[0] === max($lineKeys)) {
+            $reportsUnexecutedLines = count($covered) < count($lines);
+
+            if ($reportsUnexecutedLines && $lineKeys !== [] && count($covered) === 1 && $covered[0] === max($lineKeys)) {
                 continue;
             }
 

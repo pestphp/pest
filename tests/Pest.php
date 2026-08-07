@@ -19,7 +19,10 @@ pest()->in('PHPUnit/GlobPatternTests/SubFolder2/*AsPattern.php')->use(CustomTest
 
 pest()->in('Visual')->group('integration');
 
-pest()->in('Features/Tia')->group('integration');
+// Also their own group, so a CI job with a coverage driver can run the TIA
+// scenarios — the half of TIA that only exists when a driver is present —
+// without dragging the visual snapshots along.
+pest()->in('Features/Tia')->group('integration', 'tia');
 
 // NOTE: global test value container to be mutated and checked across files, as needed
 $_SERVER['globalHook'] = (object) ['calls' => (object) ['beforeAll' => 0, 'afterAll' => 0]];

@@ -159,3 +159,48 @@ test('the default branch baseline survives every branch that comes and goes', fu
         ->and($delta->removed())->toBe(0, $delta->summary())
         ->and($project->graph()['baselines']['master']['results'])->toHaveCount(Project::TOTAL_TESTS);
 })->skipOnWindows();
+
+test('a project below the git repository root refuses to run and writes nothing', function (array $arguments): void {
+    $project = Project::make('master');
+    $nested = $project->nested();
+
+    // git addresses paths from the repository root while the graph is
+    // project-relative, so the two have to coincide. TIA says so and stops.
+    $result = $project->pestIn($nested, '--tia', ...$arguments);
+
+    expect($result->exitCode)->toBe(1, $result->describe())
+        ->and($result->output)->toContain('Tia mode requires the git repository root')
+        ->and(is_dir($project->path('.home/.pest')))->toBeFalse()
+        ->and(is_dir($nested.DIRECTORY_SEPARATOR.'.pest'))->toBeFalse();
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
+
+test('a repository with no commits says so, and leaves plain runs alone', function (): void {
+    $project = Project::withoutGit();
+    $project->git()->run(['init', '--quiet']);
+    $project->git()->run(['checkout', '--quiet', '-b', 'master']);
+    $project->git()->addOrigin();
+
+    // Every git call TIA makes asks about HEAD, which does not exist yet. That
+    // used to surface as `requires "git"`, with git installed and working.
+    $tia = $project->pest('--tia');
+
+    expect($tia->exitCode)->toBe(1, $tia->describe())
+        ->and($tia->output)->toContain('Tia mode requires at least one commit')
+        ->and($tia->output)->not->toContain('requires "git"')
+        ->and($project->graphExists())->toBeFalse();
+
+    $plain = $project->pest();
+
+    expect($plain->exitCode)->toBe(0, $plain->describe())
+        ->and($plain->tally())->toContain(Project::TOTAL_TESTS.' passed');
+})->skipOnWindows();
+
+test('a directory with no repository at all still asks for git', function (): void {
+    $project = Project::withoutGit();
+
+    $result = $project->pest('--tia');
+
+    expect($result->exitCode)->toBe(1, $result->describe())
+        ->and($result->output)->toContain('requires "git"')
+        ->and($project->graphExists())->toBeFalse();
+})->skipOnWindows();

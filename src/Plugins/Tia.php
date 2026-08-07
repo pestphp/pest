@@ -12,6 +12,7 @@ use Pest\Contracts\Plugins\Terminable;
 use Pest\Exceptions\InvalidOption;
 use Pest\Exceptions\MissingDependency;
 use Pest\Exceptions\NoAffectedTestsFound;
+use Pest\Exceptions\TiaRequiresCommit;
 use Pest\Exceptions\TiaRequiresDefaultBranch;
 use Pest\Exceptions\TiaRequiresRemote;
 use Pest\Exceptions\TiaRequiresRepositoryRoot;
@@ -209,6 +210,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     private bool $unreadableGraphReported = false;
 
     private bool $detachedHead = false;
+
+    private bool $graphUnreachable = false;
 
     /** @var array<int, string> */
     private array $originalArguments = [];
@@ -692,7 +695,17 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return $exitCode;
         }
 
-        if ($this->replayRan) {
+        // Re-anchor the baseline. Reaching here means the run was complete —
+        // nothing suppressed, narrowed or truncated it — so its results are the
+        // truth at HEAD and the recorded revision may say so.
+        //
+        // That matters most when the recorded commit had become unreachable (a
+        // rebase, a force-push) and no coverage driver was available to rebuild:
+        // without this the stale revision survives, and every later run warns
+        // and re-runs the whole suite, for good. Stale edges are no objection —
+        // a complete run just re-recorded every result, and later changes are
+        // compared against the revision written here.
+        if ($this->replayRan || $this->graphUnreachable) {
             $this->bumpRecordedSha();
         }
 
@@ -836,7 +849,20 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             Panic::with(new TiaRequiresRepositoryRoot($subdirectoryPrefix));
         }
 
-        $this->resolveBranch($projectRoot);
+        try {
+            $this->resolveBranch($projectRoot);
+        } catch (MissingDependency $missingGit) {
+            // Every git call TIA makes fails on `HEAD` in a repository that has
+            // no commits yet, which reads as "git is missing" when git is right
+            // there. Say what is actually wrong instead.
+            $repository = new ChangedFiles($projectRoot);
+
+            if ($repository->isRepository() && ! $repository->hasCommits()) {
+                Panic::with(new TiaRequiresCommit);
+            }
+
+            throw $missingGit;
+        }
 
         if (! $this->fallbackBranchResolved) {
             Panic::with(new ChangedFiles($projectRoot)->hasRemote()
@@ -865,6 +891,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
                 && $changedFiles->since($branchSha) === null) {
                 $this->renderBadge('WARN', 'Recorded commit is no longer reachable — graph will be rebuilt.');
                 $graph = null;
+                $this->graphUnreachable = true;
             }
         }
 
@@ -886,8 +913,23 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             $this->state->write(self::KEY_COVERAGE_MARKER, '');
         }
 
+        // An active coverage report owns the driver, so edges have to be
+        // piggybacked off its session — and that session is scoped to
+        // phpunit.xml's <source>, not to the whole project. Refreshing an
+        // existing graph that way is safe (`replaceEdges()` keeps what it
+        // already has), but *founding* one on it is not: every source file
+        // outside the coverage scope would be missing from the graph for good,
+        // and a change to one of them would select nothing and replay a pass.
+        if (! $graph instanceof Graph && $this->piggybackCoverage) {
+            $this->emitCoverageScopedRecordSkipped();
+
+            return $arguments;
+        }
+
+        // Past the guard above, a coverage-owned run always has a graph to
+        // refresh — a run without one never gets here.
         if ($coverageCacheOwned && ! $this->state->exists(self::KEY_COVERAGE_CACHE)) {
-            if ($graph instanceof Graph && $this->driftLabel === null) {
+            if ($this->driftLabel === null) {
                 $this->freshGraphReason = 'recording a coverage baseline';
             }
 
@@ -1042,7 +1084,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return $arguments;
         }
 
-        $affectedFromChanges = $changed === [] ? [] : $graph->affected($changed);
+        $affectedFromChanges = $changed === [] ? [] : $graph->testFilesOnDisk($graph->affected($changed));
         $rerunFromCache = [];
 
         if ($this->filteredMode && $graph->hasUnlocatedTestsToRerun($this->branch)) {
@@ -1293,6 +1335,14 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $this->output->writeln('');
 
         $this->renderChild('Running in TIA mode, however TIA is skipped as it needs ext-pcov or Xdebug.');
+    }
+
+    private function emitCoverageScopedRecordSkipped(): void
+    {
+        $this->output->writeln('');
+
+        $this->renderChild('Running in TIA mode, however TIA is skipped as an active coverage report narrows the edges it could record.');
+        $this->renderChild('Record the baseline with a plain --tia run first; coverage runs then reuse it.');
     }
 
     /**
