@@ -5,14 +5,19 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 use Pest\Exceptions\MissingDependency;
-use Symfony\Component\Process\Process;
+use Pest\Support\Git;
 
 /**
  * @internal
  */
 final readonly class ChangedFiles
 {
-    public function __construct(private string $projectRoot) {}
+    private Git $git;
+
+    public function __construct(private string $projectRoot)
+    {
+        $this->git = new Git($projectRoot);
+    }
 
     /**
      * @param  array<int, string>  $files  project-relative paths.
@@ -155,15 +160,7 @@ final readonly class ChangedFiles
 
     private function contentAtSha(string $sha, string $path): ?string
     {
-        $process = new Process(['git', 'show', $sha.':'.$path], $this->projectRoot);
-        $process->setTimeout(5.0);
-        $process->run();
-
-        if (! $process->isSuccessful()) {
-            return null;
-        }
-
-        return $process->getOutput();
+        return $this->git->show($sha, $path);
     }
 
     /**
@@ -176,21 +173,17 @@ final readonly class ChangedFiles
             return $candidates;
         }
 
-        $process = new Process(
-            ['git', 'check-ignore', '--no-index', '-z', '--stdin'],
-            $this->projectRoot,
+        $result = $this->git->result(
+            ['check-ignore', '--no-index', '-z', '--stdin'],
+            implode("\x00", array_keys($candidates)),
         );
-        $process->setTimeout(5.0);
-        $process->setInput(implode("\x00", array_keys($candidates)));
-        $process->run();
 
-        $exitCode = $process->getExitCode();
-
-        if ($exitCode !== 0 && $exitCode !== 1) {
+        // `check-ignore` exits 1 when nothing matched — that is not a failure.
+        if ($result['exitCode'] !== 0 && $result['exitCode'] !== 1) {
             throw new MissingDependency('Tia mode', 'git');
         }
 
-        $output = $process->getOutput();
+        $output = $result['output'];
 
         if ($output === '') {
             return $candidates;
@@ -207,21 +200,20 @@ final readonly class ChangedFiles
 
     public function currentBranch(): ?string
     {
-        $process = new Process(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], $this->projectRoot);
-        $process->run();
+        $output = $this->git->raw(['rev-parse', '--abbrev-ref', 'HEAD']);
 
-        if (! $process->isSuccessful()) {
+        if ($output === null) {
             throw new MissingDependency('Tia mode', 'git');
         }
 
-        $branch = trim($process->getOutput());
+        $branch = trim($output);
 
         return $branch === '' || $branch === 'HEAD' ? null : $branch;
     }
 
     public function defaultBranch(): ?string
     {
-        $head = $this->gitOutput(['git', 'symbolic-ref', '--short', 'refs/remotes/origin/HEAD']);
+        $head = $this->git->output(['symbolic-ref', '--short', 'refs/remotes/origin/HEAD']);
 
         if ($head !== null) {
             $branch = preg_replace('#^origin/#', '', $head);
@@ -231,14 +223,14 @@ final readonly class ChangedFiles
             }
         }
 
-        $configured = $this->gitOutput(['git', 'config', '--get', 'init.defaultBranch']);
+        $configured = $this->git->output(['config', '--get', 'init.defaultBranch']);
 
         if ($configured === null) {
             return null;
         }
 
-        $exists = $this->gitOutput(['git', 'rev-parse', '--verify', '--quiet', 'refs/heads/'.$configured]) !== null
-            || $this->gitOutput(['git', 'rev-parse', '--verify', '--quiet', 'refs/remotes/origin/'.$configured]) !== null;
+        $exists = $this->git->hasRef('refs/heads/'.$configured)
+            || $this->git->hasRef('refs/remotes/origin/'.$configured);
 
         return $exists ? $configured : null;
     }
@@ -248,20 +240,15 @@ final readonly class ChangedFiles
      */
     public function branchNames(): ?array
     {
-        $process = new Process(
-            ['git', 'for-each-ref', '--format=%(refname)', 'refs/heads', 'refs/remotes'],
-            $this->projectRoot,
-        );
-        $process->setTimeout(5.0);
-        $process->run();
+        $output = $this->git->raw(['for-each-ref', '--format=%(refname)', 'refs/heads', 'refs/remotes']);
 
-        if (! $process->isSuccessful()) {
+        if ($output === null) {
             return null;
         }
 
         $names = [];
 
-        foreach ($this->splitLines($process->getOutput()) as $ref) {
+        foreach ($this->splitLines($output) as $ref) {
             if (str_starts_with($ref, 'refs/heads/')) {
                 $names[substr($ref, strlen('refs/heads/'))] = true;
 
@@ -291,54 +278,31 @@ final readonly class ChangedFiles
 
     public function hasRemote(): bool
     {
-        return $this->gitOutput(['git', 'remote']) !== null;
+        return $this->git->hasRemote();
     }
 
     public function isRepository(): bool
     {
-        $process = new Process(['git', 'rev-parse', '--git-dir'], $this->projectRoot);
-        $process->setTimeout(5.0);
-        $process->run();
-
-        return $process->getExitCode() === 0;
+        return $this->git->isRepository();
     }
 
     public function hasCommits(): bool
     {
-        $process = new Process(['git', 'rev-parse', '--verify', '--quiet', 'HEAD'], $this->projectRoot);
-        $process->setTimeout(5.0);
-        $process->run();
-
-        return $process->getExitCode() === 0;
+        return $this->git->hasCommits();
     }
 
     /**
-     * @param  array<int, string>  $command
+     * Working-tree scans get a longer leash than metadata queries — on a large
+     * repository with a cold cache, `status` and `diff` are not instant.
      */
-    private function gitOutput(array $command): ?string
+    private function scan(): Git
     {
-        $process = new Process($command, $this->projectRoot);
-        $process->setTimeout(5.0);
-        $process->run();
-
-        if (! $process->isSuccessful()) {
-            return null;
-        }
-
-        $output = trim($process->getOutput());
-
-        return $output === '' ? null : $output;
+        return $this->git->withTimeout(60.0);
     }
 
     private function shaIsReachable(string $sha): bool
     {
-        $process = new Process(
-            ['git', 'merge-base', '--is-ancestor', $sha, 'HEAD'],
-            $this->projectRoot,
-        );
-        $process->run();
-
-        return $process->getExitCode() === 0;
+        return $this->git->succeeds(['merge-base', '--is-ancestor', $sha, 'HEAD']);
     }
 
     /**
@@ -346,17 +310,13 @@ final readonly class ChangedFiles
      */
     private function diffSinceSha(string $sha): array
     {
-        $process = new Process(
-            ['git', 'diff', '--name-only', '--no-renames', $sha.'..HEAD'],
-            $this->projectRoot,
-        );
-        $process->run();
+        $output = $this->scan()->raw(['diff', '--name-only', '--no-renames', $sha.'..HEAD']);
 
-        if (! $process->isSuccessful()) {
+        if ($output === null) {
             throw new MissingDependency('Tia mode', 'git');
         }
 
-        return $this->splitLines($process->getOutput());
+        return $this->splitLines($output);
     }
 
     /**
@@ -364,17 +324,11 @@ final readonly class ChangedFiles
      */
     private function workingTreeChanges(): array
     {
-        $process = new Process(
-            ['git', 'status', '--porcelain', '-z', '--untracked-files=all'],
-            $this->projectRoot,
-        );
-        $process->run();
+        $output = $this->scan()->raw(['status', '--porcelain', '-z', '--untracked-files=all']);
 
-        if (! $process->isSuccessful()) {
+        if ($output === null) {
             throw new MissingDependency('Tia mode', 'git');
         }
-
-        $output = $process->getOutput();
 
         if ($output === '') {
             return [];
@@ -413,14 +367,13 @@ final readonly class ChangedFiles
 
     public function currentSha(): ?string
     {
-        $process = new Process(['git', 'rev-parse', 'HEAD'], $this->projectRoot);
-        $process->run();
+        $output = $this->git->raw(['rev-parse', 'HEAD']);
 
-        if (! $process->isSuccessful()) {
+        if ($output === null) {
             throw new MissingDependency('Tia mode', 'git');
         }
 
-        $sha = trim($process->getOutput());
+        $sha = trim($output);
 
         return $sha === '' ? null : $sha;
     }

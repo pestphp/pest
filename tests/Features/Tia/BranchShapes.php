@@ -177,7 +177,7 @@ test('a repository with no commits says so, and leaves plain runs alone', functi
 
     expect($tia->exitCode)->toBe(1, $tia->describe())
         ->and($tia->output)->toContain('Tia mode requires at least one commit')
-        ->and($tia->output)->not->toContain('requires "git"')
+        ->and($tia->output)->not->toContain('requires [git]')
         ->and($project->graphExists())->toBeFalse();
 
     $plain = $project->pest();

@@ -33,13 +33,13 @@ use Pest\Plugins\Tia\Storage;
 use Pest\Plugins\Tia\TableExtractor;
 use Pest\Plugins\Tia\WatchPatterns;
 use Pest\Support\Container;
+use Pest\Support\Git;
 use Pest\Support\View;
 use Pest\TestCaseFilters\TiaTestCaseFilter;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestStatus\TestStatus;
 use PHPUnit\TestRunner\TestResult\Facade as TestResultFacade;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Process\Process;
 
 /**
  * @internal
@@ -2136,16 +2136,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
      */
     private function gitSubdirectoryPrefix(string $projectRoot): ?string
     {
-        $process = new Process(['git', 'rev-parse', '--show-prefix'], $projectRoot);
-        $process->run();
-
-        if (! $process->isSuccessful()) {
-            return null;
-        }
-
-        $prefix = trim($process->getOutput());
-
-        return $prefix === '' ? null : rtrim(str_replace(DIRECTORY_SEPARATOR, '/', $prefix), '/');
+        return new Git($projectRoot)->subdirectoryPrefix();
     }
 
     private function composerLockDelta(string $projectRoot, string $sha): string
@@ -2155,15 +2146,13 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return '';
         }
 
-        $process = new Process(['git', 'show', $sha.':composer.lock'], $projectRoot);
-        $process->setTimeout(5.0);
-        $process->run();
+        $baseline = new Git($projectRoot)->show($sha, 'composer.lock');
 
-        if (! $process->isSuccessful()) {
+        if ($baseline === null) {
             return '';
         }
 
-        $oldVersions = $this->lockVersions($process->getOutput());
+        $oldVersions = $this->lockVersions($baseline);
         $newVersions = $this->lockVersions($current);
 
         if ($oldVersions === [] && $newVersions === []) {
