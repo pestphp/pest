@@ -18,13 +18,10 @@ final readonly class Help implements HandlesArguments
 {
     use Concerns\HandleArguments;
 
-    /**
-     * Creates a new Plugin instance.
-     */
     public function __construct(
         private OutputInterface $output
     ) {
-        // ..
+        //
     }
 
     /**
@@ -80,9 +77,6 @@ final readonly class Help implements HandlesArguments
         return $arguments;
     }
 
-    /**
-     * Colorizes the given string options.
-     */
     private function colorizeOptions(string $argument): string
     {
         return (string) preg_replace(

@@ -6,11 +6,11 @@ use Pest\Exceptions\InvalidExpectationValue;
 use PHPUnit\Framework\ExpectationFailedException;
 
 test('pass', function (): void {
-    expect('abcdef')->toBeHexadecimal() // lowercase
-        ->and('ABCDEF')->toBeHexadecimal() // uppercase
-        ->and('aBcDeF')->toBeHexadecimal() // mixed case
-        ->and('1234567890')->toBeHexadecimal() // numeric
-        ->and('deadbeef')->toBeHexadecimal(); // alphanumeric
+    expect('abcdef')->toBeHexadecimal()
+        ->and('ABCDEF')->toBeHexadecimal()
+        ->and('aBcDeF')->toBeHexadecimal()
+        ->and('1234567890')->toBeHexadecimal()
+        ->and('deadbeef')->toBeHexadecimal();
 });
 
 test('failures', function (): void {
@@ -31,7 +31,7 @@ test('failures with empty string', function (): void {
 
 test('failures with invalid type', function (): void {
     expect([])->toBeHexadecimal();
-})->throws(InvalidExpectationValue::class, 'Invalid expectation value type. Expected [string].');
+})->throws(InvalidExpectationValue::class, 'This expectation may only be used on a value of type [string].');
 
 test('failures with custom message', function (): void {
     expect('xyz')->toBeHexadecimal('oh no!');

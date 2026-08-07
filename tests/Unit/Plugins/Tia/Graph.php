@@ -66,8 +66,24 @@ describe('applyMigrationChanges()', function (): void {
 });
 
 describe('rerun tracking', function (): void {
+    beforeEach(function (): void {
+        $this->projectRoot = sys_get_temp_dir().'/pest-tia-rerun-'.bin2hex(random_bytes(4));
+        mkdir($this->projectRoot.'/tests/Feature', 0755, true);
+
+        touch($this->projectRoot.'/tests/Feature/FooTest.php');
+        touch($this->projectRoot.'/tests/Feature/BarTest.php');
+    });
+
+    afterEach(function (): void {
+        @unlink($this->projectRoot.'/tests/Feature/FooTest.php');
+        @unlink($this->projectRoot.'/tests/Feature/BarTest.php');
+        @rmdir($this->projectRoot.'/tests/Feature');
+        @rmdir($this->projectRoot.'/tests');
+        @rmdir($this->projectRoot);
+    });
+
     it('reruns cached failures via their file', function (): void {
-        $graph = new Graph(sys_get_temp_dir());
+        $graph = new Graph($this->projectRoot);
         $graph->setResult('main', 'Tests\FooTest::it fails', 7, 'boom', 0.1, 1, 'tests/Feature/FooTest.php');
         $graph->setResult('main', 'Tests\BarTest::it passes', 0, '', 0.1, 1, 'tests/Feature/BarTest.php');
 
@@ -76,7 +92,7 @@ describe('rerun tracking', function (): void {
     });
 
     it('flags cached failures whose file is unknown', function (): void {
-        $graph = new Graph(sys_get_temp_dir());
+        $graph = new Graph($this->projectRoot);
         $graph->setResult('main', 'Tests\EvalTest::it fails', 7, 'boom', 0.1, 1);
 
         expect($graph->testFilesToRerun('main'))->toBeEmpty()
@@ -217,6 +233,27 @@ describe('Livewire component views', function (): void {
         'default component location without emoji' => ['resources/views/components/post/create', 'resources/views/components/post/create/create.blade.php'],
         'default pages namespace' => ['resources/views/pages/post/⚡create', 'resources/views/pages/post/⚡create/create.blade.php'],
         'additional component location' => ['resources/views/widgets/create', 'resources/views/widgets/create/create.blade.php'],
+        'index convention' => ['resources/views/components/post/⚡index', 'resources/views/components/post/⚡index/index.blade.php'],
+    ]);
+
+    it('maps a changed MFC sibling through the component directory hash', function (string $sibling, string $generated): void {
+        $componentDirectory = 'resources/views/components/post/⚡create';
+        $hash = substr(md5(DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $componentDirectory)), 0, 8);
+
+        mkdir($this->projectRoot.'/'.$componentDirectory, 0755, true);
+        file_put_contents($this->projectRoot.'/'.$componentDirectory.'/create.blade.php', '<div>Component</div>');
+        file_put_contents($this->projectRoot.'/'.$componentDirectory.'/create.php', '<?php');
+        file_put_contents($this->projectRoot.'/'.$componentDirectory.'/create.js', '// js');
+
+        $graph = new Graph($this->projectRoot);
+        $graph->link('tests/Feature/ComponentTest.php', 'storage/framework/views/test_7/livewire/'.str_replace('{hash}', $hash, $generated));
+        $graph->link('tests/Feature/UnrelatedTest.php', 'storage/framework/views/test_8/livewire/views/deadbeef.blade.php');
+
+        expect($graph->affected([$componentDirectory.'/'.$sibling]))->toBe(['tests/Feature/ComponentTest.php']);
+    })->with([
+        'class sibling via the generated class' => ['create.php', 'classes/{hash}.php'],
+        'class sibling via the generated view' => ['create.php', 'views/{hash}.blade.php'],
+        'asset sibling via the generated view' => ['create.js', 'views/{hash}.blade.php'],
     ]);
 
     it('preserves direct view edges for class-based components', function (): void {
@@ -266,7 +303,6 @@ describe('markKnownTestFiles()', function (): void {
 
         $graph->markKnownTestFiles(['tests/Feature/UserTest.php']);
 
-        // The pre-existing edge survives — the test still depends on the source file.
         $affected = $graph->affected(['app/Models/User.php']);
 
         expect($affected)->toContain('tests/Feature/UserTest.php');

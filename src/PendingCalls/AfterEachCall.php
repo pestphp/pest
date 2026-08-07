@@ -20,19 +20,10 @@ final class AfterEachCall
 {
     use Describable;
 
-    /**
-     * The "afterEach" closure.
-     */
     private readonly Closure $closure;
 
-    /**
-     * The calls that should be proxied.
-     */
     private readonly HigherOrderMessageCollection $proxies;
 
-    /**
-     * Creates a new Pending Call.
-     */
     public function __construct(
         private readonly TestSuite $testSuite,
         private readonly string $filename,
@@ -45,9 +36,6 @@ final class AfterEachCall
         $this->describing = DescribeCall::describing();
     }
 
-    /**
-     * Creates the Call.
-     */
     public function __destruct()
     {
         $describing = $this->describing;
@@ -69,8 +57,6 @@ final class AfterEachCall
     }
 
     /**
-     * Saves the calls to be used on the target.
-     *
      * @param  array<int, mixed>  $arguments
      */
     public function __call(string $name, array $arguments): self

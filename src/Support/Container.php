@@ -13,9 +13,6 @@ use ReflectionParameter;
  */
 final class Container
 {
-    /**
-     * The instance of the container.
-     */
     private static ?Container $instance = null;
 
     /**
@@ -23,9 +20,6 @@ final class Container
      */
     private array $instances = [];
 
-    /**
-     * Gets a new or already existing container.
-     */
     public static function getInstance(): self
     {
         if (! self::$instance instanceof Container) {
@@ -35,9 +29,6 @@ final class Container
         return self::$instance;
     }
 
-    /**
-     * Gets a dependency from the container.
-     */
     public function get(string $id): object|string
     {
         if (! array_key_exists($id, $this->instances)) {
@@ -49,8 +40,6 @@ final class Container
     }
 
     /**
-     * Adds the given instance to the container.
-     *
      * @return $this
      */
     public function add(string $id, object|string $instance): self
@@ -61,8 +50,6 @@ final class Container
     }
 
     /**
-     * Tries to build the given instance.
-     *
      * @template TObject of object
      *
      * @param  class-string<TObject>  $id
@@ -86,7 +73,7 @@ final class Container
                             if ($type instanceof \ReflectionType && $type->isBuiltin()) {
                                 $candidate = $param->getName();
                             } else {
-                                throw ShouldNotHappen::fromMessage(sprintf('The type of `$%s` in `%s` cannot be determined.', $id, $param->getName()));
+                                throw ShouldNotHappen::fromMessage(sprintf('The type of [$%s] in [%s] cannot be determined.', $id, $param->getName()));
                             }
                         }
 
@@ -101,6 +88,6 @@ final class Container
             return $reflectionClass->newInstance();
         }
 
-        throw ShouldNotHappen::fromMessage(sprintf('A dependency with the name `%s` cannot be resolved.', $id));
+        throw ShouldNotHappen::fromMessage(sprintf('A dependency with the name [%s] cannot be resolved.', $id));
     }
 }

@@ -16,3 +16,19 @@ composer test:integration  # visual and snapshot tests
 composer test              # everything CI runs, in CI's order
 composer update:snapshots  # only when a test was added or removed
 ```
+
+## TIA scenario tests
+
+`tests/Features/Tia/*` scaffold a throwaway git project, run a real `pest` subprocess against it, and diff the TIA graph it wrote. They exist because TIA's contract is about what a run *writes* — replay, branch keys, and the COMPLETE / RESULTS-ONLY / HARD-SUPPRESSED tiers are invisible to ordinary assertions, and every case used to be measured by hand against a playground app.
+
+Add one whenever a change touches branch resolution, replay, filtered mode, or the write tiers. How:
+
+- `Project::make('master')` scaffolds; `seed('master')` writes a graph and sentinels every cached result (`time=9.999`, `assertions=42`) so any rewrite shows up.
+- `$project->pest('--tia', …)` runs it; `$project->delta()` compares against that snapshot. `writtenCount()` is the discriminator — `0` means "replayed", not "wrote the same values". `mutateGraph()` bends one entry; overlays in `tests/Fixtures/Tia/overlays/<name>/` supply a different `tests/Pest.php`.
+- Keep expectations driver-independent: a cold recording run needs pcov/xdebug and behaves differently without one. Seed a graph instead of recording one.
+
+Run them by file (a directory argument finds nothing) or by `--filter`:
+
+```bash
+php bin/pest tests/Features/Tia/PartialRunWriteTier.php
+```

@@ -16,6 +16,6 @@ test('deletes file after all', function () use ($file): void {
     file_put_contents($file, 'foo');
     expect($file)->toBeFile();
     register_shutdown_function(function (): void {
-        // $this->assertFileDoesNotExist($file);
+        //
     });
 });

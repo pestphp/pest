@@ -20,9 +20,6 @@ final class AfterEachRepository
      */
     private array $state = [];
 
-    /**
-     * Sets a after each closure.
-     */
     public function set(string $filename, AfterEachCall $afterEachCall, Closure $afterEachTestCase): void
     {
         if (array_key_exists($filename, $this->state)) {
@@ -37,9 +34,6 @@ final class AfterEachRepository
         $this->state[$filename] = $afterEachTestCase;
     }
 
-    /**
-     * Gets an after each closure by the given filename.
-     */
     public function get(string $filename): Closure
     {
         $afterEach = $this->state[$filename] ?? NullClosure::create();

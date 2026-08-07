@@ -167,7 +167,6 @@ final class StateGenerator
             }
         }
 
-        // for each test that passed, we need to add it to the state
         for ($i = 0; $i < $passedTests; $i++) {
             $state->add(TestResult::fromPestParallelTestCase(
                 new TestMethod(
@@ -186,11 +185,6 @@ final class StateGenerator
         return $state;
     }
 
-    /**
-     * Adds the given class-level "hook" failure to the state. Collision's
-     * `fromBeforeFirstTestMethodErrored` only accepts `BeforeFirstTestMethodErrored`
-     * events, so the remaining class-level events get a synthesized test method.
-     */
     private function addClassLevelEvent(State $state, AfterLastTestMethodErrored|AfterLastTestMethodFailed|BeforeFirstTestMethodErrored|BeforeFirstTestMethodFailed $event): void
     {
         if ($event instanceof BeforeFirstTestMethodErrored) {

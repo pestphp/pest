@@ -11,13 +11,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 interface Panicable
 {
-    /**
-     * Renders the panic on the given output.
-     */
     public function render(OutputInterface $output): void;
 
-    /**
-     * The exit code to be used.
-     */
     public function exitCode(): int;
 }

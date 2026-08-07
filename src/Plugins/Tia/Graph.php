@@ -18,6 +18,15 @@ use PHPUnit\TextUI\Configuration\Registry;
  */
 final class Graph
 {
+    /**
+     * @var array<string, string>
+     */
+    private const array LIVEWIRE_GENERATED_PATHS = [
+        '/livewire/views/' => '.blade.php',
+        '/livewire/placeholders/' => '.blade.php',
+        '/livewire/classes/' => '.php',
+    ];
+
     /** @var array<int, string> */
     private array $files = [];
 
@@ -43,10 +52,13 @@ final class Graph
      * @var array<string, array{
      *     sha: ?string,
      *     tree: array<string, string>,
+     *     complete?: bool,
      *     results: array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>
      * }>
      */
     private array $baselines = [];
+
+    private string $fallbackBranch = 'main';
 
     private readonly string $projectRoot;
 
@@ -101,7 +113,7 @@ final class Graph
         $this->applyTestFileChanges($nonMigrationPaths, $affectedSet);
 
         $handledBlade = $this->applyBladeStaticChanges($nonMigrationPaths, $affectedSet)
-            + $this->applyLivewireViewChanges($nonMigrationPaths, $affectedSet);
+            + $this->applyLivewireComponentChanges($nonMigrationPaths, $affectedSet);
 
         $this->applyWatchPatternFallback(
             $nonMigrationPaths,
@@ -115,6 +127,24 @@ final class Graph
         $this->applyUnknownSourceDirs($unknownSourceDirs, $affectedSet);
 
         return array_keys($affectedSet);
+    }
+
+    /**
+     * @param  array<int, string>  $testFiles  Project-relative paths.
+     * @return list<string>
+     */
+    public function testFilesOnDisk(array $testFiles): array
+    {
+        $root = rtrim($this->projectRoot, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
+        $onDisk = [];
+
+        foreach ($testFiles as $testFile) {
+            if (is_file($root.$testFile)) {
+                $onDisk[] = $testFile;
+            }
+        }
+
+        return $onDisk;
     }
 
     /**
@@ -150,9 +180,6 @@ final class Graph
      */
     private function applyMigrationChanges(array $migrationPaths, array &$affectedSet): array
     {
-        // With no recorded table usage at all, table intersection can never
-        // select anything — route every migration change through the
-        // watch-pattern fallback instead of silently skipping tests.
         if ($this->testTables === []) {
             return $migrationPaths;
         }
@@ -197,7 +224,6 @@ final class Graph
      * @param  list<string>  $nonMigrationPaths
      * @param  array<string, true>  $affectedSet
      * @return array{0: array<string, true>, 1: array<string, true>, 2: array<string, true>}
-     *                                                                                       globalFrontendRuntimeFiles, preciselyHandledPages, sharedFilesResolved
      */
     private function applyInertiaChanges(array $nonMigrationPaths, array &$affectedSet): array
     {
@@ -406,9 +432,6 @@ final class Graph
     }
 
     /**
-     * A changed file inside the configured test suites is itself the unit of
-     * work — always run it (new untracked tests, edited tests, renames).
-     *
      * @param  list<string>  $nonMigrationPaths
      * @param  array<string, true>  $affectedSet
      */
@@ -454,9 +477,6 @@ final class Graph
 
             $bladeAffected = $this->affectedByStaticBladeUsage($rel);
 
-            // Only a walk that actually selected tests counts as handled — a
-            // component whose usage the static walk missed must still reach
-            // the watch-pattern fallback instead of being silently swallowed.
             if ($bladeAffected !== []) {
                 foreach ($bladeAffected as $testFile) {
                     $affectedSet[$testFile] = true;
@@ -474,53 +494,132 @@ final class Graph
      * @param  array<string, true>  $affectedSet
      * @return array<string, true>
      */
-    private function applyLivewireViewChanges(array $nonMigrationPaths, array &$affectedSet): array
+    private function applyLivewireComponentChanges(array $nonMigrationPaths, array &$affectedSet): array
     {
-        $handled = [];
+        $generatedIds = $this->livewireGeneratedFileIds();
+
+        if ($generatedIds === []) {
+            return [];
+        }
+
+        /** @var array<int, array<string, true>> $sourcesByGeneratedId */
+        $sourcesByGeneratedId = [];
 
         foreach ($nonMigrationPaths as $rel) {
-            $sourcePaths = $this->livewireSourcePaths($rel);
-
-            if ($sourcePaths === []) {
-                continue;
-            }
-            if (! is_file($this->projectRoot.'/'.$rel)) {
-                continue;
-            }
-
-            $generatedViewIds = [];
-
-            foreach ($sourcePaths as $sourcePath) {
-                $nativeSourcePath = DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $sourcePath);
-                $hash = substr(md5($nativeSourcePath), 0, 8);
-                $generatedViewSuffix = '/livewire/views/'.$hash.'.blade.php';
-
-                foreach ($this->fileIds as $path => $id) {
-                    if (str_ends_with('/'.ltrim($path, '/'), $generatedViewSuffix)) {
-                        $generatedViewIds[$id] = true;
-                    }
-                }
-            }
-
-            if ($generatedViewIds === []) {
-                continue;
-            }
-
-            foreach ($this->edges as $testFile => $ids) {
-                foreach ($ids as $id) {
-                    if (! isset($generatedViewIds[$id])) {
-                        continue;
-                    }
-
-                    $affectedSet[$testFile] = true;
-                    $handled[$rel] = true;
-
-                    break;
+            foreach ($this->livewireSourcePaths($rel) as $sourcePath) {
+                foreach ($generatedIds[$this->livewireHash($sourcePath)] ?? [] as $id) {
+                    $sourcesByGeneratedId[$id][$rel] = true;
                 }
             }
         }
 
+        if ($sourcesByGeneratedId === []) {
+            return [];
+        }
+
+        $handled = [];
+
+        foreach ($this->edges as $testFile => $ids) {
+            foreach ($ids as $id) {
+                if (! isset($sourcesByGeneratedId[$id])) {
+                    continue;
+                }
+
+                $affectedSet[$testFile] = true;
+                $handled += $sourcesByGeneratedId[$id];
+            }
+        }
+
         return $handled;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function livewireSourcePaths(string $rel): array
+    {
+        $sourcePaths = [];
+
+        if (str_ends_with($rel, '.blade.php')) {
+            $sourcePaths[] = $rel;
+        }
+
+        $componentDirectory = dirname($rel);
+
+        if ($this->isLivewireMultiFileDirectory($componentDirectory)) {
+            $sourcePaths[] = $componentDirectory;
+        }
+
+        return $sourcePaths;
+    }
+
+    private function isLivewireMultiFileDirectory(string $componentDirectory): bool
+    {
+        $directoryName = basename($componentDirectory);
+
+        if (str_contains($directoryName, 'index')) {
+            $directoryName = 'index';
+        }
+
+        $componentName = preg_replace('/⚡[\x{FE0E}\x{FE0F}]?/u', '', $directoryName);
+
+        if ($componentName === null || $componentName === '') {
+            return false;
+        }
+
+        $source = $this->projectRoot.'/'.$componentDirectory.'/'.$componentName;
+
+        return is_file($source.'.php') && is_file($source.'.blade.php');
+    }
+
+    private function livewireHash(string $sourcePath): string
+    {
+        return substr(md5(DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $sourcePath)), 0, 8);
+    }
+
+    /**
+     * @return array<string, list<int>>
+     */
+    private function livewireGeneratedFileIds(): array
+    {
+        $generated = [];
+
+        foreach ($this->fileIds as $path => $id) {
+            $hash = $this->livewireGeneratedHash($path);
+
+            if ($hash === null) {
+                continue;
+            }
+
+            $generated[$hash][] = $id;
+        }
+
+        return $generated;
+    }
+
+    private function livewireGeneratedHash(string $path): ?string
+    {
+        $normalized = '/'.ltrim($path, '/');
+
+        foreach (self::LIVEWIRE_GENERATED_PATHS as $directory => $extension) {
+            if (! str_ends_with($normalized, $extension)) {
+                continue;
+            }
+
+            $position = strrpos($normalized, $directory);
+
+            if ($position === false) {
+                continue;
+            }
+
+            $hash = substr($normalized, $position + strlen($directory), -strlen($extension));
+
+            if (preg_match('/^[0-9a-f]{8}$/', $hash) === 1) {
+                return $hash;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -631,7 +730,12 @@ final class Graph
         return $this->fingerprint;
     }
 
-    public function recordedAtSha(string $branch, string $fallbackBranch = 'main'): ?string
+    public function setFallbackBranch(string $branch): void
+    {
+        $this->fallbackBranch = $branch;
+    }
+
+    public function recordedAtSha(string $branch, ?string $fallbackBranch = null): ?string
     {
         $baseline = $this->baselineFor($branch, $fallbackBranch);
 
@@ -666,7 +770,7 @@ final class Graph
         $this->baselines[$branch]['results'][$testId] = $entry;
     }
 
-    public function getAssertions(string $branch, string $testId, string $fallbackBranch = 'main'): ?int
+    public function getAssertions(string $branch, string $testId, ?string $fallbackBranch = null): ?int
     {
         $baseline = $this->baselineFor($branch, $fallbackBranch);
 
@@ -677,7 +781,18 @@ final class Graph
         return $baseline['results'][$testId]['assertions'];
     }
 
-    public function getResult(string $branch, string $testId, string $fallbackBranch = 'main'): ?TestStatus
+    public function getTime(string $branch, string $testId, ?string $fallbackBranch = null): ?float
+    {
+        $baseline = $this->baselineFor($branch, $fallbackBranch);
+
+        if (! isset($baseline['results'][$testId]['time'])) {
+            return null;
+        }
+
+        return $baseline['results'][$testId]['time'];
+    }
+
+    public function getResult(string $branch, string $testId, ?string $fallbackBranch = null): ?TestStatus
     {
         $baseline = $this->baselineFor($branch, $fallbackBranch);
 
@@ -697,14 +812,14 @@ final class Graph
             6 => TestStatus::warning($r['message']),
             7 => TestStatus::failure($r['message']),
             8 => TestStatus::error($r['message']),
-            default => TestStatus::unknown(),
+            default => null,
         };
     }
 
     /**
      * @return array<int, string>
      */
-    public function testFilesToRerun(string $branch, string $fallbackBranch = 'main'): array
+    public function testFilesToRerun(string $branch, ?string $fallbackBranch = null): array
     {
         $baseline = $this->baselineFor($branch, $fallbackBranch);
         $files = [];
@@ -724,7 +839,7 @@ final class Graph
 
             $rel = $this->relative($file);
 
-            if ($rel !== null) {
+            if ($rel !== null && is_file($this->projectRoot.'/'.$rel)) {
                 $files[$rel] = true;
             }
         }
@@ -732,7 +847,7 @@ final class Graph
         return array_keys($files);
     }
 
-    public function hasUnlocatedTestsToRerun(string $branch, string $fallbackBranch = 'main'): bool
+    public function hasUnlocatedTestsToRerun(string $branch, ?string $fallbackBranch = null): bool
     {
         $baseline = $this->baselineFor($branch, $fallbackBranch);
 
@@ -743,7 +858,11 @@ final class Graph
 
             $file = $result['file'] ?? null;
 
-            if ($file === null || $file === '' || $this->relative($file) === null) {
+            if ($file === null || $file === '') {
+                return true;
+            }
+
+            if ($this->relative($file) === null) {
                 return true;
             }
         }
@@ -756,14 +875,13 @@ final class Graph
         return $this->shouldRerunStatus(TestStatus::from($status));
     }
 
-    /**
-     * Whether a cached result with this status must be re-executed rather
-     * than replayed, honouring the configured failOn* / displayDetailsOn*
-     * policies.
-     */
     public function shouldRerunStatus(TestStatus $testStatus): bool
     {
         if ($testStatus->isFailure() || $testStatus->isError()) {
+            return true;
+        }
+
+        if ($testStatus->isUnknown()) {
             return true;
         }
 
@@ -834,25 +952,70 @@ final class Graph
     /**
      * @return array<string, string>
      */
-    public function lastRunTree(string $branch, string $fallbackBranch = 'main'): array
+    public function lastRunTree(string $branch, ?string $fallbackBranch = null): array
     {
         return $this->baselineFor($branch, $fallbackBranch)['tree'];
     }
 
     /**
-     * @return array{sha: ?string, tree: array<string, string>, results: array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>}
+     * @return array{sha: ?string, tree: array<string, string>, complete?: bool, results: array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>}
      */
-    private function baselineFor(string $branch, string $fallbackBranch): array
+    private function baselineFor(string $branch, ?string $fallbackBranch): array
     {
-        if (isset($this->baselines[$branch])) {
-            return $this->baselines[$branch];
+        $fallbackBranch ??= $this->fallbackBranch;
+
+        $fallback = $branch !== $fallbackBranch ? ($this->baselines[$fallbackBranch] ?? null) : null;
+        $own = $this->baselines[$branch] ?? null;
+
+        if ($own === null) {
+            return $fallback ?? ['sha' => null, 'tree' => [], 'results' => []];
         }
 
-        if ($branch !== $fallbackBranch && isset($this->baselines[$fallbackBranch])) {
-            return $this->baselines[$fallbackBranch];
+        if ($fallback === null) {
+            return $own;
         }
 
-        return ['sha' => null, 'tree' => [], 'results' => []];
+        $under = ($own['complete'] ?? false) === true
+            ? $this->withoutFilesCoveredBy($fallback['results'], $own['results'])
+            : $fallback['results'];
+
+        return [
+            'sha' => $own['sha'] ?? $fallback['sha'],
+            'tree' => $own['tree'] !== [] ? $own['tree'] : $fallback['tree'],
+            'results' => array_replace($under, $own['results']),
+        ];
+    }
+
+    /**
+     * @param  array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>  $results
+     * @param  array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>  $authoritative
+     * @return array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>
+     */
+    private function withoutFilesCoveredBy(array $results, array $authoritative): array
+    {
+        $covered = [];
+
+        foreach ($authoritative as $entry) {
+            $file = $entry['file'] ?? null;
+
+            if (is_string($file) && $file !== '') {
+                $covered[$file] = true;
+            }
+        }
+
+        if ($covered === []) {
+            return $results;
+        }
+
+        foreach ($results as $testId => $entry) {
+            $file = $entry['file'] ?? null;
+
+            if (is_string($file) && isset($covered[$file])) {
+                unset($results[$testId]);
+            }
+        }
+
+        return $results;
     }
 
     private function ensureBaseline(string $branch): void
@@ -864,13 +1027,18 @@ final class Graph
 
     /**
      * @param  array<string, array<int, string>>  $testToFiles
+     * @param  bool  $keepExisting  Leave already-recorded edge sets alone.
      */
-    public function replaceEdges(array $testToFiles): void
+    public function replaceEdges(array $testToFiles, bool $keepExisting = false): void
     {
         foreach ($testToFiles as $testFile => $sources) {
             $testRel = $this->relative($testFile);
 
             if ($testRel === null) {
+                continue;
+            }
+
+            if ($keepExisting && ($this->edges[$testRel] ?? []) !== []) {
                 continue;
             }
 
@@ -885,19 +1053,8 @@ final class Graph
     }
 
     /**
-     * Mark test files that executed under a recorded coverage session as "known",
-     * seeding an empty edge set for any that produced zero project-source edges.
-     *
-     * Without this, a test that covers no application source (e.g. a pure unit
-     * test asserting on language primitives) never becomes an edge key, so
      * {@see self::knowsTest()} reports it as unknown and it re-runs on every TIA
-     * run. Recording it with an empty edge set lets it be replayed/skipped while
-     * unchanged; it is still re-run whenever its own file changes, via
      * {@see self::applyTestFileChanges()}.
-     *
-     * Must only be called from the recording path, where coverage was actually
-     * collected — otherwise a missing edge set could mean "coverage was off",
-     * not "genuinely covered nothing".
      *
      * @param  array<int, string>  $testFiles  Absolute or project-relative test file paths.
      */
@@ -1146,30 +1303,6 @@ final class Graph
         return str_starts_with($rel, 'resources/views/') && str_ends_with($rel, '.blade.php');
     }
 
-    /**
-     * @return list<string>
-     */
-    private function livewireSourcePaths(string $rel): array
-    {
-        if (! str_ends_with($rel, '.blade.php')) {
-            return [];
-        }
-
-        $sourcePaths = [$rel];
-        $componentDirectory = dirname($rel);
-        $componentName = preg_replace('/^⚡[\x{FE0E}\x{FE0F}]?/u', '', basename($componentDirectory));
-
-        if ($componentName === null || basename($rel) !== $componentName.'.blade.php') {
-            return $sourcePaths;
-        }
-
-        if (is_file($this->projectRoot.'/'.$componentDirectory.'/'.$componentName.'.php')) {
-            $sourcePaths[] = $componentDirectory;
-        }
-
-        return $sourcePaths;
-    }
-
     private function isBladeComponentPath(string $rel): bool
     {
         return str_starts_with($rel, 'resources/views/components/') && str_ends_with($rel, '.blade.php');
@@ -1350,7 +1483,6 @@ final class Graph
 
         $names = [$name, str_replace('_', '-', $name)];
 
-        // Anonymous index components: components/card/index.blade.php resolves as <x-card>.
         if (str_ends_with($name, '.index') && $name !== '.index') {
             $base = substr($name, 0, -strlen('.index'));
 
@@ -1456,10 +1588,57 @@ final class Graph
         }
     }
 
+    public function markBaselineComplete(string $branch): void
+    {
+        if (isset($this->baselines[$branch])) {
+            $this->baselines[$branch]['complete'] = true;
+        }
+    }
+
+    public function pruneResultsForMissingFiles(string $branch): void
+    {
+        if (! isset($this->baselines[$branch]['results'])) {
+            return;
+        }
+
+        $root = rtrim($this->projectRoot, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
+
+        foreach ($this->baselines[$branch]['results'] as $testId => $result) {
+            $file = $result['file'] ?? null;
+            if (! is_string($file)) {
+                continue;
+            }
+            if ($file === '') {
+                continue;
+            }
+
+            $rel = $this->relative($file);
+            if ($rel === null) {
+                continue;
+            }
+            if (is_file($root.$rel)) {
+                continue;
+            }
+
+            unset($this->baselines[$branch]['results'][$testId]);
+        }
+    }
+
     /**
-     * Prune baseline result entries whose test files were just executed but whose
-     * test IDs are no longer present (e.g. the test method was removed or renamed).
-     *
+     * @param  array<int, string>  $keep
+     */
+    public function pruneMissingBranches(array $keep): void
+    {
+        $survivors = array_fill_keys($keep, true);
+
+        foreach (array_keys($this->baselines) as $branch) {
+            if (! isset($survivors[$branch])) {
+                unset($this->baselines[$branch]);
+            }
+        }
+    }
+
+    /**
      * @param  array<int, string>  $touchedFiles  Absolute or project-relative paths.
      * @param  array<int, string>  $keepTestIds  Test IDs that produced a result this run.
      */
@@ -1501,6 +1680,28 @@ final class Graph
         }
     }
 
+    /**
+     * @return list<string>
+     */
+    public static function branchesIn(string $json): array
+    {
+        $data = json_decode($json, true);
+
+        if (! is_array($data) || ! is_array($data['baselines'] ?? null)) {
+            return [];
+        }
+
+        $branches = [];
+
+        foreach (array_keys($data['baselines']) as $branch) {
+            if (is_string($branch) && $branch !== '') {
+                $branches[] = $branch;
+            }
+        }
+
+        return $branches;
+    }
+
     public static function decode(string $json, string $projectRoot): ?self
     {
         $data = json_decode($json, true);
@@ -1511,16 +1712,163 @@ final class Graph
 
         $graph = new self($projectRoot);
         $graph->fingerprint = is_array($data['fingerprint'] ?? null) ? $data['fingerprint'] : [];
-        $graph->files = is_array($data['files'] ?? null) ? array_values($data['files']) : [];
+        $graph->files = self::decodeFiles($data['files'] ?? null);
         $graph->fileIds = array_flip($graph->files);
-        $graph->edges = is_array($data['edges'] ?? null) ? $data['edges'] : [];
-        $graph->baselines = is_array($data['baselines'] ?? null) ? $data['baselines'] : [];
+        $graph->edges = self::decodeEdges($data['edges'] ?? null);
+        $graph->baselines = self::decodeBaselines($data['baselines'] ?? null);
 
         $graph->testTables = self::decodeStringMap($data['test_tables'] ?? null);
         $graph->testInertiaComponents = self::decodeStringMap($data['test_inertia_components'] ?? null);
         $graph->jsFileToComponents = self::decodeStringMap($data['js_file_to_components'] ?? null);
 
         return $graph;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private static function decodeFiles(mixed $section): array
+    {
+        if (! is_array($section)) {
+            return [];
+        }
+
+        $files = [];
+
+        foreach ($section as $path) {
+            if (is_string($path) && $path !== '') {
+                $files[] = $path;
+            }
+        }
+
+        return $files;
+    }
+
+    /**
+     * @return array<string, array<int, int>>
+     */
+    private static function decodeEdges(mixed $section): array
+    {
+        if (! is_array($section)) {
+            return [];
+        }
+
+        $edges = [];
+
+        foreach ($section as $key => $ids) {
+            $testFile = (string) $key;
+
+            if ($testFile === '') {
+                continue;
+            }
+            if (! is_array($ids)) {
+                continue;
+            }
+
+            $clean = [];
+
+            foreach ($ids as $id) {
+                if (is_int($id)) {
+                    $clean[] = $id;
+                }
+            }
+
+            $edges[$testFile] = $clean;
+        }
+
+        return $edges;
+    }
+
+    /**
+     * @return array<string, array{sha: ?string, tree: array<string, string>, complete?: bool, results: array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>}>
+     */
+    private static function decodeBaselines(mixed $section): array
+    {
+        if (! is_array($section)) {
+            return [];
+        }
+
+        $baselines = [];
+
+        foreach ($section as $key => $baseline) {
+            $branch = (string) $key;
+
+            if ($branch === '') {
+                continue;
+            }
+            if (! is_array($baseline)) {
+                continue;
+            }
+
+            $sha = $baseline['sha'] ?? null;
+            $tree = [];
+
+            if (is_array($baseline['tree'] ?? null)) {
+                foreach ($baseline['tree'] as $path => $hash) {
+                    if (is_string($path) && is_string($hash)) {
+                        $tree[$path] = $hash;
+                    }
+                }
+            }
+
+            $baselines[$branch] = [
+                'sha' => is_string($sha) ? $sha : null,
+                'tree' => $tree,
+                'results' => self::decodeResults($baseline['results'] ?? null),
+            ];
+
+            if (($baseline['complete'] ?? null) === true) {
+                $baselines[$branch]['complete'] = true;
+            }
+        }
+
+        return $baselines;
+    }
+
+    /**
+     * @return array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>
+     */
+    private static function decodeResults(mixed $section): array
+    {
+        if (! is_array($section)) {
+            return [];
+        }
+
+        $results = [];
+
+        foreach ($section as $key => $entry) {
+            $testId = (string) $key;
+
+            if ($testId === '') {
+                continue;
+            }
+            if (! is_array($entry)) {
+                continue;
+            }
+            if (! is_int($entry['status'] ?? null)) {
+                continue;
+            }
+
+            $time = $entry['time'] ?? null;
+
+            $result = [
+                'status' => $entry['status'],
+                'message' => is_string($entry['message'] ?? null) ? $entry['message'] : '',
+                'time' => is_int($time) || is_float($time) ? (float) $time : 0.0,
+            ];
+
+            if (is_int($entry['assertions'] ?? null)) {
+                $result['assertions'] = $entry['assertions'];
+            }
+
+            if (is_string($entry['file'] ?? null) && $entry['file'] !== '') {
+                $result['file'] = $entry['file'];
+            }
+
+            $results[$testId] = $result;
+        }
+
+        return $results;
     }
 
     /**

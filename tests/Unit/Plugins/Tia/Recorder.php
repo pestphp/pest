@@ -38,7 +38,6 @@ describe('activateLinkTracking()', function (): void {
         $recorder->linkSource('/project/resources/views/welcome.blade.php');
         $recorder->endTest();
 
-        // A second test must start cleanly — endTest resets state even with no driver.
         $recorder->beginTest('Some\Missing\TestClass', 'second', '/project/tests/Feature/SecondTest.php');
         $recorder->linkSource('/project/resources/views/about.blade.php');
         $recorder->endTest();

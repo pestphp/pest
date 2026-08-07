@@ -26,7 +26,6 @@ it('does not run user hooks when replaying cached skipped and incomplete results
         $graph = new Graph($projectRoot);
         $graph->setFingerprint(Fingerprint::compute($projectRoot));
         $graph->setRecordedAtSha($branch, $sha);
-        // Hashes the working tree as it stands, so the replay sees nothing as changed.
         $graph->setLastRunTree($branch, $changedFiles->snapshotTree($changedFiles->since($sha) ?? []));
         $graph->markKnownTestFiles([$fixture]);
         $graph->setResult($branch, $id('replayed pass'), 0, '', 0.01, 1, $fixture);
@@ -49,7 +48,7 @@ it('does not run user hooks when replaying cached skipped and incomplete results
         expect($storage->write(Tia::KEY_GRAPH, (string) $json))->toBeTrue();
 
         $process = new Process(
-            ['php', 'bin/pest', $fixture, '--tia'],
+            ['php', 'bin/pest', '--configuration', 'tests/Fixtures/Suites/TiaReplayHooks.xml', '--tia'],
             $projectRoot,
             [
                 'COLLISION_PRINTER' => 'DefaultPrinter',
@@ -64,7 +63,6 @@ it('does not run user hooks when replaying cached skipped and incomplete results
 
         $output = removeAnsiEscapeSequences($process->getOutput().$process->getErrorOutput());
 
-        // Both hooks throw, so the run stays green only if neither one ran.
         expect($output)->toContain('3 replayed')
             ->and($output)->not->toContain('must not run for replayed tests')
             ->and($output)->toContain('1 incomplete, 1 skipped, 1 passed')

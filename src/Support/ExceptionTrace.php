@@ -16,8 +16,6 @@ final class ExceptionTrace
     private const string UNDEFINED_METHOD = 'Call to undefined method P\\';
 
     /**
-     * Ensures the given closure reports the good execution context.
-     *
      * @throws Throwable
      */
     public static function ensure(Closure $closure): mixed

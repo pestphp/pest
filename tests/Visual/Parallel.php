@@ -9,6 +9,8 @@ $run = function (): ?string {
         ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
     );
 
+    $process->setTimeout(300.0);
+
     $process->run();
 
     return removeAnsiEscapeSequences($process->getOutput());
@@ -24,13 +26,13 @@ test('parallel', function () use ($run): void {
         $file = file_get_contents(__FILE__);
         $file = preg_replace(
             '/\$expected = \'.*?\';/',
-            "\$expected = '1 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1543 passed (3346 assertions)';",
+            "\$expected = '1 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1547 passed (3349 assertions)';",
             $file,
         );
         file_put_contents(__FILE__, $file);
     }
 
-    $expected = '1 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1543 passed (3346 assertions)';
+    $expected = '1 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1547 passed (3349 assertions)';
 
     expect($output)
         ->toContain("Tests:    {$expected}")
@@ -43,7 +45,7 @@ test('a parallel test can extend another test with same name', function () use (
 
 test('parallel reports invalid datasets as failures', function () use ($run): void {
     expect($run('tests/Fixtures/Suites/ParallelInvalidDataset'))
-        ->toContain("A dataset with the name `missing.dataset` does not exist. You can create it using `dataset('missing.dataset', ['a', 'b']);`.")
+        ->toContain("A dataset named [missing.dataset] does not exist. You may create one using `dataset('missing.dataset', ['a', 'b']);`.")
         ->toContain('Tests:    1 failed, 1 passed (1 assertions)')
         ->toContain('Parallel: 3 processes');
 })->skipOnWindows();

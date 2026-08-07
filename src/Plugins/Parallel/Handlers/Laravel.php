@@ -37,8 +37,6 @@ final class Laravel implements HandlesArguments
     }
 
     /**
-     * Executes the given closure when running Laravel.
-     *
      * @param  array<int, string>  $arguments
      * @param  Closure(array<int, string>): array<int, string>  $closure
      * @return array<int, string>
@@ -55,9 +53,6 @@ final class Laravel implements HandlesArguments
         return $arguments;
     }
 
-    /**
-     * Ensures the runner is resolvable.
-     */
     private function ensureRunnerIsResolvable(): void
     {
         ParallelRunner::resolveRunnerUsing( // @phpstan-ignore-line
@@ -66,8 +61,6 @@ final class Laravel implements HandlesArguments
     }
 
     /**
-     * Ensures the environment variables are set.
-     *
      * @param  array<int, string>  $arguments
      * @return array<int, string>
      */
@@ -89,8 +82,6 @@ final class Laravel implements HandlesArguments
     }
 
     /**
-     * Ensure the runner is set.
-     *
      * @param  array<int, string>  $arguments
      * @return array<int, string>
      */

@@ -28,8 +28,6 @@ return RectorConfig::configure()
     ->withSkip([
         __DIR__.'/src/Plugins/Parallel/Paratest/WrapperRunner.php',
         __DIR__.'/tests/Fixtures/Arch',
-        // Fixture suites are pinned by the TeamCity / JUnit snapshots, down to
-        // the line numbers — rewriting their source would break them.
         __DIR__.'/tests/Fixtures/Suites',
         ReturnNeverTypeRector::class,
         ArrowFunctionDelegatingCallToFirstClassCallableRector::class,
@@ -40,13 +38,7 @@ return RectorConfig::configure()
         RemoveReturnTagIncompatibleWithNativeTypeRector::class => [
             __DIR__.'/src/Expectations/HigherOrderExpectation.php',
         ],
-        // Merges unrelated expectations into a single `toMatchArray()`, turning
-        // `toContain()` into exact matches, dropping `->not`, and mistaking a
-        // `toBeTrue()` failure message for an expected value. Unsafe here.
         UseToMatchArrayRector::class,
-        // Test fixtures rely on "unused" constructors, params and properties
-        // (resolved via the container or read through reflection), so the
-        // dead-code and return-type rules below must not touch the test suite.
         RemoveEmptyClassMethodRector::class => [
             __DIR__.'/tests',
         ],
