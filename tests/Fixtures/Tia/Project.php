@@ -174,6 +174,9 @@ final class Project
                 'HOME' => $this->home(),
                 'GITHUB_EVENT_PATH' => '',
                 'CI_DEFAULT_BRANCH' => '',
+                'GITHUB_ACTIONS' => '',
+                'GITLAB_CI' => '',
+                'CIRCLECI' => '',
                 ...$environment,
             ],
         );
