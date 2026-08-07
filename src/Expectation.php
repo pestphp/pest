@@ -318,7 +318,7 @@ final class Expectation
 
             if (! is_object($this->value)) {
                 throw new BadMethodCallException(sprintf(
-                    'Method "%s" does not exist in %s.',
+                    'Method [%s] does not exist in [%s].',
                     $method,
                     gettype($this->value)
                 ));
@@ -534,7 +534,7 @@ final class Expectation
         return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => count(array_filter($methods, fn (string $method): bool => isset($object->reflectionClass) && $object->reflectionClass->hasMethod($method))) === count($methods),
-            sprintf("to have method '%s'", implode("', '", $methods)),
+            sprintf('to have method [%s]', implode('], [', $methods)),
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
@@ -659,7 +659,7 @@ final class Expectation
         return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => isset($object->reflectionClass) && ($class === $object->reflectionClass->getName() || $object->reflectionClass->isSubclassOf($class)),
-            sprintf("to extend '%s'", $class),
+            sprintf('to extend [%s]', $class),
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
@@ -753,7 +753,7 @@ final class Expectation
         return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => isset($object->reflectionClass) && str_starts_with($object->reflectionClass->getShortName(), $prefix),
-            "to have prefix '{$prefix}'",
+            "to have prefix [{$prefix}]",
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
@@ -763,7 +763,7 @@ final class Expectation
         return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => isset($object->reflectionClass) && str_ends_with($object->reflectionClass->getName(), $suffix),
-            "to have suffix '{$suffix}'",
+            "to have suffix [{$suffix}]",
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
@@ -930,7 +930,7 @@ final class Expectation
         return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => isset($object->reflectionClass) && $object->reflectionClass->getAttributes($attribute) !== [],
-            "to have attribute '{$attribute}'",
+            "to have attribute [{$attribute}]",
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }

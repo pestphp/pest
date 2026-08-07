@@ -15,7 +15,7 @@ it('does not allow to add the same test description twice', function (): void {
     $testSuite->tests->set($method);
 })->throws(
     TestAlreadyExist::class,
-    sprintf('A test with the description [%s] already exists in the filename [%s].', 'bar', 'foo'),
+    sprintf('A test named [%s] already exists in [%s]. Please give this test a different description.', 'bar', 'foo'),
 );
 
 it('does not allow static closures', function (): void {
@@ -27,7 +27,7 @@ it('does not allow static closures', function (): void {
     $testSuite->tests->set($method);
 })->throws(
     TestClosureMustNotBeStatic::class,
-    'Test closure must not be static. Please remove the [static] keyword from the [bar] method in [foo].',
+    'Test closures may not be static. Please remove the [static] keyword from the test [bar] in [foo].',
 );
 
 it('alerts users about tests with arguments but no input', function (): void {
@@ -40,7 +40,7 @@ it('alerts users about tests with arguments but no input', function (): void {
     $testSuite->tests->set($method);
 })->throws(
     DatasetMissing::class,
-    sprintf('A test with the description [%s] has [%d] argument(s) ([%s]) and no dataset(s) provided in [%s]', 'bar', 1, 'int $arg', 'foo'),
+    sprintf('The test [%s] in [%s] expects [%d] argument(s) ([%s]), but no dataset was provided. Please chain [with()] onto the test to supply one.', 'bar', 'foo', 1, 'int $arg'),
 );
 
 it('can return an array of all test suite filenames', function (): void {

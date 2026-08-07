@@ -296,7 +296,7 @@ final readonly class OppositeExpectation
             },
             $methods === []
                 ? 'not to have public methods'
-                : sprintf("not to have public methods besides '%s'", implode("', '", $methods)),
+                : sprintf('not to have public methods besides [%s]', implode('], [', $methods)),
             FileLineFinder::where(fn (string $line): bool => str_contains($line, (string) $state->contains)),
         );
     }
@@ -337,7 +337,7 @@ final readonly class OppositeExpectation
             },
             $methods === []
                 ? 'not to have protected methods'
-                : sprintf("not to have protected methods besides '%s'", implode("', '", $methods)),
+                : sprintf('not to have protected methods besides [%s]', implode('], [', $methods)),
             FileLineFinder::where(fn (string $line): bool => str_contains($line, (string) $state->contains)),
         );
     }
@@ -378,7 +378,7 @@ final readonly class OppositeExpectation
             },
             $methods === []
                 ? 'not to have private methods'
-                : sprintf("not to have private methods besides '%s'", implode("', '", $methods)),
+                : sprintf('not to have private methods besides [%s]', implode('], [', $methods)),
             FileLineFinder::where(fn (string $line): bool => str_contains($line, (string) $state->contains)),
         );
     }
@@ -450,7 +450,7 @@ final readonly class OppositeExpectation
         return Targeted::make(
             $original,
             fn (ObjectDescription $object): bool => isset($object->reflectionClass) === false || ! $object->reflectionClass->isSubclassOf($class),
-            sprintf("not to extend '%s'", $class),
+            sprintf('not to extend [%s]', $class),
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
@@ -535,7 +535,7 @@ final readonly class OppositeExpectation
         return Targeted::make(
             $original,
             fn (ObjectDescription $object): bool => isset($object->reflectionClass) === false || ! str_starts_with($object->reflectionClass->getShortName(), $prefix),
-            "not to have prefix '{$prefix}'",
+            "not to have prefix [{$prefix}]",
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
@@ -548,7 +548,7 @@ final readonly class OppositeExpectation
         return Targeted::make(
             $original,
             fn (ObjectDescription $object): bool => isset($object->reflectionClass) === false || ! str_ends_with($object->reflectionClass->getName(), $suffix),
-            "not to have suffix '{$suffix}'",
+            "not to have suffix [{$suffix}]",
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
@@ -615,7 +615,7 @@ final readonly class OppositeExpectation
         return Targeted::make(
             $original,
             fn (ObjectDescription $object): bool => isset($object->reflectionClass) === false || $object->reflectionClass->getAttributes($attribute) === [],
-            "to not have attribute '{$attribute}'",
+            "to not have attribute [{$attribute}]",
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class'))
         );
     }

@@ -13,6 +13,6 @@ final class ExpectationNotFound extends Exception
 {
     public static function fromName(string $name): ExpectationNotFound
     {
-        return new self("Expectation [$name] does not exist.");
+        return new self("The expectation [$name] does not exist. You may register it using [expect()->extend()].");
     }
 }

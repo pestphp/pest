@@ -19,7 +19,7 @@ final class TestClosureMustNotBeStatic extends InvalidArgumentException implemen
     {
         parent::__construct(
             sprintf(
-                'Test closure must not be static. Please remove the [static] keyword from the [%s] method in [%s].',
+                'Test closures may not be static. Please remove the [static] keyword from the test [%s] in [%s].',
                 $method->description,
                 $method->filename
             )

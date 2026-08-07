@@ -16,6 +16,6 @@ final class BeforeAllAlreadyExist extends InvalidArgumentException implements Ex
 {
     public function __construct(string $filename)
     {
-        parent::__construct(sprintf('The beforeAll already exists in the filename [%s].', $filename));
+        parent::__construct(sprintf('The [beforeAll] hook is already defined in [%s]. Each test file may only define it once.', $filename));
     }
 }

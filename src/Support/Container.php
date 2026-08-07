@@ -73,7 +73,7 @@ final class Container
                             if ($type instanceof \ReflectionType && $type->isBuiltin()) {
                                 $candidate = $param->getName();
                             } else {
-                                throw ShouldNotHappen::fromMessage(sprintf('The type of `$%s` in `%s` cannot be determined.', $id, $param->getName()));
+                                throw ShouldNotHappen::fromMessage(sprintf('The type of [$%s] in [%s] cannot be determined.', $id, $param->getName()));
                             }
                         }
 
@@ -88,6 +88,6 @@ final class Container
             return $reflectionClass->newInstance();
         }
 
-        throw ShouldNotHappen::fromMessage(sprintf('A dependency with the name `%s` cannot be resolved.', $id));
+        throw ShouldNotHappen::fromMessage(sprintf('A dependency with the name [%s] cannot be resolved.', $id));
     }
 }

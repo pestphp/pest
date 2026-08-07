@@ -16,6 +16,6 @@ final class AfterBeforeTestFunction extends InvalidArgumentException implements 
 {
     public function __construct(string $filename)
     {
-        parent::__construct('After method cannot be used with before the [test|it] functions in the filename ['.$filename.'].');
+        parent::__construct(sprintf('The [after] hook may only be chained onto [beforeEach] inside a [describe] block. Please move it inside one in [%s].', $filename));
     }
 }

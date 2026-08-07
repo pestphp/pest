@@ -21,7 +21,7 @@ test('reports missing datasets as errors for a single file run', function () use
     $result = $run('tests/Fixtures/Suites/IssueOnly.php');
 
     expect($result['output'])
-        ->toContain("A dataset with the name [missing] does not exist. You can create it using `dataset('missing', ['a', 'b']);`.")
+        ->toContain("A dataset named [missing] does not exist. You may create one using `dataset('missing', ['a', 'b']);`.")
         ->toContain('FAILED')
         ->toContain('Tests:    1 failed')
         ->and($result['code'])->not->toBe(0);
@@ -31,7 +31,7 @@ test('reports missing datasets as errors alongside passing tests', function () u
     $result = $run('tests/Fixtures/Suites/IssueWithPassing.php');
 
     expect($result['output'])
-        ->toContain("A dataset with the name [missing] does not exist. You can create it using `dataset('missing', ['a', 'b']);`.")
+        ->toContain("A dataset named [missing] does not exist. You may create one using `dataset('missing', ['a', 'b']);`.")
         ->toContain('1 passed')
         ->toContain('1 failed')
         ->and($result['code'])->not->toBe(0);

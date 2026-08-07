@@ -16,6 +16,6 @@ final class MissingDependency extends InvalidArgumentException implements Except
 {
     public function __construct(string $feature, string $dependency)
     {
-        parent::__construct(sprintf('The feature [%s] requires [%s].', $feature, $dependency));
+        parent::__construct(sprintf('The [%s] feature requires [%s]. Please install it and try again.', $feature, $dependency));
     }
 }

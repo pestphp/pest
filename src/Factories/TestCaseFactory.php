@@ -170,7 +170,7 @@ final class TestCaseFactory
             eval($classCode);
         } catch (ParseError $caught) {
             throw new RuntimeException(sprintf(
-                "Unable to create test case for test file at %s. \n %s",
+                "Unable to create test case for test file at [%s]. \n %s",
                 $filename,
                 $classCode
             ), 1, $caught);
@@ -237,6 +237,6 @@ final class TestCaseFactory
             }
         }
 
-        throw ShouldNotHappen::fromMessage(sprintf('Method %s not found.', $methodName));
+        throw ShouldNotHappen::fromMessage(sprintf('Method [%s] not found.', $methodName));
     }
 }

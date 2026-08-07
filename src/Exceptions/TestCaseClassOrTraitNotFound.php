@@ -16,6 +16,6 @@ final class TestCaseClassOrTraitNotFound extends InvalidArgumentException implem
 {
     public function __construct(string $testCaseClass)
     {
-        parent::__construct(sprintf('The class [%s] was not found.', $testCaseClass));
+        parent::__construct(sprintf('The class or trait [%s] could not be found. Please check the name, and make sure it is autoloadable.', $testCaseClass));
     }
 }

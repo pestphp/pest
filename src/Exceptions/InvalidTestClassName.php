@@ -17,7 +17,7 @@ final class InvalidTestClassName extends InvalidArgumentException implements Exc
     public static function fromClassName(string $filename, string $className): self
     {
         return new self(sprintf(
-            'The test file [%s] would create the class [%s], which is not a valid PHP class name. Please rename the test file.',
+            'The test file [%s] would create the class [%s], which is not a valid PHP class name. Please rename the file.',
             $filename,
             $className,
         ));
@@ -26,7 +26,7 @@ final class InvalidTestClassName extends InvalidArgumentException implements Exc
     public static function fromNamespace(string $filename, string $namespace, string $part): self
     {
         return new self(sprintf(
-            'The test file [%s] would create the namespace [%s], which is not a valid PHP namespace, as [%s] may not be used as a namespace name. Please rename the folder in question.',
+            'The test file [%s] would create the namespace [%s], which is not a valid PHP namespace, because [%s] may not be used as a namespace name. Please rename that folder.',
             $filename,
             $namespace,
             $part,

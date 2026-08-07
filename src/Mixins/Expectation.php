@@ -541,7 +541,7 @@ final class Expectation
             /* @phpstan-ignore-next-line */
         } catch (ExpectationFailedException $exception) {
             if ($message === '') {
-                $message = "Failed asserting that an array has the key '$key'";
+                $message = "Failed asserting that an array has the key [$key]";
             }
 
             throw new ExpectationFailedException($message, $exception->getComparisonFailure());
@@ -863,10 +863,10 @@ final class Expectation
         Assert::assertTrue(true);
 
         if (! $exception instanceof Throwable && ! class_exists($exception)) {
-            throw new ExpectationFailedException("Exception with message \"$exception\" not thrown.");
+            throw new ExpectationFailedException("Exception with message [$exception] not thrown.");
         }
 
-        throw new ExpectationFailedException("Exception \"$exception\" not thrown.");
+        throw new ExpectationFailedException("Exception [$exception] not thrown.");
     }
 
     private function export(mixed $value): string

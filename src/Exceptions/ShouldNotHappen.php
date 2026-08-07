@@ -17,7 +17,7 @@ final class ShouldNotHappen extends RuntimeException
         $message = $exception->getMessage();
 
         parent::__construct(sprintf(<<<'EOF'
-This should not happen - please create an new issue here: https://github.com/pestphp/pest/issues
+This should not have happened. Please report it here: https://github.com/pestphp/pest/issues
 
   Issue: %s
   PHP version: %s

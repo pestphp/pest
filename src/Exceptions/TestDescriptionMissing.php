@@ -16,6 +16,6 @@ final class TestDescriptionMissing extends InvalidArgumentException implements E
 {
     public function __construct(string $fileName)
     {
-        parent::__construct(sprintf('Test description is missing in the filename [%s].', $fileName));
+        parent::__construct(sprintf('A test in [%s] is missing its description. Please give every test a description.', $fileName));
     }
 }

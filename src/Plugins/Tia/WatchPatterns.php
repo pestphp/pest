@@ -46,6 +46,8 @@ final class WatchPatterns
 
     private ?string $defaultBranch = null;
 
+    private ?string $baselineWorkflow = null;
+
     public function useDefaults(string $projectRoot): void
     {
         $testPath = TestSuite::getInstance()->testPath;
@@ -189,6 +191,18 @@ final class WatchPatterns
         return $this->defaultBranch;
     }
 
+    public function setBaselineWorkflow(string $workflow): void
+    {
+        $workflow = trim($workflow);
+
+        $this->baselineWorkflow = $workflow === '' ? null : $workflow;
+    }
+
+    public function baselineWorkflow(): ?string
+    {
+        return $this->baselineWorkflow;
+    }
+
     public function reset(): void
     {
         $this->patterns = [];
@@ -198,6 +212,7 @@ final class WatchPatterns
         $this->filtered = false;
         $this->baselined = false;
         $this->defaultBranch = null;
+        $this->baselineWorkflow = null;
     }
 
     private function keyMatches(string $key, string $file): bool

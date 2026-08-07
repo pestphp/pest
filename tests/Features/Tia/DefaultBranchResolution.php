@@ -175,7 +175,7 @@ test('tia still requires git', function (): void {
 
     $result = $project->pest('--tia');
 
-    expect($result->output)->toContain('The feature [Tia mode] requires [git].')
+    expect($result->output)->toContain('The [Tia mode] feature requires [git].')
         ->and($result->exitCode)->not->toBe(0);
 })->skipOnWindows();
 

@@ -16,6 +16,6 @@ final class AfterAllAlreadyExist extends InvalidArgumentException implements Exc
 {
     public function __construct(string $filename)
     {
-        parent::__construct(sprintf('The afterAll already exists in the filename [%s].', $filename));
+        parent::__construct(sprintf('The [afterAll] hook is already defined in [%s]. Each test file may only define it once.', $filename));
     }
 }

@@ -31,7 +31,7 @@ test('failures with malformed input', function (): void {
 
 test('failures with invalid type', function (): void {
     expect([])->toBeBase64();
-})->throws(InvalidExpectationValue::class, 'Invalid expectation value type. Expected [string].');
+})->throws(InvalidExpectationValue::class, 'This expectation may only be used on a value of type [string].');
 
 test('failures with custom message', function (): void {
     expect('!!invalid!!')->toBeBase64('oh no!');

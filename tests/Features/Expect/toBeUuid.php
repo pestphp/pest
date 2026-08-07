@@ -7,7 +7,7 @@ use PHPUnit\Framework\ExpectationFailedException;
 
 test('failures with wrong type', function (): void {
     expect([])->toBeUuid();
-})->throws(InvalidExpectationValue::class, 'Invalid expectation value type. Expected [string].');
+})->throws(InvalidExpectationValue::class, 'This expectation may only be used on a value of type [string].');
 
 test('pass', function (): void {
     expect('3cafb226-4326-11ee-a516-846993788c86')->toBeUuid()

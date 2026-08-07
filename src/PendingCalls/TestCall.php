@@ -504,7 +504,7 @@ final class TestCall // @phpstan-ignore-line
             $isFunction = function_exists($classOrFunction);
 
             if (! $isClass && ! $isTrait && ! $isFunction) {
-                throw new InvalidArgumentException(sprintf('No class, trait or method named "%s" has been found.', $classOrFunction));
+                throw new InvalidArgumentException(sprintf('No class, trait or method named [%s] has been found.', $classOrFunction));
             }
 
             if ($isClass) {

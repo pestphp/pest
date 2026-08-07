@@ -74,7 +74,7 @@ final class Coverage
                 return 0.0;
             }
 
-            throw ShouldNotHappen::fromMessage(sprintf('Coverage not found in path: %s.', $reportPath));
+            throw ShouldNotHappen::fromMessage(sprintf('Coverage not found in path: [%s].', $reportPath));
         }
 
         CoverageMerger::applyIfMarked($reportPath);

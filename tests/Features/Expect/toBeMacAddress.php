@@ -17,7 +17,7 @@ test('failures', function (): void {
 
 test('failures with invalid type', function (): void {
     expect([])->toBeMacAddress();
-})->throws(InvalidExpectationValue::class, 'Invalid expectation value type. Expected [string].');
+})->throws(InvalidExpectationValue::class, 'This expectation may only be used on a value of type [string].');
 
 test('failures with custom message', function (): void {
     expect('not-a-mac')->toBeMacAddress('oh no!');

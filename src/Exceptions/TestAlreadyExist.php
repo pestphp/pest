@@ -16,6 +16,6 @@ final class TestAlreadyExist extends InvalidArgumentException implements Excepti
 {
     public function __construct(string $fileName, string $description)
     {
-        parent::__construct(sprintf('A test with the description [%s] already exists in the filename [%s].', $description, $fileName));
+        parent::__construct(sprintf('A test named [%s] already exists in [%s]. Please give this test a different description.', $description, $fileName));
     }
 }
