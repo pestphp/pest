@@ -129,6 +129,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         '--coverage-text', '--coverage-xml',
     ];
 
+    private const string MUTATE_OPTION = '--mutate';
+
     /** @var list<string> */
     private const array PARTIAL_SELECTION_FLAGS = [
         '--filter', '--exclude-filter', '--group', '--exclude-group',
@@ -504,6 +506,13 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
             $this->forceRefetch = false;
             $this->filteredMode = false;
+
+            return $arguments;
+        }
+
+        if (! $isWorker && $enabled && $this->hasArgument(self::MUTATE_OPTION, $this->originalArguments)) {
+            $this->requestWorkerResults();
+            $this->emitMutationRecordSkipped();
 
             return $arguments;
         }
@@ -1284,6 +1293,14 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         $this->renderChild('Running in TIA mode, however TIA is skipped as an active coverage report narrows the edges it could record.');
         $this->renderChild('Record the baseline with a plain --tia run first; coverage runs then reuse it.');
+    }
+
+    private function emitMutationRecordSkipped(): void
+    {
+        $this->output->writeln('');
+
+        $this->renderChild('TIA is skipped — mutation testing needs the coverage report of a real run.');
+        $this->renderChild('Drop --mutate to use TIA.');
     }
 
     /**
