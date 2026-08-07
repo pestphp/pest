@@ -4,56 +4,31 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
+use Pest\Plugins\Tia\Contracts\Ci;
+
 /**
  * @internal
  */
 final class CiDefaultBranch
 {
+    /**
+     * @var array<int, class-string<Ci>>
+     */
+    private const array CIS = [
+        Cis\GitLab::class,
+        Cis\GitHub::class,
+    ];
+
     public static function detect(): ?string
     {
-        return self::fromGitLab() ?? self::fromGitHubEvent();
-    }
+        foreach (self::CIS as $class) {
+            $branch = (new $class)->defaultBranch();
 
-    private static function fromGitLab(): ?string
-    {
-        return self::environment('CI_DEFAULT_BRANCH');
-    }
-
-    private static function fromGitHubEvent(): ?string
-    {
-        $path = self::environment('GITHUB_EVENT_PATH');
-
-        if ($path === null || ! is_file($path) || ! is_readable($path)) {
-            return null;
+            if ($branch !== null) {
+                return $branch;
+            }
         }
 
-        $contents = @file_get_contents($path);
-
-        if ($contents === false) {
-            return null;
-        }
-
-        $payload = json_decode($contents, true);
-
-        if (! is_array($payload) || ! is_array($payload['repository'] ?? null)) {
-            return null;
-        }
-
-        $branch = $payload['repository']['default_branch'] ?? null;
-
-        return is_string($branch) && $branch !== '' ? $branch : null;
-    }
-
-    private static function environment(string $name): ?string
-    {
-        $value = getenv($name);
-
-        if (! is_string($value)) {
-            return null;
-        }
-
-        $value = trim($value);
-
-        return $value === '' ? null : $value;
+        return null;
     }
 }
