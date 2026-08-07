@@ -8,11 +8,6 @@ afterEach(function (): void {
     Project::destroyAll();
 });
 
-/*
- * Invariant 7 — a hostile state dir cannot break a run. Whatever is in
- * graph.json, the suite still runs and exits on the tests' merit.
- */
-
 test('a graph mangled beyond use still lets the suite run', function (string $contents): void {
     $project = Project::make('master');
     $project->seed('master');

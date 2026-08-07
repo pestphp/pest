@@ -120,14 +120,6 @@ final class Graph
     }
 
     /**
-     * Keep only the test files this checkout actually has.
-     *
-     * A stale edge key — a test file a fetched baseline knew, or one another
-     * branch deleted — cannot be run by anyone, and selecting it strands
-     * `--filtered` on a run that matches nothing and reports success on a
-     * change no test looked at. {@see self::testFilesToRerun()} has always
-     * dropped these; the change-driven half of selection must agree.
-     *
      * @param  array<int, string>  $testFiles  Project-relative paths.
      * @return list<string>
      */
@@ -677,9 +669,6 @@ final class Graph
 
         $r = $baseline['results'][$testId];
 
-        // A status this build does not know — a graph written by a newer Pest,
-        // or a corrupt one — is not a result. Returning null re-executes the
-        // test rather than replaying an outcome nobody can interpret.
         return match ($r['status']) {
             0 => TestStatus::success(),
             1 => TestStatus::skipped($r['message']),
@@ -717,8 +706,6 @@ final class Graph
 
             $rel = $this->relative($file);
 
-            // A test file that is no longer on disk cannot be re-run by anyone,
-            // so selecting it would only widen the run for nothing.
             if ($rel !== null && is_file($this->projectRoot.'/'.$rel)) {
                 $files[$rel] = true;
             }
@@ -727,15 +714,6 @@ final class Graph
         return array_keys($files);
     }
 
-    /**
-     * Whether a cached result due a re-run names a test file this project
-     * cannot address — an empty path, or one that resolves outside the project
-     * root. Those are genuinely lost, so the caller widens to the full suite.
-     *
-     * A path that resolves fine but is simply absent is *deleted*, not lost:
-     * widening would not run it either, and treating it as unlocated used to
-     * strand `--filtered` on a full replay for good.
-     */
     public function hasUnlocatedTestsToRerun(string $branch, ?string $fallbackBranch = null): bool
     {
         $baseline = $this->baselineFor($branch, $fallbackBranch);
@@ -852,24 +830,6 @@ final class Graph
     }
 
     /**
-     * The baseline a read sees for this branch: its own entries layered over the
-     * default branch's, so a key minted by a narrowed run — which only holds the
-     * handful of tests that ran — does not shadow the fallback for everything else.
-     *
-     * Once this branch has had a complete run, the layering becomes per *file*
-     * rather than per test id: the branch's entries for a file it executed are
-     * the whole truth, so the fallback's entries for that same file are dropped
-     * rather than merged. Without that, a test the branch renamed or removed —
-     * and {@see self::pruneStaleResults()} therefore unset — is resurrected by
-     * the default branch on the very next read, and never stops coming back.
-     *
-     * A branch whose key was minted by a *narrowed* run holds only the handful
-     * of tests that ran, and has no business speaking for the rest of their
-     * file, so it keeps the per-test-id merge.
-     *
-     * Read-only: the layering never reaches `$this->baselines`, so writes stay on
-     * the branch that ran.
-     *
      * @return array{sha: ?string, tree: array<string, string>, complete?: bool, results: array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>}
      */
     private function baselineFor(string $branch, ?string $fallbackBranch): array
@@ -1512,12 +1472,6 @@ final class Graph
         }
     }
 
-    /**
-     * Record that this branch has run the whole suite at least once, which is
-     * what lets {@see self::baselineFor()} treat its entries as authoritative
-     * for the files they cover. Never mints a key: a run that recorded nothing
-     * has nothing to be authoritative about.
-     */
     public function markBaselineComplete(string $branch): void
     {
         if (isset($this->baselines[$branch])) {
@@ -1525,12 +1479,6 @@ final class Graph
         }
     }
 
-    /**
-     * Drop this branch's result entries whose test file is no longer on disk.
-     *
-     * Without this nothing but `--fresh` ever reclaims them, and a *failing*
-     * one keeps `--filtered` widened to a full replay on every later run.
-     */
     public function pruneResultsForMissingFiles(string $branch): void
     {
         if (! isset($this->baselines[$branch]['results'])) {
@@ -1561,10 +1509,7 @@ final class Graph
     }
 
     /**
-     * Drop baselines for branches git no longer knows, so the graph does not
-     * carry one full copy of the suite per branch ever created.
-     *
-     * @param  array<int, string>  $keep  Branch names that must survive.
+     * @param  array<int, string>  $keep
      */
     public function pruneMissingBranches(array $keep): void
     {
@@ -1722,11 +1667,6 @@ final class Graph
     }
 
     /**
-     * A graph is state on disk that any process may have written: a newer Pest,
-     * a half-finished write, a hand edit. Every branch, every entry and every
-     * field is checked here so that a malformed one is dropped rather than
-     * reaching a read path and taking the run down with it.
-     *
      * @return array<string, array{sha: ?string, tree: array<string, string>, complete?: bool, results: array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>}>
      */
     private static function decodeBaselines(mixed $section): array
@@ -1738,8 +1678,6 @@ final class Graph
         $baselines = [];
 
         foreach ($section as $key => $baseline) {
-            // A branch named `12345` decodes as an integer key, and must not be
-            // mistaken for a malformed one.
             $branch = (string) $key;
 
             if ($branch === '') {

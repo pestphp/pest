@@ -8,13 +8,6 @@ afterEach(function (): void {
     Project::destroyAll();
 });
 
-/*
- * A test that triggers a notice, deprecation or warning is reported by PHPUnit
- * as passed, and emits Passed. Recording it as a plain success made the cache
- * hide the issue: a later run under --fail-on-* came back green where a fresh
- * run failed. Invariant 3 — replay is faithful — at its most dangerous.
- */
-
 function tiaTriggering(string $call): string
 {
     return <<<PHP

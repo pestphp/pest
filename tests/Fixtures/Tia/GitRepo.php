@@ -130,10 +130,6 @@ final readonly class GitRepo
     private function process(array $arguments, bool $mustSucceed): Process
     {
         $process = new Process(['git', ...$arguments], $this->path, self::ENV);
-        // Generous on purpose: these rows each spawn a real pest subprocess, so
-        // a loaded machine — a shared CI runner, or two of these suites at once
-        // — can starve a git call for tens of seconds. A timeout here fails the
-        // row for reasons that have nothing to do with what it asserts.
         $process->setTimeout(120.0);
         $process->run();
 

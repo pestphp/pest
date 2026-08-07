@@ -75,9 +75,6 @@ test('filtered mode falls back to a full replay when a cached failure cannot be 
 
     $project->seed('master', failing: ['adds two numbers']);
 
-    // A path this project cannot address at all — recorded on another machine.
-    // A path that merely no longer exists is a *deleted* test, not a lost one,
-    // and widening the run would not find it either; see StateReclamation.
     $project->mutateGraph(function (array $graph): array {
         $testId = Project::testId('tests/Unit/CalculatorTest.php', 'adds two numbers');
 

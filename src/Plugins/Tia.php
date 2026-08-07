@@ -124,18 +124,14 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         '--compact', '--ci-build-id', '--min',
     ];
 
-    /**
-     * @var list<string>
-     */
+    /** @var list<string> */
     private const array COVERAGE_REPORT_FLAGS = [
         '--coverage-clover', '--coverage-cobertura', '--coverage-crap4j',
         '--coverage-html', '--coverage-openclover', '--coverage-php',
         '--coverage-text', '--coverage-xml',
     ];
 
-    /**
-     * @var list<string>
-     */
+    /** @var list<string> */
     private const array PARTIAL_SELECTION_FLAGS = [
         '--filter', '--exclude-filter', '--group', '--exclude-group',
         '--covers', '--uses', '--testsuite', '--exclude-testsuite', '--test-suffix',
@@ -160,19 +156,10 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     /** @var array<string, int> */
     private array $cachedAssertionsByTestId = [];
 
-    /**
-     * The status a replayed test was replayed *as*, so the write-back records
-     * what was cached rather than what the replay looked like from the
-     * outside. A cached deprecation replays as a pass — recording that pass
-     * would erase the deprecation from the baseline on the very next run.
-     *
-     * @var array<string, array{status: int, message: string}>
-     */
+    /** @var array<string, array{status: int, message: string}> */
     private array $cachedStatusByTestId = [];
 
-    /**
-     * @var array<string, float>
-     */
+    /** @var array<string, float> */
     private array $cachedTimeByTestId = [];
 
     private ?Graph $replayGraph = null;
@@ -272,11 +259,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         return $graph;
     }
 
-    /**
-     * Drop a graph that will not decode, so the next run that can record starts
-     * clean instead of tripping over the same file forever — rebuilding needs a
-     * coverage driver, and without one the file would stay corrupt for good.
-     */
     private function discardUnreadableGraph(): void
     {
         if (Parallel::isWorker()) {
@@ -297,16 +279,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $this->renderBadge('WARN', 'The dependency graph could not be read — it will be rebuilt.');
     }
 
-    /**
-     * Delete a state file, unless this checkout may not write.
-     *
-     * A detached HEAD names no branch, so {@see self::saveGraph()} refuses to
-     * write — which means anything deleted here could never be rebuilt from
-     * this checkout. Read-only has to mean deletes too, or a drifted
-     * `composer.lock` on a detached CI checkout wipes the whole team's baseline.
-     *
-     * @return bool Whether the delete happened.
-     */
     private function deleteState(string $key): bool
     {
         if ($this->detachedHead) {
@@ -318,9 +290,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     private function saveGraph(Graph $graph): bool
     {
-        // A detached HEAD names no branch of its own, so `$this->branch` is the
-        // fallback — writing here would land this checkout's results in the
-        // default branch's baseline. Leave the graph exactly as it was.
         if ($this->detachedHead) {
             return true;
         }
@@ -580,9 +549,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             $this->flushWorkerReplay();
         }
 
-        // `terminate()` also runs from the shutdown handler, which is how a run
-        // that `exit()`s inside a test gets here — with a test prepared and
-        // never finished, and so with no right to a complete write.
         if ($this->writesSuppressed || $this->resultsOnlyWrites || $this->hasUnfinishedTest()) {
             $this->recorder->reset();
             $this->coverageCollector->reset();
@@ -695,16 +661,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return $exitCode;
         }
 
-        // Re-anchor the baseline. Reaching here means the run was complete —
-        // nothing suppressed, narrowed or truncated it — so its results are the
-        // truth at HEAD and the recorded revision may say so.
-        //
-        // That matters most when the recorded commit had become unreachable (a
-        // rebase, a force-push) and no coverage driver was available to rebuild:
-        // without this the stale revision survives, and every later run warns
-        // and re-runs the whole suite, for good. Stale edges are no objection —
-        // a complete run just re-recorded every result, and later changes are
-        // compared against the revision written here.
         if ($this->replayRan || $this->graphUnreachable) {
             $this->bumpRecordedSha();
         }
@@ -852,9 +808,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         try {
             $this->resolveBranch($projectRoot);
         } catch (MissingDependency $missingGit) {
-            // Every git call TIA makes fails on `HEAD` in a repository that has
-            // no commits yet, which reads as "git is missing" when git is right
-            // there. Say what is actually wrong instead.
             $repository = new ChangedFiles($projectRoot);
 
             if ($repository->isRepository() && ! $repository->hasCommits()) {
@@ -913,21 +866,12 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             $this->state->write(self::KEY_COVERAGE_MARKER, '');
         }
 
-        // An active coverage report owns the driver, so edges have to be
-        // piggybacked off its session — and that session is scoped to
-        // phpunit.xml's <source>, not to the whole project. Refreshing an
-        // existing graph that way is safe (`replaceEdges()` keeps what it
-        // already has), but *founding* one on it is not: every source file
-        // outside the coverage scope would be missing from the graph for good,
-        // and a change to one of them would select nothing and replay a pass.
         if (! $graph instanceof Graph && $this->piggybackCoverage) {
             $this->emitCoverageScopedRecordSkipped();
 
             return $arguments;
         }
 
-        // Past the guard above, a coverage-owned run always has a graph to
-        // refresh — a run without one never gets here.
         if ($coverageCacheOwned && ! $this->state->exists(self::KEY_COVERAGE_CACHE)) {
             if ($this->driftLabel === null) {
                 $this->freshGraphReason = 'recording a coverage baseline';
@@ -1392,15 +1336,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $this->renderChild('Install / enable pcov or xdebug (mode: coverage) in the worker PHP and rerun.');
     }
 
-    /**
-     * A parallel run keeps its results in the workers, so the parent's collector
-     * is empty and nothing would ever reach the graph. Ask the workers to flush
-     * what they ran, so a parallel run refreshes — and prunes — exactly like the
-     * sequential run of the same command.
-     *
-     * Gated on a graph already existing: a project that has never run TIA must
-     * not gain a baseline from a plain `--parallel` run.
-     */
     private function requestWorkerResults(): void
     {
         if (Parallel::isWorker() || ! Parallel::isEnabled() || $this->writesSuppressed) {
@@ -1772,16 +1707,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $collector->reset();
     }
 
-    /**
-     * Give back what the graph no longer needs. Only ever called from a
-     * complete write — the RESULTS-ONLY and HARD-SUPPRESSED tiers may not
-     * remove an entry, and a narrowed run has not seen enough to judge.
-     */
     private function reclaim(Graph $graph): void
     {
-        // The fallback branch never layers under itself, so marking it would
-        // write the graph for no reader's benefit — and cost a clean green run
-        // its "wrote nothing at all".
         if ($this->branch !== $this->fallbackBranch) {
             $graph->markBaselineComplete($this->branch);
         }
@@ -1795,10 +1722,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return;
         }
 
-        // A shallow, single-branch CI checkout can see almost no refs, and
-        // "git has never heard of it" would then mean "this clone is narrow",
-        // not "that branch is gone". Only reclaim from a checkout that can at
-        // least see the branch everything else falls back to.
         if (! in_array($this->fallbackBranch, $branches, true)) {
             return;
         }
@@ -1966,10 +1889,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         return TestResultFacade::shouldStop();
     }
 
-    /**
-     * A test that was prepared and never finished means this process is being
-     * torn down mid-file, so it has not seen enough of that file to prune it.
-     */
     private function hasUnfinishedTest(): bool
     {
         $collector = Container::getInstance()->get(ResultCollector::class);

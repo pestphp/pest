@@ -129,8 +129,6 @@ test('the fallback still reaches a branch that has never run a test file', funct
 
     $project->git()->switchTo('feature-x', new: true);
 
-    // A narrowed run mints the branch key holding only the Greeter entries, so
-    // the layering must still serve master's cached failure for the Calculator.
     $project->pest('--filter=greets a person');
 
     $result = $project->pest('--tia', '--filtered');
@@ -212,12 +210,6 @@ test('a malformed baseline entry cannot break the run', function (array $argumen
         ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed');
 })->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
 
-/*
- * Invariant 1 — sequential and parallel must agree — under a process that is
- * torn down in the middle of a test file. A worker that flushed what it got to
- * before dying has not seen enough of that file to license pruning the
- * siblings it never reached.
- */
 test('a run torn down mid-file does not prune the tests it never reached', function (array $arguments): void {
     $project = Project::make('master');
     $project->seed('master');
@@ -281,10 +273,6 @@ test('a fatal error mid-file is a test error, not a truncation', function (array
         ->and($delta->structureMoved())->toBeFalse($delta->summary());
 })->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
 
-/*
- * Invariant 2 — every command lands in exactly one tier and stays inside it —
- * for the combinations that were never exercised.
- */
 test('a green complete run leaves the graph exactly as it found it', function (array $arguments): void {
     $project = Project::make('master');
     $project->seed('master');
@@ -351,16 +339,11 @@ test('a graph whose recorded commit is gone is re-anchored, not warned about for
 
     $recordedSha = $project->graph()['baselines']['master']['sha'];
 
-    // A rebase, a force-push, a reset: the commit the baseline was recorded at
-    // is no longer an ancestor of HEAD, so nothing can be diffed against it.
     $project->git()->run(['reset', '--quiet', '--hard', 'HEAD~1']);
     $project->snapshot();
 
     $first = $project->pest('--tia', ...$arguments);
 
-    // The whole suite runs, and its results are the truth at HEAD — so the
-    // recorded revision has to move, whether or not a coverage driver was
-    // around to refresh the edges. Without that, the run below repeats forever.
     expect($first->exitCode)->toBe(0, $first->describe())
         ->and($first->output)->toContain('no longer reachable')
         ->and($first->tally())->toContain(Project::TOTAL_TESTS.' passed')

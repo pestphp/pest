@@ -1,7 +1,4 @@
 #!/bin/sh
-# A stand-in for the GitHub CLI, so the remote-baseline path can be exercised
-# without a network. `GH_STUB_MODE` picks the failure to serve; `GH_STUB_PAYLOAD`
-# names the graph.json the fake artifact carries.
 
 if [ "$1" = "auth" ]; then
   [ "$GH_STUB_MODE" = "unauthenticated" ] && exit 1

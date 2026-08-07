@@ -9,14 +9,6 @@ afterEach(function (): void {
 });
 
 /**
- * The remote-baseline path is the only one where a graph arrives from another
- * machine, so every one of these rows is really a hostile-input row: whatever
- * the artifact carries, the suite still has to run and exit on its own merit.
- *
- * `Project::gh()` installs a stand-in for the GitHub CLI, so none of this
- * touches the network. The graph it serves is a real seeded one, taken out of
- * the state dir with `detachGraph()` so the run has to fetch it back.
- *
  * @param  callable(array<string, mixed>): array<string, mixed>|null  $mutator
  * @return array{0: Project, 1: array<string, string>}
  */
@@ -52,8 +44,6 @@ test('a fetched baseline that will not decode is discarded rather than trusted',
 
     $result = $project->pestWithEnvironment($project->path(), $environment, '--tia', '--baselined');
 
-    // Nothing may be replayed out of it. Whether the run then records a graph
-    // of its own depends on the coverage driver, so that is not asserted here.
     expect($result->exitCode)->toBe(0, $result->describe())
         ->and($result->output)->toContain('The dependency graph could not be read')
         ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed')
@@ -120,9 +110,6 @@ test('a network failure warns and lets the suite run', function (string $mode): 
 test('no published baseline yet starts a cooldown, and a corrupt cooldown does not break the run', function (): void {
     [$project, $environment] = tiaPublishedBaseline('no-runs');
 
-    // On a machine with a coverage driver each run below records a graph of its
-    // own, and a run that has a graph never reaches the fetch at all. Take it
-    // away between runs, so what is under test is the cooldown and nothing else.
     $discardGraph = function () use ($project): void {
         if ($project->graphExists()) {
             $project->detachGraph();

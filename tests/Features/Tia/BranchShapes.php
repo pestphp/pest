@@ -8,11 +8,6 @@ afterEach(function (): void {
     Project::destroyAll();
 });
 
-/*
- * Invariant 5 — writes land on the branch that ran and only there — and
- * invariant 6 — nothing is unbounded — under every branch shape git allows.
- */
-
 test('a branch name git allows is a branch key TIA can hold', function (string $branch): void {
     $project = Project::make('master');
     $project->seed('master');
@@ -164,8 +159,6 @@ test('a project below the git repository root refuses to run and writes nothing'
     $project = Project::make('master');
     $nested = $project->nested();
 
-    // git addresses paths from the repository root while the graph is
-    // project-relative, so the two have to coincide. TIA says so and stops.
     $result = $project->pestIn($nested, '--tia', ...$arguments);
 
     expect($result->exitCode)->toBe(1, $result->describe())
@@ -180,8 +173,6 @@ test('a repository with no commits says so, and leaves plain runs alone', functi
     $project->git()->run(['checkout', '--quiet', '-b', 'master']);
     $project->git()->addOrigin();
 
-    // Every git call TIA makes asks about HEAD, which does not exist yet. That
-    // used to surface as `requires "git"`, with git installed and working.
     $tia = $project->pest('--tia');
 
     expect($tia->exitCode)->toBe(1, $tia->describe())

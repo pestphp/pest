@@ -8,13 +8,6 @@ afterEach(function (): void {
     Project::destroyAll();
 });
 
-/**
- * The selection paths below are all driven from a *seeded* graph rather than a
- * recorded one: Blade and Inertia edges are recorded through Laravel hooks the
- * fixture project does not have, and a changed `.php` source file would trip
- * the driverless full-suite fallback. Views and JS files are neither, so what
- * `Graph::affected()` does with them is measurable on any interpreter.
- */
 function tiaSeedWithView(Project $project, string $view): void
 {
     $project->seed('master');
@@ -51,8 +44,6 @@ test('a committed rename selects the tests that depended on the old path', funct
 
     tiaSeedWithView($project, 'resources/views/greeting.blade.php');
 
-    // git reports only the destination of a rename unless asked not to, so the
-    // path the graph holds an edge for is the one that must still show up.
     $project->git()->run(['mv', 'resources/views/greeting.blade.php', 'resources/views/hello.blade.php']);
     $project->git()->commit('move the view');
     $project->snapshot();
@@ -70,10 +61,6 @@ test('an affected test file that is gone does not strand a filtered run', functi
     $project->git()->commit('add view');
     $project->seed('master');
 
-    // A graph written before this checkout existed — a fetched baseline, or a
-    // branch that deleted the file — can hold an edge for a test file nothing
-    // can run. Selecting it would filter the suite down to nothing and report
-    // success on a change no test looked at.
     $project->mutateGraph(function (array $graph): array {
         $id = count($graph['files']);
         $graph['files'][$id] = 'resources/views/page.blade.php';
@@ -174,8 +161,6 @@ test('a changed partial selects the test that rendered its ancestor', function (
         'resources/views/page.blade.php' => "<x-card>hi</x-card>\n",
         'resources/views/components/card.blade.php' => "<div>one</div>\n",
     ], 'resources/views/components/card.blade.php'],
-    // Two partials that include each other: the ancestor walk has to notice it
-    // has seen them and stop, rather than chase the cycle forever.
     'include cycle' => [[
         'resources/views/page.blade.php' => "@include('partials.a')\n",
         'resources/views/partials/a.blade.php' => "@include('partials.b')\n",

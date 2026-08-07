@@ -43,9 +43,6 @@ final class Project
     public const int TOTAL_TESTS = 6;
 
     /**
-     * A dataset for the rule that TIA must reach the same outcome sequentially
-     * and in parallel: the same command, run both ways, must leave the same graph.
-     *
      * @var array<string, array<int, array<int, string>>>
      */
     public const array SEQUENTIAL_AND_PARALLEL = [
@@ -124,12 +121,6 @@ final class Project
         }
     }
 
-    /**
-     * A second copy of the fixture app in a subdirectory of this project, so a
-     * run can be started from a root that sits *below* the git repository root.
-     *
-     * @return string The nested project's absolute path.
-     */
     public function nested(string $directory = 'nested'): string
     {
         $path = $this->path($directory);
@@ -179,11 +170,6 @@ final class Project
                 'COLLISION_IGNORE_DURATION' => 'true',
                 'PARATEST' => '0',
                 'PAO_DISABLE' => '1',
-                // Recording is what needs a driver, and recording happens here,
-                // in the subprocess — never in the process running these rows.
-                // Asking for coverage mode only here lets a CI job leave xdebug
-                // off for the suite it is running (whose collection under xdebug
-                // costs more than every scenario put together) and still record.
                 'XDEBUG_MODE' => 'coverage',
                 'HOME' => $this->home(),
                 'GITHUB_EVENT_PATH' => '',
@@ -265,10 +251,6 @@ final class Project
         $sentinel ? $this->sentinel() : $this->snapshot();
     }
 
-    /**
-     * Take the graph out of the state dir and hand back its JSON, so it can be
-     * served as the artifact a remote baseline fetch downloads.
-     */
     public function detachGraph(): string
     {
         $json = $this->state()->read(Tia::KEY_GRAPH);
@@ -287,10 +269,6 @@ final class Project
     }
 
     /**
-     * Install a stand-in for the GitHub CLI and return the environment that
-     * points a run at it. `$mode` names the failure it should serve (see
-     * `stubs/gh`); `$payload` is the graph.json its artifact carries.
-     *
      * @return array<string, string>
      */
     public function gh(string $mode = 'ok', string $payload = '{}'): array
@@ -338,10 +316,6 @@ final class Project
         });
     }
 
-    /**
-     * Adds a second, empty baseline key, so a lone recorded baseline can no
-     * longer stand in for the default branch.
-     */
     public function addBaseline(string $branch): void
     {
         $this->mutateGraph(function (array $graph) use ($branch): array {
@@ -390,7 +364,6 @@ final class Project
     {
         $baselines = $this->graph()['baselines'] ?? [];
 
-        // A branch named `12345` comes back from json_decode as an integer key.
         return is_array($baselines) ? array_map(strval(...), array_keys($baselines)) : [];
     }
 

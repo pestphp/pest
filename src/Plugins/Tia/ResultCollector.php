@@ -38,11 +38,6 @@ final class ResultCollector
             return;
         }
 
-        // PHPUnit reports a test that triggered a notice, deprecation or
-        // warning as passed, and emits Passed for it. Recording success here
-        // would erase the issue from the baseline, and a later replay under
-        // --fail-on-deprecation (and friends) would come back green where a
-        // fresh run fails. Keep the issue; only refresh what it cannot know.
         if (isset($this->triggered[$this->currentTestId])) {
             $this->refreshTime();
 
@@ -120,12 +115,6 @@ final class ResultCollector
         return $this->results;
     }
 
-    /**
-     * Whether a test was prepared but never finished — the process is being
-     * torn down in the middle of it (an `exit()` inside a test, a killed
-     * worker). What it collected is therefore a partial view of that test
-     * file, and must not license pruning the siblings it never reached.
-     */
     public function hasUnfinishedTest(): bool
     {
         return $this->currentTestId !== null;
@@ -164,11 +153,6 @@ final class ResultCollector
         $this->startTime = null;
     }
 
-    /**
-     * Record an issue raised while the test was running. The most important
-     * one wins, exactly as PHPUnit ranks them, so a deprecation does not
-     * shadow the warning that followed it — or the failure.
-     */
     private function recordIssue(TestStatus $status): void
     {
         if ($this->currentTestId === null) {
