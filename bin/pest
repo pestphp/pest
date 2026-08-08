@@ -1,8 +1,6 @@
 #!/usr/bin/env php
 <?php
-
 declare(strict_types=1);
-
 use Pest\Contracts\Restarter;
 use Pest\Kernel;
 use Pest\Panic;
@@ -17,110 +15,89 @@ use Pest\TestCaseMethodFilters\TodoTestCaseFilter;
 use Pest\TestSuite;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
-
 (static function () {
     // Ensures Collision's Printer is registered.
     $_SERVER['COLLISION_PRINTER'] = 'DefaultPrinter';
 
     $arguments = $originalArguments = $_SERVER['argv'];
-
     $dirty = false;
     $todo = false;
     $flaky = false;
     $notes = false;
 
     foreach ($arguments as $key => $value) {
-
         if ($value === '--compact') {
             $_SERVER['COLLISION_PRINTER_COMPACT'] = 'true';
             unset($arguments[$key]);
         }
-
         if ($value === '--profile') {
             $_SERVER['COLLISION_PRINTER_PROFILE'] = 'true';
             unset($arguments[$key]);
         }
-
         if (str_contains($value, '--test-directory=')) {
             unset($arguments[$key]);
         } elseif ($value === '--test-directory') {
             unset($arguments[$key]);
-
             if (isset($arguments[$key + 1])) {
                 unset($arguments[$key + 1]);
             }
         }
-
         if ($value === '--dirty') {
             $dirty = true;
             unset($arguments[$key]);
         }
-
         if (in_array($value, ['--todo', '--todos'], true)) {
             $todo = true;
             unset($arguments[$key]);
         }
-
         if ($value === '--flaky') {
             $flaky = true;
             unset($arguments[$key]);
         }
-
         if ($value === '--notes') {
             $notes = true;
             unset($arguments[$key]);
         }
-
         if (str_contains($value, '--assignee=')) {
             unset($arguments[$key]);
         } elseif ($value === '--assignee') {
             unset($arguments[$key]);
-
             if (isset($arguments[$key + 1])) {
                 unset($arguments[$key + 1]);
             }
         }
-
         if (str_contains($value, '--issue=')) {
             unset($arguments[$key]);
         } elseif ($value === '--issue') {
             unset($arguments[$key]);
-
             if (isset($arguments[$key + 1])) {
                 unset($arguments[$key + 1]);
             }
         }
-
         if (str_contains($value, '--ticket=')) {
             unset($arguments[$key]);
         } elseif ($value === '--ticket') {
             unset($arguments[$key]);
-
             if (isset($arguments[$key + 1])) {
                 unset($arguments[$key + 1]);
             }
         }
-
         if (str_contains($value, '--pr=')) {
             unset($arguments[$key]);
         } elseif ($value === '--pr') {
             unset($arguments[$key]);
-
             if (isset($arguments[$key + 1])) {
                 unset($arguments[$key + 1]);
             }
         }
-
         if (str_contains($value, '--pull-request=')) {
             unset($arguments[$key]);
         } elseif ($value === '--pull-request') {
             unset($arguments[$key]);
-
             if (isset($arguments[$key + 1])) {
                 unset($arguments[$key + 1]);
             }
         }
-
         if (str_contains($value, '--teamcity')) {
             unset($arguments[$key]);
             $arguments[] = '--no-output';
@@ -128,25 +105,60 @@ use Symfony\Component\Console\Output\ConsoleOutput;
         }
     }
 
-    // Used when Pest is required using composer.
-    $vendorPath = dirname(__DIR__, 4).'/vendor/autoload.php';
+    // Resolve Composer autoload. Prefer the path set by Composer's bin proxy
+    // ($GLOBALS['_composer_autoload_path']), then walk up for vendor-dir layouts
+    // including custom names (e.g. third_party/) not only vendor/.
+    $autoloadCandidates = [];
 
-    // Used when Pest maintainers are running Pest tests.
-    $localPath = dirname(__DIR__).'/vendor/autoload.php';
-
-    if (file_exists($vendorPath)) {
-        include_once $vendorPath;
-        $autoloadPath = $vendorPath;
-    } else {
-        include_once $localPath;
-        $autoloadPath = $localPath;
+    if (isset($GLOBALS['_composer_autoload_path']) && is_string($GLOBALS['_composer_autoload_path'])) {
+        $autoloadCandidates[] = $GLOBALS['_composer_autoload_path'];
     }
 
-    // Get $rootPath based on $autoloadPath
+    // Pest maintainers running from a local clone (pestphp/pest/vendor).
+    $autoloadCandidates[] = dirname(__DIR__).'/vendor/autoload.php';
+
+    // Installed as vendor/{vendor}/{package}/bin → vendor/autoload.php
+    // (also works when vendor-dir is "third_party": third_party/autoload.php).
+    $autoloadCandidates[] = dirname(__DIR__, 3).'/autoload.php';
+
+    // Legacy fixed depths when vendor-dir is still named "vendor".
+    $autoloadCandidates[] = dirname(__DIR__, 4).'/vendor/autoload.php';
+    $autoloadCandidates[] = dirname(__DIR__, 4).'/third_party/autoload.php';
+
+    // Walk up a few levels for non-standard install trees.
+    $walk = dirname(__DIR__);
+    for ($i = 0; $i < 6; $i++) {
+        $autoloadCandidates[] = $walk.'/autoload.php';
+        $autoloadCandidates[] = $walk.'/vendor/autoload.php';
+        $autoloadCandidates[] = $walk.'/third_party/autoload.php';
+        $parent = dirname($walk);
+        if ($parent === $walk) {
+            break;
+        }
+        $walk = $parent;
+    }
+
+    $autoloadPath = null;
+    foreach (array_unique($autoloadCandidates) as $candidate) {
+        if (! is_string($candidate) || $candidate === '' || ! file_exists($candidate)) {
+            continue;
+        }
+
+        include_once $candidate;
+        // realpath() so paths with ".." from Composer's bin proxy do not break dirname().
+        $autoloadPath = realpath($candidate) ?: $candidate;
+        break;
+    }
+
+    if ($autoloadPath === null) {
+        fwrite(STDERR, "Pest: Autoloader not found. Please run `composer install`.\n");
+        exit(1);
+    }
+
+    // Project root is the parent of the Composer vendor directory that owns autoload.php.
     $rootPath = dirname($autoloadPath, 2);
 
     $input = new ArgvInput;
-
     $testSuite = TestSuite::getInstance(
         $rootPath,
         $input->getParameterOption('--test-directory', 'tests'),
@@ -155,57 +167,43 @@ use Symfony\Component\Console\Output\ConsoleOutput;
     if ($dirty) {
         $testSuite->tests->addTestCaseFilter(new GitDirtyTestCaseFilter($rootPath));
     }
-
     if ($todo) {
         $testSuite->tests->addTestCaseMethodFilter(new TodoTestCaseFilter);
     }
-
     if ($flaky) {
         $testSuite->tests->addTestCaseMethodFilter(new FlakyTestCaseFilter);
     }
-
     if ($notes) {
         $testSuite->tests->addTestCaseMethodFilter(new NotesTestCaseFilter);
     }
-
     if ($assignee = $input->getParameterOption('--assignee')) {
         $testSuite->tests->addTestCaseMethodFilter(new AssigneeTestCaseFilter((string) $assignee));
     }
-
     if ($issue = $input->getParameterOption('--issue')) {
         $testSuite->tests->addTestCaseMethodFilter(new IssueTestCaseFilter((int) $issue));
     }
-
     if ($issue = $input->getParameterOption('--ticket')) {
         $testSuite->tests->addTestCaseMethodFilter(new IssueTestCaseFilter((int) $issue));
     }
-
     if ($pr = $input->getParameterOption('--pr')) {
         $testSuite->tests->addTestCaseMethodFilter(new PrTestCaseFilter((int) $pr));
     }
-
     if ($pr = $input->getParameterOption('--pull-request')) {
         $testSuite->tests->addTestCaseMethodFilter(new PrTestCaseFilter((int) $pr));
     }
 
     $isDecorated = $input->getParameterOption('--colors', 'always') !== 'never';
-
     $output = new ConsoleOutput(ConsoleOutput::VERBOSITY_NORMAL, $isDecorated);
 
     try {
         $kernel = Kernel::boot($testSuite, $input, $output);
-
         $container = Container::getInstance();
-
         foreach (Kernel::RESTARTERS as $restarterClass) {
             $restarter = $container->get($restarterClass);
             assert($restarter instanceof Restarter);
-
             $restarter->maybeRestart($rootPath, $originalArguments);
         }
-
         $result = $kernel->handle($originalArguments, $arguments);
-
         $kernel->terminate();
     } catch (Throwable|Error $e) {
         Panic::with($e);
