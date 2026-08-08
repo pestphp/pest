@@ -1,37 +1,5 @@
 <?php
 
-/*
- * BSD 3-Clause License
- *
- * Copyright (c) 2001-2023, Sebastian Bergmann
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *
- * 3. Neither the name of the copyright holder nor the names of its
- *    contributors may be used to endorse or promote products derived from
- *    this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 declare(strict_types=1);
 
 /*
@@ -256,13 +224,6 @@ final class TestSuiteSorter
         return $tests;
     }
 
-    /**
-     * Comparator callback function to sort tests for "reach failure as fast as possible".
-     *
-     * 1. sort tests by defect weight defined in self::DEFECT_SORT_WEIGHT
-     * 2. when tests are equally defective, sort the fastest to the front
-     * 3. do not reorder successful tests
-     */
     private function cmpDefectPriorityAndTime(Test $a, Test $b): int
     {
         assert($a instanceof Reorderable);
@@ -272,7 +233,6 @@ final class TestSuiteSorter
         $priorityB = $this->defectSortOrder[$b->sortId()] ?? 0;
 
         if ($priorityA !== $priorityB) {
-            // Sort defect weight descending
             return $priorityB <=> $priorityA;
         }
 
@@ -280,13 +240,9 @@ final class TestSuiteSorter
             return $this->cmpDuration($a, $b);
         }
 
-        // do not change execution order
         return 0;
     }
 
-    /**
-     * Compares test duration for sorting tests by duration ascending.
-     */
     private function cmpDuration(Test $a, Test $b): int
     {
         if (! ($a instanceof Reorderable && $b instanceof Reorderable)) {
@@ -296,9 +252,6 @@ final class TestSuiteSorter
         return $this->cache->time(ResultCacheId::fromReorderable($a)) <=> $this->cache->time(ResultCacheId::fromReorderable($b));
     }
 
-    /**
-     * Compares test size for sorting tests small->medium->large->unknown.
-     */
     private function cmpSize(Test $a, Test $b): int
     {
         $sizeA = ($a instanceof TestCase || $a instanceof DataProviderTestSuite)
@@ -312,30 +265,11 @@ final class TestSuiteSorter
     }
 
     /**
-     * Reorder Tests within a TestCase in such a way as to resolve as many dependencies as possible.
-     * The algorithm will leave the tests in original running order when it can.
-     * For more details see the documentation for test dependencies.
-     *
-     * Short description of algorithm:
-     * 1. Pick the next Test from remaining tests to be checked for dependencies.
-     * 2. If the test has no dependencies: mark done, start again from the top
-     * 3. If the test has dependencies but none left to do: mark done, start again from the top
-     * 4. When we reach the end add any leftover tests to the end. These will be marked 'skipped' during execution.
-     *
      * @param  array<TestCase>  $tests
      * @return array<TestCase>
      */
     private function resolveDependencies(array $tests): array
     {
-        // Pest: Fast-path. If no test in this suite declares dependencies, the
-        // original O(N^2) algorithm is wasted work — it would splice each test
-        // one-by-one back into the same order. The check deliberately walks
-        // TestCase instances directly instead of calling TestSuite::requires(),
-        // because the latter lazily builds TestSuite::provides() via
-        // ExecutionOrderDependency::mergeUnique, which is O(N^2) in the total
-        // number of tests. With thousands of tests that single call alone can
-        // burn several seconds before the sort even begins. Reading the
-        // cached TestCase::$dependencies property stays O(N) and costs nothing
         // when no test uses `->depends()` / PHPUnit `@depends`.
         if (! $this->anyTestHasDependencies($tests)) {
             return $tests;
@@ -360,10 +294,6 @@ final class TestSuiteSorter
 
     /**
      * Cheaply determines whether any test in the tree declares @depends.
-     *
-     * Walks `TestSuite` containers recursively and inspects each `TestCase`
-     * directly so it never triggers `TestSuite::provides()`, which is O(N^2)
-     * in the total number of aggregated tests.
      *
      * @param  iterable<Test>  $tests
      */

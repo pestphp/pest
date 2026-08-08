@@ -100,19 +100,32 @@ final class CoverageMerger
         }
 
         $cachedData = $cached->getData();
+
+        $staleIndexes = [];
+
+        foreach ($cachedData->testIds() as $index => $id) {
+            if (in_array($id, $currentIds, true)) {
+                $staleIndexes[$index] = true;
+            }
+        }
+
+        if ($staleIndexes === []) {
+            return;
+        }
+
         $lineCoverage = $cachedData->lineCoverage();
 
         foreach ($lineCoverage as $file => $lines) {
-            foreach ($lines as $line => $ids) {
-                if ($ids === null) {
+            foreach ($lines as $line => $hits) {
+                if ($hits === null) {
                     continue;
                 }
-                if ($ids === []) {
+                if ($hits === []) {
                     continue;
                 }
-                $filtered = array_values(array_diff($ids, $currentIds));
+                $filtered = array_diff_key($hits, $staleIndexes);
 
-                if ($filtered !== $ids) {
+                if ($filtered !== $hits) {
                     $lineCoverage[$file][$line] = $filtered;
                 }
             }
@@ -126,21 +139,28 @@ final class CoverageMerger
      */
     private static function collectTestIds(CodeCoverage $coverage): array
     {
+        $data = $coverage->getData();
+        $idByIndex = $data->testIds();
+
         $ids = [];
 
-        foreach ($coverage->getData()->lineCoverage() as $lines) {
+        foreach ($data->lineCoverage() as $lines) {
             foreach ($lines as $hits) {
                 if ($hits === null) {
                     continue;
                 }
 
-                foreach ($hits as $id) {
-                    $ids[$id] = true;
+                foreach (array_keys($hits) as $index) {
+                    if (! isset($idByIndex[$index])) {
+                        continue;
+                    }
+
+                    $ids[$index] = $idByIndex[$index];
                 }
             }
         }
 
-        return array_keys($ids);
+        return array_values($ids);
     }
 
     private static function state(): State
@@ -164,15 +184,10 @@ final class CoverageMerger
             return null;
         }
 
-        // Legacy `--coverage-php` format: a serialized `CodeCoverage` object.
         if ($value instanceof CodeCoverage) {
             return $value;
         }
 
-        // Since phpunit/php-code-coverage 14, `--coverage-php` writes the report
-        // as a serialized array (`['codeCoverage' => ..., 'testResults' => ...,
-        // 'basePath' => ...]`) rather than a `CodeCoverage` object, so it has to
-        // be rebuilt into one before it can be merged.
         return self::coverageFromSerializedData($reportPath);
     }
 

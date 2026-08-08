@@ -29,24 +29,12 @@ use function strlen;
  */
 final class ResultPrinter
 {
-    /**
-     * If the test should be marked as todo.
-     */
     public bool $lastWasTodo = false;
 
-    /**
-     * The "native" printer.
-     */
     public readonly Printer $printer;
 
-    /**
-     * The state.
-     */
     public int $passedTests = 0;
 
-    /**
-     * The "compact" printer.
-     */
     private readonly CompactPrinter $compactPrinter;
 
     /** @var resource|null */

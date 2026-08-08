@@ -21,8 +21,6 @@ use function Pest\testDirectory;
 final class BootFiles implements Bootstrapper
 {
     /**
-     * The structure of the tests directory.
-     *
      * @var array<int, string>
      */
     private const array STRUCTURE = [
@@ -33,9 +31,6 @@ final class BootFiles implements Bootstrapper
         'Pest.php',
     ];
 
-    /**
-     * Boots the structure of the tests directory.
-     */
     public function boot(): void
     {
         $rootPath = TestSuite::getInstance()->rootPath;
@@ -67,9 +62,6 @@ final class BootFiles implements Bootstrapper
         $this->bootDatasets($testsPath);
     }
 
-    /**
-     * Loads, if possible, the given file.
-     */
     private function load(string $filename): void
     {
         if (! Str::endsWith($filename, '.php')) {

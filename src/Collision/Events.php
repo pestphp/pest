@@ -16,22 +16,13 @@ use function Termwind\renderUsing;
  */
 final class Events
 {
-    /**
-     * Sets the output.
-     */
     private static ?OutputInterface $output = null;
 
-    /**
-     * Sets the output.
-     */
     public static function setOutput(OutputInterface $output): void
     {
         self::$output = $output;
     }
 
-    /**
-     * Fires before the test method description is printed.
-     */
     public static function beforeTestMethodDescription(TestResult $result, string $description): string
     {
         if (($context = $result->context) === []) {
@@ -73,9 +64,6 @@ final class Events
         return $description;
     }
 
-    /**
-     * Fires after the test method description is printed.
-     */
     public static function afterTestMethodDescription(TestResult $result): void
     {
         if (($context = $result->context) === []) {

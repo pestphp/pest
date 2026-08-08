@@ -22,22 +22,16 @@ final class DatasetsRepository
     private const string SEPARATOR = '>>';
 
     /**
-     * Holds the datasets.
-     *
      * @var array<string, Closure|iterable<int|string, mixed>>
      */
     private static array $datasets = [];
 
     /**
-     * Holds the withs.
-     *
      * @var array<array<string, Closure|iterable<int|string, mixed>|string>>
      */
     private static array $withs = [];
 
     /**
-     * Sets the given.
-     *
      * @param  Closure|iterable<int|string, mixed>  $data
      */
     public static function set(string $name, Closure|iterable $data, string $scope): void
@@ -52,8 +46,6 @@ final class DatasetsRepository
     }
 
     /**
-     * Sets the given "with".
-     *
      * @param  array<Closure|iterable<int|string, mixed>|string>  $with
      */
     public static function with(string $filename, string $description, array $with): void
@@ -85,8 +77,6 @@ final class DatasetsRepository
     }
 
     /**
-     * Resolves the current dataset to an array value.
-     *
      * @param  array<Closure|iterable<int|string, mixed>|string>  $dataset
      * @return array<string, mixed>|null
      */

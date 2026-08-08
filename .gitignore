@@ -1,7 +1,7 @@
 .idea/*
 .idea/codeStyleSettings.xml
 .temp/*
-composer.lock
+/composer.lock
 /vendor/
 coverage.xml
 .phpunit.result.cache

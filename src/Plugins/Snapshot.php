@@ -14,9 +14,6 @@ final class Snapshot implements HandlesArguments
 {
     use Concerns\HandleArguments;
 
-    /**
-     * Whether snapshots should be updated on this run.
-     */
     public static bool $updateSnapshots = false;
 
     /**
@@ -48,8 +45,6 @@ final class Snapshot implements HandlesArguments
     }
 
     /**
-     * Options that take a value as the next argument (rather than via "=value").
-     *
      * @var list<string>
      */
     private const array FLAGS_WITH_VALUES = [
@@ -89,8 +84,6 @@ final class Snapshot implements HandlesArguments
     ];
 
     /**
-     * Determines whether the command targets the entire suite (no filter, no path).
-     *
      * @param  array<int, string>  $arguments
      */
     private function isFullRun(array $arguments): bool

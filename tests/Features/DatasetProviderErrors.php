@@ -18,27 +18,27 @@ $run = function (string $target): array {
 };
 
 test('reports missing datasets as errors for a single file run', function () use ($run): void {
-    $result = $run('tests/.tests/IssueOnly.php');
+    $result = $run('tests/Fixtures/Suites/IssueOnly.php');
 
     expect($result['output'])
-        ->toContain("A dataset with the name `missing` does not exist. You can create it using `dataset('missing', ['a', 'b']);`.")
+        ->toContain("A dataset named [missing] does not exist. You may create one using `dataset('missing', ['a', 'b']);`.")
         ->toContain('FAILED')
         ->toContain('Tests:    1 failed')
         ->and($result['code'])->not->toBe(0);
 })->skipOnWindows();
 
 test('reports missing datasets as errors alongside passing tests', function () use ($run): void {
-    $result = $run('tests/.tests/IssueWithPassing.php');
+    $result = $run('tests/Fixtures/Suites/IssueWithPassing.php');
 
     expect($result['output'])
-        ->toContain("A dataset with the name `missing` does not exist. You can create it using `dataset('missing', ['a', 'b']);`.")
+        ->toContain("A dataset named [missing] does not exist. You may create one using `dataset('missing', ['a', 'b']);`.")
         ->toContain('1 passed')
         ->toContain('1 failed')
         ->and($result['code'])->not->toBe(0);
 })->skipOnWindows();
 
 test('reports dataset closure exceptions as errors', function () use ($run): void {
-    $result = $run('tests/.tests/DatasetClosureThrows.php');
+    $result = $run('tests/Fixtures/Suites/DatasetClosureThrows.php');
 
     expect($result['output'])
         ->toContain('boom from dataset')

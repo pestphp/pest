@@ -13,9 +13,6 @@ final class Verbose implements HandlesArguments
 {
     use Concerns\HandleArguments;
 
-    /**
-     * The list of verbosity levels.
-     */
     private const array VERBOSITY_LEVELS = ['v', 'vv', 'vvv', 'q'];
 
     /**

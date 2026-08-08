@@ -13,8 +13,6 @@ use PHPUnit\Util\ExcludeList;
 final class BootExcludeList implements Bootstrapper
 {
     /**
-     * The directories to exclude.
-     *
      * @var array<int, non-empty-string>
      */
     private const array EXCLUDE_LIST = [
@@ -25,9 +23,6 @@ final class BootExcludeList implements Bootstrapper
         'stubs',
     ];
 
-    /**
-     * Boots the "exclude list" for PHPUnit to ignore Pest files.
-     */
     public function boot(): void
     {
         $baseDirectory = dirname(__DIR__, 2);

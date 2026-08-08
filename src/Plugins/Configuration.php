@@ -18,9 +18,6 @@ final class Configuration implements HandlesArguments, Terminable
 {
     use HandleArguments;
 
-    /**
-     * The base PHPUnit file.
-     */
     public const string BASE_PHPUNIT_FILE = __DIR__
         .DIRECTORY_SEPARATOR
         .'..'
@@ -29,9 +26,6 @@ final class Configuration implements HandlesArguments, Terminable
         .DIRECTORY_SEPARATOR
         .'resources/base-phpunit.xml';
 
-    /**
-     * Handles the arguments, adding the cache directory and the cache result arguments.
-     */
     public function handleArguments(array $arguments): array
     {
         if ($this->hasArgument('--configuration', $arguments) || $this->hasArgument('-c', $arguments) || $this->hasCustomConfigurationFile()) {
@@ -43,9 +37,6 @@ final class Configuration implements HandlesArguments, Terminable
         return $this->pushArgument((string) realpath($this->fromGeneratedConfigurationFile()), $arguments);
     }
 
-    /**
-     * Get the configuration file from the generated configuration file.
-     */
     private function fromGeneratedConfigurationFile(): string
     {
         $path = $this->getTempPhpunitXmlPath();
@@ -63,9 +54,6 @@ final class Configuration implements HandlesArguments, Terminable
         return $path;
     }
 
-    /**
-     * Check if the configuration file is custom.
-     */
     private function hasCustomConfigurationFile(): bool
     {
         $cliConfiguration = (new CliConfigurationBuilder)->fromParameters([]);
@@ -74,17 +62,11 @@ final class Configuration implements HandlesArguments, Terminable
         return is_string($configurationFile);
     }
 
-    /**
-     * Get the temporary phpunit.xml path.
-     */
     private function getTempPhpunitXmlPath(): string
     {
         return getcwd().'/.pest.xml';
     }
 
-    /**
-     * Terminates the plugin.
-     */
     public function terminate(): void
     {
         $path = $this->getTempPhpunitXmlPath();

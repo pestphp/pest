@@ -10,7 +10,7 @@ function normalize_windows_os_output(string $text): string
 }
 
 test('visual snapshot of team city', function (string $testFile): void {
-    $testsPath = dirname(__DIR__)."/.tests/$testFile";
+    $testsPath = dirname(__DIR__)."/Fixtures/Suites/$testFile";
 
     $snapshot = implode(DIRECTORY_SEPARATOR, [
         dirname(__DIR__),

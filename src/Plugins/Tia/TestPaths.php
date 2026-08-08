@@ -9,10 +9,6 @@ use PHPUnit\TextUI\Configuration\Registry;
 use Throwable;
 
 /**
- * Resolves the set of project-relative paths that are considered test files,
- * driven by phpunit.xml's <testsuites>. Falls back to the runtime TestSuite
- * configuration when no config file is present.
- *
  * @internal
  */
 final readonly class TestPaths
@@ -63,7 +59,7 @@ final readonly class TestPaths
                 }
             }
         } catch (Throwable) {
-            // Registry not initialized — fall through to defaults.
+            //
         }
 
         if ($suffixes === []) {

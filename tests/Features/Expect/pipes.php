@@ -12,7 +12,7 @@ class Number
     public function __construct(
         public int $value
     ) {
-        // ..
+        //
     }
 }
 
@@ -21,7 +21,7 @@ class Char
     public function __construct(
         public string $value
     ) {
-        // ..
+        //
     }
 }
 
@@ -30,7 +30,7 @@ class Symbol
     public function __construct(
         public string $value
     ) {
-        // ..
+        //
     }
 }
 
@@ -58,9 +58,6 @@ class State
 
 $state = new State;
 
-/*
- * Overrides toBe to assert two Characters are the same
- */
 expect()->pipe('toBe', function ($next, $expected) use ($state): void {
     $state->runCount['char']++;
 
@@ -70,17 +67,12 @@ expect()->pipe('toBe', function ($next, $expected) use ($state): void {
         assertInstanceOf(Char::class, $expected);
         assertEquals($this->value->value, $expected->value);
 
-        // returning nothing stops pipeline execution
         return;
     }
 
-    // calling $next(); let the pipeline to keep running
     $next();
 });
 
-/*
- * Overrides toBe to assert two Number objects are the same
- */
 expect()->intercept('toBe', Number::class, function ($expected) use ($state): void {
     $state->runCount['number']++;
     $state->appliedCount['number']++;
@@ -89,17 +81,11 @@ expect()->intercept('toBe', Number::class, function ($expected) use ($state): vo
     assertEquals($this->value->value, $expected->value);
 });
 
-/*
- * Overrides toBe to assert all integers are allowed if value is a wildcard (*)
- */
 expect()->intercept('toBe', fn ($value, $expected) => $value === '*' && is_numeric($expected), function ($expected) use ($state): void {
     $state->runCount['wildcard']++;
     $state->appliedCount['wildcard']++;
 });
 
-/*
- * Overrides toBe to assert to Symbols are the same
- */
 expect()->pipe('toBe', function ($next, $expected) use ($state): void {
     $state->runCount['symbol']++;
 
@@ -114,9 +100,6 @@ expect()->pipe('toBe', function ($next, $expected) use ($state): void {
     $next();
 });
 
-/*
- * Overrides toBe to allow ignoring case when checking strings
- */
 expect()->intercept('toBe', fn ($value) => is_string($value), function ($expected, $ignoreCase = false): void {
     if ($ignoreCase) {
         assertEqualsIgnoringCase($expected, $this->value);
