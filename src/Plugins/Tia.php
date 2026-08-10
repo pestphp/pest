@@ -332,14 +332,15 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     }
 
     /**
-     * Mutation testing needs the coverage of a complete run, so TIA stays out of its way.
-     *
      * @param  array<int, string>  $arguments
      */
     public static function isMutationRun(array $arguments): bool
     {
-        return self::argumentPresent(self::MUTATE_OPTION, $arguments)
-            || getenv(self::ENV_MUTATION_TESTING) !== false;
+        if (self::argumentPresent(self::MUTATE_OPTION, $arguments)) {
+            return true;
+        }
+
+        return getenv(self::ENV_MUTATION_TESTING) !== false;
     }
 
     public static function recordsEdgesInWorkers(): bool
