@@ -56,7 +56,12 @@ final class SnapshotRepository
 
         file_put_contents($snapshotFilename, $snapshot);
 
-        return str_replace(dirname($this->testsPath).'/', '', $snapshotFilename);
+        return $this->filename();
+    }
+
+    public function filename(): string
+    {
+        return str_replace(dirname($this->testsPath).'/', '', $this->getSnapshotFilename());
     }
 
     public function flush(): void

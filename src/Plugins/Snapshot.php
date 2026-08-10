@@ -17,6 +17,36 @@ final class Snapshot implements HandlesArguments
     public static bool $updateSnapshots = false;
 
     /**
+     * @var list<string>
+     */
+    private const array CI_ENVIRONMENT_VARIABLES = [
+        'CI',
+        'GITHUB_ACTIONS',
+        'GITLAB_CI',
+        'CIRCLECI',
+        'TRAVIS',
+        'APPVEYOR',
+        'BITBUCKET_BUILD_NUMBER',
+        'BUILDKITE',
+        'TEAMCITY_VERSION',
+        'JENKINS_URL',
+        'SYSTEM_COLLECTIONURI',
+        'CI_NAME',
+        'TASKCLUSTER_ROOT_URL',
+        'DRONE',
+        'WERCKER',
+        'NEVERCODE',
+        'SEMAPHORE',
+        'NETLIFY',
+        'NOW_BUILDER',
+    ];
+
+    public static function shouldCreateMissingSnapshots(): bool
+    {
+        return self::$updateSnapshots || ! self::runningOnCI();
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function handleArguments(array $arguments): array
@@ -118,5 +148,20 @@ final class Snapshot implements HandlesArguments
         }
 
         return true;
+    }
+
+    private static function runningOnCI(): bool
+    {
+        if (Environment::name() === Environment::CI) {
+            return true;
+        }
+
+        foreach (self::CI_ENVIRONMENT_VARIABLES as $environmentVariable) {
+            if (getenv($environmentVariable) !== false) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
