@@ -288,6 +288,25 @@ final class Project
         ];
     }
 
+    /**
+     * @return array<string, string>
+     */
+    public function glab(string $mode = 'ok', string $payload = '{}', string $host = 'gitlab.com'): array
+    {
+        $this->git()->setOriginUrl(sprintf('git@%s:pestphp/tia-fixture.git', $host));
+
+        self::mirror(__DIR__.'/stubs/glab', $this->path('stub/glab'));
+        chmod($this->path('stub/glab'), 0755);
+
+        $this->write('payload/graph.json', $payload);
+
+        return [
+            'PATH' => $this->path('stub').PATH_SEPARATOR.getenv('PATH'),
+            'GLAB_STUB_MODE' => $mode,
+            'GLAB_STUB_PAYLOAD' => $this->path('payload/graph.json'),
+        ];
+    }
+
     public static function testId(string $testFile, string $description): string
     {
         $basename = basename($testFile, '.php');
