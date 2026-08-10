@@ -64,6 +64,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     private const string BASELINE_PATH_OPTION = '--baseline';
 
+    private const string MUTATE_OPTION = '--mutate';
+
     private const string ENV_MUTATION_TESTING = 'PEST_MUTATION_TESTING';
 
     private const string ENV_TIA = 'PEST_TIA';
@@ -329,6 +331,17 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         return ! self::argumentPresent('--ci', $arguments);
     }
 
+    /**
+     * Mutation testing needs the coverage of a complete run, so TIA stays out of its way.
+     *
+     * @param  array<int, string>  $arguments
+     */
+    public static function isMutationRun(array $arguments): bool
+    {
+        return self::argumentPresent(self::MUTATE_OPTION, $arguments)
+            || getenv(self::ENV_MUTATION_TESTING) !== false;
+    }
+
     public static function recordsEdgesInWorkers(): bool
     {
         return (string) Parallel::getGlobal(self::RECORDING_GLOBAL) === '1'
@@ -472,6 +485,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $partial = ! $isWorker && ($hasExplicitPath || $this->hasPartialSelection($arguments));
         $disabled = $disabled || $partial;
 
+        $mutating = self::isMutationRun($this->originalArguments);
+
         if (getenv(self::ENV_MUTATION_TESTING) !== false) {
             $this->writesSuppressed = true;
         }
@@ -501,6 +516,16 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
                     $this->renderChild('TIA does not apply to partial runs — running the selected tests directly.');
                 }
             }
+
+            $this->forceRefetch = false;
+            $this->filteredMode = false;
+
+            return $arguments;
+        }
+
+        if (! $isWorker && $mutating && ($enabled || $this->forceRefetch)) {
+            $this->requestWorkerResults();
+            $this->emitMutationScopedRecordSkipped();
 
             $this->forceRefetch = false;
             $this->filteredMode = false;
@@ -1284,6 +1309,14 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         $this->renderChild('Running in TIA mode, however TIA is skipped as an active coverage report narrows the edges it could record.');
         $this->renderChild('Record the baseline with a plain --tia run first; coverage runs then reuse it.');
+    }
+
+    private function emitMutationScopedRecordSkipped(): void
+    {
+        $this->output->writeln('');
+
+        $this->renderChild('Running in TIA mode, however TIA is skipped as mutation testing needs the coverage of a complete run.');
+        $this->renderChild('Drop --mutate to narrow and replay with TIA.');
     }
 
     /**

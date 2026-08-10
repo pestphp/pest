@@ -78,6 +78,10 @@ final class XdebugRestarter implements Restarter
             }
         }
 
+        if (Tia::isMutationRun($arguments)) {
+            return false;
+        }
+
         if (! Tia::isEnabledForRun($arguments)) {
             return false;
         }
