@@ -85,12 +85,37 @@ final class JsModuleGraph
                 continue;
             }
 
+            if (! self::matchesDiskCasing($projectRoot, $rel)) {
+                continue;
+            }
+
             if (self::dirHasPageFile($abs)) {
                 return $abs;
             }
         }
 
         return null;
+    }
+
+    private static function matchesDiskCasing(string $projectRoot, string $relative): bool
+    {
+        $current = rtrim($projectRoot, DIRECTORY_SEPARATOR);
+
+        foreach (explode('/', $relative) as $segment) {
+            $entries = @scandir($current);
+
+            if ($entries === false) {
+                return false;
+            }
+
+            if (! in_array($segment, $entries, true)) {
+                return false;
+            }
+
+            $current .= DIRECTORY_SEPARATOR.$segment;
+        }
+
+        return true;
     }
 
     private static function dirHasPageFile(string $dir): bool

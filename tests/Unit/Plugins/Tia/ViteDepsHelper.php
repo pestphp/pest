@@ -357,6 +357,49 @@ function tiaViteAliasResults(): array
     return $cache = ['roots' => $roots, 'aliases' => $aliases];
 }
 
+/**
+ * @return array<string, bool>
+ */
+function tiaDiskCasingResults(): array
+{
+    static $cache = null;
+    if ($cache !== null) {
+        return $cache;
+    }
+
+    $root = sys_get_temp_dir().'/pest-tia-casing-'.bin2hex(random_bytes(6));
+    mkdir($root.'/resources/js/pages', 0755, true);
+    file_put_contents($root.'/resources/js/pages/Dashboard.vue', "<template>ok</template>\n");
+
+    $helper = str_replace('\\', '/', tiaViteHelperPath());
+    $normalized = str_replace('\\', '/', $root);
+
+    $script = <<<JS
+    import { matchesDiskCasing } from '{$helper}'
+    const out = {
+      exact: await matchesDiskCasing('{$normalized}', 'resources/js/pages'),
+      'wrong-leaf': await matchesDiskCasing('{$normalized}', 'resources/js/Pages'),
+      'wrong-parent': await matchesDiskCasing('{$normalized}', 'Resources/js/pages'),
+      absent: await matchesDiskCasing('{$normalized}', 'assets/js/pages'),
+    }
+    process.stdout.write(JSON.stringify(out))
+    JS;
+
+    $process = new Process(['node', '--input-type=module', '-e', $script]);
+    $process->mustRun();
+
+    /** @var array<string, bool> $results */
+    $results = json_decode($process->getOutput(), true, flags: JSON_THROW_ON_ERROR);
+
+    @unlink($root.'/resources/js/pages/Dashboard.vue');
+    @rmdir($root.'/resources/js/pages');
+    @rmdir($root.'/resources/js');
+    @rmdir($root.'/resources');
+    @rmdir($root);
+
+    return $cache = $results;
+}
+
 beforeEach(function (): void {
     if ((new ExecutableFinder)->find('node') === null) {
         $this->markTestSkipped('node is not available.');
@@ -409,3 +452,12 @@ it('builds the expected alias map from a vite config', function (string $name): 
 
     expect($results['aliases'][$name])->toEqual($expected);
 })->with(array_keys(tiaViteAliasFixtures()));
+
+it('accepts a page directory candidate only when it matches the casing on disk', function (): void {
+    $results = tiaDiskCasingResults();
+
+    expect($results['exact'])->toBeTrue()
+        ->and($results['wrong-leaf'])->toBeFalse()
+        ->and($results['wrong-parent'])->toBeFalse()
+        ->and($results['absent'])->toBeFalse();
+});
