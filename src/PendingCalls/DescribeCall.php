@@ -10,6 +10,8 @@ use Pest\TestSuite;
 
 /**
  * @internal
+ *
+ * @mixin TestCall
  */
 final class DescribeCall
 {
