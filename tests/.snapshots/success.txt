@@ -73,9 +73,9 @@
   ↓ is marked as todo 3
   ↓ shouldBeMarkedAsTodo
 
-   PASS  Tests\Features\Coverage
+   WARN  Tests\Features\Coverage
   ✓ it has plugin
-  ✓ it adds coverage if --coverage exist
+  - it adds coverage if --coverage exist → Coverage is not available
   ✓ it adds coverage if --min exist
   ✓ it generates coverage based on file input
 
@@ -2209,4 +2209,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 34 skipped, 1561 passed (3405 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1560 passed (3400 assertions)
