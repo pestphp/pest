@@ -157,7 +157,7 @@ final class Project
     }
 
     /**
-     * @param  array<string, string>  $environment
+     * @param  array<string, string|false>  $environment
      */
     public function pestWithEnvironment(string $directory, array $environment, string ...$arguments): PestResult
     {
@@ -172,11 +172,14 @@ final class Project
                 'PAO_DISABLE' => '1',
                 'XDEBUG_MODE' => 'coverage',
                 'HOME' => $this->home(),
-                'GITHUB_EVENT_PATH' => '',
-                'CI_DEFAULT_BRANCH' => '',
-                'GITHUB_ACTIONS' => '',
-                'GITLAB_CI' => '',
-                'CIRCLECI' => '',
+                'CI' => false,
+                'GITHUB_EVENT_PATH' => false,
+                'CI_DEFAULT_BRANCH' => false,
+                'CI_COMMIT_BRANCH' => false,
+                'GITHUB_ACTIONS' => false,
+                'GITHUB_REF_NAME' => false,
+                'GITLAB_CI' => false,
+                'CIRCLECI' => false,
                 ...$environment,
             ],
         );
