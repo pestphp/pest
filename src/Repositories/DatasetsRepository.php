@@ -141,7 +141,7 @@ final class DatasetsRepository
                 $datasets[$index] = self::getScopedDataset($data, $currentTestFile);
             }
 
-            if (is_callable($datasets[$index])) {
+            if (! is_array($datasets[$index]) && is_callable($datasets[$index])) {
                 $datasets[$index] = call_user_func($datasets[$index]);
             }
 

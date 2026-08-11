@@ -1764,6 +1764,7 @@
   ✓ it shows the correct description for long texts with newlines
   ✓ it shows the correct description for arrays with many elements
   ✓ it shows the correct description of datasets with html
+  ✓ it does not treat a two element dataset of class names as a callable
 
    PASS  Tests\Unit\Expectations\OppositeExpectation
   ✓ it throw expectation failed exception with string argument
@@ -2221,4 +2222,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1570 passed (3410 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1571 passed (3411 assertions)
