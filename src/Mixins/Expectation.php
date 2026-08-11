@@ -152,6 +152,68 @@ final class Expectation
     /**
      * @return self<TValue>
      */
+    public function toBePositive(string $message = ''): self
+    {
+        Assert::assertGreaterThan(0, $this->value, $message);
+
+        return $this;
+    }
+
+    /**
+     * @return self<TValue>
+     */
+    public function toBeNegative(string $message = ''): self
+    {
+        Assert::assertLessThan(0, $this->value, $message);
+
+        return $this;
+    }
+
+    /**
+     * @return self<TValue>
+     */
+    public function toBeZero(string $message = ''): self
+    {
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is zero.";
+        }
+
+        Assert::assertEquals(0, $this->value, $message);
+
+        return $this;
+    }
+
+    /**
+     * @return self<TValue>
+     */
+    public function toBeOdd(string $message = ''): self
+    {
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is odd.";
+        }
+
+        Assert::assertTrue(((int) $this->value) % 2 !== 0, $message);
+
+        return $this;
+    }
+
+    /**
+     * @return self<TValue>
+     */
+    public function toBeEven(string $message = ''): self
+    {
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is even.";
+        }
+
+        Assert::assertTrue(((int) $this->value) % 2 === 0, $message);
+
+        return $this;
+    }
+
+    /**
+     * @return self<TValue>
+     */
     public function toContain(mixed ...$needles): self
     {
         foreach ($needles as $needle) {
