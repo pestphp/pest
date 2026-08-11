@@ -1906,6 +1906,14 @@
   ✓ does not throw when an integer --random-order-seed is passed as a separate argv element
   ✓ still detects --tia when an integer argument is present
 
+   PASS  Tests\Unit\Plugins\Tia\JsModuleGraph
+  ✓ it accepts a page directory candidate only when every segment matches the casing on disk with dataset "exact"
+  ✓ it accepts a page directory candidate only when every segment matches the casing on disk with dataset "wrong leaf"
+  ✓ it accepts a page directory candidate only when every segment matches the casing on disk with dataset "wrong parent"
+  ✓ it accepts a page directory candidate only when every segment matches the casing on disk with dataset "absent"
+  ✓ it resolves the pages directory with the casing it has on disk
+  ✓ it fingerprints a project whose js tree holds a directory it cannot open
+
    PASS  Tests\Unit\Plugins\Tia\Lockfiles\PackageLock
   ✓ it applies only to package-lock.json
   ✓ it returns null for contents that are not an npm lockfile
@@ -2021,6 +2029,10 @@
   ✓ it builds the expected alias map from a vite config with ('laravel-plugin-default')
   ✓ it builds the expected alias map from a vite config with ('no-alias-no-plugin')
   ✓ it builds the expected alias map from a vite config with ('no-config')
+  ✓ it accepts a page directory candidate only when it matches the casing on disk with ('exact')
+  ✓ it accepts a page directory candidate only when it matches the casing on disk with ('wrong leaf')
+  ✓ it accepts a page directory candidate only when it matches the casing on disk with ('wrong parent')
+  ✓ it accepts a page directory candidate only when it matches the casing on disk with ('absent')
 
    PASS  Tests\Unit\Preset
   ✓ preset invalid name
@@ -2209,4 +2221,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1560 passed (3400 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1570 passed (3410 assertions)
