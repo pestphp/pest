@@ -9,5 +9,7 @@ namespace Pest\Plugins\Tia\Contracts;
  */
 interface Ci
 {
+    public function currentBranch(): ?string;
+
     public function defaultBranch(): ?string;
 }
