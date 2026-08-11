@@ -193,7 +193,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             '--list-tests',
         ]))->setTimeout(120)->mustRun()->getOutput();
 
-        preg_match_all('/ - (?:P\\\\)?(Tests\\\\[^:]+)::/', $output, $matches);
+        preg_match_all('/ - (?:P\\\\)?(.+?)::/', $output, $matches);
 
         return array_values(array_unique($matches[1]));
     }
