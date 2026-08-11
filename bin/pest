@@ -126,6 +126,38 @@ use Symfony\Component\Console\Output\ConsoleOutput;
         }
     }
 
+    // Convert namespace-style arguments (e.g. Tests\Unit\TestName) to file paths.
+    foreach ($arguments as $key => $value) {
+        if (str_starts_with($value, '-')) {
+            continue;
+        }
+
+        if (! str_contains($value, '\\')) {
+            continue;
+        }
+
+        $path = str_replace('\\', DIRECTORY_SEPARATOR, $value);
+
+        if (! str_ends_with($path, '.php')) {
+            $path .= '.php';
+        }
+
+        if (file_exists($path)) {
+            $arguments[$key] = $path;
+
+            continue;
+        }
+
+        // Try lowercasing the first directory segment (e.g. Tests -> tests).
+        $segments = explode(DIRECTORY_SEPARATOR, $path);
+        $segments[0] = lcfirst($segments[0]);
+        $lowercasedPath = implode(DIRECTORY_SEPARATOR, $segments);
+
+        if (file_exists($lowercasedPath)) {
+            $arguments[$key] = $lowercasedPath;
+        }
+    }
+
     // Used when Pest is required using composer.
     $vendorPath = dirname(__DIR__, 4).'/vendor/autoload.php';
 
