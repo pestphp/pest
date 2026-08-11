@@ -21,7 +21,7 @@ use PHPUnit\Event\Facade as EventFacade;
 use PHPUnit\Event\Test\AfterLastTestMethodFailed;
 use PHPUnit\Event\TestRunner\WarningTriggered;
 use PHPUnit\Runner\CodeCoverage;
-use PHPUnit\Runner\ResultCache\DefaultResultCache;
+use PHPUnit\Runner\TestRunHistory\DefaultTestRunHistory;
 use PHPUnit\TestRunner\TestResult\Facade as TestResultFacade;
 use PHPUnit\TestRunner\TestResult\TestResult;
 use PHPUnit\TextUI\Configuration\CodeCoverageFilterRegistry;
@@ -417,6 +417,9 @@ final class WrapperRunner implements RunnerInterface
                 // @phpstan-ignore-next-line
                 array_merge_recursive($testResultSum->phpWarnings(), $testResult->phpWarnings()),
                 $testResultSum->numberOfIssuesIgnoredByBaseline() + $testResult->numberOfIssuesIgnoredByBaseline(),
+                self::numberOfDeprecationsByTrigger($testResultSum, $testResult),
+                // @phpstan-ignore-next-line
+                array_merge_recursive($testResultSum->retriedTests(), $testResult->retriedTests()),
             );
         }
 
@@ -455,14 +458,16 @@ final class WrapperRunner implements RunnerInterface
             $testResultSum->phpNotices(),
             $testResultSum->phpWarnings(),
             $testResultSum->numberOfIssuesIgnoredByBaseline(),
+            self::numberOfDeprecationsByTrigger($testResultSum),
+            $testResultSum->retriedTests(),
         );
 
         self::$result = $testResultSum;
 
-        if ($this->options->configuration->cacheResult()) {
-            $resultCacheSum = new DefaultResultCache($this->options->configuration->testResultCacheFile());
+        if ($this->options->configuration->recordTestRunHistory()) {
+            $resultCacheSum = new DefaultTestRunHistory($this->options->configuration->testRunHistoryFile());
             foreach ($this->resultCacheFiles as $resultCacheFile) {
-                $resultCache = new DefaultResultCache($resultCacheFile->getPathname());
+                $resultCache = new DefaultTestRunHistory($resultCacheFile->getPathname());
                 $resultCache->load();
 
                 $resultCacheSum->mergeWith($resultCache);
@@ -493,6 +498,28 @@ final class WrapperRunner implements RunnerInterface
         $this->clearFiles($this->testdoxFiles);
 
         return $exitcode;
+    }
+
+    /**
+     * @return array{self: non-negative-int, direct: non-negative-int, indirect: non-negative-int, unknown: non-negative-int}
+     */
+    private static function numberOfDeprecationsByTrigger(TestResult ...$results): array
+    {
+        $self = $direct = $indirect = $unknown = 0;
+
+        foreach ($results as $result) {
+            $self += max(0, $result->numberOfSelfDeprecations());
+            $direct += max(0, $result->numberOfDirectDeprecations());
+            $indirect += max(0, $result->numberOfIndirectDeprecations());
+            $unknown += max(0, $result->numberOfDeprecationsWithUnknownTrigger());
+        }
+
+        return [
+            'self' => $self,
+            'direct' => $direct,
+            'indirect' => $indirect,
+            'unknown' => $unknown,
+        ];
     }
 
     private function generateCodeCoverageReports(): void

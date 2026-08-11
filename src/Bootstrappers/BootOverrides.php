@@ -18,7 +18,7 @@ final class BootOverrides implements Bootstrapper
     public const array FILES = [
         'ParaTest/WrapperRunner/ProgressPrinterOutput.php',
         'Runner/Filter/NameFilterIterator.php',
-        'Runner/ResultCache/DefaultResultCache.php',
+        'Runner/TestRunHistory/DefaultTestRunHistory.php',
         'Runner/TestSuiteLoader.php',
         'Runner/TestSuiteSorter.php',
         'TextUI/Command/Commands/WarmCodeCoverageCacheCommand.php',

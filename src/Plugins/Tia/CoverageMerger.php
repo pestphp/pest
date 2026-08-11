@@ -57,7 +57,7 @@ final class CoverageMerger
         }
 
         self::primeUncoveredFiles($cached);
-        self::primeUncoveredFiles($current);
+        self::discardUnexercisedFiles($current);
 
         self::stripCurrentTestsFromCached($cached, $current);
 
@@ -75,6 +75,28 @@ final class CoverageMerger
     private static function primeUncoveredFiles(CodeCoverage $coverage): void
     {
         $coverage->getData(false);
+    }
+
+    private static function discardUnexercisedFiles(CodeCoverage $coverage): void
+    {
+        $data = $coverage->getData(true);
+        $lineCoverage = $data->lineCoverage();
+        $discarded = false;
+
+        foreach ($lineCoverage as $file => $lines) {
+            foreach ($lines as $hits) {
+                if (is_array($hits) && $hits !== []) {
+                    continue 2;
+                }
+            }
+
+            unset($lineCoverage[$file]);
+            $discarded = true;
+        }
+
+        if ($discarded) {
+            $data->setLineCoverage($lineCoverage);
+        }
     }
 
     private static function compress(string $bytes): string
@@ -139,7 +161,7 @@ final class CoverageMerger
      */
     private static function collectTestIds(CodeCoverage $coverage): array
     {
-        $data = $coverage->getData();
+        $data = $coverage->getData(true);
         $idByIndex = $data->testIds();
 
         $ids = [];

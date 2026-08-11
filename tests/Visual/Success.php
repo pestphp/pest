@@ -12,9 +12,9 @@ test('visual snapshot of test suite on success', function (): void {
 
     $output = function () use ($testsPath): ?string {
         $process = (new Process(
-            ['php', '-d', 'memory_limit=-1', 'bin/pest'],
+            ['php', '-d', 'memory_limit=-1', 'bin/pest', '--exclude-group=tia'],
             dirname($testsPath),
-            ['EXCLUDE' => 'integration', '--exclude-group' => 'integration', 'REBUILD_SNAPSHOTS' => false, 'PARATEST' => 0, 'COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
+            ['EXCLUDE' => 'integration', 'REBUILD_SNAPSHOTS' => false, 'PARATEST' => 0, 'COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
         ));
 
         $process->setTimeout(300.0);

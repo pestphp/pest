@@ -44,10 +44,18 @@ final class Cache implements HandlesArguments
             }
         }
 
-        if (! $this->hasArgument('--parallel', $arguments) && ! $this->hasArgument('--do-not-cache-result', $arguments) && ! $this->hasArgument('--cache-result', $arguments)) {
-            return $this->pushArgument('--cache-result', $arguments);
+        if (! $this->hasArgument('--parallel', $arguments) && ! $this->hasTestRunHistoryArgument($arguments)) {
+            return $this->pushArgument('--record-test-run-history', $arguments);
         }
 
         return $arguments;
+    }
+
+    /**
+     * @param  array<int, string>  $arguments
+     */
+    private function hasTestRunHistoryArgument(array $arguments): bool
+    {
+        return array_any(['--record-test-run-history', '--do-not-record-test-run-history', '--cache-result', '--do-not-cache-result'], fn (string $argument): bool => $this->hasArgument($argument, $arguments));
     }
 }

@@ -16,42 +16,32 @@ namespace PHPUnit\Runner\Filter;
 use Pest\Contracts\HasPrintableTestCaseName;
 use PHPUnit\Framework\Test;
 use PHPUnit\Framework\TestSuite;
-use PHPUnit\Runner\PhptTestCase;
+use PHPUnit\Runner\Phpt\TestCase as PhptTestCase;
 use RecursiveFilterIterator;
 use RecursiveIterator;
 
 use function end;
 use function preg_match;
-use function sprintf;
-use function str_replace;
+use function trim;
 
 /**
+ * @extends RecursiveFilterIterator<int, Test, RecursiveIterator<int, Test>>
+ *
  * @internal This class is not covered by the backward compatibility promise for PHPUnit
  */
 abstract class NameFilterIterator extends RecursiveFilterIterator
 {
-    /**
-     * @psalm-var non-empty-string
-     */
-    private readonly string $regularExpression;
-
-    private readonly ?int $dataSetMinimum;
-
-    private readonly ?int $dataSetMaximum;
+    private readonly CompiledNameFilter $filter;
 
     /**
-     * @psalm-param RecursiveIterator<int, Test> $iterator
-     * @psalm-param non-empty-string $filter
+     * @param  RecursiveIterator<int, Test>  $iterator
+     * @param  non-empty-string  $filter
      */
     public function __construct(RecursiveIterator $iterator, string $filter)
     {
         parent::__construct($iterator);
 
-        $preparedFilter = $this->prepareFilter($filter);
-
-        $this->regularExpression = $preparedFilter['regularExpression'];
-        $this->dataSetMinimum = $preparedFilter['dataSetMinimum'];
-        $this->dataSetMaximum = $preparedFilter['dataSetMaximum'];
+        $this->filter = CompiledNameFilter::from($filter);
     }
 
     public function accept(): bool
@@ -74,70 +64,15 @@ abstract class NameFilterIterator extends RecursiveFilterIterator
             $name = $test::class.'::'.$test->nameWithDataSet();
         }
 
-        $accepted = @preg_match($this->regularExpression, $name, $matches) === 1;
+        $accepted = @preg_match($this->filter->regularExpression(), $name, $matches) === 1;
 
-        if ($accepted && isset($this->dataSetMaximum)) {
+        if ($accepted && $this->filter->hasDataSetRange()) {
             $set = end($matches);
-            $accepted = $set >= $this->dataSetMinimum && $set <= $this->dataSetMaximum;
+            $accepted = $set >= $this->filter->dataSetMinimum() && $set <= $this->filter->dataSetMaximum();
         }
 
         return $this->doAccept($accepted);
     }
 
     abstract protected function doAccept(bool $result): bool;
-
-    /**
-     * @psalm-param non-empty-string $filter
-     *
-     * @psalm-return array{regularExpression: non-empty-string, dataSetMinimum: ?int, dataSetMaximum: ?int}
-     */
-    private function prepareFilter(string $filter): array
-    {
-        $dataSetMinimum = null;
-        $dataSetMaximum = null;
-
-        if (@preg_match($filter, '') === false) {
-            if (preg_match('/^(.*?)#(\d+)(?:-(\d+))?$/', $filter, $matches)) {
-                if (isset($matches[3]) && $matches[2] < $matches[3]) {
-                    $filter = sprintf(
-                        '%s.*with data set #(\d+)$',
-                        $matches[1],
-                    );
-
-                    $dataSetMinimum = (int) $matches[2];
-                    $dataSetMaximum = (int) $matches[3];
-                } else {
-                    $filter = sprintf(
-                        '%s.*with data set #%s$',
-                        $matches[1],
-                        $matches[2],
-                    );
-                }
-            }
-            //  * testDetermineJsonError@JSON_ERROR_NONE
-            //  * testDetermineJsonError@JSON.*
-            elseif (preg_match('/^(.*?)@(.+)$/', $filter, $matches)) {
-                $filter = sprintf(
-                    '%s.*with data set "%s"$',
-                    $matches[1],
-                    $matches[2],
-                );
-            }
-
-            $filter = sprintf(
-                '/%s/i',
-                str_replace(
-                    '/',
-                    '\\/',
-                    $filter,
-                ),
-            );
-        }
-
-        return [
-            'regularExpression' => $filter,
-            'dataSetMinimum' => $dataSetMinimum,
-            'dataSetMaximum' => $dataSetMaximum,
-        ];
-    }
 }

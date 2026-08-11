@@ -18,19 +18,19 @@
     ],
     "require": {
         "php": "^8.4",
-        "brianium/paratest": "^7.23.1",
+        "brianium/paratest": "^7.24.0",
         "nunomaduro/collision": "^8.9.5",
         "nunomaduro/termwind": "^2.4.0",
         "pestphp/pest-plugin": "^5.0.0",
         "pestphp/pest-plugin-arch": "^5.0.0",
-        "pestphp/pest-plugin-mutate": "^5.0.1",
+        "pestphp/pest-plugin-mutate": "^5.0.2",
         "pestphp/pest-plugin-profanity": "^5.0.0",
-        "phpunit/phpunit": "^13.2.6",
+        "phpunit/phpunit": "^13.3.0",
         "symfony/process": "^8.1.0"
     },
     "conflict": {
         "filp/whoops": "<2.18.3",
-        "phpunit/phpunit": ">13.2.6",
+        "phpunit/phpunit": ">13.3.0",
         "sebastian/exporter": "<7.0.0",
         "webmozart/assert": "<1.11.0"
     },
@@ -60,8 +60,8 @@
     },
     "require-dev": {
         "pestphp/pest-dev-tools": "^5.0.0",
-        "pestphp/pest-plugin-browser": "^5.0.0",
-        "pestphp/pest-plugin-phpstan": "^5.0.0",
+        "pestphp/pest-plugin-browser": "^5.0.1",
+        "pestphp/pest-plugin-phpstan": "^5.0.2",
         "pestphp/pest-plugin-rector": "^5.0.3",
         "pestphp/pest-plugin-type-coverage": "^5.0.2",
         "psy/psysh": "^0.12.24"
@@ -96,7 +96,7 @@
         "test:parallel": "php bin/pest --exclude-group=integration --parallel --processes=3",
         "test:integration": "php bin/pest --group=integration -v",
         "test:tia": "php bin/pest --group=tia -v",
-        "update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --update-snapshots",
+        "update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --update-snapshots --exclude-group=tia",
         "test": [
             "@test:lint",
             "@test:type:check",

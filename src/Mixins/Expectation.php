@@ -734,6 +734,12 @@ final class Expectation
         };
 
         if (! $snapshots->has()) {
+            if (! Snapshot::shouldCreateMissingSnapshots()) {
+                $filename = $snapshots->filename();
+
+                Assert::fail($message === '' ? "Snapshot is missing at [$filename]. Run Pest with --update-snapshots to create it." : $message);
+            }
+
             $filename = $snapshots->save($string);
 
             TestSuite::getInstance()->registerSnapshotChange("Snapshot created at [$filename]");

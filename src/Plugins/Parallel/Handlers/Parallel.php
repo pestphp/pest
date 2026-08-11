@@ -20,6 +20,7 @@ final class Parallel implements HandlesArguments
         '-p',
         '--no-output',
         '--cache-result',
+        '--record-test-run-history',
     ];
 
     public function handleArguments(array $arguments): array
