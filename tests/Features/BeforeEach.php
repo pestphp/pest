@@ -126,3 +126,29 @@ describe('called on all tests', function (): void {
         expect($this->baz)->toBe(2);
     });
 });
+
+describe('hierarchical test naming', function (): void {
+    describe('block one', function (): void {
+        describe('the same name', function (): void {
+            it('does not call beforeEach from sibling describe with same name', function (): void {
+                expect($this)->not->toHaveProperty('example');
+            });
+        });
+    });
+
+    describe('block two', function (): void {
+        beforeEach(function (): void {
+            $this->example = false;
+        });
+
+        describe('the same name', function (): void {
+            beforeEach(function (): void {
+                $this->result = $this->example;
+            });
+
+            it('correctly calls beforeEach from own describe hierarchy', function (): void {
+                expect($this->result)->toBeFalse();
+            });
+        });
+    });
+});
