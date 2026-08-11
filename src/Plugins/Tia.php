@@ -20,7 +20,7 @@ use Pest\Panic;
 use Pest\Plugins\Concerns\HandleArguments;
 use Pest\Plugins\Tia\BaselineSync;
 use Pest\Plugins\Tia\ChangedFiles;
-use Pest\Plugins\Tia\CiDefaultBranch;
+use Pest\Plugins\Tia\CiBranch;
 use Pest\Plugins\Tia\Contracts\State;
 use Pest\Plugins\Tia\CoverageCollector;
 use Pest\Plugins\Tia\Fingerprint;
@@ -196,8 +196,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     private bool $unreadableGraphReported = false;
 
-    private bool $detachedHead = false;
-
     private bool $graphUnreachable = false;
 
     private bool $fullSuiteFallbackRan = false;
@@ -283,19 +281,11 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     private function deleteState(string $key): bool
     {
-        if ($this->detachedHead) {
-            return false;
-        }
-
         return $this->state->delete($key);
     }
 
     private function saveGraph(Graph $graph): bool
     {
-        if ($this->detachedHead) {
-            return true;
-        }
-
         $json = $graph->encode();
 
         if ($json === null) {
@@ -851,7 +841,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $fingerprint = Fingerprint::compute($projectRoot);
         $this->startFingerprint = $fingerprint;
 
-        if ($forceRebuild && ! $this->detachedHead) {
+        if ($forceRebuild) {
             Storage::purge($projectRoot);
         }
 
@@ -1950,10 +1940,17 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         Parallel::setGlobal(self::FALLBACK_BRANCH_GLOBAL, $this->fallbackBranch);
 
-        $currentBranch = $changedFiles->currentBranch();
+        $this->branch = $changedFiles->currentBranch()
+            ?? CiBranch::detectCurrent()
+            ?? $this->workspaceBranch($projectRoot);
+    }
 
-        $this->detachedHead = $currentBranch === null;
-        $this->branch = $currentBranch ?? $this->fallbackBranch;
+    private function workspaceBranch(string $projectRoot): string
+    {
+        $realProjectRoot = realpath($projectRoot);
+        $hash = hash('sha256', $realProjectRoot === false ? $projectRoot : $realProjectRoot);
+
+        return Graph::WORKSPACE_BRANCH_PREFIX.substr($hash, 0, 16);
     }
 
     private function resolveFallbackBranch(ChangedFiles $changedFiles): ?string
@@ -1965,7 +1962,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         }
 
         return $this->watchPatterns->defaultBranch()
-            ?? CiDefaultBranch::detect()
+            ?? CiBranch::detectDefault()
             ?? $changedFiles->defaultBranch()
             ?? $this->soleRecordedBranch();
     }
@@ -1978,7 +1975,10 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return null;
         }
 
-        $branches = Graph::branchesIn($json);
+        $branches = array_values(array_filter(
+            Graph::branchesIn($json),
+            fn (string $branch): bool => ! str_starts_with($branch, Graph::WORKSPACE_BRANCH_PREFIX),
+        ));
 
         return count($branches) === 1 ? $branches[0] : null;
     }

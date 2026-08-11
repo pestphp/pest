@@ -14,6 +14,11 @@ final readonly class GitLab implements Ci
 {
     use ReadsEnvironment;
 
+    public function currentBranch(): ?string
+    {
+        return $this->environment('CI_COMMIT_BRANCH');
+    }
+
     public function defaultBranch(): ?string
     {
         return $this->environment('CI_DEFAULT_BRANCH');

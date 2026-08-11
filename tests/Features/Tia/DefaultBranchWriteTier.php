@@ -104,17 +104,20 @@ test('filtered mode finds nothing to do on the default branch itself', function 
         ->and($delta->isHardSuppressed())->toBeTrue($delta->summary());
 })->skipOnWindows();
 
-test('a detached HEAD replays without minting a branch key', function (): void {
+test('a detached HEAD replays through a workspace baseline', function (): void {
     $project = Project::make('master');
     $project->seed('master');
 
     $project->git()->detach();
 
     $result = $project->pest('--tia');
+    $hasWorkspaceBranch = array_any($project->branchKeys(), fn (string $branch): bool => str_starts_with($branch, '@workspace:'));
 
     expect($result->replayed())->toBe(Project::TOTAL_TESTS, $result->describe())
         ->and($result->uncached())->toBe(0, $result->describe())
-        ->and($project->branchKeys())->toBe(['master']);
+        ->and($project->branchKeys())->toHaveCount(2)
+        ->and($project->branchKeys())->toContain('master')
+        ->and($hasWorkspaceBranch)->toBeTrue();
 })->skipOnWindows();
 
 test('a detached HEAD does not write into the default branch baseline', function (array $arguments): void {
@@ -125,9 +128,13 @@ test('a detached HEAD does not write into the default branch baseline', function
     $project->pest(...$arguments);
 
     $delta = $project->delta();
+    $hasWorkspaceBranch = array_any($project->branchKeys(), fn (string $branch): bool => str_starts_with($branch, '@workspace:'));
 
     expect($delta->baselineUntouched('master'))->toBeTrue($delta->summary())
-        ->and($project->branchKeys())->toBe(['master']);
+        ->and($project->branchKeys())->toHaveCount(2)
+        ->and($project->branchKeys())->toContain('master')
+        ->and($hasWorkspaceBranch)->toBeTrue()
+        ->and($delta->writtenCount())->toBe(0, $delta->summary());
 })->with([
     'sequential' => [['--filter=adds two numbers']],
     'parallel' => [['--parallel', '--processes=2', '--filter=adds two numbers']],
@@ -146,6 +153,26 @@ test('the branch that ran gets its own key and the default branch keeps its base
         ->and($delta->baselineUntouched('master'))->toBeTrue($delta->summary())
         ->and($delta->writtenCount())->toBe(0, $delta->summary());
 })->skipOnWindows();
+
+test('a detached CI branch writes into its branch baseline', function (array $environment): void {
+    $project = Project::make('master');
+    $project->seed('master');
+
+    $project->git()->detach();
+    $project->pestWithEnvironment($project->path(), $environment, '--filter=adds two numbers');
+
+    expect($project->branchKeys())->toBe(['master', 'feature-x'])
+        ->and(array_any($project->branchKeys(), fn (string $branch): bool => str_starts_with($branch, '@workspace:')))->toBeFalse();
+})->with([
+    'GitLab' => [[
+        'GITLAB_CI' => 'true',
+        'CI_COMMIT_BRANCH' => 'feature-x',
+    ]],
+    'GitHub' => [[
+        'GITHUB_ACTIONS' => 'true',
+        'GITHUB_REF_NAME' => 'feature-x',
+    ]],
+])->skipOnWindows();
 
 test('the fallback reaches parallel workers', function (): void {
     $project = Project::make('master');
