@@ -33,6 +33,8 @@
   ✓ matching describe block names → outer → middle → it should not call afterEach functions for sibling describe blocks with the same name
   ✓ matching describe block names → outer → inner → it does not get executed before the test
   ✓ matching describe block names → outer → inner → it should not call afterEach functions for descendent of sibling describe blocks with the same name
+  ✓ hierarchical test naming → block one → the same name → it does not call afterEach from sibling describe with same name
+  ✓ hierarchical test naming → block two → the same name → it correctly calls afterEach from own describe hierarchy
 
    PASS  Tests\Features\Assignee
   ✓ it may be associated with an assignee [@nunomaduro, @taylorotwell]
@@ -56,6 +58,8 @@
   ✓ matching name → it should not call the before each on the describe block with the same name
   ✓ called on all tests → beforeEach should be called
   ✓ called on all tests → beforeEach should be called for all tests
+  ✓ hierarchical test naming → block one → the same name → it does not call beforeEach from sibling describe with same name
+  ✓ hierarchical test naming → block two → the same name → it correctly calls beforeEach from own describe hierarchy
 
    PASS  Tests\Features\BeforeEachProxiesToTestCallWithExpectations
   ✓ runs 1
@@ -320,6 +324,8 @@
   ✓ depends on describe using with → foo with (3)
   ✓ depends on describe using with → bar with (3)
   ✓ with test after describe → it should run the before each
+  ✓ sibling describes may share the same it() description → block one → it can be created
+  ✓ sibling describes may share the same it() description → block two → it can be created
 
    PASS  Tests\Features\DescriptionLess
   ✓ get 'foo'
@@ -2221,4 +2227,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1570 passed (3410 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1576 passed (3417 assertions)
