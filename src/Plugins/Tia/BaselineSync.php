@@ -8,6 +8,7 @@ use Pest\Exceptions\BaselineFetchFailed;
 use Pest\Panic;
 use Pest\Plugins\Tia;
 use Pest\Plugins\Tia\Contracts\State;
+use Pest\Support\Ci;
 use Pest\Support\View;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
@@ -164,7 +165,7 @@ final readonly class BaselineSync
 
     private function emitPublishInstructions(): void
     {
-        if ($this->isCi()) {
+        if (Ci::isRunning()) {
             $this->renderBadge('INFO', 'No baseline yet — this run will produce one.');
 
             return;
@@ -172,13 +173,6 @@ final readonly class BaselineSync
 
         $this->renderBadge('WARN', 'No baseline published yet — recording locally.');
         $this->renderChild('See https://pestphp.com/docs/tia for how to publish one from CI.');
-    }
-
-    private function isCi(): bool
-    {
-        return getenv('GITHUB_ACTIONS') === 'true'
-            || getenv('GITLAB_CI') === 'true'
-            || getenv('CIRCLECI') === 'true';
     }
 
     private function detectGitHubRepo(string $projectRoot): ?string
