@@ -41,6 +41,23 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
 
     private static bool $updateShards = false;
 
+    private static ?string $timingsFilename = null;
+
+    /**
+     * @var array<string, float|array{time: float, tests: list<string>}>|null
+     */
+    private static ?array $externalTimings = null;
+
+    /**
+     * @var list<string>
+     */
+    private static array $selectedUnits = [];
+
+    /**
+     * @var array<string, scalar>
+     */
+    private static array $metadata = [];
+
     private static bool $timeBalanced = false;
 
     private static bool $shardsOutdated = false;
@@ -48,7 +65,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     private static bool $passed = false;
 
     /**
-     * @var array<string, float>|null
+     * @var array<string, float|array{time: float, tests: list<string>}>|null
      */
     private static ?array $collectedTimings = null;
 
@@ -61,6 +78,41 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
         private readonly OutputInterface $output,
     ) {
         //
+    }
+
+    public static function useTimingsFile(string $filename): void
+    {
+        self::$timingsFilename = $filename;
+    }
+
+    /**
+     * @param  array<string, float|array{time: float, tests: list<string>}>  $units
+     * @param  array<string, scalar>  $metadata  Stored alongside the units, and read back
+     *                                           by {@see self::metadata()} on sharded runs.
+     */
+    public static function useTimings(array $units, array $metadata = []): void
+    {
+        self::$externalTimings = $units;
+
+        if ($metadata !== []) {
+            self::$metadata = $metadata;
+        }
+    }
+
+    /**
+     * @return array<string, scalar>
+     */
+    public static function metadata(): array
+    {
+        return self::$metadata;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function selectedUnits(): array
+    {
+        return self::$selectedUnits;
     }
 
     /**
@@ -98,20 +150,25 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
         /** @phpstan-ignore-next-line */
         $tests = $this->allTests($arguments);
 
-        $timings = $this->loadShardsFile();
-        if ($timings !== null) {
-            $knownTests = array_values(array_filter($tests, fn (string $test): bool => isset($timings[$test])));
-            $newTests = array_values(array_diff($tests, $knownTests));
+        $units = $this->loadShardsFile();
+        if ($units !== null) {
+            $newTests = array_values(array_diff($tests, $this->testsOf($units)));
 
-            $partitions = $this->partitionByTime($knownTests, $timings, $total);
+            $partitions = $this->partitionByTime($units, $total);
+
+            $median = $this->medianTime($units);
 
             foreach ($newTests as $i => $test) {
-                $partitions[$i % $total][] = $test;
+                $partitions[$i % $total][$test] = ['time' => $median, 'tests' => [$test]];
             }
 
-            $testsToRun = $partitions[$index - 1] ?? [];
+            $selected = $partitions[$index - 1] ?? [];
+
+            self::$selectedUnits = array_keys($selected);
             self::$timeBalanced = true;
             self::$shardsOutdated = $newTests !== [];
+
+            $testsToRun = array_values(array_intersect($tests, $this->testsOf($selected)));
         } else {
             $isInCurrentShard = fn (int $key): bool => $key % $total === ($index - 1);
             $testsToRun = array_values(array_filter($tests, $isInCurrentShard, ARRAY_FILTER_USE_KEY));
@@ -198,9 +255,12 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      */
     private function buildListTestsCommand(array $arguments, string $testPath): array
     {
-        $filtered = $this->removeParallelArguments($arguments);
+        $filtered = array_filter(
+            $this->removeParallelArguments($arguments),
+            fn (string $argument): bool => ! str_starts_with($argument, '--coverage'),
+        );
 
-        return ['php', ...$filtered, '--test-directory='.$testPath, '--list-tests'];
+        return ['php', ...array_values($filtered), '--test-directory='.$testPath, '--list-tests'];
     }
 
     /**
@@ -274,15 +334,14 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     {
         self::$passed = $exitCode === 0;
 
-        if (self::$updateShards && self::$passed && ! Parallel::isWorker()) {
+        if (self::$updateShards && (self::$passed || self::$externalTimings !== null) && ! Parallel::isWorker()) {
             self::$collectedTimings = $this->collectTimings();
 
-            $count = self::$knownTests !== null
-                ? count(array_intersect_key(self::$collectedTimings, array_flip(self::$knownTests)))
-                : count(self::$collectedTimings);
+            $count = count($this->unitsToWrite(self::$collectedTimings));
 
             $this->output->writeln(sprintf(
-                '  <fg=gray>Shards:</>   <fg=default>shards.json updated with timings for %d test class%s.</>',
+                '  <fg=gray>Shards:</>   <fg=default>%s updated with timings for %d test class%s.</>',
+                $this->timingsFilename(),
                 $count,
                 $count === 1 ? '' : 'es',
             ));
@@ -310,7 +369,10 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
         ));
 
         if (self::$shardsOutdated) {
-            $this->output->writeln('  <fg=yellow;options=bold>WARN</>  <fg=default>The [tests/.pest/shards.json] file is out of date. Run [--update-shards] to update it.</>');
+            $this->output->writeln(sprintf(
+                '  <fg=yellow;options=bold>WARN</>  <fg=default>The [%s] file is out of date. Run [--update-shards] to update it.</>',
+                $this->relativeTimingsPath(),
+            ));
         }
 
         return $exitCode;
@@ -328,7 +390,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             return;
         }
 
-        if (! self::$passed) {
+        if (! self::$passed && self::$externalTimings === null) {
             return;
         }
 
@@ -342,10 +404,14 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * @return array<string, float>
+     * @return array<string, float|array{time: float, tests: list<string>}>
      */
     private function collectTimings(): array
     {
+        if (self::$externalTimings !== null) {
+            return self::$externalTimings;
+        }
+
         $runId = Parallel::getGlobal('SHARD_RUN_ID');
 
         if (is_string($runId)) {
@@ -407,15 +473,46 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
         return $merged;
     }
 
+    private function timingsFilename(): string
+    {
+        return self::$timingsFilename ?? 'shards.json';
+    }
+
+    private function relativeTimingsPath(): string
+    {
+        return implode(DIRECTORY_SEPARATOR, [TestSuite::getInstance()->testPath, '.pest', $this->timingsFilename()]);
+    }
+
     private function shardsPath(): string
     {
-        $testSuite = TestSuite::getInstance();
-
-        return implode(DIRECTORY_SEPARATOR, [$testSuite->rootPath, $testSuite->testPath, '.pest', 'shards.json']);
+        return TestSuite::getInstance()->rootPath.DIRECTORY_SEPARATOR.$this->relativeTimingsPath();
     }
 
     /**
-     * @return array<string, float>|null
+     * @param  array<string, mixed>  $units
+     * @return array<string, array{time: float, tests: list<string>}>
+     */
+    private function normaliseUnits(array $units): array
+    {
+        $normalised = [];
+
+        foreach ($units as $key => $unit) {
+            if (is_array($unit) && isset($unit['time']) && isset($unit['tests']) && is_array($unit['tests'])) {
+                $normalised[$key] = ['time' => (float) $unit['time'], 'tests' => array_values(array_map(strval(...), $unit['tests']))];
+
+                continue;
+            }
+
+            if (is_float($unit) || is_int($unit)) {
+                $normalised[$key] = ['time' => (float) $unit, 'tests' => [$key]];
+            }
+        }
+
+        return $normalised;
+    }
+
+    /**
+     * @return array<string, array{time: float, tests: list<string>}>|null
      */
     private function loadShardsFile(): ?array
     {
@@ -428,50 +525,74 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
         $contents = file_get_contents($path);
 
         if ($contents === false) {
-            throw new InvalidOption('The [tests/.pest/shards.json] file could not be read. Delete it or run [--update-shards] to regenerate.');
+            throw new InvalidOption(sprintf('The [%s] file could not be read. Delete it or run [--update-shards] to regenerate.', $this->relativeTimingsPath()));
         }
 
         $data = json_decode($contents, true);
 
-        if (! is_array($data) || ! isset($data['timings']) || ! is_array($data['timings'])) {
-            throw new InvalidOption('The [tests/.pest/shards.json] file is corrupted. Delete it or run [--update-shards] to regenerate.');
+        $units = null;
+
+        if (is_array($data)) {
+            $units = $data['units'] ?? $data['timings'] ?? null;
         }
 
-        return $data['timings'];
+        if (! is_array($units)) {
+            throw new InvalidOption(sprintf('The [%s] file is corrupted. Delete it or run [--update-shards] to regenerate.', $this->relativeTimingsPath()));
+        }
+
+        if (is_array($data) && isset($data['metadata']) && is_array($data['metadata'])) {
+            self::$metadata = array_filter($data['metadata'], is_scalar(...));
+        }
+
+        return $this->normaliseUnits($units);
     }
 
     /**
-     * @param  list<string>  $tests
-     * @param  array<string, float>  $timings
-     * @return list<list<string>>
+     * @param  array<string, array{time: float, tests: list<string>}>  $units
+     * @return list<string>
      */
-    private function partitionByTime(array $tests, array $timings, int $total): array
+    private function testsOf(array $units): array
     {
-        $knownTimings = array_filter(
-            array_map(fn (string $test): ?float => $timings[$test] ?? null, $tests),
-            fn (?float $t): bool => $t !== null,
-        );
+        $tests = [];
 
-        $median = $knownTimings !== [] ? $this->median(array_values($knownTimings)) : 1.0;
+        foreach ($units as $unit) {
+            foreach ($unit['tests'] as $test) {
+                $tests[$test] = true;
+            }
+        }
 
-        $testsWithTimings = array_map(
-            fn (string $test): array => ['test' => $test, 'time' => $timings[$test] ?? $median],
-            $tests,
-        );
+        return array_keys($tests);
+    }
 
-        usort($testsWithTimings, fn (array $a, array $b): int => $b['time'] <=> $a['time']);
+    /**
+     * @param  array<string, array{time: float, tests: list<string>}>  $units
+     */
+    private function medianTime(array $units): float
+    {
+        $times = array_column($units, 'time');
 
-        /** @var list<list<string>> */
+        return $times === [] ? 1.0 : $this->median($times);
+    }
+
+    /**
+     * @param  array<string, array{time: float, tests: list<string>}>  $units
+     * @return list<array<string, array{time: float, tests: list<string>}>>
+     */
+    private function partitionByTime(array $units, int $total): array
+    {
+        uasort($units, fn (array $a, array $b): int => $b['time'] <=> $a['time']);
+
+        /** @var list<array<string, array{time: float, tests: list<string>}>> */
         $bins = array_fill(0, $total, []);
         /** @var non-empty-list<float> */
         $binTimes = array_fill(0, $total, 0.0);
 
-        foreach ($testsWithTimings as $item) {
+        foreach ($units as $key => $unit) {
             $minIndex = array_search(min($binTimes), $binTimes, strict: true);
             assert(is_int($minIndex));
 
-            $bins[$minIndex][] = $item['test'];
-            $binTimes[$minIndex] += $item['time'];
+            $bins[$minIndex][$key] = $unit;
+            $binTimes[$minIndex] += $unit['time'];
         }
 
         return $bins;
@@ -495,9 +616,32 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * @param  array<string, float>  $timings
+     * @param  array<string, float|array{time: float, tests: list<string>}>  $units
+     * @return array<string, array{time: float, tests: list<string>}>
      */
-    private function writeTimings(array $timings): void
+    private function unitsToWrite(array $units): array
+    {
+        $units = $this->normaliseUnits($units);
+
+        if (self::$knownTests === null) {
+            return $units;
+        }
+
+        $known = self::$knownTests;
+
+        $units = array_filter($units, fn (array $unit): bool => array_intersect($unit['tests'], $known) !== []);
+
+        foreach (array_diff($known, $this->testsOf($units)) as $test) {
+            $units[$test] = ['time' => 0.0, 'tests' => [$test]];
+        }
+
+        return $units;
+    }
+
+    /**
+     * @param  array<string, float|array{time: float, tests: list<string>}>  $units
+     */
+    private function writeTimings(array $units): void
     {
         $path = $this->shardsPath();
 
@@ -506,18 +650,25 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             mkdir($directory, 0755, true);
         }
 
-        if (self::$knownTests !== null) {
-            $knownSet = array_flip(self::$knownTests);
-            $timings = array_intersect_key($timings, $knownSet);
-        }
+        $bundled = self::$externalTimings !== null && array_filter($units, is_array(...)) !== [];
 
-        ksort($timings);
+        $units = $this->unitsToWrite($units);
 
-        $canonical = self::$knownTests ?? array_keys($timings);
+        ksort($units);
+
+        $canonical = self::$knownTests ?? $this->testsOf($units);
         sort($canonical);
 
+        $payload = $bundled
+            ? ['units' => $units]
+            : ['timings' => array_map(fn (array $unit): float => $unit['time'], $units)];
+
+        if (self::$metadata !== []) {
+            $payload['metadata'] = self::$metadata;
+        }
+
         file_put_contents($path, json_encode([
-            'timings' => $timings,
+            ...$payload,
             'checksum' => md5(implode("\n", $canonical)),
             'updated_at' => date('c'),
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n");
