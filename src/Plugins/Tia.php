@@ -1238,6 +1238,10 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return $arguments;
         }
 
+        if (! $this->piggybackCoverage && ! in_array('--no-coverage', $arguments, true)) {
+            $arguments[] = '--no-coverage';
+        }
+
         if (Parallel::isEnabled()) {
             $this->purgeWorkerPartials();
 
