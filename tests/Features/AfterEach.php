@@ -100,3 +100,33 @@ describe('matching describe block names', function (): void {
         });
     });
 });
+
+describe('hierarchical test naming', function (): void {
+    describe('block one', function (): void {
+        describe('the same name', function (): void {
+            it('does not call afterEach from sibling describe with same name', function (): void {
+                expect($this)->not->toHaveProperty('example');
+            });
+        });
+    });
+
+    describe('block two', function (): void {
+        afterEach(function (): void {
+            expect($this->result)->toBeFalse();
+        });
+
+        describe('the same name', function (): void {
+            beforeEach(function (): void {
+                $this->example = false;
+            });
+
+            afterEach(function (): void {
+                $this->result = $this->example;
+            });
+
+            it('correctly calls afterEach from own describe hierarchy', function (): void {
+                expect($this->example)->toBeFalse();
+            });
+        });
+    });
+});
