@@ -1837,9 +1837,6 @@
   ✓ addOutput → it uses singular form for single test file
   ✓ addOutput → it returns original exit code when shard is not set
 
-   PASS  Tests\Unit\Plugins\Tia\Configuration
-  ✓ it configures the fallback branch
-
    PASS  Tests\Unit\Plugins\Tia\ContentHash
   ✓ of() → it returns false when file does not exist
   ✓ of() → it hashes an existing file
