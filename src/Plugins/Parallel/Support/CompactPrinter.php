@@ -28,9 +28,6 @@ use function Termwind\terminal;
  */
 final class CompactPrinter
 {
-    /**
-     * The number of processed tests.
-     */
     private int $processed = 0;
 
     /**
@@ -49,21 +46,15 @@ final class CompactPrinter
         'F' => ['red', '⨯'],
     ];
 
-    /**
-     * Creates a new instance of the Compact Printer.
-     */
     public function __construct(
         private readonly Terminal $terminal,
         private readonly OutputInterface $output,
         private readonly Style $style,
         private readonly int $compactSymbolsPerLine,
     ) {
-        // ..
+        //
     }
 
-    /**
-     * Creates a new instance of the Compact Printer.
-     */
     public static function default(bool $decorated = true): self
     {
         return new self(
@@ -74,17 +65,11 @@ final class CompactPrinter
         );
     }
 
-    /**
-     * Output an empty line in the console. Useful for providing a little breathing room.
-     */
     public function newLine(): void
     {
         render('<div class="py-1"></div>');
     }
 
-    /**
-     * Outputs the given description item from the ProgressPrinter as a gorgeous, colored symbol.
-     */
     public function descriptionItem(string $item): void
     {
         [$color, $icon] = self::LOOKUP_TABLE[$item] ?? self::LOOKUP_TABLE['.'];
@@ -105,9 +90,6 @@ final class CompactPrinter
         $this->processed++;
     }
 
-    /**
-     * Outputs all errors from the given state using Collision's beautiful error output.
-     */
     public function errors(State $state): void
     {
         $this->output->writeln('');
@@ -117,8 +99,9 @@ final class CompactPrinter
 
     /**
      * Outputs a clean recap of the test run, including the number of tests, assertions, and failures.
+     *
+     * @param  list<TestResult>  $profile
      */
-    /** @param  list<TestResult>  $profile */
     public function recap(State $state, PHPUnitTestResult $testResult, Duration $duration, Options $options, array $profile = []): void
     {
         assert($this->output instanceof ConsoleOutput);

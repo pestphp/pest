@@ -58,7 +58,7 @@ final class SourceScope
                 $phpunitExcludes[] = self::normalise($dir->path());
             }
         } catch (Throwable) {
-            // Registry not initialized — fall back to project-root scanning.
+            //
         }
 
         $rootIncludes = self::topLevelProjectDirs($projectRoot);

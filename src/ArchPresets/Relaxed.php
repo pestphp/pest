@@ -12,9 +12,6 @@ use Pest\Expectation;
  */
 final class Relaxed extends AbstractPreset
 {
-    /**
-     * Executes the arch preset.
-     */
     public function execute(): void
     {
         $this->eachUserNamespace(

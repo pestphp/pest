@@ -15,12 +15,6 @@ use PHPStan\Type\ObjectType;
 use PHPStan\Type\Type;
 
 /**
- * Prevents native declared properties of HigherOrderExpectation (like $original,
- * $expectation, $opposite, $shouldReset) from being incorrectly resolved as
- * higher-order value property accesses by downstream ExpressionTypeResolverExtensions.
- *
- * This extension must be registered BEFORE the pest-plugin-phpstan HigherOrderExpectationTypeExtension.
- *
  * @internal
  */
 final readonly class HigherOrderExpectationTypeExtension implements ExpressionTypeResolverExtension

@@ -15,18 +15,12 @@ final class Memory implements AddsOutput, HandlesArguments
 {
     use Concerns\HandleArguments;
 
-    /**
-     * If memory should be displayed.
-     */
     private bool $enabled = false;
 
-    /**
-     * Creates a new Plugin instance.
-     */
     public function __construct(
         private readonly OutputInterface $output
     ) {
-        // ..
+        //
     }
 
     /**

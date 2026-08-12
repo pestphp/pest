@@ -27,37 +27,19 @@ final class Coverage implements AddsOutput, HandlesArguments
 
     private const string ONLY_COVERED_OPTION = 'only-covered';
 
-    /**
-     * Whether it should show the coverage or not.
-     */
     public bool $coverage = false;
 
-    /**
-     * Whether it should show the coverage or not.
-     */
     public bool $compact = false;
 
-    /**
-     * The minimum coverage.
-     */
     public float $coverageMin = 0.0;
 
-    /**
-     * The exactly coverage.
-     */
     public ?float $coverageExactly = null;
 
-    /**
-     * Whether it should show only covered files.
-     */
     public bool $showOnlyCovered = false;
 
-    /**
-     * Creates a new Plugin instance.
-     */
     public function __construct(private readonly OutputInterface $output)
     {
-        // ..
+        //
     }
 
     /**
@@ -186,9 +168,6 @@ final class Coverage implements AddsOutput, HandlesArguments
         return $exitCode;
     }
 
-    /**
-     * Computes the comparable coverage to a percentage with one decimal.
-     */
     private function computeComparableCoverage(float $coverage): float
     {
         return floor($coverage * 10) / 10;

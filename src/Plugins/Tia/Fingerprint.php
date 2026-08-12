@@ -35,19 +35,13 @@ final readonly class Fingerprint
                 'composer_lock' => self::composerLockHash($projectRoot),
                 'phpunit_xml' => self::trackedHash($projectRoot, 'phpunit.xml'),
                 'phpunit_xml_dist' => self::trackedHash($projectRoot, 'phpunit.xml.dist'),
-                // 'pest_factory' => self::contentHashOrNull(__DIR__.'/../../Factories/TestCaseFactory.php'),
-                // 'pest_method_factory' => self::contentHashOrNull(__DIR__.'/../../Factories/TestCaseMethodFactory.php'),
                 'vite_config' => self::viteConfigHash($projectRoot),
-                // 'package_json' => self::packageJsonHash($projectRoot),
                 'package_lock' => self::packageLockHash($projectRoot),
                 'js_config' => self::jsConfigHash($projectRoot),
-                // 'composer_json' => self::composerJsonHash($projectRoot),
             ],
             'environmental' => [
                 'php_minor' => PHP_MAJOR_VERSION,
 
-                // 'extensions' => self::extensionsFingerprint($projectRoot),
-                // 'env_files' => self::envFilesHash($projectRoot),
             ],
         ];
     }
@@ -267,13 +261,6 @@ final readonly class Fingerprint
         return self::hashIfExists($projectRoot.'/'.$relativePath);
     }
 
-    /**
-     * Returns true when the file exists and is not gitignored.
-     *
-     * Gitignored lockfiles (e.g. `package-lock.json` excluded from the repo)
-     * regenerate per-machine with OS-specific optional deps, which would
-     * otherwise force a fingerprint mismatch on every fetched baseline.
-     */
     private static function isTrackedByGit(string $projectRoot, string $relativePath): bool
     {
         if (! is_file($projectRoot.'/'.$relativePath)) {

@@ -51,11 +51,27 @@ final class Configuration
     /**
      * @return $this
      */
-    public function baselined(): self
+    public function baselined(?string $workflow = null): self
     {
         /** @var WatchPatterns $watchPatterns */
         $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
         $watchPatterns->markBaselined();
+
+        if ($workflow !== null) {
+            $watchPatterns->setBaselineWorkflow($workflow);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function defaultBranch(string $branch): self
+    {
+        /** @var WatchPatterns $watchPatterns */
+        $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
+        $watchPatterns->setDefaultBranch($branch);
 
         return $this;
     }

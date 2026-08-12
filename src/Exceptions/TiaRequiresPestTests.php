@@ -19,7 +19,7 @@ final class TiaRequiresPestTests extends RuntimeException implements ExceptionIn
     public function __construct(private readonly string $className, string $filename)
     {
         parent::__construct(sprintf(
-            'Tia mode requires only functional based Pest tests, but encountered PHPUnit class [%s] in [%s].',
+            'Tia mode supports functional Pest tests only, but found the PHPUnit class [%s] in [%s]. Please convert it to a Pest test, or run without Tia.',
             $className,
             $filename,
         ));

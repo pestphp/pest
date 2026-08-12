@@ -21,9 +21,6 @@ final class CleanConsoleOutput extends ConsoleOutput
         parent::doWrite($message, $newline);
     }
 
-    /**
-     * Removes the opening headline, witch is not needed.
-     */
     private function isOpeningHeadline(string $message): bool
     {
         return str_contains($message, 'by Sebastian Bergmann and contributors.');

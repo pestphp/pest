@@ -14,8 +14,6 @@ trait Expectable
     /**
      * @template TValue
      *
-     * Creates a new Expectation.
-     *
      * @param  TValue  $value
      * @return Expectation<TValue>
      */

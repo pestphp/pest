@@ -13,15 +13,11 @@ use Pest\Expectation;
 abstract class AbstractPreset // @pest-arch-ignore-line
 {
     /**
-     * The expectations.
-     *
      * @var array<int, Expectation<mixed>|ArchExpectation>
      */
     protected array $expectations = [];
 
     /**
-     * Creates a new preset instance.
-     *
      * @param  array<int, string>  $userNamespaces
      */
     public function __construct(
@@ -31,15 +27,11 @@ abstract class AbstractPreset // @pest-arch-ignore-line
     }
 
     /**
-     * Executes the arch preset.
-     *
      * @internal
      */
     abstract public function execute(): void;
 
     /**
-     * Ignores the given "targets" or "dependencies".
-     *
      * @param  array<int, string>|string  $targetsOrDependencies
      */
     final public function ignoring(array|string $targetsOrDependencies): void
@@ -51,8 +43,6 @@ abstract class AbstractPreset // @pest-arch-ignore-line
     }
 
     /**
-     * Runs the given callback for each namespace.
-     *
      * @param  callable(Expectation<string>): ArchExpectation  ...$callbacks
      */
     final public function eachUserNamespace(callable ...$callbacks): void
@@ -64,9 +54,6 @@ abstract class AbstractPreset // @pest-arch-ignore-line
         }
     }
 
-    /**
-     * Flushes the expectations.
-     */
     final public function flush(): void
     {
         $this->expectations = [];

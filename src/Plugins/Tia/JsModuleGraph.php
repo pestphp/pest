@@ -28,9 +28,6 @@ final class JsModuleGraph
     ];
 
     /**
-     * Candidate page directories, in priority order. Must stay in sync with
-     * `PAGE_DIR_CANDIDATES` in bin/pest-tia-vite-deps.mjs.
-     *
      * @var list<string>
      */
     private const array PAGE_DIR_CANDIDATES = [
@@ -88,6 +85,10 @@ final class JsModuleGraph
                 continue;
             }
 
+            if (! self::matchesDiskCasing($projectRoot, $rel)) {
+                continue;
+            }
+
             if (self::dirHasPageFile($abs)) {
                 return $abs;
             }
@@ -96,12 +97,30 @@ final class JsModuleGraph
         return null;
     }
 
+    private static function matchesDiskCasing(string $projectRoot, string $relative): bool
+    {
+        $current = rtrim($projectRoot, DIRECTORY_SEPARATOR);
+
+        foreach (explode('/', $relative) as $segment) {
+            $entries = @scandir($current);
+
+            if ($entries === false || ! in_array($segment, $entries, true)) {
+                return false;
+            }
+
+            $current .= DIRECTORY_SEPARATOR.$segment;
+        }
+
+        return true;
+    }
+
     private static function dirHasPageFile(string $dir): bool
     {
         try {
             $iterator = new \RecursiveIteratorIterator(
                 new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
                 \RecursiveIteratorIterator::LEAVES_ONLY,
+                \RecursiveIteratorIterator::CATCH_GET_CHILD,
             );
         } catch (\UnexpectedValueException) {
             return false;
@@ -268,20 +287,25 @@ final class JsModuleGraph
         if ($jsRoot !== null && is_dir($jsRoot)) {
             $entries = [];
 
-            $iterator = new \RecursiveIteratorIterator(
-                new \RecursiveDirectoryIterator($jsRoot, \FilesystemIterator::SKIP_DOTS),
-                \RecursiveIteratorIterator::LEAVES_ONLY,
-            );
+            try {
+                $iterator = new \RecursiveIteratorIterator(
+                    new \RecursiveDirectoryIterator($jsRoot, \FilesystemIterator::SKIP_DOTS),
+                    \RecursiveIteratorIterator::LEAVES_ONLY,
+                    \RecursiveIteratorIterator::CATCH_GET_CHILD,
+                );
 
-            /** @var \SplFileInfo $file */
-            foreach ($iterator as $file) {
-                if (! $file->isFile()) {
-                    continue;
+                /** @var \SplFileInfo $file */
+                foreach ($iterator as $file) {
+                    if (! $file->isFile()) {
+                        continue;
+                    }
+
+                    $entries[] = $file->getPathname()
+                        .':'.$file->getSize()
+                        .':'.$file->getMTime();
                 }
-
-                $entries[] = $file->getPathname()
-                    .':'.$file->getSize()
-                    .':'.$file->getMTime();
+            } catch (\UnexpectedValueException|\RuntimeException) {
+                return null;
             }
 
             sort($entries);

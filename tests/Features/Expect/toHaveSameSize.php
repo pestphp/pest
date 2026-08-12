@@ -7,7 +7,7 @@ use PHPUnit\Framework\ExpectationFailedException;
 
 test('failures with wrong type', function (): void {
     expect('foo')->toHaveSameSize([1]);
-})->throws(InvalidExpectationValue::class, 'Invalid expectation value type. Expected [countable|iterable].');
+})->throws(InvalidExpectationValue::class, 'This expectation may only be used on a value of type [countable|iterable].');
 
 test('pass', function (): void {
     expect([1, 2, 3])->toHaveSameSize([4, 5, 6]);

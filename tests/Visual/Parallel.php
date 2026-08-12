@@ -9,6 +9,8 @@ $run = function (): ?string {
         ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
     );
 
+    $process->setTimeout(300.0);
+
     $process->run();
 
     return removeAnsiEscapeSequences($process->getOutput());
@@ -17,7 +19,7 @@ $run = function (): ?string {
 test('parallel', function () use ($run): void {
     $output = $run('--exclude-group=integration');
     $output = implode("\n", array_slice(explode("\n", (string) $output), -10));
-    $profileOutput = $run('tests/.tests/SuccessOnly.php', '--profile');
+    $profileOutput = $run('tests/Fixtures/Suites/SuccessOnly.php', '--profile');
 
     if (getenv('REBUILD_SNAPSHOTS')) {
         preg_match('/Tests:\s+(.+\(\d+ assertions\))/', $output, $matches);
@@ -25,13 +27,13 @@ test('parallel', function () use ($run): void {
         $file = file_get_contents(__FILE__);
         $file = preg_replace(
             '/\$expected = \'.*?\';/',
-            "\$expected = '1 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1525 passed (3322 assertions)';",
+            "\$expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1552 passed (3355 assertions)';",
             $file,
         );
         file_put_contents(__FILE__, $file);
     }
 
-    $expected = '1 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1525 passed (3322 assertions)';
+    $expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1552 passed (3355 assertions)';
 
     expect($output)
         ->toContain("Tests:    {$expected}")
@@ -48,8 +50,8 @@ test('a parallel test can extend another test with same name', function () use (
 })->skipOnWindows();
 
 test('parallel reports invalid datasets as failures', function () use ($run): void {
-    expect($run('tests/.tests/ParallelInvalidDataset'))
-        ->toContain("A dataset with the name `missing.dataset` does not exist. You can create it using `dataset('missing.dataset', ['a', 'b']);`.")
+    expect($run('tests/Fixtures/Suites/ParallelInvalidDataset'))
+        ->toContain("A dataset named [missing.dataset] does not exist. You may create one using `dataset('missing.dataset', ['a', 'b']);`.")
         ->toContain('Tests:    1 failed, 1 passed (1 assertions)')
         ->toContain('Parallel: 3 processes');
 })->skipOnWindows();
@@ -63,4 +65,12 @@ test('parallel can have multiple exclude-groups', function () use ($run): void {
 
     expect((int) $doubleMatch[1])->toBeLessThan((int) $singleMatch[1])
         ->and($doubleExclude)->toContain('Parallel: 3 processes');
+})->skipOnWindows();
+
+test('parallel can have multiple groups', function () use ($run): void {
+    $output = $run('tests/Fixtures/Suites/MultipleGroups', '--group=one', '--group=two');
+
+    expect($output)
+        ->toContain('Tests:    2 passed (2 assertions)')
+        ->toContain('Parallel: 3 processes');
 })->skipOnWindows();

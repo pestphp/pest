@@ -10,13 +10,9 @@ it('expects on each item', function (): void {
     expect([1, 1, 1])
         ->each()
         ->toEqual(1)
-        ->and(static::getCount())->toBe(3); // + 1 assertion
-
-    expect([1, 1, 1])
-        ->each
-        ->toEqual(1);
-
-    expect(static::getCount())->toBe(7);
+        ->and(static::getCount())->toBe(3)
+        ->and([1, 1, 1])->each->toEqual(1)
+        ->and(static::getCount())->toBe(7);
 });
 
 it('chains expectations on each item', function (): void {
@@ -24,14 +20,8 @@ it('chains expectations on each item', function (): void {
         ->each()
         ->toBeInt()
         ->toEqual(1)
-        ->and(static::getCount())->toBe(6); // + 1 assertion
-
-    expect([2, 2, 2])
-        ->each
-        ->toBeInt
-        ->toEqual(2);
-
-    expect(static::getCount())->toBe(13);
+        ->and(static::getCount())->toBe(6)->and([2, 2, 2])->each->toBeInt->toEqual(2)
+        ->and(static::getCount())->toBe(13);
 });
 
 test('opposite expectations on each item', function (): void {
@@ -60,18 +50,17 @@ test('chained opposite and non-opposite expectations', function (): void {
 it('can add expectations via "and"', function (): void {
     expect([1, 2, 3])
         ->each()
-        ->toBeInt // + 3
+        ->toBeInt
         ->and([4, 5, 6])
         ->each
-        ->toBeLessThan(7) // + 3
+        ->toBeLessThan(7)
         ->not
         ->toBeLessThan(3)
-        ->toBeGreaterThan(3) // + 3
+        ->toBeGreaterThan(3)
         ->and('Hello World')
-        ->toBeString // + 1
-        ->toEqual('Hello World'); // + 1
-
-    expect(static::getCount())->toBe(14);
+        ->toBeString
+        ->toEqual('Hello World')
+        ->and(static::getCount())->toBe(14);
 });
 
 it('accepts callables', function (): void {
