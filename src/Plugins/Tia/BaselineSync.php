@@ -17,7 +17,7 @@ use Symfony\Component\Process\Process;
  */
 final readonly class BaselineSync
 {
-    private const string WORKFLOW_FILE = 'tia-baseline.yml';
+    private const string DEFAULT_WORKFLOW_FILE = 'tia-baseline.yml';
 
     private const string ARTIFACT_NAME = 'pest-tia-baseline';
 
@@ -57,7 +57,13 @@ final readonly class BaselineSync
     public function __construct(
         private State $state,
         private OutputInterface $output,
+        private WatchPatterns $watchPatterns,
     ) {}
+
+    private function workflowFile(): string
+    {
+        return $this->watchPatterns->baselineWorkflow() ?? self::DEFAULT_WORKFLOW_FILE;
+    }
 
     private function renderBadge(string $type, string $content): void
     {
@@ -276,7 +282,7 @@ final readonly class BaselineSync
 
         Panic::with(new BaselineFetchFailed(
             sprintf('%s — %s', $contextPrefix, $diagnosis['message']),
-            'Verify workflow tia-baseline.yml, artifact pest-tia-baseline, and gh token scope.',
+            sprintf('Verify workflow [%s], artifact [%s], and gh token scope.', $this->workflowFile(), self::ARTIFACT_NAME),
             $hasAnchor,
         ));
     }
@@ -528,7 +534,7 @@ final readonly class BaselineSync
         $process = new Process([
             'gh', 'run', 'list',
             '-R', $repo,
-            '--workflow', self::WORKFLOW_FILE,
+            '--workflow', $this->workflowFile(),
             '--status', 'success',
             '--limit', '1',
             '--json', 'databaseId',

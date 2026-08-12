@@ -27,16 +27,9 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
 
     private const string SHARD_OPTION = 'shard';
 
-    /**
-     * The maximum length allowed for the filter argument.
-     * While ARG_MAX can be 2MB, individual arguments are often limited to 128KB (MAX_ARG_STRLEN).
-     * Practical limits in CI environments (like Docker or pipeline runners) can be even lower.
-     */
     private const int MAX_FILTER_LENGTH = 32768;
 
     /**
-     * The shard index and total number of shards.
-     *
      * @var array{
      *     index: int,
      *     total: int,
@@ -46,43 +39,24 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      */
     private static ?array $shard = null;
 
-    /**
-     * Whether to update the shards.json file.
-     */
     private static bool $updateShards = false;
 
-    /**
-     * Whether time-balanced sharding was used.
-     */
     private static bool $timeBalanced = false;
 
-    /**
-     * Whether the shards.json file is outdated.
-     */
     private static bool $shardsOutdated = false;
 
-    /**
-     * Whether the test suite passed.
-     */
     private static bool $passed = false;
 
     /**
-     * Collected timings from workers or subscribers.
-     *
      * @var array<string, float>|null
      */
     private static ?array $collectedTimings = null;
 
     /**
-     * The canonical list of test classes from --list-tests.
-     *
      * @var list<string>|null
      */
     private static ?array $knownTests = null;
 
-    /**
-     * Creates a new Plugin instance.
-     */
     public function __construct(
         private readonly OutputInterface $output,
     ) {
@@ -162,8 +136,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Handles the --update-shards argument.
-     *
      * @param  array<int, string>  $arguments
      * @return array<int, string>
      */
@@ -192,8 +164,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Returns all tests that the test suite would run.
-     *
      * @param  list<string>  $arguments
      * @return list<string>
      */
@@ -223,8 +193,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Builds the subprocess command used to enumerate tests via `--list-tests`.
-     *
      * @param  list<string>  $arguments
      * @return list<string>
      */
@@ -236,8 +204,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Parses `--list-tests` output into a unique list of test class FQCNs.
-     *
      * @return list<string>
      */
     private function parseListTestsOutput(string $output): array
@@ -248,8 +214,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Builds the filter argument for the given tests to run.
-     *
      * @param  array<int, string>  $testsToRun
      */
     private function buildFilterArgument(array $testsToRun): string
@@ -289,8 +253,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Ensures that the filter length is safe for the current environment.
-     *
      * @throws InvalidOption
      */
     private function ensureFilterLengthIsSafe(string $filter): void
@@ -308,9 +270,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
         }
     }
 
-    /**
-     * Adds output after the Test Suite execution.
-     */
     public function addOutput(int $exitCode): int
     {
         self::$passed = $exitCode === 0;
@@ -357,9 +316,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
         return $exitCode;
     }
 
-    /**
-     * Terminates the plugin.
-     */
     public function terminate(): void
     {
         if (! self::$updateShards) {
@@ -386,8 +342,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Collects timings from subscribers or worker temp files.
-     *
      * @return array<string, float>
      */
     private function collectTimings(): array
@@ -401,9 +355,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
         return EnsureShardTimingsAreCollected::timings();
     }
 
-    /**
-     * Writes the current worker's timing data to a temp file.
-     */
     private function writeWorkerTimings(): void
     {
         $timings = EnsureShardTimingsAreCollected::timings();
@@ -424,8 +375,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Reads and merges timing data from all worker temp files.
-     *
      * @return array<string, float>
      */
     private function readWorkerTimings(string $runId): array
@@ -458,9 +407,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
         return $merged;
     }
 
-    /**
-     * Returns the path to shards.json.
-     */
     private function shardsPath(): string
     {
         $testSuite = TestSuite::getInstance();
@@ -469,8 +415,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Loads the timings from shards.json.
-     *
      * @return array<string, float>|null
      */
     private function loadShardsFile(): ?array
@@ -497,8 +441,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Partitions tests across shards using the LPT (Longest Processing Time) algorithm.
-     *
      * @param  list<string>  $tests
      * @param  array<string, float>  $timings
      * @return list<list<string>>
@@ -536,8 +478,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Calculates the median of an array of floats.
-     *
      * @param  list<float>  $values
      */
     private function median(array $values): float
@@ -555,8 +495,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Writes the timings to shards.json.
-     *
      * @param  array<string, float>  $timings
      */
     private function writeTimings(array $timings): void
@@ -586,8 +524,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Returns the shard information.
-     *
      * @return array{index: int, total: int}
      */
     public static function getShard(InputInterface $input): array

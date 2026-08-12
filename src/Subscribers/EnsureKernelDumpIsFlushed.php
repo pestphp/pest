@@ -14,9 +14,6 @@ use PHPUnit\Event\TestRunner\StartedSubscriber;
  */
 final class EnsureKernelDumpIsFlushed implements StartedSubscriber
 {
-    /**
-     * Runs the subscriber.
-     */
     public function notify(Started $event): void
     {
         $kernelDump = Container::getInstance()->get(KernelDump::class);

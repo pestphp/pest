@@ -9,8 +9,5 @@ namespace Pest\Contracts\Plugins;
  */
 interface Bootable
 {
-    /**
-     * Boots the plugin.
-     */
     public function boot(): void;
 }

@@ -1,17 +1,4 @@
-   WARN  Tests\Fixtures\CollisionTest
-  - error
-  - success
-
    PASS  Tests\Fixtures\DirectoryWithTests\ExampleTest
   ✓ it example 1
 
-   PASS  Tests\Fixtures\ExampleTest
-  ✓ it example 2
-
-   WARN  Tests\Fixtures\Inheritance\Base\ExampleTest
-  - example
-
-   PASS  Tests\Fixtures\Inheritance\ExampleTest
-  ✓ example
-
-  Tests:    3 skipped, 3 passed (3 assertions)
+  Tests:    1 passed (1 assertions)

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pest;
 
-use Attribute;
 use BadMethodCallException;
 use Closure;
 use InvalidArgumentException;
@@ -60,19 +59,15 @@ final class Expectation
     use Retrievable;
 
     /**
-     * Creates a new expectation.
-     *
      * @param  TValue  $value
      */
     public function __construct(
         public mixed $value
     ) {
-        // ..
+        //
     }
 
     /**
-     * Creates a new expectation.
-     *
      * @template TAndValue
      *
      * @param  TAndValue  $value
@@ -84,8 +79,6 @@ final class Expectation
     }
 
     /**
-     * Creates a new expectation with the decoded JSON value.
-     *
      * @return self<array<int|string, mixed>|bool>
      */
     public function json(): Expectation
@@ -103,8 +96,6 @@ final class Expectation
     }
 
     /**
-     * Dump the expectation value.
-     *
      * @return self<TValue>
      */
     public function dump(mixed ...$arguments): self
@@ -118,9 +109,6 @@ final class Expectation
         return $this;
     }
 
-    /**
-     * Dump the expectation value and end the script.
-     */
     public function dd(mixed ...$arguments): never
     {
         if (function_exists('dd')) {
@@ -141,8 +129,6 @@ final class Expectation
     }
 
     /**
-     * Dump the expectation value when the result of the condition is truthy.
-     *
      * @param  (Closure(TValue): bool)|bool  $condition
      * @return self<TValue>
      */
@@ -158,8 +144,6 @@ final class Expectation
     }
 
     /**
-     * Dump the expectation value when the result of the condition is falsy.
-     *
      * @param  (Closure(TValue): bool)|bool  $condition
      * @return self<TValue>
      */
@@ -175,8 +159,6 @@ final class Expectation
     }
 
     /**
-     * Send the expectation value to Ray along with all given arguments.
-     *
      * @return self<TValue>
      */
     public function ray(mixed ...$arguments): self
@@ -189,8 +171,6 @@ final class Expectation
     }
 
     /**
-     * Creates the opposite expectation for the value.
-     *
      * @return OppositeExpectation<TValue>
      */
     public function not(): OppositeExpectation
@@ -199,8 +179,6 @@ final class Expectation
     }
 
     /**
-     * Creates an expectation on each item of the iterable "value".
-     *
      * @return EachExpectation<TValue>
      */
     public function each(?callable $callback = null): EachExpectation
@@ -219,8 +197,6 @@ final class Expectation
     }
 
     /**
-     * Allows you to specify a sequential set of expectations for each item in a iterable "value".
-     *
      * @template TSequenceValue
      *
      * @param  (callable(self<TValue>, self<string|int>): void)|TSequenceValue  ...$callbacks
@@ -258,8 +234,6 @@ final class Expectation
     }
 
     /**
-     * If the subject matches one of the given "expressions", the expression callback will run.
-     *
      * @template TMatchSubject of array-key
      *
      * @param  (callable(): TMatchSubject)|TMatchSubject  $subject
@@ -298,8 +272,6 @@ final class Expectation
     }
 
     /**
-     * Apply the callback if the given "condition" is falsy.
-     *
      * @param  (callable(): bool)|bool  $condition
      * @param  callable(Expectation<TValue>): mixed  $callback
      * @return self<TValue>
@@ -314,8 +286,6 @@ final class Expectation
     }
 
     /**
-     * Apply the callback if the given "condition" is truthy.
-     *
      * @param  (callable(): bool)|bool  $condition
      * @param  callable(self<TValue>): mixed  $callback
      * @return self<TValue>
@@ -334,8 +304,6 @@ final class Expectation
     }
 
     /**
-     * Dynamically calls methods on the class or creates a new higher order expectation.
-     *
      * @param  array<int, mixed>  $parameters
      * @return Expectation<TValue>|HigherOrderExpectation<Expectation<TValue>, TValue>
      */
@@ -350,7 +318,7 @@ final class Expectation
 
             if (! is_object($this->value)) {
                 throw new BadMethodCallException(sprintf(
-                    'Method "%s" does not exist in %s.',
+                    'Method [%s] does not exist in [%s].',
                     $method,
                     gettype($this->value)
                 ));
@@ -379,8 +347,6 @@ final class Expectation
     }
 
     /**
-     * Creates a new expectation closure from the given name.
-     *
      * @throws ExpectationNotFound
      */
     private function getExpectationClosure(string $name): Closure
@@ -402,8 +368,6 @@ final class Expectation
     }
 
     /**
-     * Dynamically calls methods on the class without any arguments or creates a new higher order expectation.
-     *
      * @return Expectation<TValue>|OppositeExpectation<TValue>|EachExpectation<TValue>|HigherOrderExpectation<Expectation<TValue>, TValue|null>|TValue
      */
     public function __get(string $name): mixed
@@ -422,9 +386,6 @@ final class Expectation
         return $this->{$name}();
     }
 
-    /**
-     * Checks if the given expectation method exists.
-     */
     public static function hasMethod(string $name): bool
     {
         return method_exists(self::class, $name)
@@ -432,17 +393,12 @@ final class Expectation
             || self::hasExtend($name);
     }
 
-    /**
-     * Matches any value.
-     */
     public function any(): Any
     {
         return new Any;
     }
 
     /**
-     * Asserts that the given expectation target use the given dependencies.
-     *
      * @param  array<int, string>|string  $targets
      */
     public function toUse(array|string $targets): ArchExpectation
@@ -450,9 +406,6 @@ final class Expectation
         return ToUse::make($this, $targets);
     }
 
-    /**
-     * Asserts that the given expectation target does have the given permissions
-     */
     public function toHaveFileSystemPermissions(string $permissions): ArchExpectation
     {
         return Targeted::make(
@@ -463,9 +416,6 @@ final class Expectation
         );
     }
 
-    /**
-     * Asserts that the given expectation target to have line count less than the given number.
-     */
     public function toHaveLineCountLessThan(int $lines): ArchExpectation
     {
         return Targeted::make(
@@ -476,9 +426,6 @@ final class Expectation
         );
     }
 
-    /**
-     * Asserts that the given expectation target have all methods documented.
-     */
     public function toHaveMethodsDocumented(): ArchExpectation
     {
         return Targeted::make(
@@ -495,9 +442,6 @@ final class Expectation
         );
     }
 
-    /**
-     * Asserts that the given expectation target have all properties documented.
-     */
     public function toHavePropertiesDocumented(): ArchExpectation
     {
         return Targeted::make(
@@ -515,9 +459,6 @@ final class Expectation
         );
     }
 
-    /**
-     * Asserts that the given expectation target use the "declare(strict_types=1)" declaration.
-     */
     public function toUseStrictTypes(): ArchExpectation
     {
         return Targeted::make(
@@ -528,9 +469,6 @@ final class Expectation
         );
     }
 
-    /**
-     * Asserts that the given expectation target uses strict equality.
-     */
     public function toUseStrictEquality(): ArchExpectation
     {
         return Targeted::make(
@@ -541,9 +479,6 @@ final class Expectation
         );
     }
 
-    /**
-     * Asserts that the given expectation target is final.
-     */
     public function toBeFinal(): ArchExpectation
     {
         return Targeted::make(
@@ -554,9 +489,6 @@ final class Expectation
         );
     }
 
-    /**
-     * Asserts that the given expectation target is readonly.
-     */
     public function toBeReadonly(): ArchExpectation
     {
         return Targeted::make(
@@ -567,9 +499,6 @@ final class Expectation
         );
     }
 
-    /**
-     * Asserts that the given expectation target is trait.
-     */
     public function toBeTrait(): ArchExpectation
     {
         return Targeted::make(
@@ -580,17 +509,11 @@ final class Expectation
         );
     }
 
-    /**
-     * Asserts that the given expectation targets are traits.
-     */
     public function toBeTraits(): ArchExpectation
     {
         return $this->toBeTrait();
     }
 
-    /**
-     * Asserts that the given expectation target is abstract.
-     */
     public function toBeAbstract(): ArchExpectation
     {
         return Targeted::make(
@@ -602,8 +525,6 @@ final class Expectation
     }
 
     /**
-     * Asserts that the given expectation target has a specific method.
-     *
      * @param  array<int, string>|string  $method
      */
     public function toHaveMethod(array|string $method): ArchExpectation
@@ -613,14 +534,12 @@ final class Expectation
         return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => count(array_filter($methods, fn (string $method): bool => isset($object->reflectionClass) && $object->reflectionClass->hasMethod($method))) === count($methods),
-            sprintf("to have method '%s'", implode("', '", $methods)),
+            sprintf('to have method [%s]', implode('], [', $methods)),
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
 
     /**
-     * Asserts that the given expectation target has a specific methods.
-     *
      * @param  array<int, string>  $methods
      */
     public function toHaveMethods(array $methods): ArchExpectation
@@ -628,57 +547,36 @@ final class Expectation
         return $this->toHaveMethod($methods);
     }
 
-    /**
-     * Not supported.
-     */
     public function toHavePublicMethodsBesides(): void
     {
         throw InvalidExpectation::fromMethods(['toHavePublicMethodsBesides']);
     }
 
-    /**
-     * Not supported.
-     */
     public function toHavePublicMethods(): void
     {
         throw InvalidExpectation::fromMethods(['toHavePublicMethods']);
     }
 
-    /**
-     * Not supported.
-     */
     public function toHaveProtectedMethodsBesides(): void
     {
         throw InvalidExpectation::fromMethods(['toHaveProtectedMethodsBesides']);
     }
 
-    /**
-     * Not supported.
-     */
     public function toHaveProtectedMethods(): void
     {
         throw InvalidExpectation::fromMethods(['toHaveProtectedMethods']);
     }
 
-    /**
-     * Not supported.
-     */
     public function toHavePrivateMethodsBesides(): void
     {
         throw InvalidExpectation::fromMethods(['toHavePrivateMethodsBesides']);
     }
 
-    /**
-     * Not supported.
-     */
     public function toHavePrivateMethods(): void
     {
         throw InvalidExpectation::fromMethods(['toHavePrivateMethods']);
     }
 
-    /**
-     * Asserts that the given expectation target is cased correctly.
-     */
     public function toBeCasedCorrectly(): ArchExpectation
     {
         return Targeted::make(
@@ -711,9 +609,6 @@ final class Expectation
         );
     }
 
-    /**
-     * Asserts that the given expectation target is enum.
-     */
     public function toBeEnum(): ArchExpectation
     {
         return Targeted::make(
@@ -724,17 +619,11 @@ final class Expectation
         );
     }
 
-    /**
-     * Asserts that the given expectation targets are enums.
-     */
     public function toBeEnums(): ArchExpectation
     {
         return $this->toBeEnum();
     }
 
-    /**
-     * Asserts that the given expectation target is a class.
-     */
     public function toBeClass(): ArchExpectation
     {
         return Targeted::make(
@@ -745,17 +634,11 @@ final class Expectation
         );
     }
 
-    /**
-     * Asserts that the given expectation targets are classes.
-     */
     public function toBeClasses(): ArchExpectation
     {
         return $this->toBeClass();
     }
 
-    /**
-     * Asserts that the given expectation target is interface.
-     */
     public function toBeInterface(): ArchExpectation
     {
         return Targeted::make(
@@ -766,30 +649,21 @@ final class Expectation
         );
     }
 
-    /**
-     * Asserts that the given expectation targets are interfaces.
-     */
     public function toBeInterfaces(): ArchExpectation
     {
         return $this->toBeInterface();
     }
 
-    /**
-     * Asserts that the given expectation target to be subclass of the given class.
-     */
     public function toExtend(string $class): ArchExpectation
     {
         return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => isset($object->reflectionClass) && ($class === $object->reflectionClass->getName() || $object->reflectionClass->isSubclassOf($class)),
-            sprintf("to extend '%s'", $class),
+            sprintf('to extend [%s]', $class),
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
 
-    /**
-     * Asserts that the given expectation target to be have a parent class.
-     */
     public function toExtendNothing(): ArchExpectation
     {
         return Targeted::make(
@@ -800,17 +674,12 @@ final class Expectation
         );
     }
 
-    /**
-     * Asserts that the given expectation target to use the given trait.
-     */
     public function toUseTrait(string $trait): ArchExpectation
     {
         return $this->toUseTraits($trait);
     }
 
     /**
-     * Asserts that the given expectation target to use the given traits.
-     *
      * @param  array<int, string>|string  $traits
      */
     public function toUseTraits(array|string $traits): ArchExpectation
@@ -852,9 +721,6 @@ final class Expectation
         );
     }
 
-    /**
-     * Asserts that the given expectation target to not implement any interfaces.
-     */
     public function toImplementNothing(): ArchExpectation
     {
         return Targeted::make(
@@ -866,8 +732,6 @@ final class Expectation
     }
 
     /**
-     * Asserts that the given expectation target to only implement the given interfaces.
-     *
      * @param  array<int, string>|string  $interfaces
      */
     public function toOnlyImplement(array|string $interfaces): ArchExpectation
@@ -884,35 +748,27 @@ final class Expectation
         );
     }
 
-    /**
-     * Asserts that the given expectation target to have the given prefix.
-     */
     public function toHavePrefix(string $prefix): ArchExpectation
     {
         return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => isset($object->reflectionClass) && str_starts_with($object->reflectionClass->getShortName(), $prefix),
-            "to have prefix '{$prefix}'",
+            "to have prefix [{$prefix}]",
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
 
-    /**
-     * Asserts that the given expectation target to have the given suffix.
-     */
     public function toHaveSuffix(string $suffix): ArchExpectation
     {
         return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => isset($object->reflectionClass) && str_ends_with($object->reflectionClass->getName(), $suffix),
-            "to have suffix '{$suffix}'",
+            "to have suffix [{$suffix}]",
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
 
     /**
-     * Asserts that the given expectation target to implement the given interfaces.
-     *
      * @param  array<int, string>|string  $interfaces
      */
     public function toImplement(array|string $interfaces): ArchExpectation
@@ -928,8 +784,6 @@ final class Expectation
     }
 
     /**
-     * Asserts that the given expectation target "only" use on the given dependencies.
-     *
      * @param  array<int, string>|string  $targets
      */
     public function toOnlyUse(array|string $targets): ArchExpectation
@@ -937,33 +791,22 @@ final class Expectation
         return ToOnlyUse::make($this, $targets);
     }
 
-    /**
-     * Asserts that the given expectation target does not use any dependencies.
-     */
     public function toUseNothing(): ArchExpectation
     {
         return ToUseNothing::make($this);
     }
 
-    /**
-     * Asserts that the source code of the given expectation target does not include suspicious characters.
-     */
     public function toHaveSuspiciousCharacters(): ArchExpectation
     {
         throw InvalidExpectation::fromMethods(['toHaveSuspiciousCharacters']);
     }
 
-    /**
-     * Not supported.
-     */
     public function toBeUsed(): void
     {
         throw InvalidExpectation::fromMethods(['toBeUsed']);
     }
 
     /**
-     * Asserts that the given expectation dependency is used by the given targets.
-     *
      * @param  array<int, string>|string  $targets
      */
     public function toBeUsedIn(array|string $targets): ArchExpectation
@@ -972,8 +815,6 @@ final class Expectation
     }
 
     /**
-     * Asserts that the given expectation dependency is "only" used by the given targets.
-     *
      * @param  array<int, string>|string  $targets
      */
     public function toOnlyBeUsedIn(array|string $targets): ArchExpectation
@@ -981,17 +822,11 @@ final class Expectation
         return ToOnlyBeUsedIn::make($this, $targets);
     }
 
-    /**
-     * Asserts that the given expectation dependency is not used.
-     */
     public function toBeUsedInNothing(): ArchExpectation
     {
         return ToBeUsedInNothing::make($this);
     }
 
-    /**
-     * Asserts that the given expectation dependency is an invokable class.
-     */
     public function toBeInvokable(): ArchExpectation
     {
         return Targeted::make(
@@ -1003,8 +838,6 @@ final class Expectation
     }
 
     /**
-     * Asserts that the given expectation is iterable and contains snake_case keys.
-     *
      * @return self<TValue>
      */
     public function toHaveSnakeCaseKeys(string $message = ''): self
@@ -1027,8 +860,6 @@ final class Expectation
     }
 
     /**
-     * Asserts that the given expectation is iterable and contains kebab-case keys.
-     *
      * @return self<TValue>
      */
     public function toHaveKebabCaseKeys(string $message = ''): self
@@ -1051,8 +882,6 @@ final class Expectation
     }
 
     /**
-     * Asserts that the given expectation is iterable and contains camelCase keys.
-     *
      * @return self<TValue>
      */
     public function toHaveCamelCaseKeys(string $message = ''): self
@@ -1075,8 +904,6 @@ final class Expectation
     }
 
     /**
-     * Asserts that the given expectation is iterable and contains StudlyCase keys.
-     *
      * @return self<TValue>
      */
     public function toHaveStudlyCaseKeys(string $message = ''): self
@@ -1098,38 +925,26 @@ final class Expectation
         return $this;
     }
 
-    /**
-     * Asserts that the given expectation target to have the given attribute.
-     */
     public function toHaveAttribute(string $attribute): ArchExpectation
     {
         return Targeted::make(
             $this,
             fn (ObjectDescription $object): bool => isset($object->reflectionClass) && $object->reflectionClass->getAttributes($attribute) !== [],
-            "to have attribute '{$attribute}'",
+            "to have attribute [{$attribute}]",
             FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
         );
     }
 
-    /**
-     * Asserts that the given expectation target has a constructor method.
-     */
     public function toHaveConstructor(): ArchExpectation
     {
         return $this->toHaveMethod('__construct');
     }
 
-    /**
-     * Asserts that the given expectation target has a destructor method.
-     */
     public function toHaveDestructor(): ArchExpectation
     {
         return $this->toHaveMethod('__destruct');
     }
 
-    /**
-     * Asserts that the given expectation target is a backed enum of given type.
-     */
     private function toBeBackedEnum(string $backingType): ArchExpectation
     {
         return Targeted::make(
@@ -1143,33 +958,21 @@ final class Expectation
         );
     }
 
-    /**
-     * Asserts that the given expectation targets are string backed enums.
-     */
     public function toBeStringBackedEnums(): ArchExpectation
     {
         return $this->toBeStringBackedEnum();
     }
 
-    /**
-     * Asserts that the given expectation targets are int backed enums.
-     */
     public function toBeIntBackedEnums(): ArchExpectation
     {
         return $this->toBeIntBackedEnum();
     }
 
-    /**
-     * Asserts that the given expectation target is a string backed enum.
-     */
     public function toBeStringBackedEnum(): ArchExpectation
     {
         return $this->toBeBackedEnum('string');
     }
 
-    /**
-     * Asserts that the given expectation target is an int backed enum.
-     */
     public function toBeIntBackedEnum(): ArchExpectation
     {
         return $this->toBeBackedEnum('int');

@@ -1,16 +1,5 @@
 <?php
 
-/**
- * Tests for dataset method chaining with hooks and describe blocks.
- *
- * Covers the fix from PR #1565: beforeEach()->with(), describe()->with(),
- * and nested describe blocks with datasets.
- */
-
-// ---------------------------------------------------------------
-// beforeEach()->with() inside describe blocks
-// ---------------------------------------------------------------
-
 describe('beforeEach()->with() applies dataset to tests', function (): void {
     beforeEach()->with([10]);
 
@@ -50,10 +39,6 @@ describe('beforeEach()->with() with closure dataset', function (): void {
     });
 });
 
-// ---------------------------------------------------------------
-// describe()->with() method chaining
-// ---------------------------------------------------------------
-
 describe('describe()->with() passes dataset to tests', function (): void {
     test('receives the dataset value', function ($value): void {
         expect($value)->toBe(42);
@@ -84,10 +69,6 @@ describe('describe()->with() with closure dataset', function (): void {
     yield [7];
     yield [14];
 });
-
-// ---------------------------------------------------------------
-// Nested describe blocks with datasets
-// ---------------------------------------------------------------
 
 describe('outer with dataset', function (): void {
     describe('inner without dataset', function (): void {
@@ -123,10 +104,6 @@ describe('deeply nested describe with datasets', function (): void {
     })->with([1]);
 });
 
-// ---------------------------------------------------------------
-// Combining hook datasets with test-level datasets
-// ---------------------------------------------------------------
-
 describe('beforeEach()->with() combined with test->with()', function (): void {
     beforeEach()->with([10]);
 
@@ -142,10 +119,6 @@ describe('describe()->with() combined with test->with()', function (): void {
             ->and($testValue)->toBeIn([50, 60]);
     })->with([50, 60]);
 })->with([5]);
-
-// ---------------------------------------------------------------
-// beforeEach()->with() combined with beforeEach closure
-// ---------------------------------------------------------------
 
 describe('beforeEach closure and beforeEach()->with() coexist', function (): void {
     beforeEach(function (): void {
@@ -177,10 +150,6 @@ describe('beforeEach()->with() does not interfere with closure hooks', function 
     });
 });
 
-// ---------------------------------------------------------------
-// Dataset isolation between describe blocks
-// ---------------------------------------------------------------
-
 describe('first describe with dataset', function (): void {
     beforeEach()->with([111]);
 
@@ -202,10 +171,6 @@ describe('third describe without dataset', function (): void {
         expect(true)->toBeTrue();
     });
 });
-
-// ---------------------------------------------------------------
-// describe()->with() combined with beforeEach hooks
-// ---------------------------------------------------------------
 
 describe('describe()->with() with beforeEach closure', function (): void {
     beforeEach(function (): void {
@@ -229,10 +194,6 @@ describe('describe()->with() with afterEach closure', function (): void {
     });
 })->with([88]);
 
-// ---------------------------------------------------------------
-// Multiple tests in a describe with beforeEach()->with()
-// ---------------------------------------------------------------
-
 describe('multiple tests share the same beforeEach dataset', function (): void {
     beforeEach()->with([33]);
 
@@ -248,10 +209,6 @@ describe('multiple tests share the same beforeEach dataset', function (): void {
         expect($value)->toBe(33);
     });
 });
-
-// ---------------------------------------------------------------
-// Nested describe with beforeEach()->with() at inner level
-// ---------------------------------------------------------------
 
 describe('outer describe', function (): void {
     beforeEach(function (): void {
@@ -271,10 +228,6 @@ describe('outer describe', function (): void {
         expect($this->outer)->toBeTrue();
     });
 });
-
-// ---------------------------------------------------------------
-// describe()->with() with depends
-// ---------------------------------------------------------------
 
 describe('describe()->with() preserves depends', function (): void {
     test('first', function ($value): void {

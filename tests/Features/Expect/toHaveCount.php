@@ -11,7 +11,7 @@ test('pass', function (): void {
 
 test('failures with invalid type', function (): void {
     expect('foo')->toHaveCount(3);
-})->throws(InvalidExpectationValue::class, 'Invalid expectation value type. Expected [countable|iterable]');
+})->throws(InvalidExpectationValue::class, 'This expectation may only be used on a value of type [countable|iterable]');
 
 test('failures', function (): void {
     expect([1, 2, 3])->toHaveCount(4);

@@ -6,10 +6,10 @@ use Pest\Exceptions\InvalidExpectationValue;
 use PHPUnit\Framework\ExpectationFailedException;
 
 test('pass', function (): void {
-    expect('example')->toBeHostname() // single label
-        ->and('example.com')->toBeHostname() // multiple labels
-        ->and('sub.example.com')->toBeHostname() // subdomain
-        ->and('my-host')->toBeHostname(); // with hyphen
+    expect('example')->toBeHostname()
+        ->and('example.com')->toBeHostname()
+        ->and('sub.example.com')->toBeHostname()
+        ->and('my-host')->toBeHostname();
 });
 
 test('failures', function (): void {
@@ -22,7 +22,7 @@ test('failures with trailing hyphen', function (): void {
 
 test('failures with invalid type', function (): void {
     expect([])->toBeHostname();
-})->throws(InvalidExpectationValue::class, 'Invalid expectation value type. Expected [string].');
+})->throws(InvalidExpectationValue::class, 'This expectation may only be used on a value of type [string].');
 
 test('failures with custom message', function (): void {
     expect('-example')->toBeHostname('oh no!');

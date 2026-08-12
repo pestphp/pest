@@ -9,8 +9,5 @@ namespace Pest\Contracts;
  */
 interface Bootstrapper
 {
-    /**
-     * Boots the bootstrapper.
-     */
     public function boot(): void;
 }

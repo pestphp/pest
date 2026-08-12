@@ -27,7 +27,7 @@ test('allows to run a single test', function () use ($run, $snapshot): void {
 })->skipOnWindows();
 
 test('allows to run a directory', function () use ($run, $snapshot): void {
-    expect($run('tests/Fixtures'))->toContain($snapshot('allows-to-run-a-directory'));
+    expect($run('tests/Fixtures/DirectoryWithTests'))->toContain($snapshot('allows-to-run-a-directory'));
 })->skipOnWindows();
 
 it('disable decorating printer when colors is set to never', function () use ($snapshot): void {

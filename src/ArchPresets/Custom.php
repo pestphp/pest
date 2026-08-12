@@ -14,8 +14,6 @@ use Pest\Expectation;
 final class Custom extends AbstractPreset
 {
     /**
-     * Creates a new preset instance.
-     *
      * @param  array<int, string>  $userNamespaces
      * @param  Closure(array<int, string>): array<Expectation<mixed>|ArchExpectation>  $execute
      */
@@ -27,17 +25,11 @@ final class Custom extends AbstractPreset
         parent::__construct($userNamespaces);
     }
 
-    /**
-     * Returns the name of the preset.
-     */
     public function name(): string
     {
         return $this->name;
     }
 
-    /**
-     * Executes the arch preset.
-     */
     public function execute(): void
     {
         $this->expectations = ($this->execute)($this->userNamespaces);

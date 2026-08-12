@@ -1,5 +1,5 @@
 
-  Pest Testing Framework 5.0.2.  
+  Pest Testing Framework 5.0.5.  
 
   USAGE: pest <file> [options]  
 
@@ -77,6 +77,9 @@
   --fail-on-warning  Signal failure using shell exit code when a warning was triggered  
   --fail-on-risky  Signal failure using shell exit code when a test was considered risky  
   --fail-on-deprecation  Signal failure using shell exit code when a deprecation was triggered  
+  --fail-on-self-deprecation  Signal failure using shell exit code when a deprecation was triggered in first-party code  
+  --fail-on-direct-deprecation  Signal failure using shell exit code when a deprecation was triggered in third-party code called from first-party code  
+  --fail-on-indirect-deprecation  Signal failure using shell exit code when a deprecation was triggered in third-party code called from third-party code  
   --fail-on-phpunit-deprecation  Signal failure using shell exit code when a PHPUnit deprecation was triggered  
   --fail-on-phpunit-notice  Signal failure using shell exit code when a PHPUnit notice was triggered  
   --fail-on-phpunit-warning  Signal failure using shell exit code when a PHPUnit warning was triggered  
@@ -88,19 +91,26 @@
   --do-not-fail-on-warning  Do not signal failure using shell exit code when a warning was triggered  
   --do-not-fail-on-risky  Do not signal failure using shell exit code when a test was considered risky  
   --do-not-fail-on-deprecation  Do not signal failure using shell exit code when a deprecation was triggered  
+  --do-not-fail-on-self-deprecation  Do not signal failure using shell exit code when a deprecation was triggered in first-party code  
+  --do-not-fail-on-direct-deprecation  Do not signal failure using shell exit code when a deprecation was triggered in third-party code called from first-party code  
+  --do-not-fail-on-indirect-deprecation  Do not signal failure using shell exit code when a deprecation was triggered in third-party code called from third-party code  
   --do-not-fail-on-phpunit-deprecation  Do not signal failure using shell exit code when a PHPUnit deprecation was triggered  
   --do-not-fail-on-phpunit-notice  Do not signal failure using shell exit code when a PHPUnit notice was triggered  
   --do-not-fail-on-phpunit-warning  Do not signal failure using shell exit code when a PHPUnit warning was triggered  
   --do-not-fail-on-notice  Do not signal failure using shell exit code when a notice was triggered  
   --do-not-fail-on-skipped  Do not signal failure using shell exit code when a test was skipped  
   --do-not-fail-on-incomplete  Do not signal failure using shell exit code when a test was marked incomplete  
-  --cache-result ............................ Write test results to cache file  
-  --do-not-cache-result .............. Do not write test results to cache file  
+  --record-test-run-history .......................... Record test run history  
+  --do-not-record-test-run-history ............ Do not record test run history  
+  --warn-when-php-is-not-configured-for-development  Trigger a test runner warning when PHP is not configured for development  
+  --do-not-warn-when-php-is-not-configured-for-development  Do not trigger a test runner warning when PHP is not configured for development  
   --order-by [order]  Run tests in order: default|defects|depends|duration-ascending|duration-descending|no-depends|random|reverse|size-ascending|size-descending  
   --resolve-dependencies ...................... Alias for "--order-by depends"  
   --ignore-dependencies .................... Alias for "--order-by no-depends"  
   --random-order ............................... Alias for "--order-by random"  
   --random-order-seed [N]  Use the specified random seed when running tests in random order  
+  --repeat [N] .......... Run each test N times, stopping at the first failure  
+  --retry [N] . Attempt each test up to N times, stopping at the first success  
   --reverse-order ............................. Alias for "--order-by reverse"  
 
   REPORTING OPTIONS:
@@ -151,6 +161,8 @@
   --coverage-cobertura [file]  Write code coverage report in Cobertura XML format to file  
   --coverage-crap4j [file]  Write code coverage report in Crap4J XML format to file  
   --coverage-html [dir]  Write code coverage report in HTML format to directory  
+  --without-class-view  Render code coverage report in HTML format without class view  
+  --without-file-view  Render code coverage report in HTML format without file view  
   --coverage-php [file] .......... Write serialized code coverage data to file  
   --coverage-text=[file]  Write code coverage report in text format to file [default: standard output]  
   --only-summary-for-coverage-text  Option for code coverage report in text format: only show summary  

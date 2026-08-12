@@ -33,11 +33,11 @@ test('passes', function (): void {
 
 test('failures 1', function (): void {
     expect(function (): void {})->toThrow(RuntimeException::class);
-})->throws(ExpectationFailedException::class, 'Exception "'.RuntimeException::class.'" not thrown.');
+})->throws(ExpectationFailedException::class, 'Exception ['.RuntimeException::class.'] not thrown.');
 
 test('failures 2', function (): void {
     expect(function (): void {})->toThrow(function (RuntimeException $e): void {});
-})->throws(ExpectationFailedException::class, 'Exception "'.RuntimeException::class.'" not thrown.');
+})->throws(ExpectationFailedException::class, 'Exception ['.RuntimeException::class.'] not thrown.');
 
 test('failures 3', function (): void {
     expect(function (): void {
@@ -64,7 +64,7 @@ test('failures 5', function (): void {
 
 test('failures 6', function (): void {
     expect(function (): void {})->toThrow('actual message');
-})->throws(ExpectationFailedException::class, 'Exception with message "actual message" not thrown');
+})->throws(ExpectationFailedException::class, 'Exception with message [actual message] not thrown');
 
 test('failures 7', function (): void {
     expect(function (): void {

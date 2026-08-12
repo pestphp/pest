@@ -19,9 +19,6 @@ final class BeforeAllRepository
      */
     private array $state = [];
 
-    /**
-     * Runs one before all closure, and unsets it from the repository.
-     */
     public function pop(string $filename): Closure
     {
         $closure = $this->get($filename);
@@ -31,9 +28,6 @@ final class BeforeAllRepository
         return $closure;
     }
 
-    /**
-     * Sets a before all closure.
-     */
     public function set(Closure $closure): void
     {
         $filename = Reflection::getFileNameFromClosure($closure);
@@ -45,9 +39,6 @@ final class BeforeAllRepository
         $this->state[$filename] = $closure;
     }
 
-    /**
-     * Gets a before all closure by the given filename.
-     */
     public function get(string $filename): Closure
     {
         return $this->state[$filename] ?? NullClosure::create();

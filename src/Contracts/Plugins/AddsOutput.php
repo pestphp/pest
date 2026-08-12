@@ -9,8 +9,5 @@ namespace Pest\Contracts\Plugins;
  */
 interface AddsOutput
 {
-    /**
-     * Adds output after the Test Suite execution.
-     */
     public function addOutput(int $exitCode): int;
 }

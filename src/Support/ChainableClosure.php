@@ -12,9 +12,6 @@ use Pest\Exceptions\ShouldNotHappen;
  */
 final class ChainableClosure
 {
-    /**
-     * Calls the given `$closure` when the given condition is true, "bound" to the same object.
-     */
     public static function boundWhen(Closure $condition, Closure $next): Closure
     {
         return function (...$arguments) use ($condition, $next): void {
@@ -28,9 +25,6 @@ final class ChainableClosure
         };
     }
 
-    /**
-     * Calls the given `$closure` and chains the `$next` closure, "bound" to the same object.
-     */
     public static function bound(Closure $closure, Closure $next): Closure
     {
         return function (...$arguments) use ($closure, $next): void {
@@ -43,9 +37,6 @@ final class ChainableClosure
         };
     }
 
-    /**
-     * Calls the given `$closure` and chains the `$next` closure, "unbound" of any object.
-     */
     public static function unbound(Closure $closure, Closure $next): Closure
     {
         return function (...$arguments) use ($closure, $next): void {
@@ -54,9 +45,6 @@ final class ChainableClosure
         };
     }
 
-    /**
-     * Call the given static `$closure` and chains the `$next` closure, "bound" to the same object statically.
-     */
     public static function boundStatically(Closure $closure, Closure $next): Closure
     {
         return static function (...$arguments) use ($closure, $next): void {

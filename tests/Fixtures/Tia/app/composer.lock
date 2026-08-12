@@ -1,0 +1,17 @@
+{
+    "_readme": [
+        "Hand-written: the fixture project installs nothing. It exists so the TIA",
+        "fingerprint has a composer.lock to hash, the way a real project does."
+    ],
+    "content-hash": "0000000000000000000000000000000000",
+    "packages": [],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {},
+    "prefer-stable": true,
+    "prefer-lowest": false,
+    "platform": {},
+    "platform-dev": {},
+    "plugin-api-version": "2.6.0"
+}
