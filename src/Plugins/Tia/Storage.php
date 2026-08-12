@@ -9,8 +9,17 @@ namespace Pest\Plugins\Tia;
  */
 final class Storage
 {
+    private static ?string $directory = null;
+
     public static function tempDir(string $projectRoot): string
     {
+        if (self::$directory !== null) {
+            $isAbsolute = str_starts_with(self::$directory, DIRECTORY_SEPARATOR)
+                || preg_match('/^[a-z]:[\\\\\/]/i', self::$directory) === 1;
+
+            return $isAbsolute ? self::$directory : $projectRoot.DIRECTORY_SEPARATOR.self::$directory;
+        }
+
         $home = self::homeDir();
 
         if ($home === null) {
@@ -23,6 +32,11 @@ final class Storage
             .DIRECTORY_SEPARATOR.'.pest'
             .DIRECTORY_SEPARATOR.'tia'
             .DIRECTORY_SEPARATOR.self::projectKey($projectRoot);
+    }
+
+    public static function useDirectory(?string $directory): void
+    {
+        self::$directory = $directory;
     }
 
     public static function purge(string $projectRoot): void

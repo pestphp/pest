@@ -156,12 +156,6 @@ final class Snapshot implements HandlesArguments
             return true;
         }
 
-        foreach (self::CI_ENVIRONMENT_VARIABLES as $environmentVariable) {
-            if (getenv($environmentVariable) !== false) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any(self::CI_ENVIRONMENT_VARIABLES, fn (string $environmentVariable): bool => getenv($environmentVariable) !== false);
     }
 }
