@@ -98,8 +98,6 @@ final class CompactPrinter
     }
 
     /**
-     * Outputs a clean recap of the test run, including the number of tests, assertions, and failures.
-     *
      * @param  list<TestResult>  $profile
      */
     public function recap(State $state, PHPUnitTestResult $testResult, Duration $duration, Options $options, array $profile = []): void
