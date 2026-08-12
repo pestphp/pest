@@ -18,7 +18,7 @@ it('does not run user hooks when replaying cached skipped and incomplete results
 
     try {
         $changedFiles = new ChangedFiles($projectRoot);
-        $branch = $changedFiles->currentBranch() ?? 'main';
+        $branch = $changedFiles->currentBranch() ?? $changedFiles->defaultBranch() ?? 'main';
         $sha = $changedFiles->currentSha();
 
         $id = fn (string $description): string => 'P\Tests\Fixtures\Suites\TiaReplayHooks::'.Str::evaluable($description);
