@@ -15,9 +15,6 @@ use PHPUnit\Framework\Attributes\Group;
  */
 final class Only implements Terminable
 {
-    /**
-     * The temporary folder.
-     */
     private const string TEMPORARY_FOLDER = __DIR__
         .DIRECTORY_SEPARATOR
         .'..'
@@ -26,9 +23,6 @@ final class Only implements Terminable
         .DIRECTORY_SEPARATOR
         .'.temp';
 
-    /**
-     * Creates the lock file.
-     */
     public static function enable(TestCall|TestCaseMethodFactory $testCall, string $group = '__pest_only'): void
     {
         if ($testCall instanceof TestCall) {
@@ -59,9 +53,6 @@ final class Only implements Terminable
         }
     }
 
-    /**
-     * Checks if "only" mode is enabled.
-     */
     public static function isEnabled(): bool
     {
         $lockFile = self::TEMPORARY_FOLDER.DIRECTORY_SEPARATOR.'only.lock';
@@ -69,9 +60,6 @@ final class Only implements Terminable
         return file_exists($lockFile);
     }
 
-    /**
-     * Returns the group name.
-     */
     public static function group(): string
     {
         $lockFile = self::TEMPORARY_FOLDER.DIRECTORY_SEPARATOR.'only.lock';

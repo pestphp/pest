@@ -15,26 +15,18 @@ final class SnapshotRepository
     /** @var array<string, int> */
     private static array $expectationsCounter = [];
 
-    /**
-     * Creates a snapshot repository instance.
-     */
     public function __construct(
         private readonly string $rootPath,
         private readonly string $testsPath,
         private readonly string $snapshotsPath,
     ) {}
 
-    /**
-     * Checks if the snapshot exists.
-     */
     public function has(): bool
     {
         return file_exists($this->getSnapshotFilename());
     }
 
     /**
-     * Gets the snapshot.
-     *
      * @return array{0: string, 1: string}
      *
      * @throws ShouldNotHappen
@@ -52,9 +44,6 @@ final class SnapshotRepository
         return [$snapshot, $contents];
     }
 
-    /**
-     * Saves the given snapshot for the given test case.
-     */
     public function save(string $snapshot): string
     {
         $snapshotFilename = $this->getSnapshotFilename();
@@ -67,12 +56,14 @@ final class SnapshotRepository
 
         file_put_contents($snapshotFilename, $snapshot);
 
-        return str_replace(dirname($this->testsPath).'/', '', $snapshotFilename);
+        return $this->filename();
     }
 
-    /**
-     * Flushes the snapshots.
-     */
+    public function filename(): string
+    {
+        return str_replace(dirname($this->testsPath).'/', '', $this->getSnapshotFilename());
+    }
+
     public function flush(): void
     {
         $absoluteSnapshotsPath = $this->testsPath.'/'.$this->snapshotsPath;
@@ -101,26 +92,18 @@ final class SnapshotRepository
         }
     }
 
-    /**
-     * Gets the snapshot's "filename".
-     */
     private function getSnapshotFilename(): string
     {
         $testFile = TestSuite::getInstance()->getFilename();
 
         if (str_starts_with($testFile, $this->testsPath)) {
-            // if the test file is in the tests directory
             $startPath = $this->testsPath;
         } else {
-            // if the test file is in the app, src, etc. directory
             $startPath = $this->rootPath;
         }
 
-        // relative path: we use substr() and not str_replace() to remove the start path
-        // for instance, if the $startPath is /app/ and the $testFile is /app/app/tests/Unit/ExampleTest.php, we should only remove the first /app/ from the path
         $relativePath = substr($testFile, strlen($startPath));
 
-        // remove extension from filename
         $relativePath = substr($relativePath, 0, (int) strrpos($relativePath, '.'));
 
         $description = TestSuite::getInstance()->getDescription();

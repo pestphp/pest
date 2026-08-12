@@ -16,9 +16,6 @@ use ReflectionClass;
  */
 final class EnsureIgnorableTestCasesAreIgnored implements StartedSubscriber
 {
-    /**
-     * Runs the subscriber.
-     */
     public function notify(Started $event): void
     {
         $reflection = new ReflectionClass(Facade::class);

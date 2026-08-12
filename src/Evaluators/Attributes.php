@@ -12,8 +12,6 @@ use Pest\Factories\Attribute;
 final class Attributes
 {
     /**
-     * Evaluates the given attributes and returns the code.
-     *
      * @param  iterable<int, Attribute>  $attributes
      */
     public static function code(iterable $attributes): string

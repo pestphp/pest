@@ -57,9 +57,6 @@ describe('isTestFile()', function (): void {
             ->and($paths->isTestFile('tests/Unit/Helper.php'))->toBeTrue();
     });
 
-    // Regression: a suffix of "Test.php" must match "ExampleTest.php". A previous
-    // normalisation prepended a dot (".Test.php"), which matched nothing and left
-    // edited tests looking unchanged to TIA, replaying stale results.
     it('does not require a dot before the suffix', function (): void {
         $paths = new TestPaths(
             directories: ['tests/Unit'],

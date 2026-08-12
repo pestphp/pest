@@ -357,6 +357,63 @@ function tiaViteAliasResults(): array
     return $cache = ['roots' => $roots, 'aliases' => $aliases];
 }
 
+function tiaViteCasingFixtures(): array
+{
+    return [
+        'exact' => ['resources/js/pages', true],
+        'wrong leaf' => ['resources/js/Pages', false],
+        'wrong parent' => ['Resources/js/pages', false],
+        'absent' => ['assets/js/pages', false],
+    ];
+}
+
+function tiaViteCasingResults(): array
+{
+    static $cache = null;
+    if ($cache !== null) {
+        return $cache;
+    }
+
+    $root = sys_get_temp_dir().'/pest-tia-vite-casing-'.bin2hex(random_bytes(6));
+    mkdir($root.'/resources/js/pages', 0755, true);
+    file_put_contents($root.'/resources/js/pages/Dashboard.vue', "<template>ok</template>\n");
+
+    $helper = str_replace('\\', '/', tiaViteHelperPath());
+    $normalized = str_replace('\\', '/', $root);
+
+    $payload = [];
+    foreach (tiaViteCasingFixtures() as $name => [$candidate]) {
+        $payload[] = ['name' => $name, 'candidate' => $candidate];
+    }
+
+    $inputFile = tempnam(sys_get_temp_dir(), 'tia-vite-casing-');
+    file_put_contents($inputFile, json_encode($payload));
+    $input = str_replace('\\', '/', $inputFile);
+
+    $script = <<<JS
+    import { matchesDiskCasing } from '{$helper}'
+    import { readFileSync } from 'node:fs'
+    const cases = JSON.parse(readFileSync('{$input}', 'utf8'))
+    const out = {}
+    for (const c of cases) out[c.name] = await matchesDiskCasing('{$normalized}', c.candidate)
+    process.stdout.write(JSON.stringify(out))
+    JS;
+
+    $process = new Process(['node', '--input-type=module', '-e', $script]);
+    $process->mustRun();
+
+    $results = json_decode($process->getOutput(), true, flags: JSON_THROW_ON_ERROR);
+
+    @unlink($inputFile);
+    @unlink($root.'/resources/js/pages/Dashboard.vue');
+    @rmdir($root.'/resources/js/pages');
+    @rmdir($root.'/resources/js');
+    @rmdir($root.'/resources');
+    @rmdir($root);
+
+    return $cache = $results;
+}
+
 beforeEach(function (): void {
     if ((new ExecutableFinder)->find('node') === null) {
         $this->markTestSkipped('node is not available.');
@@ -409,3 +466,9 @@ it('builds the expected alias map from a vite config', function (string $name): 
 
     expect($results['aliases'][$name])->toEqual($expected);
 })->with(array_keys(tiaViteAliasFixtures()));
+
+it('accepts a page directory candidate only when it matches the casing on disk', function (string $name): void {
+    [, $expected] = tiaViteCasingFixtures()[$name];
+
+    expect(tiaViteCasingResults()[$name])->toBe($expected);
+})->with(array_keys(tiaViteCasingFixtures()));

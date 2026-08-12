@@ -12,11 +12,6 @@ use Pest\Plugin\Loader;
  */
 final class CallsBoot
 {
-    /**
-     * Executes the Plugin action.
-     *
-     * Provides an opportunity for any plugins to boot.
-     */
     public static function execute(): void
     {
         $plugins = Loader::getPlugins(Plugins\Bootable::class);

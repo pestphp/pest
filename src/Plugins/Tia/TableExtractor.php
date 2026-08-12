@@ -11,9 +11,6 @@ final class TableExtractor
 {
     private const array DML_PREFIXES = ['select', 'insert', 'update', 'delete', 'with', 'replace'];
 
-    /**
-     * A single (optionally quoted) identifier segment.
-     */
     private const string IDENTIFIER = '(?:"[^"]+"|`[^`]+`|\[[^\]]+\]|\w+)';
 
     /**
@@ -56,7 +53,7 @@ final class TableExtractor
             $tables[strtolower($name)] = true;
         }
 
-        $out = array_keys($tables);
+        $out = array_map(strval(...), array_keys($tables));
         sort($out);
 
         return $out;
@@ -112,17 +109,12 @@ final class TableExtractor
             }
         }
 
-        $out = array_keys($tables);
+        $out = array_map(strval(...), array_keys($tables));
         sort($out);
 
         return $out;
     }
 
-    /**
-     * The table segment of a possibly schema-qualified identifier chain,
-     * e.g. `"public"."users"` or `analytics.events` yield `users` / `events`.
-     * Empty when any segment is schema metadata (`information_schema.tables`, ...).
-     */
     private static function unqualified(string $qualified): string
     {
         $name = '';

@@ -19,7 +19,7 @@ final class TiaRequiresRepositoryRoot extends RuntimeException implements Except
     public function __construct(private readonly string $subdirectoryPrefix)
     {
         parent::__construct(sprintf(
-            'Tia mode requires the project root to be the git repository root, but it sits in the subdirectory [%s] of a larger repo.',
+            'Tia mode requires the project root to be the git repository root, but this project sits in the subdirectory [%s] of a larger repository. Please give it its own repository to use Tia.',
             $this->subdirectoryPrefix,
         ));
     }

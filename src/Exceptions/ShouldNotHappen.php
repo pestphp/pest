@@ -12,15 +12,12 @@ use RuntimeException;
  */
 final class ShouldNotHappen extends RuntimeException
 {
-    /**
-     * Creates a new Exception instance.
-     */
     public function __construct(Exception $exception)
     {
         $message = $exception->getMessage();
 
         parent::__construct(sprintf(<<<'EOF'
-This should not happen - please create an new issue here: https://github.com/pestphp/pest/issues
+This should not have happened. Please report it here: https://github.com/pestphp/pest/issues
 
   Issue: %s
   PHP version: %s
@@ -29,9 +26,6 @@ EOF
             , $message, phpversion(), PHP_OS), 1, $exception);
     }
 
-    /**
-     * Creates a new instance of should not happen without a specific exception.
-     */
     public static function fromMessage(string $message): ShouldNotHappen
     {
         return new ShouldNotHappen(new Exception($message));

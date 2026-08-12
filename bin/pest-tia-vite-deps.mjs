@@ -190,6 +190,24 @@ async function listPageFiles(pagesDir) {
   return out
 }
 
+// `existsSync()` ignores casing on APFS and NTFS, and on a macOS bind mount seen from
+// inside a Linux container, so the `resources/js/Pages` candidate resolves in a project
+// whose directory is really `resources/js/pages`. Every page path derives from the
+// directory accepted below, so a wrong-cased one detaches the pages tree from the paths
+// the PHP side reports. `readdir()` is case-exact everywhere.
+export async function matchesDiskCasing(projectRoot, rel) {
+  let current = projectRoot
+
+  for (const segment of rel.split('/')) {
+    let entries
+    try { entries = await readdir(current) } catch { return false }
+    if (!entries.includes(segment)) return false
+    current = join(current, segment)
+  }
+
+  return true
+}
+
 async function discoverPagesDir() {
   const override = process.env.TIA_VITE_PAGES_DIR
   if (override && override.length > 0) {
@@ -199,6 +217,7 @@ async function discoverPagesDir() {
   for (const rel of PAGE_DIR_CANDIDATES) {
     const abs = resolve(PROJECT_ROOT, rel)
     if (!existsSync(abs)) continue
+    if (!(await matchesDiskCasing(PROJECT_ROOT, rel))) continue
     const files = await listPageFiles(abs)
     if (files.length > 0) return abs
   }

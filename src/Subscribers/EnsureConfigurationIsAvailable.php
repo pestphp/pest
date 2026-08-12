@@ -14,9 +14,6 @@ use PHPUnit\TextUI\Configuration\Configuration;
  */
 final class EnsureConfigurationIsAvailable implements ConfiguredSubscriber
 {
-    /**
-     * Runs the subscriber.
-     */
     public function notify(Configured $event): void
     {
         Container::getInstance()->add(Configuration::class, $event->configuration());

@@ -14,11 +14,8 @@ use Symfony\Component\Console\Exception\ExceptionInterface;
  */
 final class AfterBeforeTestFunction extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
 {
-    /**
-     * Creates a new Exception instance.
-     */
     public function __construct(string $filename)
     {
-        parent::__construct('After method cannot be used with before the [test|it] functions in the filename `['.$filename.']`.');
+        parent::__construct(sprintf('The [after] hook may only be chained onto [beforeEach] inside a [describe] block. Please move it inside one in [%s].', $filename));
     }
 }

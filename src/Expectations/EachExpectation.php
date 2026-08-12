@@ -17,21 +17,14 @@ use function expect;
  */
 final class EachExpectation
 {
-    /**
-     * Indicates if the expectation is the opposite.
-     */
     private bool $opposite = false;
 
     /**
-     * Creates an expectation on each item of the iterable "value".
-     *
      * @param  Expectation<TValue>  $original
      */
     public function __construct(private readonly Expectation $original) {}
 
     /**
-     * Creates a new expectation.
-     *
      * @template TAndValue
      *
      * @param  TAndValue  $value
@@ -43,8 +36,6 @@ final class EachExpectation
     }
 
     /**
-     * Creates the opposite expectation for the value.
-     *
      * @return self<TValue>
      */
     public function not(): self
@@ -55,8 +46,6 @@ final class EachExpectation
     }
 
     /**
-     * Dynamically calls methods on the class with the given arguments on each item.
-     *
      * @param  array<int|string, mixed>  $arguments
      * @return self<TValue>
      */
@@ -73,8 +62,6 @@ final class EachExpectation
     }
 
     /**
-     * Dynamically calls methods on the class without any arguments on each item.
-     *
      * @return self<TValue>
      */
     public function __get(string $name): self

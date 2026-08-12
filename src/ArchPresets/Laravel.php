@@ -11,9 +11,6 @@ use Throwable;
  */
 final class Laravel extends AbstractPreset
 {
-    /**
-     * Executes the arch preset.
-     */
     public function execute(): void
     {
         $this->expectations[] = expect('App\Traits')

@@ -34,7 +34,6 @@ describe('keysWithPrefix()', function (): void {
         $state = new FileState($this->root);
         $state->write('worker-edges-a.json', '{}');
 
-        // Simulate another process mid-write: its temp file exists but has not been renamed yet.
         file_put_contents($this->root.'/worker-edges-b.json.'.bin2hex(random_bytes(4)).'.tmp', '{');
 
         expect($state->keysWithPrefix('worker-edges-'))->toBe(['worker-edges-a.json']);

@@ -43,14 +43,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class TeamCityLogger
 {
-    /**
-     * The current time.
-     */
     private ?HRTime $time = null;
 
-    /**
-     * Indicates if the summary test count has been printed.
-     */
     private bool $isSummaryTestCountPrinted = false;
 
     /**
@@ -129,10 +123,6 @@ final class TeamCityLogger
         });
     }
 
-    /**
-     * This will trigger in the following scenarios
-     * - When an exception is thrown
-     */
     public function testErrored(Errored $event): void
     {
         $this->whenFirstEventForTest($event->test(), function () use ($event): void {
@@ -150,10 +140,6 @@ final class TeamCityLogger
         });
     }
 
-    /**
-     * This will trigger in the following scenarios
-     * - When an assertion fails
-     */
     public function testFailed(Failed $event): void
     {
         $this->whenFirstEventForTest($event->test(), function () use ($event): void {
@@ -182,10 +168,6 @@ final class TeamCityLogger
         });
     }
 
-    /**
-     * This will trigger in the following scenarios
-     * - When no assertions in a test
-     */
     public function testConsideredRisky(ConsideredRisky $event): void
     {
         $this->whenFirstEventForTest($event->test(), function () use ($event): void {

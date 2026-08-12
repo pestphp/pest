@@ -50,11 +50,6 @@ final class Recorder
         $this->captureCoverage = true;
     }
 
-    /**
-     * Enable per-test link tracking (tables, Inertia components, database
-     * usage, rendered views) without driving pcov/xdebug — for runs where
-     * coverage edges are piggybacked from an existing PHPUnit coverage session.
-     */
     public function activateLinkTracking(): void
     {
         $this->active = true;
@@ -360,7 +355,9 @@ final class Recorder
             }
 
             $lineKeys = array_keys($lines);
-            if ($lineKeys !== [] && count($covered) === 1 && $covered[0] === max($lineKeys)) {
+            $reportsUnexecutedLines = count($covered) < count($lines);
+
+            if ($reportsUnexecutedLines && $lineKeys !== [] && count($covered) === 1 && $covered[0] === max($lineKeys)) {
                 continue;
             }
 

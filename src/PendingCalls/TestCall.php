@@ -38,25 +38,14 @@ final class TestCall // @phpstan-ignore-line
     use Describable;
 
     /**
-     * The list of test case factory attributes.
-     *
      * @var array<int, Attribute>
      */
     private array $testCaseFactoryAttributes = [];
 
-    /**
-     * The Test Case Factory.
-     */
     public readonly TestCaseMethodFactory $testCaseMethod;
 
-    /**
-     * If test call is descriptionLess.
-     */
     private readonly bool $descriptionLess;
 
-    /**
-     * Creates a new Pending Call.
-     */
     public function __construct(
         private readonly TestSuite $testSuite,
         private readonly string $filename,
@@ -72,9 +61,6 @@ final class TestCall // @phpstan-ignore-line
         $this->testSuite->beforeEach->get($this->filename)[0]($this);
     }
 
-    /**
-     * Runs the given closure after the test.
-     */
     public function after(Closure $closure): self
     {
         if ($this->description === null) {
@@ -108,17 +94,11 @@ final class TestCall // @phpstan-ignore-line
         return $this;
     }
 
-    /**
-     * Asserts that the test fails with the given message.
-     */
     public function fails(?string $message = null): self
     {
         return $this->throws(AssertionFailedError::class, $message);
     }
 
-    /**
-     * Asserts that the test throws the given `$exceptionClass` when called.
-     */
     public function throws(string|int $exception, ?string $exceptionMessage = null, ?int $exceptionCode = null): self
     {
         if (is_int($exception)) {
@@ -147,8 +127,6 @@ final class TestCall // @phpstan-ignore-line
     }
 
     /**
-     * Asserts that the test throws the given `$exceptionClass` when called if the given condition is true.
-     *
      * @param  (callable(): bool)|bool  $condition
      */
     public function throwsIf(callable|bool $condition, string|int $exception, ?string $exceptionMessage = null, ?int $exceptionCode = null): self
@@ -165,8 +143,6 @@ final class TestCall // @phpstan-ignore-line
     }
 
     /**
-     * Asserts that the test throws the given `$exceptionClass` when called if the given condition is false.
-     *
      * @param  (callable(): bool)|bool  $condition
      */
     public function throwsUnless(callable|bool $condition, string|int $exception, ?string $exceptionMessage = null, ?int $exceptionCode = null): self
@@ -183,8 +159,6 @@ final class TestCall // @phpstan-ignore-line
     }
 
     /**
-     * Runs the current test multiple times with each item of the given `iterable`.
-     *
      * @param  Closure|iterable<array-key, mixed>|string  $data
      */
     public function with(Closure|iterable|string ...$data): self
@@ -196,9 +170,6 @@ final class TestCall // @phpstan-ignore-line
         return $this;
     }
 
-    /**
-     * Sets the test depends.
-     */
     public function depends(string ...$depends): self
     {
         foreach ($depends as $depend) {
@@ -208,9 +179,6 @@ final class TestCall // @phpstan-ignore-line
         return $this;
     }
 
-    /**
-     * Sets the test group(s).
-     */
     public function group(string ...$groups): self
     {
         foreach ($groups as $group) {
@@ -223,9 +191,6 @@ final class TestCall // @phpstan-ignore-line
         return $this;
     }
 
-    /**
-     * Filters the test suite by "only" tests.
-     */
     public function only(): self
     {
         Only::enable($this, ...func_get_args());
@@ -233,9 +198,6 @@ final class TestCall // @phpstan-ignore-line
         return $this;
     }
 
-    /**
-     * Skips the current test.
-     */
     public function skip(Closure|bool|string $conditionOrMessage = true, string $message = ''): self
     {
         $condition = is_string($conditionOrMessage)
@@ -260,9 +222,6 @@ final class TestCall // @phpstan-ignore-line
         return $this;
     }
 
-    /**
-     * Skips the current test on the given PHP version.
-     */
     public function skipOnPhp(string $version): self
     {
         if (mb_strlen($version) < 2) {
@@ -275,7 +234,6 @@ final class TestCall // @phpstan-ignore-line
         } elseif (str_starts_with($version, '>') || str_starts_with($version, '<')) {
             $operator = $version[0];
             $version = substr($version, 1);
-            // ensure starts with number:
         } elseif (is_numeric($version[0])) {
             $operator = '==';
         } else {
@@ -285,33 +243,21 @@ final class TestCall // @phpstan-ignore-line
         return $this->skip(version_compare(PHP_VERSION, $version, $operator), sprintf('This test is skipped on PHP [%s%s].', $operator, $version));
     }
 
-    /**
-     * Skips the current test if the given test is running on Windows.
-     */
     public function skipOnWindows(): self
     {
         return $this->skipOnOs('Windows', 'This test is skipped on [Windows].');
     }
 
-    /**
-     * Skips the current test if the given test is running on Mac OS.
-     */
     public function skipOnMac(): self
     {
         return $this->skipOnOs('Darwin', 'This test is skipped on [Mac].');
     }
 
-    /**
-     * Skips the current test if the given test is running on Linux.
-     */
     public function skipOnLinux(): self
     {
         return $this->skipOnOs('Linux', 'This test is skipped on [Linux].');
     }
 
-    /**
-     * Skips the current test if the given test is running on the given operating systems.
-     */
     private function skipOnOs(string $osFamily, string $message): self
     {
         return $osFamily === PHP_OS_FAMILY
@@ -319,9 +265,6 @@ final class TestCall // @phpstan-ignore-line
             : $this;
     }
 
-    /**
-     * Weather the current test is running on a CI environment.
-     */
     private function runningOnCI(): bool
     {
         foreach ([
@@ -353,9 +296,6 @@ final class TestCall // @phpstan-ignore-line
         return Environment::name() === Environment::CI;
     }
 
-    /**
-     * Skips the current test when running on a CI environments.
-     */
     public function skipOnCI(): self
     {
         if ($this->runningOnCI()) {
@@ -374,33 +314,21 @@ final class TestCall // @phpstan-ignore-line
         return $this;
     }
 
-    /**
-     * Skips the current test unless the given test is running on Windows.
-     */
     public function onlyOnWindows(): self
     {
         return $this->skipOnMac()->skipOnLinux();
     }
 
-    /**
-     * Skips the current test unless the given test is running on Mac.
-     */
     public function onlyOnMac(): self
     {
         return $this->skipOnWindows()->skipOnLinux();
     }
 
-    /**
-     * Skips the current test unless the given test is running on Linux.
-     */
     public function onlyOnLinux(): self
     {
         return $this->skipOnWindows()->skipOnMac();
     }
 
-    /**
-     * Repeats the current test the given number of times.
-     */
     public function repeat(int $times): self
     {
         if ($times < 1) {
@@ -412,9 +340,6 @@ final class TestCall // @phpstan-ignore-line
         return $this;
     }
 
-    /**
-     * Marks the test as flaky, retrying it up to the given number of times.
-     */
     public function flaky(int $tries = 3): self
     {
         if ($tries < 1) {
@@ -426,9 +351,6 @@ final class TestCall // @phpstan-ignore-line
         return $this;
     }
 
-    /**
-     * Marks the test as "todo".
-     */
     public function todo(// @phpstan-ignore-line
         array|string|null $note = null,
         array|string|null $assignee = null,
@@ -458,9 +380,6 @@ final class TestCall // @phpstan-ignore-line
         return $this;
     }
 
-    /**
-     * Sets the test as "work in progress".
-     */
     public function wip(// @phpstan-ignore-line
         array|string|null $note = null,
         array|string|null $assignee = null,
@@ -486,9 +405,6 @@ final class TestCall // @phpstan-ignore-line
         return $this;
     }
 
-    /**
-     * Sets the test as "done".
-     */
     public function done(// @phpstan-ignore-line
         array|string|null $note = null,
         array|string|null $assignee = null,
@@ -515,8 +431,6 @@ final class TestCall // @phpstan-ignore-line
     }
 
     /**
-     * Associates the test with the given issue(s).
-     *
      * @param  array<int, string|int>|string|int  $number
      */
     public function issue(array|string|int $number): self
@@ -531,8 +445,6 @@ final class TestCall // @phpstan-ignore-line
     }
 
     /**
-     * Associates the test with the given ticket(s). (Alias for `issue`)
-     *
      * @param  array<int, string|int>|string|int  $number
      */
     public function ticket(array|string|int $number): self
@@ -541,8 +453,6 @@ final class TestCall // @phpstan-ignore-line
     }
 
     /**
-     * Sets the test assignee(s).
-     *
      * @param  array<int, string>|string  $assignee
      */
     public function assignee(array|string $assignee): self
@@ -555,8 +465,6 @@ final class TestCall // @phpstan-ignore-line
     }
 
     /**
-     * Associates the test with the given pull request(s).
-     *
      * @param  array<int, string|int>|string|int  $number
      */
     public function pr(array|string|int $number): self
@@ -571,8 +479,6 @@ final class TestCall // @phpstan-ignore-line
     }
 
     /**
-     * Adds a note to the test.
-     *
      * @param  array<int, string>|string  $note
      */
     public function note(array|string $note): self
@@ -585,8 +491,6 @@ final class TestCall // @phpstan-ignore-line
     }
 
     /**
-     * Sets the covered classes or methods.
-     *
      * @param  array<int, string>|string  $classesOrFunctions
      */
     public function covers(array|string ...$classesOrFunctions): self
@@ -600,7 +504,7 @@ final class TestCall // @phpstan-ignore-line
             $isFunction = function_exists($classOrFunction);
 
             if (! $isClass && ! $isTrait && ! $isFunction) {
-                throw new InvalidArgumentException(sprintf('No class, trait or method named "%s" has been found.', $classOrFunction));
+                throw new InvalidArgumentException(sprintf('No class, trait or method named [%s] has been found.', $classOrFunction));
             }
 
             if ($isClass) {
@@ -615,9 +519,6 @@ final class TestCall // @phpstan-ignore-line
         return $this;
     }
 
-    /**
-     * Sets the covered classes.
-     */
     public function coversClass(string ...$classes): self
     {
         foreach ($classes as $class) {
@@ -638,9 +539,6 @@ final class TestCall // @phpstan-ignore-line
         return $this;
     }
 
-    /**
-     * Sets the covered classes.
-     */
     public function coversTrait(string ...$traits): self
     {
         foreach ($traits as $trait) {
@@ -661,9 +559,6 @@ final class TestCall // @phpstan-ignore-line
         return $this;
     }
 
-    /**
-     * Sets the covered functions.
-     */
     public function coversFunction(string ...$functions): self
     {
         foreach ($functions as $function) {
@@ -677,9 +572,6 @@ final class TestCall // @phpstan-ignore-line
     }
 
     /**
-     * Adds one or more references to the tested method or class. This helps
-     * to link test cases to the source code for easier navigation.
-     *
      * @param  array<class-string|string>|class-string  ...$classes
      */
     public function references(string|array ...$classes): self
@@ -690,9 +582,6 @@ final class TestCall // @phpstan-ignore-line
     }
 
     /**
-     * Adds one or more references to the tested method or class. This helps
-     * to link test cases to the source code for easier navigation.
-     *
      * @param  array<class-string|string>|class-string  ...$classes
      */
     public function see(string|array ...$classes): self
@@ -700,11 +589,6 @@ final class TestCall // @phpstan-ignore-line
         return $this->references(...$classes);
     }
 
-    /**
-     * Informs the test runner that no expectations happen in this test,
-     * and its purpose is simply to check whether the given code can
-     * be executed without throwing exceptions.
-     */
     public function throwsNoExceptions(): self
     {
         $this->testCaseMethod->proxies->add(Backtrace::file(), Backtrace::line(), 'expectNotToPerformAssertions', []);
@@ -712,17 +596,12 @@ final class TestCall // @phpstan-ignore-line
         return $this;
     }
 
-    /**
-     * Saves the property accessors to be used on the target.
-     */
     public function __get(string $name): self
     {
         return $this->addChain(Backtrace::file(), Backtrace::line(), $name);
     }
 
     /**
-     * Saves the calls to be used on the target.
-     *
      * @param  array<int, mixed>  $arguments
      */
     public function __call(string $name, array $arguments): self
@@ -731,8 +610,6 @@ final class TestCall // @phpstan-ignore-line
     }
 
     /**
-     * Add a chain to the test case factory. Omitting the arguments will treat it as a property accessor.
-     *
      * @param  array<int, mixed>|null  $arguments
      */
     private function addChain(string $file, int $line, string $name, ?array $arguments = null): self
@@ -758,9 +635,6 @@ final class TestCall // @phpstan-ignore-line
         return $this;
     }
 
-    /**
-     * Creates the Call.
-     */
     public function __destruct()
     {
         if ($this->description === null) {

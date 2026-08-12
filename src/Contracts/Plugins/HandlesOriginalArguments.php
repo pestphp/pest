@@ -10,8 +10,6 @@ namespace Pest\Contracts\Plugins;
 interface HandlesOriginalArguments
 {
     /**
-     * Adds original arguments before the Test Suite execution.
-     *
      * @param  array<int, string>  $arguments
      */
     public function handleOriginalArguments(array $arguments): void;

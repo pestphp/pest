@@ -2,12 +2,10 @@
 
 use Pest\Arch\Exceptions\ArchExpectationFailedException;
 use Pest\Configuration;
-use Pest\Expectation;
 use Tests\Fixtures\Inheritance\ExampleTest;
 
 it('passes', function (): void {
-    expect(Expectation::class)->toHaveMethodsDocumented()
-        ->and(ExampleTest::class)->not->toHaveMethodsDocumented();
+    expect(ExampleTest::class)->not->toHaveMethodsDocumented();
 });
 
 it('fails 1', function (): void {

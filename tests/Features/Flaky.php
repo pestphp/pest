@@ -100,7 +100,6 @@ describe('lifecycle hooks with flaky', function (): void {
         }
 
         @unlink($file);
-        // After retry: setUp ran for initial + retry = setupCount should be 2
         expect($this->setupCount)->toBe(2);
     })->flaky(tries: 3);
 });
@@ -123,7 +122,6 @@ describe('afterEach with flaky', function (): void {
         }
 
         @unlink($file);
-        // tearDown was called once between retries
         expect($state->teardownCount)->toBe(1);
     })->flaky(tries: 3);
 });
@@ -142,7 +140,7 @@ it('works as higher order test')
 
 it('fails after exhausting all retries', function (): void {
     $process = new Process(
-        ['php', 'bin/pest', 'tests/.tests/FlakyFailure.php'],
+        ['php', 'bin/pest', 'tests/Fixtures/Suites/FlakyFailure.php'],
         dirname(__DIR__, 2),
         ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
     );
@@ -184,9 +182,6 @@ it('works with throws and flaky', function (): void {
 })->throws(RuntimeException::class, 'Expected exception')->flaky(tries: 2);
 
 it('does not retry expected exceptions', function (): void {
-    // If flaky retried this, the temp file counter would reach 2 and
-    // the test would NOT throw — causing PHPUnit's "expected exception
-    // was not raised" to fail. The test passes only if we don't retry.
     $file = sys_get_temp_dir().'/pest_flaky_expected';
     $count = file_exists($file) ? (int) file_get_contents($file) : 0;
     file_put_contents($file, (string) ++$count);
@@ -194,8 +189,6 @@ it('does not retry expected exceptions', function (): void {
     if ($count >= 2) {
         @unlink($file);
 
-        // Second call means flaky retried — don't throw, which will FAIL
-        // because PHPUnit expects the exception
         return;
     }
 
@@ -229,18 +222,16 @@ it('does not leak mock objects between retries', function (): void {
     file_put_contents($file, (string) ++$count);
 
     if ($count < 2) {
-        @unlink(sys_get_temp_dir().'/pest_flaky_mock'); // clean before retry writes again
+        @unlink(sys_get_temp_dir().'/pest_flaky_mock');
         file_put_contents($file, '1');
         throw new Exception('Flaky mock failure');
     }
 
     @unlink($file);
-    // Call mock — only the mock from THIS attempt should be verified
     expect($mock->count())->toBe(1);
 })->flaky(tries: 3);
 
 it('does not stop retrying when snapshot changes are absent', function (): void {
-    // Ensures the snapshot guard only triggers when __snapshotChanges is non-empty
     $file = sys_get_temp_dir().'/pest_flaky_no_snapshot';
     $count = file_exists($file) ? (int) file_get_contents($file) : 0;
     file_put_contents($file, (string) ++$count);
@@ -294,6 +285,5 @@ it('preserves output between retries when no output expectation is set', functio
     }
 
     @unlink($file);
-    // Output from attempt 1 is still in the buffer
     $this->expectOutputString('from attempt 1');
 })->flaky(tries: 3);

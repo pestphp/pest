@@ -41,15 +41,11 @@ it('skips with falsy', function (): void {
     expect($this->unlessObject)
         ->unless(
             1,
-            function ($value) {
-                return $value->trueValue->toBeFalse(); // fails
-            }
+            fn ($value) => $value->trueValue->toBeFalse()
         )
         ->unless(
             true,
-            function ($value) {
-                return $value->trueValue->toBeFalse(); // fails
-            }
+            fn ($value) => $value->trueValue->toBeFalse()
         )
         ->foo->toEqual('foo')
         ->and(static::getCount())->toBe(1);
@@ -69,9 +65,7 @@ it('skips with falsy closure condition', function (): void {
     expect($this->unlessObject)
         ->unless(
             fn (): string => '1',
-            function ($value) {
-                return $value->trueValue->toBeFalse(); // fails
-            }
+            fn ($value) => $value->trueValue->toBeFalse()
         )
         ->foo->toEqual('foo')
         ->and(static::getCount())->toBe(1);

@@ -41,17 +41,12 @@ final class TestRepository
      */
     private array $testCaseMethodFilters = [];
 
-    /**
-     * Counts the number of test cases.
-     */
     public function count(): int
     {
         return count($this->testCases);
     }
 
     /**
-     * Returns the filename of each test that should be executed in the suite.
-     *
      * @return array<int, string>
      */
     public function getFilenames(): array
@@ -60,8 +55,6 @@ final class TestRepository
     }
 
     /**
-     * Uses the given `$testCaseClass` on the given `$paths`.
-     *
      * @param  array<int, string>  $classOrTraits
      * @param  array<int, string>  $groups
      * @param  array<int, string>  $paths
@@ -97,25 +90,17 @@ final class TestRepository
         }
     }
 
-    /**
-     * Filters the test cases using the given filter.
-     */
     public function addTestCaseFilter(TestCaseFilter $filter): void
     {
         $this->testCaseFilters[] = $filter;
     }
 
-    /**
-     * Filters the test cases using the given filter.
-     */
     public function addTestCaseMethodFilter(TestCaseMethodFilter $filter): void
     {
         $this->testCaseMethodFilters[] = $filter;
     }
 
     /**
-     * Gets the class and traits configured for the given directory path.
-     *
      * @return array<int, string>
      */
     public function getUsesForPath(string $path): array
@@ -123,17 +108,11 @@ final class TestRepository
         return $this->uses[$path][0] ?? [];
     }
 
-    /**
-     * Gets the test case factory from the given filename.
-     */
     public function get(string $filename): ?TestCaseFactory
     {
         return $this->testCases[$filename] ?? null;
     }
 
-    /**
-     * Sets a new test case method.
-     */
     public function set(TestCaseMethodFactory $method): void
     {
         foreach ($this->testCaseFilters as $filter) {
@@ -155,9 +134,6 @@ final class TestRepository
         $this->testCases[$method->filename]->addMethod($method);
     }
 
-    /**
-     * Makes a Test Case from the given filename, if exists.
-     */
     public function makeIfNeeded(string $filename): void
     {
         if (! array_key_exists($filename, $this->testCases)) {
@@ -173,9 +149,6 @@ final class TestRepository
         $this->make($this->testCases[$filename]);
     }
 
-    /**
-     * Makes a Test Case using the given factory.
-     */
     private function make(TestCaseFactory $testCase): void
     {
         $startsWith = static fn (string $target, string $directory): bool => Str::startsWith($target, $directory.DIRECTORY_SEPARATOR);
