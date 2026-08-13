@@ -109,3 +109,27 @@ it('shows the correct description of datasets with html', function (): void {
 
     expect($descriptions[0])->toBe('(\'<div class="flex items-center"></div>\')');
 });
+
+it('does not treat a two element dataset of class names as a callable', function (): void {
+    $datasets = DatasetsRepository::resolve([
+        [
+            MagicCallDataset::class,
+            AnotherMagicCallDataset::class,
+        ],
+    ], __FILE__);
+
+    expect(array_values($datasets))->toBe([
+        [MagicCallDataset::class],
+        [AnotherMagicCallDataset::class],
+    ]);
+});
+
+class MagicCallDataset
+{
+    public static function __callStatic(string $name, array $arguments): void
+    {
+        throw new RuntimeException('This dataset should not be called.');
+    }
+}
+
+class AnotherMagicCallDataset {}
