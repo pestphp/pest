@@ -1937,6 +1937,10 @@
   ✓ it records assertions against the same per-dataset key
   ✓ it leaves a test without a dataset keyed by class and method
 
+   PASS  Tests\Unit\Plugins\Tia\SourceScope
+  ✓ noisePaths() → it lists the directories that hold no project source
+  ✓ noisePaths() → it ends every path with a separator so a sibling directory cannot match it
+
    PASS  Tests\Unit\Plugins\Tia\Storage
   ✓ it uses a project-relative configured directory
   ✓ it uses an absolute configured directory
@@ -2226,4 +2230,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1573 passed (3414 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1575 passed (3429 assertions)

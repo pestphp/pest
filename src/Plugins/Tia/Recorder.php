@@ -48,6 +48,14 @@ final class Recorder
     {
         $this->active = true;
         $this->captureCoverage = true;
+
+        if ($this->driverAvailable() && $this->driver === 'xdebug') {
+            \xdebug_set_filter(
+                XDEBUG_FILTER_CODE_COVERAGE,
+                XDEBUG_PATH_EXCLUDE,
+                SourceScope::noisePaths(TestSuite::getInstance()->rootPath),
+            );
+        }
     }
 
     public function activateLinkTracking(): void
