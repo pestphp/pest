@@ -100,6 +100,21 @@ final class SourceScope
         return array_values(array_unique($out));
     }
 
+    /**
+     * @return list<string> Absolute directory prefixes, each ending in a separator, that hold no project source.
+     */
+    public static function noisePaths(string $projectRoot): array
+    {
+        $out = [];
+
+        foreach ([...self::TOP_LEVEL_NOISE, ...self::NESTED_NOISE] as $relative) {
+            $abs = $projectRoot.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relative);
+            $out[] = self::normalise(@realpath($abs) ?: $abs).DIRECTORY_SEPARATOR;
+        }
+
+        return array_values(array_unique($out));
+    }
+
     public function contains(string $absoluteFile): bool
     {
         if (isset($this->containsCache[$absoluteFile])) {
