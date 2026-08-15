@@ -159,6 +159,8 @@ it('does not advance the snapshot counter between retries', function (): void {
         mkdir($directory, 0755, true);
     }
 
+    array_map(unlink(...), (array) glob($directory.'/*.snap'));
+
     file_put_contents($directory.'/it_compares_a_snapshot.snap', 'before');
 
     $process = new Process(
@@ -169,7 +171,7 @@ it('does not advance the snapshot counter between retries', function (): void {
 
     $process->run();
 
-    $snapshots = glob($directory.'/*.snap');
+    $snapshots = (array) glob($directory.'/*.snap');
 
     array_map(unlink(...), $snapshots);
     rmdir($directory);

@@ -342,7 +342,7 @@ trait Testable
                         throw $e;
                     }
 
-                    TestSuite::getInstance()->snapshots->resetExpectations();
+                    $snapshotKey = TestSuite::getInstance()->snapshots->currentKey();
 
                     $this->tearDown();
 
@@ -362,6 +362,8 @@ trait Testable
                             $this->expectedRegularExpression = null;
                         }, $outputBuffer, OutputBuffer::class)();
                     }
+
+                    TestSuite::getInstance()->snapshots->resetExpectations($snapshotKey);
 
                     $this->setUp();
                 }
