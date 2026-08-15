@@ -1215,6 +1215,7 @@
   ✓ it works with repeat and flaky @ repetition 2 of 2
   ✓ it works as higher order test
   ✓ it fails after exhausting all retries
+  ✓ it does not advance the snapshot counter between retries
   ✓ it throws when tries is less than 1
   ✓ it throws when tries is negative
   ↓ it does not retry todo tests
@@ -2226,4 +2227,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1573 passed (3414 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1574 passed (3418 assertions)

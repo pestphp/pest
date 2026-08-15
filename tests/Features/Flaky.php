@@ -152,6 +152,34 @@ it('fails after exhausting all retries', function (): void {
         ->toContain('Always fails');
 });
 
+it('does not advance the snapshot counter between retries', function (): void {
+    $directory = dirname(__DIR__).'/.pest/snapshots/Fixtures/Suites/FlakySnapshot';
+
+    if (! is_dir($directory)) {
+        mkdir($directory, 0755, true);
+    }
+
+    file_put_contents($directory.'/it_compares_a_snapshot.snap', 'before');
+
+    $process = new Process(
+        ['php', 'bin/pest', 'tests/Fixtures/Suites/FlakySnapshot.php'],
+        dirname(__DIR__, 2),
+        ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
+    );
+
+    $process->run();
+
+    $snapshots = glob($directory.'/*.snap');
+
+    array_map(unlink(...), $snapshots);
+    rmdir($directory);
+
+    expect($process->getExitCode())->not->toBe(0)
+        ->and($snapshots)->toHaveCount(1)
+        ->and(removeAnsiEscapeSequences($process->getOutput()))->toContain('FAILED')
+        ->toContain('it_compares_a_snapshot.snap');
+});
+
 it('throws when tries is less than 1', function (): void {
     it('invalid', function (): void {})->flaky(tries: 0);
 })->throws(InvalidArgumentException::class, 'The number of tries must be greater than 0.');

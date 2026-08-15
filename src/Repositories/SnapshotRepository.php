@@ -125,6 +125,11 @@ final class SnapshotRepository
         return self::$expectationsCounter[$this->getCurrentSnapshotKey()] ?? 0;
     }
 
+    public function resetExpectations(): void
+    {
+        unset(self::$expectationsCounter[$this->getCurrentSnapshotKey()]);
+    }
+
     public function startNewExpectation(): void
     {
         $key = $this->getCurrentSnapshotKey();

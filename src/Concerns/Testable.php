@@ -342,6 +342,8 @@ trait Testable
                         throw $e;
                     }
 
+                    TestSuite::getInstance()->snapshots->resetExpectations();
+
                     $this->tearDown();
 
                     Closure::bind(fn (): array => $this->mockObjects = [], $this, TestCase::class)();
