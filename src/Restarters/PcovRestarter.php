@@ -79,7 +79,7 @@ final class PcovRestarter implements Restarter
             [
                 PHP_BINARY,
                 '-d',
-                'memory_limit='.(string) ini_get('memory_limit'),
+                'memory_limit='.ini_get('memory_limit'),
                 '-d',
                 'pcov.directory='.$projectRoot,
             ],
