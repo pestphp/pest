@@ -52,13 +52,8 @@ final class PcovRestarter implements Restarter
         $env = $this->inheritEnv();
         $env[self::ENV_RESTARTED] = '1';
 
-        $command = array_merge(
-            [PHP_BINARY, '-d', 'pcov.directory='.$projectRoot],
-            array_values($arguments),
-        );
-
         $proc = @proc_open(
-            $command,
+            $this->command($projectRoot, $arguments),
             [STDIN, STDOUT, STDERR],
             $pipes,
             null,
@@ -72,6 +67,24 @@ final class PcovRestarter implements Restarter
         $exitCode = proc_close($proc);
 
         exit($exitCode === -1 ? 1 : $exitCode);
+    }
+
+    /**
+     * @param  array<int, string>  $arguments
+     * @return array<int, string>
+     */
+    private function command(string $projectRoot, array $arguments): array
+    {
+        return array_merge(
+            [
+                PHP_BINARY,
+                '-d',
+                'memory_limit='.(string) ini_get('memory_limit'),
+                '-d',
+                'pcov.directory='.$projectRoot,
+            ],
+            array_values($arguments),
+        );
     }
 
     /**
