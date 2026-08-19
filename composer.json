@@ -30,7 +30,7 @@
     },
     "conflict": {
         "filp/whoops": "<2.18.3",
-        "phpunit/phpunit": ">13.3.0",
+        "phpunit/phpunit": ">=13.4.0",
         "sebastian/exporter": "<7.0.0",
         "webmozart/assert": "<1.11.0"
     },
