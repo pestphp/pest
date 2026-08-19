@@ -2051,6 +2051,9 @@
   ✓ preset invalid name
   ✓ preset → myFramework
 
+   PASS  Tests\Unit\Restarters\PcovRestarter
+  ✓ it preserves the active memory limit in the restarted process
+
    PASS  Tests\Unit\Support\Arr
   ✓ last → it should return false for an empty arary
   ✓ last → it should return the last element for an array with a single element
@@ -2234,4 +2237,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1581 passed (3434 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1582 passed (3435 assertions)

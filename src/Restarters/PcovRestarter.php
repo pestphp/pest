@@ -71,7 +71,7 @@ final class PcovRestarter implements Restarter
 
     /**
      * @param  array<int, string>  $arguments
-     * @return array<int, string>
+     * @return list<string>
      */
     private function command(string $projectRoot, array $arguments): array
     {
