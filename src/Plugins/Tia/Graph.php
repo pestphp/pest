@@ -103,7 +103,7 @@ final class Graph
 
         $affectedSet = [];
 
-        $unparseableMigrations = $this->applyMigrationChanges($migrationPaths, $affectedSet);
+        $unmatchedMigrations = $this->applyMigrationChanges($migrationPaths, $affectedSet);
 
         [$globalFrontendRuntimeFiles, $preciselyHandledPages, $sharedFilesResolved]
             = $this->applyInertiaChanges($nonMigrationPaths, $affectedSet);
@@ -117,7 +117,7 @@ final class Graph
 
         $this->applyWatchPatternFallback(
             $nonMigrationPaths,
-            $unparseableMigrations,
+            $unmatchedMigrations,
             $preciselyHandledPages,
             $sharedFilesResolved,
             $handledBlade,
@@ -176,7 +176,7 @@ final class Graph
     /**
      * @param  list<string>  $migrationPaths
      * @param  array<string, true>  $affectedSet
-     * @return list<string> Unparseable migrations (caller treats as unknown-to-graph).
+     * @return list<string> Migrations that could not be matched by table (caller treats as unknown-to-graph).
      */
     private function applyMigrationChanges(array $migrationPaths, array &$affectedSet): array
     {
@@ -184,40 +184,40 @@ final class Graph
             return $migrationPaths;
         }
 
-        $changedTables = [];
-        $unparseable = [];
+        $unmatched = [];
 
         foreach ($migrationPaths as $rel) {
             $tables = $this->tablesForMigration($rel);
 
-            if ($tables === []) {
-                $unparseable[] = $rel;
-
-                continue;
+            if ($tables === [] || ! $this->selectTestsUsingTables($tables, $affectedSet)) {
+                $unmatched[] = $rel;
             }
+        }
 
+        return $unmatched;
+    }
+
+    /**
+     * @param  list<string>  $changedTables
+     * @param  array<string, true>  $affectedSet
+     */
+    private function selectTestsUsingTables(array $changedTables, array &$affectedSet): bool
+    {
+        $changed = array_fill_keys($changedTables, true);
+        $selected = false;
+
+        foreach ($this->testTables as $testFile => $tables) {
             foreach ($tables as $table) {
-                $changedTables[$table] = true;
-            }
-        }
+                if (isset($changed[$table])) {
+                    $affectedSet[$testFile] = true;
+                    $selected = true;
 
-        if ($changedTables !== []) {
-            foreach ($this->testTables as $testFile => $tables) {
-                if (isset($affectedSet[$testFile])) {
-                    continue;
-                }
-
-                foreach ($tables as $table) {
-                    if (isset($changedTables[$table])) {
-                        $affectedSet[$testFile] = true;
-
-                        break;
-                    }
+                    break;
                 }
             }
         }
 
-        return $unparseable;
+        return $selected;
     }
 
     /**
@@ -624,7 +624,7 @@ final class Graph
 
     /**
      * @param  list<string>  $nonMigrationPaths
-     * @param  list<string>  $unparseableMigrations
+     * @param  list<string>  $unmatchedMigrations
      * @param  array<string, true>  $preciselyHandledPages
      * @param  array<string, true>  $sharedFilesResolved
      * @param  array<string, true>  $handledBlade
@@ -632,13 +632,13 @@ final class Graph
      */
     private function applyWatchPatternFallback(
         array $nonMigrationPaths,
-        array $unparseableMigrations,
+        array $unmatchedMigrations,
         array $preciselyHandledPages,
         array $sharedFilesResolved,
         array $handledBlade,
         array &$affectedSet,
     ): void {
-        $unknownToGraph = $unparseableMigrations;
+        $unknownToGraph = $unmatchedMigrations;
 
         foreach ($nonMigrationPaths as $rel) {
             if (isset($preciselyHandledPages[$rel])) {
