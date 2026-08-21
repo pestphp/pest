@@ -29,6 +29,8 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
 
     private const int MAX_FILTER_LENGTH = 32768;
 
+    private const string CLASS_END = "\0";
+
     /**
      * @var array{
      *     index: int,
@@ -239,17 +241,35 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
                 }
                 $current = &$current[$part];
             }
+            $current[self::CLASS_END] = true;
         }
 
         $buildRegex = function (array $tree) use (&$buildRegex): string {
             $parts = [];
             foreach ($tree as $key => $sub) {
-                $subRegex = $buildRegex($sub);
-                if ($subRegex === '') {
-                    $parts[] = preg_quote($key, '/');
-                } else {
-                    $parts[] = preg_quote($key, '/').'\\\\'.(count($sub) > 1 ? '('.$subRegex.')' : $subRegex);
+                if ($key === self::CLASS_END) {
+                    continue;
                 }
+
+                assert(is_array($sub));
+
+                $endsWithClass = isset($sub[self::CLASS_END]);
+                $sub = array_diff_key($sub, [self::CLASS_END => null]);
+                $subRegex = $sub === [] ? '' : $buildRegex($sub);
+
+                $segment = preg_quote($key, '/');
+
+                if ($subRegex !== '') {
+                    $segment .= '\\\\'.(count($sub) > 1 ? '('.$subRegex.')' : $subRegex);
+                }
+
+                if ($endsWithClass && $subRegex !== '') {
+                    $parts[] = '(?:'.preg_quote($key, '/').'(?=::)|'.$segment.')';
+
+                    continue;
+                }
+
+                $parts[] = $endsWithClass ? $segment.'(?=::)' : $segment;
             }
 
             return implode('|', $parts);

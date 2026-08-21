@@ -60,7 +60,7 @@ describe('buildFilterArgument', function (): void {
 
         $filter = $method->invoke($shard, ['Tests\\Unit\\ExampleTest']);
 
-        expect($filter)->toBe('Tests\\\\Unit\\\\ExampleTest');
+        expect($filter)->toBe('Tests\\\\Unit\\\\ExampleTest(?=::)');
     });
 
     it('generates compact filter for multiple tests with common prefix', function (): void {
@@ -75,7 +75,7 @@ describe('buildFilterArgument', function (): void {
             'Tests\\Unit\\Foo\\BazTest',
         ]);
 
-        expect($filter)->toBe('Tests\\\\Unit\\\\Foo\\\\(BarTest|BazTest)');
+        expect($filter)->toBe('Tests\\\\Unit\\\\Foo\\\\(BarTest(?=::)|BazTest(?=::))');
     });
 
     it('generates compact filter for tests with different namespaces', function (): void {
@@ -90,7 +90,7 @@ describe('buildFilterArgument', function (): void {
             'Tests\\Feature\\BarTest',
         ]);
 
-        expect($filter)->toBe('Tests\\\\(Unit\\\\FooTest|Feature\\\\BarTest)');
+        expect($filter)->toBe('Tests\\\\(Unit\\\\FooTest(?=::)|Feature\\\\BarTest(?=::))');
     });
 
     it('returns empty string for empty test list', function (): void {
@@ -118,7 +118,7 @@ describe('buildFilterArgument', function (): void {
             'Tests\\Unit\\Plugins\\Concerns\\Baz',
         ]);
 
-        expect($filter)->toBe('Tests\\\\Unit\\\\Plugins\\\\Concerns\\\\(Foo|Bar|Baz)');
+        expect($filter)->toBe('Tests\\\\Unit\\\\Plugins\\\\Concerns\\\\(Foo(?=::)|Bar(?=::)|Baz(?=::))');
     });
 
     it('handles mix of nested and flat namespaces', function (): void {
@@ -138,7 +138,46 @@ describe('buildFilterArgument', function (): void {
         $filter = $method->invoke($shard, $tests);
 
         expect($filter)
-            ->toBe(addslashes('Tests\\Unit\\(SimpleTest|Plugins\\Concerns\\(HandleArguments|Validation)|Another\\Deep\\Nested\\Test)'));
+            ->toBe(addslashes('Tests\\Unit\\(SimpleTest(?=::)|Plugins\\Concerns\\(HandleArguments(?=::)|Validation(?=::))|Another\\Deep\\Nested\\Test(?=::))'));
+    });
+
+    it('does not match a class outside of the shard when another class name is its prefix', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('buildFilterArgument');
+
+        $filter = $method->invoke($shard, ['Tests\\Feature\\After']);
+
+        expect(preg_match('{'.$filter.'}i', 'P\Tests\Feature\AfterAll::deletes file after all'))->toBe(0)
+            ->and(preg_match('{'.$filter.'}i', 'P\Tests\Feature\After::it runs'))->toBe(1);
+    });
+
+    it('still matches dataset variants after the class boundary', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('buildFilterArgument');
+
+        $filter = $method->invoke($shard, ['Tests\\Feature\\After']);
+
+        expect(preg_match('{'.$filter.'}i', 'P\Tests\Feature\After::it runs with data set "foo"'))->toBe(1);
+    });
+
+    it('keeps a class matchable when another class nests below its namespace', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('buildFilterArgument');
+
+        $filter = $method->invoke($shard, ['Tests\\Unit\\After', 'Tests\\Unit\\After\\AfterAll']);
+
+        expect($filter)->toBe('Tests\\\\Unit\\\\(?:After(?=::)|After\\\\AfterAll(?=::))')
+            ->and(preg_match('{'.$filter.'}i', 'P\Tests\Unit\After::x'))->toBe(1)
+            ->and(preg_match('{'.$filter.'}i', 'P\Tests\Unit\After\AfterAll::y'))->toBe(1);
     });
 });
 
