@@ -58,7 +58,7 @@ it('routes --coverage-php to .pest/coverage/{n}.cov when --shard is used', funct
     $arguments = $plugin->handleArguments(['--coverage', '--shard=1/3']);
 
     $phpIdx = array_search('--coverage-php', $arguments, true);
-    expect($phpIdx)->toBeTrue();
+    expect($phpIdx)->not->toBeFalse();
 
     $covPath = $arguments[$phpIdx + 1];
     expect($covPath)->toEndWith('.pest'.DIRECTORY_SEPARATOR.'coverage'.DIRECTORY_SEPARATOR.'1.cov');
