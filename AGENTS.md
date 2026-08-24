@@ -12,7 +12,7 @@ This file is for a coding agent. No user reads it. Write an instruction that an 
 
 Start each rule with a verb in the imperative. Put the condition before the instruction. Give the exact path, the exact command and the exact name that the agent must use. If a rule needs a test, give the command that does the test.
 
-The public files are different. `README.md`, the website, the release notes and the `description` in each manifest are for a user. Section 3 controls them.
+The public files are different. `README.md`, the website, the release notes and the `description` in each manifest are for a user. Section 3 controls them. Section 5 controls each message that you give the user.
 
 ---
 
@@ -32,7 +32,7 @@ A fact that you learned during one task is not a rule. Use it in that task, then
 
 Write no sentence for a fact that an agent finds when it reads the code. The cost of that read does not change the answer: a fact that four files hold is in the code. Put the fact in the code first, because a test stops the agent that breaks it and a sentence here does not.
 
-Ask the user before you write a rule. Give the fault, then call the skill `learn` after the user agrees. Keep the number of the rules: delete a rule file in the same change, or ask the user to accept one more rule. A correction from the user is a rule and needs no question: write it in a file before you continue the work.
+Ask the user before you write a rule. Give the fault, and write the rule after the user agrees. Give the file the path `.hod/rules/<name>.md`. Give `<name>` two or three words with a hyphen between them, and name the subject of the rule. Give the file `name` and `description` in its front matter, and write one rule in one file. Run `hod update --project` after the write, thus this file names the rule in section 6. Keep the number of the rules: delete a rule file in the same change, or ask the user to accept one more rule. A correction from the user is a rule and needs no question: write it in a file before you continue the work.
 
 Give no new part of the program its own rule, because the code of that part holds its design. Delete text that follows the order of a file of source code: that text describes the file, and the file describes itself. Replace an old rule. Do not write a second rule near it. Delete a rule that the project does not obey. Do not keep a record of what the project stopped doing, in a file or in a directory. Git holds the history.
 
@@ -65,3 +65,11 @@ Write a reason that the code cannot hold in a file in `.hod/rules/`, with the pa
 When a library reads the text of a comment as data, such as the description of a command on a help screen, write that text in an attribute or a field of that library instead.
 
 A tool that writes a comment into a file that it owns keeps that comment. Do not delete it: the tool fails until it writes the comment again.
+
+---
+
+## 5. How to write a message to the user
+
+Write each message that you give the user in the English of section 2: one instruction in one sentence, the imperative, the active voice, one meaning for one word, and no contraction. A question, a report, a plan and an answer obey this rule.
+
+Give the result first. Give the exact path, the exact command and the exact name. Write no sentence that says the work again, and no adjective that gives the reader no new fact.
