@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 it('allows access to the underlying expectNotToPerformAssertions method', function (): void {
     $this->expectNotToPerformAssertions();
 
