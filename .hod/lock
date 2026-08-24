@@ -1,0 +1,10 @@
+1a51f3f6c4eef45e6995bb5ac9a82cf3f23ccad0c68cc4f957796bb9fc198f58  .agents/skills/deps-upgrade/SKILL.md
+984c7232ae1681ebba980ede2a0543db9a850dd2406990cdfa011384f929e981  .agents/skills/deps-upgrade/agents/openai.yaml
+cb04cd147c57791f740b37a9b486851858388867ba4b32b4af4454ca28ba0b5f  .agents/skills/learn/SKILL.md
+6a9515e9c8b30b33743ac5b1beb797d683ae7b1acaee50f4dd3d0a445da735c6  .agents/skills/learn/agents/openai.yaml
+1a51f3f6c4eef45e6995bb5ac9a82cf3f23ccad0c68cc4f957796bb9fc198f58  .claude/skills/deps-upgrade/SKILL.md
+984c7232ae1681ebba980ede2a0543db9a850dd2406990cdfa011384f929e981  .claude/skills/deps-upgrade/agents/openai.yaml
+cb04cd147c57791f740b37a9b486851858388867ba4b32b4af4454ca28ba0b5f  .claude/skills/learn/SKILL.md
+6a9515e9c8b30b33743ac5b1beb797d683ae7b1acaee50f4dd3d0a445da735c6  .claude/skills/learn/agents/openai.yaml
+c246ffcdee10cea23b94b1b1efa379beca374c672e8aefb54d52e8fc007f98cc  AGENTS.md
+336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49  CLAUDE.md

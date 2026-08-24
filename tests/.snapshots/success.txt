@@ -439,6 +439,7 @@
   ✓ interceptor can be filter the expected parameter as well
   ✓ interceptor works with negated expectation
   ✓ intercept can add new parameters to the expectation
+  ✓ named arguments reach the pipes of an expectation
 
    PASS  Tests\Features\Expect\ray
   ✓ ray calls do not fail when ray is not installed
@@ -1122,6 +1123,17 @@
   ✓ multiple snapshot expectations with repeat @ repetition 8 of 10
   ✓ multiple snapshot expectations with repeat @ repetition 9 of 10
   ✓ multiple snapshot expectations with repeat @ repetition 10 of 10
+  ✓ pass with named snapshot
+  ✓ named snapshots do not depend on the order they are asserted in
+  ✓ named snapshots do not consume the ordinal of the unnamed ones
+  ✓ named snapshots require a name
+  ✓ ordinal snapshots start over once forgotten
+  ✓ ordinal snapshots start over on every repetition @ repetition 1 of 3
+  ✓ ordinal snapshots start over on every repetition @ repetition 2 of 3
+  ✓ ordinal snapshots start over on every repetition @ repetition 3 of 3
+  ✓ snapshots of a repeated test are recorded per repetition @ repetition 1 of 3
+  ✓ snapshots of a repeated test are recorded per repetition @ repetition 2 of 3
+  ✓ snapshots of a repeated test are recorded per repetition @ repetition 3 of 3
 
    PASS  Tests\Features\Expect\toStartWith
   ✓ pass
@@ -1224,6 +1236,8 @@
   ✓ it does not retry fails()
   ✓ it retries unexpected exceptions even with throws set
   ✓ it does not leak mock objects between retries
+  ✓ it resolves the same snapshot ordinals on every retry
+  ✓ it matches the same snapshot on every retry
   ✓ it does not stop retrying when snapshot changes are absent
   ✓ it does not leak dynamic properties between retries
   ! it clears output buffer between retries when expectOutputString is used → Creation of dynamic property PHPUnit\Framework\TestCase\OutputBuffer::$expectedString is deprecated
@@ -2237,4 +2251,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1582 passed (3435 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1596 passed (3481 assertions)

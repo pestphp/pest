@@ -344,6 +344,8 @@ trait Testable
 
                     $this->tearDown();
 
+                    TestSuite::getInstance()->snapshots->forget();
+
                     Closure::bind(fn (): array => $this->mockObjects = [], $this, TestCase::class)();
 
                     foreach (array_keys(array_diff_key(get_object_vars($this), $initialProperties)) as $property) {
