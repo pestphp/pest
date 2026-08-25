@@ -344,6 +344,8 @@ trait Testable
 
                     $this->tearDown();
 
+                    TestSuite::getInstance()->snapshots->forget();
+
                     Closure::bind(fn (): array => $this->mockObjects = [], $this, TestCase::class)();
 
                     foreach (array_keys(array_diff_key(get_object_vars($this), $initialProperties)) as $property) {
@@ -408,15 +410,24 @@ trait Testable
     private function __resolveTestArguments(array $arguments): array
     {
         $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
-
-        if ($method->repetitions > 1) {
-            $firstArgument = array_shift($arguments);
-            $arguments[] = $firstArgument;
-        }
-
         $underlyingTest = Reflection::getFunctionVariable($this->__test, 'closure');
         $testParameterTypesByName = Reflection::getFunctionArguments($underlyingTest);
         $testParameterTypes = array_values($testParameterTypesByName);
+
+        if ($method->repetitions > 1) {
+            $firstArgument = array_shift($arguments);
+
+            if (array_is_list($arguments)) {
+                $arguments[] = $firstArgument;
+            } else {
+                $testParameterNames = array_keys($testParameterTypesByName);
+                $iterationParameterName = $testParameterNames[count($arguments)] ?? null;
+
+                if ($iterationParameterName !== null) {
+                    $arguments[$iterationParameterName] = $firstArgument;
+                }
+            }
+        }
 
         if (count($arguments) !== 1) {
             foreach ($arguments as $argumentIndex => $argumentValue) {

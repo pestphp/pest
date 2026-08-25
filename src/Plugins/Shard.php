@@ -132,7 +132,13 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
 
         $this->ensureFilterLengthIsSafe($filter);
 
-        return [...$arguments, '--filter', $filter];
+        $arguments = [...$arguments, '--filter', $filter];
+
+        if ($this->hasArgument('--do-not-fail-on-empty-test-suite', $arguments) || $this->hasArgument('--fail-on-empty-test-suite', $arguments)) {
+            return $arguments;
+        }
+
+        return $this->pushArgument('--do-not-fail-on-empty-test-suite', $arguments);
     }
 
     /**
