@@ -2061,6 +2061,10 @@
   ✓ it accepts a page directory candidate only when it matches the casing on disk with ('wrong parent')
   ✓ it accepts a page directory candidate only when it matches the casing on disk with ('absent')
 
+   PASS  Tests\Unit\Plugins\Tia\WorkerToken
+  ✓ prefers the per-process UNIQUE_TEST_TOKEN over the per-slot TEST_TOKEN, so two workers recycled into the same slot get different tokens
+  ✓ falls back to TEST_TOKEN when UNIQUE_TEST_TOKEN is absent
+
    PASS  Tests\Unit\Preset
   ✓ preset invalid name
   ✓ preset → myFramework
@@ -2251,4 +2255,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1596 passed (3481 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1598 passed (3485 assertions)
