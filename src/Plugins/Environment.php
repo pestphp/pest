@@ -11,19 +11,10 @@ use Pest\Contracts\Plugins\HandlesArguments;
  */
 final class Environment implements HandlesArguments
 {
-    /**
-     * The continuous integration environment.
-     */
     public const string CI = 'ci';
 
-    /**
-     * The local environment.
-     */
     public const string LOCAL = 'local';
 
-    /**
-     * The current environment.
-     */
     private static ?string $name = null;
 
     /**
@@ -42,9 +33,6 @@ final class Environment implements HandlesArguments
         return array_values($arguments);
     }
 
-    /**
-     * Gets the environment name.
-     */
     public static function name(?string $name = null): string
     {
         if (is_string($name)) {

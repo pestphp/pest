@@ -12,9 +12,6 @@ use PHPUnit\Event\TestSuite\FinishedSubscriber;
  */
 final class EnsureShardTimingFinished implements FinishedSubscriber
 {
-    /**
-     * Runs the subscriber.
-     */
     public function notify(Finished $event): void
     {
         EnsureShardTimingsAreCollected::finished($event);

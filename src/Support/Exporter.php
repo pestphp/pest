@@ -12,23 +12,14 @@ use SebastianBergmann\RecursionContext\Context;
  */
 final readonly class Exporter
 {
-    /**
-     * The maximum number of items in an array to export.
-     */
     private const int MAX_ARRAY_ITEMS = 3;
 
-    /**
-     * Creates a new Exporter instance.
-     */
     public function __construct(
         private BaseExporter $exporter,
     ) {
-        // ...
+        //
     }
 
-    /**
-     * Creates a new Exporter instance.
-     */
     public static function default(): self
     {
         return new self(
@@ -37,8 +28,6 @@ final readonly class Exporter
     }
 
     /**
-     * Exports a value into a single-line string recursively.
-     *
      * @param  array<int|string, mixed>  $data
      */
     public function shortenedRecursiveExport(array &$data, ?Context $context = null): string
@@ -73,9 +62,6 @@ final readonly class Exporter
         return implode(', ', $result);
     }
 
-    /**
-     * Exports a value into a single-line string.
-     */
     public function shortenedExport(mixed $value): string
     {
         $map = [
@@ -87,9 +73,6 @@ final readonly class Exporter
         return (string) preg_replace(array_keys($map), array_values($map), $this->exporter->shortenedExport($value));
     }
 
-    /**
-     * Exports a value into a full single-line string without truncation.
-     */
     public function export(mixed $value): string
     {
         $map = [

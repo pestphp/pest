@@ -18,19 +18,20 @@
     ],
     "require": {
         "php": "^8.4",
-        "brianium/paratest": "^7.23.0",
+        "brianium/paratest": "^7.24.1",
         "nunomaduro/collision": "^8.9.5",
         "nunomaduro/termwind": "^2.4.0",
         "pestphp/pest-plugin": "^5.0.0",
         "pestphp/pest-plugin-arch": "^5.0.0",
-        "pestphp/pest-plugin-mutate": "^5.0.0",
+        "pestphp/pest-plugin-mutate": "^5.0.2",
         "pestphp/pest-plugin-profanity": "^5.0.0",
-        "phpunit/phpunit": "^13.2.4",
-        "symfony/process": "^8.1.0"
+        "phpunit/phpunit": "^13.3.1",
+        "symfony/process": "^8.1.5"
     },
     "conflict": {
         "filp/whoops": "<2.18.3",
-        "phpunit/phpunit": ">13.2.4",
+        "laravel/boost": "<2.6.0",
+        "phpunit/phpunit": ">13.3.1",
         "sebastian/exporter": "<7.0.0",
         "webmozart/assert": "<1.11.0"
     },
@@ -48,6 +49,7 @@
             "Tests\\Fixtures\\Covers\\": "tests/Fixtures/Covers",
             "Tests\\Fixtures\\Inheritance\\": "tests/Fixtures/Inheritance",
             "Tests\\Fixtures\\Arch\\": "tests/Fixtures/Arch",
+            "Tests\\Fixtures\\Tia\\": "tests/Fixtures/Tia",
             "Tests\\": "tests/PHPUnit/"
         },
         "classmap": [
@@ -58,12 +60,11 @@
         ]
     },
     "require-dev": {
-        "laravel/pao": "^1.1.2",
         "pestphp/pest-dev-tools": "^5.0.0",
-        "pestphp/pest-plugin-browser": "^5.0.0",
-        "pestphp/pest-plugin-phpstan": "^5.0.0",
-        "pestphp/pest-plugin-rector": "^5.0.0",
-        "pestphp/pest-plugin-type-coverage": "^5.0.0",
+        "pestphp/pest-plugin-browser": "^5.0.1",
+        "pestphp/pest-plugin-phpstan": "^5.2.0",
+        "pestphp/pest-plugin-rector": "^5.0.4",
+        "pestphp/pest-plugin-type-coverage": "^5.0.2",
         "psy/psysh": "^0.12.24"
     },
     "minimum-stability": "dev",
@@ -71,6 +72,7 @@
     "config": {
         "sort-packages": true,
         "preferred-install": "dist",
+        "process-timeout": 0,
         "allow-plugins": {
             "pestphp/pest-plugin": true
         }
@@ -94,7 +96,8 @@
         "test:inline": "php bin/pest --configuration=phpunit.inline.xml",
         "test:parallel": "php bin/pest --exclude-group=integration --parallel --processes=3",
         "test:integration": "php bin/pest --group=integration -v",
-        "update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --update-snapshots",
+        "test:tia": "php bin/pest --group=tia -v",
+        "update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --update-snapshots --exclude-group=tia",
         "test": [
             "@test:lint",
             "@test:type:check",

@@ -12,9 +12,6 @@ use PHPUnit\Event\TestSuite\StartedSubscriber;
  */
 final class EnsureShardTimingStarted implements StartedSubscriber
 {
-    /**
-     * Runs the subscriber.
-     */
     public function notify(Started $event): void
     {
         EnsureShardTimingsAreCollected::started($event);

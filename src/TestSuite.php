@@ -19,54 +19,24 @@ use PHPUnit\Framework\TestCase;
  */
 final class TestSuite
 {
-    /**
-     * Holds the current test case.
-     */
     public ?TestCase $test = null;
 
-    /**
-     * Holds the tests repository.
-     */
     public TestRepository $tests;
 
-    /**
-     * Holds the before each repository.
-     */
     public BeforeEachRepository $beforeEach;
 
-    /**
-     * Holds the before all repository.
-     */
     public BeforeAllRepository $beforeAll;
 
-    /**
-     * Holds the after each repository.
-     */
     public AfterEachRepository $afterEach;
 
-    /**
-     * Holds the after all repository.
-     */
     public AfterAllRepository $afterAll;
 
-    /**
-     * Holds the snapshots repository.
-     */
     public SnapshotRepository $snapshots;
 
-    /**
-     * Holds the root path.
-     */
     public string $rootPath;
 
-    /**
-     * Holds an instance of the test suite.
-     */
     private static ?TestSuite $instance = null;
 
-    /**
-     * Creates a new instance of the test suite.
-     */
     public function __construct(
         string $rootPath,
         public string $testPath,
@@ -84,9 +54,6 @@ final class TestSuite
         );
     }
 
-    /**
-     * Returns the current instance of the test suite.
-     */
     public static function getInstance(
         ?string $rootPath = null,
         ?string $testPath = null,

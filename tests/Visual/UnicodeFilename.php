@@ -8,7 +8,7 @@ test('filter works with unicode characters in filename', function (): void {
     $process = new Process([
         'php',
         'bin/pest',
-        'tests/.tests/StraßenTest.php',
+        'tests/Fixtures/Suites/StraßenTest.php',
         '--colors=never',
     ], dirname(__DIR__, 2), ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1']);
 
@@ -26,7 +26,7 @@ test('filter with unicode regex matches unicode filename', function (): void {
         'php',
         'bin/pest',
         '--filter=.*Straß.*',
-        'tests/.tests/',
+        'tests/Fixtures/Suites/',
         '--colors=never',
     ], dirname(__DIR__, 2), ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1']);
 

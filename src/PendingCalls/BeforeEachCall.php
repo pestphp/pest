@@ -23,24 +23,12 @@ final class BeforeEachCall
 {
     use Describable;
 
-    /**
-     * Holds the before each closure.
-     */
     private readonly Closure $closure;
 
-    /**
-     * The test call proxies.
-     */
     private readonly HigherOrderMessageCollection $testCallProxies;
 
-    /**
-     * The test case proxies.
-     */
     private readonly HigherOrderMessageCollection $testCaseProxies;
 
-    /**
-     * Creates a new Pending Call.
-     */
     public function __construct(
         public readonly TestSuite $testSuite,
         private readonly string $filename,
@@ -54,9 +42,6 @@ final class BeforeEachCall
         $this->describing = DescribeCall::describing();
     }
 
-    /**
-     * Creates the Call.
-     */
     public function __destruct()
     {
         $describing = $this->describing;
@@ -92,9 +77,6 @@ final class BeforeEachCall
         );
     }
 
-    /**
-     * Runs the given closure after the test.
-     */
     public function after(Closure $closure): self
     {
         if ($this->describing === []) {
@@ -105,8 +87,6 @@ final class BeforeEachCall
     }
 
     /**
-     * Saves the calls to be used on the target.
-     *
      * @param  array<int, mixed>  $arguments
      */
     public function __call(string $name, array $arguments): self

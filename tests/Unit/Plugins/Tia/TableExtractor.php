@@ -47,6 +47,11 @@ describe('fromSql()', function (): void {
             ->and(TableExtractor::fromSql('select * from information_schema.tables'))->toBeEmpty();
     });
 
+    it('does not leak int keys for numeric identifiers', function (): void {
+        expect(TableExtractor::fromSql('select substring(name from 1 for 3) from users'))
+            ->each->toBeString();
+    });
+
     it('returns nothing for non-DML statements', function (): void {
         expect(TableExtractor::fromSql('PRAGMA foreign_keys = ON'))->toBeEmpty()
             ->and(TableExtractor::fromSql(''))->toBeEmpty()
@@ -87,6 +92,11 @@ describe('fromMigrationSource()', function (): void {
 
         expect(TableExtractor::fromMigrationSource($php))
             ->toBe(['audits', 'events', 'sessions', 'settings', 'users']);
+    });
+
+    it('does not leak int keys for numeric table names', function (): void {
+        expect(TableExtractor::fromMigrationSource("DB::table('123')->insert([]);"))
+            ->toBe(['123']);
     });
 
     it('extracts tables from DB::table calls', function (): void {

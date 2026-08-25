@@ -13,14 +13,12 @@ use Pest\Exceptions\ShouldNotHappen;
 final class BootOverrides implements Bootstrapper
 {
     /**
-     * The list of files to be overridden.
-     *
      * @var array<int, string>
      */
     public const array FILES = [
         'ParaTest/WrapperRunner/ProgressPrinterOutput.php',
         'Runner/Filter/NameFilterIterator.php',
-        'Runner/ResultCache/DefaultResultCache.php',
+        'Runner/TestRunHistory/DefaultTestRunHistory.php',
         'Runner/TestSuiteLoader.php',
         'Runner/TestSuiteSorter.php',
         'TextUI/Command/Commands/WarmCodeCoverageCacheCommand.php',
@@ -30,9 +28,6 @@ final class BootOverrides implements Bootstrapper
         'Logging/JUnit/JunitXmlLogger.php',
     ];
 
-    /**
-     * Boots the list of files to be overridden.
-     */
     public function boot(): void
     {
         foreach (self::FILES as $file) {

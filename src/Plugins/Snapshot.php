@@ -14,10 +14,37 @@ final class Snapshot implements HandlesArguments
 {
     use Concerns\HandleArguments;
 
-    /**
-     * Whether snapshots should be updated on this run.
-     */
     public static bool $updateSnapshots = false;
+
+    /**
+     * @var list<string>
+     */
+    private const array CI_ENVIRONMENT_VARIABLES = [
+        'CI',
+        'GITHUB_ACTIONS',
+        'GITLAB_CI',
+        'CIRCLECI',
+        'TRAVIS',
+        'APPVEYOR',
+        'BITBUCKET_BUILD_NUMBER',
+        'BUILDKITE',
+        'TEAMCITY_VERSION',
+        'JENKINS_URL',
+        'SYSTEM_COLLECTIONURI',
+        'CI_NAME',
+        'TASKCLUSTER_ROOT_URL',
+        'DRONE',
+        'WERCKER',
+        'NEVERCODE',
+        'SEMAPHORE',
+        'NETLIFY',
+        'NOW_BUILDER',
+    ];
+
+    public static function shouldCreateMissingSnapshots(): bool
+    {
+        return self::$updateSnapshots || ! self::runningOnCI();
+    }
 
     /**
      * {@inheritDoc}
@@ -48,8 +75,6 @@ final class Snapshot implements HandlesArguments
     }
 
     /**
-     * Options that take a value as the next argument (rather than via "=value").
-     *
      * @var list<string>
      */
     private const array FLAGS_WITH_VALUES = [
@@ -89,8 +114,6 @@ final class Snapshot implements HandlesArguments
     ];
 
     /**
-     * Determines whether the command targets the entire suite (no filter, no path).
-     *
      * @param  array<int, string>  $arguments
      */
     private function isFullRun(array $arguments): bool
@@ -125,5 +148,14 @@ final class Snapshot implements HandlesArguments
         }
 
         return true;
+    }
+
+    private static function runningOnCI(): bool
+    {
+        if (Environment::name() === Environment::CI) {
+            return true;
+        }
+
+        return array_any(self::CI_ENVIRONMENT_VARIABLES, fn (string $environmentVariable): bool => getenv($environmentVariable) !== false);
     }
 }

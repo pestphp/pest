@@ -6,8 +6,8 @@ use Pest\Exceptions\InvalidExpectationValue;
 use PHPUnit\Framework\ExpectationFailedException;
 
 test('pass', function (): void {
-    expect('00:1a:2b:3c:4d:5e')->toBeMacAddress() // colon-separated
-        ->and('00-1a-2b-3c-4d-5e')->toBeMacAddress() // hyphen-separated
+    expect('00:1a:2b:3c:4d:5e')->toBeMacAddress()
+        ->and('00-1a-2b-3c-4d-5e')->toBeMacAddress()
         ->and('ff:ff:ff:ff:ff:ff')->toBeMacAddress();
 });
 
@@ -17,7 +17,7 @@ test('failures', function (): void {
 
 test('failures with invalid type', function (): void {
     expect([])->toBeMacAddress();
-})->throws(InvalidExpectationValue::class, 'Invalid expectation value type. Expected [string].');
+})->throws(InvalidExpectationValue::class, 'This expectation may only be used on a value of type [string].');
 
 test('failures with custom message', function (): void {
     expect('not-a-mac')->toBeMacAddress('oh no!');

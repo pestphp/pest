@@ -25,19 +25,11 @@ final class HigherOrderExpectation
      */
     private Expectation|EachExpectation $expectation;
 
-    /**
-     * Indicates if the expectation is the opposite.
-     */
     private bool $opposite = false;
 
-    /**
-     * Indicates if the expectation should reset the value.
-     */
     private bool $shouldReset = false;
 
     /**
-     * Creates a new higher order expectation.
-     *
      * @param  Expectation<TOriginalValue>  $original
      * @param  TValue  $value
      */
@@ -47,8 +39,6 @@ final class HigherOrderExpectation
     }
 
     /**
-     * Creates the opposite expectation for the value.
-     *
      * @return self<TOriginalValue, TValue>
      */
     public function not(): self
@@ -59,8 +49,6 @@ final class HigherOrderExpectation
     }
 
     /**
-     * Creates a new Expectation.
-     *
      * @template TExpectValue
      *
      * @param  TExpectValue  $value
@@ -72,8 +60,6 @@ final class HigherOrderExpectation
     }
 
     /**
-     * Creates a new expectation.
-     *
      * @template TExpectValue
      *
      * @param  TExpectValue  $value
@@ -85,9 +71,6 @@ final class HigherOrderExpectation
     }
 
     /**
-     * Scope an expectation callback to the current value in
-     * the HigherOrderExpectation chain.
-     *
      * @param  Closure(Expectation<TValue>): void  $expectation
      * @return HigherOrderExpectation<TOriginalValue, TOriginalValue>
      */
@@ -99,8 +82,6 @@ final class HigherOrderExpectation
     }
 
     /**
-     * Creates a new expectation with the decoded JSON value.
-     *
      * @return self<TOriginalValue, array<string|int, mixed>|bool>
      */
     public function json(): self
@@ -109,8 +90,6 @@ final class HigherOrderExpectation
     }
 
     /**
-     * Dynamically calls methods on the class with the given arguments.
-     *
      * @param  array<int, mixed>  $arguments
      * @return self<TOriginalValue, mixed>
      */
@@ -125,8 +104,6 @@ final class HigherOrderExpectation
     }
 
     /**
-     * Accesses properties in the value or in the expectation.
-     *
      * @return self<TOriginalValue, mixed>
      */
     public function __get(string $name): self
@@ -145,9 +122,6 @@ final class HigherOrderExpectation
         return $this->performAssertion($name, []);
     }
 
-    /**
-     * Determines if the original expectation has the given method name.
-     */
     private function expectationHasMethod(string $name): bool
     {
         if (method_exists($this->original, $name)) {
@@ -161,8 +135,6 @@ final class HigherOrderExpectation
     }
 
     /**
-     * Retrieve the applicable value based on the current reset condition.
-     *
      * @return TOriginalValue|TValue
      */
     private function getValue(): mixed
@@ -171,8 +143,6 @@ final class HigherOrderExpectation
     }
 
     /**
-     * Performs the given assertion with the current expectation.
-     *
      * @param  array<int, mixed>  $arguments
      * @return self<TOriginalValue, TValue>
      */

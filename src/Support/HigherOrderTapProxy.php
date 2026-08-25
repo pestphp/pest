@@ -12,26 +12,17 @@ use ReflectionClass;
  */
 final class HigherOrderTapProxy
 {
-    /**
-     * Create a new tap proxy instance.
-     */
     public function __construct(
         public TestCase $target
     ) {
-        // ..
+        //
     }
 
-    /**
-     * Dynamically sets properties on the target.
-     */
     public function __set(string $property, mixed $value): void
     {
         $this->target->{$property} = $value;
     }
 
-    /**
-     * Dynamically pass properties gets to the target.
-     */
     public function __get(string $property): mixed
     {
         if (property_exists($this->target, $property)) {
@@ -50,8 +41,6 @@ final class HigherOrderTapProxy
     }
 
     /**
-     * Dynamically pass method calls to the target.
-     *
      * @param  array<int, mixed>  $arguments
      * @return mixed
      */

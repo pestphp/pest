@@ -439,6 +439,7 @@
   ✓ interceptor can be filter the expected parameter as well
   ✓ interceptor works with negated expectation
   ✓ intercept can add new parameters to the expectation
+  ✓ named arguments reach the pipes of an expectation
 
    PASS  Tests\Features\Expect\ray
   ✓ ray calls do not fail when ray is not installed
@@ -1122,6 +1123,17 @@
   ✓ multiple snapshot expectations with repeat @ repetition 8 of 10
   ✓ multiple snapshot expectations with repeat @ repetition 9 of 10
   ✓ multiple snapshot expectations with repeat @ repetition 10 of 10
+  ✓ pass with named snapshot
+  ✓ named snapshots do not depend on the order they are asserted in
+  ✓ named snapshots do not consume the ordinal of the unnamed ones
+  ✓ named snapshots require a name
+  ✓ ordinal snapshots start over once forgotten
+  ✓ ordinal snapshots start over on every repetition @ repetition 1 of 3
+  ✓ ordinal snapshots start over on every repetition @ repetition 2 of 3
+  ✓ ordinal snapshots start over on every repetition @ repetition 3 of 3
+  ✓ snapshots of a repeated test are recorded per repetition @ repetition 1 of 3
+  ✓ snapshots of a repeated test are recorded per repetition @ repetition 2 of 3
+  ✓ snapshots of a repeated test are recorded per repetition @ repetition 3 of 3
 
    PASS  Tests\Features\Expect\toStartWith
   ✓ pass
@@ -1224,9 +1236,11 @@
   ✓ it does not retry fails()
   ✓ it retries unexpected exceptions even with throws set
   ✓ it does not leak mock objects between retries
+  ✓ it resolves the same snapshot ordinals on every retry
+  ✓ it matches the same snapshot on every retry
   ✓ it does not stop retrying when snapshot changes are absent
   ✓ it does not leak dynamic properties between retries
-  ✓ it clears output buffer between retries when expectOutputString is used
+  ! it clears output buffer between retries when expectOutputString is used → Creation of dynamic property PHPUnit\Framework\TestCase\OutputBuffer::$expectedString is deprecated
   ✓ it preserves output between retries when no output expectation is set
 
    WARN  Tests\Features\Helpers
@@ -1455,6 +1469,14 @@
   ✓ multiple times with repeat iterator with multiple dataset ('c') / ('d') @ repetition 2 of 2
   ✓ multiple times with repeat iterator with multiple dataset ('c') / ('e') @ repetition 2 of 2
   ✓ multiple times with repeat iterator with multiple dataset ('c') / ('f') @ repetition 2 of 2
+  ✓ multiple times with named dataset arguments ('Taylor', 'taylor@laravel.com') @ repetition 1 of 2
+  ✓ multiple times with named dataset arguments ('Nuno', 'enunomaduro@gmail.com') @ repetition 1 of 2
+  ✓ multiple times with named dataset arguments ('Taylor', 'taylor@laravel.com') @ repetition 2 of 2
+  ✓ multiple times with named dataset arguments ('Nuno', 'enunomaduro@gmail.com') @ repetition 2 of 2
+  ✓ multiple times with named dataset arguments and repeat iterator ('Taylor', 'taylor@laravel.com') @ repetition 1 of 2
+  ✓ multiple times with named dataset arguments and repeat iterator ('Nuno', 'enunomaduro@gmail.com') @ repetition 1 of 2
+  ✓ multiple times with named dataset arguments and repeat iterator ('Taylor', 'taylor@laravel.com') @ repetition 2 of 2
+  ✓ multiple times with named dataset arguments and repeat iterator ('Nuno', 'enunomaduro@gmail.com') @ repetition 2 of 2
   ✓ describe blocks → multiple times @ repetition 1 of 3
   ✓ describe blocks → multiple times @ repetition 2 of 3
   ✓ describe blocks → multiple times @ repetition 3 of 3
@@ -1564,6 +1586,9 @@
   ✓ it allows access to the underlying expectNotToPerformAssertions method
   ✓ it allows performing no expectations without being risky
   ✓ a "describe" group of tests → it allows performing no expectations without being risky
+
+   PASS  Tests\Features\Tia
+  ✓ it does not run user hooks when replaying cached skipped and incomplete results
 
    PASS  Tests\Features\Ticket
   ✓ it may be associated with an ticket #1, #2
@@ -1761,6 +1786,7 @@
   ✓ it shows the correct description for long texts with newlines
   ✓ it shows the correct description for arrays with many elements
   ✓ it shows the correct description of datasets with html
+  ✓ it does not treat a two element dataset of class names as a callable
 
    PASS  Tests\Unit\Expectations\OppositeExpectation
   ✓ it throw expectation failed exception with string argument
@@ -1883,6 +1909,18 @@
   ✓ rerun tracking → it flags cached failures whose file is unknown
   ✓ applyBladeStaticChanges() → it maps an anonymous index component to the views that render it
   ✓ applyBladeStaticChanges() → it falls back to watch patterns for components with no matched usage
+  ✓ Livewire component views → it maps a changed component to generated views from different workers
+  ✓ Livewire component views → it maps documented SFC locations with dataset "default pages namespace"
+  ✓ Livewire component views → it maps documented SFC locations with dataset "default layouts namespace without emoji"
+  ✓ Livewire component views → it maps documented SFC locations with dataset "additional component location"
+  ✓ Livewire component views → it maps documented MFC locations using the component directory hash with dataset "default component location"
+  ✓ Livewire component views → it maps documented MFC locations using the component directory hash with dataset "default component location without emoji"
+  ✓ Livewire component views → it maps documented MFC locations using the component directory hash with dataset "index convention"
+  ✓ Livewire component views → it maps a changed MFC sibling through the component directory hash with dataset "class sibling via the generated class"
+  ✓ Livewire component views → it maps a changed MFC sibling through the component directory hash with dataset "class sibling via the generated view"
+  ✓ Livewire component views → it maps a changed MFC sibling through the component directory hash with dataset "asset sibling via the generated view"
+  ✓ Livewire component views → it preserves direct view edges for class-based components
+  ✓ Livewire component views → it falls back to watch patterns when no generated view matches
   ✓ markKnownTestFiles() → it makes a test file with no edges known
   ✓ markKnownTestFiles() → it does not clobber edges of an already-known test file
   ✓ markKnownTestFiles() → it ignores paths outside the project root
@@ -1890,6 +1928,14 @@
    PASS  Tests\Unit\Plugins\Tia\IsEnabledForRun
   ✓ does not throw when an integer --random-order-seed is passed as a separate argv element
   ✓ still detects --tia when an integer argument is present
+
+   PASS  Tests\Unit\Plugins\Tia\JsModuleGraph
+  ✓ it accepts a page directory candidate only when every segment matches the casing on disk with dataset "exact"
+  ✓ it accepts a page directory candidate only when every segment matches the casing on disk with dataset "wrong leaf"
+  ✓ it accepts a page directory candidate only when every segment matches the casing on disk with dataset "wrong parent"
+  ✓ it accepts a page directory candidate only when every segment matches the casing on disk with dataset "absent"
+  ✓ it resolves the pages directory with the casing it has on disk
+  ✓ it fingerprints a project whose js tree holds a directory it cannot open
 
    PASS  Tests\Unit\Plugins\Tia\Lockfiles\PackageLock
   ✓ it applies only to package-lock.json
@@ -1908,6 +1954,15 @@
   ✓ activateLinkTracking() → it tracks linked sources across consecutive tests
   ✓ activateLinkTracking() → it records nothing while inactive
 
+   PASS  Tests\Unit\Plugins\Tia\ResultKey
+  ✓ it keys a result per dataset row rather than per method
+  ✓ it records assertions against the same per-dataset key
+  ✓ it leaves a test without a dataset keyed by class and method
+
+   PASS  Tests\Unit\Plugins\Tia\Storage
+  ✓ it uses a project-relative configured directory
+  ✓ it uses an absolute configured directory
+
    PASS  Tests\Unit\Plugins\Tia\TableExtractor
   ✓ fromSql() → it extracts tables from plain DML
   ✓ fromSql() → it extracts tables from joins
@@ -1916,10 +1971,12 @@
   ✓ fromSql() → it records the table, not the schema, for qualified identifiers
   ✓ fromSql() → it handles quoted identifiers
   ✓ fromSql() → it ignores schema metadata tables
+  ✓ fromSql() → it does not leak int keys for numeric identifiers
   ✓ fromSql() → it returns nothing for non-DML statements
   ✓ fromMigrationSource() → it extracts tables from Schema builder calls
   ✓ fromMigrationSource() → it extracts tables from raw DDL statements
   ✓ fromMigrationSource() → it records the table, not the schema, in qualified DDL and DML
+  ✓ fromMigrationSource() → it does not leak int keys for numeric table names
   ✓ fromMigrationSource() → it extracts tables from DB::table calls
 
    PASS  Tests\Unit\Plugins\Tia\TestPaths
@@ -1999,10 +2056,17 @@
   ✓ it builds the expected alias map from a vite config with ('laravel-plugin-default')
   ✓ it builds the expected alias map from a vite config with ('no-alias-no-plugin')
   ✓ it builds the expected alias map from a vite config with ('no-config')
+  ✓ it accepts a page directory candidate only when it matches the casing on disk with ('exact')
+  ✓ it accepts a page directory candidate only when it matches the casing on disk with ('wrong leaf')
+  ✓ it accepts a page directory candidate only when it matches the casing on disk with ('wrong parent')
+  ✓ it accepts a page directory candidate only when it matches the casing on disk with ('absent')
 
    PASS  Tests\Unit\Preset
   ✓ preset invalid name
   ✓ preset → myFramework
+
+   PASS  Tests\Unit\Restarters\PcovRestarter
+  ✓ it preserves the active memory limit in the restarted process
 
    PASS  Tests\Unit\Support\Arr
   ✓ last → it should return false for an empty arary
@@ -2153,6 +2217,7 @@
   ✓ a parallel test can extend another test with same name
   ✓ parallel reports invalid datasets as failures
   ✓ parallel can have multiple exclude-groups
+  ✓ parallel can have multiple groups
 
    PASS  Tests\Visual\ParallelNestedDatasets
   ✓ parallel loads nested datasets from nested directories
@@ -2186,4 +2251,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    1 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1542 passed (3375 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1596 passed (3481 assertions)

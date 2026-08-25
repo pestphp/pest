@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Repositories;
 
+use InvalidArgumentException;
 use Pest\Exceptions\ShouldNotHappen;
 use Pest\TestSuite;
 
@@ -12,67 +13,51 @@ use Pest\TestSuite;
  */
 final class SnapshotRepository
 {
-    /** @var array<string, int> */
-    private static array $expectationsCounter = [];
+    private static ?string $key = null;
 
-    /**
-     * Creates a snapshot repository instance.
-     */
+    private static int $ordinal = 0;
+
     public function __construct(
         private readonly string $rootPath,
         private readonly string $testsPath,
         private readonly string $snapshotsPath,
     ) {}
 
-    /**
-     * Checks if the snapshot exists.
-     */
-    public function has(): bool
+    public function current(): Snapshot
     {
-        return file_exists($this->getSnapshotFilename());
+        $this->synchronize();
+
+        return $this->snapshot(self::$ordinal > 1 ? '__'.self::$ordinal : '');
     }
 
-    /**
-     * Gets the snapshot.
-     *
-     * @return array{0: string, 1: string}
-     *
-     * @throws ShouldNotHappen
-     */
-    public function get(): array
+    public function next(): Snapshot
     {
-        $contents = file_get_contents($snapshotFilename = $this->getSnapshotFilename());
+        $this->synchronize();
 
-        if ($contents === false) {
-            throw ShouldNotHappen::fromMessage('Snapshot file could not be read.');
+        self::$ordinal++;
+
+        return $this->current();
+    }
+
+    public function named(string $name): Snapshot
+    {
+        $this->synchronize();
+
+        $suffix = trim((string) preg_replace('/[^\w-]+/', '_', $name), '_');
+
+        if ($suffix === '') {
+            throw new InvalidArgumentException('The snapshot name must contain at least one alphanumeric character.');
         }
 
-        $snapshot = str_replace(dirname($this->testsPath).'/', '', $snapshotFilename);
-
-        return [$snapshot, $contents];
+        return $this->snapshot('__'.$suffix);
     }
 
-    /**
-     * Saves the given snapshot for the given test case.
-     */
-    public function save(string $snapshot): string
+    public function forget(): void
     {
-        $snapshotFilename = $this->getSnapshotFilename();
-
-        $directory = dirname($snapshotFilename);
-
-        if (! is_dir($directory)) {
-            @mkdir($directory, 0755, true);
-        }
-
-        file_put_contents($snapshotFilename, $snapshot);
-
-        return str_replace(dirname($this->testsPath).'/', '', $snapshotFilename);
+        self::$key = null;
+        self::$ordinal = 0;
     }
 
-    /**
-     * Flushes the snapshots.
-     */
     public function flush(): void
     {
         $absoluteSnapshotsPath = $this->testsPath.'/'.$this->snapshotsPath;
@@ -101,55 +86,81 @@ final class SnapshotRepository
         }
     }
 
-    /**
-     * Gets the snapshot's "filename".
-     */
-    private function getSnapshotFilename(): string
+    private function snapshot(string $suffix): Snapshot
     {
         $testFile = TestSuite::getInstance()->getFilename();
 
-        if (str_starts_with($testFile, $this->testsPath)) {
-            // if the test file is in the tests directory
-            $startPath = $this->testsPath;
-        } else {
-            // if the test file is in the app, src, etc. directory
-            $startPath = $this->rootPath;
-        }
+        $startPath = str_starts_with($testFile, $this->testsPath) ? $this->testsPath : $this->rootPath;
 
-        // relative path: we use substr() and not str_replace() to remove the start path
-        // for instance, if the $startPath is /app/ and the $testFile is /app/app/tests/Unit/ExampleTest.php, we should only remove the first /app/ from the path
         $relativePath = substr($testFile, strlen($startPath));
-
-        // remove extension from filename
         $relativePath = substr($relativePath, 0, (int) strrpos($relativePath, '.'));
 
-        $description = TestSuite::getInstance()->getDescription();
+        return new Snapshot(
+            sprintf(
+                '%s/%s%s.snap',
+                $this->testsPath.'/'.$this->snapshotsPath.$relativePath,
+                TestSuite::getInstance()->getDescription(),
+                $suffix,
+            ),
+            dirname($this->testsPath).'/',
+        );
+    }
 
-        if ($this->getCurrentSnapshotCounter() > 1) {
-            $description .= '__'.$this->getCurrentSnapshotCounter();
+    private function synchronize(): void
+    {
+        $key = TestSuite::getInstance()->getFilename().'###'.TestSuite::getInstance()->getDescription();
+
+        if (self::$key === $key) {
+            return;
         }
 
-        return sprintf('%s/%s.snap', $this->testsPath.'/'.$this->snapshotsPath.$relativePath, $description);
+        self::$key = $key;
+        self::$ordinal = 0;
     }
 
-    private function getCurrentSnapshotKey(): string
-    {
-        return TestSuite::getInstance()->getFilename().'###'.TestSuite::getInstance()->getDescription();
-    }
-
-    private function getCurrentSnapshotCounter(): int
-    {
-        return self::$expectationsCounter[$this->getCurrentSnapshotKey()] ?? 0;
-    }
-
+    /**
+     * @deprecated Use `next` and `current` instead.
+     */
     public function startNewExpectation(): void
     {
-        $key = $this->getCurrentSnapshotKey();
+        $this->next();
+    }
 
-        if (! isset(self::$expectationsCounter[$key])) {
-            self::$expectationsCounter[$key] = 0;
-        }
+    /**
+     * @deprecated Use `current` instead.
+     */
+    public function has(): bool
+    {
+        return $this->current()->exists();
+    }
 
-        self::$expectationsCounter[$key]++;
+    /**
+     * @deprecated Use `current` instead.
+     *
+     * @return array{0: string, 1: string}
+     *
+     * @throws ShouldNotHappen
+     */
+    public function get(): array
+    {
+        $snapshot = $this->current();
+
+        return [$snapshot->path(), $snapshot->read()];
+    }
+
+    /**
+     * @deprecated Use `current` instead.
+     */
+    public function save(string $snapshot): string
+    {
+        return $this->current()->write($snapshot)->path();
+    }
+
+    /**
+     * @deprecated Use `current` instead.
+     */
+    public function filename(): string
+    {
+        return $this->current()->path();
     }
 }

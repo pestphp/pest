@@ -6,8 +6,5 @@ namespace Pest\Contracts;
 
 interface TestCaseFilter
 {
-    /**
-     * Whether the test case is accepted.
-     */
     public function accept(string $testCaseFilename): bool;
 }
