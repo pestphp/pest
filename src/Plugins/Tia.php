@@ -200,6 +200,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     private bool $graphUnreachable = false;
 
+    private bool $fullSuiteFallbackRan = false;
+
     /** @var array<int, string> */
     private array $originalArguments = [];
 
@@ -684,7 +686,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return $exitCode;
         }
 
-        if ($this->replayRan || $this->graphUnreachable) {
+        if ($this->replayRan || $this->graphUnreachable || $this->fullSuiteFallbackRan) {
             $this->bumpRecordedSha();
         }
 
@@ -1044,6 +1046,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $coverageAvailable = $this->piggybackCoverage || $this->recorder->driverAvailable();
 
         if ($hasProjectPhpSourceChanges && ! $coverageAvailable) {
+            $this->fullSuiteFallbackRan = true;
+
             $this->renderBadge('WARN', 'Detected PHP source changes but no coverage driver is available.');
             $this->renderChild('Running the full suite to avoid using a stale dependency graph.');
             $this->renderChild('Install / enable pcov or xdebug (mode: coverage) so edges can be safely refreshed after PHP refactors.');
