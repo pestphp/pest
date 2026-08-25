@@ -12,6 +12,7 @@ use PHPUnit\TextUI\Output\Printer;
 use SebastianBergmann\Timer\Duration;
 use SplFileInfo;
 use Symfony\Component\Console\Formatter\OutputFormatter;
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use function assert;
@@ -83,6 +84,7 @@ final class ResultPrinter
 
         $this->compactPrinter = CompactPrinter::default(
             decorated: ! in_array('--colors=never', $_SERVER['argv'] ?? [], true),
+            verbosity: ConsoleOutput::VERBOSITY_VERBOSE,
         );
 
         if (! $this->options->configuration->hasLogfileTeamcity()) {

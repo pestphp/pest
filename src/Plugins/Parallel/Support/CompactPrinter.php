@@ -62,12 +62,17 @@ final class CompactPrinter
     /**
      * Creates a new instance of the Compact Printer.
      */
-    public static function default(bool $decorated = true): self
-    {
+    public static function default(
+        bool $decorated = true,
+        int $verbosity = ConsoleOutput::VERBOSITY_NORMAL,
+    ): self {
         return new self(
             terminal(),
             new ConsoleOutput(decorated: $decorated),
-            new Style(new ConsoleOutput(decorated: $decorated)),
+            new Style(new ConsoleOutput(
+                verbosity: $verbosity,
+                decorated: $decorated,
+            )),
             terminal()->width() - 4,
         );
     }
