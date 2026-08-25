@@ -30,6 +30,7 @@
     },
     "conflict": {
         "filp/whoops": "<2.18.3",
+        "laravel/boost": "<2.6.0",
         "phpunit/phpunit": ">13.3.1",
         "sebastian/exporter": "<7.0.0",
         "webmozart/assert": "<1.11.0"
