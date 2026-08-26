@@ -1505,7 +1505,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     private function workerToken(): string
     {
-        $raw = $_SERVER['TEST_TOKEN'] ?? $_ENV['TEST_TOKEN'] ?? null;
+        $raw = $_SERVER['UNIQUE_TEST_TOKEN'] ?? $_ENV['UNIQUE_TEST_TOKEN']
+            ?? $_SERVER['TEST_TOKEN'] ?? $_ENV['TEST_TOKEN'] ?? null;
 
         $token = is_scalar($raw) ? (string) $raw : (string) getmypid();
         $token = preg_replace('/[^A-Za-z0-9_-]/', '', $token);
