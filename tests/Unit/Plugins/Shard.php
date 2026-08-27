@@ -151,7 +151,7 @@ describe('buildFilterArgument', function (): void {
         $filter = $method->invoke($shard, ['Tests\\Feature\\After']);
 
         expect(preg_match('{'.$filter.'}i', 'P\Tests\Feature\AfterAll::deletes file after all'))->toBe(0)
-            ->and(preg_match('{'.$filter.'}i', 'P\Tests\Feature\After::it runs'))->toBe(1);
+            ->and('P\Tests\Feature\After::it runs')->toMatch('{'.$filter.'}i');
     });
 
     it('still matches dataset variants after the class boundary', function (): void {
@@ -163,7 +163,7 @@ describe('buildFilterArgument', function (): void {
 
         $filter = $method->invoke($shard, ['Tests\\Feature\\After']);
 
-        expect(preg_match('{'.$filter.'}i', 'P\Tests\Feature\After::it runs with data set "foo"'))->toBe(1);
+        expect('P\Tests\Feature\After::it runs with data set "foo"')->toMatch('{'.$filter.'}i');
     });
 
     it('keeps a class matchable when another class nests below its namespace', function (): void {
@@ -176,8 +176,8 @@ describe('buildFilterArgument', function (): void {
         $filter = $method->invoke($shard, ['Tests\\Unit\\After', 'Tests\\Unit\\After\\AfterAll']);
 
         expect($filter)->toBe('Tests\\\\Unit\\\\(?:After(?=::)|After\\\\AfterAll(?=::))')
-            ->and(preg_match('{'.$filter.'}i', 'P\Tests\Unit\After::x'))->toBe(1)
-            ->and(preg_match('{'.$filter.'}i', 'P\Tests\Unit\After\AfterAll::y'))->toBe(1);
+            ->and('P\Tests\Unit\After::x')->toMatch('{'.$filter.'}i')
+            ->and('P\Tests\Unit\After\AfterAll::y')->toMatch('{'.$filter.'}i');
     });
 });
 
