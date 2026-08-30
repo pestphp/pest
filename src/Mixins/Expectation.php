@@ -14,7 +14,7 @@ use InvalidArgumentException;
 use JsonSerializable;
 use Pest\Exceptions\InvalidExpectationValue;
 use Pest\Matchers\Any;
-use Pest\Plugins\Snapshot;
+use Pest\Plugins\Snapshot as SnapshotPlugin;
 use Pest\Support\Arr;
 use Pest\Support\Exporter;
 use Pest\Support\NullClosure;
@@ -712,10 +712,11 @@ final class Expectation
     /**
      * @return self<TValue>
      */
-    public function toMatchSnapshot(string $message = ''): self
+    public function toMatchSnapshot(string $message = '', ?string $as = null): self
     {
         $snapshots = TestSuite::getInstance()->snapshots;
-        $snapshots->startNewExpectation();
+
+        $snapshot = $as === null ? $snapshots->next() : $snapshots->named($as);
 
         $testCase = TestSuite::getInstance()->test;
         assert($testCase instanceof TestCase);
@@ -733,38 +734,35 @@ final class Expectation
             default => InvalidExpectationValue::expected('array|object|string'),
         };
 
-        if (! $snapshots->has()) {
-            if (! Snapshot::shouldCreateMissingSnapshots()) {
-                $filename = $snapshots->filename();
-
-                Assert::fail($message === '' ? "Snapshot is missing at [$filename]. Run Pest with --update-snapshots to create it." : $message);
+        if (! $snapshot->exists()) {
+            if (! SnapshotPlugin::shouldCreateMissingSnapshots()) {
+                Assert::fail($message === '' ? "Snapshot is missing at [{$snapshot->path()}]. Run Pest with --update-snapshots to create it." : $message);
             }
 
-            $filename = $snapshots->save($string);
+            $snapshot->write($string);
 
-            TestSuite::getInstance()->registerSnapshotChange("Snapshot created at [$filename]");
-        } else {
-            [$filename, $content] = $snapshots->get();
+            TestSuite::getInstance()->registerSnapshotChange("Snapshot created at [{$snapshot->path()}]");
 
-            $normalizedContent = strtr($content, ["\r\n" => "\n", "\r" => "\n"]);
-            $normalizedString = strtr($string, ["\r\n" => "\n", "\r" => "\n"]);
-
-            if (Snapshot::$updateSnapshots && $normalizedContent !== $normalizedString) {
-                $snapshots->save($string);
-
-                TestSuite::getInstance()->registerSnapshotChange("Snapshot updated at [$filename]");
-            } else {
-                if (Snapshot::$updateSnapshots) {
-                    TestSuite::getInstance()->registerSnapshotChange("Snapshot unchanged at [$filename]");
-                }
-
-                Assert::assertSame(
-                    $normalizedContent,
-                    $normalizedString,
-                    $message === '' ? "Failed asserting that the string value matches its snapshot ($filename)." : $message
-                );
-            }
+            return $this;
         }
+
+        if (SnapshotPlugin::$updateSnapshots) {
+            if (! $snapshot->matches($string)) {
+                $snapshot->write($string);
+
+                TestSuite::getInstance()->registerSnapshotChange("Snapshot updated at [{$snapshot->path()}]");
+
+                return $this;
+            }
+
+            TestSuite::getInstance()->registerSnapshotChange("Snapshot unchanged at [{$snapshot->path()}]");
+        }
+
+        Assert::assertSame(
+            $snapshot->normalize($snapshot->read()),
+            $snapshot->normalize($string),
+            $message === '' ? "Failed asserting that the string value matches its snapshot ({$snapshot->path()})." : $message
+        );
 
         return $this;
     }

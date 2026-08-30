@@ -358,3 +358,30 @@ test('a graph whose recorded commit is gone is re-anchored, not warned about for
         ->and($second->replayed())->toBe(Project::TOTAL_TESTS, $second->describe())
         ->and($delta->writtenCount())->toBe(0, $delta->summary());
 })->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
+
+test('a full suite run without a coverage driver clears the tree it could not refresh', function (array $arguments): void {
+    $project = Project::make('master');
+    $project->seed('master');
+
+    $project->mutateGraph(function (array $graph): array {
+        $graph['baselines']['master']['tree'] = ['app/Calculator.php' => 'deadbeefdeadbeefdeadbeefdeadbeef'];
+
+        return $graph;
+    });
+
+    $environment = ['XDEBUG_MODE' => 'off'];
+
+    $first = $project->pestWithEnvironment($project->path(), $environment, '--tia', ...$arguments);
+
+    expect($first->exitCode)->toBe(0, $first->describe())
+        ->and($first->output)->toContain('no coverage driver is available')
+        ->and($first->tally())->toContain(Project::TOTAL_TESTS.' passed');
+
+    $project->snapshot();
+    $second = $project->pestWithEnvironment($project->path(), $environment, '--tia', ...$arguments);
+    $delta = $project->delta();
+
+    expect($second->output)->not->toContain('no coverage driver is available')
+        ->and($second->replayed())->toBe(Project::TOTAL_TESTS, $second->describe())
+        ->and($delta->writtenCount())->toBe(0, $delta->summary());
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();

@@ -200,6 +200,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     private bool $graphUnreachable = false;
 
+    private bool $fullSuiteFallbackRan = false;
+
     /** @var array<int, string> */
     private array $originalArguments = [];
 
@@ -684,7 +686,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return $exitCode;
         }
 
-        if ($this->replayRan || $this->graphUnreachable) {
+        if ($this->replayRan || $this->graphUnreachable || $this->fullSuiteFallbackRan) {
             $this->bumpRecordedSha();
         }
 
@@ -1044,6 +1046,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $coverageAvailable = $this->piggybackCoverage || $this->recorder->driverAvailable();
 
         if ($hasProjectPhpSourceChanges && ! $coverageAvailable) {
+            $this->fullSuiteFallbackRan = true;
+
             $this->renderBadge('WARN', 'Detected PHP source changes but no coverage driver is available.');
             $this->renderChild('Running the full suite to avoid using a stale dependency graph.');
             $this->renderChild('Install / enable pcov or xdebug (mode: coverage) so edges can be safely refreshed after PHP refactors.');
@@ -1232,6 +1236,10 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             $this->emitCoverageDriverMissing();
 
             return $arguments;
+        }
+
+        if (! $this->piggybackCoverage && ! in_array('--no-coverage', $arguments, true)) {
+            $arguments[] = '--no-coverage';
         }
 
         if (Parallel::isEnabled()) {
@@ -1497,7 +1505,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     private function workerToken(): string
     {
-        $raw = $_SERVER['TEST_TOKEN'] ?? $_ENV['TEST_TOKEN'] ?? null;
+        $raw = $_SERVER['UNIQUE_TEST_TOKEN'] ?? $_ENV['UNIQUE_TEST_TOKEN']
+            ?? $_SERVER['TEST_TOKEN'] ?? $_ENV['TEST_TOKEN'] ?? null;
 
         $token = is_scalar($raw) ? (string) $raw : (string) getmypid();
         $token = preg_replace('/[^A-Za-z0-9_-]/', '', $token);

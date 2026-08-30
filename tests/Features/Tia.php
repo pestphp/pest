@@ -57,6 +57,7 @@ it('does not run user hooks when replaying cached skipped and incomplete results
                 'PARATEST' => 0,
                 'PAO_DISABLE' => '1',
                 'HOME' => $home,
+                'CI_DEFAULT_BRANCH' => $branch,
             ],
         );
 

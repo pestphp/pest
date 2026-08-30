@@ -439,6 +439,7 @@
   ✓ interceptor can be filter the expected parameter as well
   ✓ interceptor works with negated expectation
   ✓ intercept can add new parameters to the expectation
+  ✓ named arguments reach the pipes of an expectation
 
    PASS  Tests\Features\Expect\ray
   ✓ ray calls do not fail when ray is not installed
@@ -1122,6 +1123,17 @@
   ✓ multiple snapshot expectations with repeat @ repetition 8 of 10
   ✓ multiple snapshot expectations with repeat @ repetition 9 of 10
   ✓ multiple snapshot expectations with repeat @ repetition 10 of 10
+  ✓ pass with named snapshot
+  ✓ named snapshots do not depend on the order they are asserted in
+  ✓ named snapshots do not consume the ordinal of the unnamed ones
+  ✓ named snapshots require a name
+  ✓ ordinal snapshots start over once forgotten
+  ✓ ordinal snapshots start over on every repetition @ repetition 1 of 3
+  ✓ ordinal snapshots start over on every repetition @ repetition 2 of 3
+  ✓ ordinal snapshots start over on every repetition @ repetition 3 of 3
+  ✓ snapshots of a repeated test are recorded per repetition @ repetition 1 of 3
+  ✓ snapshots of a repeated test are recorded per repetition @ repetition 2 of 3
+  ✓ snapshots of a repeated test are recorded per repetition @ repetition 3 of 3
 
    PASS  Tests\Features\Expect\toStartWith
   ✓ pass
@@ -1224,6 +1236,8 @@
   ✓ it does not retry fails()
   ✓ it retries unexpected exceptions even with throws set
   ✓ it does not leak mock objects between retries
+  ✓ it resolves the same snapshot ordinals on every retry
+  ✓ it matches the same snapshot on every retry
   ✓ it does not stop retrying when snapshot changes are absent
   ✓ it does not leak dynamic properties between retries
   ! it clears output buffer between retries when expectOutputString is used → Creation of dynamic property PHPUnit\Framework\TestCase\OutputBuffer::$expectedString is deprecated
@@ -1455,6 +1469,14 @@
   ✓ multiple times with repeat iterator with multiple dataset ('c') / ('d') @ repetition 2 of 2
   ✓ multiple times with repeat iterator with multiple dataset ('c') / ('e') @ repetition 2 of 2
   ✓ multiple times with repeat iterator with multiple dataset ('c') / ('f') @ repetition 2 of 2
+  ✓ multiple times with named dataset arguments ('Taylor', 'taylor@laravel.com') @ repetition 1 of 2
+  ✓ multiple times with named dataset arguments ('Nuno', 'enunomaduro@gmail.com') @ repetition 1 of 2
+  ✓ multiple times with named dataset arguments ('Taylor', 'taylor@laravel.com') @ repetition 2 of 2
+  ✓ multiple times with named dataset arguments ('Nuno', 'enunomaduro@gmail.com') @ repetition 2 of 2
+  ✓ multiple times with named dataset arguments and repeat iterator ('Taylor', 'taylor@laravel.com') @ repetition 1 of 2
+  ✓ multiple times with named dataset arguments and repeat iterator ('Nuno', 'enunomaduro@gmail.com') @ repetition 1 of 2
+  ✓ multiple times with named dataset arguments and repeat iterator ('Taylor', 'taylor@laravel.com') @ repetition 2 of 2
+  ✓ multiple times with named dataset arguments and repeat iterator ('Nuno', 'enunomaduro@gmail.com') @ repetition 2 of 2
   ✓ describe blocks → multiple times @ repetition 1 of 3
   ✓ describe blocks → multiple times @ repetition 2 of 3
   ✓ describe blocks → multiple times @ repetition 3 of 3
@@ -1764,6 +1786,7 @@
   ✓ it shows the correct description for long texts with newlines
   ✓ it shows the correct description for arrays with many elements
   ✓ it shows the correct description of datasets with html
+  ✓ it does not treat a two element dataset of class names as a callable
 
    PASS  Tests\Unit\Expectations\OppositeExpectation
   ✓ it throw expectation failed exception with string argument
@@ -2038,9 +2061,16 @@
   ✓ it accepts a page directory candidate only when it matches the casing on disk with ('wrong parent')
   ✓ it accepts a page directory candidate only when it matches the casing on disk with ('absent')
 
+   PASS  Tests\Unit\Plugins\Tia\WorkerToken
+  ✓ prefers the per-process UNIQUE_TEST_TOKEN over the per-slot TEST_TOKEN, so two workers recycled into the same slot get different tokens
+  ✓ falls back to TEST_TOKEN when UNIQUE_TEST_TOKEN is absent
+
    PASS  Tests\Unit\Preset
   ✓ preset invalid name
   ✓ preset → myFramework
+
+   PASS  Tests\Unit\Restarters\PcovRestarter
+  ✓ it preserves the active memory limit in the restarted process
 
    PASS  Tests\Unit\Support\Arr
   ✓ last → it should return false for an empty arary
@@ -2225,4 +2255,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1572 passed (3413 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1598 passed (3485 assertions)
