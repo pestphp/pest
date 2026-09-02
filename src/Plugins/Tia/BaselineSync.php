@@ -583,7 +583,12 @@ final readonly class BaselineSync
 
     private function commandExists(string $cmd): bool
     {
-        $process = new Process(['which', $cmd]);
+        if (PHP_OS_FAMILY === 'Windows') {
+            $process = new Process(['where', $cmd]);
+        } else {
+            $process = new Process(['which', $cmd]);
+        }
+
         $process->run();
 
         return $process->isSuccessful();
