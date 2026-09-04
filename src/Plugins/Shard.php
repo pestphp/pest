@@ -234,9 +234,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             $parts = explode('\\', $class);
             $current = &$tree;
             foreach ($parts as $part) {
-                if (! isset($current[$part])) {
-                    $current[$part] = [];
-                }
+                $current[$part] ??= [];
                 $current = &$current[$part];
             }
         }

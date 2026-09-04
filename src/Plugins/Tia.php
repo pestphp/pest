@@ -1537,9 +1537,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
             foreach (['files', 'tables', 'inertia'] as $section) {
                 foreach ($data[$section] as $testFile => $values) {
-                    if (! isset($merged[$section][$testFile])) {
-                        $merged[$section][$testFile] = [];
-                    }
+                    $merged[$section][$testFile] ??= [];
 
                     foreach ($values as $value) {
                         $merged[$section][$testFile][$value] = true;

@@ -1020,9 +1020,7 @@ final class Graph
 
     private function ensureBaseline(string $branch): void
     {
-        if (! isset($this->baselines[$branch])) {
-            $this->baselines[$branch] = ['sha' => null, 'tree' => [], 'results' => []];
-        }
+        $this->baselines[$branch] ??= ['sha' => null, 'tree' => [], 'results' => []];
     }
 
     /**
@@ -1067,9 +1065,7 @@ final class Graph
                 continue;
             }
 
-            if (! isset($this->edges[$rel])) {
-                $this->edges[$rel] = [];
-            }
+            $this->edges[$rel] ??= [];
         }
     }
 
