@@ -53,6 +53,32 @@ describe('applyMigrationChanges()', function (): void {
         expect($affected)->toBe(['tests/Feature/OrderTest.php']);
     });
 
+    it('falls back to watch patterns when no recorded test touches the changed table', function (): void {
+        $this->watchPatterns->add(['database/migrations/**' => 'tests/Feature']);
+
+        $graph = new Graph($this->projectRoot);
+        $graph->link('tests/Feature/UserTest.php', 'app/Models/User.php');
+        $graph->replaceTestTables([
+            'tests/Feature/UserTest.php' => ['users'],
+        ]);
+
+        $affected = $graph->affected(['database/migrations/2024_01_01_000000_create_orders_table.php']);
+
+        expect($affected)->toBe(['tests/Feature/UserTest.php']);
+    });
+
+    it('selects nothing for an unrelated migration when no watch pattern covers it', function (): void {
+        $graph = new Graph($this->projectRoot);
+        $graph->link('tests/Feature/UserTest.php', 'app/Models/User.php');
+        $graph->replaceTestTables([
+            'tests/Feature/UserTest.php' => ['users'],
+        ]);
+
+        $affected = $graph->affected(['database/migrations/2024_01_01_000000_create_orders_table.php']);
+
+        expect($affected)->toBeEmpty();
+    });
+
     it('falls back to watch patterns when no table usage was recorded at all', function (): void {
         $this->watchPatterns->add(['database/migrations/**' => 'tests/Feature']);
 

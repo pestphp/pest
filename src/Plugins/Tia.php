@@ -23,6 +23,7 @@ use Pest\Plugins\Tia\ChangedFiles;
 use Pest\Plugins\Tia\CiDefaultBranch;
 use Pest\Plugins\Tia\Contracts\State;
 use Pest\Plugins\Tia\CoverageCollector;
+use Pest\Plugins\Tia\DatabaseTestTables;
 use Pest\Plugins\Tia\Fingerprint;
 use Pest\Plugins\Tia\Graph;
 use Pest\Plugins\Tia\JsModuleGraph;
@@ -30,7 +31,6 @@ use Pest\Plugins\Tia\Recorder;
 use Pest\Plugins\Tia\ResultCollector;
 use Pest\Plugins\Tia\SourceScope;
 use Pest\Plugins\Tia\Storage;
-use Pest\Plugins\Tia\TableExtractor;
 use Pest\Plugins\Tia\WatchPatterns;
 use Pest\Support\Container;
 use Pest\Support\Git;
@@ -606,11 +606,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $perTestUsesDatabase = $recorder->perTestUsesDatabase();
 
         if ($perTestUsesDatabase !== []) {
-            $perTestTables = $this->augmentDatabaseTestTables(
-                $perTestTables,
-                $perTestUsesDatabase,
-                $projectRoot,
-            );
+            $perTestTables = DatabaseTestTables::augment($perTestTables, $perTestUsesDatabase, $projectRoot);
         }
 
         if (Parallel::isWorker()) {
@@ -2214,58 +2210,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         }
 
         return implode(', ', $changes);
-    }
-
-    /**
-     * @param  array<string, array<int, string>>  $perTestTables
-     * @param  array<string, true>  $perTestUsesDatabase
-     * @return array<string, array<int, string>>
-     */
-    private function augmentDatabaseTestTables(array $perTestTables, array $perTestUsesDatabase, string $projectRoot): array
-    {
-        $migrationDir = rtrim($projectRoot, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'database'.DIRECTORY_SEPARATOR.'migrations';
-
-        if (! is_dir($migrationDir)) {
-            return $perTestTables;
-        }
-
-        $allTables = [];
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($migrationDir, \FilesystemIterator::SKIP_DOTS),
-        );
-
-        foreach ($iterator as $fileInfo) {
-            if (! $fileInfo->isFile()) {
-                continue;
-            }
-            if (! str_ends_with(strtolower((string) $fileInfo->getPathname()), '.php')) {
-                continue;
-            }
-
-            $content = @file_get_contents((string) $fileInfo->getPathname());
-
-            if ($content === false) {
-                continue;
-            }
-
-            foreach (TableExtractor::fromMigrationSource($content) as $table) {
-                $allTables[strtolower($table)] = true;
-            }
-        }
-
-        if ($allTables === []) {
-            return $perTestTables;
-        }
-
-        foreach (array_keys($perTestUsesDatabase) as $testFile) {
-            $existing = $perTestTables[$testFile] ?? [];
-            $merged = array_fill_keys($existing, true) + $allTables;
-            $names = array_keys($merged);
-            sort($names);
-            $perTestTables[$testFile] = $names;
-        }
-
-        return $perTestTables;
     }
 
     /**
