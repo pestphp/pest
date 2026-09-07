@@ -9,6 +9,7 @@ use Pest\Plugins\Tia;
 use Pest\Plugins\Tia\ChangedFiles;
 use Pest\Plugins\Tia\FileState;
 use Pest\Plugins\Tia\Fingerprint;
+use Pest\Plugins\Tia\GitHubRepository;
 use Pest\Plugins\Tia\Graph;
 use Pest\Plugins\Tia\Storage;
 use Pest\Support\Str;
@@ -274,7 +275,7 @@ final class Project
     /**
      * @return array<string, string>
      */
-    public function gh(string $mode = 'ok', string $payload = '{}'): array
+    public function gh(string $mode = 'ok', string $payload = '{}', string $host = GitHubRepository::DEFAULT_HOST): array
     {
         self::mirror(__DIR__.'/stubs/gh', $this->path('stub/gh'));
         chmod($this->path('stub/gh'), 0755);
@@ -285,7 +286,21 @@ final class Project
             'PATH' => $this->path('stub').PATH_SEPARATOR.getenv('PATH'),
             'GH_STUB_MODE' => $mode,
             'GH_STUB_PAYLOAD' => $this->path('payload/graph.json'),
+            'GH_STUB_HOST' => $host,
+            'GH_STUB_ARGV_LOG' => $this->path('payload/gh-argv.log'),
         ];
+    }
+
+    public function ghArgv(): string
+    {
+        $path = $this->path('payload/gh-argv.log');
+
+        return is_file($path) ? (string) file_get_contents($path) : '';
+    }
+
+    public function origin(string $url): void
+    {
+        $this->git()->config('remote.origin.url', $url);
     }
 
     public static function testId(string $testFile, string $description): string
