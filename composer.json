@@ -25,13 +25,13 @@
         "pestphp/pest-plugin-arch": "^5.0.0",
         "pestphp/pest-plugin-mutate": "^5.0.2",
         "pestphp/pest-plugin-profanity": "^5.0.0",
-        "phpunit/phpunit": "^13.3.1",
-        "symfony/process": "^8.1.5"
+        "phpunit/phpunit": "^13.3.2",
+        "symfony/process": "^8.1.6"
     },
     "conflict": {
         "filp/whoops": "<2.18.3",
         "laravel/boost": "<2.6.0",
-        "phpunit/phpunit": ">13.3.1",
+        "phpunit/phpunit": ">13.3.2",
         "sebastian/exporter": "<7.0.0",
         "webmozart/assert": "<1.11.0"
     },
@@ -62,7 +62,7 @@
     "require-dev": {
         "pestphp/pest-dev-tools": "^5.0.0",
         "pestphp/pest-plugin-browser": "^5.0.1",
-        "pestphp/pest-plugin-phpstan": "^5.2.0",
+        "pestphp/pest-plugin-phpstan": "^5.2.1",
         "pestphp/pest-plugin-rector": "^5.0.4",
         "pestphp/pest-plugin-type-coverage": "^5.0.2",
         "psy/psysh": "^0.12.24"
@@ -89,15 +89,15 @@
             "rector --dry-run",
             "pint --parallel --test"
         ],
-        "test:profanity": "php bin/pest --profanity --compact",
+        "test:profanity": "XDEBUG_MODE=off php bin/pest --profanity --compact",
         "test:type:check": "phpstan analyse --ansi --memory-limit=-1 --debug",
-        "test:type:coverage": "php -d memory_limit=-1  bin/pest --type-coverage --min=100",
-        "test:unit": "php bin/pest --exclude-group=integration --compact",
-        "test:inline": "php bin/pest --configuration=phpunit.inline.xml",
-        "test:parallel": "php bin/pest --exclude-group=integration --parallel --processes=3",
-        "test:integration": "php bin/pest --group=integration -v",
+        "test:type:coverage": "XDEBUG_MODE=off php -d memory_limit=-1 bin/pest --type-coverage --min=100",
+        "test:unit": "XDEBUG_MODE=off php bin/pest --exclude-group=integration --compact",
+        "test:inline": "XDEBUG_MODE=off php bin/pest --configuration=phpunit.inline.xml",
+        "test:parallel": "XDEBUG_MODE=off php bin/pest --exclude-group=integration --parallel --processes=3",
+        "test:integration": "XDEBUG_MODE=off php bin/pest --group=integration -v",
         "test:tia": "php bin/pest --group=tia -v",
-        "update:snapshots": "REBUILD_SNAPSHOTS=true php bin/pest --update-snapshots --exclude-group=tia",
+        "update:snapshots": "XDEBUG_MODE=off REBUILD_SNAPSHOTS=true php bin/pest --update-snapshots --exclude-group=tia",
         "test": [
             "@test:lint",
             "@test:type:check",
