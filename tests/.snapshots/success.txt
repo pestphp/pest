@@ -275,6 +275,7 @@
   ✓ dataset items can mix named and sequential styles with ('Taylor', 'taylor@laravel.com')
   ✓ dataset items can mix named and sequential styles with ('James', 'james@laravel.com') #1
   ✓ dataset items can mix named and sequential styles with ('James', 'james@laravel.com') #2
+  ✓ named parameters work with a single argument with ('Taylor')
 
    PASS  Tests\Features\Depends
   ✓ first
@@ -2255,4 +2256,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1598 passed (3485 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1599 passed (3486 assertions)
