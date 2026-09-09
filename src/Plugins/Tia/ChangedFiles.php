@@ -14,9 +14,17 @@ final readonly class ChangedFiles
 {
     private Git $git;
 
+    private string $repoPrefix;
+
     public function __construct(private string $projectRoot)
     {
         $this->git = new Git($projectRoot);
+        $this->repoPrefix = $this->detectRepoPrefix();
+    }
+
+    public function repoPrefix(): string
+    {
+        return $this->repoPrefix;
     }
 
     /**
@@ -158,9 +166,9 @@ final readonly class ChangedFiles
         return $remaining;
     }
 
-    private function contentAtSha(string $sha, string $path): ?string
+    public function contentAtSha(string $sha, string $path): ?string
     {
-        return $this->git->show($sha, $path);
+        return $this->git->show($sha, $this->repoPrefix.$path);
     }
 
     /**
@@ -305,13 +313,15 @@ final readonly class ChangedFiles
      */
     private function diffSinceSha(string $sha): array
     {
-        $output = $this->scan()->raw(['diff', '--name-only', '--no-renames', $sha.'..HEAD']);
+        $output = $this->scan()->raw(['diff', '--name-only', '-z', '--no-renames', $sha.'..HEAD']);
 
         if ($output === null) {
             throw new MissingDependency('Tia mode', 'git');
         }
 
-        return $this->splitLines($output);
+        $paths = explode("\x00", rtrim($output, "\x00"));
+
+        return $this->toProjectRelative(array_values(array_filter($paths, static fn (string $path): bool => $path !== '')));
     }
 
     /**
@@ -357,7 +367,7 @@ final readonly class ChangedFiles
             $files[] = $path;
         }
 
-        return $files;
+        return $this->toProjectRelative($files);
     }
 
     public function currentSha(): ?string
@@ -371,6 +381,44 @@ final readonly class ChangedFiles
         $sha = trim($output);
 
         return $sha === '' ? null : $sha;
+    }
+
+    /**
+     * @param  array<int, string>  $repoRelativePaths
+     * @return array<int, string>
+     */
+    private function toProjectRelative(array $repoRelativePaths): array
+    {
+        if ($this->repoPrefix === '') {
+            return $repoRelativePaths;
+        }
+
+        $projectRelative = [];
+
+        foreach ($repoRelativePaths as $path) {
+            if (str_starts_with($path, $this->repoPrefix)) {
+                $projectRelative[] = substr($path, strlen($this->repoPrefix));
+            }
+        }
+
+        return $projectRelative;
+    }
+
+    private function detectRepoPrefix(): string
+    {
+        static $cache = [];
+
+        if (isset($cache[$this->projectRoot])) {
+            return $cache[$this->projectRoot];
+        }
+
+        $prefix = $this->git->subdirectoryPrefix();
+
+        if ($prefix === null || $prefix === '') {
+            return $cache[$this->projectRoot] = '';
+        }
+
+        return $cache[$this->projectRoot] = $prefix.'/';
     }
 
     /**

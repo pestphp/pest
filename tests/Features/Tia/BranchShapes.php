@@ -155,16 +155,14 @@ test('the default branch baseline survives every branch that comes and goes', fu
         ->and($project->graph()['baselines']['master']['results'])->toHaveCount(Project::TOTAL_TESTS);
 })->skipOnWindows();
 
-test('a project below the git repository root refuses to run and writes nothing', function (array $arguments): void {
+test('a project below the git repository root runs from the subdirectory', function (array $arguments): void {
     $project = Project::make('master');
     $nested = $project->nested();
 
     $result = $project->pestIn($nested, '--tia', ...$arguments);
 
-    expect($result->exitCode)->toBe(1, $result->describe())
-        ->and($result->output)->toContain('Tia mode requires the git repository root')
-        ->and($project->path('.home/.pest'))->not->toBeDirectory()
-        ->and($nested.DIRECTORY_SEPARATOR.'.pest')->not->toBeDirectory();
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed');
 })->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
 
 test('a repository with no commits says so, and leaves plain runs alone', function (): void {
