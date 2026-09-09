@@ -22,19 +22,19 @@ final readonly class Fingerprint
     ];
 
     /**
+     * @param  array<int, string>  $arguments
      * @return array{
      *     structural: array<string, int|string|null>,
      *     environmental: array<string, int|string|null>,
      * }
      */
-    public static function compute(string $projectRoot): array
+    public static function compute(string $projectRoot, array $arguments = []): array
     {
         return [
             'structural' => [
                 'schema' => self::SCHEMA_VERSION,
                 'composer_lock' => self::composerLockHash($projectRoot),
-                'phpunit_xml' => self::trackedHash($projectRoot, 'phpunit.xml'),
-                'phpunit_xml_dist' => self::trackedHash($projectRoot, 'phpunit.xml.dist'),
+                'phpunit_xml' => self::phpunitConfigurationHash($projectRoot, $arguments),
                 'vite_config' => self::viteConfigHash($projectRoot),
                 'package_lock' => self::packageLockHash($projectRoot),
                 'js_config' => self::jsConfigHash($projectRoot),
@@ -195,6 +195,70 @@ final readonly class Fingerprint
         }
 
         return $parts === [] ? null : hash('xxh128', implode("\n", $parts));
+    }
+
+    /**
+     * @param  array<int, string>  $arguments
+     */
+    private static function phpunitConfigurationHash(string $projectRoot, array $arguments): ?string
+    {
+        foreach (self::configurationCandidates($projectRoot, $arguments) as $candidate) {
+            $hash = self::hashIfExists($candidate);
+
+            if ($hash !== null) {
+                return $hash;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array<int, string>  $arguments
+     * @return list<string>
+     */
+    private static function configurationCandidates(string $projectRoot, array $arguments): array
+    {
+        $option = self::configurationOption($arguments);
+
+        $path = $option === null ? $projectRoot : realpath($option);
+
+        if ($path === false) {
+            return [];
+        }
+
+        if (is_file($path)) {
+            return [$path];
+        }
+
+        return [
+            $path.DIRECTORY_SEPARATOR.'phpunit.xml',
+            $path.DIRECTORY_SEPARATOR.'phpunit.xml.dist',
+        ];
+    }
+
+    /**
+     * @param  array<int, string>  $arguments
+     */
+    private static function configurationOption(array $arguments): ?string
+    {
+        $arguments = array_values($arguments);
+
+        foreach ($arguments as $index => $argument) {
+            if ($argument === '-c' || $argument === '--configuration') {
+                return $arguments[$index + 1] ?? null;
+            }
+
+            if (str_starts_with($argument, '--configuration=')) {
+                return substr($argument, strlen('--configuration='));
+            }
+
+            if (str_starts_with($argument, '-c')) {
+                return substr($argument, 2);
+            }
+        }
+
+        return null;
     }
 
     private static function composerLockHash(string $projectRoot): ?string
