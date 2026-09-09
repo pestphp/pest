@@ -1,7 +1,18 @@
 #!/bin/sh
 
+[ -n "$GH_STUB_ARGV_LOG" ] && echo "$@" >> "$GH_STUB_ARGV_LOG"
+
 if [ "$1" = "auth" ]; then
   [ "$GH_STUB_MODE" = "unauthenticated" ] && exit 1
+
+  previous=""
+  for argument in "$@"; do
+    if [ "$previous" = "--hostname" ] && [ "$argument" != "$GH_STUB_HOST" ]; then
+      exit 1
+    fi
+    previous="$argument"
+  done
+
   exit 0
 fi
 

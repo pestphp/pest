@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Pest\Plugins\Tia\GitHubRepository;
 use Tests\Fixtures\Tia\Project;
 
 afterEach(function (): void {
@@ -12,9 +13,18 @@ afterEach(function (): void {
  * @param  callable(array<string, mixed>): array<string, mixed>|null  $mutator
  * @return array{0: Project, 1: array<string, string>}
  */
-function tiaPublishedBaseline(string $mode = 'ok', ?callable $mutator = null): array
-{
+function tiaPublishedBaseline(
+    string $mode = 'ok',
+    ?callable $mutator = null,
+    ?string $origin = null,
+    string $host = GitHubRepository::DEFAULT_HOST,
+): array {
     $project = Project::make('master');
+
+    if ($origin !== null) {
+        $project->origin($origin);
+    }
+
     $project->seed('master');
 
     $payload = $project->detachGraph();
@@ -25,7 +35,7 @@ function tiaPublishedBaseline(string $mode = 'ok', ?callable $mutator = null): a
         $payload = (string) json_encode($mutator($decoded), JSON_UNESCAPED_SLASHES);
     }
 
-    return [$project, $project->gh($mode, $payload)];
+    return [$project, $project->gh($mode, $payload, $host)];
 }
 
 test('a published baseline is fetched instead of recorded locally', function (): void {
@@ -36,8 +46,42 @@ test('a published baseline is fetched instead of recorded locally', function ():
     expect($result->exitCode)->toBe(0, $result->describe())
         ->and($result->output)->toContain('Downloading TIA baseline')
         ->and($result->replayed())->toBe(Project::TOTAL_TESTS, $result->describe())
-        ->and($project->graphExists())->toBeTrue();
+        ->and($project->graphExists())->toBeTrue()
+        ->and($project->ghArgv())->toContain('-R pestphp/tia-fixture')
+        ->and($project->ghArgv())->not->toContain('--hostname');
 })->skipOnWindows();
+
+test('a published baseline is fetched from a GitHub Enterprise Server remote', function (): void {
+    [$project, $environment] = tiaPublishedBaseline(
+        origin: 'git@github.foodics.com:pay/capital-api.git',
+        host: 'github.foodics.com',
+    );
+
+    $result = $project->pestWithEnvironment($project->path(), $environment, '--tia', '--baselined');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('Downloading TIA baseline')
+        ->and($result->output)->toContain('github.foodics.com/pay/capital-api')
+        ->and($result->replayed())->toBe(Project::TOTAL_TESTS, $result->describe())
+        ->and($project->graphExists())->toBeTrue()
+        ->and($project->ghArgv())->toContain('-R github.foodics.com/pay/capital-api')
+        ->and($project->ghArgv())->toContain('auth status --hostname github.foodics.com')
+        ->and($project->ghArgv())->toContain('api --hostname github.foodics.com repos/pay/capital-api/actions/runs/');
+})->skipOnWindows();
+
+test('a remote on a host gh is not authenticated for records locally', function (string $origin): void {
+    [$project, $environment] = tiaPublishedBaseline(origin: $origin);
+
+    $result = $project->pestWithEnvironment($project->path(), $environment, '--tia', '--baselined');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->not->toContain('Downloading TIA baseline')
+        ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed')
+        ->and($project->ghArgv())->not->toContain('run list');
+})->with([
+    'a GitLab remote' => ['git@gitlab.com:org/repo.git'],
+    'an unknown Enterprise Server host' => ['git@ghe.example.com:org/repo.git'],
+])->skipOnWindows();
 
 test('a fetched baseline that will not decode is discarded rather than trusted', function (): void {
     [$project, $environment] = tiaPublishedBaseline('corrupt');

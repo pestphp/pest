@@ -78,9 +78,9 @@ final readonly class BaselineSync
 
     public function fetchIfAvailable(string $projectRoot, bool $force = false, bool $hasAnchor = false): bool
     {
-        $repo = $this->detectGitHubRepo($projectRoot);
+        $repo = $this->detectRepository($projectRoot);
 
-        if ($repo === null) {
+        if (! $repo instanceof GitHubRepository) {
             return false;
         }
 
@@ -182,47 +182,23 @@ final readonly class BaselineSync
             || getenv('CIRCLECI') === 'true';
     }
 
-    private function detectGitHubRepo(string $projectRoot): ?string
+    private function detectRepository(string $projectRoot): ?GitHubRepository
     {
-        $gitConfig = $projectRoot.DIRECTORY_SEPARATOR.'.git'.DIRECTORY_SEPARATOR.'config';
+        $repo = GitHubRepository::fromProjectRoot($projectRoot);
 
-        if (! is_file($gitConfig)) {
-            return null;
+        if (! $repo instanceof GitHubRepository || $repo->isDefaultHost()) {
+            return $repo;
         }
 
-        $content = @file_get_contents($gitConfig);
-
-        if ($content === false) {
-            return null;
-        }
-
-        if (preg_match('/\[remote "origin"\][^\[]*?url\s*=\s*(\S+)/s', $content, $match) !== 1) {
-            return null;
-        }
-
-        $url = $match[1];
-
-        if (preg_match('#^git@github\.com:([\w.-]+/[\w.-]+?)(?:\.git)?$#', $url, $m) === 1) {
-            return $m[1];
-        }
-
-        if (preg_match('#^https?://github\.com/([\w.-]+/[\w.-]+?)(?:\.git)?/?$#', $url, $m) === 1) {
-            return $m[1];
-        }
-
-        if (preg_match('#^ssh://(?:[^@/]+@)?github\.com(?::\d+)?/([\w.-]+/[\w.-]+?)(?:\.git)?/?$#i', $url, $m) === 1) {
-            return $m[1];
-        }
-
-        return null;
+        return $this->ghAuthenticated($repo) ? $repo : null;
     }
 
     /**
      * @return array{payload: array{graph: string, coverage: ?string, sizeOnDisk: int}|null, failureKind: ?string}
      */
-    private function download(string $repo, string $projectRoot, bool $hasAnchor = false): array
+    private function download(GitHubRepository $repo, string $projectRoot, bool $hasAnchor = false): array
     {
-        $this->validateGhDependencies($hasAnchor);
+        $this->validateGhDependencies($repo, $hasAnchor);
 
         [$runId, $listError] = $this->latestSuccessfulRunIdWithError($repo);
 
@@ -248,7 +224,7 @@ final readonly class BaselineSync
 
             $this->renderChild(sprintf(
                 'Using cached baseline from %s (run %s).',
-                $repo,
+                $repo->qualifiedName(),
                 $runId,
             ));
 
@@ -288,7 +264,7 @@ final readonly class BaselineSync
         ));
     }
 
-    private function validateGhDependencies(bool $hasAnchor): void
+    private function validateGhDependencies(GitHubRepository $repo, bool $hasAnchor): void
     {
         if (! $this->commandExists('gh')) {
             Panic::with(new BaselineFetchFailed(
@@ -298,7 +274,7 @@ final readonly class BaselineSync
             ));
         }
 
-        if (! $this->ghAuthenticated()) {
+        if (! $this->ghAuthenticated($repo)) {
             Panic::with(new BaselineFetchFailed(
                 'GitHub CLI (gh) is not authenticated — cannot fetch baseline.',
                 'Run `gh auth login` and retry.',
@@ -310,7 +286,7 @@ final readonly class BaselineSync
     /**
      * @return array{success: bool, failureKind: ?string}
      */
-    private function downloadArtifact(string $repo, string $runId, string $runCacheDir, bool $hasAnchor): array
+    private function downloadArtifact(GitHubRepository $repo, string $runId, string $runCacheDir, bool $hasAnchor): array
     {
         $artifactSize = $this->artifactSize($repo, $runId);
 
@@ -319,16 +295,16 @@ final readonly class BaselineSync
             ? sprintf(
                 'Downloading TIA baseline (%s) from %s…',
                 $this->formatSize($artifactSize),
-                $repo,
+                $repo->qualifiedName(),
             )
             : sprintf(
                 'Downloading TIA baseline from %s…',
-                $repo,
+                $repo->qualifiedName(),
             ));
 
         $process = new Process([
             'gh', 'run', 'download', $runId,
-            '-R', $repo,
+            '-R', $repo->qualifiedName(),
             '-n', self::ARTIFACT_NAME,
             '-D', $runCacheDir,
         ]);
@@ -384,11 +360,12 @@ final readonly class BaselineSync
         return $payload;
     }
 
-    private function artifactSize(string $repo, string $runId): ?int
+    private function artifactSize(GitHubRepository $repo, string $runId): ?int
     {
         $process = new Process([
             'gh', 'api',
-            sprintf('repos/%s/actions/runs/%s/artifacts', $repo, $runId),
+            ...$repo->hostnameArguments(),
+            sprintf('repos/%s/actions/runs/%s/artifacts', $repo->name, $runId),
             '--jq', sprintf(
                 '.artifacts[] | select(.name == "%s") | .size_in_bytes', // @pest-ignore-type
                 self::ARTIFACT_NAME,
@@ -530,11 +507,11 @@ final readonly class BaselineSync
     /**
      * @return array{0: ?string, 1: ?array{kind: string, message: string}}
      */
-    private function latestSuccessfulRunIdWithError(string $repo): array
+    private function latestSuccessfulRunIdWithError(GitHubRepository $repo): array
     {
         $process = new Process([
             'gh', 'run', 'list',
-            '-R', $repo,
+            '-R', $repo->qualifiedName(),
             '--workflow', $this->workflowFile(),
             '--status', 'success',
             '--limit', '1',
@@ -553,9 +530,9 @@ final readonly class BaselineSync
         return [$runId === '' ? null : $runId, null];
     }
 
-    private function ghAuthenticated(): bool
+    private function ghAuthenticated(GitHubRepository $repo): bool
     {
-        $process = new Process(['gh', 'auth', 'status']);
+        $process = new Process(['gh', 'auth', 'status', ...$repo->hostnameArguments()]);
         $process->setTimeout(10.0);
         $process->run();
 
