@@ -10,6 +10,7 @@ use Pest\Plugins\Tia;
 use Pest\Plugins\Tia\Contracts\State;
 use Pest\Support\View;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 
 /**
@@ -583,10 +584,7 @@ final readonly class BaselineSync
 
     private function commandExists(string $cmd): bool
     {
-        $process = new Process(['which', $cmd]);
-        $process->run();
-
-        return $process->isSuccessful();
+        return new ExecutableFinder()->find($cmd) !== null;
     }
 
     private function cleanup(string $dir): void
