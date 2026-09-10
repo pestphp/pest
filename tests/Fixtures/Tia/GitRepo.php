@@ -65,6 +65,11 @@ final readonly class GitRepo
         $this->run(['remote', 'remove', 'origin']);
     }
 
+    public function setOriginUrl(string $url): void
+    {
+        $this->run(['remote', 'set-url', 'origin', $url]);
+    }
+
     public function setOriginHead(string $branch): void
     {
         $this->run(['update-ref', 'refs/remotes/origin/'.$branch, 'HEAD']);
