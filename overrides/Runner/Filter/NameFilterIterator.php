@@ -22,7 +22,6 @@ use RecursiveIterator;
 
 use function end;
 use function preg_match;
-use function trim;
 
 /**
  * @extends RecursiveFilterIterator<int, Test, RecursiveIterator<int, Test>>
@@ -57,9 +56,7 @@ abstract class NameFilterIterator extends RecursiveFilterIterator
         }
 
         if ($test instanceof HasPrintableTestCaseName) {
-            $name = trim(
-                $test::getPrintableTestCaseName().'::'.$test->getPrintableTestCaseMethodName().$test->dataSetAsString()
-            );
+            $name = $test::getPrintableTestCaseName().'::'.$test->getPrintableTestCaseMethodName().$test->dataSetAsString();
         } else {
             $name = $test::class.'::'.$test->nameWithDataSet();
         }
