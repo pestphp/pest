@@ -1798,6 +1798,15 @@
    PASS  Tests\Unit\Overrides\ThrowableBuilder
   ✓ collision editor can be added to the stack trace
 
+   PASS  Tests\Unit\Plugins\Actions\CallsAddsOutput
+  ✓ exit code observers run after every output plugin
+  ✓ exit code observers receive unchanged codes when there are no output plugins with (0)
+  ✓ exit code observers receive unchanged codes when there are no output plugins with (1)
+  ✓ exit code observers receive unchanged codes when there are no output plugins with (2)
+  ✓ exit code observers receive unchanged codes when there are no output plugins with (42)
+  ✓ output plugins work without exit code observers
+  ✓ exit code observers are not called when an output plugin throws
+
    PASS  Tests\Unit\Plugins\Concerns\HandleArguments
   ✓ method hasArgument with ('--long-argument', true)
   ✓ method hasArgument with ('-a', true)
@@ -2256,4 +2265,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1599 passed (3486 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1606 passed (3500 assertions)
