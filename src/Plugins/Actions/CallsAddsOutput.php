@@ -26,6 +26,12 @@ final class CallsAddsOutput
             $exitCode = $plugin->addOutput($exitCode);
         }
 
+        foreach (Loader::getPlugins(Plugins\ObservesExitCode::class) as $plugin) {
+            assert($plugin instanceof Plugins\ObservesExitCode);
+
+            $plugin->observeExitCode($exitCode);
+        }
+
         return $exitCode;
     }
 }
