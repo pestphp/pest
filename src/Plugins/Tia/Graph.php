@@ -60,6 +60,16 @@ final class Graph
      */
     private array $baselines = [];
 
+    /**
+     * @var array<string, array<string, array{
+     *     sha: ?string,
+     *     tree: array<string, string>,
+     *     complete?: bool,
+     *     results: array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>
+     * }>>
+     */
+    private array $resolvedBaselines = [];
+
     private string $fallbackBranch = 'main';
 
     private readonly string $projectRoot;
@@ -734,6 +744,8 @@ final class Graph
 
     public function setFallbackBranch(string $branch): void
     {
+        $this->forgetResolvedBaselines();
+
         $this->fallbackBranch = $branch;
     }
 
@@ -746,12 +758,16 @@ final class Graph
 
     public function setRecordedAtSha(string $branch, ?string $sha): void
     {
+        $this->forgetResolvedBaselines();
+
         $this->ensureBaseline($branch);
         $this->baselines[$branch]['sha'] = $sha;
     }
 
     public function setResult(string $branch, string $testId, int $status, string $message, float $time, int $assertions = 0, ?string $file = null): void
     {
+        $this->forgetResolvedBaselines();
+
         $this->ensureBaseline($branch);
 
         $entry = [
@@ -941,12 +957,16 @@ final class Graph
      */
     public function setLastRunTree(string $branch, array $tree): void
     {
+        $this->forgetResolvedBaselines();
+
         $this->ensureBaseline($branch);
         $this->baselines[$branch]['tree'] = $tree;
     }
 
     public function clearResults(string $branch): void
     {
+        $this->forgetResolvedBaselines();
+
         $this->ensureBaseline($branch);
         $this->baselines[$branch]['results'] = [];
     }
@@ -966,6 +986,14 @@ final class Graph
     {
         $fallbackBranch ??= $this->fallbackBranch;
 
+        return $this->resolvedBaselines[$branch][$fallbackBranch] ??= $this->resolveBaseline($branch, $fallbackBranch);
+    }
+
+    /**
+     * @return array{sha: ?string, tree: array<string, string>, complete?: bool, results: array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>}
+     */
+    private function resolveBaseline(string $branch, string $fallbackBranch): array
+    {
         $fallback = $branch !== $fallbackBranch ? ($this->baselines[$fallbackBranch] ?? null) : null;
         $own = $this->baselines[$branch] ?? null;
 
@@ -1018,6 +1046,11 @@ final class Graph
         }
 
         return $results;
+    }
+
+    private function forgetResolvedBaselines(): void
+    {
+        $this->resolvedBaselines = [];
     }
 
     private function ensureBaseline(string $branch): void
@@ -1588,6 +1621,8 @@ final class Graph
 
     public function markBaselineComplete(string $branch): void
     {
+        $this->forgetResolvedBaselines();
+
         if (isset($this->baselines[$branch])) {
             $this->baselines[$branch]['complete'] = true;
         }
@@ -1598,6 +1633,8 @@ final class Graph
         if (! isset($this->baselines[$branch]['results'])) {
             return;
         }
+
+        $this->forgetResolvedBaselines();
 
         $root = rtrim($this->projectRoot, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
 
@@ -1627,6 +1664,8 @@ final class Graph
      */
     public function pruneMissingBranches(array $keep): void
     {
+        $this->forgetResolvedBaselines();
+
         $survivors = array_fill_keys($keep, true);
 
         foreach (array_keys($this->baselines) as $branch) {
@@ -1649,6 +1688,8 @@ final class Graph
         if (! isset($this->baselines[$branch]['results'])) {
             return;
         }
+
+        $this->forgetResolvedBaselines();
 
         $touched = [];
         foreach ($touchedFiles as $file) {
