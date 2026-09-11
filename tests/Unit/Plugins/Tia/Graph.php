@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Pest\Plugins\Tia\Graph;
 use Pest\Plugins\Tia\WatchPatterns;
 use Pest\Support\Container;
+use Pest\Support\Reflection;
 use PHPUnit\Framework\TestStatus\TestStatus;
 
 describe('shouldRerunStatus()', function (): void {
@@ -310,5 +311,165 @@ describe('markKnownTestFiles()', function (): void {
         $graph->markKnownTestFiles(['/somewhere/else/tests/FooTest.php']);
 
         expect($graph->knowsTest('/somewhere/else/tests/FooTest.php'))->toBeFalse();
+    });
+});
+
+describe('baselineFor() fallback merging and memoization', function (): void {
+    beforeEach(function (): void {
+        $this->projectRoot = sys_get_temp_dir().'/pest-tia-baseline-'.bin2hex(random_bytes(4));
+        mkdir($this->projectRoot.'/tests/Feature', 0755, true);
+
+        touch($this->projectRoot.'/tests/Feature/FooTest.php');
+        touch($this->projectRoot.'/tests/Feature/BarTest.php');
+
+        $graph = new Graph($this->projectRoot);
+
+        $graph->setRecordedAtSha('main', 'main-sha');
+        $graph->setLastRunTree('main', ['app/A.php' => 'a1']);
+        $graph->setResult('main', 'Tests\FooTest::a', 0, '', 0.1, 1, 'tests/Feature/FooTest.php');
+        $graph->setResult('main', 'Tests\BarTest::b', 0, '', 0.2, 1, 'tests/Feature/BarTest.php');
+
+        $graph->setResult('develop', 'Tests\FooTest::a', 7, 'boom', 0.9, 1, 'tests/Feature/FooTest.php');
+
+        $graph->setResult('feature', 'Tests\FooTest::f', 0, '', 0.3, 1, 'tests/Feature/FooTest.php');
+        $graph->setResult('feature', 'Tests\GoneTest::g', 0, '', 0.4, 1, 'tests/Feature/GoneTest.php');
+
+        $this->graph = $graph;
+    });
+
+    afterEach(function (): void {
+        @unlink($this->projectRoot.'/tests/Feature/FooTest.php');
+        @unlink($this->projectRoot.'/tests/Feature/BarTest.php');
+        @rmdir($this->projectRoot.'/tests/Feature');
+        @rmdir($this->projectRoot.'/tests');
+        @rmdir($this->projectRoot);
+    });
+
+    it('overlays a partial branch baseline on top of the fallback', function (): void {
+        expect($this->graph->getTime('feature', 'Tests\FooTest::f'))->toBe(0.3)
+            ->and($this->graph->getTime('feature', 'Tests\FooTest::a'))->toBe(0.1)
+            ->and($this->graph->getTime('feature', 'Tests\BarTest::b'))->toBe(0.2)
+            ->and($this->graph->recordedAtSha('feature'))->toBe('main-sha')
+            ->and($this->graph->lastRunTree('feature'))->toBe(['app/A.php' => 'a1']);
+    });
+
+    it('lets a complete branch baseline shadow fallback results from the files it covers', function (): void {
+        $this->graph->markBaselineComplete('feature');
+
+        expect($this->graph->getTime('feature', 'Tests\FooTest::f'))->toBe(0.3)
+            ->and($this->graph->getTime('feature', 'Tests\FooTest::a'))->toBeNull()
+            ->and($this->graph->getTime('feature', 'Tests\BarTest::b'))->toBe(0.2);
+    });
+
+    it('memoizes the resolved baseline until the graph changes', function (): void {
+        expect(Reflection::getPropertyValue($this->graph, 'resolvedBaselines'))->toBe([]);
+
+        $this->graph->getTime('feature', 'Tests\FooTest::a');
+
+        expect(Reflection::getPropertyValue($this->graph, 'resolvedBaselines'))->toHaveKey('feature');
+
+        $this->graph->setResult('feature', 'Tests\FooTest::a', 0, '', 0.5, 1, 'tests/Feature/FooTest.php');
+
+        expect(Reflection::getPropertyValue($this->graph, 'resolvedBaselines'))->toBe([]);
+    });
+
+    it('resolves each requested fallback separately', function (): void {
+        expect($this->graph->getTime('feature', 'Tests\FooTest::a'))->toBe(0.1)
+            ->and($this->graph->getTime('feature', 'Tests\FooTest::a', 'develop'))->toBe(0.9)
+            ->and($this->graph->getTime('feature', 'Tests\FooTest::a'))->toBe(0.1);
+    });
+
+    it('keeps the resolved baseline out of the encoded graph', function (): void {
+        $before = $this->graph->encode();
+
+        $this->graph->getTime('feature', 'Tests\FooTest::a');
+
+        $after = $this->graph->encode();
+
+        expect($after)->toBe($before)
+            ->and(Graph::decode((string) $after, $this->projectRoot)?->getTime('feature', 'Tests\FooTest::a'))->toBe(0.1);
+    });
+
+    it('reflects setResult() after a lookup', function (): void {
+        expect($this->graph->getTime('feature', 'Tests\FooTest::a'))->toBe(0.1);
+
+        $this->graph->setResult('feature', 'Tests\FooTest::a', 0, '', 0.5, 1, 'tests/Feature/FooTest.php');
+
+        expect($this->graph->getTime('feature', 'Tests\FooTest::a'))->toBe(0.5);
+    });
+
+    it('reflects a fallback branch mutation after a lookup', function (): void {
+        expect($this->graph->getTime('feature', 'Tests\BarTest::b'))->toBe(0.2);
+
+        $this->graph->setResult('main', 'Tests\BarTest::b', 0, '', 0.6, 1, 'tests/Feature/BarTest.php');
+
+        expect($this->graph->getTime('feature', 'Tests\BarTest::b'))->toBe(0.6);
+    });
+
+    it('reflects setRecordedAtSha() after a lookup', function (): void {
+        expect($this->graph->recordedAtSha('feature'))->toBe('main-sha');
+
+        $this->graph->setRecordedAtSha('feature', 'feature-sha');
+
+        expect($this->graph->recordedAtSha('feature'))->toBe('feature-sha');
+    });
+
+    it('reflects setLastRunTree() after a lookup', function (): void {
+        expect($this->graph->lastRunTree('feature'))->toBe(['app/A.php' => 'a1']);
+
+        $this->graph->setLastRunTree('feature', ['app/A.php' => 'a2']);
+
+        expect($this->graph->lastRunTree('feature'))->toBe(['app/A.php' => 'a2']);
+    });
+
+    it('reflects clearResults() after a lookup', function (): void {
+        expect($this->graph->getTime('feature', 'Tests\FooTest::f'))->toBe(0.3);
+
+        $this->graph->clearResults('feature');
+
+        expect($this->graph->getTime('feature', 'Tests\FooTest::f'))->toBeNull()
+            ->and($this->graph->getTime('feature', 'Tests\FooTest::a'))->toBe(0.1);
+    });
+
+    it('reflects markBaselineComplete() after a lookup', function (): void {
+        expect($this->graph->getTime('feature', 'Tests\FooTest::a'))->toBe(0.1);
+
+        $this->graph->markBaselineComplete('feature');
+
+        expect($this->graph->getTime('feature', 'Tests\FooTest::a'))->toBeNull();
+    });
+
+    it('reflects pruneResultsForMissingFiles() after a lookup', function (): void {
+        expect($this->graph->getTime('feature', 'Tests\GoneTest::g'))->toBe(0.4);
+
+        $this->graph->pruneResultsForMissingFiles('feature');
+
+        expect($this->graph->getTime('feature', 'Tests\GoneTest::g'))->toBeNull()
+            ->and($this->graph->getTime('feature', 'Tests\FooTest::f'))->toBe(0.3);
+    });
+
+    it('reflects pruneMissingBranches() after a lookup', function (): void {
+        expect($this->graph->getTime('feature', 'Tests\FooTest::f'))->toBe(0.3);
+
+        $this->graph->pruneMissingBranches(['main']);
+
+        expect($this->graph->getTime('feature', 'Tests\FooTest::f'))->toBeNull()
+            ->and($this->graph->getTime('feature', 'Tests\FooTest::a'))->toBe(0.1);
+    });
+
+    it('reflects pruneStaleResults() after a lookup', function (): void {
+        expect($this->graph->getTime('feature', 'Tests\FooTest::f'))->toBe(0.3);
+
+        $this->graph->pruneStaleResults('feature', ['tests/Feature/FooTest.php'], []);
+
+        expect($this->graph->getTime('feature', 'Tests\FooTest::f'))->toBeNull();
+    });
+
+    it('reflects setFallbackBranch() after a lookup', function (): void {
+        expect($this->graph->getTime('feature', 'Tests\FooTest::a'))->toBe(0.1);
+
+        $this->graph->setFallbackBranch('develop');
+
+        expect($this->graph->getTime('feature', 'Tests\FooTest::a'))->toBe(0.9);
     });
 });
