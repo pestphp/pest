@@ -115,7 +115,7 @@ test('a narrowed run does not reclaim anything', function (): void {
         ->and($delta->isResultsOnly())->toBeTrue($delta->summary());
 })->skipOnWindows();
 
-test('a detached HEAD does not reclaim anything either', function (): void {
+test('a detached HEAD reclaims missing branches without changing the default baseline', function (): void {
     $project = Project::make('master');
     $project->seed('master');
 
@@ -130,8 +130,11 @@ test('a detached HEAD does not reclaim anything either', function (): void {
     $project->pest('--tia');
     $delta = $project->delta();
 
-    expect($project->branchKeys())->toBe(['master', 'feature-x'])
-        ->and($delta->isHardSuppressed())->toBeTrue($delta->summary());
+    expect($project->branchKeys())->toHaveCount(2)
+        ->and($project->branchKeys())->toContain('master')
+        ->and($project->branchKeys())->not->toContain('feature-x')
+        ->and($delta->baselineUntouched('master'))->toBeTrue($delta->summary())
+        ->and($delta->structureMoved())->toBeTrue($delta->summary());
 })->skipOnWindows();
 
 test('the default branch baseline survives every branch that comes and goes', function (): void {
