@@ -7,10 +7,10 @@ namespace Pest\Plugins\Tia;
 use Pest\Exceptions\BaselineFetchFailed;
 use Pest\Panic;
 use Pest\Plugins\Tia;
+use Pest\Plugins\Tia\Baselines\BaseRemote;
 use Pest\Plugins\Tia\Contracts\State;
 use Pest\Support\View;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 
 /**
@@ -18,10 +18,6 @@ use Symfony\Component\Process\Process;
  */
 final readonly class BaselineSync
 {
-    private const string DEFAULT_WORKFLOW_FILE = 'tia-baseline.yml';
-
-    private const string ARTIFACT_NAME = 'pest-tia-baseline';
-
     private const string GRAPH_ASSET = Tia::KEY_GRAPH;
 
     private const string COVERAGE_ASSET = Tia::KEY_COVERAGE_CACHE;
@@ -32,27 +28,12 @@ final readonly class BaselineSync
 
     private const int FETCH_COOLDOWN_SECONDS = 86400;
 
-    private const array DIAGNOSES = [
-        'network' => [
-            'pattern' => '/could not resolve host|connection refused|connection reset|temporary failure in name resolution|network is unreachable|no route to host|i\/o timeout|tls handshake|getaddrinfo/i',
-            'message' => 'network error (offline or DNS unreachable). Try again when connected.',
-        ],
-        'gh-auth' => [
-            'pattern' => '/authentication failed|not logged in|requires authentication|bad credentials|401/i',
-            'message' => 'authentication failed — run `gh auth login` and retry.',
-        ],
-        'rate-limit' => [
-            'pattern' => '/rate limit|too many requests|secondary rate limit/i',
-            'message' => 'GitHub API rate limit hit — try again later.',
-        ],
-        'not-found' => [
-            'pattern' => '/404|not found|repository not found/i',
-            'message' => 'workflow or artifact not found in repo.',
-        ],
-        'forbidden' => [
-            'pattern' => '/403|forbidden|access denied/i',
-            'message' => 'access denied — check that your `gh` token has repo + actions read scope.',
-        ],
+    /**
+     * @var array<int, class-string<BaseRemote>>
+     */
+    private const array REMOTES = [
+        Baselines\GitHubRemote::class,
+        Baselines\GitLabRemote::class,
     ];
 
     public function __construct(
@@ -60,11 +41,6 @@ final readonly class BaselineSync
         private OutputInterface $output,
         private WatchPatterns $watchPatterns,
     ) {}
-
-    private function workflowFile(): string
-    {
-        return $this->watchPatterns->baselineWorkflow() ?? self::DEFAULT_WORKFLOW_FILE;
-    }
 
     private function renderBadge(string $type, string $content): void
     {
@@ -78,11 +54,13 @@ final readonly class BaselineSync
 
     public function fetchIfAvailable(string $projectRoot, bool $force = false, bool $hasAnchor = false): bool
     {
-        $repo = $this->detectGitHubRepo($projectRoot);
+        $detected = $this->detectRemote($projectRoot);
 
-        if ($repo === null) {
+        if ($detected === null) {
             return false;
         }
+
+        [$remote, $repo] = $detected;
 
         if (! $force && ($remaining = $this->cooldownRemaining()) !== null) {
             $this->renderBadge('WARN', sprintf(
@@ -93,7 +71,7 @@ final readonly class BaselineSync
             return false;
         }
 
-        $result = $this->download($repo, $projectRoot, $hasAnchor);
+        $result = $this->download($remote, $repo, $projectRoot, $hasAnchor);
         $payload = $result['payload'];
         $failureKind = $result['failureKind'];
 
@@ -117,6 +95,23 @@ final readonly class BaselineSync
         $this->clearCooldown();
 
         return true;
+    }
+
+    /**
+     * @return array{0: BaseRemote, 1: string}|null
+     */
+    private function detectRemote(string $projectRoot): ?array
+    {
+        foreach (self::REMOTES as $class) {
+            $remote = new $class($this->watchPatterns);
+            $repo = $remote->detect($projectRoot);
+
+            if ($repo !== null) {
+                return [$remote, $repo];
+            }
+        }
+
+        return null;
     }
 
     private function cooldownRemaining(): ?int
@@ -182,52 +177,17 @@ final readonly class BaselineSync
             || getenv('CIRCLECI') === 'true';
     }
 
-    private function detectGitHubRepo(string $projectRoot): ?string
-    {
-        $gitConfig = $projectRoot.DIRECTORY_SEPARATOR.'.git'.DIRECTORY_SEPARATOR.'config';
-
-        if (! is_file($gitConfig)) {
-            return null;
-        }
-
-        $content = @file_get_contents($gitConfig);
-
-        if ($content === false) {
-            return null;
-        }
-
-        if (preg_match('/\[remote "origin"\][^\[]*?url\s*=\s*(\S+)/s', $content, $match) !== 1) {
-            return null;
-        }
-
-        $url = $match[1];
-
-        if (preg_match('#^git@github\.com:([\w.-]+/[\w.-]+?)(?:\.git)?$#', $url, $m) === 1) {
-            return $m[1];
-        }
-
-        if (preg_match('#^https?://github\.com/([\w.-]+/[\w.-]+?)(?:\.git)?/?$#', $url, $m) === 1) {
-            return $m[1];
-        }
-
-        if (preg_match('#^ssh://(?:[^@/]+@)?github\.com(?::\d+)?/([\w.-]+/[\w.-]+?)(?:\.git)?/?$#i', $url, $m) === 1) {
-            return $m[1];
-        }
-
-        return null;
-    }
-
     /**
      * @return array{payload: array{graph: string, coverage: ?string, sizeOnDisk: int}|null, failureKind: ?string}
      */
-    private function download(string $repo, string $projectRoot, bool $hasAnchor = false): array
+    private function download(BaseRemote $remote, string $repo, string $projectRoot, bool $hasAnchor = false): array
     {
-        $this->validateGhDependencies($hasAnchor);
+        $this->validateCliDependencies($remote, $hasAnchor);
 
-        [$runId, $listError] = $this->latestSuccessfulRunIdWithError($repo);
+        [$runId, $listError] = $remote->latestSuccessfulRunId($repo);
 
         if ($listError !== null) {
-            $this->panicOnClassifiedError($listError, 'Failed to query baseline runs', $hasAnchor);
+            $this->panicOnClassifiedError($remote, $listError, 'Failed to query baseline runs', $hasAnchor);
 
             $this->renderBadge('WARN', sprintf(
                 'Failed to query baseline runs — %s',
@@ -259,7 +219,7 @@ final readonly class BaselineSync
             return ['payload' => null, 'failureKind' => null];
         }
 
-        $download = $this->downloadArtifact($repo, $runId, $runCacheDir, $hasAnchor);
+        $download = $this->downloadArtifact($remote, $repo, $runId, $runCacheDir, $hasAnchor);
 
         if (! $download['success']) {
             return ['payload' => null, 'failureKind' => $download['failureKind']];
@@ -275,7 +235,7 @@ final readonly class BaselineSync
     /**
      * @param  array{kind: string, message: string}  $diagnosis
      */
-    private function panicOnClassifiedError(array $diagnosis, string $contextPrefix, bool $hasAnchor): void
+    private function panicOnClassifiedError(BaseRemote $remote, array $diagnosis, string $contextPrefix, bool $hasAnchor): void
     {
         if (! in_array($diagnosis['kind'], ['forbidden', 'not-found'], true)) {
             return;
@@ -283,25 +243,25 @@ final readonly class BaselineSync
 
         Panic::with(new BaselineFetchFailed(
             sprintf('%s — %s', $contextPrefix, $diagnosis['message']),
-            sprintf('Verify workflow [%s], artifact [%s], and gh token scope.', $this->workflowFile(), self::ARTIFACT_NAME),
+            sprintf('Verify your CI baseline configuration and `%s` token scope.', $remote->cliName()),
             $hasAnchor,
         ));
     }
 
-    private function validateGhDependencies(bool $hasAnchor): void
+    private function validateCliDependencies(BaseRemote $remote, bool $hasAnchor): void
     {
-        if (! $this->commandExists('gh')) {
+        if (! $remote->cliExists()) {
             Panic::with(new BaselineFetchFailed(
-                'GitHub CLI (gh) not found — cannot fetch baseline.',
-                'Install it from https://cli.github.com.',
+                sprintf('%s CLI (%s) not found — cannot fetch baseline.', $remote->providerLabel(), $remote->cliName()),
+                sprintf('Install it from %s.', $remote->installUrl()),
                 $hasAnchor,
             ));
         }
 
-        if (! $this->ghAuthenticated()) {
+        if (! $remote->cliAuthenticated()) {
             Panic::with(new BaselineFetchFailed(
-                'GitHub CLI (gh) is not authenticated — cannot fetch baseline.',
-                'Run `gh auth login` and retry.',
+                sprintf('%s CLI (%s) is not authenticated — cannot fetch baseline.', $remote->providerLabel(), $remote->cliName()),
+                sprintf('Run `%s` and retry.', $remote->loginCommand()),
                 $hasAnchor,
             ));
         }
@@ -310,9 +270,9 @@ final readonly class BaselineSync
     /**
      * @return array{success: bool, failureKind: ?string}
      */
-    private function downloadArtifact(string $repo, string $runId, string $runCacheDir, bool $hasAnchor): array
+    private function downloadArtifact(BaseRemote $remote, string $repo, string $runId, string $runCacheDir, bool $hasAnchor): array
     {
-        $artifactSize = $this->artifactSize($repo, $runId);
+        $artifactSize = $remote->artifactSize($repo, $runId);
 
         $this->output->writeln('');
         $this->renderChild($artifactSize !== null
@@ -326,12 +286,7 @@ final readonly class BaselineSync
                 $repo,
             ));
 
-        $process = new Process([
-            'gh', 'run', 'download', $runId,
-            '-R', $repo,
-            '-n', self::ARTIFACT_NAME,
-            '-D', $runCacheDir,
-        ]);
+        $process = new Process($remote->downloadCommand($repo, $runId, $runCacheDir));
         $process->setTimeout(900.0);
         $process->start();
 
@@ -352,9 +307,9 @@ final readonly class BaselineSync
 
         $this->cleanup($runCacheDir);
 
-        $diagnosis = $this->classifyGhError($process->getErrorOutput().$process->getOutput());
+        $diagnosis = $remote->classifyError($process->getErrorOutput().$process->getOutput());
 
-        $this->panicOnClassifiedError($diagnosis, 'Baseline download failed', $hasAnchor);
+        $this->panicOnClassifiedError($remote, $diagnosis, 'Baseline download failed', $hasAnchor);
 
         $this->renderBadge('WARN', sprintf(
             'Baseline download failed — %s',
@@ -376,34 +331,12 @@ final readonly class BaselineSync
 
             Panic::with(new BaselineFetchFailed(
                 'Baseline downloaded but the artifact is missing expected files (graph.json).',
-                'Your CI publish step is broken — check the workflow that uploads pest-tia-baseline.',
+                'Your CI publish step is broken — check the job that uploads the TIA baseline artifact.',
                 $hasAnchor,
             ));
         }
 
         return $payload;
-    }
-
-    private function artifactSize(string $repo, string $runId): ?int
-    {
-        $process = new Process([
-            'gh', 'api',
-            sprintf('repos/%s/actions/runs/%s/artifacts', $repo, $runId),
-            '--jq', sprintf(
-                '.artifacts[] | select(.name == "%s") | .size_in_bytes', // @pest-ignore-type
-                self::ARTIFACT_NAME,
-            ),
-        ]);
-        $process->setTimeout(30.0);
-        $process->run();
-
-        if (! $process->isSuccessful()) {
-            return null;
-        }
-
-        $size = trim($process->getOutput());
-
-        return is_numeric($size) ? (int) $size : null;
     }
 
     private function renderDownloadProgress(float $startedAt, int $tick): void
@@ -525,66 +458,6 @@ final readonly class BaselineSync
         foreach (array_slice($candidates, self::DOWNLOAD_CACHE_MAX_ENTRIES) as $stale) {
             $this->cleanup($stale['path']);
         }
-    }
-
-    /**
-     * @return array{0: ?string, 1: ?array{kind: string, message: string}}
-     */
-    private function latestSuccessfulRunIdWithError(string $repo): array
-    {
-        $process = new Process([
-            'gh', 'run', 'list',
-            '-R', $repo,
-            '--workflow', $this->workflowFile(),
-            '--status', 'success',
-            '--limit', '1',
-            '--json', 'databaseId',
-            '--jq', '.[0].databaseId // empty',
-        ]);
-        $process->setTimeout(30.0);
-        $process->run();
-
-        if (! $process->isSuccessful()) {
-            return [null, $this->classifyGhError($process->getErrorOutput().$process->getOutput())];
-        }
-
-        $runId = trim($process->getOutput());
-
-        return [$runId === '' ? null : $runId, null];
-    }
-
-    private function ghAuthenticated(): bool
-    {
-        $process = new Process(['gh', 'auth', 'status']);
-        $process->setTimeout(10.0);
-        $process->run();
-
-        return $process->isSuccessful();
-    }
-
-    /**
-     * @return array{kind: string, message: string}
-     */
-    private function classifyGhError(string $output): array
-    {
-        $output = trim($output);
-
-        if ($output === '') {
-            return ['kind' => 'unknown', 'message' => 'unknown error'];
-        }
-
-        foreach (self::DIAGNOSES as $kind => $diagnosis) {
-            if (preg_match($diagnosis['pattern'], $output) === 1) {
-                return ['kind' => $kind, 'message' => $diagnosis['message']];
-            }
-        }
-
-        return ['kind' => 'unknown', 'message' => trim(strtok($output, "\n"))];
-    }
-
-    private function commandExists(string $cmd): bool
-    {
-        return new ExecutableFinder()->find($cmd) !== null;
     }
 
     private function cleanup(string $dir): void
