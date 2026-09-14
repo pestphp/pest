@@ -18,6 +18,8 @@ use PHPUnit\TextUI\Configuration\Registry;
  */
 final class Graph
 {
+    public const string WORKSPACE_BRANCH_PREFIX = '@workspace:';
+
     /**
      * @var array<string, string>
      */
@@ -1020,9 +1022,7 @@ final class Graph
 
     private function ensureBaseline(string $branch): void
     {
-        if (! isset($this->baselines[$branch])) {
-            $this->baselines[$branch] = ['sha' => null, 'tree' => [], 'results' => []];
-        }
+        $this->baselines[$branch] ??= ['sha' => null, 'tree' => [], 'results' => []];
     }
 
     /**
@@ -1067,9 +1067,7 @@ final class Graph
                 continue;
             }
 
-            if (! isset($this->edges[$rel])) {
-                $this->edges[$rel] = [];
-            }
+            $this->edges[$rel] ??= [];
         }
     }
 
@@ -1632,6 +1630,10 @@ final class Graph
         $survivors = array_fill_keys($keep, true);
 
         foreach (array_keys($this->baselines) as $branch) {
+            if (str_starts_with($branch, self::WORKSPACE_BRANCH_PREFIX)) {
+                continue;
+            }
+
             if (! isset($survivors[$branch])) {
                 unset($this->baselines[$branch]);
             }

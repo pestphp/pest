@@ -5,20 +5,10 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 /**
- * Locates the git repository governing a path, which for projects living in
- * a subdirectory of a monorepo sits in an ancestor directory rather than the
- * project root itself. Paths are walked as strings, so callers pass
- * canonical (realpath'd) roots.
- *
  * @internal
  */
 final class GitRepository
 {
-    /**
-     * The nearest ancestor `.git` entry governing the given path — a
-     * directory for regular repositories, a file for worktrees and
-     * submodules — or `null` when the path is not inside a repository.
-     */
     public static function locate(string $path): ?string
     {
         $dir = $path;
@@ -40,10 +30,6 @@ final class GitRepository
         }
     }
 
-    /**
-     * The governing repository's config file, or `null` when there is none
-     * or it cannot be resolved by static inspection.
-     */
     public static function configPath(string $path): ?string
     {
         $dotGit = self::locate($path);
@@ -57,11 +43,6 @@ final class GitRepository
         return is_file($config) ? $config : null;
     }
 
-    /**
-     * The project's path relative to the governing repository's root, with a
-     * trailing slash (`apps/api/`), or an empty string when the project is
-     * the repository root or sits outside any repository.
-     */
     public static function subdirectoryPrefix(string $projectRoot): string
     {
         $dotGit = self::locate($projectRoot);

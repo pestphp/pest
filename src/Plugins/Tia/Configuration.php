@@ -14,6 +14,16 @@ final class Configuration
     /**
      * @return $this
      */
+    public function directory(string $directory): self
+    {
+        Storage::useDirectory($directory);
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
     public function always(): self
     {
         /** @var WatchPatterns $watchPatterns */
@@ -51,7 +61,7 @@ final class Configuration
     /**
      * @return $this
      */
-    public function baselined(?string $workflow = null): self
+    public function baselined(?string $workflow = null, ?string $job = null): self
     {
         /** @var WatchPatterns $watchPatterns */
         $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
@@ -59,6 +69,10 @@ final class Configuration
 
         if ($workflow !== null) {
             $watchPatterns->setBaselineWorkflow($workflow);
+        }
+
+        if ($job !== null) {
+            $watchPatterns->setBaselineJob($job);
         }
 
         return $this;

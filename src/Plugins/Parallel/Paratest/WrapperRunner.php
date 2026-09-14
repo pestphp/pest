@@ -369,7 +369,7 @@ final class WrapperRunner implements RunnerInterface
             $failedEvents = array_merge_recursive($testResultSum->testFailedEvents(), $testResult->testFailedEvents());
 
             $testResultSum = new TestResult(
-                (int) $testResultSum->hasTests() + (int) $testResult->hasTests(),
+                ResultReflection::numberOfTests($testResultSum) + self::numberOfTestsSeenByWorker($testResult),
                 $testResultSum->numberOfTestsRun() + $testResult->numberOfTestsRun(),
                 $testResultSum->numberOfAssertions() + $testResult->numberOfAssertions(),
                 array_merge_recursive($testResultSum->testErroredEvents(), $testResult->testErroredEvents()),
@@ -498,6 +498,11 @@ final class WrapperRunner implements RunnerInterface
         $this->clearFiles($this->testdoxFiles);
 
         return $exitcode;
+    }
+
+    private static function numberOfTestsSeenByWorker(TestResult $result): int
+    {
+        return max(ResultReflection::numberOfTests($result), $result->numberOfTestsRun());
     }
 
     /**

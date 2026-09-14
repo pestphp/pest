@@ -37,9 +37,9 @@ final class Kernel
     private const array BOOTSTRAPPERS = [
         Bootstrappers\BootOverrides::class,
         Bootstrappers\BootPhpUnitConfiguration::class,
-        Plugins\Tia\Bootstrapper::class,
         Bootstrappers\BootSubscribers::class,
         Bootstrappers\BootFiles::class,
+        Plugins\Tia\Bootstrapper::class,
         Bootstrappers\BootView::class,
         Bootstrappers\BootKernelDump::class,
         Bootstrappers\BootExcludeList::class,

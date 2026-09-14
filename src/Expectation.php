@@ -34,6 +34,7 @@ use Pest\Support\Reflection;
 use PHPUnit\Architecture\Elements\ObjectDescription;
 use PHPUnit\Framework\ExpectationFailedException;
 use ReflectionEnum;
+use ReflectionFunction;
 use ReflectionMethod;
 use ReflectionProperty;
 
@@ -329,8 +330,9 @@ final class Expectation
         }
 
         $closure = $this->getExpectationClosure($method);
-        $reflectionClosure = new \ReflectionFunction($closure);
+        $reflectionClosure = new ReflectionFunction($closure);
         $expectation = $reflectionClosure->getClosureThis();
+        $parameters = $this->positionalParameters($reflectionClosure, $parameters);
 
         if ($reflectionClosure->getReturnType()?->__toString() === ArchExpectation::class) {
             return $closure(...$parameters);
@@ -344,6 +346,43 @@ final class Expectation
             ->run();
 
         return $this;
+    }
+
+    /**
+     * @param  array<array-key, mixed>  $parameters
+     * @return array<array-key, mixed>
+     */
+    private function positionalParameters(ReflectionFunction $closure, array $parameters): array
+    {
+        if ($parameters === [] || array_is_list($parameters)) {
+            return $parameters;
+        }
+
+        $positional = [];
+
+        foreach ($closure->getParameters() as $position => $parameter) {
+            if ($parameter->isVariadic()) {
+                return $parameters;
+            }
+
+            $name = $parameter->getName();
+
+            if (array_key_exists($position, $parameters)) {
+                $positional[] = $parameters[$position];
+
+                unset($parameters[$position]);
+            } elseif (array_key_exists($name, $parameters)) {
+                $positional[] = $parameters[$name];
+
+                unset($parameters[$name]);
+            } elseif ($parameter->isDefaultValueAvailable()) {
+                $positional[] = $parameter->getDefaultValue();
+            } else {
+                return $parameters;
+            }
+        }
+
+        return $parameters === [] ? $positional : $parameters;
     }
 
     /**

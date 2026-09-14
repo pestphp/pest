@@ -3,12 +3,15 @@
 /tests                   export-ignore
 /scripts                 export-ignore
 /.github                 export-ignore
+/.hod                    export-ignore
 .editorconfig            export-ignore
 .gitattributes           export-ignore
 .gitignore               export-ignore
 /phpstan.neon            export-ignore
 /phpunit.xml             export-ignore
 /CHANGELOG.md            export-ignore
+/AGENTS.md               export-ignore
+/CLAUDE.md               export-ignore
 /CONTRIBUTING.md         export-ignore
 /docker-compose.yml      export-ignore
 /Makefile                export-ignore

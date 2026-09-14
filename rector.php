@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Pest\Rector\Rules\UseToMatchArrayRector;
 use Pest\Rector\Set\PestSetList;
+use Rector\CodeQuality\Rector\Isset_\IssetOnPropertyObjectToPropertyExistsRector;
 use Rector\CodingStyle\Rector\ArrowFunction\ArrowFunctionDelegatingCallToFirstClassCallableRector;
 use Rector\Config\RectorConfig;
 use Rector\DeadCode\Rector\ClassMethod\RemoveDuplicatedReturnSelfDocblockRector;
@@ -49,6 +50,9 @@ return RectorConfig::configure()
             __DIR__.'/tests',
         ],
         AddArrowFunctionReturnTypeRector::class => [
+            __DIR__.'/tests',
+        ],
+        IssetOnPropertyObjectToPropertyExistsRector::class => [
             __DIR__.'/tests',
         ],
     ])

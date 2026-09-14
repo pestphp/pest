@@ -1,0 +1,55 @@
+#!/bin/sh
+
+if [ "$1" = "auth" ]; then
+  [ "$GLAB_STUB_MODE" = "unauthenticated" ] && exit 1
+  exit 0
+fi
+
+if [ "$1" = "api" ]; then
+  case "$2" in
+    *jobs\?scope*)
+      case "$GLAB_STUB_MODE" in
+        no-runs) exit 0 ;;
+        list-404) echo "404 Not Found" >&2; exit 1 ;;
+        list-network) echo "could not resolve host" >&2; exit 1 ;;
+      esac
+      printf '[{"name":"tia-baseline","ref":"master","pipeline":{"id":987654321}}]'
+      exit 0
+      ;;
+    *pipelines/*/jobs*)
+      printf '[{"name":"tia-baseline","artifacts":[{"size":2048}]}]'
+      exit 0
+      ;;
+    projects/*)
+      printf '{"default_branch":"master"}'
+      exit 0
+      ;;
+  esac
+  exit 0
+fi
+
+if [ "$1" = "job" ] && [ "$2" = "artifact" ]; then
+  case "$GLAB_STUB_MODE" in
+    download-403) echo "403 Forbidden" >&2; exit 1 ;;
+    download-network) echo "connection refused" >&2; exit 1 ;;
+  esac
+
+  dir=""
+  previous=""
+  for argument in "$@"; do
+    [ "$previous" = "--path" ] && dir="$argument"
+    previous="$argument"
+  done
+
+  [ -z "$dir" ] && exit 1
+
+  case "$GLAB_STUB_MODE" in
+    missing-asset) echo "{}" > "$dir/other.json" ;;
+    corrupt) printf 'not json at all' > "$dir/graph.json" ;;
+    *) cp "$GLAB_STUB_PAYLOAD" "$dir/graph.json" ;;
+  esac
+
+  exit 0
+fi
+
+exit 1

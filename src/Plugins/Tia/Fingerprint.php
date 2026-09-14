@@ -40,7 +40,7 @@ final readonly class Fingerprint
                 'js_config' => self::jsConfigHash($projectRoot),
             ],
             'environmental' => [
-                'php_minor' => PHP_MAJOR_VERSION,
+                'php_minor' => PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION,
 
             ],
         ];
