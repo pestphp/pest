@@ -367,7 +367,7 @@ describe('buildListTestsCommand', function (): void {
         $command = $method->invoke($shard, ['bin/pest', '--update-shards'], 'custom/suite');
 
         expect($command)->toBe([
-            'php',
+            PHP_BINARY,
             'bin/pest',
             '--update-shards',
             '--test-directory=custom/suite',
@@ -385,7 +385,7 @@ describe('buildListTestsCommand', function (): void {
         $command = $method->invoke($shard, ['bin/pest', '--parallel', '--update-shards', '-p'], 'tests');
 
         expect($command)->toBe([
-            'php',
+            PHP_BINARY,
             'bin/pest',
             '--update-shards',
             '--test-directory=tests',
@@ -415,7 +415,7 @@ describe('buildListTestsCommand', function (): void {
         $command = $method->invoke($shard, ['bin/pest', '--parallel', '--processes=4', '--update-shards'], 'tests');
 
         expect($command)->toBe([
-            'php',
+            PHP_BINARY,
             'bin/pest',
             '--update-shards',
             '--test-directory=tests',
