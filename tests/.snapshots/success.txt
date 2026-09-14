@@ -2210,6 +2210,11 @@
    PASS  Tests\Visual\Collision
   ✓ collision with ([''])
 
+   PASS  Tests\Visual\FilterTrailingSpace
+  ✓ filter matches a test name with a trailing space
+  ✓ filter without a trailing space does not match a test name with a trailing space
+  ✓ filter matches a dataset test name with a trailing space
+
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
 
@@ -2256,4 +2261,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1599 passed (3486 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1602 passed (3493 assertions)
