@@ -7,17 +7,25 @@ fi
 
 if [ "$1" = "api" ]; then
   case "$2" in
-    *jobs\?scope*)
+    *pipelines\?ref*)
       case "$GLAB_STUB_MODE" in
-        no-runs) exit 0 ;;
+        no-runs) printf '[]'; exit 0 ;;
         list-404) echo "404 Not Found" >&2; exit 1 ;;
         list-network) echo "could not resolve host" >&2; exit 1 ;;
+        older-pipeline) printf '[{"id":111},{"id":222},{"id":987654321}]'; exit 0 ;;
       esac
-      printf '[{"name":"tia-baseline","ref":"master","pipeline":{"id":987654321}}]'
+      printf '[{"id":987654321}]'
+      exit 0
+      ;;
+    *pipelines/111/jobs*|*pipelines/222/jobs*)
+      printf '[{"name":"some-other-job","status":"success","artifacts":[{"size":1}]}]'
       exit 0
       ;;
     *pipelines/*/jobs*)
-      printf '[{"name":"tia-baseline","artifacts":[{"size":2048}]}]'
+      case "$GLAB_STUB_MODE" in
+        job-failed) printf '[{"name":"tia-baseline","status":"failed","artifacts":[{"size":2048}]}]'; exit 0 ;;
+      esac
+      printf '[{"name":"tia-baseline","status":"success","artifacts":[{"size":2048}]}]'
       exit 0
       ;;
     projects/*)
