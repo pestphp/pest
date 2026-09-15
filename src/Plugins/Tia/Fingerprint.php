@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 use Pest\Plugins\Tia\Contracts\Lockfile;
+use Pest\Support\Git;
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -22,23 +23,44 @@ final readonly class Fingerprint
     ];
 
     /**
+     * @param  array<int, string>  $arguments
      * @return array{
      *     structural: array<string, int|string|null>,
      *     environmental: array<string, int|string|null>,
      * }
      */
-    public static function compute(string $projectRoot): array
+    public static function compute(string $projectRoot, array $arguments = []): array
     {
+        $structural = [
+            'schema' => self::SCHEMA_VERSION,
+            'composer_lock' => self::composerLockHash($projectRoot),
+            'phpunit_xml' => self::trackedHash($projectRoot, 'phpunit.xml'),
+            'phpunit_xml_dist' => self::trackedHash($projectRoot, 'phpunit.xml.dist'),
+            'vite_config' => self::viteConfigHash($projectRoot),
+            'package_lock' => self::packageLockHash($projectRoot),
+            'js_config' => self::jsConfigHash($projectRoot),
+        ];
+
+        $prefix = self::projectPrefix($projectRoot);
+
+        if ($prefix !== '') {
+            $structural['project_prefix'] = $prefix;
+        }
+
+        $externalRoots = ExternalSources::rootsFor($projectRoot, $arguments);
+
+        if ($externalRoots !== []) {
+            $structural['external_roots'] = implode("\n", $externalRoots);
+        }
+
+        $configuration = self::selectedConfigurationHash($projectRoot, $arguments);
+
+        if ($configuration !== null) {
+            $structural['configuration'] = $configuration;
+        }
+
         return [
-            'structural' => [
-                'schema' => self::SCHEMA_VERSION,
-                'composer_lock' => self::composerLockHash($projectRoot),
-                'phpunit_xml' => self::trackedHash($projectRoot, 'phpunit.xml'),
-                'phpunit_xml_dist' => self::trackedHash($projectRoot, 'phpunit.xml.dist'),
-                'vite_config' => self::viteConfigHash($projectRoot),
-                'package_lock' => self::packageLockHash($projectRoot),
-                'js_config' => self::jsConfigHash($projectRoot),
-            ],
+            'structural' => $structural,
             'environmental' => [
                 'php_minor' => PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION,
 
@@ -275,7 +297,7 @@ final readonly class Fingerprint
             return $cache[$key];
         }
 
-        if (! is_dir($projectRoot.'/.git') && ! is_file($projectRoot.'/.git')) {
+        if (! self::isGitRepository($projectRoot)) {
             return $cache[$key] = true;
         }
 
@@ -286,6 +308,46 @@ final readonly class Fingerprint
             ->ignoreVCSIgnored(true);
 
         return $cache[$key] = $finder->hasResults();
+    }
+
+    /**
+     * @param  array<int, string>  $arguments
+     */
+    private static function selectedConfigurationHash(string $projectRoot, array $arguments): ?string
+    {
+        if (ExternalSources::suppressesConfiguration($projectRoot, $arguments)) {
+            return 'none';
+        }
+
+        $configuration = ExternalSources::selectedConfiguration($projectRoot, $arguments);
+
+        if ($configuration === null) {
+            return null;
+        }
+
+        $hash = self::contentHashOrNull($configuration);
+
+        if ($hash === null) {
+            return null;
+        }
+
+        $relative = ExternalSources::repositoryRelative($projectRoot, $configuration);
+
+        return ($relative ?? basename($configuration)).':'.$hash;
+    }
+
+    private static function projectPrefix(string $projectRoot): string
+    {
+        static $cache = [];
+
+        return $cache[$projectRoot] ??= new Git($projectRoot)->pathPrefix();
+    }
+
+    private static function isGitRepository(string $projectRoot): bool
+    {
+        static $cache = [];
+
+        return $cache[$projectRoot] ??= new Git($projectRoot)->isRepository();
     }
 
     private static function contentHashOrNull(string $path): ?string
