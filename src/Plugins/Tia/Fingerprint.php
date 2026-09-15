@@ -23,12 +23,13 @@ final readonly class Fingerprint
     ];
 
     /**
+     * @param  array<int, string>  $arguments
      * @return array{
      *     structural: array<string, int|string|null>,
      *     environmental: array<string, int|string|null>,
      * }
      */
-    public static function compute(string $projectRoot): array
+    public static function compute(string $projectRoot, array $arguments = []): array
     {
         $structural = [
             'schema' => self::SCHEMA_VERSION,
@@ -44,6 +45,18 @@ final readonly class Fingerprint
 
         if ($prefix !== '') {
             $structural['project_prefix'] = $prefix;
+        }
+
+        $externalRoots = ExternalSources::rootsFor($projectRoot, $arguments);
+
+        if ($externalRoots !== []) {
+            $structural['external_roots'] = implode("\n", $externalRoots);
+        }
+
+        $configuration = self::selectedConfigurationHash($projectRoot, $arguments);
+
+        if ($configuration !== null) {
+            $structural['configuration'] = $configuration;
         }
 
         return [
@@ -295,6 +308,32 @@ final readonly class Fingerprint
             ->ignoreVCSIgnored(true);
 
         return $cache[$key] = $finder->hasResults();
+    }
+
+    /**
+     * @param  array<int, string>  $arguments
+     */
+    private static function selectedConfigurationHash(string $projectRoot, array $arguments): ?string
+    {
+        if (ExternalSources::suppressesConfiguration($projectRoot, $arguments)) {
+            return 'none';
+        }
+
+        $configuration = ExternalSources::selectedConfiguration($projectRoot, $arguments);
+
+        if ($configuration === null) {
+            return null;
+        }
+
+        $hash = self::contentHashOrNull($configuration);
+
+        if ($hash === null) {
+            return null;
+        }
+
+        $relative = ExternalSources::repositoryRelative($projectRoot, $configuration);
+
+        return ($relative ?? basename($configuration)).':'.$hash;
     }
 
     private static function projectPrefix(string $projectRoot): string

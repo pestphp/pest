@@ -244,3 +244,18 @@ it('reads committed paths from the repository root even when git is told to be r
     expect($changedFiles->since($monorepo['sha']))->toBe(['app/Service.php'])
         ->and($changedFiles->outsideProject())->toBe(['frontend/widget.php']);
 })->skipOnWindows();
+
+it('tells a working tree change outside the project from a committed one', function (): void {
+    $monorepo = tiaMonorepoRepository();
+
+    file_put_contents($monorepo['root'].'/frontend/widget.php', "<?php\n\$widget = 2;\n");
+    $monorepo['repo']->commit('rework the widget');
+
+    file_put_contents($monorepo['root'].'/frontend/other.php', "<?php\n\$other = 1;\n");
+
+    $changedFiles = new ChangedFiles($monorepo['project']);
+    $changedFiles->since($monorepo['sha']);
+
+    expect($changedFiles->outsideProject())->toBe(['frontend/widget.php', 'frontend/other.php'])
+        ->and($changedFiles->outsideProjectDirty())->toBe(['frontend/other.php']);
+})->skipOnWindows();

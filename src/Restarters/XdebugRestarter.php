@@ -86,10 +86,13 @@ final class XdebugRestarter implements Restarter
             return false;
         }
 
-        return $this->tiaWillReplay($projectRoot);
+        return $this->tiaWillReplay($projectRoot, $arguments);
     }
 
-    private function tiaWillReplay(string $projectRoot): bool
+    /**
+     * @param  array<int, string>  $arguments
+     */
+    private function tiaWillReplay(string $projectRoot, array $arguments): bool
     {
         $path = Storage::tempDir($projectRoot).DIRECTORY_SEPARATOR.Tia::KEY_GRAPH;
 
@@ -111,7 +114,7 @@ final class XdebugRestarter implements Restarter
 
         return Fingerprint::structuralMatches(
             $graph->fingerprint(),
-            Fingerprint::compute($projectRoot),
+            Fingerprint::compute($projectRoot, $arguments),
         );
     }
 }
