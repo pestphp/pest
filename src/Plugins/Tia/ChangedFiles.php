@@ -10,13 +10,64 @@ use Pest\Support\Git;
 /**
  * @internal
  */
-final readonly class ChangedFiles
+final class ChangedFiles
 {
-    private Git $git;
+    private readonly Git $git;
 
-    public function __construct(private string $projectRoot)
+    private ?string $gitPrefix = null;
+
+    /**
+     * @var array<string, true>
+     */
+    private array $outsideProject = [];
+
+    public function __construct(private readonly string $projectRoot)
     {
         $this->git = new Git($projectRoot);
+    }
+
+    public function gitPrefix(): string
+    {
+        return $this->gitPrefix ??= $this->git->pathPrefix();
+    }
+
+    /**
+     * @param  array<int, string>  $files  repository-relative paths, as printed by git.
+     * @return array<int, string> project-relative paths; paths outside the project are dropped.
+     */
+    private function toProjectRelative(array $files): array
+    {
+        $prefix = $this->gitPrefix();
+
+        if ($prefix === '') {
+            return $files;
+        }
+
+        $projectFiles = [];
+
+        foreach ($files as $file) {
+            if (str_starts_with($file, $prefix)) {
+                $projectFiles[] = substr($file, strlen($prefix));
+
+                continue;
+            }
+
+            if ($file === '') {
+                continue;
+            }
+
+            $this->outsideProject[$file] = true;
+        }
+
+        return $projectFiles;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function outsideProject(): array
+    {
+        return array_keys($this->outsideProject);
     }
 
     /**
@@ -95,6 +146,8 @@ final readonly class ChangedFiles
      */
     public function since(?string $sha): ?array
     {
+        $this->outsideProject = [];
+
         $files = [];
 
         if ($sha !== null && $sha !== '') {
@@ -117,6 +170,8 @@ final readonly class ChangedFiles
         }
 
         $candidates = array_keys($this->filterIgnored($unique));
+
+        $this->filterIgnoredOutsideProject();
 
         if ($sha !== null && $sha !== '') {
             return $this->filterBehaviourallyUnchanged($candidates, $sha);
@@ -160,7 +215,24 @@ final readonly class ChangedFiles
 
     private function contentAtSha(string $sha, string $path): ?string
     {
-        return $this->git->show($sha, $path);
+        return $this->git->show($sha, $this->gitPrefix().$path);
+    }
+
+    private function filterIgnoredOutsideProject(): void
+    {
+        if ($this->outsideProject === []) {
+            return;
+        }
+
+        $repositoryRoot = $this->git->repositoryRoot();
+
+        if ($repositoryRoot === null) {
+            return;
+        }
+
+        $git = new Git($repositoryRoot);
+
+        $this->outsideProject = $this->filterIgnoredWith($git, $this->outsideProject);
     }
 
     /**
@@ -169,12 +241,21 @@ final readonly class ChangedFiles
      */
     private function filterIgnored(array $candidates): array
     {
+        return $this->filterIgnoredWith($this->git, $candidates);
+    }
+
+    /**
+     * @param  array<string, true>  $candidates
+     * @return array<string, true>
+     */
+    private function filterIgnoredWith(Git $git, array $candidates): array
+    {
         if ($candidates === []) {
             return $candidates;
         }
 
-        $result = $this->git->result(
-            ['check-ignore', '--no-index', '-z', '--stdin'],
+        $result = $git->result(
+            ['check-ignore', '-z', '--stdin'],
             implode("\x00", array_keys($candidates)),
         );
 
@@ -305,13 +386,13 @@ final readonly class ChangedFiles
      */
     private function diffSinceSha(string $sha): array
     {
-        $output = $this->scan()->raw(['diff', '--name-only', '--no-renames', $sha.'..HEAD']);
+        $output = $this->scan()->raw(['diff', '--name-only', '--no-renames', '--no-relative', '-z', $sha.'..HEAD']);
 
         if ($output === null) {
             throw new MissingDependency('Tia mode', 'git');
         }
 
-        return $this->splitLines($output);
+        return $this->toProjectRelative($this->splitRecords($output));
     }
 
     /**
@@ -357,7 +438,7 @@ final readonly class ChangedFiles
             $files[] = $path;
         }
 
-        return $files;
+        return $this->toProjectRelative($files);
     }
 
     public function currentSha(): ?string
@@ -371,6 +452,21 @@ final readonly class ChangedFiles
         $sha = trim($output);
 
         return $sha === '' ? null : $sha;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function splitRecords(string $output): array
+    {
+        if ($output === '') {
+            return [];
+        }
+
+        return array_values(array_filter(
+            explode("\x00", rtrim($output, "\x00")),
+            static fn (string $record): bool => $record !== '',
+        ));
     }
 
     /**
