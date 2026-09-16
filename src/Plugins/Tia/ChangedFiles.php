@@ -297,7 +297,29 @@ final readonly class ChangedFiles
 
     private function shaIsReachable(string $sha): bool
     {
-        return $this->git->succeeds(['merge-base', '--is-ancestor', $sha, 'HEAD']);
+        if ($this->git->succeeds(['merge-base', '--is-ancestor', $sha, 'HEAD'])) {
+            return true;
+        }
+
+        $parents = $this->git->raw(['show', '--no-patch', '--format=%P', $sha]);
+
+        if ($parents === null) {
+            return false;
+        }
+
+        $parents = explode(' ', trim($parents));
+
+        if (count($parents) < 2) {
+            return false;
+        }
+
+        foreach ($parents as $parent) {
+            if (! $this->git->succeeds(['merge-base', '--is-ancestor', $parent, 'HEAD'])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
