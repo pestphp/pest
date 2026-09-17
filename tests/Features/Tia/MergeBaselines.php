@@ -48,5 +48,5 @@ test('a merge baseline is rejected when one of its parents is absent from the cu
     $sha = $git->sha();
     $git->switchTo('master');
 
-    expect((new ChangedFiles($project->path()))->since($sha))->toBeNull();
+    expect(new ChangedFiles($project->path())->since($sha))->toBeNull();
 })->skipOnWindows();

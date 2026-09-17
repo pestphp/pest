@@ -313,13 +313,7 @@ final readonly class ChangedFiles
             return false;
         }
 
-        foreach ($parents as $parent) {
-            if (! $this->git->succeeds(['merge-base', '--is-ancestor', $parent, 'HEAD'])) {
-                return false;
-            }
-        }
-
-        return true;
+        return array_all($parents, fn (string $parent): bool => $this->git->succeeds(['merge-base', '--is-ancestor', $parent, 'HEAD']));
     }
 
     /**
