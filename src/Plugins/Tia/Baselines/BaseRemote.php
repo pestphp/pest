@@ -39,7 +39,7 @@ abstract readonly class BaseRemote // @pest-arch-ignore-line
 
     public function cliExists(): bool
     {
-        return new ExecutableFinder()->find($cmd) !== null;
+        return new ExecutableFinder()->find($this->cliName()) !== null;
     }
 
     public function cliAuthenticated(): bool
