@@ -25,13 +25,13 @@
         "pestphp/pest-plugin-arch": "^5.0.0",
         "pestphp/pest-plugin-mutate": "^5.0.2",
         "pestphp/pest-plugin-profanity": "^5.0.0",
-        "phpunit/phpunit": "^13.3.3",
-        "symfony/process": "^8.1.6"
+        "phpunit/phpunit": "^13.3.4",
+        "symfony/process": "^8.1.7"
     },
     "conflict": {
         "filp/whoops": "<2.18.3",
         "laravel/boost": "<2.6.0",
-        "phpunit/phpunit": ">13.3.3",
+        "phpunit/phpunit": ">13.3.4",
         "sebastian/exporter": "<7.0.0",
         "webmozart/assert": "<1.11.0"
     },
