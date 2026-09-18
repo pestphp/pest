@@ -2,6 +2,7 @@
 
 use Pest\Plugins\Tia;
 use Pest\Plugins\Tia\ChangedFiles;
+use Pest\Plugins\Tia\ConfigurationFile;
 use Pest\Plugins\Tia\FileState;
 use Pest\Plugins\Tia\Fingerprint;
 use Pest\Plugins\Tia\Graph;
@@ -25,7 +26,7 @@ it('does not run user hooks when replaying cached skipped and incomplete results
         $id = fn (string $description): string => 'P\Tests\Fixtures\Suites\TiaReplayHooks::'.Str::evaluable($description);
 
         $graph = new Graph($projectRoot);
-        $graph->setFingerprint(Fingerprint::compute($projectRoot, $projectRoot.DIRECTORY_SEPARATOR.$configuration));
+        $graph->setFingerprint(Fingerprint::compute($projectRoot, ConfigurationFile::at($projectRoot.DIRECTORY_SEPARATOR.$configuration)));
         $graph->setRecordedAtSha($branch, $sha);
         $graph->setLastRunTree($branch, $changedFiles->snapshotTree($changedFiles->since($sha) ?? []));
         $graph->markKnownTestFiles([$fixture]);

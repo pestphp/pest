@@ -87,3 +87,16 @@ test('editing a configuration file that git ignores stops the replay', function 
         ->and($edited->replayed())->toBe(0, $edited->describe())
         ->and($edited->tally())->toContain(Project::TOTAL_TESTS.' passed');
 })->skipOnWindows();
+
+test('an identical copy of the configuration file under another name does not replay the graph', function (array $arguments): void {
+    $project = Project::make('master');
+    $project->write('phpunit.copy.xml', (string) file_get_contents($project->path('phpunit.xml')));
+    $project->git()->commit('add an identical copy of the configuration');
+    $project->seed('master');
+
+    $result = $project->pest('--tia', '--configuration', 'phpunit.copy.xml', ...$arguments);
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->replayed())->toBe(0, $result->describe())
+        ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed');
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();

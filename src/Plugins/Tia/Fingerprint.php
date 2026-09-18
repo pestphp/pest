@@ -27,13 +27,13 @@ final readonly class Fingerprint
      *     environmental: array<string, int|string|null>,
      * }
      */
-    public static function compute(string $projectRoot, ?string $configurationFile = null): array
+    public static function compute(string $projectRoot, ?ConfigurationFile $configuration = null): array
     {
         return [
             'structural' => [
                 'schema' => self::SCHEMA_VERSION,
                 'composer_lock' => self::composerLockHash($projectRoot),
-                'phpunit_configuration' => self::configurationHash($projectRoot, $configurationFile),
+                'phpunit_configuration' => ($configuration ?? ConfigurationFile::projectDefault())->fingerprint($projectRoot),
                 'vite_config' => self::viteConfigHash($projectRoot),
                 'package_lock' => self::packageLockHash($projectRoot),
                 'js_config' => self::jsConfigHash($projectRoot),
@@ -194,24 +194,6 @@ final readonly class Fingerprint
         }
 
         return $parts === [] ? null : hash('xxh128', implode("\n", $parts));
-    }
-
-    private static function configurationHash(string $projectRoot, ?string $configurationFile): ?string
-    {
-        $configurationFile ??= self::defaultConfigurationFile($projectRoot);
-
-        return $configurationFile === null ? null : self::hashIfExists($configurationFile);
-    }
-
-    private static function defaultConfigurationFile(string $projectRoot): ?string
-    {
-        foreach (['phpunit.xml', 'phpunit.dist.xml', 'phpunit.xml.dist'] as $name) {
-            if (is_file($projectRoot.'/'.$name)) {
-                return $projectRoot.'/'.$name;
-            }
-        }
-
-        return null;
     }
 
     private static function composerLockHash(string $projectRoot): ?string
