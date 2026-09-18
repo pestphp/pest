@@ -23,6 +23,9 @@ final readonly class Laravel implements WatchDefault
         return [
             'database/migrations/**/*.php' => [$testPath],
 
+            'config/**/*.php' => [$testPath],
+            'bootstrap/*.php' => [$testPath],
+
             'storage/fixtures/**/*' => [$testPath],
 
             'app/** !*.php' => [$testPath],
