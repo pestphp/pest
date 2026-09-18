@@ -450,7 +450,7 @@ it('treats a classmap directory that carries a dot as a directory', function ():
         ->toBe(['packages/shared.core/Service.php']);
 })->skipOnWindows();
 
-it('reports no selected configuration for the phpunit file of the project root', function (): void {
+it('selects the phpunit file of the project root', function (): void {
     $repository = tiaExternalRepository([], <<<'XML_WRAP'
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit/>
@@ -466,8 +466,10 @@ XML_WRAP);
         chdir((string) $previous);
     }
 
-    expect($withoutArguments)->toBeNull()
-        ->and($withArgument)->toBeNull();
+    $expected = realpath($repository['project'].'/phpunit.xml');
+
+    expect($withoutArguments)->toBe($expected)
+        ->and($withArgument)->toBe($expected);
 })->skipOnWindows();
 
 it('tells the dist configuration apart from the one phpunit selects by default', function (): void {
@@ -484,7 +486,7 @@ XML_WRAP);
     $default = Fingerprint::compute($repository['project'], []);
     $dist = Fingerprint::compute($repository['project'], ['-c', 'phpunit.xml.dist']);
 
-    expect($default['structural'])->not->toHaveKey('configuration')
+    expect($default['structural']['configuration'])->toStartWith('backend/phpunit.xml:')
         ->and($dist['structural']['configuration'])->toStartWith('backend/phpunit.xml.dist:')
         ->and(Fingerprint::structuralMatches($default, $dist))->toBeFalse();
 })->skipOnWindows();
@@ -498,16 +500,16 @@ XML_WRAP);
     $default = Fingerprint::compute($repository['project'], []);
     $none = Fingerprint::compute($repository['project'], ['--no-configuration']);
 
-    expect($default['structural'])->not->toHaveKey('configuration')
+    expect($default['structural']['configuration'])->toStartWith('backend/phpunit.xml:')
         ->and($none['structural']['configuration'])->toBe('none')
         ->and(Fingerprint::structuralMatches($default, $none))->toBeFalse();
 })->skipOnWindows();
 
-it('reports no run without configuration for a project that holds none', function (): void {
+it('holds no configuration value for a project that holds no configuration file', function (): void {
     $repository = tiaExternalRepository();
 
-    expect(Fingerprint::compute($repository['project'], ['--no-configuration'])['structural'])
-        ->not->toHaveKey('configuration');
+    expect(Fingerprint::compute($repository['project'], ['--no-configuration'])['structural']['configuration'])
+        ->toBeNull();
 })->skipOnWindows();
 
 it('accepts the configuration argument attached to its short flag', function (): void {

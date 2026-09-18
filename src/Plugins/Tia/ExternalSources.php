@@ -33,11 +33,6 @@ final class ExternalSources
      */
     private const array CONFIGURATION_NAMES = ['phpunit.xml', 'phpunit.dist.xml', 'phpunit.xml.dist'];
 
-    /**
-     * @var list<string>
-     */
-    private const array FINGERPRINTED_NAMES = ['phpunit.xml', 'phpunit.xml.dist'];
-
     private const string NO_CONFIGURATION_FLAG = '--no-configuration';
 
     /**
@@ -109,17 +104,7 @@ final class ExternalSources
      */
     public static function selectedConfiguration(string $projectRoot, array $arguments): ?string
     {
-        $selected = self::configurations($projectRoot, $arguments)[0] ?? null;
-
-        if ($selected === null) {
-            return null;
-        }
-
-        if ($selected === self::configurationFileIn($projectRoot) && in_array(basename($selected), self::FINGERPRINTED_NAMES, true)) {
-            return null;
-        }
-
-        return $selected;
+        return self::configurations($projectRoot, $arguments)[0] ?? null;
     }
 
     /**

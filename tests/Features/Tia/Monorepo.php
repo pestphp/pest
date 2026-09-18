@@ -696,3 +696,40 @@ test('an uncommitted change outside the project records no result on a partial r
     expect($clean->tally())->toContain('1 passed')
         ->and($delta->writtenCount())->toBe(1, $delta->summary());
 })->skipOnWindows();
+
+test('editing a configuration that git ignores stops the replay', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('nested/.gitignore', "phpunit.xml\n");
+    $project->git()->run(['rm', '--cached', '--quiet', 'nested/phpunit.xml']);
+    $project->git()->commit('stop tracking the configuration');
+    $project->seedFor($nested, 'master');
+    $project->snapshot();
+
+    $replayed = $project->pestIn($nested, '--tia');
+
+    $project->write('nested/phpunit.xml', str_replace(
+        'failOnRisky="true"',
+        'failOnRisky="false"',
+        (string) file_get_contents($nested.'/phpunit.xml'),
+    ));
+
+    $edited = $project->pestIn($nested, '--tia');
+
+    expect($replayed->replayed())->toBe(Project::TOTAL_TESTS, $replayed->describe())
+        ->and($edited->replayed())->toBe(0, $edited->describe())
+        ->and($edited->tally())->toContain(Project::TOTAL_TESTS.' passed');
+})->skipOnWindows();
+
+test('a run with --no-configuration does not replay a graph recorded with one', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->seedFor($nested, 'master');
+    $project->snapshot();
+
+    $replayed = $project->pestIn($nested, '--tia');
+    $suppressed = $project->pestIn($nested, '--tia', '--no-configuration');
+
+    expect($replayed->replayed())->toBe(Project::TOTAL_TESTS, $replayed->describe())
+        ->and($suppressed->replayed())->toBe(0, $suppressed->describe());
+})->skipOnWindows();
