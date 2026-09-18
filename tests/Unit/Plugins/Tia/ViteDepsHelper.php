@@ -414,6 +414,95 @@ function tiaViteCasingResults(): array
     return $cache = $results;
 }
 
+function tiaSfcFixtures(): array
+{
+    return [
+        'script-setup' => [
+            "<script setup>\nimport A from '@/A.vue'\n</script>\n<template><A /></template>",
+            ['imports' => ['@/A.vue'], 'moduleType' => 'js'],
+        ],
+        'plain-script-with-default' => [
+            "<script>\nimport A from '@/A.vue'\nexport default { components: { A } }\n</script>",
+            ['imports' => ['@/A.vue'], 'moduleType' => 'js'],
+        ],
+        'typescript-lang' => [
+            "<script setup lang=\"ts\">\nimport type { Foo } from '@/types'\nimport B from '@/B.vue'\n</script>",
+            ['imports' => ['@/types', '@/B.vue'], 'moduleType' => 'ts'],
+        ],
+        'lang-tsx' => [
+            "<script setup lang=\"tsx\">\nimport C from '@/C.vue'\n</script>",
+            ['imports' => ['@/C.vue'], 'moduleType' => 'ts'],
+        ],
+        'lang-unquoted' => [
+            "<script setup lang=ts>\nimport D from '@/D.vue'\n</script>",
+            ['imports' => ['@/D.vue'], 'moduleType' => 'ts'],
+        ],
+        'both-script-blocks' => [
+            "<script>\nimport A from '@/A.vue'\nexport default {}\n</script>\n<script setup>\nimport B from '@/B.vue'\n</script>",
+            ['imports' => ['@/A.vue', '@/B.vue'], 'moduleType' => 'js'],
+        ],
+        'template-only' => [
+            '<template><div>hello</div></template>',
+            ['imports' => [], 'moduleType' => 'js'],
+        ],
+        'style-block-ignored' => [
+            "<script setup>\nimport A from '@/A.vue'\n</script>\n<style scoped>\n.a { color: red }\n</style>",
+            ['imports' => ['@/A.vue'], 'moduleType' => 'js'],
+        ],
+        'dynamic-import' => [
+            "<script setup>\nconst C = () => import('@/Lazy.vue')\n</script>",
+            ['imports' => ['@/Lazy.vue'], 'moduleType' => 'js'],
+        ],
+        'svelte-component' => [
+            "<script>\nimport A from './A.svelte'\n</script>\n<h1>hi</h1>",
+            ['imports' => ['./A.svelte'], 'moduleType' => 'js'],
+        ],
+        'no-script-at-all' => [
+            '<div>plain markup</div>',
+            ['imports' => [], 'moduleType' => 'js'],
+        ],
+    ];
+}
+
+function tiaSfcResults(): array
+{
+    static $cache = null;
+    if ($cache !== null) {
+        return $cache;
+    }
+
+    $payload = [];
+    foreach (tiaSfcFixtures() as $name => [$raw]) {
+        $payload[] = ['name' => $name, 'raw' => $raw];
+    }
+
+    $inputFile = tempnam(sys_get_temp_dir(), 'tia-sfc-');
+    file_put_contents($inputFile, json_encode($payload));
+
+    $helper = str_replace('\\', '/', tiaViteHelperPath());
+    $input = str_replace('\\', '/', $inputFile);
+
+    $script = <<<JS
+    import { extractSfcScript } from '{$helper}'
+    import { readFileSync } from 'node:fs'
+    const cases = JSON.parse(readFileSync('{$input}', 'utf8'))
+    const out = {}
+    for (const c of cases) {
+      const r = extractSfcScript(c.raw)
+      const imports = [...r.code.matchAll(/(?:from|import)\s*\(?\s*['"]([^'"]+)['"]/g)].map((m) => m[1])
+      out[c.name] = { code: r.code, moduleType: r.moduleType, imports }
+    }
+    process.stdout.write(JSON.stringify(out))
+    JS;
+
+    $process = new Process(['node', '--input-type=module', '-e', $script]);
+    $process->mustRun();
+
+    @unlink($inputFile);
+
+    return $cache = json_decode($process->getOutput(), true, flags: JSON_THROW_ON_ERROR);
+}
+
 beforeEach(function (): void {
     if ((new ExecutableFinder)->find('node') === null) {
         $this->markTestSkipped('node is not available.');
@@ -472,3 +561,31 @@ it('accepts a page directory candidate only when it matches the casing on disk',
 
     expect(tiaViteCasingResults()[$name])->toBe($expected);
 })->with(array_keys(tiaViteCasingFixtures()));
+
+it('keeps every import a single file component declares', function (string $name): void {
+    [, $expected] = tiaSfcFixtures()[$name];
+
+    expect(tiaSfcResults()[$name]['imports'])->toEqual($expected['imports']);
+})->with(array_keys(tiaSfcFixtures()));
+
+it('reports the script block language so the parser matches it', function (string $name): void {
+    [, $expected] = tiaSfcFixtures()[$name];
+
+    expect(tiaSfcResults()[$name]['moduleType'])->toBe($expected['moduleType']);
+})->with(array_keys(tiaSfcFixtures()));
+
+it('always leaves a default export for importers to resolve against', function (string $name): void {
+    expect(tiaSfcResults()[$name]['code'])->toMatch('/export\s+default\b/');
+})->with(array_keys(tiaSfcFixtures()));
+
+it('does not add a second default export when the block already has one', function (): void {
+    preg_match_all('/export\s+default\b/', tiaSfcResults()['plain-script-with-default']['code'], $matches);
+
+    expect($matches[0])->toHaveCount(1);
+});
+
+it('drops template and style markup that the parser would reject', function (): void {
+    expect(tiaSfcResults()['style-block-ignored']['code'])->not->toContain('<style')
+        ->and(tiaSfcResults()['style-block-ignored']['code'])->not->toContain('color: red')
+        ->and(tiaSfcResults()['script-setup']['code'])->not->toContain('<template');
+});
