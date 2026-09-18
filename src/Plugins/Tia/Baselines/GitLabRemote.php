@@ -13,6 +13,8 @@ final readonly class GitLabRemote extends BaseRemote
 {
     private const string DEFAULT_JOB_NAME = 'tia-baseline';
 
+    private const int PIPELINES_PER_PAGE = 20;
+
     public function detect(string $projectRoot): ?string
     {
         $url = $this->readOriginUrl($projectRoot);
@@ -72,7 +74,12 @@ final readonly class GitLabRemote extends BaseRemote
 
         $process = new Process([
             'glab', 'api',
-            sprintf('projects/%s/jobs?scope[]=success&per_page=100', $encodedRepo),
+            sprintf(
+                'projects/%s/pipelines?ref=%s&status=success&order_by=id&sort=desc&per_page=%d',
+                $encodedRepo,
+                rawurlencode($defaultBranch),
+                self::PIPELINES_PER_PAGE,
+            ),
         ]);
         $process->setTimeout(30.0);
         $process->run();
@@ -81,28 +88,32 @@ final readonly class GitLabRemote extends BaseRemote
             return [null, $this->classifyError($process->getErrorOutput().$process->getOutput())];
         }
 
-        $runId = $this->findPipelineId($process->getOutput(), $jobName, $defaultBranch);
+        foreach ($this->pipelineIds($process->getOutput()) as $pipelineId) {
+            if ($this->findJob($encodedRepo, $pipelineId, $jobName) !== null) {
+                return [$pipelineId, null];
+            }
+        }
 
-        return [$runId, null];
+        return [null, null];
     }
 
     public function artifactSize(string $repo, string $runId): ?int
     {
-        $encodedRepo = rawurlencode($repo);
-        $jobName = $this->jobName();
+        $job = $this->findJob(rawurlencode($repo), $runId, $this->jobName());
 
-        $process = new Process([
-            'glab', 'api',
-            sprintf('projects/%s/pipelines/%s/jobs', $encodedRepo, $runId),
-        ]);
-        $process->setTimeout(30.0);
-        $process->run();
-
-        if (! $process->isSuccessful()) {
+        if ($job === null || ! is_array($job['artifacts'] ?? null)) {
             return null;
         }
 
-        return $this->findArtifactSize($process->getOutput(), $jobName);
+        $size = 0;
+
+        foreach ($job['artifacts'] as $artifact) {
+            if (is_array($artifact) && is_int($artifact['size'] ?? null)) {
+                $size += $artifact['size'];
+            }
+        }
+
+        return $size;
     }
 
     public function downloadCommand(string $repo, string $runId, string $destDir): array
@@ -166,53 +177,63 @@ final readonly class GitLabRemote extends BaseRemote
         return $this->watchPatterns->baselineJob() ?? self::DEFAULT_JOB_NAME;
     }
 
-    private function findPipelineId(string $output, string $jobName, string $defaultBranch): ?string
+    /**
+     * @return array<int, string>
+     */
+    private function pipelineIds(string $output): array
     {
-        $jobs = json_decode($output, true);
+        $pipelines = json_decode($output, true);
 
-        if (! is_array($jobs)) {
-            return null;
+        if (! is_array($pipelines)) {
+            return [];
         }
 
-        foreach ($jobs as $job) {
-            if (! is_array($job)) {
-                continue;
+        $ids = [];
+
+        foreach ($pipelines as $pipeline) {
+            $id = is_array($pipeline) ? ($pipeline['id'] ?? null) : null;
+
+            if (is_int($id) || (is_string($id) && $id !== '')) {
+                $ids[] = (string) $id;
             }
-
-            if (($job['name'] ?? null) !== $jobName || ($job['ref'] ?? null) !== $defaultBranch) {
-                continue;
-            }
-
-            $id = $job['pipeline']['id'] ?? null;
-
-            return is_int($id) || is_string($id) ? (string) $id : null;
         }
 
-        return null;
+        return $ids;
     }
 
-    private function findArtifactSize(string $output, string $jobName): ?int
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function findJob(string $encodedRepo, string $pipelineId, string $jobName): ?array
     {
-        $jobs = json_decode($output, true);
+        $process = new Process([
+            'glab', 'api',
+            sprintf('projects/%s/pipelines/%s/jobs', $encodedRepo, $pipelineId),
+        ]);
+        $process->setTimeout(30.0);
+        $process->run();
+
+        if (! $process->isSuccessful()) {
+            return null;
+        }
+
+        $jobs = json_decode($process->getOutput(), true);
 
         if (! is_array($jobs)) {
             return null;
         }
 
         foreach ($jobs as $job) {
-            if (! is_array($job) || ($job['name'] ?? null) !== $jobName || ! is_array($job['artifacts'] ?? null)) {
+            if (! is_array($job) || ($job['name'] ?? null) !== $jobName) {
                 continue;
             }
 
-            $size = 0;
-
-            foreach ($job['artifacts'] as $artifact) {
-                if (is_array($artifact) && is_int($artifact['size'] ?? null)) {
-                    $size += $artifact['size'];
-                }
+            if (($job['status'] ?? null) !== 'success') {
+                continue;
             }
 
-            return $size;
+            /** @var array<string, mixed> $job */
+            return $job;
         }
 
         return null;
