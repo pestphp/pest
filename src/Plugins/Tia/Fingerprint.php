@@ -12,7 +12,7 @@ use Symfony\Component\Finder\Finder;
  */
 final readonly class Fingerprint
 {
-    private const int SCHEMA_VERSION = 18;
+    private const int SCHEMA_VERSION = 19;
 
     /**
      * @var array<int, class-string<Lockfile>>
@@ -27,14 +27,13 @@ final readonly class Fingerprint
      *     environmental: array<string, int|string|null>,
      * }
      */
-    public static function compute(string $projectRoot): array
+    public static function compute(string $projectRoot, ?string $configurationFile = null): array
     {
         return [
             'structural' => [
                 'schema' => self::SCHEMA_VERSION,
                 'composer_lock' => self::composerLockHash($projectRoot),
-                'phpunit_xml' => self::trackedHash($projectRoot, 'phpunit.xml'),
-                'phpunit_xml_dist' => self::trackedHash($projectRoot, 'phpunit.xml.dist'),
+                'phpunit_configuration' => self::configurationHash($projectRoot, $configurationFile),
                 'vite_config' => self::viteConfigHash($projectRoot),
                 'package_lock' => self::packageLockHash($projectRoot),
                 'js_config' => self::jsConfigHash($projectRoot),
@@ -195,6 +194,24 @@ final readonly class Fingerprint
         }
 
         return $parts === [] ? null : hash('xxh128', implode("\n", $parts));
+    }
+
+    private static function configurationHash(string $projectRoot, ?string $configurationFile): ?string
+    {
+        $configurationFile ??= self::defaultConfigurationFile($projectRoot);
+
+        return $configurationFile === null ? null : self::hashIfExists($configurationFile);
+    }
+
+    private static function defaultConfigurationFile(string $projectRoot): ?string
+    {
+        foreach (['phpunit.xml', 'phpunit.dist.xml', 'phpunit.xml.dist'] as $name) {
+            if (is_file($projectRoot.'/'.$name)) {
+                return $projectRoot.'/'.$name;
+            }
+        }
+
+        return null;
     }
 
     private static function composerLockHash(string $projectRoot): ?string

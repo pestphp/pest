@@ -21,6 +21,7 @@ use Pest\Plugins\Concerns\HandleArguments;
 use Pest\Plugins\Tia\BaselineSync;
 use Pest\Plugins\Tia\ChangedFiles;
 use Pest\Plugins\Tia\CiBranch;
+use Pest\Plugins\Tia\ConfigurationFile;
 use Pest\Plugins\Tia\Contracts\State;
 use Pest\Plugins\Tia\CoverageCollector;
 use Pest\Plugins\Tia\Fingerprint;
@@ -202,6 +203,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     /** @var array<int, string> */
     private array $originalArguments = [];
+
+    private ?string $configurationFile = null;
 
     private ?string $driftLabel = null;
 
@@ -459,6 +462,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             exit(0);
         }
 
+        $this->configurationFile = ConfigurationFile::fromArguments($arguments);
+
         $isWorker = Parallel::isWorker();
         $recordingGlobal = $isWorker && (string) Parallel::getGlobal(self::RECORDING_GLOBAL) === '1';
         $replayingGlobal = $isWorker && (string) Parallel::getGlobal(self::REPLAYING_GLOBAL) === '1';
@@ -614,7 +619,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $changedFiles = new ChangedFiles($projectRoot);
         $currentSha = $changedFiles->currentSha();
 
-        $currentFingerprint = Fingerprint::compute($projectRoot);
+        $currentFingerprint = Fingerprint::compute($projectRoot, $this->configurationFile);
 
         if ($this->structuralFingerprintShifted($currentFingerprint)) {
             $this->renderBadge('WARN', 'Project files changed during the run — discarding recorded edges.');
@@ -700,7 +705,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $changedFiles = new ChangedFiles($projectRoot);
         $currentSha = $changedFiles->currentSha();
 
-        $currentFingerprint = Fingerprint::compute($projectRoot);
+        $currentFingerprint = Fingerprint::compute($projectRoot, $this->configurationFile);
 
         if ($this->structuralFingerprintShifted($currentFingerprint)) {
             $this->renderBadge('WARN', 'Project files changed during the run — discarding recorded edges.');
@@ -840,7 +845,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
                 : new TiaRequiresRemote);
         }
 
-        $fingerprint = Fingerprint::compute($projectRoot);
+        $fingerprint = Fingerprint::compute($projectRoot, $this->configurationFile);
         $this->startFingerprint = $fingerprint;
 
         if ($forceRebuild && $this->canRebuildGraph()) {
