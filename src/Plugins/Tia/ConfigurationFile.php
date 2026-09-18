@@ -13,26 +13,80 @@ use Throwable;
  */
 final readonly class ConfigurationFile
 {
+    private const string SUPPRESSED = 'none';
+
+    private const array DEFAULT_NAMES = ['phpunit.xml', 'phpunit.dist.xml', 'phpunit.xml.dist'];
+
+    private function __construct(
+        private ?string $path,
+        private bool $suppressed,
+    ) {}
+
     /**
      * @param  array<int, string>  $arguments
      */
-    public static function fromArguments(array $arguments): ?string
+    public static function fromArguments(array $arguments): self
     {
         try {
             $configuration = new Builder()->fromParameters(self::configurationParameters($arguments));
         } catch (Throwable) {
-            return null;
+            return self::projectDefault();
+        }
+
+        if (! $configuration->hasConfigurationFile() && ! $configuration->useDefaultConfiguration()) {
+            return new self(null, true);
         }
 
         $file = new XmlConfigurationFileFinder()->find($configuration);
+        $path = $file === false ? false : realpath($file);
 
-        if ($file === false) {
+        return new self($path === false ? null : $path, false);
+    }
+
+    public static function at(string $path): self
+    {
+        return new self($path, false);
+    }
+
+    public static function projectDefault(): self
+    {
+        return new self(null, false);
+    }
+
+    public function fingerprint(string $projectRoot): ?string
+    {
+        if ($this->suppressed) {
+            return self::SUPPRESSED;
+        }
+
+        $path = $this->path ?? $this->defaultIn($projectRoot);
+
+        if ($path === null || ! is_file($path)) {
             return null;
         }
 
-        $path = realpath($file);
+        $hash = @hash_file('xxh128', $path);
 
-        return $path === false ? null : $path;
+        return $hash === false ? null : $this->relativeTo($projectRoot, $path).':'.$hash;
+    }
+
+    private function defaultIn(string $projectRoot): ?string
+    {
+        foreach (self::DEFAULT_NAMES as $name) {
+            if (is_file($projectRoot.DIRECTORY_SEPARATOR.$name)) {
+                return $projectRoot.DIRECTORY_SEPARATOR.$name;
+            }
+        }
+
+        return null;
+    }
+
+    private function relativeTo(string $projectRoot, string $path): string
+    {
+        $root = rtrim(str_replace('\\', '/', realpath($projectRoot) ?: $projectRoot), '/').'/';
+        $file = str_replace('\\', '/', realpath($path) ?: $path);
+
+        return str_starts_with($file, $root) ? substr($file, strlen($root)) : $file;
     }
 
     /**

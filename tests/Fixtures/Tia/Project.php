@@ -7,6 +7,7 @@ namespace Tests\Fixtures\Tia;
 use FilesystemIterator;
 use Pest\Plugins\Tia;
 use Pest\Plugins\Tia\ChangedFiles;
+use Pest\Plugins\Tia\ConfigurationFile;
 use Pest\Plugins\Tia\FileState;
 use Pest\Plugins\Tia\Fingerprint;
 use Pest\Plugins\Tia\Graph;
@@ -213,7 +214,7 @@ final class Project
         $sha = new GitRepo($root)->sha();
 
         $graph = new Graph($root);
-        $graph->setFingerprint(Fingerprint::compute($root, $configuration === null ? null : $root.DIRECTORY_SEPARATOR.$configuration));
+        $graph->setFingerprint(Fingerprint::compute($root, $configuration === null ? null : ConfigurationFile::at($root.DIRECTORY_SEPARATOR.$configuration)));
         $graph->setRecordedAtSha($branch, $sha);
 
         $graph->setLastRunTree($branch, $changedFiles->snapshotTree($changedFiles->since($sha) ?? []));

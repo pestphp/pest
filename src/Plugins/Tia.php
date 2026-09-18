@@ -204,7 +204,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     /** @var array<int, string> */
     private array $originalArguments = [];
 
-    private ?string $configurationFile = null;
+    private ?ConfigurationFile $configuration = null;
 
     private ?string $driftLabel = null;
 
@@ -462,7 +462,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             exit(0);
         }
 
-        $this->configurationFile = ConfigurationFile::fromArguments($arguments);
+        $this->configuration = ConfigurationFile::fromArguments($arguments);
 
         $isWorker = Parallel::isWorker();
         $recordingGlobal = $isWorker && (string) Parallel::getGlobal(self::RECORDING_GLOBAL) === '1';
@@ -619,7 +619,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $changedFiles = new ChangedFiles($projectRoot);
         $currentSha = $changedFiles->currentSha();
 
-        $currentFingerprint = Fingerprint::compute($projectRoot, $this->configurationFile);
+        $currentFingerprint = Fingerprint::compute($projectRoot, $this->configuration);
 
         if ($this->structuralFingerprintShifted($currentFingerprint)) {
             $this->renderBadge('WARN', 'Project files changed during the run — discarding recorded edges.');
@@ -705,7 +705,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $changedFiles = new ChangedFiles($projectRoot);
         $currentSha = $changedFiles->currentSha();
 
-        $currentFingerprint = Fingerprint::compute($projectRoot, $this->configurationFile);
+        $currentFingerprint = Fingerprint::compute($projectRoot, $this->configuration);
 
         if ($this->structuralFingerprintShifted($currentFingerprint)) {
             $this->renderBadge('WARN', 'Project files changed during the run — discarding recorded edges.');
@@ -845,7 +845,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
                 : new TiaRequiresRemote);
         }
 
-        $fingerprint = Fingerprint::compute($projectRoot, $this->configurationFile);
+        $fingerprint = Fingerprint::compute($projectRoot, $this->configuration);
         $this->startFingerprint = $fingerprint;
 
         if ($forceRebuild && $this->canRebuildGraph()) {
