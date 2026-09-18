@@ -1925,6 +1925,12 @@
   ✓ markKnownTestFiles() → it makes a test file with no edges known
   ✓ markKnownTestFiles() → it does not clobber edges of an already-known test file
   ✓ markKnownTestFiles() → it ignores paths outside the project root
+  ✓ Laravel boot files → it applies the watch patterns to a boot file that the graph links to one test only with ('config/app.php')
+  ✓ Laravel boot files → it applies the watch patterns to a boot file that the graph links to one test only with ('config/services/mail.php')
+  ✓ Laravel boot files → it applies the watch patterns to a boot file that the graph links to one test only with ('bootstrap/providers.php')
+  ✓ Laravel boot files → it keeps the recorded edges of a boot file that no pattern watches
+  ✓ Laravel boot files → it does not treat the framework cache as a boot file
+  ✓ Laravel boot files → it watches the config and bootstrap files in the Laravel defaults
 
    PASS  Tests\Unit\Plugins\Tia\IsEnabledForRun
   ✓ does not throw when an integer --random-order-seed is passed as a separate argv element
@@ -2256,4 +2262,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1599 passed (3486 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1605 passed (3495 assertions)
