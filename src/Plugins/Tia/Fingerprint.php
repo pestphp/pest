@@ -12,7 +12,7 @@ use Symfony\Component\Finder\Finder;
  */
 final readonly class Fingerprint
 {
-    private const int SCHEMA_VERSION = 18;
+    private const int SCHEMA_VERSION = 19;
 
     /**
      * @var array<int, class-string<Lockfile>>
@@ -27,14 +27,13 @@ final readonly class Fingerprint
      *     environmental: array<string, int|string|null>,
      * }
      */
-    public static function compute(string $projectRoot): array
+    public static function compute(string $projectRoot, ?ConfigurationFile $configuration = null): array
     {
         return [
             'structural' => [
                 'schema' => self::SCHEMA_VERSION,
                 'composer_lock' => self::composerLockHash($projectRoot),
-                'phpunit_xml' => self::trackedHash($projectRoot, 'phpunit.xml'),
-                'phpunit_xml_dist' => self::trackedHash($projectRoot, 'phpunit.xml.dist'),
+                'phpunit_configuration' => ($configuration ?? ConfigurationFile::projectDefault())->fingerprint($projectRoot),
                 'vite_config' => self::viteConfigHash($projectRoot),
                 'package_lock' => self::packageLockHash($projectRoot),
                 'js_config' => self::jsConfigHash($projectRoot),

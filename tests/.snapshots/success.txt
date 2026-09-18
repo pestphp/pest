@@ -1861,6 +1861,12 @@
   ✓ addOutput → it uses singular form for single test file
   ✓ addOutput → it returns original exit code when shard is not set
 
+   PASS  Tests\Unit\Plugins\Tia\ConfigurationFile
+  ✓ it fingerprints the path and the content of the configuration file
+  ✓ it tells an identical copy under another name apart from the original
+  ✓ it resolves a configuration directory the way PHPUnit does
+  ✓ it gives a run with --no-configuration its own fingerprint
+
    PASS  Tests\Unit\Plugins\Tia\ContentHash
   ✓ of() → it returns false when file does not exist
   ✓ of() → it hashes an existing file
@@ -2256,4 +2262,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1599 passed (3486 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1603 passed (3491 assertions)
