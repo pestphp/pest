@@ -6,6 +6,8 @@ namespace Pest\Plugins\Parallel\Paratest;
 
 use ParaTest\Options;
 use Pest\Plugins\Parallel\Support\CompactPrinter;
+use Pest\Plugins\Profile;
+use Pest\Result;
 use Pest\Support\StateGenerator;
 use PHPUnit\TestRunner\TestResult\TestResult;
 use PHPUnit\TextUI\Output\Printer;
@@ -130,6 +132,8 @@ final class ResultPrinter
      */
     public function printResults(TestResult $testResult, array $teamcityFiles, array $testdoxFiles, Duration $duration): void
     {
+        $profile = Profile::results();
+
         if ($this->options->needsTeamcity) {
             $teamcityProgress = $this->tailMultiple($teamcityFiles);
 
@@ -166,7 +170,13 @@ final class ResultPrinter
 
         if (! isset($_SERVER['PEST_PARALLEL_NO_OUTPUT'])) {
             $this->compactPrinter->errors($state);
-            $this->compactPrinter->recap($state, $testResult, $duration, $this->options);
+            $this->compactPrinter->recap(
+                $state,
+                $testResult,
+                $duration,
+                $this->options,
+                Result::ok($this->options->configuration, $testResult) ? $profile : [],
+            );
         }
     }
 
