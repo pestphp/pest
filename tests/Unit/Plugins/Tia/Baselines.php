@@ -45,3 +45,35 @@ it('uses the nearest repository for baseline detection', function (): void {
 
     expect(new GitHubRemote(new WatchPatterns)->detect($nested->path))->toBe('acme/nested');
 });
+
+it('detects a baseline repository from a project in a worktree', function (string $host): void {
+    $this->repo->addOrigin('git@'.$host.':acme/mono.git');
+    file_put_contents($this->root.'/apps/api/composer.json', '{}');
+    $this->repo->commit('Add project');
+    $worktree = $this->repo->worktree($this->root.'/worktree', 'feature');
+
+    $remote = $host === 'github.com'
+        ? new GitHubRemote(new WatchPatterns)
+        : new GitLabRemote(new WatchPatterns);
+
+    expect($remote->detect($worktree.'/apps/api'))->toBe('acme/mono');
+})->with(['github.com', 'gitlab.com']);
+
+it('detects a submodule baseline repository without using its parent remote', function (string $host): void {
+    $this->repo->addOrigin('git@'.$host.':acme/mono.git');
+    mkdir($this->root.'/source');
+    $source = new GitRepo($this->root.'/source');
+    $source->init();
+    mkdir($source->path.'/apps/api', 0755, true);
+    file_put_contents($source->path.'/apps/api/composer.json', '{}');
+    $source->commit('Add project');
+    $this->repo->run(['-c', 'protocol.file.allow=always', 'submodule', 'add', $source->path, 'packages/module']);
+    $submodule = new GitRepo($this->root.'/packages/module');
+    $submodule->setOriginUrl('git@'.$host.':acme/module.git');
+
+    $remote = $host === 'github.com'
+        ? new GitHubRemote(new WatchPatterns)
+        : new GitLabRemote(new WatchPatterns);
+
+    expect($remote->detect($submodule->path.'/apps/api'))->toBe('acme/module');
+})->with(['github.com', 'gitlab.com']);

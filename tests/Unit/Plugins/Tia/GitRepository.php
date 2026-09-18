@@ -58,8 +58,73 @@ describe('configPath()', function (): void {
             ->toBe($this->root.DIRECTORY_SEPARATOR.'.git'.DIRECTORY_SEPARATOR.'config');
     });
 
-    it('returns null for a .git FILE, matching the previous degradation', function (): void {
+    it('resolves the shared config from a worktree', function (bool $absoluteGitDir, bool $absoluteCommonDir): void {
+        $worktree = $this->root.'/worktree';
+        $gitDir = $this->root.'/.git/worktrees/feature';
+        mkdir($worktree.'/apps/api', 0755, true);
+        mkdir($gitDir, 0755, true);
+        file_put_contents($worktree.'/.git', 'gitdir: '.($absoluteGitDir ? $gitDir : '../.git/worktrees/feature')."\n");
+        file_put_contents($gitDir.'/commondir', ($absoluteCommonDir ? $this->root.'/.git' : '../..')."\n");
+        file_put_contents($gitDir.'/config', "[remote \"origin\"]\n\turl = git@github.com:acme/wrong.git\n");
+
+        expect(GitRepository::configPath($worktree.'/apps/api'))
+            ->toBe(realpath($this->root.'/.git').DIRECTORY_SEPARATOR.'config')
+            ->and(GitRepository::subdirectoryPrefix($worktree.'/apps/api'))->toBe('apps/api/');
+    })->with([
+        'relative gitdir and commondir' => [false, false],
+        'relative gitdir and absolute commondir' => [false, true],
+        'absolute gitdir and relative commondir' => [true, false],
+        'absolute gitdir and commondir' => [true, true],
+    ]);
+
+    it('resolves a submodule config without a commondir', function (bool $absoluteGitDir): void {
+        $gitDir = $this->root.'/.git/modules/api';
+        mkdir($gitDir, 0755, true);
+        file_put_contents($gitDir.'/config', "[remote \"origin\"]\n\turl = git@github.com:acme/api.git\n");
+        file_put_contents($this->root.'/apps/api/.git', 'gitdir: '.($absoluteGitDir ? $gitDir : '../../.git/modules/api')."\n");
+
+        expect(GitRepository::configPath($this->root.'/apps/api'))
+            ->toBe(realpath($gitDir).DIRECTORY_SEPARATOR.'config');
+    })->with([
+        'relative gitdir' => [false],
+        'absolute gitdir' => [true],
+    ]);
+
+    it('returns null when the .git file points to a missing directory', function (): void {
         file_put_contents($this->root.'/apps/api/.git', "gitdir: /elsewhere\n");
+
+        expect(GitRepository::configPath($this->root.'/apps/api'))->toBeNull();
+    });
+
+    it('returns null for malformed .git files without using the parent config', function (string $content): void {
+        file_put_contents($this->root.'/apps/api/.git', $content);
+
+        expect(GitRepository::configPath($this->root.'/apps/api'))->toBeNull();
+    })->with([
+        'empty file' => [''],
+        'missing gitdir prefix' => ["../../.git\n"],
+        'empty gitdir' => ["gitdir:\n"],
+    ]);
+
+    it('returns null when a repository has no config', function (): void {
+        unlink($this->root.'/.git/config');
+
+        expect(GitRepository::configPath($this->root.'/apps/api'))->toBeNull();
+    });
+
+    it('returns null when the referenced git directory has no config', function (): void {
+        mkdir($this->root.'/.git/modules/api', 0755, true);
+        file_put_contents($this->root.'/apps/api/.git', "gitdir: ../../.git/modules/api\n");
+
+        expect(GitRepository::configPath($this->root.'/apps/api'))->toBeNull();
+    });
+
+    it('returns null when the common directory is missing', function (): void {
+        $gitDir = $this->root.'/.git/worktrees/feature';
+        mkdir($gitDir, 0755, true);
+        file_put_contents($this->root.'/apps/api/.git', 'gitdir: '.$gitDir."\n");
+        file_put_contents($gitDir.'/commondir', "../../../missing\n");
+        file_put_contents($gitDir.'/config', "[remote \"origin\"]\n\turl = git@github.com:acme/wrong.git\n");
 
         expect(GitRepository::configPath($this->root.'/apps/api'))->toBeNull();
     });
