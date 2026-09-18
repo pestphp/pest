@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia\Baselines;
 
+use Pest\Plugins\Tia\GitRepository;
 use Pest\Plugins\Tia\WatchPatterns;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
@@ -73,9 +74,9 @@ abstract readonly class BaseRemote // @pest-arch-ignore-line
 
     protected function readOriginUrl(string $projectRoot): ?string // @pest-arch-ignore-line
     {
-        $gitConfig = $projectRoot.DIRECTORY_SEPARATOR.'.git'.DIRECTORY_SEPARATOR.'config';
+        $gitConfig = GitRepository::configPath($projectRoot);
 
-        if (! is_file($gitConfig)) {
+        if ($gitConfig === null) {
             return null;
         }
 

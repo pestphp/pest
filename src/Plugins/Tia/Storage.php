@@ -99,6 +99,14 @@ final class Storage
     {
         $origin = self::originIdentity($projectRoot);
 
+        if ($origin !== null) {
+            $prefix = GitRepository::subdirectoryPrefix($projectRoot);
+
+            if ($prefix !== '') {
+                $origin .= '#'.$prefix;
+            }
+        }
+
         $realpath = @realpath($projectRoot);
         $input = $origin ?? ($realpath === false ? $projectRoot : $realpath);
 
@@ -131,9 +139,9 @@ final class Storage
 
     private static function rawOriginUrl(string $projectRoot): ?string
     {
-        $config = $projectRoot.DIRECTORY_SEPARATOR.'.git'.DIRECTORY_SEPARATOR.'config';
+        $config = GitRepository::configPath($projectRoot);
 
-        if (! is_file($config)) {
+        if ($config === null) {
             return null;
         }
 
