@@ -33,6 +33,10 @@ final class BootFiles implements Bootstrapper
 
     public function boot(): void
     {
+        if ($this->runningInit()) {
+            return;
+        }
+
         $rootPath = TestSuite::getInstance()->rootPath;
         $testsPath = $rootPath.DIRECTORY_SEPARATOR.testDirectory();
 
@@ -60,6 +64,20 @@ final class BootFiles implements Bootstrapper
         }
 
         $this->bootDatasets($testsPath);
+    }
+
+    /**
+     * `--init` creates the tests directory, so it cannot be required yet.
+     */
+    private function runningInit(): bool
+    {
+        $arguments = $_SERVER['argv'] ?? null;
+
+        if (! is_array($arguments)) {
+            return false;
+        }
+
+        return ($arguments[1] ?? null) === '--init';
     }
 
     private function load(string $filename): void
