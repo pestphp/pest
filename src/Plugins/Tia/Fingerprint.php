@@ -275,7 +275,7 @@ final readonly class Fingerprint
             return $cache[$key];
         }
 
-        if (! is_dir($projectRoot.'/.git') && ! is_file($projectRoot.'/.git')) {
+        if (GitRepository::locate($projectRoot) === null) {
             return $cache[$key] = true;
         }
 
