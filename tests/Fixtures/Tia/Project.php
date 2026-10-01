@@ -7,6 +7,7 @@ namespace Tests\Fixtures\Tia;
 use FilesystemIterator;
 use Pest\Plugins\Tia;
 use Pest\Plugins\Tia\ChangedFiles;
+use Pest\Plugins\Tia\ConfigurationFile;
 use Pest\Plugins\Tia\FileState;
 use Pest\Plugins\Tia\Fingerprint;
 use Pest\Plugins\Tia\Graph;
@@ -197,15 +198,15 @@ final class Project
     /**
      * @param  array<int, string>  $failing
      */
-    public function seed(string $branch, bool $sentinel = true, array $failing = []): void
+    public function seed(string $branch, bool $sentinel = true, array $failing = [], ?string $configuration = null): void
     {
-        $this->seedFor($this->path, $branch, $sentinel, $failing);
+        $this->seedFor($this->path, $branch, $sentinel, $failing, $configuration);
     }
 
     /**
      * @param  array<int, string>  $failing
      */
-    public function seedFor(string $root, string $branch, bool $sentinel = true, array $failing = []): void
+    public function seedFor(string $root, string $branch, bool $sentinel = true, array $failing = [], ?string $configuration = null): void
     {
         $this->graphRoot = $root;
 
@@ -213,7 +214,7 @@ final class Project
         $sha = new GitRepo($root)->sha();
 
         $graph = new Graph($root);
-        $graph->setFingerprint(Fingerprint::compute($root));
+        $graph->setFingerprint(Fingerprint::compute($root, $configuration === null ? null : ConfigurationFile::at($root.DIRECTORY_SEPARATOR.$configuration)));
         $graph->setRecordedAtSha($branch, $sha);
 
         $graph->setLastRunTree($branch, $changedFiles->snapshotTree($changedFiles->since($sha) ?? []));

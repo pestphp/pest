@@ -2,6 +2,7 @@
 
 use Pest\Plugins\Tia;
 use Pest\Plugins\Tia\ChangedFiles;
+use Pest\Plugins\Tia\ConfigurationFile;
 use Pest\Plugins\Tia\FileState;
 use Pest\Plugins\Tia\Fingerprint;
 use Pest\Plugins\Tia\Graph;
@@ -13,6 +14,7 @@ it('does not run user hooks when replaying cached skipped and incomplete results
     $projectRoot = dirname(__DIR__, 2);
     $home = sys_get_temp_dir().'/pest-tia-'.bin2hex(random_bytes(8));
     $fixture = 'tests/Fixtures/Suites/TiaReplayHooks.php';
+    $configuration = 'tests/Fixtures/Suites/TiaReplayHooks.xml';
 
     mkdir($home, 0755, true);
 
@@ -24,7 +26,7 @@ it('does not run user hooks when replaying cached skipped and incomplete results
         $id = fn (string $description): string => 'P\Tests\Fixtures\Suites\TiaReplayHooks::'.Str::evaluable($description);
 
         $graph = new Graph($projectRoot);
-        $graph->setFingerprint(Fingerprint::compute($projectRoot));
+        $graph->setFingerprint(Fingerprint::compute($projectRoot, ConfigurationFile::at($projectRoot.DIRECTORY_SEPARATOR.$configuration)));
         $graph->setRecordedAtSha($branch, $sha);
         $graph->setLastRunTree($branch, $changedFiles->snapshotTree($changedFiles->since($sha) ?? []));
         $graph->markKnownTestFiles([$fixture]);
@@ -48,7 +50,7 @@ it('does not run user hooks when replaying cached skipped and incomplete results
         expect($storage->write(Tia::KEY_GRAPH, (string) $json))->toBeTrue();
 
         $process = new Process(
-            ['php', 'bin/pest', '--configuration', 'tests/Fixtures/Suites/TiaReplayHooks.xml', '--tia'],
+            ['php', 'bin/pest', '--configuration', $configuration, '--tia'],
             $projectRoot,
             [
                 'COLLISION_PRINTER' => 'DefaultPrinter',
