@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Pest\Plugins\Tia\Graph;
+use Pest\Plugins\Tia\WatchDefaults\Laravel;
 use Pest\Plugins\Tia\WatchPatterns;
 use Pest\Support\Container;
 use PHPUnit\Framework\TestStatus\TestStatus;
@@ -310,5 +311,67 @@ describe('markKnownTestFiles()', function (): void {
         $graph->markKnownTestFiles(['/somewhere/else/tests/FooTest.php']);
 
         expect($graph->knowsTest('/somewhere/else/tests/FooTest.php'))->toBeFalse();
+    });
+});
+
+describe('Laravel boot files', function (): void {
+    beforeEach(function (): void {
+        $this->projectRoot = sys_get_temp_dir().'/pest-tia-boot-'.bin2hex(random_bytes(4));
+
+        foreach (['config/app.php', 'config/services/mail.php', 'bootstrap/providers.php', 'bootstrap/cache/config.php', 'app/Other.php'] as $file) {
+            @mkdir(dirname($this->projectRoot.'/'.$file), 0755, true);
+            file_put_contents($this->projectRoot.'/'.$file, "<?php\n\nreturn [];\n");
+        }
+
+        $this->watchPatterns = new WatchPatterns;
+        Container::getInstance()->add(WatchPatterns::class, $this->watchPatterns);
+
+        $this->graph = new Graph($this->projectRoot);
+
+        foreach (['config/app.php', 'config/services/mail.php', 'bootstrap/providers.php', 'bootstrap/cache/config.php'] as $file) {
+            $this->graph->link('tests/Feature/FirstInWorkerTest.php', $file);
+        }
+
+        $this->graph->link('tests/Feature/OtherTest.php', 'app/Other.php');
+    });
+
+    afterEach(function (): void {
+        $files = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($this->projectRoot, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST,
+        );
+
+        foreach ($files as $file) {
+            assert($file instanceof SplFileInfo);
+
+            $file->isDir() ? @rmdir($file->getPathname()) : @unlink($file->getPathname());
+        }
+
+        @rmdir($this->projectRoot);
+
+        Container::getInstance()->add(WatchPatterns::class, new WatchPatterns);
+    });
+
+    it('applies the watch patterns to a boot file that the graph links to one test only', function (string $bootFile): void {
+        $this->watchPatterns->add(['config/**/*.php' => 'tests', 'bootstrap/*.php' => 'tests']);
+
+        expect($this->graph->affected([$bootFile]))
+            ->toEqualCanonicalizing(['tests/Feature/FirstInWorkerTest.php', 'tests/Feature/OtherTest.php']);
+    })->with(['config/app.php', 'config/services/mail.php', 'bootstrap/providers.php']);
+
+    it('keeps the recorded edges of a boot file that no pattern watches', function (): void {
+        expect($this->graph->affected(['config/app.php']))->toBe(['tests/Feature/FirstInWorkerTest.php']);
+    });
+
+    it('does not treat the framework cache as a boot file', function (): void {
+        $this->watchPatterns->add(['bootstrap/**' => 'tests']);
+
+        expect($this->graph->affected(['bootstrap/cache/config.php']))->toBe(['tests/Feature/FirstInWorkerTest.php']);
+    });
+
+    it('watches the config and bootstrap files in the Laravel defaults', function (): void {
+        expect(new Laravel()->defaults('/project', 'tests'))
+            ->toHaveKey('config/**/*.php', ['tests'])
+            ->toHaveKey('bootstrap/*.php', ['tests']);
     });
 });
