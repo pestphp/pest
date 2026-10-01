@@ -1925,6 +1925,21 @@
   ✓ markKnownTestFiles() → it makes a test file with no edges known
   ✓ markKnownTestFiles() → it does not clobber edges of an already-known test file
   ✓ markKnownTestFiles() → it ignores paths outside the project root
+  ✓ baselineFor() fallback merging and memoization → it overlays a partial branch baseline on top of the fallback
+  ✓ baselineFor() fallback merging and memoization → it lets a complete branch baseline shadow fallback results from the files it covers
+  ✓ baselineFor() fallback merging and memoization → it memoizes the resolved baseline until the graph changes
+  ✓ baselineFor() fallback merging and memoization → it resolves each requested fallback separately
+  ✓ baselineFor() fallback merging and memoization → it keeps the resolved baseline out of the encoded graph
+  ✓ baselineFor() fallback merging and memoization → it reflects setResult() after a lookup
+  ✓ baselineFor() fallback merging and memoization → it reflects a fallback branch mutation after a lookup
+  ✓ baselineFor() fallback merging and memoization → it reflects setRecordedAtSha() after a lookup
+  ✓ baselineFor() fallback merging and memoization → it reflects setLastRunTree() after a lookup
+  ✓ baselineFor() fallback merging and memoization → it reflects clearResults() after a lookup
+  ✓ baselineFor() fallback merging and memoization → it reflects markBaselineComplete() after a lookup
+  ✓ baselineFor() fallback merging and memoization → it reflects pruneResultsForMissingFiles() after a lookup
+  ✓ baselineFor() fallback merging and memoization → it reflects pruneMissingBranches() after a lookup
+  ✓ baselineFor() fallback merging and memoization → it reflects pruneStaleResults() after a lookup
+  ✓ baselineFor() fallback merging and memoization → it reflects setFallbackBranch() after a lookup
 
    PASS  Tests\Unit\Plugins\Tia\IsEnabledForRun
   ✓ does not throw when an integer --random-order-seed is passed as a separate argv element
@@ -2256,4 +2271,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1599 passed (3486 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1614 passed (3525 assertions)
