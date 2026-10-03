@@ -172,6 +172,46 @@ export async function loadAliasFromViteConfig(projectRoot = PROJECT_ROOT) {
   return alias
 }
 
+const SFC_RE = /\.(vue|svelte)$/i
+const SCRIPT_BLOCK_RE = /<script\b([^>]*)>([\s\S]*?)<\/script>/gi
+const LANG_ATTR_RE = /\blang\s*=\s*['"]?([a-z]+)['"]?/i
+const SRC_ATTR_RE = /\bsrc\s*=\s*['"]([^'"]+)['"]/i
+
+// A Single-File Component is not JavaScript, so the parser rejects the raw file.
+// The graph only needs the import edges, and every one of them lives in a
+// `<script>` block, so the concatenated blocks carry the exact same edges the
+// framework compiler would emit, with no compile step and no extra dependency.
+export function extractSfcScript(source) {
+  const chunks = []
+  let typescript = false
+  let jsx = false
+
+  for (const match of source.matchAll(SCRIPT_BLOCK_RE)) {
+    const attrs = match[1] ?? ''
+    const lang = LANG_ATTR_RE.exec(attrs)?.[1]?.toLowerCase()
+
+    if (lang === 'ts' || lang === 'tsx') typescript = true
+    if (lang === 'jsx' || lang === 'tsx') jsx = true
+
+    const src = SRC_ATTR_RE.exec(attrs)?.[1]
+    if (src) { chunks.push(`import ${JSON.stringify(src)}`); continue }
+
+    chunks.push(match[2] ?? '')
+  }
+
+  let code = chunks.join('\n;\n')
+
+  // `<script setup>` compiles to a default export the block itself never holds,
+  // and an importer of the component asks for that export by name.
+  if (!/\bexport\s+default\b/.test(code)) code += '\nexport default null'
+
+  const moduleType = typescript
+    ? (jsx ? 'tsx' : 'ts')
+    : (jsx ? 'jsx' : 'js')
+
+  return { code, moduleType }
+}
+
 async function listPageFiles(pagesDir) {
   if (!existsSync(pagesDir)) return []
 
@@ -289,12 +329,28 @@ async function main() {
     },
   }
 
+  const sfcScript = {
+    name: 'pest-tia-sfc-script',
+    async load(id) {
+      if (!id || !SFC_RE.test(id)) return null
+
+      let source
+      try { source = await readFile(id, 'utf8') } catch { return null }
+
+      const { code, moduleType } = extractSfcScript(source)
+
+      return { code, moduleType, moduleSideEffects: false }
+    },
+  }
+
   const assetStub = {
     name: 'pest-tia-asset-stub',
     load(id) {
       if (!id) return null
       if (ASSET_EXT_RE.test(id)) {
-        return { code: 'export default null', moduleSideEffects: false }
+        // The module type follows the extension unless a plugin overrides it,
+        // and rolldown refuses to bundle a CSS module at all.
+        return { code: 'export default null', moduleType: 'js', moduleSideEffects: false }
       }
       return null
     },
@@ -310,9 +366,12 @@ async function main() {
       alias,
       extensions: ['.tsx', '.ts', '.jsx', '.js', '.mts', '.cts', '.mjs', '.cjs', '.json', '.vue', '.svelte'],
     },
-    transform: { jsx: 'preserve' },
+    // TypeScript drops an import whose bindings the emitted code does not use,
+    // and a component that only appears in an SFC template is exactly that, so
+    // the graph loses the edge unless the value import survives the transform.
+    transform: { jsx: 'preserve', typescript: { onlyRemoveTypeImports: true } },
     treeshake: false,
-    plugins: [externalBare, assetStub, collector],
+    plugins: [externalBare, sfcScript, assetStub, collector],
     logLevel: 'silent',
     onLog: () => {},
   })

@@ -472,3 +472,271 @@ it('accepts a page directory candidate only when it matches the casing on disk',
 
     expect(tiaViteCasingResults()[$name])->toBe($expected);
 })->with(array_keys(tiaViteCasingFixtures()));
+
+function tiaSfcFixtures(): array
+{
+    return [
+        'script-setup' => [
+            <<<'VUE'
+            <template><div /></template>
+            <script setup>
+            import Layout from '@/Layouts/AppLayout.vue'
+            </script>
+            VUE,
+            'js',
+            ["import Layout from '@/Layouts/AppLayout.vue'", 'export default null'],
+            ['<template>'],
+            1,
+        ],
+        'script-setup-typescript' => [
+            <<<'VUE'
+            <template><div /></template>
+            <script setup lang="ts">
+            import type { Page } from '@inertiajs/core'
+            import Card from './Card.vue'
+            </script>
+            VUE,
+            'ts',
+            ["import Card from './Card.vue'", 'export default null'],
+            [],
+            1,
+        ],
+        'render-function-jsx' => [
+            <<<'VUE'
+            <script lang="tsx">
+            import Button from './Button.vue'
+
+            export default { render: (): unknown => <Button /> }
+            </script>
+            VUE,
+            'tsx',
+            ["import Button from './Button.vue'", '<Button />'],
+            ['export default null'],
+            1,
+        ],
+        'options-api-keeps-its-own-default' => [
+            <<<'VUE'
+            <template><div /></template>
+            <script>
+            import Card from './Card.vue'
+
+            export default { components: { Card } }
+            </script>
+            VUE,
+            'js',
+            ["import Card from './Card.vue'", 'export default { components: { Card } }'],
+            ['export default null'],
+            1,
+        ],
+        'both-script-blocks' => [
+            <<<'VUE'
+            <script>
+            import Base from './Base.vue'
+
+            export default { inheritAttrs: false }
+            </script>
+            <script setup>
+            import Icon from './Icon.vue'
+            </script>
+            VUE,
+            'js',
+            ["import Base from './Base.vue'", "import Icon from './Icon.vue'"],
+            ['export default null'],
+            1,
+        ],
+        'external-script-src' => [
+            <<<'VUE'
+            <template><div /></template>
+            <script src="./external.js"></script>
+            VUE,
+            'js',
+            ['import "./external.js"', 'export default null'],
+            [],
+            1,
+        ],
+        'leading-html-comment' => [
+            <<<'VUE'
+            <!-- eslint-disable no-undef -->
+            <template><div /></template>
+            <script setup>
+            import Card from './Card.vue'
+            </script>
+            VUE,
+            'js',
+            ["import Card from './Card.vue'"],
+            ['<!--', 'eslint-disable'],
+            1,
+        ],
+        'svelte-component' => [
+            <<<'SVELTE'
+            <script lang="ts">
+            import Nested from './Nested.svelte'
+            </script>
+
+            <Nested />
+            SVELTE,
+            'ts',
+            ["import Nested from './Nested.svelte'", 'export default null'],
+            ['<Nested />'],
+            1,
+        ],
+        'no-script-block' => [
+            '<template><div>static</div></template>',
+            'js',
+            ['export default null'],
+            ['<template>'],
+            1,
+        ],
+    ];
+}
+
+function tiaSfcResults(): array
+{
+    static $cache = null;
+    if ($cache !== null) {
+        return $cache;
+    }
+
+    $payload = [];
+    foreach (tiaSfcFixtures() as $name => [$source]) {
+        $payload[] = ['name' => $name, 'source' => $source];
+    }
+
+    $inputFile = tempnam(sys_get_temp_dir(), 'tia-sfc-');
+    file_put_contents($inputFile, json_encode($payload));
+
+    $helper = str_replace('\\', '/', tiaViteHelperPath());
+    $input = str_replace('\\', '/', $inputFile);
+
+    $script = <<<JS
+    import { extractSfcScript } from '{$helper}'
+    import { readFileSync } from 'node:fs'
+    const cases = JSON.parse(readFileSync('{$input}', 'utf8'))
+    const out = {}
+    for (const c of cases) out[c.name] = extractSfcScript(c.source)
+    process.stdout.write(JSON.stringify(out))
+    JS;
+
+    $process = new Process(['node', '--input-type=module', '-e', $script]);
+    $process->mustRun();
+
+    @unlink($inputFile);
+
+    return $cache = json_decode($process->getOutput(), true, flags: JSON_THROW_ON_ERROR);
+}
+
+function tiaSfcBundleResult(): array
+{
+    static $cache = null;
+    if ($cache !== null) {
+        return $cache;
+    }
+
+    $root = sys_get_temp_dir().'/pest-tia-sfc-'.bin2hex(random_bytes(6));
+    mkdir($root, 0755, true);
+    $root = realpath($root);
+    $pages = $root.'/resources/js/Pages/Auth';
+    $layouts = $root.'/resources/js/Layouts';
+    mkdir($pages, 0755, true);
+    mkdir($layouts, 0755, true);
+
+    file_put_contents($root.'/package.json', tiaJson(['name' => 'tia-sfc-fixture']));
+    file_put_contents($root.'/jsconfig.json', tiaJson([
+        'compilerOptions' => ['baseUrl' => '.', 'paths' => ['@/*' => ['./resources/js/*']]],
+    ]));
+
+    file_put_contents($layouts.'/layout.css', '.a { color: red }');
+    file_put_contents($layouts.'/types.ts', "export type Page = { id: number }\n");
+
+    file_put_contents($layouts.'/Button.vue', <<<'VUE'
+    <template><button /></template>
+    <script>
+    export default { name: 'Button' }
+    </script>
+    VUE);
+
+    file_put_contents($layouts.'/GuestLayout.vue', <<<'VUE'
+    <template><slot /></template>
+    <script setup lang="ts">
+    import type { Page } from './types'
+    import Button from './Button.vue'
+    import './layout.css'
+    </script>
+    <style scoped>.a { color: red }</style>
+    VUE);
+
+    file_put_contents($pages.'/Login.vue', <<<'VUE'
+    <!-- eslint-disable no-undef -->
+    <template><GuestLayout /></template>
+    <script setup>
+    import GuestLayout from '@/Layouts/GuestLayout.vue'
+    </script>
+    VUE);
+
+    file_put_contents($pages.'/Register.vue', <<<'VUE'
+    <template><GuestLayout /></template>
+    <script setup lang="ts">
+    import GuestLayout from '@/Layouts/GuestLayout.vue'
+    </script>
+    VUE);
+
+    file_put_contents($pages.'/Widget.vue', <<<'VUE'
+    <script lang="tsx">
+    import Button from '@/Layouts/Button.vue'
+
+    export default { render: (): unknown => <Button /> }
+    </script>
+    VUE);
+
+    $process = new Process(['node', tiaViteHelperPath(), $root], $root);
+    $process->run();
+
+    $output = $process->getOutput();
+
+    return $cache = [
+        'root' => $root,
+        'exitCode' => $process->getExitCode(),
+        'errorOutput' => $process->getErrorOutput(),
+        'map' => $output === '' ? null : json_decode($output, true),
+    ];
+}
+
+it('extracts the script blocks of a single-file component', function (string $name): void {
+    [, $moduleType, $contains, $missing, $defaults] = tiaSfcFixtures()[$name];
+    $result = tiaSfcResults()[$name];
+
+    expect($result['moduleType'])->toBe($moduleType);
+
+    foreach ($contains as $needle) {
+        expect($result['code'])->toContain($needle);
+    }
+
+    foreach ($missing as $needle) {
+        expect($result['code'])->not->toContain($needle);
+    }
+
+    expect(substr_count($result['code'], 'export default'))->toBe($defaults);
+})->with(array_keys(tiaSfcFixtures()));
+
+it('bundles a single-file component tree without a framework plugin', function (): void {
+    $result = tiaSfcBundleResult();
+
+    $probe = new Process(['node', '-e', "require.resolve('rolldown')"], $result['root']);
+    $probe->run();
+
+    if (! $probe->isSuccessful()) {
+        $this->markTestSkipped('rolldown is not installed.');
+    }
+
+    $pages = ['Auth/Login', 'Auth/Register'];
+
+    expect($result['exitCode'])->toBe(0, $result['errorOutput'])
+        ->and($result['map'])->toHaveKeys([
+            'resources/js/Layouts/GuestLayout.vue',
+            'resources/js/Layouts/Button.vue',
+            'resources/js/Layouts/layout.css',
+        ])
+        ->and($result['map']['resources/js/Layouts/GuestLayout.vue'])->toBe($pages)
+        ->and($result['map']['resources/js/Layouts/Button.vue'])->toBe([...$pages, 'Auth/Widget'])
+        ->and($result['map']['resources/js/Layouts/layout.css'])->toBe($pages);
+});
