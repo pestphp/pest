@@ -28,6 +28,10 @@ test('failures with custom message', function (): void {
     expect('example')->toBeDomain('oh no!');
 })->throws(ExpectationFailedException::class, 'oh no!');
 
+test('failures with default message', function (): void {
+    expect('example')->toBeDomain();
+})->throws(ExpectationFailedException::class, 'Failed asserting that example is a domain.');
+
 test('not failures', function (): void {
     expect('example.com')->not->toBeDomain();
 })->throws(ExpectationFailedException::class);

@@ -17,6 +17,10 @@ test('failures with custom message', function (): void {
     expect('lowercase')->toBeUppercase('oh no!');
 })->throws(ExpectationFailedException::class, 'oh no!');
 
+test('failures with default message', function (): void {
+    expect('lowercase')->toBeUppercase();
+})->throws(ExpectationFailedException::class, 'Failed asserting that lowercase is uppercase.');
+
 test('not failures', function (): void {
     expect('UPPERCASE')->not->toBeUppercase();
 })->throws(ExpectationFailedException::class);
