@@ -519,11 +519,19 @@ final class Project
             throw new RuntimeException(sprintf('Unable to create [%s].', $directory));
         }
 
-        if (@link($from, $to) || @copy($from, $to)) {
+        if ((self::shareDevice($from, $directory) && @link($from, $to)) || @copy($from, $to)) {
             return;
         }
 
         throw new RuntimeException(sprintf('Unable to mirror [%s] into [%s].', $from, $to));
+    }
+
+    private static function shareDevice(string $from, string $directory): bool
+    {
+        $source = @stat($from);
+        $target = @stat($directory);
+
+        return $source !== false && $target !== false && $source['dev'] === $target['dev'];
     }
 
     /**
