@@ -77,7 +77,7 @@ final class BootFiles implements Bootstrapper
             return false;
         }
 
-        return ($arguments[1] ?? null) === '--init';
+        return in_array('--init', $arguments, true);
     }
 
     private function load(string $filename): void

@@ -22,6 +22,22 @@ test('init creates a suite when the tests directory is missing', function (): vo
     }
 });
 
+test('init creates a suite when --init is not the first argument', function (): void {
+    $root = makeInitProject();
+
+    try {
+        $process = runInitProject($root, '--colors=never', '--init');
+
+        expect($process->getExitCode())->toBe(0)
+            ->and($process->getErrorOutput())->not->toContain('cannot be resolved')
+            ->and($process->getOutput())->toContain('File created.')
+            ->and(is_file($root.DIRECTORY_SEPARATOR.'phpunit.xml'))->toBeTrue()
+            ->and(is_file($root.DIRECTORY_SEPARATOR.'tests'.DIRECTORY_SEPARATOR.'Pest.php'))->toBeTrue();
+    } finally {
+        removeInitProject($root);
+    }
+});
+
 test('a missing tests directory does not crash while resolving tia state', function (): void {
     $root = makeInitProject();
 
@@ -66,14 +82,18 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
 require {$autoload};
 
-\$command = \$argv[1] ?? '--version';
+\$arguments = array_slice(\$argv, 1);
+
+if (\$arguments === []) {
+    \$arguments = ['--version'];
+}
 
 \$GLOBALS['_composer_bin_dir'] = getcwd().'/vendor/bin';
 
-\$_SERVER['argv'] = ['pest', \$command];
+\$_SERVER['argv'] = ['pest', ...\$arguments];
 \$_SERVER['COLLISION_PRINTER'] = 'DefaultPrinter';
 
-\$input = new ArgvInput(['pest', \$command]);
+\$input = new ArgvInput(\$_SERVER['argv']);
 \$output = new ConsoleOutput(ConsoleOutput::VERBOSITY_NORMAL, false);
 
 \$testSuite = TestSuite::getInstance(getcwd(), 'tests');
@@ -92,10 +112,10 @@ PHP);
     return $root;
 }
 
-function runInitProject(string $root, string $command): Process
+function runInitProject(string $root, string ...$command): Process
 {
     $process = new Process(
-        [PHP_BINARY, 'run.php', $command],
+        [PHP_BINARY, 'run.php', ...$command],
         $root,
         [
             'PEST_NO_SUPPORT' => 'true',
