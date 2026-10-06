@@ -17,6 +17,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final readonly class Init implements HandlesArguments
 {
+    use Concerns\HandleArguments;
+
     private const string INIT_OPTION = '--init';
 
     private const array STUBS = [
@@ -40,14 +42,9 @@ final readonly class Init implements HandlesArguments
      */
     public function handleArguments(array $arguments): array
     {
-        if (! array_key_exists(1, $arguments)) {
+        if (! $this->hasArgument(self::INIT_OPTION, $arguments)) {
             return $arguments;
         }
-        if ($arguments[1] !== self::INIT_OPTION) {
-            return $arguments;
-        }
-
-        unset($arguments[1]);
 
         $this->init();
 
