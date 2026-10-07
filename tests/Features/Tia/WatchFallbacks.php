@@ -41,8 +41,16 @@ test('retains custom mappings and PHP edges in sequential and parallel runs', fu
 
     $result = $project->pest('--tia', '--filtered', ...$arguments);
 
-    expect($result->exitCode)->toBe(0, $result->describe())
-        ->and($result->affected())->toBe(4, $result->describe());
+    expect($result->exitCode)->toBe(0, $result->describe());
+
+    if (str_contains($result->output, 'no coverage driver is available')) {
+        expect($result->output)->toContain('Running the full suite to avoid using a stale dependency graph.')
+            ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed');
+
+        return;
+    }
+
+    expect($result->affected())->toBe(4, $result->describe());
 })->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
 
 test('still runs every test without a baseline when defaults are disabled', function (array $arguments): void {

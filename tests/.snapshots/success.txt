@@ -2062,6 +2062,22 @@
   ✓ it accepts a page directory candidate only when it matches the casing on disk with ('wrong parent')
   ✓ it accepts a page directory candidate only when it matches the casing on disk with ('absent')
 
+   PASS  Tests\Unit\Plugins\Tia\WatchPatterns
+  ✓ it keeps the built-in fallbacks enabled by default
+  ✓ it excludes every overlapping default for a matching changed path
+  ✓ it retains custom watches when their matching defaults are excluded
+  ✓ it keeps watch additive when defaults are enabled
+  ✓ it disables all defaults without disabling custom watches
+  ✓ it retains exclusions when defaults are loaded after configuration
+  ✓ it accumulates exclusions from repeated calls
+  ✓ it does not disable defaults for an empty exclusion list
+  ✓ it supports exclusions within a changed-path pattern
+  ✓ it restores default watches and removes custom watches on reset
+  ✓ it does not select unrelated tests for an excluded unknown Vue page
+  ✓ it retains recorded Inertia dependencies when default watches are disabled
+  ✓ it retains recorded migration tables when default watches are disabled
+  ✓ it uses custom mappings for an unknown Vue page with defaults disabled
+
    PASS  Tests\Unit\Plugins\Tia\WorkerToken
   ✓ prefers the per-process UNIQUE_TEST_TOKEN over the per-slot TEST_TOKEN, so two workers recycled into the same slot get different tokens
   ✓ falls back to TEST_TOKEN when UNIQUE_TEST_TOKEN is absent
@@ -2256,4 +2272,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1599 passed (3486 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1613 passed (3507 assertions)
