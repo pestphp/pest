@@ -340,7 +340,7 @@ final class Recorder
         $out = [];
 
         foreach ($data as $file => $lines) {
-            if (! is_array($lines)) {
+            if (! is_array($lines) || $lines === []) {
                 continue;
             }
             $covered = [];
@@ -357,7 +357,7 @@ final class Recorder
             $lineKeys = array_keys($lines);
             $reportsUnexecutedLines = count($covered) < count($lines);
 
-            if ($reportsUnexecutedLines && $lineKeys !== [] && count($covered) === 1 && $covered[0] === max($lineKeys)) {
+            if ($reportsUnexecutedLines && count($covered) === 1 && $covered[0] === max($lineKeys)) {
                 continue;
             }
 
