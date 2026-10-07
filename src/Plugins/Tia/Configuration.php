@@ -102,4 +102,17 @@ final class Configuration
 
         return $this;
     }
+
+    /**
+     * @param  list<string>|null  $patterns  changed-file globs; null disables all default watches
+     * @return $this
+     */
+    public function withoutDefaultWatchPatterns(?array $patterns = null): self
+    {
+        /** @var WatchPatterns $watchPatterns */
+        $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
+        $watchPatterns->excludeDefaults($patterns);
+
+        return $this;
+    }
 }
