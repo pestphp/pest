@@ -8,6 +8,7 @@ use DOMDocument;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Contracts\Plugins\Terminable;
 use Pest\Plugins\Concerns\HandleArguments;
+use PHPUnit\Event\Facade as EventFacade;
 use PHPUnit\TextUI\CliArguments\Builder as CliConfigurationBuilder;
 use PHPUnit\TextUI\CliArguments\XmlConfigurationFileFinder;
 
@@ -56,7 +57,7 @@ final class Configuration implements HandlesArguments, Terminable
 
     private function hasCustomConfigurationFile(): bool
     {
-        $cliConfiguration = (new CliConfigurationBuilder)->fromParameters([]);
+        $cliConfiguration = new CliConfigurationBuilder(EventFacade::emitter())->fromParameters([]);
         $configurationFile = (new XmlConfigurationFileFinder)->find($cliConfiguration);
 
         return is_string($configurationFile);
