@@ -24,7 +24,7 @@
         "pestphp/pest-plugin": "^5.0.0",
         "pestphp/pest-plugin-arch": "^5.0.0",
         "pestphp/pest-plugin-mutate": "^5.0.2",
-        "pestphp/pest-plugin-profanity": "^5.0.0",
+        "pestphp/pest-plugin-profanity": "^5.0.1",
         "phpunit/phpunit": "^13.4.1",
         "symfony/process": "^8.1.7"
     },
