@@ -56,8 +56,6 @@ final readonly class Help implements HandlesArguments
                         'desc' => $description,
                     ] = $option;
 
-                    assert(is_string($argument));
-
                     if (trim($argument) === '--process-isolation') {
                         continue;
                     }
@@ -87,7 +85,7 @@ final readonly class Help implements HandlesArguments
     }
 
     /**
-     * @return array<string, array<int, array<'arg'|'desc'|int, array{arg: string, desc: string}|string>>>
+     * @return array<string, list<array{arg: string, desc: string}|array{spacer: string}|array{text: string}|array{}>>
      */
     private function getContent(): array
     {
