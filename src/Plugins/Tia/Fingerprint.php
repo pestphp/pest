@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 use Pest\Plugins\Tia\Contracts\Lockfile;
-use Symfony\Component\Finder\Finder;
+use Symfony\Component\Process\Exception\ExceptionInterface as ProcessException;
+use Symfony\Component\Process\Process;
 
 /**
  * @internal
@@ -279,13 +280,16 @@ final readonly class Fingerprint
             return $cache[$key] = true;
         }
 
-        $finder = (new Finder)
-            ->in($projectRoot)
-            ->depth('== 0')
-            ->name($relativePath)
-            ->ignoreVCSIgnored(true);
+        $process = new Process(['git', 'check-ignore', '-q', '--', $relativePath], $projectRoot);
+        $process->setTimeout(5.0);
 
-        return $cache[$key] = $finder->hasResults();
+        try {
+            $process->run();
+        } catch (ProcessException) {
+            return $cache[$key] = true;
+        }
+
+        return $cache[$key] = $process->getExitCode() !== 0;
     }
 
     private static function contentHashOrNull(string $path): ?string
