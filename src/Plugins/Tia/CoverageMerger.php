@@ -7,6 +7,7 @@ namespace Pest\Plugins\Tia;
 use Pest\Plugins\Tia;
 use Pest\Plugins\Tia\Contracts\State;
 use Pest\Support\Container;
+use Pest\TestSuite;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\Driver\Selector;
 use SebastianBergmann\CodeCoverage\Filter;
@@ -28,31 +29,22 @@ final class CoverageMerger
 
         $state->delete(Tia::KEY_COVERAGE_MARKER);
 
-        $cachedBytes = $state->read(Tia::KEY_COVERAGE_CACHE);
+        $cached = self::readCache($state);
 
-        if ($cachedBytes === null) {
+        if (! $cached instanceof CodeCoverage) {
             $current = self::requireCoverage($reportPath);
 
             if ($current instanceof CodeCoverage) {
                 self::primeUncoveredFiles($current);
-                $state->write(Tia::KEY_COVERAGE_CACHE, self::compress(serialize($current)));
+                $state->write(Tia::KEY_COVERAGE_CACHE, self::compress(self::serializeRelativeToProjectRoot($current)));
             }
 
             return;
         }
 
-        $decoded = self::decompress($cachedBytes);
-
-        if ($decoded === null) {
-            $state->delete(Tia::KEY_COVERAGE_CACHE);
-
-            return;
-        }
-
-        $cached = self::unserializeCoverage($decoded);
         $current = self::requireCoverage($reportPath);
 
-        if (! $cached instanceof CodeCoverage || ! $current instanceof CodeCoverage) {
+        if (! $current instanceof CodeCoverage) {
             return;
         }
 
@@ -63,13 +55,108 @@ final class CoverageMerger
 
         $cached->merge($current);
 
-        $serialised = serialize($cached);
-
         @file_put_contents(
             $reportPath,
-            '<?php return unserialize('.var_export($serialised, true).");\n",
+            '<?php return unserialize('.var_export(serialize($cached), true).");\n",
         );
-        $state->write(Tia::KEY_COVERAGE_CACHE, self::compress($serialised));
+        $state->write(Tia::KEY_COVERAGE_CACHE, self::compress(self::serializeRelativeToProjectRoot($cached)));
+    }
+
+    /**
+     * Reads the cached baseline coverage and maps it onto this machine's
+     * project root. An unreadable cache — or one recorded on another machine
+     * that cannot be mapped — is dropped so the current run can seed a fresh
+     * one, instead of poisoning the merged report with foreign paths.
+     */
+    private static function readCache(State $state): ?CodeCoverage
+    {
+        $bytes = $state->read(Tia::KEY_COVERAGE_CACHE);
+
+        if ($bytes === null) {
+            return null;
+        }
+
+        $decoded = self::decompress($bytes);
+        $cached = $decoded === null ? null : self::unserializeCoverage($decoded);
+
+        if ($cached instanceof CodeCoverage) {
+            $cached = self::rebaseOntoProjectRoot($cached);
+        }
+
+        if (! $cached instanceof CodeCoverage) {
+            $state->delete(Tia::KEY_COVERAGE_CACHE);
+
+            return null;
+        }
+
+        return $cached;
+    }
+
+    /**
+     * The cache stores file paths relative to the project root so that a
+     * baseline recorded on one machine (e.g. CI) stays mergeable on another.
+     * Relative entries are mapped onto the local root here; absolute entries
+     * under the local root are kept (caches written by previous versions on
+     * this machine), while absolute entries of another machine make the whole
+     * cache unusable — a report built from mixed roots contains no resolvable
+     * file at all.
+     */
+    private static function rebaseOntoProjectRoot(CodeCoverage $coverage): ?CodeCoverage
+    {
+        $root = self::projectRootPrefix();
+        $data = $coverage->getData(true);
+
+        foreach ($data->coveredFiles() as $file) {
+            if (self::isAbsolutePath($file)) {
+                if (! str_starts_with($file, $root)) {
+                    return null;
+                }
+
+                continue;
+            }
+
+            $data->renameFile($file, $root.str_replace('/', DIRECTORY_SEPARATOR, $file));
+        }
+
+        $coverage->clearCache();
+
+        return $coverage;
+    }
+
+    private static function serializeRelativeToProjectRoot(CodeCoverage $coverage): string
+    {
+        $root = self::projectRootPrefix();
+        $data = $coverage->getData(true);
+
+        foreach ($data->coveredFiles() as $file) {
+            if (! str_starts_with($file, $root)) {
+                continue;
+            }
+
+            $relative = str_replace(DIRECTORY_SEPARATOR, '/', substr($file, strlen($root)));
+
+            if ($relative === '') {
+                continue;
+            }
+
+            $data->renameFile($file, $relative);
+        }
+
+        $coverage->clearCache();
+
+        return serialize($coverage);
+    }
+
+    private static function projectRootPrefix(): string
+    {
+        return rtrim(TestSuite::getInstance()->rootPath, '/\\').DIRECTORY_SEPARATOR;
+    }
+
+    private static function isAbsolutePath(string $path): bool
+    {
+        return str_starts_with($path, '/')
+            || str_starts_with($path, '\\')
+            || preg_match('#^[A-Za-z]:[/\\\\]#', $path) === 1;
     }
 
     private static function primeUncoveredFiles(CodeCoverage $coverage): void
