@@ -33,6 +33,8 @@ final class Kernel
 
     private bool $terminated = false;
 
+    private bool $booted = false;
+
     /**
      * @var array<int, class-string>
      */
@@ -143,7 +145,9 @@ final class Kernel
 
     public function shutdown(): void
     {
-        $this->terminate();
+        if ($this->booted) {
+            $this->terminate();
+        }
 
         if (is_array($error = error_get_last())) {
             if (! in_array($error['type'], [E_ERROR, E_COMPILE_ERROR, E_CORE_ERROR], true)) {
