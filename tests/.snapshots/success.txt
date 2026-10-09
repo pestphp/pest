@@ -466,12 +466,14 @@
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeAlphaNumeric
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeArray
@@ -488,6 +490,7 @@
   ✓ failures with malformed input
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeBetween
@@ -528,6 +531,7 @@
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeDirectory
@@ -542,6 +546,7 @@
   ✓ failures with leading dot
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeEmail
@@ -614,6 +619,7 @@
   ✓ failures with empty string
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeHostname
@@ -622,6 +628,7 @@
   ✓ failures with trailing hyphen
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeIn
@@ -665,6 +672,7 @@
   ✓ failures
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeIterable
@@ -711,6 +719,7 @@
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeMacAddress
@@ -718,6 +727,7 @@
   ✓ failures
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeNAN
@@ -823,12 +833,14 @@
   ✓ pass
   ✓ failures
   ✓ failures with message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeUppercase
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeUrl
@@ -843,6 +855,7 @@
   ✓ pass
   ✓ failures
   ✓ failures with message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeWritableDirectory

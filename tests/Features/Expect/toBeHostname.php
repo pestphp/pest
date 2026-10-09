@@ -28,6 +28,10 @@ test('failures with custom message', function (): void {
     expect('-example')->toBeHostname('oh no!');
 })->throws(ExpectationFailedException::class, 'oh no!');
 
+test('failures with default message', function (): void {
+    expect('-example')->toBeHostname();
+})->throws(ExpectationFailedException::class, 'Failed asserting that -example is a hostname.');
+
 test('not failures', function (): void {
     expect('example.com')->not->toBeHostname();
 })->throws(ExpectationFailedException::class);
