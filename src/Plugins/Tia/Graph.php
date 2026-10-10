@@ -703,6 +703,14 @@ final class Graph
         }
     }
 
+    /**
+     * @return array<int, string> Project-relative Blade views that tests link to.
+     */
+    public function bladeFiles(): array
+    {
+        return array_values(array_filter($this->files, $this->isBladePath(...)));
+    }
+
     public function knowsTest(string $testFile): bool
     {
         $rel = $this->relative($testFile);
@@ -1027,10 +1035,20 @@ final class Graph
 
     /**
      * @param  array<string, array<int, string>>  $testToFiles
-     * @param  bool  $keepExisting  Leave already-recorded edge sets alone.
+     * @param  array<int, string>|null  $observedFiles  Files the run could see; old edges to others stay. Null: every file.
      */
-    public function replaceEdges(array $testToFiles, bool $keepExisting = false): void
+    public function replaceEdges(array $testToFiles, ?array $observedFiles = null): void
     {
+        $observedIds = [];
+
+        foreach ($observedFiles ?? [] as $observedFile) {
+            $rel = $this->relative($observedFile);
+
+            if ($rel !== null && isset($this->fileIds[$rel])) {
+                $observedIds[$this->fileIds[$rel]] = true;
+            }
+        }
+
         foreach ($testToFiles as $testFile => $sources) {
             $testRel = $this->relative($testFile);
 
@@ -1038,11 +1056,10 @@ final class Graph
                 continue;
             }
 
-            if ($keepExisting && ($this->edges[$testRel] ?? []) !== []) {
-                continue;
-            }
-
-            $this->edges[$testRel] = [];
+            $this->edges[$testRel] = $observedFiles === null ? [] : array_values(array_filter(
+                $this->edges[$testRel] ?? [],
+                fn (int $id): bool => ! isset($observedIds[$id]),
+            ));
 
             foreach ($sources as $source) {
                 $this->link($testFile, $source);

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 use PHPUnit\Runner\CodeCoverage as PhpUnitCodeCoverage;
+use PHPUnit\TextUI\Configuration\Registry;
+use SebastianBergmann\CodeCoverage\Data\ProcessedCodeCoverageData;
 use Throwable;
 
 /**
@@ -22,20 +24,14 @@ final class CoverageCollector
      */
     public function perTestFiles(): array
     {
-        if (! PhpUnitCodeCoverage::instance()->isActive()) {
+        $data = $this->data();
+
+        if (! $data instanceof ProcessedCodeCoverageData) {
             return [];
         }
 
-        try {
-            $data = PhpUnitCodeCoverage::instance()
-                ->codeCoverage()
-                ->getData();
-
-            $lineCoverage = $data->lineCoverage();
-            $idByIndex = $data->testIds();
-        } catch (Throwable) {
-            return [];
-        }
+        $lineCoverage = $data->lineCoverage();
+        $idByIndex = $data->testIds();
 
         /** @var array<string, array<string, true>> $edges */
         $edges = [];
@@ -77,9 +73,49 @@ final class CoverageCollector
         return $out;
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public function observableFiles(): array
+    {
+        $ignoresDeprecatedCode = Registry::get()->ignoreDeprecatedCodeUnitsFromCodeCoverage();
+        $files = [];
+
+        foreach ($this->data()?->lineCoverage() ?? [] as $sourceFile => $lines) {
+            if (array_filter($lines, fn (?array $hits): bool => $hits !== null) === []) {
+                continue;
+            }
+
+            $source = @file_get_contents($sourceFile);
+
+            if ($source === false
+                || stripos($source, 'codeCoverageIgnore') !== false
+                || ($ignoresDeprecatedCode && str_contains($source, '@deprecated'))) {
+                continue;
+            }
+
+            $files[] = $sourceFile;
+        }
+
+        return $files;
+    }
+
     public function reset(): void
     {
         $this->classFileCache = [];
+    }
+
+    private function data(): ?ProcessedCodeCoverageData
+    {
+        if (! PhpUnitCodeCoverage::instance()->isActive()) {
+            return null;
+        }
+
+        try {
+            return PhpUnitCodeCoverage::instance()->codeCoverage()->getData();
+        } catch (Throwable) {
+            return null;
+        }
     }
 
     private function testIdToFile(string $testId): ?string

@@ -383,6 +383,16 @@ final class Project
     }
 
     /**
+     * @return array<int, string> Project-relative files the graph links the test file to.
+     */
+    public function edgesOf(string $testFile): array
+    {
+        $graph = $this->graph() ?? [];
+
+        return array_map(fn (int $id): string => $graph['files'][$id], $graph['edges'][$testFile] ?? []);
+    }
+
+    /**
      * @return array<int, string>
      */
     public function branchKeys(): array

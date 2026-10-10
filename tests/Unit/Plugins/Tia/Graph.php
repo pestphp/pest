@@ -312,3 +312,67 @@ describe('markKnownTestFiles()', function (): void {
         expect($graph->knowsTest('/somewhere/else/tests/FooTest.php'))->toBeFalse();
     });
 });
+
+describe('replaceEdges()', function (): void {
+    beforeEach(function (): void {
+        $this->graph = new Graph(sys_get_temp_dir());
+        $this->graph->link('tests/Feature/GreeterTest.php', 'app/Greeter.php');
+        $this->graph->link('tests/Feature/GreeterTest.php', 'app/Calculator.php');
+        $this->graph->link('tests/Feature/GreeterTest.php', 'config/app.php');
+
+        $this->edges = function (): array {
+            $encoded = json_decode((string) $this->graph->encode(), true);
+
+            return array_map(fn (int $id): string => $encoded['files'][$id], $encoded['edges']['tests/Feature/GreeterTest.php']);
+        };
+    });
+
+    it('replaces every recorded edge when the run saw every file', function (): void {
+        $this->graph->replaceEdges([
+            'tests/Feature/GreeterTest.php' => ['app/Greeter.php', 'app/Formatter.php'],
+        ]);
+
+        expect(($this->edges)())->toEqualCanonicalizing(['app/Greeter.php', 'app/Formatter.php']);
+    });
+
+    it('adds new edges to a recorded edge set when the run saw no file', function (): void {
+        $this->graph->replaceEdges([
+            'tests/Feature/GreeterTest.php' => ['app/Greeter.php', 'app/Formatter.php'],
+        ], observedFiles: []);
+
+        expect(($this->edges)())->toEqualCanonicalizing(['app/Greeter.php', 'app/Calculator.php', 'config/app.php', 'app/Formatter.php'])
+            ->and($this->graph->affected(['app/Formatter.php']))->toBe(['tests/Feature/GreeterTest.php']);
+    });
+
+    it('drops recorded edges to observed files and keeps the others', function (): void {
+        $root = (string) realpath(sys_get_temp_dir());
+
+        $this->graph->replaceEdges([
+            'tests/Feature/GreeterTest.php' => ['app/Greeter.php', 'app/Formatter.php'],
+        ], observedFiles: [$root.'/app/Greeter.php', $root.'/app/Calculator.php', $root.'/app/Formatter.php']);
+
+        expect(($this->edges)())->toEqualCanonicalizing(['app/Greeter.php', 'config/app.php', 'app/Formatter.php'])
+            ->and($this->graph->affected(['app/Calculator.php']))->toBeEmpty();
+    });
+
+    it('leaves the edges of test files the run did not record alone', function (): void {
+        $this->graph->link('tests/Feature/CalculatorTest.php', 'app/Calculator.php');
+
+        $this->graph->replaceEdges([
+            'tests/Feature/GreeterTest.php' => ['app/Greeter.php'],
+        ], observedFiles: ['app/Greeter.php', 'app/Calculator.php']);
+
+        expect($this->graph->affected(['app/Calculator.php']))->toBe(['tests/Feature/CalculatorTest.php']);
+    });
+});
+
+describe('bladeFiles()', function (): void {
+    it('lists the Blade views that tests link to', function (): void {
+        $graph = new Graph(sys_get_temp_dir());
+        $graph->link('tests/Feature/PageTest.php', 'resources/views/page.blade.php');
+        $graph->link('tests/Feature/PageTest.php', 'resources/views/legacy.php');
+        $graph->link('tests/Feature/PageTest.php', 'app/Page.php');
+
+        expect($graph->bladeFiles())->toBe(['resources/views/page.blade.php']);
+    });
+});
