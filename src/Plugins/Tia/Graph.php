@@ -1027,7 +1027,7 @@ final class Graph
 
     /**
      * @param  array<string, array<int, string>>  $testToFiles
-     * @param  bool  $keepExisting  Leave already-recorded edge sets alone.
+     * @param  bool  $keepExisting  Add to already-recorded edge sets instead of replacing them.
      */
     public function replaceEdges(array $testToFiles, bool $keepExisting = false): void
     {
@@ -1038,11 +1038,7 @@ final class Graph
                 continue;
             }
 
-            if ($keepExisting && ($this->edges[$testRel] ?? []) !== []) {
-                continue;
-            }
-
-            $this->edges[$testRel] = [];
+            $this->edges[$testRel] = $keepExisting ? ($this->edges[$testRel] ?? []) : [];
 
             foreach ($sources as $source) {
                 $this->link($testFile, $source);
