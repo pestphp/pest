@@ -38,6 +38,8 @@ use Pest\Support\View;
 use Pest\TestCaseFilters\TiaTestCaseFilter;
 use Pest\TestSuite;
 use PHPUnit\Framework\TestStatus\TestStatus;
+use PHPUnit\Metadata\Api\CodeCoverage as CodeCoverageMetadata;
+use PHPUnit\Metadata\Parser\Registry as MetadataRegistry;
 use PHPUnit\TestRunner\TestResult\Facade as TestResultFacade;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -179,6 +181,9 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     private ?array $startFingerprint = null;
 
     private bool $piggybackCoverage = false;
+
+    /** @var array<string, true> */
+    private array $partlyObservedTestFiles = [];
 
     private bool $recordingActive = false;
 
@@ -416,6 +421,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             }
 
             $this->replayedCount++;
+            $this->partlyObservedTestFiles[$real] = true;
             $this->cachedStatusByTestId[$testId] = [
                 'status' => $result->asInt(),
                 'message' => $result->message(),
@@ -604,6 +610,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         }
 
         if (Parallel::isWorker()) {
+            $this->markPartlyObservedTestFiles();
             $this->flushWorkerPartial($perTest, $perTestTables, $perTestInertia);
             $recorder->reset();
             $this->coverageCollector->reset();
@@ -632,7 +639,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             $this->branch,
             $changedFiles->snapshotTree($changedFiles->since($currentSha) ?? []),
         );
-        $graph->replaceEdges($perTest, keepExisting: $this->piggybackCoverage);
+        $this->refreshEdges($graph, $perTest, $this->coverageCollector->observableFiles(), array_keys($this->partlyObservedTestFiles));
         $graph->replaceTestTables($perTestTables);
         $graph->replaceTestInertiaComponents($perTestInertia);
         $graph->replaceJsFileToComponents(JsModuleGraph::build($projectRoot));
@@ -654,6 +661,10 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     {
         if (Parallel::isWorker()) {
             return $exitCode;
+        }
+
+        if (! Parallel::isEnabled()) {
+            $this->markPartlyObservedTestFiles();
         }
 
         if (Only::isEnabled() || $this->stoppedEarly() || $this->hasUnfinishedTest()) {
@@ -721,7 +732,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             $changedFiles->snapshotTree($changedFiles->since($currentSha) ?? []),
         );
 
-        [$finalised, $finalisedTables, $finalisedInertia] = $this->consumePartials($partialKeys);
+        [$finalised, $finalisedTables, $finalisedInertia, $coverage] = $this->consumePartials($partialKeys);
 
         if ($finalised === []) {
             if ($this->replayRan) {
@@ -736,7 +747,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return $exitCode;
         }
 
-        $graph->replaceEdges($finalised, keepExisting: $this->piggybackCoverage);
+        $this->refreshEdges($graph, $finalised, $coverage['observed'] ?? [], $coverage['partial'] ?? []);
         $graph->replaceTestTables($finalisedTables);
         $graph->replaceTestInertiaComponents($finalisedInertia);
         $graph->replaceJsFileToComponents(JsModuleGraph::build($projectRoot));
@@ -1350,16 +1361,87 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     }
 
     /**
+     * @param  array<string, array<int, string>>  $perTest
+     * @param  array<int, string>  $observedFiles  Files the coverage data can show a test use.
+     * @param  array<int, string>  $partlyObservedTestFiles  Real paths of test files the coverage run saw only in part.
+     */
+    private function refreshEdges(Graph $graph, array $perTest, array $observedFiles, array $partlyObservedTestFiles): void
+    {
+        if (! $this->piggybackCoverage) {
+            $graph->replaceEdges($perTest);
+
+            return;
+        }
+
+        $partlyObserved = array_fill_keys($partlyObservedTestFiles, true);
+        $fullyObserved = array_filter(
+            $perTest,
+            fn (string $testFile): bool => ! isset($partlyObserved[realpath($testFile) ?: $testFile]),
+            ARRAY_FILTER_USE_KEY,
+        );
+
+        $graph->replaceEdges($fullyObserved, [...$observedFiles, ...$graph->bladeFiles()]);
+        $graph->replaceEdges(array_diff_key($perTest, $fullyObserved), []);
+    }
+
+    private function markPartlyObservedTestFiles(): void
+    {
+        if (! $this->piggybackCoverage) {
+            return;
+        }
+
+        /** @var ResultCollector $collector */
+        $collector = Container::getInstance()->get(ResultCollector::class);
+
+        foreach ($collector->all() as $testId => $result) {
+            $status = TestStatus::from($result['status']);
+
+            if (! $status->isSkipped() && ! $status->isIncomplete() && ! $status->isRisky() && ! $status->isUnknown()
+                && ! $this->narrowsCoverage($testId)) {
+                continue;
+            }
+
+            $file = $result['file'] ?? null;
+
+            if ($file === null || str_contains($file, "eval()'d")) {
+                $file = $this->resolveFailedTestFile($testId);
+            }
+
+            if (is_string($file) && $file !== '') {
+                $this->partlyObservedTestFiles[realpath($file) ?: $file] = true;
+            }
+        }
+    }
+
+    private function narrowsCoverage(string $testId): bool
+    {
+        [$className, $methodName] = explode('::', explode('#', $testId, 2)[0], 2) + [1 => ''];
+
+        if ($methodName === '' || ! class_exists($className, false) || ! method_exists($className, $methodName)) {
+            return true;
+        }
+
+        return MetadataRegistry::parser()->forClassAndMethod($className, $methodName)->isCoversNothing()->isNotEmpty()
+            || new CodeCoverageMetadata()->coversTargets($className, $methodName)->isNotEmpty();
+    }
+
+    /**
      * @param  array<string, array<int, string>>  $perTestFiles
      * @param  array<string, array<int, string>>  $perTestTables
      * @param  array<string, array<int, string>>  $perTestInertiaComponents
      */
     private function flushWorkerPartial(array $perTestFiles, array $perTestTables, array $perTestInertiaComponents): void
     {
+        $observedFiles = $this->piggybackCoverage ? $this->coverageCollector->observableFiles() : [];
+
         $json = json_encode([
             'files' => $perTestFiles,
             'tables' => $perTestTables,
             'inertia' => $perTestInertiaComponents,
+            'coverage' => [
+                'observed' => $observedFiles,
+                'partial' => $observedFiles === [] ? array_keys($perTestFiles) : array_keys($this->partlyObservedTestFiles),
+            ],
         ], JSON_UNESCAPED_SLASHES);
 
         if ($json === false) {
@@ -1541,11 +1623,11 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     /**
      * @param  list<string>  $partialKeys
-     * @return array{0: array<string, list<string>>, 1: array<string, list<string>>, 2: array<string, list<string>>}
+     * @return array{0: array<string, list<string>>, 1: array<string, list<string>>, 2: array<string, list<string>>, 3: array<string, list<string>>}
      */
     private function consumePartials(array $partialKeys): array
     {
-        $merged = ['files' => [], 'tables' => [], 'inertia' => []];
+        $merged = ['files' => [], 'tables' => [], 'inertia' => [], 'coverage' => []];
 
         foreach ($partialKeys as $key) {
             $data = $this->readPartial($key);
@@ -1556,7 +1638,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
                 continue;
             }
 
-            foreach (['files', 'tables', 'inertia'] as $section) {
+            foreach (['files', 'tables', 'inertia', 'coverage'] as $section) {
                 foreach ($data[$section] as $testFile => $values) {
                     $merged[$section][$testFile] ??= [];
 
@@ -1573,11 +1655,12 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             array_map(array_keys(...), $merged['files']),
             array_map(array_keys(...), $merged['tables']),
             array_map(array_keys(...), $merged['inertia']),
+            array_map(array_keys(...), $merged['coverage']),
         ];
     }
 
     /**
-     * @return array{files: array<string, array<int, string>>, tables: array<string, array<int, string>>, inertia: array<string, array<int, string>>}|null
+     * @return array{files: array<string, array<int, string>>, tables: array<string, array<int, string>>, inertia: array<string, array<int, string>>, coverage: array<string, array<int, string>>}|null
      */
     private function readPartial(string $key): ?array
     {
@@ -1596,11 +1679,13 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $filesSource = is_array($data['files'] ?? null) ? $data['files'] : [];
         $tablesSource = is_array($data['tables'] ?? null) ? $data['tables'] : [];
         $inertiaSource = is_array($data['inertia'] ?? null) ? $data['inertia'] : [];
+        $coverageSource = is_array($data['coverage'] ?? null) ? $data['coverage'] : [];
 
         return [
             'files' => $this->cleanPartialSection($filesSource),
             'tables' => $this->cleanPartialSection($tablesSource),
             'inertia' => $this->cleanPartialSection($inertiaSource),
+            'coverage' => $this->cleanPartialSection($coverageSource),
         ];
     }
 
