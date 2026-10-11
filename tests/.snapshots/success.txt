@@ -1861,6 +1861,22 @@
   ✓ addOutput → it uses singular form for single test file
   ✓ addOutput → it returns original exit code when shard is not set
 
+   PASS  Tests\Unit\Plugins\Tia\ChangedFiles
+  ✓ it resolves the project prefix inside the repository
+  ✓ it reports working tree changes relative to the project, dropping siblings
+  ✓ it reports committed changes relative to the project, dropping siblings
+  ✓ it drops a file whose content came back to its baseline across the prefix boundary
+  ✓ it honours a gitignore inside the project
+  ✓ it leaves a project at the repository root untouched
+  ✓ it reports the changes it left outside the project
+  ✓ it reports nothing outside the project for a project at the repository root
+  ✓ it ties a fingerprint to the project location inside the repository
+  ✓ it sees a committed non-ascii path that git would otherwise quote
+  ✓ it sees a committed non-ascii path at the repository root too
+  ✓ it keeps a tracked outside change and drops an untracked ignored one
+  ✓ it keeps a tracked project change that the ignore rules match
+  ✓ it reads committed paths from the repository root even when git is told to be relative
+
    PASS  Tests\Unit\Plugins\Tia\ContentHash
   ✓ of() → it returns false when file does not exist
   ✓ of() → it hashes an existing file
@@ -1949,6 +1965,36 @@
   ✓ it detects an added or removed non-platform dependency
   ✓ it is independent of package ordering
 
+   PASS  Tests\Unit\Plugins\Tia\MonorepoBaselines
+  ✓ it detects the baseline repository from a project subdirectory with ('github.com')
+  ✓ it detects the baseline repository from a project subdirectory with ('gitlab.com')
+  ✓ it uses the nearest repository for baseline detection with ('github.com')
+  ✓ it uses the nearest repository for baseline detection with ('gitlab.com')
+  ✓ it detects worktree baselines through relative and absolute git pointers with dataset "relative gitdir and commondir" / ('github.com')
+  ✓ it detects worktree baselines through relative and absolute git pointers with dataset "relative gitdir and commondir" / ('gitlab.com')
+  ✓ it detects worktree baselines through relative and absolute git pointers with dataset "relative gitdir and absolute commondir" / ('github.com')
+  ✓ it detects worktree baselines through relative and absolute git pointers with dataset "relative gitdir and absolute commondir" / ('gitlab.com')
+  ✓ it detects worktree baselines through relative and absolute git pointers with dataset "absolute gitdir and relative commondir" / ('github.com')
+  ✓ it detects worktree baselines through relative and absolute git pointers with dataset "absolute gitdir and relative commondir" / ('gitlab.com')
+  ✓ it detects worktree baselines through relative and absolute git pointers with dataset "absolute gitdir and commondir" / ('github.com')
+  ✓ it detects worktree baselines through relative and absolute git pointers with dataset "absolute gitdir and commondir" / ('gitlab.com')
+  ✓ it uses the submodule baseline repository instead of its parent remote with dataset "relative gitdir" / ('github.com')
+  ✓ it uses the submodule baseline repository instead of its parent remote with dataset "relative gitdir" / ('gitlab.com')
+  ✓ it uses the submodule baseline repository instead of its parent remote with dataset "absolute gitdir" / ('github.com')
+  ✓ it uses the submodule baseline repository instead of its parent remote with dataset "absolute gitdir" / ('gitlab.com')
+  ✓ it does not use the parent baseline remote when a nested git file is malformed with ('github.com')
+  ✓ it does not use the parent baseline remote when a nested git file is malformed with ('gitlab.com')
+  ✓ it keeps caches separate for sibling projects with the same name
+  ✓ it shares a nested project cache and fingerprint across worktrees
+
+   PASS  Tests\Unit\Plugins\Tia\MonorepoChangedFiles
+  ✓ it detects committed Unicode filenames with git path quoting enabled with dataset "repository root"
+  ✓ it detects committed Unicode filenames with git path quoting enabled with dataset "nested project"
+  ✓ it reports the old path when a file moves outside the project with dataset "staged move"
+  ✓ it reports the old path when a file moves outside the project with dataset "committed move"
+  ✓ it ignores cosmetic changes when reading a nested project baseline
+  ✓ it includes untracked files inside the project
+
    PASS  Tests\Unit\Plugins\Tia\Recorder
   ✓ activateLinkTracking() → it tracks tables without a coverage driver
   ✓ activateLinkTracking() → it tracks inertia components without a coverage driver
@@ -1963,6 +2009,7 @@
    PASS  Tests\Unit\Plugins\Tia\Storage
   ✓ it uses a project-relative configured directory
   ✓ it uses an absolute configured directory
+  ✓ it keeps the state directory of a project at the repository root
 
    PASS  Tests\Unit\Plugins\Tia\TableExtractor
   ✓ fromSql() → it extracts tables from plain DML
@@ -2259,4 +2306,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1600 passed (3489 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1641 passed (3541 assertions)
