@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia\Baselines;
 
 use Pest\Plugins\Tia\WatchPatterns;
+use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 
 /**
@@ -38,10 +39,7 @@ abstract readonly class BaseRemote // @pest-arch-ignore-line
 
     public function cliExists(): bool
     {
-        $process = new Process(['which', $this->cliName()]);
-        $process->run();
-
-        return $process->isSuccessful();
+        return new ExecutableFinder()->find($this->cliName()) !== null;
     }
 
     public function cliAuthenticated(): bool

@@ -547,7 +547,7 @@ final class WrapperRunner implements RunnerInterface
             throw MissingResultsException::create($missingCoverageFiles, 'coverage');
         }
 
-        $coverageManager = new CodeCoverage;
+        $coverageManager = new CodeCoverage(EventFacade::emitter());
         $coverageManager->init(
             $this->options->configuration,
             $this->codeCoverageFilterRegistry,
