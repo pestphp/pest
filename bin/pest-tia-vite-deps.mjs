@@ -199,6 +199,18 @@ export function extractSfcScript(raw) {
   }
 }
 
+// rolldown no longer bundles CSS, so a stub without an explicit `moduleType` is
+// rejected as an unsupported module and fails the whole build.
+export function stubAsset(id) {
+  if (!id || !ASSET_EXT_RE.test(id)) return null
+
+  return { code: 'export default null', moduleType: 'js', moduleSideEffects: false }
+}
+
+// A component used only in a `<template>` has no binding the extracted script reads,
+// so TypeScript elision would drop its import and the edge with it.
+export const TRANSFORM_OPTIONS = { jsx: 'preserve', typescript: { onlyRemoveTypeImports: true } }
+
 async function listPageFiles(pagesDir) {
   if (!existsSync(pagesDir)) return []
 
@@ -330,13 +342,7 @@ async function main() {
 
   const assetStub = {
     name: 'pest-tia-asset-stub',
-    load(id) {
-      if (!id) return null
-      if (ASSET_EXT_RE.test(id)) {
-        return { code: 'export default null', moduleSideEffects: false }
-      }
-      return null
-    },
+    load: stubAsset,
   }
 
   const input = Object.create(null)
@@ -349,7 +355,7 @@ async function main() {
       alias,
       extensions: ['.tsx', '.ts', '.jsx', '.js', '.mts', '.cts', '.mjs', '.cjs', '.json', '.vue', '.svelte'],
     },
-    transform: { jsx: 'preserve' },
+    transform: TRANSFORM_OPTIONS,
     treeshake: false,
     plugins: [externalBare, assetStub, sfcScript, collector],
     logLevel: 'silent',

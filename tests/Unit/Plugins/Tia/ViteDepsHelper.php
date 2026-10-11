@@ -503,6 +503,30 @@ function tiaSfcResults(): array
     return $cache = json_decode($process->getOutput(), true, flags: JSON_THROW_ON_ERROR);
 }
 
+function tiaBuildOptionResults(): array
+{
+    static $cache = null;
+    if ($cache !== null) {
+        return $cache;
+    }
+
+    $helper = str_replace('\\', '/', tiaViteHelperPath());
+
+    $script = <<<JS
+    import { stubAsset, TRANSFORM_OPTIONS } from '{$helper}'
+    const stubs = {}
+    for (const id of ['/app/resources/css/app.css', '/app/logo.svg', '/app/Page.vue', '/app/util.ts']) {
+      stubs[id] = stubAsset(id)
+    }
+    process.stdout.write(JSON.stringify({ stubs, transform: TRANSFORM_OPTIONS }))
+    JS;
+
+    $process = new Process(['node', '--input-type=module', '-e', $script]);
+    $process->mustRun();
+
+    return $cache = json_decode($process->getOutput(), true, flags: JSON_THROW_ON_ERROR);
+}
+
 beforeEach(function (): void {
     if ((new ExecutableFinder)->find('node') === null) {
         $this->markTestSkipped('node is not available.');
@@ -588,4 +612,20 @@ it('drops template and style markup that the parser would reject', function (): 
     expect(tiaSfcResults()['style-block-ignored']['code'])->not->toContain('<style')
         ->and(tiaSfcResults()['style-block-ignored']['code'])->not->toContain('color: red')
         ->and(tiaSfcResults()['script-setup']['code'])->not->toContain('<template');
+});
+
+it('stubs assets as JS modules so rolldown does not reject them as CSS', function (string $id): void {
+    expect(tiaBuildOptionResults()['stubs'][$id])->toBe([
+        'code' => 'export default null',
+        'moduleType' => 'js',
+        'moduleSideEffects' => false,
+    ]);
+})->with(['/app/resources/css/app.css', '/app/logo.svg']);
+
+it('leaves source modules for the other loaders', function (string $id): void {
+    expect(tiaBuildOptionResults()['stubs'][$id])->toBeNull();
+})->with(['/app/Page.vue', '/app/util.ts']);
+
+it('keeps value imports that only a template uses through the TypeScript transform', function (): void {
+    expect(tiaBuildOptionResults()['transform']['typescript']['onlyRemoveTypeImports'])->toBeTrue();
 });
