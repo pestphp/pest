@@ -20,13 +20,8 @@ final readonly class Help implements HandlesArguments
 
     public function __construct(
         private OutputInterface $output
-    ) {
-        //
-    }
+    ) {}
 
-    /**
-     * {@inheritDoc}
-     */
     public function handleArguments(array $arguments): array
     {
         if ($this->hasArgument('--help', $arguments)) {
@@ -85,13 +80,12 @@ final readonly class Help implements HandlesArguments
     }
 
     /**
-     * @return array<string, list<array{arg: string, desc: string}|array{spacer: string}|array{text: string}|array{}>>
+     * @return array<non-empty-string, non-empty-list<array{}|array{arg: non-empty-string, desc: non-empty-string}|array{spacer: ''}|array{text: non-empty-string}>>
      */
     private function getContent(): array
     {
         $helpReflection = new PHPUnitHelp;
 
-        // @phpstan-ignore-next-line
         $content = (fn (): array => $this->elements())->call($helpReflection);
 
         $content['Configuration'] = [...[[

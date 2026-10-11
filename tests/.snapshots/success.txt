@@ -1839,6 +1839,9 @@
   ✓ buildFilterArgument → it returns empty string for empty test list
   ✓ buildFilterArgument → it generates compact filter for deeply nested namespaces
   ✓ buildFilterArgument → it handles mix of nested and flat namespaces
+  ✓ buildFilterArgument → it does not match a class outside of the shard when another class name is its prefix
+  ✓ buildFilterArgument → it still matches dataset variants after the class boundary
+  ✓ buildFilterArgument → it keeps a class matchable when another class nests below its namespace
   ✓ ensureFilterLengthIsSafe → it accepts filter within length limit
   ✓ ensureFilterLengthIsSafe → it throws exception when filter exceeds default limit
   ✓ ensureFilterLengthIsSafe → it respects custom limit from environment variable
@@ -2226,6 +2229,9 @@
    PASS  Tests\Visual\Collision
   ✓ collision with ([''])
 
+   PASS  Tests\Visual\FailingBoot
+  ✓ a failure in the boot files renders only that failure
+
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
 
@@ -2272,4 +2278,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1613 passed (3507 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1617 passed (3516 assertions)
