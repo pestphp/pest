@@ -173,7 +173,7 @@ final class WrapperRunner implements RunnerInterface
 
         $this->timer->start();
 
-        $this->runTmpDir = $this->createPrivateRunTmpDir();
+        $this->runTmpDir = $this->createRunTmpDir();
         $this->startWorkers();
         $this->assignAllPendingTests();
         $this->waitForAllToFinish();
@@ -208,17 +208,17 @@ final class WrapperRunner implements RunnerInterface
     }
 
     /** @return non-empty-string */
-    private function createPrivateRunTmpDir(): string
+    private function createRunTmpDir(): string
     {
         $runTmpDir = sprintf(
-            '%s%spest_%s',
+            '%s%sparatest_%s',
             $this->options->tmpDir,
             DIRECTORY_SEPARATOR,
             bin2hex(random_bytes(16)),
         );
 
         if (! @mkdir($runTmpDir, 0700)) {
-            throw new RuntimeException(sprintf('Unable to create private temporary directory "%s"', $runTmpDir));
+            throw new RuntimeException(sprintf('Unable to create the private temporary directory [%s].', $runTmpDir));
         }
 
         return $runTmpDir;
@@ -410,44 +410,26 @@ final class WrapperRunner implements RunnerInterface
                 array_merge_recursive($testResultSum->testTriggeredPhpunitErrorEvents(), $testResult->testTriggeredPhpunitErrorEvents()),
                 array_merge_recursive($testResultSum->testTriggeredPhpunitNoticeEvents(), $testResult->testTriggeredPhpunitNoticeEvents()),
                 array_merge_recursive($testResultSum->testTriggeredPhpunitWarningEvents(), $testResult->testTriggeredPhpunitWarningEvents()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->testRunnerTriggeredDeprecationEvents(), $testResult->testRunnerTriggeredDeprecationEvents()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->testRunnerTriggeredNoticeEvents(), $testResult->testRunnerTriggeredNoticeEvents()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->testRunnerTriggeredWarningEvents(), $testResult->testRunnerTriggeredWarningEvents()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->testRunnerTriggeredIssueDeprecationEvents(), $testResult->testRunnerTriggeredIssueDeprecationEvents()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->testRunnerTriggeredIssueErrorEvents(), $testResult->testRunnerTriggeredIssueErrorEvents()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->testRunnerTriggeredIssueNoticeEvents(), $testResult->testRunnerTriggeredIssueNoticeEvents()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->testRunnerTriggeredIssuePhpDeprecationEvents(), $testResult->testRunnerTriggeredIssuePhpDeprecationEvents()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->testRunnerTriggeredIssuePhpNoticeEvents(), $testResult->testRunnerTriggeredIssuePhpNoticeEvents()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->testRunnerTriggeredIssuePhpWarningEvents(), $testResult->testRunnerTriggeredIssuePhpWarningEvents()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->testRunnerTriggeredIssueWarningEvents(), $testResult->testRunnerTriggeredIssueWarningEvents()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->errors(), $testResult->errors()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->deprecations(), $testResult->deprecations()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->notices(), $testResult->notices()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->warnings(), $testResult->warnings()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->phpDeprecations(), $testResult->phpDeprecations()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->phpNotices(), $testResult->phpNotices()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->phpWarnings(), $testResult->phpWarnings()),
+                array_merge($testResultSum->testRunnerTriggeredDeprecationEvents(), $testResult->testRunnerTriggeredDeprecationEvents()),
+                array_merge($testResultSum->testRunnerTriggeredNoticeEvents(), $testResult->testRunnerTriggeredNoticeEvents()),
+                array_merge($testResultSum->testRunnerTriggeredWarningEvents(), $testResult->testRunnerTriggeredWarningEvents()),
+                array_merge($testResultSum->testRunnerTriggeredIssueDeprecationEvents(), $testResult->testRunnerTriggeredIssueDeprecationEvents()),
+                array_merge($testResultSum->testRunnerTriggeredIssueErrorEvents(), $testResult->testRunnerTriggeredIssueErrorEvents()),
+                array_merge($testResultSum->testRunnerTriggeredIssueNoticeEvents(), $testResult->testRunnerTriggeredIssueNoticeEvents()),
+                array_merge($testResultSum->testRunnerTriggeredIssuePhpDeprecationEvents(), $testResult->testRunnerTriggeredIssuePhpDeprecationEvents()),
+                array_merge($testResultSum->testRunnerTriggeredIssuePhpNoticeEvents(), $testResult->testRunnerTriggeredIssuePhpNoticeEvents()),
+                array_merge($testResultSum->testRunnerTriggeredIssuePhpWarningEvents(), $testResult->testRunnerTriggeredIssuePhpWarningEvents()),
+                array_merge($testResultSum->testRunnerTriggeredIssueWarningEvents(), $testResult->testRunnerTriggeredIssueWarningEvents()),
+                array_merge($testResultSum->errors(), $testResult->errors()),
+                array_merge($testResultSum->deprecations(), $testResult->deprecations()),
+                array_merge($testResultSum->notices(), $testResult->notices()),
+                array_merge($testResultSum->warnings(), $testResult->warnings()),
+                array_merge($testResultSum->phpDeprecations(), $testResult->phpDeprecations()),
+                array_merge($testResultSum->phpNotices(), $testResult->phpNotices()),
+                array_merge($testResultSum->phpWarnings(), $testResult->phpWarnings()),
                 $testResultSum->numberOfIssuesIgnoredByBaseline() + $testResult->numberOfIssuesIgnoredByBaseline(),
                 self::numberOfDeprecationsByTrigger($testResultSum, $testResult),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->retriedTests(), $testResult->retriedTests()),
+                array_merge($testResultSum->retriedTests(), $testResult->retriedTests()),
             );
         }
 
@@ -656,7 +638,7 @@ final class WrapperRunner implements RunnerInterface
      */
     private function getTestFiles(SuiteLoader $suiteLoader): array
     {
-        /** @var array<string, null> $files */
+        /** @var array<non-empty-string, null> $files */
         $files = [];
 
         foreach (array_filter(
@@ -668,7 +650,7 @@ final class WrapperRunner implements RunnerInterface
         }
 
         foreach (TestSuite::getInstance()->tests->getFilenames() as $filename) {
-            if ($this->shouldIncludeBootstrappedTestFile($filename)) {
+            if ($filename !== '' && $this->shouldIncludeBootstrappedTestFile($filename)) {
                 $resolved = realpath($filename)
                     ?: realpath($this->options->cwd.DIRECTORY_SEPARATOR.$filename)
                     ?: $filename;
@@ -676,7 +658,7 @@ final class WrapperRunner implements RunnerInterface
             }
         }
 
-        return array_keys($files); // @phpstan-ignore-line
+        return array_keys($files);
     }
 
     private function shouldIncludeBootstrappedTestFile(string $filename): bool
