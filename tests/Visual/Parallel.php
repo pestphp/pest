@@ -4,7 +4,7 @@ use Symfony\Component\Process\Process;
 
 $run = function (): ?string {
     $process = new Process(
-        array_merge(['php', 'bin/pest', '--parallel', '--processes=3'], func_get_args()),
+        array_merge(['php', '-d', 'memory_limit=512M', 'bin/pest', '--parallel', '--processes=3', '--passthru-php=-d memory_limit=512M'], func_get_args()),
         dirname(__DIR__, 2),
         ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
     );
