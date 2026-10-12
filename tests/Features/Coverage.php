@@ -19,6 +19,26 @@ it('adds coverage if --coverage exist', function () {
         ->and($plugin->coverage)->toBeTrue();
 })->skip(! Coverage::isAvailable() || ! function_exists('xdebug_info') || ! in_array('coverage', xdebug_info('mode'), true), 'Coverage is not available');
 
+it('keeps the explicit coverage path when --coverage exists', function () {
+    foreach ([
+        ['--coverage-php=test.cov'],
+        ['--coverage-php', 'test.cov'],
+    ] as $coverageArguments) {
+        $plugin = new CoveragePlugin(new ConsoleOutput);
+
+        $arguments = $plugin->handleArguments([
+            '--coverage',
+            '--coverage-text',
+            ...$coverageArguments,
+        ]);
+
+        expect(array_values($arguments))->toEqual([
+            '--coverage-text',
+            ...$coverageArguments,
+        ]);
+    }
+})->skip(! Coverage::isAvailable() || ! function_exists('xdebug_info') || ! in_array('coverage', xdebug_info('mode'), true), 'Coverage is not available');
+
 it('adds coverage if --min exist', function () {
     $plugin = new CoveragePlugin(new ConsoleOutput);
     expect($plugin->coverageMin)->toEqual(0.0)

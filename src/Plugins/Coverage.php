@@ -50,12 +50,14 @@ final class Coverage implements AddsOutput, HandlesArguments
      */
     public bool $showOnlyCovered = false;
 
+    private string $coveragePath;
+
     /**
      * Creates a new Plugin instance.
      */
     public function __construct(private readonly OutputInterface $output)
     {
-        // ..
+        $this->coveragePath = \Pest\Support\Coverage::getPath();
     }
 
     /**
@@ -77,12 +79,6 @@ final class Coverage implements AddsOutput, HandlesArguments
             return false;
         }))];
 
-        $originals = array_flip($originals);
-        foreach ($arguments as $argument) {
-            unset($originals[$argument]);
-        }
-        $originals = array_flip($originals);
-
         $inputs = [];
         $inputs[] = new InputOption(self::COVERAGE_OPTION, null, InputOption::VALUE_NONE);
         $inputs[] = new InputOption(self::MIN_OPTION, null, InputOption::VALUE_REQUIRED);
@@ -90,10 +86,26 @@ final class Coverage implements AddsOutput, HandlesArguments
         $inputs[] = new InputOption(self::ONLY_COVERED_OPTION, null, InputOption::VALUE_NONE);
 
         $input = new ArgvInput($arguments, new InputDefinition($inputs));
+        $coveragePathProvided = false;
+
         if ((bool) $input->getOption(self::COVERAGE_OPTION)) {
             $this->coverage = true;
-            $originals[] = '--coverage-php';
-            $originals[] = \Pest\Support\Coverage::getPath();
+
+            foreach ($originals as $index => $original) {
+                if (Str::startsWith($original, '--coverage-php=')) {
+                    $this->coveragePath = Str::after($original, '--coverage-php=');
+                    $coveragePathProvided = true;
+
+                    break;
+                }
+
+                if ($original === '--coverage-php' && isset($originals[$index + 1])) {
+                    $this->coveragePath = $originals[$index + 1];
+                    $coveragePathProvided = true;
+
+                    break;
+                }
+            }
 
             if (! \Pest\Support\Coverage::isAvailable()) {
                 if (\Pest\Support\Coverage::usingXdebug()) {
@@ -112,6 +124,17 @@ final class Coverage implements AddsOutput, HandlesArguments
 
                 exit(1);
             }
+        }
+
+        $originals = array_flip($originals);
+        foreach ($arguments as $argument) {
+            unset($originals[$argument]);
+        }
+        $originals = array_flip($originals);
+
+        if ((bool) $input->getOption(self::COVERAGE_OPTION) && ! $coveragePathProvided) {
+            $originals[] = '--coverage-php';
+            $originals[] = $this->coveragePath;
         }
 
         if ($input->getOption(self::MIN_OPTION) !== null) {
@@ -156,7 +179,12 @@ final class Coverage implements AddsOutput, HandlesArguments
                 exit(1);
             }
 
-            $coverage = \Pest\Support\Coverage::report($this->output, $this->compact, $this->showOnlyCovered);
+            $coverage = \Pest\Support\Coverage::report($this->output, $this->compact, $this->showOnlyCovered, $this->coveragePath);
+
+            if ($this->coveragePath === \Pest\Support\Coverage::getPath()) {
+                unlink($this->coveragePath);
+            }
+
             $exitCode = (int) ($coverage < $this->coverageMin);
 
             if ($exitCode === 0 && $this->coverageExactly !== null) {
