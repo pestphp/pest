@@ -111,17 +111,13 @@ describe('hierarchical test naming', function (): void {
     });
 
     describe('block two', function (): void {
-        afterEach(function (): void {
-            expect($this->result)->toBeFalse();
-        });
-
         describe('the same name', function (): void {
             beforeEach(function (): void {
                 $this->example = false;
             });
 
             afterEach(function (): void {
-                $this->result = $this->example;
+                expect($this->example)->toBeFalse();
             });
 
             it('correctly calls afterEach from own describe hierarchy', function (): void {
