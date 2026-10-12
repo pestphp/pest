@@ -115,8 +115,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             self::$timeBalanced = true;
             self::$shardsOutdated = $newTests !== [];
         } else {
-            $isInCurrentShard = fn (int $key): bool => $key % $total === ($index - 1);
-            $testsToRun = array_values(array_filter($tests, $isInCurrentShard, ARRAY_FILTER_USE_KEY));
+            $testsToRun = $this->distribute($tests, $index, $total);
         }
 
         self::$shard = [
@@ -462,6 +461,17 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
         }
 
         return $data['timings'];
+    }
+
+    /**
+     * @param  list<string>  $tests
+     * @return list<string>
+     */
+    private function distribute(array $tests, int $index, int $total): array
+    {
+        $isInCurrentShard = fn (int $key): bool => $key % $total === ($index - 1);
+
+        return array_values(array_filter($tests, $isInCurrentShard, ARRAY_FILTER_USE_KEY));
     }
 
     /**
