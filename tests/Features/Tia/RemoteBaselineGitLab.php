@@ -55,6 +55,27 @@ test('a published GitLab baseline is fetched instead of recorded locally', funct
         ->and($project->graphExists())->toBeTrue();
 })->skipOnWindows();
 
+test('a published GitLab baseline is found in an older pipeline when newer ones lack the job', function (): void {
+    [$project, $environment] = tiaPublishedBaselineGitLab('older-pipeline');
+
+    $result = $project->pestWithEnvironment($project->path(), $environment, '--tia', '--baselined');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('Downloading TIA baseline')
+        ->and($result->replayed())->toBe(Project::TOTAL_TESTS, $result->describe())
+        ->and($project->graphExists())->toBeTrue();
+})->skipOnWindows();
+
+test('a GitLab pipeline whose baseline job did not succeed is not treated as published', function (): void {
+    [$project, $environment] = tiaPublishedBaselineGitLab('job-failed');
+
+    $result = $project->pestWithEnvironment($project->path(), $environment, '--tia', '--baselined');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('No baseline published yet')
+        ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed');
+})->skipOnWindows();
+
 test('a fetched GitLab baseline that will not decode is discarded rather than trusted', function (): void {
     [$project, $environment] = tiaPublishedBaselineGitLab('corrupt');
 
