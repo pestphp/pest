@@ -6,6 +6,7 @@ namespace Pest\Bootstrappers;
 
 use Pest\Contracts\Bootstrapper;
 use Pest\Exceptions\FatalException;
+use Pest\Plugins\Concerns\HandleArguments;
 use Pest\Support\DatasetInfo;
 use Pest\Support\Str;
 use Pest\TestSuite;
@@ -20,6 +21,8 @@ use function Pest\testDirectory;
  */
 final class BootFiles implements Bootstrapper
 {
+    use HandleArguments;
+
     /**
      * @var array<int, string>
      */
@@ -33,6 +36,10 @@ final class BootFiles implements Bootstrapper
 
     public function boot(): void
     {
+        if ($this->runningInit()) {
+            return;
+        }
+
         $rootPath = TestSuite::getInstance()->rootPath;
         $testsPath = $rootPath.DIRECTORY_SEPARATOR.testDirectory();
 
@@ -60,6 +67,18 @@ final class BootFiles implements Bootstrapper
         }
 
         $this->bootDatasets($testsPath);
+    }
+
+    private function runningInit(): bool
+    {
+        $arguments = $_SERVER['argv'] ?? null;
+
+        if (! is_array($arguments)) {
+            return false;
+        }
+
+        /** @var array<int, string> $arguments */
+        return $this->hasArgument('--init', $arguments);
     }
 
     private function load(string $filename): void
