@@ -74,9 +74,9 @@ final class Coverage
      * Reports the code coverage report to the
      * console and returns the result in float.
      */
-    public static function report(OutputInterface $output, bool $compact = false, bool $showOnlyCovered = false): float
+    public static function report(OutputInterface $output, bool $compact, bool $showOnlyCovered, string $reportPath): float
     {
-        if (! file_exists($reportPath = self::getPath())) {
+        if (! file_exists($reportPath)) {
             if (self::usingXdebug()) {
                 $output->writeln(
                     "  <fg=black;bg=yellow;options=bold> WARN </> Unable to get coverage using Xdebug. Did you set <href=https://xdebug.org/docs/code_coverage#mode>Xdebug's coverage mode</>?</>",
@@ -90,7 +90,6 @@ final class Coverage
 
         /** @var CodeCoverage $codeCoverage */
         $codeCoverage = require $reportPath;
-        unlink($reportPath);
 
         $totalCoverage = $codeCoverage->getReport()->percentageOfExecutedLines();
 
