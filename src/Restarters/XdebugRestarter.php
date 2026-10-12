@@ -7,6 +7,7 @@ namespace Pest\Restarters;
 use Composer\XdebugHandler\XdebugHandler;
 use Pest\Contracts\Restarter;
 use Pest\Plugins\Tia;
+use Pest\Plugins\Tia\ConfigurationFile;
 use Pest\Plugins\Tia\Fingerprint;
 use Pest\Plugins\Tia\Graph;
 use Pest\Plugins\Tia\Storage;
@@ -86,10 +87,13 @@ final class XdebugRestarter implements Restarter
             return false;
         }
 
-        return $this->tiaWillReplay($projectRoot);
+        return $this->tiaWillReplay($projectRoot, $arguments);
     }
 
-    private function tiaWillReplay(string $projectRoot): bool
+    /**
+     * @param  array<int, string>  $arguments
+     */
+    private function tiaWillReplay(string $projectRoot, array $arguments): bool
     {
         $path = Storage::tempDir($projectRoot).DIRECTORY_SEPARATOR.Tia::KEY_GRAPH;
 
@@ -111,7 +115,7 @@ final class XdebugRestarter implements Restarter
 
         return Fingerprint::structuralMatches(
             $graph->fingerprint(),
-            Fingerprint::compute($projectRoot),
+            Fingerprint::compute($projectRoot, ConfigurationFile::fromArguments($arguments)),
         );
     }
 }
