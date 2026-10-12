@@ -38,6 +38,22 @@ test('init creates a suite when --init is not the first argument', function (): 
     }
 });
 
+test('init creates a suite when --init is passed with a value', function (): void {
+    $root = makeInitProject();
+
+    try {
+        $process = runInitProject($root, '--init=pest');
+
+        expect($process->getExitCode())->toBe(0)
+            ->and($process->getErrorOutput())->not->toContain('cannot be resolved')
+            ->and($process->getOutput())->toContain('File created.')
+            ->and(is_file($root.DIRECTORY_SEPARATOR.'phpunit.xml'))->toBeTrue()
+            ->and(is_file($root.DIRECTORY_SEPARATOR.'tests'.DIRECTORY_SEPARATOR.'Pest.php'))->toBeTrue();
+    } finally {
+        removeInitProject($root);
+    }
+});
+
 test('a missing tests directory does not crash while resolving tia state', function (): void {
     $root = makeInitProject();
 
