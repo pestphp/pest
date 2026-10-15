@@ -139,6 +139,12 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         '--assignee', '--issue', '--ticket', '--pr', '--pull-request',
     ];
 
+    /** @var list<string> */
+    private const array LISTING_FLAGS = [
+        '--list-groups', '--list-suites', '--list-tests', '--list-tests-xml',
+        '--list-test-files', '--list-test-ids',
+    ];
+
     private const array UNSUPPORTED_OPTIONS = [
         '--covers', '--uses', '--random-order-seed',
     ];
@@ -476,7 +482,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         $hasExplicitPath = $this->hasExplicitPathArgument($arguments);
         $partial = ! $isWorker && ($hasExplicitPath || $this->hasPartialSelection($arguments));
-        $disabled = $disabled || $partial;
+        $disabled = $disabled || $partial || $this->hasListingOption($arguments);
 
         $mutating = self::isMutationRun($this->originalArguments);
 
@@ -1937,6 +1943,14 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         }
 
         return false;
+    }
+
+    /**
+     * @param  array<int, string>  $arguments
+     */
+    private function hasListingOption(array $arguments): bool
+    {
+        return array_any(self::LISTING_FLAGS, fn (string $flag): bool => $this->hasArgument($flag, $arguments));
     }
 
     private function stoppedEarly(): bool
