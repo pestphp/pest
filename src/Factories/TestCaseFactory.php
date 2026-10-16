@@ -45,6 +45,11 @@ final class TestCaseFactory
     public array $methods = [];
 
     /**
+     * @var array<string, TestCaseMethodFactory>
+     */
+    private array $methodsByName = [];
+
+    /**
      * @var array <int, class-string>
      */
     public array $traits = [
@@ -208,35 +213,17 @@ final class TestCaseFactory
         }
 
         $this->methods[$method->description] = $method;
+        $this->methodsByName[Str::evaluable($method->description)] ??= $method;
     }
 
     public function hasMethod(string $methodName): bool
     {
-        foreach ($this->methods as $method) {
-            if ($method->description === null) {
-                throw ShouldNotHappen::fromMessage('The test description may not be empty.');
-            }
-
-            if ($methodName === Str::evaluable($method->description)) {
-                return true;
-            }
-        }
-
-        return false;
+        return isset($this->methodsByName[$methodName]);
     }
 
     public function getMethod(string $methodName): TestCaseMethodFactory
     {
-        foreach ($this->methods as $method) {
-            if ($method->description === null) {
-                throw ShouldNotHappen::fromMessage('The test description may not be empty.');
-            }
-
-            if ($methodName === Str::evaluable($method->description)) {
-                return $method;
-            }
-        }
-
-        throw ShouldNotHappen::fromMessage(sprintf('Method [%s] not found.', $methodName));
+        return $this->methodsByName[$methodName]
+            ?? throw ShouldNotHappen::fromMessage(sprintf('Method [%s] not found.', $methodName));
     }
 }
