@@ -66,7 +66,7 @@ final class WrapperRunner implements RunnerInterface
 {
     public static ?TestResult $result = null;
 
-    private const int CYCLE_SLEEP = 10000;
+    private const int CYCLE_SLEEP = 1000;
 
     private readonly ResultPrinter $printer;
 
