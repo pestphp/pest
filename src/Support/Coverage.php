@@ -22,13 +22,19 @@ use function Termwind\terminal;
  */
 final class Coverage
 {
+    public static function getTempDirectory(): string
+    {
+        return dirname(__DIR__, 2).DIRECTORY_SEPARATOR.'.temp';
+    }
+
     public static function getPath(): string
     {
-        return implode(DIRECTORY_SEPARATOR, [
-            dirname(__DIR__, 2),
-            '.temp',
-            'coverage.php',
-        ]);
+        return self::getTempDirectory().DIRECTORY_SEPARATOR.'coverage.php';
+    }
+
+    public static function getShardsDirectory(): string
+    {
+        return self::getTempDirectory().DIRECTORY_SEPARATOR.'coverage';
     }
 
     public static function isAvailable(): bool
@@ -83,8 +89,16 @@ final class Coverage
         $codeCoverage = require $reportPath;
         unlink($reportPath);
 
-        // @phpstan-ignore-next-line
+        return self::render($codeCoverage, $output, $compact, $showOnlyCovered);
+    }
+
+    /**
+     * @param  array<mixed>  $codeCoverage
+     */
+    public static function render(CodeCoverage|array $codeCoverage, OutputInterface $output, bool $compact = false, bool $showOnlyCovered = false): float
+    {
         if (is_array($codeCoverage)) {
+            // @phpstan-ignore-next-line
             $facade = Facade::fromSerializedData($codeCoverage);
 
             /** @var Directory<File|Directory> $report */
