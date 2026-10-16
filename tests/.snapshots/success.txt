@@ -2204,6 +2204,7 @@
   ✓ it does not allow to add the same test description twice
   ✓ it does not allow static closures
   ✓ it alerts users about tests with arguments but no input
+  ✓ it can look up registered test methods by evaluable name
   ✓ it can return an array of all test suite filenames
 
    PASS  Tests\Visual\BeforeEachTestName
@@ -2262,4 +2263,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1603 passed (3495 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1604 passed (3502 assertions)
