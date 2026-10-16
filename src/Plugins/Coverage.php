@@ -73,6 +73,8 @@ final class Coverage implements AddsOutput, HandlesArguments
 
     private bool $shardsCoverageClean = false;
 
+    private bool $thresholdRunsOnMerge = false;
+
     public function __construct(private readonly OutputInterface $output)
     {
         //
@@ -185,16 +187,7 @@ final class Coverage implements AddsOutput, HandlesArguments
         }
 
         if ($this->shardIndex !== null) {
-            $this->output->writeln([
-                '',
-                sprintf(
-                    '  <fg=gray>Coverage:</>  Coverage stored for shard %d/%d.',
-                    $this->shardIndex,
-                    $this->shardTotal,
-                ),
-                '  Run: <fg=cyan>pest --shards-coverage</>',
-                '',
-            ]);
+            $this->reportShardCoverageStored();
 
             return $exitCode;
         }
@@ -244,15 +237,38 @@ final class Coverage implements AddsOutput, HandlesArguments
 
         if ($input->getOption(self::MIN_OPTION) !== null) {
             $this->coverageMin = (float) $input->getOption(self::MIN_OPTION);
+            $this->thresholdRunsOnMerge = true;
         }
 
         if ($input->getOption(self::EXACTLY_OPTION) !== null) {
             $this->coverageExactly = (float) $input->getOption(self::EXACTLY_OPTION);
+            $this->thresholdRunsOnMerge = true;
         }
 
         if ((bool) $input->getOption(self::ONLY_COVERED_OPTION)) {
             $this->showOnlyCovered = true;
         }
+    }
+
+    private function reportShardCoverageStored(): void
+    {
+        $lines = [
+            '',
+            sprintf(
+                '  <fg=gray>Coverage:</>  Coverage stored for shard %d/%d.',
+                $this->shardIndex,
+                $this->shardTotal,
+            ),
+        ];
+
+        if ($this->thresholdRunsOnMerge) {
+            $lines[] = '  A <fg=white;options=bold>--min</> or <fg=white;options=bold>--exactly</> threshold runs on the merged total.';
+        }
+
+        $lines[] = '  Run: <fg=cyan>pest --shards-coverage</>';
+        $lines[] = '';
+
+        $this->output->writeln($lines);
     }
 
     private function applyThresholds(float $coverage): int

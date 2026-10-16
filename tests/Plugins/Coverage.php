@@ -406,6 +406,26 @@ function deleteDirectory(string $directory): void
     rmdir($directory);
 }
 
+test('a shard run names the merge step for a threshold', function (array $arguments, bool $warns): void {
+    $output = new BufferedOutput;
+    $plugin = new Coverage($output);
+
+    new ReflectionProperty(Coverage::class, 'shardIndex')->setValue($plugin, 1);
+    new ReflectionProperty(Coverage::class, 'shardTotal')->setValue($plugin, 2);
+
+    (fn () => $this->parseThresholdOptions($arguments))->call($plugin);
+    (fn () => $this->reportShardCoverageStored())->call($plugin);
+
+    $written = $output->fetch();
+
+    expect($written)->toContain('Coverage stored for shard 1/2')
+        ->and(str_contains($written, 'runs on the merged total'))->toBe($warns);
+})->with([
+    'min' => [['--min=90'], true],
+    'exactly' => [['--exactly=90.0'], true],
+    'neither' => [[], false],
+]);
+
 test('find report targets reads each flag', function (array $arguments, array $expected): void {
     $plugin = new Coverage(new NullOutput);
 
