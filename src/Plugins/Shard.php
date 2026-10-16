@@ -262,12 +262,12 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
                 }
 
                 if ($endsWithClass && $subRegex !== '') {
-                    $parts[] = '(?:'.preg_quote($key, '/').'(?=::)|'.$segment.')';
+                    $parts[] = '(?:'.preg_quote($key, '/').'::|'.$segment.')';
 
                     continue;
                 }
 
-                $parts[] = $endsWithClass ? $segment.'(?=::)' : $segment;
+                $parts[] = $endsWithClass ? $segment.'::' : $segment;
             }
 
             return implode('|', $parts);
