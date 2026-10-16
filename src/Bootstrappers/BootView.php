@@ -25,11 +25,12 @@ final readonly class BootView implements Bootstrapper
     {
         View::renderUsing($this->output);
 
-        if (getenv('COLUMNS') === false && property_exists(Terminal::class, 'width')) {
+        if (getenv('COLUMNS') === false && property_exists(Terminal::class, 'width') && property_exists(Terminal::class, 'height')) {
             (new Terminal)->getWidth();
 
             Closure::bind(static function (): void {
                 Terminal::$width ??= 0;
+                Terminal::$height ??= 0;
             }, null, Terminal::class)();
         }
     }
