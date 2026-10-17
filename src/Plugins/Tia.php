@@ -749,18 +749,17 @@ final class Tia implements AddsOutput, FinalizesOutput, HandlesArguments, Handle
         }
 
         if (! $this->state->write(self::KEY_RUN_PENDING, '{"pending":true}')) {
-            $this->renderBadge('WARN', 'Could not prepare safe TIA publication — graph not updated.');
+            $this->renderBadge('ERROR', 'Could not prepare safe TIA publication — run not certified.');
 
-            return $exitCode;
+            return $exitCode === 0 ? 1 : $exitCode;
         }
 
         $previous = $this->state->read(self::KEY_GRAPH);
 
         if (! $this->state->write(self::KEY_GRAPH, $this->stagedGraphJson)) {
-            $this->state->delete(self::KEY_RUN_PENDING);
-            $this->renderBadge('WARN', 'Could not persist the final TIA graph — test results are unaffected.');
+            $this->renderBadge('ERROR', 'Could not persist the final TIA graph — certification remains pending.');
 
-            return $exitCode;
+            return $exitCode === 0 ? 1 : $exitCode;
         }
 
         $publishedSnapshot = new ChangedFiles($this->snapshotRoot ?? TestSuite::getInstance()->rootPath)->runSnapshot();
