@@ -435,7 +435,20 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     {
         $testSuite = TestSuite::getInstance();
 
+        $path = getenv('PEST_SHARD_FILE');
+
+        if (is_string($path) && $path !== '') {
+            return $this->isAbsolutePath($path) ? $path : $testSuite->rootPath.DIRECTORY_SEPARATOR.$path;
+        }
+
         return implode(DIRECTORY_SEPARATOR, [$testSuite->rootPath, $testSuite->testPath, '.pest', 'shards.json']);
+    }
+
+    private function isAbsolutePath(string $path): bool
+    {
+        return str_starts_with($path, '/')
+            || str_starts_with($path, '\\')
+            || preg_match('/^[A-Za-z]:[\\\\\/]/', $path) === 1;
     }
 
     /**

@@ -2,6 +2,7 @@
 
 use Pest\Exceptions\InvalidOption;
 use Pest\Plugins\Shard;
+use Pest\TestSuite;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 
@@ -535,4 +536,54 @@ describe('addOutput', function (): void {
         expect($exitCode)->toBe(1)
             ->and($outputText)->not->toContain('Shard:');
     });
+});
+
+describe('shardsPath', function (): void {
+    it('defaults to tests/.pest/shards.json', function (): void {
+        $shard = new Shard(new BufferedOutput);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('shardsPath');
+
+        $testSuite = TestSuite::getInstance();
+
+        expect($method->invoke($shard))->toBe(implode(DIRECTORY_SEPARATOR, [
+            $testSuite->rootPath, $testSuite->testPath, '.pest', 'shards.json',
+        ]));
+    });
+
+    it('resolves a relative PEST_SHARD_FILE against the project root', function (): void {
+        putenv('PEST_SHARD_FILE=tests/.pest/browser-shards.json');
+
+        $shard = new Shard(new BufferedOutput);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('shardsPath');
+
+        try {
+            expect($method->invoke($shard))
+                ->toBe(TestSuite::getInstance()->rootPath.DIRECTORY_SEPARATOR.'tests/.pest/browser-shards.json');
+        } finally {
+            putenv('PEST_SHARD_FILE');
+        }
+    });
+
+    it('uses an absolute PEST_SHARD_FILE as is', function (string $path): void {
+        putenv('PEST_SHARD_FILE='.$path);
+
+        $shard = new Shard(new BufferedOutput);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('shardsPath');
+
+        try {
+            expect($method->invoke($shard))->toBe($path);
+        } finally {
+            putenv('PEST_SHARD_FILE');
+        }
+    })->with([
+        '/tmp/shards.json',
+        'C:\\shards\\shards.json',
+        '\\\\server\\share\\shards.json',
+    ]);
 });
