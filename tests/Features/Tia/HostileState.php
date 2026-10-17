@@ -200,9 +200,16 @@ test('an unreadable graph that cannot be replaced rejects certification', functi
 
     $result = $project->pest('--tia');
 
+    expect($result->tally())->toContain(Project::TOTAL_TESTS.' passed')
+        ->and($result->replayed())->toBe(0, $result->describe());
+
+    if (str_contains($result->output, 'TIA is skipped as it needs')) {
+        expect($result->exitCode)->toBe(0, $result->describe());
+
+        return;
+    }
+
     expect($result->exitCode)->toBe(1, $result->describe())
-        ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed')
-        ->and($result->replayed())->toBe(0, $result->describe())
         ->and($result->output)->toContain('certification remains pending');
 })->skipOnWindows();
 
