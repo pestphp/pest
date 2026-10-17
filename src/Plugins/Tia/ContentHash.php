@@ -59,9 +59,6 @@ final class ContentHash
                 if ($token[0] === T_COMMENT) {
                     continue;
                 }
-                if ($token[0] === T_DOC_COMMENT) {
-                    continue;
-                }
                 $normalised .= $token[1];
             } else {
                 $normalised .= $token;

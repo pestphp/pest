@@ -50,11 +50,11 @@ describe('PHP files', function (): void {
         expect($a)->toBe($b);
     });
 
-    it('ignores doc comments', function (): void {
+    it('detects doc comments because PHP reflection can observe them', function (): void {
         $a = ContentHash::ofContent('a.php', "<?php\n/**\n * @return int\n */\nfunction foo() { return 1; }");
         $b = ContentHash::ofContent('a.php', "<?php\nfunction foo() { return 1; }");
 
-        expect($a)->toBe($b);
+        expect($a)->not->toBe($b);
     });
 
     it('detects code changes', function (): void {

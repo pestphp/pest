@@ -10,6 +10,7 @@ use Pest\Exceptions\FatalException;
 use Pest\Exceptions\NoDirtyTestsFound;
 use Pest\Plugins\Actions\CallsAddsOutput;
 use Pest\Plugins\Actions\CallsBoot;
+use Pest\Plugins\Actions\CallsFinalizesOutput;
 use Pest\Plugins\Actions\CallsHandleArguments;
 use Pest\Plugins\Actions\CallsHandleOriginalArguments;
 use Pest\Plugins\Actions\CallsTerminable;
@@ -119,7 +120,7 @@ final class Kernel
 
         $this->terminate();
 
-        return $result;
+        return CallsFinalizesOutput::execute($result);
     }
 
     public function terminate(): void

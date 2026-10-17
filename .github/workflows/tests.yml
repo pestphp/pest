@@ -39,7 +39,7 @@ jobs:
       with:
         php-version: ${{ matrix.php }}
         tools: composer:v2
-        coverage: none
+        coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.php == '8.4' && 'xdebug' || 'none' }}
         extensions: sockets
 
     - name: Get Composer cache directory
@@ -75,3 +75,9 @@ jobs:
 
     - name: Integration Tests
       run: composer test:integration
+
+    - name: TIA integration with real Xdebug coverage
+      if: matrix.os == 'ubuntu-latest' && matrix.php == '8.4'
+      run: |
+        XDEBUG_MODE=coverage php -r 'exit(extension_loaded("xdebug") && in_array("coverage", xdebug_info("mode"), true) ? 0 : 1);'
+        XDEBUG_MODE=coverage php bin/pest --group=tia -v

@@ -6,6 +6,7 @@ namespace Pest\Plugins;
 
 use NunoMaduro\Collision\Adapters\Phpunit\Printers\DefaultPrinter;
 use Pest\Contracts\Plugins\AddsOutput;
+use Pest\Contracts\Plugins\FinalizesOutput;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Contracts\Plugins\HandlesOriginalArguments;
 use Pest\Contracts\Plugins\Terminable;
@@ -44,7 +45,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @internal
  */
-final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArguments, Terminable
+final class Tia implements AddsOutput, FinalizesOutput, HandlesArguments, HandlesOriginalArguments, Terminable
 {
     use HandleArguments;
 
@@ -85,6 +86,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     private const string KEY_WORKER_RESULTS_PREFIX = 'worker-results-';
 
     private const string KEY_WORKER_NO_DRIVER_PREFIX = 'worker-no-driver-';
+
+    public const string KEY_RUN_PENDING = 'run-pending.json';
 
     public const string KEY_COVERAGE_CACHE = 'coverage.bin.gz';
 
@@ -178,6 +181,19 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     /** @var array{structural: array<string, mixed>, environmental: array<string, mixed>}|null */
     private ?array $startFingerprint = null;
 
+    /** @var array{sha: ?string, tree: array<string, string>, raw: array<string, string>}|null */
+    private ?array $startRunSnapshot = null;
+
+    private bool $runTreeChanged = false;
+
+    private bool $stageGraphWrites = false;
+
+    private ?string $stagedGraphJson = null;
+
+    private ?Graph $stagedGraph = null;
+
+    private ?string $snapshotRoot = null;
+
     private bool $piggybackCoverage = false;
 
     private bool $recordingActive = false;
@@ -238,8 +254,47 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         return ! Fingerprint::structuralMatches($this->startFingerprint, $current);
     }
 
+    private function runTreeChangedDuringExecution(): bool
+    {
+        if ($this->runTreeChanged) {
+            return true;
+        }
+
+        if ($this->startRunSnapshot === null) {
+            return false;
+        }
+
+        $current = new ChangedFiles($this->snapshotRoot ?? TestSuite::getInstance()->rootPath)->runSnapshot();
+
+        if ($current === $this->startRunSnapshot) {
+            return false;
+        }
+
+        $this->runTreeChanged = true;
+        $this->renderBadge('ERROR', 'Project sources changed during the run — TIA cannot certify this tree.');
+        $this->renderChild('Re-run after edits settle; the graph baseline remains anchored to the run-start tree.');
+
+        return true;
+    }
+
+    private function stampRunStart(Graph $graph): void
+    {
+        if ($this->startRunSnapshot === null) {
+            return;
+        }
+
+        $graph->setRecordedAtSha($this->branch, $this->startRunSnapshot['sha']);
+        $graph->setLastRunTree($this->branch, $this->startRunSnapshot['tree']);
+    }
+
     private function loadGraph(string $projectRoot): ?Graph
     {
+        if ($this->stageGraphWrites && $this->stagedGraph instanceof Graph) {
+            $this->stagedGraph->setFallbackBranch($this->fallbackBranch);
+
+            return $this->stagedGraph;
+        }
+
         $json = $this->state->read(self::KEY_GRAPH);
 
         if ($json === null) {
@@ -290,6 +345,13 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         if ($json === null) {
             return false;
+        }
+
+        if ($this->stageGraphWrites) {
+            $this->stagedGraph = $graph;
+            $this->stagedGraphJson = $json;
+
+            return true;
         }
 
         return $this->state->write(self::KEY_GRAPH, $json);
@@ -577,6 +639,13 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return;
         }
 
+        if ($this->runTreeChangedDuringExecution()) {
+            $recorder->reset();
+            $this->coverageCollector->reset();
+
+            return;
+        }
+
         $this->graphWritten = true;
 
         $projectRoot = TestSuite::getInstance()->rootPath;
@@ -611,9 +680,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return;
         }
 
-        $changedFiles = new ChangedFiles($projectRoot);
-        $currentSha = $changedFiles->currentSha();
-
         $currentFingerprint = Fingerprint::compute($projectRoot);
 
         if ($this->structuralFingerprintShifted($currentFingerprint)) {
@@ -627,11 +693,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         $graph = $this->loadGraph($projectRoot) ?? new Graph($projectRoot);
         $graph->setFingerprint($currentFingerprint);
-        $graph->setRecordedAtSha($this->branch, $currentSha);
-        $graph->setLastRunTree(
-            $this->branch,
-            $changedFiles->snapshotTree($changedFiles->since($currentSha) ?? []),
-        );
+        $this->stampRunStart($graph);
         $graph->replaceEdges($perTest, keepExisting: $this->piggybackCoverage);
         $graph->replaceTestTables($perTestTables);
         $graph->replaceTestInertiaComponents($perTestInertia);
@@ -652,6 +714,91 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     public function addOutput(int $exitCode): int
     {
+        $this->stageGraphWrites = ! Parallel::isWorker() && $this->startRunSnapshot !== null;
+        $exitCode = $this->addOutputBeforeTermination($exitCode);
+
+        if (! Parallel::isWorker()) {
+            $this->terminate();
+
+            if ($this->runTreeChangedDuringExecution()) {
+                $this->purgeWorkerPartials();
+
+                return $exitCode === 0 ? 1 : $exitCode;
+            }
+        }
+
+        return $exitCode;
+    }
+
+    public function finalizeOutput(int $exitCode): int
+    {
+        if (! $this->stageGraphWrites || Parallel::isWorker()) {
+            return $exitCode;
+        }
+
+        if ($this->runTreeChangedDuringExecution()) {
+            $this->stagedGraphJson = null;
+            $this->stagedGraph = null;
+            $this->purgeWorkerPartials();
+
+            return $exitCode === 0 ? 1 : $exitCode;
+        }
+
+        if ($this->stagedGraphJson === null) {
+            return $exitCode;
+        }
+
+        if (! $this->state->write(self::KEY_RUN_PENDING, '{"pending":true}')) {
+            $this->renderBadge('WARN', 'Could not prepare safe TIA publication — graph not updated.');
+
+            return $exitCode;
+        }
+
+        $previous = $this->state->read(self::KEY_GRAPH);
+
+        if (! $this->state->write(self::KEY_GRAPH, $this->stagedGraphJson)) {
+            $this->state->delete(self::KEY_RUN_PENDING);
+            $this->renderBadge('WARN', 'Could not persist the final TIA graph — test results are unaffected.');
+
+            return $exitCode;
+        }
+
+        $publishedSnapshot = new ChangedFiles($this->snapshotRoot ?? TestSuite::getInstance()->rootPath)->runSnapshot();
+
+        if ($publishedSnapshot !== $this->startRunSnapshot) {
+            $this->runTreeChangedDuringExecution();
+            $restored = $previous === null
+                ? $this->state->delete(self::KEY_GRAPH)
+                : $this->state->write(self::KEY_GRAPH, $previous);
+
+            if (! $restored) {
+                $this->renderBadge('ERROR', 'Could not restore the previous TIA graph.');
+            }
+
+            $this->stagedGraphJson = null;
+            $this->stagedGraph = null;
+
+            if ($restored) {
+                $this->state->delete(self::KEY_RUN_PENDING);
+            }
+
+            return $exitCode === 0 ? 1 : $exitCode;
+        }
+
+        $this->stagedGraphJson = null;
+        $this->stagedGraph = null;
+
+        if (! $this->state->delete(self::KEY_RUN_PENDING)) {
+            $this->renderBadge('ERROR', 'Could not finish TIA certification.');
+
+            return 1;
+        }
+
+        return $exitCode;
+    }
+
+    private function addOutputBeforeTermination(int $exitCode): int
+    {
         if (Parallel::isWorker()) {
             return $exitCode;
         }
@@ -668,6 +815,12 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         if ($this->writesSuppressed) {
             return $exitCode;
+        }
+
+        if ($this->runTreeChangedDuringExecution()) {
+            $this->purgeWorkerPartials();
+
+            return $exitCode === 0 ? 1 : $exitCode;
         }
 
         if ($this->resultsOnlyWrites) {
@@ -697,9 +850,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return $exitCode;
         }
 
-        $changedFiles = new ChangedFiles($projectRoot);
-        $currentSha = $changedFiles->currentSha();
-
         $currentFingerprint = Fingerprint::compute($projectRoot);
 
         if ($this->structuralFingerprintShifted($currentFingerprint)) {
@@ -715,11 +865,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         $graph = $this->loadGraph($projectRoot) ?? new Graph($projectRoot);
         $graph->setFingerprint($currentFingerprint);
-        $graph->setRecordedAtSha($this->branch, $currentSha);
-        $graph->setLastRunTree(
-            $this->branch,
-            $changedFiles->snapshotTree($changedFiles->since($currentSha) ?? []),
-        );
+        $this->stampRunStart($graph);
 
         [$finalised, $finalisedTables, $finalisedInertia] = $this->consumePartials($partialKeys);
 
@@ -840,6 +986,28 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
                 : new TiaRequiresRemote);
         }
 
+        $this->snapshotRoot = $projectRoot;
+        $this->startRunSnapshot = new ChangedFiles($projectRoot)->runSnapshot();
+
+        if ($this->startRunSnapshot === null) {
+            $this->renderBadge('WARN', 'Unable to snapshot project sources — running the full suite without TIA.');
+            $this->writesSuppressed = true;
+
+            return $arguments;
+        }
+
+        if ($this->state->exists(self::KEY_RUN_PENDING)) {
+            $this->renderBadge('WARN', 'An earlier TIA run was not certified — rebuilding the graph.');
+
+            if (! $this->canRebuildGraph()) {
+                $this->writesSuppressed = true;
+
+                return $arguments;
+            }
+
+            $forceRebuild = true;
+        }
+
         $fingerprint = Fingerprint::compute($projectRoot);
         $this->startFingerprint = $fingerprint;
 
@@ -908,6 +1076,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     {
         foreach ([
             self::KEY_GRAPH,
+            self::KEY_RUN_PENDING,
             self::KEY_AFFECTED,
             self::KEY_COVERAGE_CACHE,
             self::KEY_COVERAGE_MARKER,
@@ -1671,15 +1840,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return;
         }
 
-        $changedFiles = new ChangedFiles($projectRoot);
-        $currentSha = $changedFiles->currentSha();
-
-        if ($currentSha !== null) {
-            $graph->setRecordedAtSha($this->branch, $currentSha);
-        }
-
-        $workingTreeFiles = $changedFiles->since($currentSha) ?? [];
-        $graph->setLastRunTree($this->branch, $changedFiles->snapshotTree($workingTreeFiles));
+        $this->stampRunStart($graph);
 
         $this->saveGraph($graph);
     }
