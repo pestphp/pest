@@ -191,7 +191,7 @@ test('a graph from a schema this build does not know is rebuilt, not read', func
         ->and($result->replayed())->toBe(0, $result->describe());
 })->skipOnWindows();
 
-test('a graph path that is a directory cannot certify a run', function (): void {
+test('an unreadable graph falls back to a full uncached run', function (): void {
     $project = Project::make('master');
     $project->seed('master');
 
@@ -200,9 +200,9 @@ test('a graph path that is a directory cannot certify a run', function (): void 
 
     $result = $project->pest('--tia');
 
-    expect($result->exitCode)->toBe(1, $result->describe())
+    expect($result->exitCode)->toBe(0, $result->describe())
         ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed')
-        ->and($result->output)->toContain('certification remains pending');
+        ->and($result->replayed())->toBe(0, $result->describe());
 })->skipOnWindows();
 
 test('a state dir it cannot write to cannot certify a replay', function (): void {
