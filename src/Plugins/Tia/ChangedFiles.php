@@ -20,6 +20,85 @@ final readonly class ChangedFiles
     }
 
     /**
+     * @return array{sha: ?string, tree: array<string, string>, raw: array<string, string>}|null
+     */
+    public function runSnapshot(): ?array
+    {
+        try {
+            $sha = $this->currentSha();
+            $files = $this->workingTreeChanges(forSnapshot: true);
+            $tree = $this->snapshotTree($files);
+            $raw = $this->snapshotRawTree($files);
+
+            if ($raw === null || count($tree) !== count($files)) {
+                return null;
+            }
+
+            $dirtyAtEnd = $this->workingTreeChanges(forSnapshot: true);
+            sort($files);
+            sort($dirtyAtEnd);
+
+            if ($this->currentSha() !== $sha || $dirtyAtEnd !== $files) {
+                return null;
+            }
+        } catch (MissingDependency) {
+            return null;
+        }
+
+        ksort($tree);
+
+        return ['sha' => $sha, 'tree' => $tree, 'raw' => $raw];
+    }
+
+    /**
+     * @param  array<int, string>  $files
+     * @return array<string, string>|null
+     */
+    private function snapshotRawTree(array $files): ?array
+    {
+        $tree = [];
+
+        foreach ($files as $file) {
+            $absolute = $this->projectRoot.DIRECTORY_SEPARATOR.$file;
+
+            if (is_link($absolute)) {
+                $target = readlink($absolute);
+
+                if ($target === false) {
+                    return null;
+                }
+
+                $tree[$file] = 'link:'.hash('xxh128', $target);
+
+                continue;
+            }
+
+            if (! file_exists($absolute)) {
+                $tree[$file] = 'missing';
+
+                continue;
+            }
+
+            if (! is_file($absolute)) {
+                return null;
+            }
+
+            $hash = @hash_file('xxh128', $absolute);
+            $mode = @fileperms($absolute);
+
+            if ($hash === false || $mode === false) {
+                return null;
+            }
+
+            $tree[$file] = sprintf('file:%o:%s', $mode & 0777, $hash);
+        }
+
+        ksort($tree);
+
+        return $tree;
+    }
+
+    /**
      * @param  array<int, string>  $files  project-relative paths.
      * @param  array<string, string>  $lastRunTree  path → content hash from last run.
      * @return array<int, string>
@@ -333,7 +412,7 @@ final readonly class ChangedFiles
     /**
      * @return array<int, string>
      */
-    private function workingTreeChanges(): array
+    private function workingTreeChanges(bool $forSnapshot = false): array
     {
         $output = $this->scan()->raw(['status', '--porcelain', '-z', '--untracked-files=all']);
 
@@ -359,6 +438,10 @@ final readonly class ChangedFiles
             $status = substr($record, 0, 2);
             $path = substr($record, 3);
 
+            if ($forSnapshot && $status === '??' && ! $this->isUntrackedSourceCandidate($path)) {
+                continue;
+            }
+
             if ($status[0] === 'R' || $status[0] === 'C') {
                 $files[] = $path;
 
@@ -374,6 +457,21 @@ final readonly class ChangedFiles
         }
 
         return $files;
+    }
+
+    private function isUntrackedSourceCandidate(string $path): bool
+    {
+        $normalised = str_replace('\\', '/', $path);
+
+        if ($normalised === '.pest.xml') {
+            return false;
+        }
+
+        if (array_any(['.pest/', 'coverage/'], fn (string $prefix): bool => str_starts_with($normalised, $prefix))) {
+            return false;
+        }
+
+        return preg_match('#^(?:junit|clover|coverage|test[-_]?results)(?:[._-][^/]*)?\.(?:xml|json|log)$#i', $normalised) !== 1;
     }
 
     public function currentSha(): ?string

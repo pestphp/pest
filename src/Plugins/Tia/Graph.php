@@ -1630,7 +1630,7 @@ final class Graph
         $survivors = array_fill_keys($keep, true);
 
         foreach (array_keys($this->baselines) as $branch) {
-            if (str_starts_with($branch, self::WORKSPACE_BRANCH_PREFIX)) {
+            if (str_starts_with((string) $branch, self::WORKSPACE_BRANCH_PREFIX)) {
                 continue;
             }
 
