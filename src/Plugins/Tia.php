@@ -188,6 +188,8 @@ final class Tia implements AddsOutput, FinalizesOutput, HandlesArguments, Handle
 
     private bool $stageGraphWrites = false;
 
+    private bool $graphStagingFailed = false;
+
     private ?string $stagedGraphJson = null;
 
     private ?Graph $stagedGraph = null;
@@ -344,6 +346,8 @@ final class Tia implements AddsOutput, FinalizesOutput, HandlesArguments, Handle
         $json = $graph->encode();
 
         if ($json === null) {
+            $this->graphStagingFailed = $this->stageGraphWrites;
+
             return false;
         }
 
@@ -734,6 +738,13 @@ final class Tia implements AddsOutput, FinalizesOutput, HandlesArguments, Handle
     {
         if (! $this->stageGraphWrites || Parallel::isWorker()) {
             return $exitCode;
+        }
+
+        if ($this->graphStagingFailed) {
+            $this->stagedGraphJson = null;
+            $this->stagedGraph = null;
+
+            return $exitCode === 0 ? 1 : $exitCode;
         }
 
         if ($this->runTreeChangedDuringExecution()) {

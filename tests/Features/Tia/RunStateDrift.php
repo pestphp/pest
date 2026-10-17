@@ -6,6 +6,7 @@ use Pest\Plugins\Tia;
 use Pest\Plugins\Tia\ChangedFiles;
 use Pest\Plugins\Tia\Contracts\State;
 use Pest\Plugins\Tia\FileState;
+use Pest\Plugins\Tia\Graph;
 use Pest\Support\Coverage;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Tests\Fixtures\Tia\GitRepo;
@@ -508,6 +509,24 @@ test('a failed TIA graph publication cannot certify a green result', function (s
     'cannot write pending marker' => Tia::KEY_RUN_PENDING,
     'cannot write graph after marker' => Tia::KEY_GRAPH,
 ])->skipOnWindows();
+
+test('a graph that cannot be serialized cannot silently certify a successful TIA run', function (): void {
+    $tia = new ReflectionClass(Tia::class)->newInstanceWithoutConstructor();
+    new ReflectionProperty(Tia::class, 'stageGraphWrites')->setValue($tia, true);
+
+    $graph = new Graph(sys_get_temp_dir());
+    $graph->setFingerprint([
+        'structural' => ['invalid_utf8' => "\xB1"],
+        'environmental' => [],
+    ]);
+
+    expect($graph->encode())->toBeNull();
+
+    $saved = new ReflectionMethod(Tia::class, 'saveGraph')->invoke($tia, $graph);
+
+    expect($saved)->toBeFalse()
+        ->and($tia->finalizeOutput(0))->toBe(1);
+})->skipOnWindows();
 
 test('a dirty Git submodule safely falls back to a full suite', function (): void {
     $project = Project::make('master');
