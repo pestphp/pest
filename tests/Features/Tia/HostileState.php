@@ -191,7 +191,7 @@ test('a graph from a schema this build does not know is rebuilt, not read', func
         ->and($result->replayed())->toBe(0, $result->describe());
 })->skipOnWindows();
 
-test('graph.json being a directory does not stop the run', function (): void {
+test('a graph path that is a directory cannot certify a run', function (): void {
     $project = Project::make('master');
     $project->seed('master');
 
@@ -200,11 +200,12 @@ test('graph.json being a directory does not stop the run', function (): void {
 
     $result = $project->pest('--tia');
 
-    expect($result->exitCode)->toBe(0, $result->describe())
-        ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed');
+    expect($result->exitCode)->toBe(1, $result->describe())
+        ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed')
+        ->and($result->output)->toContain('certification remains pending');
 })->skipOnWindows();
 
-test('a state dir it cannot write to still replays', function (): void {
+test('a state dir it cannot write to cannot certify a replay', function (): void {
     $project = Project::make('master');
     $project->seed('master');
 
@@ -216,6 +217,7 @@ test('a state dir it cannot write to still replays', function (): void {
         chmod($project->graphDir(), 0700);
     }
 
-    expect($result->exitCode)->toBe(0, $result->describe())
-        ->and($result->replayed())->toBe(Project::TOTAL_TESTS, $result->describe());
+    expect($result->exitCode)->toBe(1, $result->describe())
+        ->and($result->replayed())->toBe(Project::TOTAL_TESTS, $result->describe())
+        ->and($result->output)->toContain('run not certified');
 })->skipOnWindows();

@@ -491,7 +491,17 @@ test('a failed TIA graph publication cannot certify a green result', function (s
     new ReflectionProperty(Tia::class, 'stageGraphWrites')->setValue($tia, true);
     new ReflectionProperty(Tia::class, 'stagedGraphJson')->setValue($tia, 'new graph');
 
-    expect($tia->finalizeOutput(0))->toBe(1)
+    $level = ob_get_level();
+
+    try {
+        $result = $tia->finalizeOutput(0);
+    } finally {
+        while (ob_get_level() > $level) {
+            ob_end_clean();
+        }
+    }
+
+    expect($result)->toBe(1)
         ->and($state->read(Tia::KEY_GRAPH))->toBe('old graph')
         ->and($state->exists(Tia::KEY_RUN_PENDING))->toBe($failingKey === Tia::KEY_GRAPH);
 })->with([
