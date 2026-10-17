@@ -437,6 +437,68 @@ test('publication rolls back the graph if its state write mutates a source', fun
         ->and($state->read(Tia::KEY_GRAPH))->toBe('previous graph');
 })->skipOnWindows();
 
+test('a failed TIA graph publication cannot certify a green result', function (string $failingKey): void {
+    $project = Project::make('master');
+
+    $state = new class($failingKey) implements State
+    {
+        private array $values = [Tia::KEY_GRAPH => 'old graph'];
+
+        public function __construct(private readonly string $failingKey) {}
+
+        public function read(string $key): ?string
+        {
+            return $this->values[$key] ?? null;
+        }
+
+        public function write(string $key, string $content): bool
+        {
+            if ($key === $this->failingKey) {
+                return false;
+            }
+
+            $this->values[$key] = $content;
+
+            return true;
+        }
+
+        public function delete(string $key): bool
+        {
+            unset($this->values[$key]);
+
+            return true;
+        }
+
+        public function exists(string $key): bool
+        {
+            return isset($this->values[$key]);
+        }
+
+        public function keysWithPrefix(string $prefix): array
+        {
+            return array_values(array_filter(array_keys($this->values), fn (string $key): bool => str_starts_with($key, $prefix)));
+        }
+    };
+
+    $start = new ChangedFiles($project->path)->runSnapshot();
+    expect($start)->not->toBeNull();
+
+    $tia = new ReflectionClass(Tia::class)->newInstanceWithoutConstructor();
+    new ReflectionProperty(Tia::class, 'state')->setValue($tia, $state);
+    new ReflectionProperty(Tia::class, 'output')->setValue($tia, new BufferedOutput);
+    new ReflectionProperty(Tia::class, 'snapshotRoot')->setValue($tia, $project->path);
+    new ReflectionProperty(Tia::class, 'startRunSnapshot')->setValue($tia, $start);
+    new ReflectionProperty(Tia::class, 'stageGraphWrites')->setValue($tia, true);
+    new ReflectionProperty(Tia::class, 'stagedGraphJson')->setValue($tia, 'new graph');
+
+    expect($tia->finalizeOutput(0))->toBe(1)
+        ->and($state->read(Tia::KEY_GRAPH))->toBe('old graph')
+        ->and($state->exists(Tia::KEY_RUN_PENDING))->toBe($failingKey === Tia::KEY_GRAPH);
+})->with([
+    'cannot write pending marker' => Tia::KEY_RUN_PENDING,
+    'cannot write graph after marker' => Tia::KEY_GRAPH,
+])->skipOnWindows();
+
 test('a dirty Git submodule safely falls back to a full suite', function (): void {
     $project = Project::make('master');
     $external = sys_get_temp_dir().'/pest-tia-gitlink-'.bin2hex(random_bytes(8));
