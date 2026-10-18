@@ -14,6 +14,7 @@ use ParaTest\RunnerInterface;
 use ParaTest\WrapperRunner\MissingResultsException;
 use ParaTest\WrapperRunner\SuiteLoader;
 use ParaTest\WrapperRunner\WrapperWorker;
+use Pest\Plugins\Parallel;
 use Pest\Plugins\Tia;
 use Pest\Result;
 use Pest\TestSuite;
@@ -64,6 +65,8 @@ use function usleep;
  */
 final class WrapperRunner implements RunnerInterface
 {
+    public const string DO_NOT_RECORD_TEST_RUN_HISTORY = 'DO_NOT_RECORD_TEST_RUN_HISTORY';
+
     public static ?TestResult $result = null;
 
     private const int CYCLE_SLEEP = 1000;
@@ -474,7 +477,7 @@ final class WrapperRunner implements RunnerInterface
 
         self::$result = $testResultSum;
 
-        if ($this->options->configuration->recordTestRunHistory()) {
+        if ($this->options->configuration->recordTestRunHistory() && Parallel::getGlobal(self::DO_NOT_RECORD_TEST_RUN_HISTORY) !== true) {
             $resultCacheSum = new DefaultTestRunHistory($this->options->configuration->testRunHistoryFile());
             foreach ($this->resultCacheFiles as $resultCacheFile) {
                 $resultCache = new DefaultTestRunHistory($resultCacheFile->getPathname());

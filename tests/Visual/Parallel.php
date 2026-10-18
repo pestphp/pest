@@ -56,3 +56,37 @@ test('parallel can have multiple groups', function () use ($run): void {
         ->toContain('Tests:    2 passed (2 assertions)')
         ->toContain('Parallel: 3 processes');
 })->skipOnWindows();
+
+test('parallel accepts the options that the workers ignore', function (string $option) use ($run): void {
+    expect($run('tests/Fixtures/Inheritance', $option))
+        ->toContain('Tests:    1 skipped, 1 passed (1 assertions)')
+        ->toContain('Parallel: 3 processes');
+})->with([
+    '--no-results',
+    '--do-not-cache-result',
+    '--do-not-record-test-run-history',
+])->skipOnWindows();
+
+test('parallel records the test run history', function () use ($run): void {
+    $cacheDirectory = sys_get_temp_dir().'/pest-parallel-history-'.bin2hex(random_bytes(8));
+
+    $run('tests/Fixtures/Inheritance', '--cache-directory='.$cacheDirectory);
+
+    expect($cacheDirectory.'/test-run-history')->toBeFile();
+
+    unlink($cacheDirectory.'/test-run-history');
+    rmdir($cacheDirectory);
+})->skipOnWindows();
+
+test('parallel does not record the test run history when asked not to', function (string $option) use ($run): void {
+    $cacheDirectory = sys_get_temp_dir().'/pest-parallel-history-'.bin2hex(random_bytes(8));
+
+    expect($run('tests/Fixtures/Inheritance', '--cache-directory='.$cacheDirectory, $option))
+        ->toContain('Tests:    1 skipped, 1 passed (1 assertions)')
+        ->and($cacheDirectory.'/test-run-history')->not->toBeFile();
+
+    rmdir($cacheDirectory);
+})->with([
+    '--do-not-cache-result',
+    '--do-not-record-test-run-history',
+])->skipOnWindows();
