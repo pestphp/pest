@@ -1842,6 +1842,8 @@
   ✓ buildFilterArgument → it does not match a class outside of the shard when another class name is its prefix
   ✓ buildFilterArgument → it still matches dataset variants after the class boundary
   ✓ buildFilterArgument → it keeps a class matchable when another class nests below its namespace
+  ✓ buildFilterArgument → it keeps the filter whole when the parallel runner passes it as --filter=VALUE
+  ✓ buildFilterArgument → it matches a class-based test of the shard
   ✓ ensureFilterLengthIsSafe → it accepts filter within length limit
   ✓ ensureFilterLengthIsSafe → it throws exception when filter exceeds default limit
   ✓ ensureFilterLengthIsSafe → it respects custom limit from environment variable
@@ -2263,4 +2265,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1604 passed (3502 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1606 passed (3505 assertions)
