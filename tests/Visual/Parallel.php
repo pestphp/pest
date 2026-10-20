@@ -4,7 +4,7 @@ use Symfony\Component\Process\Process;
 
 $run = function (): ?string {
     $process = new Process(
-        array_merge(['php', 'bin/pest', '--parallel', '--processes=3'], func_get_args()),
+        array_merge(['php', '-d', 'memory_limit=512M', 'bin/pest', '--parallel', '--processes=3', '--passthru-php=-d memory_limit=512M'], func_get_args()),
         dirname(__DIR__, 2),
         ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
     );
@@ -20,7 +20,7 @@ test('parallel', function () use ($run): void {
     $output = $run('--exclude-group=integration');
     $output = implode("\n", array_slice(explode("\n", (string) $output), -10));
 
-    $expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1591 passed (3458 assertions)';
+    $expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1597 passed (3467 assertions)';
 
     expect($output)
         ->toContain("Tests:    {$expected}")
