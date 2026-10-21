@@ -203,6 +203,58 @@ test('a failing git shows its own error instead of asking for git', function ():
         ->and($result->exitCode)->toBe(1, $result->describe());
 })->skipOnWindows();
 
+test('a git binary missing from PATH still asks for git', function (): void {
+    $project = Project::make('master');
+
+    mkdir($project->path('empty-path'));
+
+    $result = $project->pestWithEnvironment($project->path(), [
+        'PATH' => $project->path('empty-path'),
+    ], '--tia');
+
+    expect($result->output)->toContain('The [Tia mode] feature requires [git].')
+        ->and($result->exitCode)->toBe(1, $result->describe());
+})->skipOnWindows();
+
+test('a git failure without error output reports its exit code', function (): void {
+    $project = Project::make('master');
+
+    $project->write('shim/git', implode("\n", [
+        '#!/bin/sh',
+        'exit 3',
+        '',
+    ]));
+    chmod($project->path('shim/git'), 0755);
+
+    $result = $project->pestWithEnvironment($project->path(), [
+        'PATH' => $project->path('shim').':'.getenv('PATH'),
+    ], '--tia');
+
+    expect($result->output)->toContain('Git exited with code 3.')
+        ->and($result->output)->not->toContain('requires [git]')
+        ->and($result->exitCode)->toBe(1, $result->describe());
+})->skipOnWindows();
+
+test('a git failure with exit code 127 shows its own error', function (): void {
+    $project = Project::make('master');
+
+    $project->write('shim/git', implode("\n", [
+        '#!/bin/sh',
+        'echo "git: error while loading shared libraries: libpcre2-8.so.0" >&2',
+        'exit 127',
+        '',
+    ]));
+    chmod($project->path('shim/git'), 0755);
+
+    $result = $project->pestWithEnvironment($project->path(), [
+        'PATH' => $project->path('shim').':'.getenv('PATH'),
+    ], '--tia');
+
+    expect($result->output)->toContain('error while loading shared libraries')
+        ->and($result->output)->not->toContain('requires [git]')
+        ->and($result->exitCode)->toBe(1, $result->describe());
+})->skipOnWindows();
+
 test('a plain run outside a repository creates no baseline', function (): void {
     $project = Project::withoutGit();
 
