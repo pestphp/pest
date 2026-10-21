@@ -209,6 +209,44 @@ describe('buildFilterArgument', function (): void {
     });
 });
 
+describe('distribute', function (): void {
+    it('splits tests round-robin across shards', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('distribute');
+
+        $tests = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+        expect($method->invoke($shard, $tests, 1, 3))->toBe(['A', 'D'])
+            ->and($method->invoke($shard, $tests, 2, 3))->toBe(['B', 'E'])
+            ->and($method->invoke($shard, $tests, 3, 3))->toBe(['C', 'F']);
+    });
+
+    it('returns an empty list when a shard gets no tests', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('distribute');
+
+        expect($method->invoke($shard, ['A', 'B'], 3, 4))->toBe([]);
+    });
+
+    it('puts every test in the single shard when total is 1', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('distribute');
+
+        $tests = ['A', 'B', 'C'];
+
+        expect($method->invoke($shard, $tests, 1, 1))->toBe($tests);
+    });
+});
+
 describe('ensureFilterLengthIsSafe', function (): void {
     it('accepts filter within length limit', function (): void {
         $output = new BufferedOutput;
