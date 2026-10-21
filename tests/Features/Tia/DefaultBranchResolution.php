@@ -179,6 +179,30 @@ test('tia still requires git', function (): void {
         ->and($result->exitCode)->not->toBe(0);
 })->skipOnWindows();
 
+test('a failing git shows its own error instead of asking for git', function (): void {
+    $project = Project::make('master');
+
+    $project->write('shim/git', implode("\n", [
+        '#!/bin/sh',
+        'echo "fatal: detected dubious ownership in repository at \'$PWD\'" >&2',
+        'echo "To add an exception for this directory, call:" >&2',
+        'echo "" >&2',
+        'echo "	git config --global --add safe.directory $PWD" >&2',
+        'exit 128',
+        '',
+    ]));
+    chmod($project->path('shim/git'), 0755);
+
+    $result = $project->pestWithEnvironment($project->path(), [
+        'PATH' => $project->path('shim').':'.getenv('PATH'),
+    ], '--tia');
+
+    expect($result->output)->toContain('detected dubious ownership in repository')
+        ->and($result->output)->toContain('git config --global --add safe.directory')
+        ->and($result->output)->not->toContain('requires [git]')
+        ->and($result->exitCode)->toBe(1, $result->describe());
+})->skipOnWindows();
+
 test('a plain run outside a repository creates no baseline', function (): void {
     $project = Project::withoutGit();
 
