@@ -7,6 +7,7 @@ namespace Pest\Plugins\Tia;
 use Pest\Exceptions\MissingDependency;
 use Pest\Exceptions\TiaGitFailed;
 use Pest\Support\Git;
+use Symfony\Component\Process\ExecutableFinder;
 
 /**
  * @internal
@@ -399,11 +400,11 @@ final readonly class ChangedFiles
     {
         $error = trim($result['errorOutput']);
 
-        if ($result['exitCode'] === 127 || $error === '' || str_contains($error, 'not a git repository')) {
+        if ((new ExecutableFinder)->find('git') === null || str_contains($error, 'not a git repository')) {
             return new MissingDependency('Tia mode', 'git');
         }
 
-        return new TiaGitFailed($error);
+        return new TiaGitFailed($error !== '' ? $error : sprintf('Git exited with code %d.', $result['exitCode']));
     }
 
     /**
