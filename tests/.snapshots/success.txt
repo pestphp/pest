@@ -2146,6 +2146,8 @@
   ✓ it gets property values
   ✓ it gets properties from classes
   ✓ it gets methods from classes
+  ✓ it calls instance methods
+  ✓ it calls static methods without passing an object
 
    PASS  Tests\Unit\Support\Str
   ✓ it evaluates the code with ('version()', '__pest_evaluable_version__')
@@ -2271,4 +2273,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1610 passed (3516 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1612 passed (3518 assertions)
