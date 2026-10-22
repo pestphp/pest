@@ -1093,7 +1093,7 @@ final class Graph
                 }
             }
 
-            $names = array_keys($normalised);
+            $names = array_map(strval(...), array_keys($normalised));
             sort($names);
 
             $this->testTables[$testRel] = $names;

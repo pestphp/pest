@@ -272,7 +272,7 @@ final class Recorder
         $out = [];
 
         foreach ($this->perTestTables as $testFile => $tables) {
-            $names = array_keys($tables);
+            $names = array_map(strval(...), array_keys($tables));
             sort($names);
             $out[$testFile] = $names;
         }
