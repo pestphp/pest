@@ -27,6 +27,16 @@ final class Coverage implements AddsOutput, HandlesArguments
 
     private const string ONLY_COVERED_OPTION = 'only-covered';
 
+    /**
+     * @var array<string, bool>
+     */
+    private const array OPTIONS = [
+        self::COVERAGE_OPTION => false,
+        self::MIN_OPTION => true,
+        self::EXACTLY_OPTION => true,
+        self::ONLY_COVERED_OPTION => false,
+    ];
+
     public bool $coverage = false;
 
     public bool $compact = false;
@@ -47,23 +57,7 @@ final class Coverage implements AddsOutput, HandlesArguments
      */
     public function handleArguments(array $originals): array
     {
-        $arguments = [...[''], ...array_values(array_filter($originals, function (string $original): bool {
-            foreach ([self::COVERAGE_OPTION, self::MIN_OPTION, self::EXACTLY_OPTION, self::ONLY_COVERED_OPTION] as $option) {
-                if ($original === sprintf('--%s', $option)) {
-                    return true;
-                }
-
-                if (Str::startsWith($original, sprintf('--%s=', $option))) {
-                    return true;
-                }
-            }
-
-            return false;
-        }))];
-
-        foreach ($arguments as $argument) {
-            $originals = $this->popArgument($argument, $originals);
-        }
+        [$arguments, $originals] = $this->extractOwnArguments($originals);
 
         $inputs = [];
         $inputs[] = new InputOption(self::COVERAGE_OPTION, null, InputOption::VALUE_NONE);
@@ -119,6 +113,49 @@ final class Coverage implements AddsOutput, HandlesArguments
         }
 
         return $originals;
+    }
+
+    /**
+     * @param  array<int, string>  $originals
+     * @return array{0: list<string>, 1: list<string>}
+     */
+    private function extractOwnArguments(array $originals): array
+    {
+        $originals = array_values($originals);
+
+        $owned = [];
+        $forwarded = [];
+
+        for ($index = 0, $total = count($originals); $index < $total; $index++) {
+            $original = $originals[$index];
+
+            foreach (self::OPTIONS as $option => $requiresValue) {
+                if (Str::startsWith($original, sprintf('--%s=', $option))) {
+                    $owned[] = $original;
+
+                    continue 2;
+                }
+
+                if ($original !== sprintf('--%s', $option)) {
+                    continue;
+                }
+
+                $owned[] = $original;
+
+                $value = $originals[$index + 1] ?? null;
+
+                if ($requiresValue && $value !== null && ! Str::startsWith($value, '-')) {
+                    $owned[] = $value;
+                    $index++;
+                }
+
+                continue 2;
+            }
+
+            $forwarded[] = $original;
+        }
+
+        return [['', ...$owned], $forwarded];
     }
 
     /**
