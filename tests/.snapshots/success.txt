@@ -77,6 +77,10 @@
   ✓ it has plugin
   - it adds coverage if --coverage exist → Coverage is not available
   ✓ it adds coverage if --min exist
+  ✓ it adds coverage if --exactly exist
+  ✓ it adds coverage if --only-covered exist
+  - it routes --coverage-php to .temp/coverage/{n}-of-{total}.cov when --shard is used → Coverage is not available
+  - it strips blocked report flags and warns when --shard is used → Coverage is not available
   ✓ it generates coverage based on file input
 
    PASS  Tests\Features\Covers\ClassCoverage
@@ -1770,6 +1774,49 @@
   ✓ compute comparable coverage with (32.53333333333333, 32.5)
   ✓ compute comparable coverage with (32.57777771232132, 32.5)
   ✓ compute comparable coverage with (100.0, 100.0)
+  ✓ apply thresholds with dataset "min pass"
+  ✓ apply thresholds with dataset "min fail"
+  ✓ apply thresholds with dataset "exactly pass"
+  ✓ apply thresholds with dataset "exactly fail"
+  ✓ strip shard blocked report flags with dataset "inline value flag"
+  ✓ strip shard blocked report flags with dataset "space-separated flag"
+  ✓ strip shard blocked report flags with dataset "jsonl flag"
+  ✓ strip shard blocked report flags with dataset "optional value flag keeps the next argument"
+  ✓ strip shard blocked report flags with dataset "no blocked flags"
+  ✓ apply thresholds returns 0 when coverage meets min
+  ✓ apply thresholds returns 1 and writes FAIL when coverage is below min
+  ✓ apply thresholds returns 0 when coverage matches exactly
+  ✓ apply thresholds returns 1 and writes FAIL when coverage does not match exactly
+  ✓ parse threshold options sets coverageMin
+  ✓ parse threshold options sets coverageExactly
+  ✓ parse threshold options sets showOnlyCovered
+  ✓ parse threshold options ignores unrelated flags
+  ✓ detect shard parses equals format
+  ✓ detect shard parses space format
+  ✓ detect shard returns null when absent
+  ✓ detect shard rejects a malformed shard like the shard plugin does
+  ✓ detect shard rejects an index above the total
+  ✓ has shards coverage flag detects --shards-coverage
+  ✓ pop shards coverage flags removes --shards-coverage and --clean
+  ✓ strip shard blocked report flags removes --coverage-html
+  ✓ strip shard blocked report flags removes --coverage-clover as separate arg
+  ✓ strip shard blocked report flags keeps non-blocked flags without warning
+  ✓ getCoverageDir sits beside the single run report
+  ✓ mergeAndReportShardsCoverage returns null when the directory holds no shard file
+  ✓ mergeAndReportShardsCoverage fails instead of reporting a partial total
+  ✓ mergeAndReportShardsCoverage fails when a shard wrote no file
+  ✓ mergeAndReportShardsCoverage fails when a file belongs to another number of shards
+  ✓ mergeAndReportShardsCoverage merges two shards into one total
+  ✓ a shard run names the merge step for a threshold with dataset "min"
+  ✓ a shard run names the merge step for a threshold with dataset "exactly"
+  ✓ a shard run names the merge step for a threshold with dataset "neither"
+  ✓ find report targets reads each flag with dataset "inline value"
+  ✓ find report targets reads each flag with dataset "separate value"
+  ✓ find report targets reads each flag with dataset "optional value"
+  ✓ find report targets reads each flag with dataset "several flags"
+  ✓ find report targets reads each flag with dataset "no flag"
+  ✓ find report targets rejects a flag without a value
+  ✓ shards coverage writes the reports that the flags ask for
 
    PASS  Tests\Plugins\Traits
   ✓ it allows global uses
@@ -2274,4 +2321,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1613 passed (3519 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1658 passed (3595 assertions)
