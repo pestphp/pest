@@ -1860,6 +1860,7 @@
   ✓ parseListTestsOutput → it deduplicates repeated class names from multiple test methods
   ✓ parseListTestsOutput → it returns an empty list for output with no matching lines
   ✓ parseListTestsOutput → it parses non-Tests namespaced classes
+  ✓ parseListTestsOutput → it parses module test classes living outside the tests directory
   ✓ parseListTestsOutput → it parses unnamespaced top-level classes
   ✓ parseListTestsOutput → it strips the P\ Pest prefix but keeps the rest of the FQCN
   ✓ parseListTestsOutput → it ignores junk lines that lack the " - …::" framing
@@ -2273,4 +2274,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1612 passed (3518 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1613 passed (3519 assertions)
