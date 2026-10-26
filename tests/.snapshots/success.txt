@@ -435,6 +435,14 @@
    PASS  Tests\Features\Expect\not
   ✓ not property calls
 
+   PASS  Tests\Features\Expect\notToUse
+  ✓ single target negation fails when the target uses the dependency
+  ✓ single target negation passes when the target does not use the dependency
+  ✓ multi target negation fails when any target uses the dependency
+  ✓ multi target negation passes when no target uses the dependency
+  ✓ multi target negation fails when any target uses any listed dependency
+  ✓ positive to use still fails when one target skips the dependency
+
    PASS  Tests\Features\Expect\pipes
   ✓ pipe is applied and can stop pipeline
   ✓ pipe is run and can let the pipeline keep going
@@ -2274,4 +2282,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1613 passed (3519 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1619 passed (3543 assertions)
