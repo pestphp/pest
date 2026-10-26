@@ -1288,6 +1288,12 @@
   ✓ it is not incompleted because of test with assertions
   … a "describe" group of tests → it is incompleted
 
+   PASS  Tests\Features\Init
+  ✓ init creates a suite when the tests directory is missing
+  ✓ init creates a suite when --init is not the first argument
+  ✓ init creates a suite when --init is passed with a value
+  ✓ a missing tests directory does not crash while resolving tia state
+
    PASS  Tests\Features\Issue
   ✓ it may be associated with an issue #1, #2
   ✓ nested → it may be associated with an issue #1, #4, #5, #6, #3
@@ -2282,4 +2288,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1619 passed (3543 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1623 passed (3564 assertions)
