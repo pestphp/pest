@@ -82,6 +82,12 @@
    PASS  Tests\Features\Covers\ClassCoverage
   ✓ it uses the correct PHPUnit attribute for class
 
+   PASS  Tests\Features\Covers\CoversNothing
+  ✓ it uses the correct PHPUnit attribute for covers nothing
+  ✓ describe → it uses the correct PHPUnit attribute for covers nothing
+  ✓ it is not risky when coverage metadata is required
+  ✓ it does not conflict with covers in the same file
+
    PASS  Tests\Features\Covers\ExceptionHandling
   ✓ it throws exception if no class nor method has been found
 
@@ -1848,6 +1854,8 @@
   ✓ buildFilterArgument → it does not match a class outside of the shard when another class name is its prefix
   ✓ buildFilterArgument → it still matches dataset variants after the class boundary
   ✓ buildFilterArgument → it keeps a class matchable when another class nests below its namespace
+  ✓ buildFilterArgument → it keeps the filter whole when the parallel runner passes it as --filter=VALUE
+  ✓ buildFilterArgument → it matches a class-based test of the shard
   ✓ ensureFilterLengthIsSafe → it accepts filter within length limit
   ✓ ensureFilterLengthIsSafe → it throws exception when filter exceeds default limit
   ✓ ensureFilterLengthIsSafe → it respects custom limit from environment variable
@@ -1858,6 +1866,7 @@
   ✓ parseListTestsOutput → it deduplicates repeated class names from multiple test methods
   ✓ parseListTestsOutput → it returns an empty list for output with no matching lines
   ✓ parseListTestsOutput → it parses non-Tests namespaced classes
+  ✓ parseListTestsOutput → it parses module test classes living outside the tests directory
   ✓ parseListTestsOutput → it parses unnamespaced top-level classes
   ✓ parseListTestsOutput → it strips the P\ Pest prefix but keeps the rest of the FQCN
   ✓ parseListTestsOutput → it ignores junk lines that lack the " - …::" framing
@@ -2144,6 +2153,8 @@
   ✓ it gets property values
   ✓ it gets properties from classes
   ✓ it gets methods from classes
+  ✓ it calls instance methods
+  ✓ it calls static methods without passing an object
 
    PASS  Tests\Unit\Support\Str
   ✓ it evaluates the code with ('version()', '__pest_evaluable_version__')
@@ -2210,6 +2221,7 @@
   ✓ it does not allow to add the same test description twice
   ✓ it does not allow static closures
   ✓ it alerts users about tests with arguments but no input
+  ✓ it can look up registered test methods by evaluable name
   ✓ it can return an array of all test suite filenames
 
    PASS  Tests\Visual\BeforeEachTestName
@@ -2268,4 +2280,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1607 passed (3516 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1617 passed (3540 assertions)
