@@ -13,10 +13,10 @@ test('init creates a suite when the tests directory is missing', function (): vo
         expect($process->getExitCode())->toBe(0)
             ->and($process->getErrorOutput())->not->toContain('cannot be resolved')
             ->and($process->getOutput())->toContain('File created.')
-            ->and(is_file($root.DIRECTORY_SEPARATOR.'phpunit.xml'))->toBeTrue()
-            ->and(is_file($root.DIRECTORY_SEPARATOR.'tests'.DIRECTORY_SEPARATOR.'Pest.php'))->toBeTrue()
-            ->and(is_file($root.DIRECTORY_SEPARATOR.'tests'.DIRECTORY_SEPARATOR.'TestCase.php'))->toBeTrue()
-            ->and(is_file($root.DIRECTORY_SEPARATOR.'tests'.DIRECTORY_SEPARATOR.'Unit'.DIRECTORY_SEPARATOR.'ExampleTest.php'))->toBeTrue();
+            ->and($root.DIRECTORY_SEPARATOR.'phpunit.xml')->toBeFile()
+            ->and($root.DIRECTORY_SEPARATOR.'tests'.DIRECTORY_SEPARATOR.'Pest.php')->toBeFile()
+            ->and($root.DIRECTORY_SEPARATOR.'tests'.DIRECTORY_SEPARATOR.'TestCase.php')->toBeFile()
+            ->and($root.DIRECTORY_SEPARATOR.'tests'.DIRECTORY_SEPARATOR.'Unit'.DIRECTORY_SEPARATOR.'ExampleTest.php')->toBeFile();
     } finally {
         removeInitProject($root);
     }
@@ -31,8 +31,8 @@ test('init creates a suite when --init is not the first argument', function (): 
         expect($process->getExitCode())->toBe(0)
             ->and($process->getErrorOutput())->not->toContain('cannot be resolved')
             ->and($process->getOutput())->toContain('File created.')
-            ->and(is_file($root.DIRECTORY_SEPARATOR.'phpunit.xml'))->toBeTrue()
-            ->and(is_file($root.DIRECTORY_SEPARATOR.'tests'.DIRECTORY_SEPARATOR.'Pest.php'))->toBeTrue();
+            ->and($root.DIRECTORY_SEPARATOR.'phpunit.xml')->toBeFile()
+            ->and($root.DIRECTORY_SEPARATOR.'tests'.DIRECTORY_SEPARATOR.'Pest.php')->toBeFile();
     } finally {
         removeInitProject($root);
     }
@@ -47,8 +47,8 @@ test('init creates a suite when --init is passed with a value', function (): voi
         expect($process->getExitCode())->toBe(0)
             ->and($process->getErrorOutput())->not->toContain('cannot be resolved')
             ->and($process->getOutput())->toContain('File created.')
-            ->and(is_file($root.DIRECTORY_SEPARATOR.'phpunit.xml'))->toBeTrue()
-            ->and(is_file($root.DIRECTORY_SEPARATOR.'tests'.DIRECTORY_SEPARATOR.'Pest.php'))->toBeTrue();
+            ->and($root.DIRECTORY_SEPARATOR.'phpunit.xml')->toBeFile()
+            ->and($root.DIRECTORY_SEPARATOR.'tests'.DIRECTORY_SEPARATOR.'Pest.php')->toBeFile();
     } finally {
         removeInitProject($root);
     }
