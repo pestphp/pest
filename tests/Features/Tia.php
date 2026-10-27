@@ -2,6 +2,7 @@
 
 use Pest\Plugins\Tia;
 use Pest\Plugins\Tia\ChangedFiles;
+use Pest\Plugins\Tia\CiDefaultBranch;
 use Pest\Plugins\Tia\FileState;
 use Pest\Plugins\Tia\Fingerprint;
 use Pest\Plugins\Tia\Graph;
@@ -18,7 +19,7 @@ it('does not run user hooks when replaying cached skipped and incomplete results
 
     try {
         $changedFiles = new ChangedFiles($projectRoot);
-        $branch = $changedFiles->currentBranch() ?? 'main';
+        $branch = $changedFiles->currentBranch() ?? CiDefaultBranch::detect() ?? 'main';
         $sha = $changedFiles->currentSha();
 
         $id = fn (string $description): string => 'P\Tests\Fixtures\Suites\TiaReplayHooks::'.Str::evaluable($description);
