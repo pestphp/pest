@@ -60,6 +60,7 @@ final class CoverageMerger
         self::discardUnexercisedFiles($current);
 
         self::stripCurrentTestsFromCached($cached, $current);
+        self::dropLinesMissingFromCurrent($cached, $current);
 
         $cached->merge($current);
 
@@ -154,6 +155,38 @@ final class CoverageMerger
         }
 
         $cachedData->setLineCoverage($lineCoverage);
+    }
+
+    private static function dropLinesMissingFromCurrent(CodeCoverage $cached, CodeCoverage $current): void
+    {
+        $currentLines = $current->getData(true)->lineCoverage();
+        $cachedData = $cached->getData();
+        $lineCoverage = $cachedData->lineCoverage();
+        $changed = false;
+
+        foreach ($currentLines as $file => $lines) {
+            if (! isset($lineCoverage[$file])) {
+                continue;
+            }
+
+            foreach ($lineCoverage[$file] as $line => $hits) {
+                if (array_key_exists($line, $lines)) {
+                    continue;
+                }
+
+                unset($lineCoverage[$file][$line]);
+                $changed = true;
+            }
+
+            if ($lineCoverage[$file] === []) {
+                unset($lineCoverage[$file]);
+                $changed = true;
+            }
+        }
+
+        if ($changed) {
+            $cachedData->setLineCoverage($lineCoverage);
+        }
     }
 
     /**
