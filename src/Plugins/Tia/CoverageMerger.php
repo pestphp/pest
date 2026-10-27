@@ -116,17 +116,12 @@ final class CoverageMerger
     private static function stripCurrentTestsFromCached(CodeCoverage $cached, CodeCoverage $current): void
     {
         $currentIds = self::collectTestIds($current);
-
-        if ($currentIds === []) {
-            return;
-        }
-
         $cachedData = $cached->getData();
 
         $staleIndexes = [];
 
         foreach ($cachedData->testIds() as $index => $id) {
-            if (in_array($id, $currentIds, true)) {
+            if (in_array($id, $currentIds, true) || ! self::testExists($id)) {
                 $staleIndexes[$index] = true;
             }
         }
@@ -154,6 +149,19 @@ final class CoverageMerger
         }
 
         $cachedData->setLineCoverage($lineCoverage);
+    }
+
+    private static function testExists(string $id): bool
+    {
+        $name = explode('#', $id, 2)[0];
+
+        if (! str_contains($name, '::')) {
+            return true;
+        }
+
+        [$class, $method] = explode('::', $name, 2);
+
+        return method_exists($class, $method);
     }
 
     /**
