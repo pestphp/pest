@@ -75,21 +75,40 @@ abstract readonly class BaseRemote // @pest-arch-ignore-line
     {
         $gitConfig = $projectRoot.DIRECTORY_SEPARATOR.'.git'.DIRECTORY_SEPARATOR.'config';
 
-        if (! is_file($gitConfig)) {
+        if (is_file($gitConfig)) {
+            $content = @file_get_contents($gitConfig);
+
+            if ($content === false) {
+                return null;
+            }
+
+            if (preg_match('/\[remote "origin"\][^\[]*?url\s*=\s*(\S+)/s', $content, $match) !== 1) {
+                return null;
+            }
+
+            return $match[1];
+        }
+
+        if (! file_exists($projectRoot.DIRECTORY_SEPARATOR.'.git')) {
             return null;
         }
 
-        $content = @file_get_contents($gitConfig);
+        $process = new Process(['git', 'config', '--get', 'remote.origin.url'], $projectRoot);
+        $process->setTimeout(5.0);
 
-        if ($content === false) {
+        try {
+            $process->run();
+        } catch (\Throwable) {
             return null;
         }
 
-        if (preg_match('/\[remote "origin"\][^\[]*?url\s*=\s*(\S+)/s', $content, $match) !== 1) {
+        if (! $process->isSuccessful()) {
             return null;
         }
 
-        return $match[1];
+        $url = trim($process->getOutput());
+
+        return $url === '' ? null : $url;
     }
 
     /**

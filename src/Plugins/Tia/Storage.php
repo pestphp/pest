@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
+use Symfony\Component\Process\Process;
+
 /**
  * @internal
  */
@@ -133,21 +135,48 @@ final class Storage
     {
         $config = $projectRoot.DIRECTORY_SEPARATOR.'.git'.DIRECTORY_SEPARATOR.'config';
 
-        if (! is_file($config)) {
+        if (is_file($config)) {
+            $raw = @file_get_contents($config);
+
+            if ($raw === false) {
+                return null;
+            }
+
+            if (preg_match('/\[remote "origin"\][^\[]*?url\s*=\s*(\S+)/s', $raw, $match) === 1) {
+                return trim($match[1]);
+            }
+
             return null;
         }
 
-        $raw = @file_get_contents($config);
+        return self::originUrlFromGit($projectRoot);
+    }
 
-        if ($raw === false) {
+    private static function originUrlFromGit(string $projectRoot): ?string
+    {
+        if (! file_exists($projectRoot.DIRECTORY_SEPARATOR.'.git')) {
             return null;
         }
 
-        if (preg_match('/\[remote "origin"\][^\[]*?url\s*=\s*(\S+)/s', $raw, $match) === 1) {
-            return trim($match[1]);
+        $process = new Process(
+            ['git', 'config', '--get', 'remote.origin.url'],
+            $projectRoot,
+        );
+        $process->setTimeout(5.0);
+
+        try {
+            $process->run();
+        } catch (\Throwable) {
+            return null;
         }
 
-        return null;
+        if (! $process->isSuccessful()) {
+            return null;
+        }
+
+        $url = trim($process->getOutput());
+
+        return $url === '' ? null : $url;
     }
 
     private static function slug(string $name): string
