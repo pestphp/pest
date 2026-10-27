@@ -103,14 +103,28 @@ final readonly class Git
         return $this->raw(['show', $sha.':'.$path]);
     }
 
-    public function subdirectoryPrefix(): ?string
+    public function repositoryRoot(): ?string
+    {
+        $root = $this->output(['rev-parse', '--show-toplevel']);
+
+        return $root === null ? null : rtrim(str_replace(DIRECTORY_SEPARATOR, '/', $root), '/');
+    }
+
+    public function pathPrefix(): string
     {
         $prefix = $this->output(['rev-parse', '--show-prefix']);
 
         if ($prefix === null) {
-            return null;
+            return '';
         }
 
-        return rtrim(str_replace(DIRECTORY_SEPARATOR, '/', $prefix), '/');
+        $prefix = trim(str_replace(DIRECTORY_SEPARATOR, '/', $prefix), '/');
+
+        return $prefix === '' ? '' : $prefix.'/';
+    }
+
+    public function originUrl(): ?string
+    {
+        return $this->output(['config', '--get', 'remote.origin.url']);
     }
 }
