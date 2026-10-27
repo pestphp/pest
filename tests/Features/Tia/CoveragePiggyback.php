@@ -90,3 +90,35 @@ test('a coverage report leaves the edges of an existing graph alone', function (
         ->and($delta->removed())->toBe(0, $delta->summary())
         ->and($delta->added())->toBe(0, $delta->summary());
 })->skipOnWindows();
+
+test('a coverage report adds a new dependency to the edges of an existing graph', function (array $arguments): void {
+    $project = Project::make('master');
+    $project->seed('master');
+
+    $project->write('app/Greeter.php', <<<'PHP'
+    <?php
+
+    declare(strict_types=1);
+
+    namespace Fixture\App;
+
+    final class Greeter
+    {
+        public function greet(string $name): string
+        {
+            (new Calculator)->add(1, 1);
+
+            return sprintf('Hello, %s!', $name);
+        }
+    }
+    PHP);
+
+    $result = $project->pest('--tia', '--coverage', ...$arguments);
+
+    $graph = $project->graph();
+    $edges = array_map(fn (int $id): string => $graph['files'][$id], $graph['edges']['tests/Unit/GreeterTest.php']);
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($edges)->toContain('app/Greeter.php')
+        ->and($edges)->toContain('app/Calculator.php');
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows()->skip(! Coverage::isAvailable(), 'Coverage is not available');
