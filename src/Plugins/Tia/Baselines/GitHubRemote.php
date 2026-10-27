@@ -83,7 +83,7 @@ final readonly class GitHubRemote extends BaseRemote
             'gh', 'api',
             sprintf('repos/%s/actions/runs/%s/artifacts', $repo, $runId),
             '--jq', sprintf(
-                '.artifacts[] | select(.name === "%s") | .size_in_bytes',
+                '.artifacts[] | select(.name == "%s") | .size_in_bytes',
                 self::ARTIFACT_NAME,
             ),
         ]);
