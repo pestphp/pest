@@ -1967,6 +1967,12 @@
   ✓ it detects an added or removed non-platform dependency
   ✓ it is independent of package ordering
 
+   PASS  Tests\Unit\Plugins\Tia\NumericTableDependencies
+  ✓ it exports numeric table dependencies from the recorder as strings
+  ✓ it persists numeric tables as JSON strings and selects only their migration readers after reload
+  ✓ it preserves numeric worker tables through payload cleaning union and graph reload
+  ✓ it preserves observed and migration added numeric tables when augmenting database tests
+
    PASS  Tests\Unit\Plugins\Tia\Recorder
   ✓ activateLinkTracking() → it tracks tables without a coverage driver
   ✓ activateLinkTracking() → it tracks inertia components without a coverage driver
@@ -2280,4 +2286,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1617 passed (3540 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1621 passed (3582 assertions)
