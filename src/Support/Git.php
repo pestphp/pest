@@ -59,7 +59,7 @@ final readonly class Git
 
     /**
      * @param  array<int, string>  $arguments
-     * @return array{exitCode: int, output: string}
+     * @return array{exitCode: int, output: string, errorOutput: string}
      */
     public function result(array $arguments, ?string $input = null): array
     {
@@ -75,6 +75,7 @@ final readonly class Git
         return [
             'exitCode' => $process->getExitCode() ?? 1,
             'output' => $process->getOutput(),
+            'errorOutput' => $process->getErrorOutput(),
         ];
     }
 
