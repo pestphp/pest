@@ -11,7 +11,6 @@ use Pest\Arch\Expectations\ToBeUsedInNothing;
 use Pest\Arch\Expectations\ToUse;
 use Pest\Arch\GroupArchExpectation;
 use Pest\Arch\PendingArchExpectation;
-use Pest\Arch\SingleArchExpectation;
 use Pest\Arch\Support\FileLineFinder;
 use Pest\Exceptions\InvalidExpectation;
 use Pest\Exceptions\MissingDependency;
@@ -72,9 +71,24 @@ final readonly class OppositeExpectation
         /** @var Expectation<array<int, string>|string> $original */
         $original = $this->original;
 
-        return GroupArchExpectation::fromExpectations($original, array_map(fn (string $target): SingleArchExpectation => ToUse::make($original, $target)->opposite(
-            fn () => $this->throwExpectationFailedException('toUse', $target),
-        ), is_string($targets) ? [$targets] : $targets));
+        /** @var array<int, string> $subjects */
+        $subjects = is_string($original->value) ? [$original->value] : $original->value;
+        $dependencies = is_string($targets) ? [$targets] : $targets;
+
+        $expectations = [];
+
+        foreach ($subjects as $subject) {
+            $subjectExpectation = new Expectation($original->value);
+            $subjectExpectation->value = $subject;
+
+            foreach ($dependencies as $dependency) {
+                $expectations[] = ToUse::make($subjectExpectation, $dependency)->opposite(
+                    fn () => $this->throwExpectationFailedException('toUse', $dependency),
+                );
+            }
+        }
+
+        return GroupArchExpectation::fromExpectations($original, $expectations);
     }
 
     public function toHaveFileSystemPermissions(string $permissions): ArchExpectation
