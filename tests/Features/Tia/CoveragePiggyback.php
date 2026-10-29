@@ -90,3 +90,36 @@ test('a coverage report leaves the edges of an existing graph alone', function (
         ->and($delta->removed())->toBe(0, $delta->summary())
         ->and($delta->added())->toBe(0, $delta->summary());
 })->skipOnWindows();
+
+test('a coverage run keeps the coverage cache when the fingerprint matches', function (): void {
+    $project = Project::make('master');
+    $project->seed('master');
+
+    $cache = $project->graphDir().DIRECTORY_SEPARATOR.'coverage.bin.gz';
+    file_put_contents($cache, 'stale-coverage');
+
+    $result = $project->pest('--tia', '--coverage-text');
+
+    expect($cache)->toBeFile($result->describe())
+        ->and(file_get_contents($cache))->toBe('stale-coverage');
+})->skipOnWindows();
+
+test('a coverage run drops the coverage cache when composer.lock drifts', function (): void {
+    $project = Project::make('master');
+    $project->seed('master');
+
+    $cache = $project->graphDir().DIRECTORY_SEPARATOR.'coverage.bin.gz';
+    file_put_contents($cache, 'stale-coverage');
+
+    $project->write('composer.lock', (string) json_encode([
+        'content-hash' => 'drifted-lock',
+        'packages' => [],
+        'packages-dev' => [],
+    ]));
+
+    $result = $project->pest('--tia', '--coverage-text');
+
+    expect($cache)->not->toBeFile($result->describe())
+        ->and($project->graphExists())->toBeTrue($result->describe())
+        ->and($result->output)->toContain('narrows the edges');
+})->skipOnWindows();
