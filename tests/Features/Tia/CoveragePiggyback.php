@@ -100,7 +100,7 @@ test('a coverage run keeps the coverage cache when the fingerprint matches', fun
 
     $result = $project->pest('--tia', '--coverage-text');
 
-    expect(is_file($cache))->toBeTrue($result->describe())
+    expect($cache)->toBeFile($result->describe())
         ->and(file_get_contents($cache))->toBe('stale-coverage');
 })->skipOnWindows();
 
@@ -119,7 +119,7 @@ test('a coverage run drops the coverage cache when composer.lock drifts', functi
 
     $result = $project->pest('--tia', '--coverage-text');
 
-    expect(is_file($cache))->toBeFalse($result->describe())
+    expect($cache)->not->toBeFile($result->describe())
         ->and($project->graphExists())->toBeTrue($result->describe())
         ->and($result->output)->toContain('narrows the edges');
 })->skipOnWindows();
