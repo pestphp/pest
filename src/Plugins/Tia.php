@@ -816,8 +816,10 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
             if ($this->canRebuildGraph()) {
                 $this->deleteState(self::KEY_GRAPH);
-                $this->deleteState(self::KEY_COVERAGE_CACHE);
             }
+
+            // A coverage run cannot rebuild the graph, but it still merges this cache.
+            $this->deleteState(self::KEY_COVERAGE_CACHE);
 
             return null;
         }
