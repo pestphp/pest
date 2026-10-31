@@ -50,6 +50,7 @@ final class CoverageMerger
         }
 
         $cached = self::unserializeCoverage($decoded);
+        unset($decoded);
         $current = self::requireCoverage($reportPath);
 
         if (! $cached instanceof CodeCoverage || ! $current instanceof CodeCoverage) {
@@ -62,14 +63,37 @@ final class CoverageMerger
         self::stripCurrentTestsFromCached($cached, $current);
 
         $cached->merge($current);
+        unset($current);
 
         $serialised = serialize($cached);
+        unset($cached);
 
-        @file_put_contents(
-            $reportPath,
-            '<?php return unserialize('.var_export($serialised, true).");\n",
-        );
+        self::writeUnserializeReport($reportPath, $serialised);
         $state->write(Tia::KEY_COVERAGE_CACHE, self::compress($serialised));
+    }
+
+    private static function writeUnserializeReport(string $reportPath, string $serialised): void
+    {
+        $handle = @fopen($reportPath, 'wb');
+
+        if ($handle === false) {
+            return;
+        }
+
+        fwrite($handle, '<?php return unserialize(base64_decode(\'');
+
+        $length = strlen($serialised);
+        $offset = 0;
+        $chunkSize = 3 * 64 * 1024;
+
+        while ($offset < $length) {
+            $chunk = substr($serialised, $offset, $chunkSize);
+            fwrite($handle, base64_encode($chunk));
+            $offset += strlen($chunk);
+        }
+
+        fwrite($handle, "'));\n");
+        fclose($handle);
     }
 
     private static function primeUncoveredFiles(CodeCoverage $coverage): void
