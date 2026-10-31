@@ -806,7 +806,9 @@ final class Expectation
     }
 
     /**
-     * @param  (Closure(Throwable): mixed)|string  $exception
+     * @template T of Throwable
+     *
+     * @param  (Closure(T): mixed)|string|T  $exception
      * @return self<TValue>
      */
     public function toThrow(callable|string|Throwable $exception, ?string $exceptionMessage = null, string $message = ''): self
