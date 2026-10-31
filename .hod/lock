@@ -16,7 +16,7 @@ a8b603bc89ff861bac1be959c857048f196b54df459dec23e355d68fd1b2a0b6  .agents/skills
 21d8709328aa899e26750b3ba33ee2461af25815f7be6e4451eae405f6342b6d  .agents/skills/rules-code-queries/agents/openai.yaml
 44bda34c653a04d9d63f717091c944380ff6fa7f092daaab9000d68ccbb341e2  .agents/skills/rules-code-security/SKILL.md
 5b1c1ad9cf5b0866ed62160d5ca7428b8acfd820ac4fd1998035f23c75d8c0c2  .agents/skills/rules-code-security/agents/openai.yaml
-af3e08e12e21cb7e8940f31cff0f1fdad6c5ba84762b81e17f7fa88e0433371f  .agents/skills/rules-code-tests/SKILL.md
+c190e5333cb9b96cca52374eed282ea394cc5cb9de4ddacdae2775a445ee5a07  .agents/skills/rules-code-tests/SKILL.md
 2a2ab6138b8e6b361d910d7af836dfd2cd9b279eb7977f07e6c0126afa11a1e9  .agents/skills/rules-code-tests/agents/openai.yaml
 6adfd8df3877b41e48c6dccc77c2ca1f8df80b8f67e6d0587589f402b57cc52e  .agents/skills/rules-code-tooling/SKILL.md
 dcd0d7595edf1445d2cc66d1af4a89d4158193927911e7c793860083893241cd  .agents/skills/rules-code-tooling/agents/openai.yaml
@@ -30,13 +30,13 @@ c13a17096ff7c6ad4d8c49d68281ab694df7c984e29d50a5f19a8bda533de4eb  .agents/skills
 bb5339d7abcaba163a384a00a9ba8607ddf8b6820a63be3570e9b6fc6a912479  .agents/skills/snapshots-update/agents/openai.yaml
 eb6cb534bc7adead5175e457dbc690164f27862ba834b25dea76e8bca3fb2b22  .agents/skills/task-code-architecture/SKILL.md
 912d856661e4eb8f0880c26b9d45b8bbdbe104ceb1a307e7ee7a9c574a1bac0a  .agents/skills/task-code-architecture/agents/openai.yaml
-a6c6ce5c2eff237d6578084af88ac0f52ca15dbc1fab91dd9097d9fd1fd46147  .agents/skills/task-code-bug/SKILL.md
+fd196f190ecaea6bc8b786dd24561a868bb36abe8ea3365f463d306658e3ff6d  .agents/skills/task-code-bug/SKILL.md
 6c1798aaebe3e7f7da194100354fe9faa5f83bf02a019a1b54e0fb598f09aff1  .agents/skills/task-code-bug/agents/openai.yaml
-fb52abffb5de2165977237f0f55202da13403436259a6f2d093b89af3b43e2c1  .agents/skills/task-code-feature/SKILL.md
+19bcaf3a9db82809c421d4f1cb2854bd41aaf53b784db687efc053173deeee57  .agents/skills/task-code-feature/SKILL.md
 87bdc9a650a6c2d2765eea4e2507d148d9e6e4459dea079ecbeb495ffdb285f7  .agents/skills/task-code-feature/agents/openai.yaml
 13a5580b308cfe3567b674fc2299159dec29338cb67c22aa51c668d36ce776b3  .agents/skills/task-code-plan/SKILL.md
 e4fb9575774792251f3b99bab5f3621b9f6b83556fa04599100d3c096a08c8d4  .agents/skills/task-code-plan/agents/openai.yaml
-c6404f7b7e8015b0374e1cf79e6068924d203352b5c70826ed7010e1189ca0ae  .agents/skills/task-code-review/SKILL.md
+4fb8edb3a0bf2a51c1ba7f375b0810bbbfa57172acf153df44a20bb5093eeda7  .agents/skills/task-code-review/SKILL.md
 d6cf11faa9dc588a50d4e5750bcbc683415f256357edabd30fb3161cb53d2365  .agents/skills/task-code-review/agents/openai.yaml
 fe3f29bbad3932841fb88e7bfeb7d7f2a40f4df65289ae367a333bea339424c3  .agents/skills/task-issues-triage/SKILL.md
 d87c9bc10b0abe2eac366e015ca6de8abac8f5f014929ecc4a8bf27d46379c30  .agents/skills/task-issues-triage/agents/openai.yaml
@@ -44,7 +44,7 @@ bfd908de525dee564d73e84b2cc9e663d8d2bc453156785826a0a24c226c8043  .agents/skills
 a3f3d3e9ef2e150a3dbcd2315683dfc10d5640aeb2af42d2ba759cf31f58bdc8  .agents/skills/task-project-glossary/agents/openai.yaml
 93ade39e9bc9595a24bf4ad773f9b427e09c4e3c233135fe903e82fc8d77a381  .agents/skills/task-project-health/SKILL.md
 1c5997b7f3eac5b3fa64afcafe9ef2bef50194b74347b4a3a36eba8aaa43884c  .agents/skills/task-project-health/agents/openai.yaml
-0a40dcc178d0998fcdb1b6d6ece8b12125cad06c3459270c87e63483a93ab1e0  .agents/skills/task-project-init/SKILL.md
+451ea13d0f65fcd03d55a90c50824323af896fdb2d277658335237844ff52256  .agents/skills/task-project-init/SKILL.md
 253f9d1183e8ff1fd84e0136ea70844187d731ab2504f7f679ecf337f83893c8  .agents/skills/task-project-init/agents/openai.yaml
 c77ebaea9b3f9d9833cb306013e71f6bd83172166944a1f0c9840bb33fe4e4e4  .agents/skills/task-project-retro/SKILL.md
 0ad86d84ff56e56603816b0e7d9d04067c99482a5e442b88b05c781743b8b618  .agents/skills/task-project-retro/agents/openai.yaml
@@ -70,7 +70,7 @@ a8b603bc89ff861bac1be959c857048f196b54df459dec23e355d68fd1b2a0b6  .claude/skills
 21d8709328aa899e26750b3ba33ee2461af25815f7be6e4451eae405f6342b6d  .claude/skills/rules-code-queries/agents/openai.yaml
 44bda34c653a04d9d63f717091c944380ff6fa7f092daaab9000d68ccbb341e2  .claude/skills/rules-code-security/SKILL.md
 5b1c1ad9cf5b0866ed62160d5ca7428b8acfd820ac4fd1998035f23c75d8c0c2  .claude/skills/rules-code-security/agents/openai.yaml
-af3e08e12e21cb7e8940f31cff0f1fdad6c5ba84762b81e17f7fa88e0433371f  .claude/skills/rules-code-tests/SKILL.md
+c190e5333cb9b96cca52374eed282ea394cc5cb9de4ddacdae2775a445ee5a07  .claude/skills/rules-code-tests/SKILL.md
 2a2ab6138b8e6b361d910d7af836dfd2cd9b279eb7977f07e6c0126afa11a1e9  .claude/skills/rules-code-tests/agents/openai.yaml
 6adfd8df3877b41e48c6dccc77c2ca1f8df80b8f67e6d0587589f402b57cc52e  .claude/skills/rules-code-tooling/SKILL.md
 dcd0d7595edf1445d2cc66d1af4a89d4158193927911e7c793860083893241cd  .claude/skills/rules-code-tooling/agents/openai.yaml
@@ -84,13 +84,13 @@ c13a17096ff7c6ad4d8c49d68281ab694df7c984e29d50a5f19a8bda533de4eb  .claude/skills
 bb5339d7abcaba163a384a00a9ba8607ddf8b6820a63be3570e9b6fc6a912479  .claude/skills/snapshots-update/agents/openai.yaml
 eb6cb534bc7adead5175e457dbc690164f27862ba834b25dea76e8bca3fb2b22  .claude/skills/task-code-architecture/SKILL.md
 912d856661e4eb8f0880c26b9d45b8bbdbe104ceb1a307e7ee7a9c574a1bac0a  .claude/skills/task-code-architecture/agents/openai.yaml
-a6c6ce5c2eff237d6578084af88ac0f52ca15dbc1fab91dd9097d9fd1fd46147  .claude/skills/task-code-bug/SKILL.md
+fd196f190ecaea6bc8b786dd24561a868bb36abe8ea3365f463d306658e3ff6d  .claude/skills/task-code-bug/SKILL.md
 6c1798aaebe3e7f7da194100354fe9faa5f83bf02a019a1b54e0fb598f09aff1  .claude/skills/task-code-bug/agents/openai.yaml
-fb52abffb5de2165977237f0f55202da13403436259a6f2d093b89af3b43e2c1  .claude/skills/task-code-feature/SKILL.md
+19bcaf3a9db82809c421d4f1cb2854bd41aaf53b784db687efc053173deeee57  .claude/skills/task-code-feature/SKILL.md
 87bdc9a650a6c2d2765eea4e2507d148d9e6e4459dea079ecbeb495ffdb285f7  .claude/skills/task-code-feature/agents/openai.yaml
 13a5580b308cfe3567b674fc2299159dec29338cb67c22aa51c668d36ce776b3  .claude/skills/task-code-plan/SKILL.md
 e4fb9575774792251f3b99bab5f3621b9f6b83556fa04599100d3c096a08c8d4  .claude/skills/task-code-plan/agents/openai.yaml
-c6404f7b7e8015b0374e1cf79e6068924d203352b5c70826ed7010e1189ca0ae  .claude/skills/task-code-review/SKILL.md
+4fb8edb3a0bf2a51c1ba7f375b0810bbbfa57172acf153df44a20bb5093eeda7  .claude/skills/task-code-review/SKILL.md
 d6cf11faa9dc588a50d4e5750bcbc683415f256357edabd30fb3161cb53d2365  .claude/skills/task-code-review/agents/openai.yaml
 fe3f29bbad3932841fb88e7bfeb7d7f2a40f4df65289ae367a333bea339424c3  .claude/skills/task-issues-triage/SKILL.md
 d87c9bc10b0abe2eac366e015ca6de8abac8f5f014929ecc4a8bf27d46379c30  .claude/skills/task-issues-triage/agents/openai.yaml
@@ -98,7 +98,7 @@ bfd908de525dee564d73e84b2cc9e663d8d2bc453156785826a0a24c226c8043  .claude/skills
 a3f3d3e9ef2e150a3dbcd2315683dfc10d5640aeb2af42d2ba759cf31f58bdc8  .claude/skills/task-project-glossary/agents/openai.yaml
 93ade39e9bc9595a24bf4ad773f9b427e09c4e3c233135fe903e82fc8d77a381  .claude/skills/task-project-health/SKILL.md
 1c5997b7f3eac5b3fa64afcafe9ef2bef50194b74347b4a3a36eba8aaa43884c  .claude/skills/task-project-health/agents/openai.yaml
-0a40dcc178d0998fcdb1b6d6ece8b12125cad06c3459270c87e63483a93ab1e0  .claude/skills/task-project-init/SKILL.md
+451ea13d0f65fcd03d55a90c50824323af896fdb2d277658335237844ff52256  .claude/skills/task-project-init/SKILL.md
 253f9d1183e8ff1fd84e0136ea70844187d731ab2504f7f679ecf337f83893c8  .claude/skills/task-project-init/agents/openai.yaml
 c77ebaea9b3f9d9833cb306013e71f6bd83172166944a1f0c9840bb33fe4e4e4  .claude/skills/task-project-retro/SKILL.md
 0ad86d84ff56e56603816b0e7d9d04067c99482a5e442b88b05c781743b8b618  .claude/skills/task-project-retro/agents/openai.yaml
@@ -106,5 +106,4 @@ bd09f10f3bd0f284b59747c37c7879ab19ffb3603ec9b6f3c7401a5e8c128835  .claude/skills
 0ecb81c140c37bba372f0033c8bf388ad976c1a7cf095a62af9e57c4ce46857a  .claude/skills/task-pulls-triage/agents/openai.yaml
 1304d3bb730aa0af55a7713337567b6c7412c84cf530199c4383228e01f89b41  .claude/skills/task-session-handoff/SKILL.md
 fbd41d31c150dea316d189a8f5973d3d5abbd769cb22217b8cd6646061477bac  .claude/skills/task-session-handoff/agents/openai.yaml
-bc65941b8bd587c4d6cc695adafd876afbe95941ebc10e1750f8801bbc5b8856  AGENTS.md
-e3979fac270270eacf852d47848cbaab874c0934732e1888d4b63b9adcf745c8  CLAUDE.md
+103351879e42cac02a1432dba6b334f793448d62ddba636303b80ff2a55e5912  AGENTS.md
