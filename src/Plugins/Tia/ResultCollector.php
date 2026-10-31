@@ -117,7 +117,7 @@ final class ResultCollector
 
     public function hasUnfinishedTest(): bool
     {
-        return $this->currentTestId !== null;
+        return $this->currentTestId !== null && ! isset($this->results[$this->currentTestId]);
     }
 
     public function recordAssertions(string $testId, int $assertions): void

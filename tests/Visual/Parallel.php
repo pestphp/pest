@@ -21,19 +21,7 @@ test('parallel', function () use ($run): void {
     $output = implode("\n", array_slice(explode("\n", (string) $output), -10));
     $profileOutput = $run('tests/Fixtures/Suites/SuccessOnly.php', '--profile');
 
-    if (getenv('REBUILD_SNAPSHOTS')) {
-        preg_match('/Tests:\s+(.+\(\d+ assertions\))/', $output, $matches);
-
-        $file = file_get_contents(__FILE__);
-        $file = preg_replace(
-            '/\$expected = \'.*?\';/',
-            "\$expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1554 passed (3358 assertions)';",
-            $file,
-        );
-        file_put_contents(__FILE__, $file);
-    }
-
-    $expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1554 passed (3358 assertions)';
+    $expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1602 passed (3524 assertions)';
 
     expect($output)
         ->toContain("Tests:    {$expected}")

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 test('once', function (): void {
     expect(true)->toBeTrue();
 })->repeat(times: 1);
@@ -43,6 +45,28 @@ test('multiple times with repeat iterator with multiple dataset', function (stri
         ->toBeNumeric()
         ->toBeGreaterThan(0);
 })->repeat(times: 2)->with(['a', 'b', 'c'], ['d', 'e', 'f']);
+
+test('multiple times with named dataset arguments', function (string $name, string $email): void {
+    expect($name)
+        ->toBeIn(['Taylor', 'Nuno'])
+        ->and($email)
+        ->toContain('@');
+})->repeat(times: 2)->with([
+    ['name' => 'Taylor', 'email' => 'taylor@laravel.com'],
+    ['name' => 'Nuno', 'email' => 'enunomaduro@gmail.com'],
+]);
+
+test('multiple times with named dataset arguments and repeat iterator', function (string $name, string $email, int $iteration): void {
+    expect($name)
+        ->toBeIn(['Taylor', 'Nuno'])
+        ->and($email)
+        ->toContain('@')
+        ->and($iteration)
+        ->toBeIn([1, 2]);
+})->repeat(times: 2)->with([
+    ['name' => 'Taylor', 'email' => 'taylor@laravel.com'],
+    ['name' => 'Nuno', 'email' => 'enunomaduro@gmail.com'],
+]);
 
 describe('describe blocks', function (): void {
     test('multiple times', function (): void {

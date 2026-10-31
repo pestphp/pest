@@ -33,6 +33,34 @@ test('a complete run prunes a deleted test', function (array $arguments): void {
         ->and($delta->structureMoved())->toBeFalse($delta->summary());
 })->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
 
+test('a complete run stays complete when the last test is skipped from a hook', function (array $arguments): void {
+    $project = Project::make('master');
+    $project->seed('master');
+
+    $project->write('tests/Unit/GreeterTest.php', <<<'PHP'
+        <?php
+
+        declare(strict_types=1);
+
+        use Fixture\App\Greeter;
+
+        beforeEach(function (): void {
+            test()->markTestSkipped('not today');
+        });
+
+        test('greets a person', function (): void {
+            expect((new Greeter)->greet('Nuno'))->toBe('Hello, Nuno!');
+        });
+        PHP);
+
+    $result = $project->pest(...$arguments);
+    $delta = $project->delta();
+
+    expect($result->tally())->toContain('1 skipped')
+        ->and($delta->removed())->toBe(1, $delta->summary())
+        ->and($delta->added())->toBe(0, $delta->summary());
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
+
 test('a complete run records nothing for a test file the graph does not know', function (): void {
     $project = Project::make('master');
     $project->seed('master');

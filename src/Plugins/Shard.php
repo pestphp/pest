@@ -29,6 +29,8 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
 
     private const int MAX_FILTER_LENGTH = 32768;
 
+    private const string CLASS_END = "\0";
+
     /**
      * @var array{
      *     index: int,
@@ -85,8 +87,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             return $arguments;
         }
 
-        // @phpstan-ignore-next-line
-        $input = new ArgvInput($arguments);
+        $input = new ArgvInput(array_values($arguments));
 
         ['index' => $index, 'total' => $total] = self::getShard($input);
 
@@ -95,7 +96,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             $arguments,
         )));
 
-        /** @phpstan-ignore-next-line */
         $tests = $this->allTests($arguments);
 
         $timings = $this->loadShardsFile();
@@ -132,7 +132,13 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
 
         $this->ensureFilterLengthIsSafe($filter);
 
-        return [...$arguments, '--filter', $filter];
+        $arguments = [...$arguments, '--filter', $filter];
+
+        if ($this->hasArgument('--do-not-fail-on-empty-test-suite', $arguments) || $this->hasArgument('--fail-on-empty-test-suite', $arguments)) {
+            return $arguments;
+        }
+
+        return $this->pushArgument('--do-not-fail-on-empty-test-suite', $arguments);
     }
 
     /**
@@ -149,7 +155,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
 
         self::$updateShards = true;
 
-        /** @phpstan-ignore-next-line */
         self::$knownTests = $this->allTests($arguments);
 
         if ($this->hasArgument('--parallel', $arguments) || $this->hasArgument('-p', $arguments)) {
@@ -200,7 +205,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     {
         $filtered = $this->removeParallelArguments($arguments);
 
-        return ['php', ...$filtered, '--test-directory='.$testPath, '--list-tests'];
+        return [PHP_BINARY, ...$filtered, '--test-directory='.$testPath, '--list-tests'];
     }
 
     /**
@@ -228,22 +233,38 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             $parts = explode('\\', $class);
             $current = &$tree;
             foreach ($parts as $part) {
-                if (! isset($current[$part])) {
-                    $current[$part] = [];
-                }
+                $current[$part] ??= [];
                 $current = &$current[$part];
             }
+            $current[self::CLASS_END] = true;
         }
 
         $buildRegex = function (array $tree) use (&$buildRegex): string {
             $parts = [];
             foreach ($tree as $key => $sub) {
-                $subRegex = $buildRegex($sub);
-                if ($subRegex === '') {
-                    $parts[] = preg_quote($key, '/');
-                } else {
-                    $parts[] = preg_quote($key, '/').'\\\\'.(count($sub) > 1 ? '('.$subRegex.')' : $subRegex);
+                if ($key === self::CLASS_END) {
+                    continue;
                 }
+
+                assert(is_array($sub));
+
+                $endsWithClass = isset($sub[self::CLASS_END]);
+                $sub = array_diff_key($sub, [self::CLASS_END => null]);
+                $subRegex = $sub === [] ? '' : $buildRegex($sub);
+
+                $segment = preg_quote($key, '/');
+
+                if ($subRegex !== '') {
+                    $segment .= '\\\\'.(count($sub) > 1 ? '('.$subRegex.')' : $subRegex);
+                }
+
+                if ($endsWithClass && $subRegex !== '') {
+                    $parts[] = '(?:'.preg_quote($key, '/').'::|'.$segment.')';
+
+                    continue;
+                }
+
+                $parts[] = $endsWithClass ? $segment.'::' : $segment;
             }
 
             return implode('|', $parts);

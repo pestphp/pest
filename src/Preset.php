@@ -111,9 +111,7 @@ final class Preset
      */
     private function baseNamespaces(): array
     {
-        if (self::$baseNamespaces === null) {
-            self::$baseNamespaces = Composer::userNamespaces();
-        }
+        self::$baseNamespaces ??= Composer::userNamespaces();
 
         return self::$baseNamespaces;
     }

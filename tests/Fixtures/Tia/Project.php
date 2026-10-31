@@ -157,7 +157,7 @@ final class Project
     }
 
     /**
-     * @param  array<string, string>  $environment
+     * @param  array<string, string|false>  $environment
      */
     public function pestWithEnvironment(string $directory, array $environment, string ...$arguments): PestResult
     {
@@ -172,11 +172,14 @@ final class Project
                 'PAO_DISABLE' => '1',
                 'XDEBUG_MODE' => 'coverage',
                 'HOME' => $this->home(),
-                'GITHUB_EVENT_PATH' => '',
-                'CI_DEFAULT_BRANCH' => '',
-                'GITHUB_ACTIONS' => '',
-                'GITLAB_CI' => '',
-                'CIRCLECI' => '',
+                'CI' => false,
+                'GITHUB_EVENT_PATH' => false,
+                'CI_DEFAULT_BRANCH' => false,
+                'CI_COMMIT_BRANCH' => false,
+                'GITHUB_ACTIONS' => false,
+                'GITHUB_REF_NAME' => false,
+                'GITLAB_CI' => false,
+                'CIRCLECI' => false,
                 ...$environment,
             ],
         );
@@ -285,6 +288,25 @@ final class Project
             'PATH' => $this->path('stub').PATH_SEPARATOR.getenv('PATH'),
             'GH_STUB_MODE' => $mode,
             'GH_STUB_PAYLOAD' => $this->path('payload/graph.json'),
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function glab(string $mode = 'ok', string $payload = '{}', string $host = 'gitlab.com'): array
+    {
+        $this->git()->setOriginUrl(sprintf('git@%s:pestphp/tia-fixture.git', $host));
+
+        self::mirror(__DIR__.'/stubs/glab', $this->path('stub/glab'));
+        chmod($this->path('stub/glab'), 0755);
+
+        $this->write('payload/graph.json', $payload);
+
+        return [
+            'PATH' => $this->path('stub').PATH_SEPARATOR.getenv('PATH'),
+            'GLAB_STUB_MODE' => $mode,
+            'GLAB_STUB_PAYLOAD' => $this->path('payload/graph.json'),
         ];
     }
 
@@ -497,11 +519,19 @@ final class Project
             throw new RuntimeException(sprintf('Unable to create [%s].', $directory));
         }
 
-        if (@link($from, $to) || @copy($from, $to)) {
+        if ((self::shareDevice($from, $directory) && @link($from, $to)) || @copy($from, $to)) {
             return;
         }
 
         throw new RuntimeException(sprintf('Unable to mirror [%s] into [%s].', $from, $to));
+    }
+
+    private static function shareDevice(string $from, string $directory): bool
+    {
+        $source = @stat($from);
+        $target = @stat($directory);
+
+        return $source !== false && $target !== false && $source['dev'] === $target['dev'];
     }
 
     /**

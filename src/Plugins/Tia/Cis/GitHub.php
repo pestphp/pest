@@ -14,6 +14,11 @@ final readonly class GitHub implements Ci
 {
     use ReadsEnvironment;
 
+    public function currentBranch(): ?string
+    {
+        return $this->environment('GITHUB_REF_NAME');
+    }
+
     public function defaultBranch(): ?string
     {
         $path = $this->environment('GITHUB_EVENT_PATH');
