@@ -355,8 +355,6 @@ final class Graph
             $pages = $freshMap[$rel] ?? [];
 
             if ($pages === []) {
-                $sharedFilesResolved[$rel] = true;
-
                 continue;
             }
 
