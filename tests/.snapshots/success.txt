@@ -1984,6 +1984,9 @@
   ✓ it records assertions against the same per-dataset key
   ✓ it leaves a test without a dataset keyed by class and method
 
+   WARN  Tests\Unit\Plugins\Tia\StaleCoverageLines
+  - a remeasured file drops line numbers that the current file no longer has → Coverage is not available
+
    PASS  Tests\Unit\Plugins\Tia\Storage
   ✓ it uses a project-relative configured directory
   ✓ it uses an absolute configured directory
@@ -2286,4 +2289,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1621 passed (3582 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 36 skipped, 1621 passed (3582 assertions)
