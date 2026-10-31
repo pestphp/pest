@@ -1,7 +1,7 @@
 
    PASS  Tests\Arch
   ✓ preset → php → ignoring ['Pest\Expectation', 'debug_backtrace', 'var_export', …]
-  ✓ preset → strict → ignoring ['Pest\Plugins\Tia\BaselineSync', 'usleep']
+  ✓ preset → strict → ignoring ['Pest\Plugins\Tia\BaselineSync', 'Pest\Plugins\Tia\Baselines\Gi…Remote', 'usleep']
   ✓ preset → security → ignoring ['eval', 'str_shuffle', 'exec', …]
   ✓ globals
 
@@ -81,6 +81,12 @@
 
    PASS  Tests\Features\Covers\ClassCoverage
   ✓ it uses the correct PHPUnit attribute for class
+
+   PASS  Tests\Features\Covers\CoversNothing
+  ✓ it uses the correct PHPUnit attribute for covers nothing
+  ✓ describe → it uses the correct PHPUnit attribute for covers nothing
+  ✓ it is not risky when coverage metadata is required
+  ✓ it does not conflict with covers in the same file
 
    PASS  Tests\Features\Covers\ExceptionHandling
   ✓ it throws exception if no class nor method has been found
@@ -1274,6 +1280,12 @@
   ✓ it is not incompleted because of test with assertions
   … a "describe" group of tests → it is incompleted
 
+   PASS  Tests\Features\Init
+  ✓ init creates a suite when the tests directory is missing
+  ✓ init creates a suite when --init is not the first argument
+  ✓ init creates a suite when --init is passed with a value
+  ✓ a missing tests directory does not crash while resolving tia state
+
    PASS  Tests\Features\Issue
   ✓ it may be associated with an issue #1, #2
   ✓ nested → it may be associated with an issue #1, #4, #5, #6, #3
@@ -1839,6 +1851,11 @@
   ✓ buildFilterArgument → it returns empty string for empty test list
   ✓ buildFilterArgument → it generates compact filter for deeply nested namespaces
   ✓ buildFilterArgument → it handles mix of nested and flat namespaces
+  ✓ buildFilterArgument → it does not match a class outside of the shard when another class name is its prefix
+  ✓ buildFilterArgument → it still matches dataset variants after the class boundary
+  ✓ buildFilterArgument → it keeps a class matchable when another class nests below its namespace
+  ✓ buildFilterArgument → it keeps the filter whole when the parallel runner passes it as --filter=VALUE
+  ✓ buildFilterArgument → it matches a class-based test of the shard
   ✓ ensureFilterLengthIsSafe → it accepts filter within length limit
   ✓ ensureFilterLengthIsSafe → it throws exception when filter exceeds default limit
   ✓ ensureFilterLengthIsSafe → it respects custom limit from environment variable
@@ -1849,6 +1866,7 @@
   ✓ parseListTestsOutput → it deduplicates repeated class names from multiple test methods
   ✓ parseListTestsOutput → it returns an empty list for output with no matching lines
   ✓ parseListTestsOutput → it parses non-Tests namespaced classes
+  ✓ parseListTestsOutput → it parses module test classes living outside the tests directory
   ✓ parseListTestsOutput → it parses unnamespaced top-level classes
   ✓ parseListTestsOutput → it strips the P\ Pest prefix but keeps the rest of the FQCN
   ✓ parseListTestsOutput → it ignores junk lines that lack the " - …::" framing
@@ -1948,6 +1966,12 @@
   ✓ it detects a real dependency version change
   ✓ it detects an added or removed non-platform dependency
   ✓ it is independent of package ordering
+
+   PASS  Tests\Unit\Plugins\Tia\NumericTableDependencies
+  ✓ it exports numeric table dependencies from the recorder as strings
+  ✓ it persists numeric tables as JSON strings and selects only their migration readers after reload
+  ✓ it preserves numeric worker tables through payload cleaning union and graph reload
+  ✓ it preserves observed and migration added numeric tables when augmenting database tests
 
    PASS  Tests\Unit\Plugins\Tia\Recorder
   ✓ activateLinkTracking() → it tracks tables without a coverage driver
@@ -2135,6 +2159,8 @@
   ✓ it gets property values
   ✓ it gets properties from classes
   ✓ it gets methods from classes
+  ✓ it calls instance methods
+  ✓ it calls static methods without passing an object
 
    PASS  Tests\Unit\Support\Str
   ✓ it evaluates the code with ('version()', '__pest_evaluable_version__')
@@ -2201,6 +2227,7 @@
   ✓ it does not allow to add the same test description twice
   ✓ it does not allow static closures
   ✓ it alerts users about tests with arguments but no input
+  ✓ it can look up registered test methods by evaluable name
   ✓ it can return an array of all test suite filenames
 
    PASS  Tests\Visual\BeforeEachTestName
@@ -2209,6 +2236,9 @@
 
    PASS  Tests\Visual\Collision
   ✓ collision with ([''])
+
+   PASS  Tests\Visual\FailingBoot
+  ✓ a failure in the boot files renders only that failure
 
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
@@ -2256,4 +2286,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1599 passed (3486 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1621 passed (3582 assertions)
