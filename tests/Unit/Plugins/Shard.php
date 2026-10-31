@@ -544,6 +544,25 @@ describe('buildListTestsCommand', function (): void {
             '--list-tests',
         ]);
     });
+
+    it('strips a space-separated --runner and its value when building the list-tests command', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('buildListTestsCommand');
+
+        $command = $method->invoke($shard, ['artisan', 'test', '--runner', '\\Illuminate\\Testing\\ParallelRunner', '--shard=1/3'], 'tests');
+
+        expect($command)->toBe([
+            PHP_BINARY,
+            'artisan',
+            'test',
+            '--shard=1/3',
+            '--test-directory=tests',
+            '--list-tests',
+        ]);
+    });
 });
 
 describe('addOutput', function (): void {
