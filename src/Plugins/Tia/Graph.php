@@ -62,6 +62,11 @@ final class Graph
 
     private string $fallbackBranch = 'main';
 
+    /**
+     * @var array<string, array{0: array{sha: ?string, tree: array<string, string>, complete?: bool, results: array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>}, 1: array{sha: ?string, tree: array<string, string>, complete?: bool, results: array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>}, 2: array{sha: ?string, tree: array<string, string>, complete?: bool, results: array<string, array{status: int, message: string, time: float, assertions?: int, file?: string}>}}>
+     */
+    private array $mergedBaselines = [];
+
     private readonly string $projectRoot;
 
     /** @var array<string, true>|null */
@@ -975,15 +980,26 @@ final class Graph
             return $own;
         }
 
+        $key = $branch."\0".$fallbackBranch;
+        $memo = $this->mergedBaselines[$key] ?? null;
+
+        if ($memo !== null && $memo[0] === $own && $memo[1] === $fallback) {
+            return $memo[2];
+        }
+
         $under = ($own['complete'] ?? false) === true
             ? $this->withoutFilesCoveredBy($fallback['results'], $own['results'])
             : $fallback['results'];
 
-        return [
+        $merged = [
             'sha' => $own['sha'] ?? $fallback['sha'],
             'tree' => $own['tree'] !== [] ? $own['tree'] : $fallback['tree'],
             'results' => array_replace($under, $own['results']),
         ];
+
+        $this->mergedBaselines[$key] = [$own, $fallback, $merged];
+
+        return $merged;
     }
 
     /**
