@@ -103,6 +103,29 @@ test('a failure outranks an issue triggered on the way to it', function (): void
         ->and($project->graph()['baselines']['master']['results'][$id]['status'])->toBe(7);
 })->skipOnWindows();
 
+test('a failure outranks the test also being risky', function (): void {
+    $project = Project::make('master');
+    $project->seed('master');
+
+    $project->write('tests/Unit/CalculatorTest.php', str_replace(
+        'toBe(3)',
+        'toBe(999)',
+        tiaTriggering('set_error_handler(fn (): bool => false);'),
+    ));
+    $project->git()->commit('a failure in a risky test');
+
+    $result = $project->pest('--tia');
+
+    $id = Project::testId('tests/Unit/CalculatorTest.php', 'adds two numbers');
+
+    expect($result->exitCode)->not->toBe(0)
+        ->and($project->graph()['baselines']['master']['results'][$id]['status'])->toBe(7);
+
+    $result = $project->pest('--tia');
+
+    expect($result->exitCode)->not->toBe(0, $result->describe());
+})->skipOnWindows();
+
 test('a skip outranks an issue triggered on the way to it', function (): void {
     $project = Project::make('master');
     $project->seed('master');
