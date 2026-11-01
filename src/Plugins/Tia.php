@@ -831,7 +831,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
                 implode(', ', $drift),
             ));
 
-            $graph->clearResults($this->branch);
+            $graph->clearResults();
             $graph->setFingerprint($current);
             $this->saveGraph($graph);
             $this->deleteState(self::KEY_COVERAGE_CACHE);
