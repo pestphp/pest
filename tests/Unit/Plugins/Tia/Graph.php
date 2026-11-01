@@ -312,3 +312,17 @@ describe('markKnownTestFiles()', function (): void {
         expect($graph->knowsTest('/somewhere/else/tests/FooTest.php'))->toBeFalse();
     });
 });
+
+describe('clearResults()', function (): void {
+    it('drops the results of the fallback branch too', function (): void {
+        $graph = new Graph(sys_get_temp_dir());
+        $graph->setResult('main', 'Tests\FooTest::it passes', 0, '', 0.1, 1);
+        $graph->setResult('feature', 'Tests\BarTest::it passes', 0, '', 0.1, 1);
+
+        $graph->clearResults();
+
+        expect($graph->getResult('feature', 'Tests\FooTest::it passes'))->toBeNull()
+            ->and($graph->getResult('feature', 'Tests\BarTest::it passes'))->toBeNull()
+            ->and($graph->getResult('main', 'Tests\FooTest::it passes'))->toBeNull();
+    });
+});
