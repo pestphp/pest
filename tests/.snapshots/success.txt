@@ -1875,6 +1875,8 @@
   ✓ buildListTestsCommand → it forwards --test-directory even when input arguments include one
   ✓ buildListTestsCommand → it strips --processes=N when building the list-tests command
   ✓ buildListTestsCommand → it strips --processes N (space-separated) when building the list-tests command
+  ✓ buildListTestsCommand → it strips --runner when building the list-tests command
+  ✓ buildListTestsCommand → it strips a space-separated --runner and its value when building the list-tests command
   ✓ addOutput → it displays shard information after test execution
   ✓ addOutput → it uses singular form for single test file
   ✓ addOutput → it returns original exit code when shard is not set
@@ -2286,4 +2288,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1621 passed (3582 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1623 passed (3584 assertions)
