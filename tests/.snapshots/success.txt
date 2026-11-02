@@ -2259,6 +2259,13 @@
   ✓ parallel reports invalid datasets as failures
   ✓ parallel can have multiple exclude-groups
   ✓ parallel can have multiple groups
+  ✓ parallel functional gives each test to a worker on its own
+  ✓ parallel functional runs the tests of a file whose name gives no class name
+  ✓ parallel functional runs the tests of its shard
+  ✓ parallel functional runs the selected cases of tests that share a description across files with dataset "without a filter"
+  ✓ parallel functional runs the selected cases of tests that share a description across files with dataset "filtered by the description"
+  ✓ parallel functional runs the selected cases of tests that share a description across files with dataset "filtered by the file"
+  ✓ parallel functional runs the selected cases of tests that share a description across files with dataset "filtered by the data set"
 
    PASS  Tests\Visual\ParallelNestedDatasets
   ✓ parallel loads nested datasets from nested directories
@@ -2292,4 +2299,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 36 skipped, 1624 passed (3587 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 36 skipped, 1631 passed (3602 assertions)

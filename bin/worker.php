@@ -111,7 +111,10 @@ $bootPest = (static function (): void {
             exit;
         }
 
-        $exitCode = $application->runTest(realpath(trim($testPath)));
+        [$testFile, $testFilter] = array_pad(explode("\0", trim($testPath), 2), 2, null);
+        $testPath = realpath($testFile).($testFilter === null ? '' : "\0".$testFilter);
+
+        $exitCode = $application->runTest($testPath);
 
         fwrite($statusFile, (string) $exitCode);
         fflush($statusFile);

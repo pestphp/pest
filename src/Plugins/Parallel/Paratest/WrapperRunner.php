@@ -6,6 +6,7 @@ namespace Pest\Plugins\Parallel\Paratest;
 
 use const DIRECTORY_SEPARATOR;
 
+use Generator;
 use NunoMaduro\Collision\Adapters\Phpunit\Support\ResultReflection;
 use ParaTest\JUnit\LogMerger;
 use ParaTest\JUnit\Writer;
@@ -14,13 +15,17 @@ use ParaTest\RunnerInterface;
 use ParaTest\WrapperRunner\MissingResultsException;
 use ParaTest\WrapperRunner\SuiteLoader;
 use ParaTest\WrapperRunner\WrapperWorker;
+use Pest\Contracts\HasPrintableTestCaseName;
 use Pest\Plugins\Tia;
 use Pest\Result;
 use Pest\TestSuite;
 use PHPUnit\Event\Facade as EventFacade;
 use PHPUnit\Event\Test\AfterLastTestMethodFailed;
 use PHPUnit\Event\TestRunner\WarningTriggered;
+use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\TestSuite as PHPUnitTestSuite;
 use PHPUnit\Runner\CodeCoverage;
+use PHPUnit\Runner\Phpt\TestCase as PhptTestCase;
 use PHPUnit\Runner\TestRunHistory\DefaultTestRunHistory;
 use PHPUnit\TestRunner\TestResult\Facade as TestResultFacade;
 use PHPUnit\TestRunner\TestResult\TestResult;
@@ -41,6 +46,8 @@ use function array_filter;
 use function array_merge;
 use function array_merge_recursive;
 use function array_shift;
+use function array_unique;
+use function array_values;
 use function assert;
 use function bin2hex;
 use function count;
@@ -48,11 +55,16 @@ use function dirname;
 use function file_get_contents;
 use function filesize;
 use function is_file;
+use function is_string;
+use function iterator_to_array;
 use function max;
 use function mkdir;
+use function preg_quote;
+use function property_exists;
 use function random_bytes;
 use function realpath;
 use function rmdir;
+use function rtrim;
 use function sprintf;
 use function str_starts_with;
 use function unlink;
@@ -638,6 +650,10 @@ final class WrapperRunner implements RunnerInterface
      */
     private function getTestFiles(SuiteLoader $suiteLoader): array
     {
+        if ($this->options->functional) {
+            return $this->getFunctionalTests($suiteLoader);
+        }
+
         /** @var array<non-empty-string, null> $files */
         $files = [];
 
@@ -659,6 +675,58 @@ final class WrapperRunner implements RunnerInterface
         }
 
         return array_keys($files);
+    }
+
+    /**
+     * @return array<int, non-empty-string>
+     */
+    private function getFunctionalTests(SuiteLoader $suiteLoader): array
+    {
+        $testSuite = TestSuite::getInstance()->filteredTestSuite;
+
+        assert($testSuite instanceof PHPUnitTestSuite);
+
+        $testCases = iterator_to_array($this->testCasesOf($testSuite), false);
+
+        assert(count($testCases) === count($suiteLoader->tests));
+
+        $tests = [];
+
+        foreach ($testCases as $index => $testCase) {
+            $tests[] = $testCase instanceof HasPrintableTestCaseName
+                ? $this->getFunctionalPestTest($testCase)
+                : $suiteLoader->tests[$index];
+        }
+
+        return array_values(array_unique($tests));
+    }
+
+    /**
+     * @return non-empty-string
+     */
+    private function getFunctionalPestTest(HasPrintableTestCaseName&TestCase $testCase): string
+    {
+        $className = $testCase::class;
+
+        assert(property_exists($className, '__filename') && is_string($className::$__filename));
+
+        $name = rtrim($testCase->getPrintableTestCaseMethodName().$testCase->dataSetAsString());
+
+        return $className::$__filename."\0/^[^:]+::".preg_quote($name, '/').'$/';
+    }
+
+    /**
+     * @return Generator<int, TestCase|PhptTestCase>
+     */
+    private function testCasesOf(PHPUnitTestSuite $testSuite): Generator
+    {
+        foreach ($testSuite as $test) {
+            if ($test instanceof PHPUnitTestSuite) {
+                yield from $this->testCasesOf($test);
+            } elseif ($test instanceof TestCase || $test instanceof PhptTestCase) {
+                yield $test;
+            }
+        }
     }
 
     private function shouldIncludeBootstrappedTestFile(string $filename): bool

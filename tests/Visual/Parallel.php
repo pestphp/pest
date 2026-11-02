@@ -56,3 +56,35 @@ test('parallel can have multiple groups', function () use ($run): void {
         ->toContain('Tests:    2 passed (2 assertions)')
         ->toContain('Parallel: 3 processes');
 })->skipOnWindows();
+
+test('parallel functional gives each test to a worker on its own', function () use ($run): void {
+    $output = $run('tests/Fixtures/Suites/ParallelFunctional/Spread', '--functional', '--verbose');
+
+    expect(preg_match_all('/executing: .+(PestTest|PhpUnitTest)\.php.+(runs the \w+ test|runs_the_first_test|runs_a_data_set)/', (string) $output))->toBe(7)
+        ->and($output)
+        ->toContain('Tests:    7 passed (7 assertions)')
+        ->toContain('Parallel: 3 processes');
+})->skipOnWindows();
+
+test('parallel functional runs the tests of a file whose name gives no class name', function () use ($run): void {
+    expect($run('tests/PHPUnit/CustomAffixes/@#$%^&()-_=+.php', '--functional'))
+        ->toContain('Tests:    1 passed (1 assertions)')
+        ->toContain('Parallel: 3 processes');
+})->skipOnWindows();
+
+test('parallel functional runs the tests of its shard', function () use ($run): void {
+    expect($run('tests/Fixtures/Suites/ParallelFunctional', '--functional', '--shard=1/2'))
+        ->toContain('Tests:    6 passed (6 assertions)')
+        ->toContain('Shard:    1 of 2 — 2 files ran, out of 4.');
+})->skipOnWindows();
+
+test('parallel functional runs the selected cases of tests that share a description across files', function (array $arguments, string $expected) use ($run): void {
+    expect($run('tests/Fixtures/Suites/ParallelFunctional/SameDescription', '--functional', ...$arguments))
+        ->toContain("Tests:    {$expected}")
+        ->toContain('Parallel: 3 processes');
+})->with([
+    'without a filter' => [[], '4 passed (6 assertions)'],
+    'filtered by the description' => [['--filter=shares a description'], '4 passed (6 assertions)'],
+    'filtered by the file' => [['--filter=SecondTest'], '2 passed (4 assertions)'],
+    'filtered by the data set' => [['--filter=shared'], '2 passed (3 assertions)'],
+])->skipOnWindows();

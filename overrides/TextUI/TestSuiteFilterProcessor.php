@@ -14,6 +14,7 @@ namespace PHPUnit\TextUI;
 
 use Pest\Plugins\Only;
 use Pest\Runner\Filter\EnsureTestCaseIsInitiatedFilter;
+use Pest\TestSuite as PestTestSuite;
 use PHPUnit\Event;
 use PHPUnit\Framework\TestSuite;
 use PHPUnit\Metadata\Api\Groups;
@@ -36,6 +37,8 @@ final readonly class TestSuiteFilterProcessor
      */
     public function process(Configuration $configuration, TestSuite $suite): void
     {
+        PestTestSuite::getInstance()->filteredTestSuite = $suite;
+
         $factory = new Factory;
 
         // @phpstan-ignore-next-line
