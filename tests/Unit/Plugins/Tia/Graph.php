@@ -312,3 +312,23 @@ describe('markKnownTestFiles()', function (): void {
         expect($graph->knowsTest('/somewhere/else/tests/FooTest.php'))->toBeFalse();
     });
 });
+
+describe('branch baseline over the fallback', function (): void {
+    it('reads results written after an earlier read', function (): void {
+        $graph = new Graph(sys_get_temp_dir());
+        $graph->setResult('main', 'Tests\FooTest::it passes', 0, '', 0.1, 1, 'tests/Feature/FooTest.php');
+        $graph->setResult('main', 'Tests\BarTest::it passes', 0, '', 0.2, 1, 'tests/Feature/BarTest.php');
+        $graph->setResult('feature', 'Tests\FooTest::it passes', 0, '', 0.3, 1, 'tests/Feature/FooTest.php');
+        $graph->markBaselineComplete('feature');
+
+        expect($graph->getTime('feature', 'Tests\FooTest::it passes', 'main'))->toBe(0.3)
+            ->and($graph->getTime('feature', 'Tests\BarTest::it passes', 'main'))->toBe(0.2);
+
+        $graph->setResult('feature', 'Tests\FooTest::it passes', 7, 'boom', 0.4, 1, 'tests/Feature/FooTest.php');
+        $graph->setResult('main', 'Tests\BarTest::it passes', 0, '', 0.5, 1, 'tests/Feature/BarTest.php');
+
+        expect($graph->getTime('feature', 'Tests\FooTest::it passes', 'main'))->toBe(0.4)
+            ->and($graph->getResult('feature', 'Tests\FooTest::it passes', 'main')?->isFailure())->toBeTrue()
+            ->and($graph->getTime('feature', 'Tests\BarTest::it passes', 'main'))->toBe(0.5);
+    });
+});
