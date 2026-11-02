@@ -1,8 +1,11 @@
-# The project
+<hodstack>
+# Hodstack
 
-Read `.hod/PROJECT.md` first. It holds the intention of this project.
+Read the text of the team first: each `AGENTS.md` and `CLAUDE.md` of this project, outside this text. Obey it. Obey each rule below where the text of the team says nothing. When a rule below disagrees with the text of the team, obey the text of the team. Do not change the text of the team to make it agree with a rule below.
 
-`hod` writes this file. Write no sentence in it, because `hod update` writes it again. Write the intention of the project in `.hod/PROJECT.md`. Write a rule in the form of section 2. Write a skill in a directory in `.hod/skills/`.
+Then read `.hod/PROJECT.md`. It holds the intention of this project.
+
+`hod` writes this text. Write no sentence in it, because `hod update` writes it again. Write the intention of the project in `.hod/PROJECT.md`. Write a rule in the form of section 2. Write a skill in a directory in `.hod/skills/`.
 
 ---
 
@@ -22,7 +25,7 @@ Write in [ASD-STE100](https://www.asd-ste100.org) Simplified Technical English: 
 
 Write GitHub flavored Markdown. Put one `#` heading in a file. Write one paragraph on one line, thus a change stays small in `git diff`. Number the sections of a long file, thus a different file can point to "section 3". Put a path, a command and a name from the code in `code font`.
 
-Write the intention of the project in `.hod/PROJECT.md`. Write a decision about one directory in the `AGENTS.md` file of that directory. If `.hod/PROJECT.md` and the `AGENTS.md` file of a directory disagree, obey `.hod/PROJECT.md` and correct the other file.
+Write the intention of the project in `.hod/PROJECT.md`. Write a decision about one directory in the `AGENTS.md` file of that directory. If `.hod/PROJECT.md` and the `AGENTS.md` file of a directory disagree, obey the `AGENTS.md` file and correct `.hod/PROJECT.md`.
 
 Write no new rule. This is the correct result of each task, and a task that adds a command, a module or a workflow does not change it. A rule needs a fault that happened: name the decision that you made wrong, or name the decision that these files refused to give you. A wrong change that you imagine is not a fault, thus write no rule to protect the code that you write today.
 
@@ -62,7 +65,7 @@ Obey three limits. Do not promise a feature that does not exist today. Do not gi
 
 These rules control each file of source code and each manifest in this repository. Sections 1, 2 and 3 do not control these files.
 
-Before you write code, call the Skill tool with "rules-code-without-slop". Before you write code, call the Skill tool with "rules-code-type-safety". Before you write an entry point or change one, such as a controller, a component that a page calls, a command or a job, call the Skill tool with "rules-code-boundaries". Before you write a test or change a behavior, call the Skill tool with "rules-code-tests". Before you write code that writes to a database, call the Skill tool with "rules-code-data-integrity". Before you finish a change, call the Skill tool with "rules-code-tooling". Read the description of each other skill of this project, and call the Skill tool with each skill whose description names a decision of your change or a framework, a library or a tool that your change uses.
+Before you write code, call the Skill tool with "rules-code-without-slop". Before you write code, call the Skill tool with "rules-code-type-safety". Before you write an entry point or change one, such as a controller, a component that a page calls, a command or a job, call the Skill tool with "rules-code-boundaries". Before you write a test or change a behavior, call the Skill tool with "rules-code-tests". Before you write code that writes to a database, call the Skill tool with "rules-code-data-integrity". Before you finish a change, call the Skill tool with "rules-code-tooling". Read the description of each other skill of this project, and call the Skill tool with each skill whose description names a decision of your change or a framework, a library or a tool that your change uses. When you need two skills or more at one time, call the Skill tool for each of them in one message, thus you wait for one response and not for one response per skill.
 
 Write no comment. Delete each comment in a line that you write or change. An annotation that gives a type that the signature cannot hold, such as `@param list<string> $names` in PHP, is part of the type and not a comment. Turn off the lint that asks for a documentation comment, because that lint asks you to say the name of an item again.
 
@@ -101,3 +104,4 @@ Delete a file with `rm`, not with `git rm`. Change no entry of the git index unt
 Write each file in its own command. Do not write a file after `&&` in a command that can fail before it.
 
 Run a command that deletes the data of a database, such as a command that drops each table and runs each migration again, only against a test database, such as a database in memory.
+</hodstack>
