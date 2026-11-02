@@ -2,6 +2,7 @@
 
 use Pest\Plugins\Tia;
 use Pest\Plugins\Tia\WatchPatterns;
+use Pest\Support\Ci;
 use Pest\Support\Container;
 
 test('does not throw when an integer --random-order-seed is passed as a separate argv element', function (): void {
@@ -17,9 +18,22 @@ test('still detects --tia when an integer argument is present', function (): voi
 });
 
 test('locally configured tia runs outside CI', function (): void {
-    withLocalTia(function (): void {
-        expect(Tia::isEnabledForRun([]))->toBeTrue();
-    });
+    $previous = [];
+
+    foreach (Ci::ENVIRONMENT_VARIABLES as $variable) {
+        $previous[$variable] = getenv($variable);
+        putenv($variable);
+    }
+
+    try {
+        withLocalTia(function (): void {
+            expect(Tia::isEnabledForRun([]))->toBeTrue();
+        });
+    } finally {
+        foreach ($previous as $variable => $value) {
+            putenv($value === false ? $variable : $variable.'='.$value);
+        }
+    }
 });
 
 test('locally configured tia stays off when CI is detected', function (string $variable): void {
