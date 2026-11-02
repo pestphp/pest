@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Pest\Plugins\Tia\JsModuleGraph;
 use Tests\Fixtures\Tia\Project;
 
 afterEach(function (): void {
@@ -215,4 +216,24 @@ test('a changed frontend runtime file selects every Inertia test', function (): 
 
     expect($result->affected())->toBe(2, $result->describe())
         ->and($result->replayed())->toBe(4, $result->describe());
+})->skipOnWindows();
+
+test('a changed JS module that no Inertia page imports falls back to the watch patterns', function (): void {
+    $project = Project::make('master', 'js-watch');
+    $project->write('vite.config.js', "export default {}\n");
+    $project->write('resources/js/widget.js', "export const widget = 1\n");
+    $project->git()->commit('add a Vite app without Inertia pages');
+
+    $project->seed('master');
+
+    $fingerprint = new ReflectionMethod(JsModuleGraph::class, 'fingerprint')->invoke(null, $project->path());
+    file_put_contents($project->graphDir().DIRECTORY_SEPARATOR.'js-module-graph.cache.json', json_encode(['fingerprint' => $fingerprint, 'graph' => []]));
+
+    $project->write('resources/js/widget.js', "export const widget = 2\n");
+    $project->snapshot();
+
+    $result = $project->pest('--tia');
+
+    expect($result->affected())->toBe(6, $result->describe())
+        ->and($result->replayed())->toBe(0, $result->describe());
 })->skipOnWindows();
