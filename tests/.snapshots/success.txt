@@ -1947,6 +1947,9 @@
    PASS  Tests\Unit\Plugins\Tia\IsEnabledForRun
   ✓ does not throw when an integer --random-order-seed is passed as a separate argv element
   ✓ still detects --tia when an integer argument is present
+  ✓ locally configured tia runs outside CI
+  ✓ locally configured tia stays off when CI is detected with ('CI')
+  ✓ locally configured tia stays off when CI is detected with ('GITHUB_ACTIONS')
 
    PASS  Tests\Unit\Plugins\Tia\JsModuleGraph
   ✓ it accepts a page directory candidate only when every segment matches the casing on disk with dataset "exact"
@@ -2289,4 +2292,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 36 skipped, 1621 passed (3582 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 36 skipped, 1624 passed (3587 assertions)
