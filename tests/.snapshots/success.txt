@@ -1,7 +1,7 @@
 
    PASS  Tests\Arch
   ✓ preset → php → ignoring ['Pest\Expectation', 'debug_backtrace', 'var_export', …]
-  ✓ preset → strict → ignoring ['Pest\Plugins\Tia\BaselineSync', 'usleep']
+  ✓ preset → strict → ignoring ['Pest\Plugins\Tia\BaselineSync', 'Pest\Plugins\Tia\Baselines\Gi…Remote', 'usleep']
   ✓ preset → security → ignoring ['eval', 'str_shuffle', 'exec', …]
   ✓ globals
 
@@ -1916,6 +1916,13 @@
   ✓ output format → it returns a 32-character hex xxh128 hash
   ✓ output format → it returns a stable hash for empty content
 
+   PASS  Tests\Unit\Plugins\Tia\CoverageReport
+  ✓ the merged coverage report round-trips binary coverage without var_export
+  ✓ the merged coverage report encodes a payload larger than one base64 chunk
+
+   WARN  Tests\Unit\Plugins\Tia\DeletedTestCoverage
+  - cached hits of a deleted test are dropped while a replayed test stays → Coverage is not available
+
    PASS  Tests\Unit\Plugins\Tia\FileState
   ✓ keysWithPrefix() → it lists keys matching the prefix
   ✓ keysWithPrefix() → it ignores in-flight temporary files from concurrent writes
@@ -1943,10 +1950,14 @@
   ✓ markKnownTestFiles() → it makes a test file with no edges known
   ✓ markKnownTestFiles() → it does not clobber edges of an already-known test file
   ✓ markKnownTestFiles() → it ignores paths outside the project root
+  ✓ clearResults() → it drops the results of the fallback branch too
 
    PASS  Tests\Unit\Plugins\Tia\IsEnabledForRun
   ✓ does not throw when an integer --random-order-seed is passed as a separate argv element
   ✓ still detects --tia when an integer argument is present
+  ✓ locally configured tia runs outside CI
+  ✓ locally configured tia stays off when CI is detected with ('CI')
+  ✓ locally configured tia stays off when CI is detected with ('GITHUB_ACTIONS')
 
    PASS  Tests\Unit\Plugins\Tia\JsModuleGraph
   ✓ it accepts a page directory candidate only when every segment matches the casing on disk with dataset "exact"
@@ -1983,6 +1994,9 @@
   ✓ it keys a result per dataset row rather than per method
   ✓ it records assertions against the same per-dataset key
   ✓ it leaves a test without a dataset keyed by class and method
+
+   WARN  Tests\Unit\Plugins\Tia\StaleCoverageLines
+  - a remeasured file drops line numbers that the current file no longer has → Coverage is not available
 
    PASS  Tests\Unit\Plugins\Tia\Storage
   ✓ it uses a project-relative configured directory
@@ -2096,6 +2110,7 @@
 
    PASS  Tests\Unit\Restarters\PcovRestarter
   ✓ it preserves the active memory limit in the restarted process
+  ✓ it preserves pcov.enabled in the restarted process
 
    PASS  Tests\Unit\Support\Arr
   ✓ last → it should return false for an empty arary
@@ -2287,4 +2302,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1622 passed (3585 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1629 passed (3599 assertions)

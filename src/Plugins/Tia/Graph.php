@@ -355,8 +355,6 @@ final class Graph
             $pages = $freshMap[$rel] ?? [];
 
             if ($pages === []) {
-                $sharedFilesResolved[$rel] = true;
-
                 continue;
             }
 
@@ -945,10 +943,11 @@ final class Graph
         $this->baselines[$branch]['tree'] = $tree;
     }
 
-    public function clearResults(string $branch): void
+    public function clearResults(): void
     {
-        $this->ensureBaseline($branch);
-        $this->baselines[$branch]['results'] = [];
+        foreach (array_keys($this->baselines) as $branch) {
+            $this->baselines[$branch]['results'] = [];
+        }
     }
 
     /**
@@ -1027,7 +1026,6 @@ final class Graph
 
     /**
      * @param  array<string, array<int, string>>  $testToFiles
-     * @param  bool  $keepExisting  Leave already-recorded edge sets alone.
      */
     public function replaceEdges(array $testToFiles, bool $keepExisting = false): void
     {
@@ -1038,11 +1036,7 @@ final class Graph
                 continue;
             }
 
-            if ($keepExisting && ($this->edges[$testRel] ?? []) !== []) {
-                continue;
-            }
-
-            $this->edges[$testRel] = [];
+            $this->edges[$testRel] = $keepExisting ? ($this->edges[$testRel] ?? []) : [];
 
             foreach ($sources as $source) {
                 $this->link($testFile, $source);
