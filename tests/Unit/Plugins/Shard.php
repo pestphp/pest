@@ -376,6 +376,28 @@ OUT;
         ]);
     });
 
+    it('parses module test classes living outside the tests directory', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('parseListTestsOutput');
+
+        $listOutput = <<<'OUT'
+ INFO  Available tests:
+
+ - P\Tests\Unit\Foo::__pest_evaluable_it_works
+ - P\Modules\Example\tests\ShardModuleExample::__pest_evaluable_module_test_is_listed
+ - P\Modules\Billing\Tests\Feature\InvoiceTest::__pest_evaluable_it_creates_invoices
+OUT;
+
+        expect($method->invoke($shard, $listOutput))->toBe([
+            'Tests\\Unit\\Foo',
+            'Modules\\Example\\tests\\ShardModuleExample',
+            'Modules\\Billing\\Tests\\Feature\\InvoiceTest',
+        ]);
+    });
+
     it('parses unnamespaced top-level classes', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
