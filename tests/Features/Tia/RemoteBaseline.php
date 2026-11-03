@@ -64,6 +64,22 @@ test('a fetched baseline recorded against another tree is not used', function ()
         ->and($result->replayed())->toBe(0, $result->describe());
 })->skipOnWindows();
 
+test('a fetched baseline recorded at a commit this clone lacks fails loudly', function (): void {
+    [$project, $environment] = tiaPublishedBaseline('ok', function (array $graph): array {
+        foreach (array_keys($graph['baselines']) as $branch) {
+            $graph['baselines'][$branch]['sha'] = str_repeat('1', 40);
+        }
+
+        return $graph;
+    });
+
+    $result = $project->pestWithEnvironment($project->path(), $environment, '--tia', '--baselined');
+
+    expect($result->exitCode)->toBe(1, $result->describe())
+        ->and($result->output)->toContain('cannot be reached from this branch')
+        ->and($result->replayed())->toBe(0, $result->describe());
+})->skipOnWindows();
+
 test('an artifact without a graph in it fails loudly', function (): void {
     [$project, $environment] = tiaPublishedBaseline('missing-asset');
 
