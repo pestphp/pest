@@ -2102,6 +2102,7 @@
 
    PASS  Tests\Unit\Restarters\PcovRestarter
   ✓ it preserves the active memory limit in the restarted process
+  ✓ it preserves pcov.enabled in the restarted process
 
    PASS  Tests\Unit\Support\Arr
   ✓ last → it should return false for an empty arary
@@ -2292,4 +2293,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 36 skipped, 1624 passed (3587 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 36 skipped, 1625 passed (3589 assertions)
