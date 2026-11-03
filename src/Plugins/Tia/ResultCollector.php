@@ -100,11 +100,7 @@ final class ResultCollector
 
     public function testRisky(string $message): void
     {
-        if ($this->currentTestId === null) {
-            return;
-        }
-
-        $this->record(TestStatus::risky($message));
+        $this->recordIssue(TestStatus::risky($message));
     }
 
     /**

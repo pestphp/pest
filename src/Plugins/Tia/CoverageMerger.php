@@ -50,6 +50,7 @@ final class CoverageMerger
         }
 
         $cached = self::unserializeCoverage($decoded);
+        unset($decoded);
         $current = self::requireCoverage($reportPath);
 
         if (! $cached instanceof CodeCoverage || ! $current instanceof CodeCoverage) {
@@ -63,14 +64,37 @@ final class CoverageMerger
         self::dropLinesMissingFromCurrent($cached, $current);
 
         $cached->merge($current);
+        unset($current);
 
         $serialised = serialize($cached);
+        unset($cached);
 
-        @file_put_contents(
-            $reportPath,
-            '<?php return unserialize('.var_export($serialised, true).");\n",
-        );
+        self::writeUnserializeReport($reportPath, $serialised);
         $state->write(Tia::KEY_COVERAGE_CACHE, self::compress($serialised));
+    }
+
+    private static function writeUnserializeReport(string $reportPath, string $serialised): void
+    {
+        $handle = @fopen($reportPath, 'wb');
+
+        if ($handle === false) {
+            return;
+        }
+
+        fwrite($handle, '<?php return unserialize(base64_decode(\'');
+
+        $length = strlen($serialised);
+        $offset = 0;
+        $chunkSize = 3 * 64 * 1024;
+
+        while ($offset < $length) {
+            $chunk = substr($serialised, $offset, $chunkSize);
+            fwrite($handle, base64_encode($chunk));
+            $offset += strlen($chunk);
+        }
+
+        fwrite($handle, "'));\n");
+        fclose($handle);
     }
 
     private static function primeUncoveredFiles(CodeCoverage $coverage): void
@@ -117,17 +141,12 @@ final class CoverageMerger
     private static function stripCurrentTestsFromCached(CodeCoverage $cached, CodeCoverage $current): void
     {
         $currentIds = self::collectTestIds($current);
-
-        if ($currentIds === []) {
-            return;
-        }
-
         $cachedData = $cached->getData();
 
         $staleIndexes = [];
 
         foreach ($cachedData->testIds() as $index => $id) {
-            if (in_array($id, $currentIds, true)) {
+            if (in_array($id, $currentIds, true) || ! self::testExists($id)) {
                 $staleIndexes[$index] = true;
             }
         }
@@ -155,6 +174,19 @@ final class CoverageMerger
         }
 
         $cachedData->setLineCoverage($lineCoverage);
+    }
+
+    private static function testExists(string $id): bool
+    {
+        $name = explode('#', $id, 2)[0];
+
+        if (! str_contains($name, '::')) {
+            return true;
+        }
+
+        [$class, $method] = explode('::', $name, 2);
+
+        return method_exists($class, $method);
     }
 
     private static function dropLinesMissingFromCurrent(CodeCoverage $cached, CodeCoverage $current): void
