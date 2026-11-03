@@ -24,3 +24,15 @@ it('preserves the active memory limit in the restarted process', function (): vo
         ini_set('memory_limit', (string) $originalMemoryLimit);
     }
 });
+
+it('preserves pcov.enabled in the restarted process', function (): void {
+    $command = new ReflectionMethod(PcovRestarter::class, 'command')
+        ->invoke(new PcovRestarter, __DIR__, []);
+
+    assert(is_array($command));
+
+    $index = array_search('pcov.enabled='.ini_get('pcov.enabled'), $command, true);
+
+    expect($index)->toBeInt()
+        ->and($command[$index - 1])->toBe('-d');
+});
