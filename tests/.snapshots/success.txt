@@ -2269,6 +2269,12 @@
   ✓ parallel lets extensions register event subscribers
   ✓ parallel can have multiple exclude-groups
   ✓ parallel can have multiple groups
+  ✓ parallel accepts the options that the workers ignore with ('--no-results')
+  ✓ parallel accepts the options that the workers ignore with ('--do-not-cache-result')
+  ✓ parallel accepts the options that the workers ignore with ('--do-not-record-test-run-history')
+  ✓ parallel records the test run history
+  ✓ parallel does not record the test run history when asked not to with ('--do-not-cache-result')
+  ✓ parallel does not record the test run history when asked not to with ('--do-not-record-test-run-history')
 
    PASS  Tests\Visual\ParallelNestedDatasets
   ✓ parallel loads nested datasets from nested directories
@@ -2302,4 +2308,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1629 passed (3599 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1635 passed (3610 assertions)
