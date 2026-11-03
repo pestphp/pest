@@ -20,7 +20,7 @@ test('parallel', function () use ($run): void {
     $output = $run('--exclude-group=integration');
     $output = implode("\n", array_slice(explode("\n", (string) $output), -10));
 
-    $expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 28 skipped, 1607 passed (3534 assertions)';
+    $expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 29 skipped, 1609 passed (3538 assertions)';
 
     expect($output)
         ->toContain("Tests:    {$expected}")
