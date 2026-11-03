@@ -13,6 +13,7 @@ use Pest\Repositories\SnapshotRepository;
 use Pest\Repositories\TestRepository;
 use Pest\Support\Str;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\TestSuite as PHPUnitTestSuite;
 
 /**
  * @internal
@@ -32,6 +33,8 @@ final class TestSuite
     public AfterAllRepository $afterAll;
 
     public SnapshotRepository $snapshots;
+
+    public ?PHPUnitTestSuite $filteredTestSuite = null;
 
     public string $rootPath;
 

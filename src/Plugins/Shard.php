@@ -192,7 +192,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     {
         return array_values(array_filter(
             $arguments,
-            fn (string $argument): bool => ! in_array($argument, ['--parallel', '-p'], strict: true)
+            fn (string $argument): bool => ! in_array($argument, ['--parallel', '-p', '--functional'], strict: true)
                 && ! str_starts_with($argument, '--processes'),
         ));
     }

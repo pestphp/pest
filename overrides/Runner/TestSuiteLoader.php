@@ -41,6 +41,11 @@ final class TestSuiteLoader
      */
     private static array $declaredClasses = [];
 
+    /**
+     * @psalm-var array<string, ReflectionClass>
+     */
+    private static array $classesBySuiteClassFile = [];
+
     public function __construct()
     {
         if (empty(self::$declaredClasses)) {
@@ -53,6 +58,10 @@ final class TestSuiteLoader
      */
     public function load(string $suiteClassFile): ReflectionClass
     {
+        if (array_key_exists($suiteClassFile, self::$classesBySuiteClassFile)) {
+            return self::$classesBySuiteClassFile[$suiteClassFile];
+        }
+
         $suiteClassName = $this->classNameFromFileName($suiteClassFile);
 
         (static function () use ($suiteClassFile) {
@@ -151,7 +160,7 @@ final class TestSuiteLoader
         // @codeCoverageIgnoreEnd
 
         if ($class->isSubclassOf(TestCase::class) && ! $class->isAbstract()) {
-            return $class;
+            return self::$classesBySuiteClassFile[$suiteClassFile] = $class;
         }
 
         if ($class->hasMethod('suite')) {
@@ -164,7 +173,7 @@ final class TestSuiteLoader
             // @codeCoverageIgnoreEnd
 
             if (! $method->isAbstract() && $method->isPublic() && $method->isStatic()) {
-                return $class;
+                return self::$classesBySuiteClassFile[$suiteClassFile] = $class;
             }
         }
 
