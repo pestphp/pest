@@ -160,8 +160,6 @@ final class WrapperRunner implements RunnerInterface
     {
         $directory = dirname(__DIR__);
         ExcludeList::addDirectory($directory);
-        TestResultFacade::init();
-        EventFacade::instance()->seal();
         $suiteLoader = new SuiteLoader(
             $this->options,
             $this->output,
