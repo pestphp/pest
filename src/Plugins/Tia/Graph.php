@@ -943,10 +943,11 @@ final class Graph
         $this->baselines[$branch]['tree'] = $tree;
     }
 
-    public function clearResults(string $branch): void
+    public function clearResults(): void
     {
-        $this->ensureBaseline($branch);
-        $this->baselines[$branch]['results'] = [];
+        foreach (array_keys($this->baselines) as $branch) {
+            $this->baselines[$branch]['results'] = [];
+        }
     }
 
     /**
