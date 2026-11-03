@@ -1919,6 +1919,7 @@
    PASS  Tests\Unit\Plugins\Tia\CoverageReport
   ✓ the merged coverage report round-trips binary coverage without var_export
   ✓ the merged coverage report encodes a payload larger than one base64 chunk
+
    WARN  Tests\Unit\Plugins\Tia\DeletedTestCoverage
   - cached hits of a deleted test are dropped while a replayed test stays → Coverage is not available
 
