@@ -12,6 +12,7 @@ use Pest\Contracts\Plugins\Terminable;
 use Pest\Exceptions\InvalidOption;
 use Pest\Exceptions\MissingDependency;
 use Pest\Exceptions\NoAffectedTestsFound;
+use Pest\Exceptions\TiaBaselineCommitMissing;
 use Pest\Exceptions\TiaRequiresCommit;
 use Pest\Exceptions\TiaRequiresDefaultBranch;
 use Pest\Exceptions\TiaRequiresRemote;
@@ -178,6 +179,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     /** @var array{structural: array<string, mixed>, environmental: array<string, mixed>}|null */
     private ?array $startFingerprint = null;
 
+    private ?string $startSha = null;
+
     private bool $piggybackCoverage = false;
 
     private bool $recordingActive = false;
@@ -236,6 +239,17 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         assert($this->startFingerprint !== null);
 
         return ! Fingerprint::structuralMatches($this->startFingerprint, $current);
+    }
+
+    private function headMovedDuringRun(?string $currentSha): bool
+    {
+        return $this->startFingerprint !== null && $this->startSha !== $currentSha;
+    }
+
+    private function renderHeadMovedDuringRun(string $consequence): void
+    {
+        $this->renderBadge('WARN', 'HEAD moved during the run — '.$consequence.'.');
+        $this->renderChild('Re-run --tia to test the new HEAD.');
     }
 
     private function loadGraph(string $projectRoot): ?Graph
@@ -625,6 +639,14 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return;
         }
 
+        if ($this->headMovedDuringRun($currentSha)) {
+            $this->renderHeadMovedDuringRun('discarding recorded edges');
+            $recorder->reset();
+            $this->coverageCollector->reset();
+
+            return;
+        }
+
         $graph = $this->loadGraph($projectRoot) ?? new Graph($projectRoot);
         $graph->setFingerprint($currentFingerprint);
         $graph->setRecordedAtSha($this->branch, $currentSha);
@@ -705,6 +727,16 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         if ($this->structuralFingerprintShifted($currentFingerprint)) {
             $this->renderBadge('WARN', 'Project files changed during the run — discarding recorded edges.');
             $this->renderChild('Re-run --tia after your edits settle to record a fresh dependency graph.');
+
+            foreach ($partialKeys as $key) {
+                $this->state->delete($key);
+            }
+
+            return $exitCode;
+        }
+
+        if ($this->headMovedDuringRun($currentSha)) {
+            $this->renderHeadMovedDuringRun('discarding recorded edges');
 
             foreach ($partialKeys as $key) {
                 $this->state->delete($key);
@@ -842,6 +874,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         $fingerprint = Fingerprint::compute($projectRoot);
         $this->startFingerprint = $fingerprint;
+        $this->startSha = new ChangedFiles($projectRoot)->currentSha();
 
         if ($forceRebuild && $this->canRebuildGraph()) {
             $this->purgeState();
@@ -1050,7 +1083,11 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $changedFiles = new ChangedFiles($projectRoot);
 
         $branchSha = $graph->recordedAtSha($this->branch);
-        $changed = $changedFiles->since($branchSha) ?? [];
+        $changed = $changedFiles->since($branchSha);
+
+        if ($changed === null) {
+            Panic::with(new TiaBaselineCommitMissing((string) $branchSha));
+        }
 
         $changed = $changedFiles->filterUnchangedSinceLastRun(
             $changed,
@@ -1571,7 +1608,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         return [
             array_map(array_keys(...), $merged['files']),
-            array_map(array_keys(...), $merged['tables']),
+            array_map(static fn (array $tables): array => array_map(strval(...), array_keys($tables)), $merged['tables']),
             array_map(array_keys(...), $merged['inertia']),
         ];
     }
@@ -1673,6 +1710,12 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         $changedFiles = new ChangedFiles($projectRoot);
         $currentSha = $changedFiles->currentSha();
+
+        if ($this->headMovedDuringRun($currentSha)) {
+            $this->renderHeadMovedDuringRun('keeping the baseline from before the run');
+
+            return;
+        }
 
         if ($currentSha !== null) {
             $graph->setRecordedAtSha($this->branch, $currentSha);
@@ -2291,7 +2334,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         foreach (array_keys($perTestUsesDatabase) as $testFile) {
             $existing = $perTestTables[$testFile] ?? [];
             $merged = array_fill_keys($existing, true) + $allTables;
-            $names = array_keys($merged);
+            $names = array_map(strval(...), array_keys($merged));
             sort($names);
             $perTestTables[$testFile] = $names;
         }
