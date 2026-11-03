@@ -2266,6 +2266,7 @@
   ✓ parallel
   ✓ a parallel test can extend another test with same name
   ✓ parallel reports invalid datasets as failures
+  ✓ parallel lets extensions register event subscribers
   ✓ parallel can have multiple exclude-groups
   ✓ parallel can have multiple groups
   ✓ parallel accepts the options that the workers ignore with ('--no-results')

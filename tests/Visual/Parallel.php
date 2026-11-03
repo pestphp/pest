@@ -38,6 +38,21 @@ test('parallel reports invalid datasets as failures', function () use ($run): vo
         ->toContain('Parallel: 3 processes');
 })->skipOnWindows();
 
+test('parallel lets extensions register event subscribers', function (): void {
+    $process = new Process(
+        ['php', 'bin/pest', '--configuration', 'tests/Fixtures/Suites/ParallelExtensionSubscriber.xml', '--parallel', '--processes=2'],
+        dirname(__DIR__, 2),
+        ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
+    );
+
+    $process->run();
+
+    expect($process->getExitCode())->toBe(0)
+        ->and(removeAnsiEscapeSequences($process->getOutput()))
+        ->not->toContain('failed')
+        ->toContain('Parallel: 2 processes');
+})->skipOnWindows();
+
 test('parallel can have multiple exclude-groups', function () use ($run): void {
     $singleExclude = $run('--exclude-group=integration');
     $doubleExclude = $run('--exclude-group=integration', '--exclude-group=container');
