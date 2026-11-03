@@ -33,6 +33,7 @@ use Pest\Plugins\Tia\SourceScope;
 use Pest\Plugins\Tia\Storage;
 use Pest\Plugins\Tia\TableExtractor;
 use Pest\Plugins\Tia\WatchPatterns;
+use Pest\Support\Ci;
 use Pest\Support\Container;
 use Pest\Support\Git;
 use Pest\Support\View;
@@ -334,7 +335,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return true;
         }
 
-        return ! self::argumentPresent('--ci', $arguments);
+        return ! Ci::isRunning() && ! self::argumentPresent('--ci', $arguments);
     }
 
     /**
@@ -482,8 +483,11 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         self::applyWatchPatternMarks($arguments, $watchPatterns);
         $disabled = $this->hasArgument(self::NO_OPTION, $arguments);
         $cliEnabled = $this->hasArgument(self::OPTION, $arguments) || self::envFlagEnabled(self::ENV_TIA);
+        $runningOnCi = Ci::isRunning()
+            || $this->hasArgument('--ci', $arguments)
+            || $this->hasArgument('--ci', $this->originalArguments);
         $alwaysEnabled = $watchPatterns->isEnabled()
-            && (! $watchPatterns->isLocally() || Environment::name() === Environment::LOCAL);
+            && (! $watchPatterns->isLocally() || ! $runningOnCi);
         if (! $isWorker && ! $disabled && ($cliEnabled || $alwaysEnabled)) {
             $this->guardUnsupportedOptions($arguments);
         }
