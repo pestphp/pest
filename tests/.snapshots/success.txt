@@ -1919,6 +1919,8 @@
    PASS  Tests\Unit\Plugins\Tia\CoverageReport
   ✓ the merged coverage report round-trips binary coverage without var_export
   ✓ the merged coverage report encodes a payload larger than one base64 chunk
+   WARN  Tests\Unit\Plugins\Tia\DeletedTestCoverage
+  - cached hits of a deleted test are dropped while a replayed test stays → Coverage is not available
 
    PASS  Tests\Unit\Plugins\Tia\FileState
   ✓ keysWithPrefix() → it lists keys matching the prefix
@@ -2298,4 +2300,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 36 skipped, 1628 passed (3596 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1628 passed (3596 assertions)
