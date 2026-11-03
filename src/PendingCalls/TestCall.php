@@ -24,6 +24,7 @@ use Pest\TestSuite;
 use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversFunction;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\CoversTrait;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
@@ -567,6 +568,16 @@ final class TestCall // @phpstan-ignore-line
                 [$function],
             );
         }
+
+        return $this;
+    }
+
+    public function coversNothing(): self
+    {
+        $this->testCaseMethod->attributes[] = new Attribute(
+            CoversNothing::class,
+            [],
+        );
 
         return $this;
     }
