@@ -346,7 +346,7 @@ trait Testable
 
                     TestSuite::getInstance()->snapshots->forget();
 
-                    Closure::bind(fn (): array => $this->mockObjects = [], $this, TestCase::class)();
+                    Closure::bind(fn () => $this->mockObjectRegistry->clear(), $this, TestCase::class)();
 
                     foreach (array_keys(array_diff_key(get_object_vars($this), $initialProperties)) as $property) {
                         unset($this->{$property});
