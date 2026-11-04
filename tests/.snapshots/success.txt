@@ -480,12 +480,14 @@
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeAlphaNumeric
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeArray
@@ -502,6 +504,7 @@
   ✓ failures with malformed input
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeBetween
@@ -542,6 +545,7 @@
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeDirectory
@@ -556,6 +560,7 @@
   ✓ failures with leading dot
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeEmail
@@ -628,6 +633,7 @@
   ✓ failures with empty string
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeHostname
@@ -636,6 +642,7 @@
   ✓ failures with trailing hyphen
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeIn
@@ -679,6 +686,7 @@
   ✓ failures
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeIterable
@@ -725,6 +733,7 @@
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeMacAddress
@@ -732,6 +741,7 @@
   ✓ failures
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeNAN
@@ -837,12 +847,14 @@
   ✓ pass
   ✓ failures
   ✓ failures with message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeUppercase
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeUrl
@@ -857,6 +869,7 @@
   ✓ pass
   ✓ failures
   ✓ failures with message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeWritableDirectory
@@ -2274,8 +2287,15 @@
   ✓ parallel
   ✓ a parallel test can extend another test with same name
   ✓ parallel reports invalid datasets as failures
+  ✓ parallel lets extensions register event subscribers
   ✓ parallel can have multiple exclude-groups
   ✓ parallel can have multiple groups
+  ✓ parallel accepts the options that the workers ignore with ('--no-results')
+  ✓ parallel accepts the options that the workers ignore with ('--do-not-cache-result')
+  ✓ parallel accepts the options that the workers ignore with ('--do-not-record-test-run-history')
+  ✓ parallel records the test run history
+  ✓ parallel does not record the test run history when asked not to with ('--do-not-cache-result')
+  ✓ parallel does not record the test run history when asked not to with ('--do-not-record-test-run-history')
 
    PASS  Tests\Visual\ParallelNestedDatasets
   ✓ parallel loads nested datasets from nested directories
@@ -2309,4 +2329,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1634 passed (3620 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1654 passed (3673 assertions)
