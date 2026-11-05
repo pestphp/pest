@@ -62,7 +62,7 @@
     "require-dev": {
         "pestphp/pest-dev-tools": "^5.0.0",
         "pestphp/pest-plugin-browser": "^5.2.0",
-        "pestphp/pest-plugin-phpstan": "^5.3.0",
+        "pestphp/pest-plugin-phpstan": "^5.3.1",
         "pestphp/pest-plugin-rector": "^5.0.6",
         "pestphp/pest-plugin-type-coverage": "^5.1.0",
         "psy/psysh": "^0.12.24"
