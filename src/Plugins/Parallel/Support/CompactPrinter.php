@@ -6,6 +6,7 @@ namespace Pest\Plugins\Parallel\Support;
 
 use NunoMaduro\Collision\Adapters\Phpunit\State;
 use NunoMaduro\Collision\Adapters\Phpunit\Style;
+use NunoMaduro\Collision\Adapters\Phpunit\TestResult;
 use ParaTest\Options;
 use PHPUnit\Event\Telemetry\CpuTime;
 use PHPUnit\Event\Telemetry\GarbageCollectorStatus;
@@ -96,7 +97,10 @@ final class CompactPrinter
         $this->style->writeErrorsSummary($state);
     }
 
-    public function recap(State $state, PHPUnitTestResult $testResult, Duration $duration, Options $options): void
+    /**
+     * @param  list<TestResult>  $profile
+     */
+    public function recap(State $state, PHPUnitTestResult $testResult, Duration $duration, Options $options, array $profile = []): void
     {
         assert($this->output instanceof ConsoleOutput);
 
@@ -156,5 +160,9 @@ final class CompactPrinter
             "\n",
             "\n",
         ]);
+
+        if ($profile !== []) {
+            $this->style->writeSlowTests($profile, $telemetry);
+        }
     }
 }
