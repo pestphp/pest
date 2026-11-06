@@ -13,6 +13,7 @@ use Pest\Exceptions\InvalidOption;
 use Pest\Exceptions\MissingDependency;
 use Pest\Exceptions\NoAffectedTestsFound;
 use Pest\Exceptions\TiaBaselineCommitMissing;
+use Pest\Exceptions\TiaGitFailed;
 use Pest\Exceptions\TiaRequiresCommit;
 use Pest\Exceptions\TiaRequiresDefaultBranch;
 use Pest\Exceptions\TiaRequiresRemote;
@@ -861,7 +862,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         try {
             $this->resolveBranch($projectRoot);
-        } catch (MissingDependency $missingGit) {
+        } catch (MissingDependency|TiaGitFailed $missingGit) {
             $repository = new ChangedFiles($projectRoot);
 
             if ($repository->isRepository() && ! $repository->hasCommits()) {
@@ -1853,7 +1854,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         try {
             $this->resolveBranch($projectRoot);
-        } catch (MissingDependency) {
+        } catch (MissingDependency|TiaGitFailed) {
         }
 
         $graph->setFallbackBranch($this->fallbackBranch);
