@@ -110,11 +110,6 @@ final class TestCaseMethodFactory
         $this->factoryProxies->proxy($concrete);
     }
 
-    public function tearDown(TestCase $concrete): void
-    {
-        $concrete::flush(); // @phpstan-ignore-line
-    }
-
     public function getClosure(): Closure
     {
         $closure = $this->closure;
