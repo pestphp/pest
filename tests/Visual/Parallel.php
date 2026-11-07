@@ -128,5 +128,6 @@ test('parallel group-filtered run still fails when the selection matches no test
 
     $process->run();
 
-    expect($process->getExitCode())->not->toBe(0);
+    expect(removeAnsiEscapeSequences($process->getOutput()))->toContain('No tests found.')
+        ->and($process->getExitCode())->toBe(1);
 })->skipOnWindows();
