@@ -1,7 +1,7 @@
 
    PASS  Tests\Arch
   ✓ preset → php → ignoring ['Pest\Expectation', 'debug_backtrace', 'var_export', …]
-  ✓ preset → strict → ignoring ['Pest\Plugins\Tia\BaselineSync', 'usleep']
+  ✓ preset → strict → ignoring ['Pest\Plugins\Tia\BaselineSync', 'Pest\Plugins\Tia\Baselines\Gi…Remote', 'usleep']
   ✓ preset → security → ignoring ['eval', 'str_shuffle', 'exec', …]
   ✓ globals
 
@@ -472,12 +472,14 @@
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeAlphaNumeric
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeArray
@@ -494,6 +496,7 @@
   ✓ failures with malformed input
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeBetween
@@ -534,6 +537,7 @@
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeDirectory
@@ -548,6 +552,7 @@
   ✓ failures with leading dot
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeEmail
@@ -620,6 +625,7 @@
   ✓ failures with empty string
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeHostname
@@ -628,6 +634,7 @@
   ✓ failures with trailing hyphen
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeIn
@@ -671,6 +678,7 @@
   ✓ failures
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeIterable
@@ -717,6 +725,7 @@
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeMacAddress
@@ -724,6 +733,7 @@
   ✓ failures
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeNAN
@@ -829,12 +839,14 @@
   ✓ pass
   ✓ failures
   ✓ failures with message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeUppercase
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeUrl
@@ -849,6 +861,7 @@
   ✓ pass
   ✓ failures
   ✓ failures with message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeWritableDirectory
@@ -1279,6 +1292,12 @@
   ✓ it is not incompleted because of assert
   ✓ it is not incompleted because of test with assertions
   … a "describe" group of tests → it is incompleted
+
+   PASS  Tests\Features\Init
+  ✓ init creates a suite when the tests directory is missing
+  ✓ init creates a suite when --init is not the first argument
+  ✓ init creates a suite when --init is passed with a value
+  ✓ a missing tests directory does not crash while resolving tia state
 
    PASS  Tests\Features\Issue
   ✓ it may be associated with an issue #1, #2
@@ -1860,6 +1879,7 @@
   ✓ parseListTestsOutput → it deduplicates repeated class names from multiple test methods
   ✓ parseListTestsOutput → it returns an empty list for output with no matching lines
   ✓ parseListTestsOutput → it parses non-Tests namespaced classes
+  ✓ parseListTestsOutput → it parses module test classes living outside the tests directory
   ✓ parseListTestsOutput → it parses unnamespaced top-level classes
   ✓ parseListTestsOutput → it strips the P\ Pest prefix but keeps the rest of the FQCN
   ✓ parseListTestsOutput → it ignores junk lines that lack the " - …::" framing
@@ -1909,6 +1929,13 @@
   ✓ output format → it returns a 32-character hex xxh128 hash
   ✓ output format → it returns a stable hash for empty content
 
+   PASS  Tests\Unit\Plugins\Tia\CoverageReport
+  ✓ the merged coverage report round-trips binary coverage without var_export
+  ✓ the merged coverage report encodes a payload larger than one base64 chunk
+
+   WARN  Tests\Unit\Plugins\Tia\DeletedTestCoverage
+  - cached hits of a deleted test are dropped while a replayed test stays → Coverage is not available
+
    PASS  Tests\Unit\Plugins\Tia\FileState
   ✓ keysWithPrefix() → it lists keys matching the prefix
   ✓ keysWithPrefix() → it ignores in-flight temporary files from concurrent writes
@@ -1936,10 +1963,14 @@
   ✓ markKnownTestFiles() → it makes a test file with no edges known
   ✓ markKnownTestFiles() → it does not clobber edges of an already-known test file
   ✓ markKnownTestFiles() → it ignores paths outside the project root
+  ✓ clearResults() → it drops the results of the fallback branch too
 
    PASS  Tests\Unit\Plugins\Tia\IsEnabledForRun
   ✓ does not throw when an integer --random-order-seed is passed as a separate argv element
   ✓ still detects --tia when an integer argument is present
+  ✓ locally configured tia runs outside CI
+  ✓ locally configured tia stays off when CI is detected with ('CI')
+  ✓ locally configured tia stays off when CI is detected with ('GITHUB_ACTIONS')
 
    PASS  Tests\Unit\Plugins\Tia\JsModuleGraph
   ✓ it accepts a page directory candidate only when every segment matches the casing on disk with dataset "exact"
@@ -1960,6 +1991,12 @@
   ✓ it detects an added or removed non-platform dependency
   ✓ it is independent of package ordering
 
+   PASS  Tests\Unit\Plugins\Tia\NumericTableDependencies
+  ✓ it exports numeric table dependencies from the recorder as strings
+  ✓ it persists numeric tables as JSON strings and selects only their migration readers after reload
+  ✓ it preserves numeric worker tables through payload cleaning union and graph reload
+  ✓ it preserves observed and migration added numeric tables when augmenting database tests
+
    PASS  Tests\Unit\Plugins\Tia\Recorder
   ✓ activateLinkTracking() → it tracks tables without a coverage driver
   ✓ activateLinkTracking() → it tracks inertia components without a coverage driver
@@ -1970,6 +2007,9 @@
   ✓ it keys a result per dataset row rather than per method
   ✓ it records assertions against the same per-dataset key
   ✓ it leaves a test without a dataset keyed by class and method
+
+   WARN  Tests\Unit\Plugins\Tia\StaleCoverageLines
+  - a remeasured file drops line numbers that the current file no longer has → Coverage is not available
 
    PASS  Tests\Unit\Plugins\Tia\Storage
   ✓ it uses a project-relative configured directory
@@ -2083,6 +2123,7 @@
 
    PASS  Tests\Unit\Restarters\PcovRestarter
   ✓ it preserves the active memory limit in the restarted process
+  ✓ it preserves pcov.enabled in the restarted process
 
    PASS  Tests\Unit\Support\Arr
   ✓ last → it should return false for an empty arary
@@ -2146,6 +2187,8 @@
   ✓ it gets property values
   ✓ it gets properties from classes
   ✓ it gets methods from classes
+  ✓ it calls instance methods
+  ✓ it calls static methods without passing an object
 
    PASS  Tests\Unit\Support\Str
   ✓ it evaluates the code with ('version()', '__pest_evaluable_version__')
@@ -2236,8 +2279,15 @@
   ✓ parallel
   ✓ a parallel test can extend another test with same name
   ✓ parallel reports invalid datasets as failures
+  ✓ parallel lets extensions register event subscribers
   ✓ parallel can have multiple exclude-groups
   ✓ parallel can have multiple groups
+  ✓ parallel accepts the options that the workers ignore with ('--no-results')
+  ✓ parallel accepts the options that the workers ignore with ('--do-not-cache-result')
+  ✓ parallel accepts the options that the workers ignore with ('--do-not-record-test-run-history')
+  ✓ parallel records the test run history
+  ✓ parallel does not record the test run history when asked not to with ('--do-not-cache-result')
+  ✓ parallel does not record the test run history when asked not to with ('--do-not-record-test-run-history')
 
    PASS  Tests\Visual\ParallelNestedDatasets
   ✓ parallel loads nested datasets from nested directories
@@ -2271,4 +2321,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1610 passed (3516 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1648 passed (3649 assertions)

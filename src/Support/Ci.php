@@ -14,7 +14,7 @@ final class Ci
     /**
      * @var list<string>
      */
-    private const array ENVIRONMENT_VARIABLES = [
+    public const array ENVIRONMENT_VARIABLES = [
         'CI',
         'GITHUB_ACTIONS',
         'GITLAB_CI',
