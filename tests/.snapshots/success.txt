@@ -2279,23 +2279,6 @@
   ✓ parallel
   ✓ a parallel test can extend another test with same name
   ✓ parallel reports invalid datasets as failures
-  ✓ parallel stop-on-* fixture runs every case without a stop flag with ('fails')
-  ✓ parallel stop-on-* fixture runs every case without a stop flag with ('errors')
-  ✓ parallel stop-on-* fixture runs every case without a stop flag with ('is risky')
-  ✓ parallel stop-on-* fixture runs every case without a stop flag with ('is incomplete')
-  ✓ parallel stop-on-* fixture runs every case without a stop flag with ('warns')
-  ✓ parallel stop-on-* fixture runs every case without a stop flag with ('notices')
-  ✓ parallel stop-on-* fixture runs every case without a stop flag with ('deprecates')
-  ✓ parallel stop-on-* fixture runs every case without a stop flag with ('is skipped')
-  ✓ parallel honors --stop-on-* with dataset "failure"
-  ✓ parallel honors --stop-on-* with dataset "defect"
-  ✓ parallel honors --stop-on-* with dataset "error"
-  ✓ parallel honors --stop-on-* with dataset "risky"
-  ✓ parallel honors --stop-on-* with dataset "incomplete"
-  ✓ parallel honors --stop-on-* with dataset "warning"
-  ✓ parallel honors --stop-on-* with dataset "notice"
-  ✓ parallel honors --stop-on-* with dataset "deprecation"
-  ✓ parallel honors --stop-on-* with dataset "skipped"
   ✓ parallel lets extensions register event subscribers
   ✓ parallel can have multiple exclude-groups
   ✓ parallel can have multiple groups
@@ -2310,6 +2293,74 @@
 
    PASS  Tests\Visual\ParallelNestedDatasets
   ✓ parallel loads nested datasets from nested directories
+
+   PASS  Tests\Visual\ParallelStopOn
+  ✓ parallel stop-on fixtures run completely without a stop flag with dataset "failure"
+  ✓ parallel stop-on fixtures run completely without a stop flag with dataset "error"
+  ✓ parallel stop-on fixtures run completely without a stop flag with dataset "risky"
+  ✓ parallel stop-on fixtures run completely without a stop flag with dataset "incomplete"
+  ✓ parallel stop-on fixtures run completely without a stop flag with dataset "warning"
+  ✓ parallel stop-on fixtures run completely without a stop flag with dataset "notice"
+  ✓ parallel stop-on fixtures run completely without a stop flag with dataset "deprecation"
+  ✓ parallel stop-on fixtures run completely without a stop flag with dataset "skipped"
+  ✓ parallel honors stop-on flags with worker recycling with dataset "failure" / (0)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "failure" / (1)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "defect" / (0)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "defect" / (1)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "error" / (0)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "error" / (1)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "risky" / (0)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "risky" / (1)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "incomplete" / (0)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "incomplete" / (1)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "warning" / (0)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "warning" / (1)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "notice" / (0)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "notice" / (1)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "deprecation" / (0)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "deprecation" / (1)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "skipped" / (0)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "skipped" / (1)
+  ✓ parallel honors numeric stop-on thresholds with dataset "failure" / (0)
+  ✓ parallel honors numeric stop-on thresholds with dataset "failure" / (1)
+  ✓ parallel honors numeric stop-on thresholds with dataset "defect" / (0)
+  ✓ parallel honors numeric stop-on thresholds with dataset "defect" / (1)
+  ✓ parallel honors numeric stop-on thresholds with dataset "error" / (0)
+  ✓ parallel honors numeric stop-on thresholds with dataset "error" / (1)
+  ✓ parallel honors numeric stop-on thresholds with dataset "risky" / (0)
+  ✓ parallel honors numeric stop-on thresholds with dataset "risky" / (1)
+  ✓ parallel honors numeric stop-on thresholds with dataset "incomplete" / (0)
+  ✓ parallel honors numeric stop-on thresholds with dataset "incomplete" / (1)
+  ✓ parallel honors numeric stop-on thresholds with dataset "warning" / (0)
+  ✓ parallel honors numeric stop-on thresholds with dataset "warning" / (1)
+  ✓ parallel honors numeric stop-on thresholds with dataset "notice" / (0)
+  ✓ parallel honors numeric stop-on thresholds with dataset "notice" / (1)
+  ✓ parallel honors numeric stop-on thresholds with dataset "deprecation" / (0)
+  ✓ parallel honors numeric stop-on thresholds with dataset "deprecation" / (1)
+  ✓ parallel honors numeric stop-on thresholds with dataset "skipped" / (0)
+  ✓ parallel honors numeric stop-on thresholds with dataset "skipped" / (1)
+  ✓ parallel stop-on-defect includes errors warnings and risky tests with ('errors', 'failed', 2)
+  ✓ parallel stop-on-defect includes errors warnings and risky tests with ('warns', 'warning', 0)
+  ✓ parallel stop-on-defect includes errors warnings and risky tests with ('is risky', 'risky', 1)
+  ✓ parallel stop-on-defect allows incomplete and skipped tests with ('is incomplete', 'incomplete')
+  ✓ parallel stop-on-defect allows incomplete and skipped tests with ('is skipped', 'skipped')
+  ✓ parallel does not count the same failure twice with (0)
+  ✓ parallel does not count the same failure twice with (1)
+  ✓ parallel counts issues hidden by the progress output with ('--stop-on-warning', 'has combined issues', 'failed', …)
+  ✓ parallel counts issues hidden by the progress output with ('--stop-on-defect=2', 'has combined issues', 'failed', …)
+  ✓ parallel counts issues hidden by the progress output with ('--stop-on-warning=2', 'has repeated warnings', 'warning', …)
+  ✓ parallel counts issues hidden by the progress output with ('--stop-on-notice=2', 'has repeated notifications', 'notice', …)
+  ✓ parallel stops only on the requested deprecation message with ('user deprecation', 1)
+  ✓ parallel stops only on the requested deprecation message with ('another deprecation', 2)
+  ✓ parallel honors stop-on flags from XML
+  ✓ parallel CLI thresholds override XML stop-on flags
+  ✓ parallel clamps empty and non-positive thresholds like PHPUnit with ('')
+  ✓ parallel clamps empty and non-positive thresholds like PHPUnit with ('0')
+  ✓ parallel clamps empty and non-positive thresholds like PHPUnit with ('-2')
+  ✓ parallel counts a shared issue only once across recycled workers with ('warning', 'shares warning', 'warning')
+  ✓ parallel counts a shared issue only once across recycled workers with ('defect', 'shares warning', 'warning')
+  ✓ parallel counts a shared issue only once across recycled workers with ('notice', 'shares notice', 'notice')
+  ✓ parallel combines stop-on counts from different workers and cleans up their files
 
    PASS  Tests\Visual\SingleTestOrDirectory
   ✓ allows to run a single test
@@ -2340,4 +2391,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1667 passed (3670 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1716 passed (3971 assertions)
