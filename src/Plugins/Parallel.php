@@ -29,6 +29,7 @@ final class Parallel implements HandlesArguments
         Parallel\Handlers\Parallel::class,
         Parallel\Handlers\Pest::class,
         Parallel\Handlers\Laravel::class,
+        Parallel\Handlers\StopOn::class,
     ];
 
     /**
@@ -147,6 +148,8 @@ final class Parallel implements HandlesArguments
         $command->setAutoExit(false);
         $command->setName('Pest');
         $command->setVersion(version());
+
+        Parallel\Handlers\StopOn::configureOptions($command->find('paratest')->getDefinition());
 
         return $command;
     }

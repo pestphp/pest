@@ -6,8 +6,10 @@ use ParaTest\WrapperRunner\ApplicationForWrapperWorker;
 use ParaTest\WrapperRunner\WrapperWorker;
 use Pest\Kernel;
 use Pest\Plugins\Actions\CallsHandleArguments;
+use Pest\Plugins\Parallel\Paratest\StopConditions;
 use Pest\Support\Container;
 use Pest\TestSuite;
+use PHPUnit\TextUI\Configuration\Registry as ConfigurationRegistry;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -99,6 +101,8 @@ $bootPest = (static function (): void {
         (int) ($getopt['testdox-columns'] ?? null),
     );
 
+    $stopConditions = null;
+
     while (true) {
         if (feof(STDIN)) {
             $application->end();
@@ -112,6 +116,9 @@ $bootPest = (static function (): void {
         }
 
         $exitCode = $application->runTest(realpath(trim($testPath)));
+
+        $stopConditions ??= new StopConditions(ConfigurationRegistry::get());
+        $stopConditions->write($getopt['test-result-file'].'.stop');
 
         fwrite($statusFile, (string) $exitCode);
         fflush($statusFile);

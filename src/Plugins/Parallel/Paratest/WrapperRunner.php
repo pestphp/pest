@@ -42,8 +42,6 @@ use function array_filter;
 use function array_merge;
 use function array_merge_recursive;
 use function array_shift;
-use function array_unique;
-use function array_values;
 use function assert;
 use function bin2hex;
 use function count;
@@ -57,7 +55,6 @@ use function random_bytes;
 use function realpath;
 use function rmdir;
 use function sprintf;
-use function str_contains;
 use function str_starts_with;
 use function unlink;
 use function unserialize;
@@ -80,8 +77,6 @@ final class WrapperRunner implements RunnerInterface
 
     /** @var list<non-empty-string> */
     private array $pending = [];
-
-    private int $exitcode = -1;
 
     /** @var array<positive-int,WrapperWorker> */
     private array $workers = [];
@@ -125,10 +120,7 @@ final class WrapperRunner implements RunnerInterface
     /** @var non-empty-string[] */
     private readonly array $parameters;
 
-    /** @var list<string>|null */
-    private ?array $stopOutcomeChars = null;
-
-    private bool $stopRequested = false;
+    private readonly StopConditions $stopConditions;
 
     private CodeCoverageFilterRegistry $codeCoverageFilterRegistry;
 
@@ -141,6 +133,7 @@ final class WrapperRunner implements RunnerInterface
     ) {
         $this->printer = new ResultPrinter($output, $options);
         $this->timer = new Timer;
+        $this->stopConditions = new StopConditions($options->configuration);
 
         $wrapper = realpath(
             dirname(__DIR__, 4).DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'worker.php',
@@ -256,14 +249,18 @@ final class WrapperRunner implements RunnerInterface
 
                 $this->flushWorker($worker);
 
+                if ($this->stopConditions->shouldStop()) {
+                    $this->pending = [];
+
+                    break;
+                }
+
                 if ($batchSize !== 0 && $this->batches[$token] === $batchSize) {
                     $this->destroyWorker($token);
                     $worker = $this->startWorker($token);
                 }
 
-                if ($this->shouldStop()) {
-                    $this->pending = [];
-                } elseif (($pending = array_shift($this->pending)) !== null) {
+                if (($pending = array_shift($this->pending)) !== null) {
                     $worker->assign($pending);
                     $this->batches[$token]++;
                 }
@@ -273,80 +270,6 @@ final class WrapperRunner implements RunnerInterface
         }
     }
 
-    private function shouldStop(): bool
-    {
-        if ($this->stopRequested) {
-            return true;
-        }
-
-        $outcomes = $this->stopOutcomeChars();
-        if ($outcomes === []) {
-            return false;
-        }
-
-        foreach ($this->workers as $worker) {
-            $progress = file_get_contents($worker->progressFile->getPathname());
-            if ($progress === false || $progress === '') {
-                continue;
-            }
-
-            foreach ($outcomes as $outcome) {
-                if (str_contains($progress, $outcome)) {
-                    return $this->stopRequested = true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * @return list<string>
-     */
-    private function stopOutcomeChars(): array
-    {
-        if ($this->stopOutcomeChars !== null) {
-            return $this->stopOutcomeChars;
-        }
-
-        $configuration = $this->options->configuration;
-        $outcomes = [];
-
-        if ($configuration->stopOnFailure() || $configuration->stopOnDefect()) {
-            $outcomes[] = 'F';
-        }
-
-        if ($configuration->stopOnError() || $configuration->stopOnDefect()) {
-            $outcomes[] = 'E';
-        }
-
-        if ($configuration->stopOnRisky() || $configuration->stopOnDefect()) {
-            $outcomes[] = 'R';
-        }
-
-        if ($configuration->stopOnIncomplete() || $configuration->stopOnDefect()) {
-            $outcomes[] = 'I';
-        }
-
-        if ($configuration->stopOnWarning()) {
-            $outcomes[] = 'W';
-        }
-
-        if ($configuration->stopOnNotice()) {
-            $outcomes[] = 'N';
-        }
-
-        if ($configuration->stopOnDeprecation()) {
-            $outcomes[] = 'D';
-        }
-
-        if ($configuration->stopOnSkipped()) {
-            $outcomes[] = 'S';
-        }
-
-        return $this->stopOutcomeChars = array_values(array_unique($outcomes));
-    }
-
     private function flushWorker(WrapperWorker $worker): void
     {
         if ($worker->hasExecutedTests()) {
@@ -354,6 +277,7 @@ final class WrapperRunner implements RunnerInterface
 
             if ($testResultFile !== '') {
                 $this->requiredTestResultFiles[$testResultFile] = true;
+                $this->stopConditions->read($testResultFile.'.stop');
             }
 
             if (isset($worker->coverageFile) && $worker->coverageFile->getPathname() !== '') {
@@ -361,7 +285,6 @@ final class WrapperRunner implements RunnerInterface
             }
         }
 
-        $this->exitcode = max($this->exitcode, $worker->getExitCode());
         $this->printer->printFeedback(
             $worker->progressFile,
             $worker->unexpectedOutputFile,
@@ -580,7 +503,11 @@ final class WrapperRunner implements RunnerInterface
         $this->clearFiles($this->statusFiles);
         $this->clearFiles($this->progressFiles);
         $this->clearFiles($this->unexpectedOutputFiles);
-        $this->clearFiles($this->testResultFiles);
+
+        foreach ($this->testResultFiles as $file) {
+            $this->clearFiles([$file, new SplFileInfo($file->getPathname().'.stop')]);
+        }
+
         $this->clearFiles($this->resultCacheFiles);
         $this->clearFiles($this->coverageFiles);
         $this->clearFiles($this->junitFiles);
