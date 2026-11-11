@@ -105,3 +105,29 @@ test('parallel does not record the test run history when asked not to', function
     '--do-not-cache-result',
     '--do-not-record-test-run-history',
 ])->skipOnWindows();
+
+test('parallel group-filtered run is not considered empty when a worker ends on a fully filtered file', function (): void {
+    $process = new Process(
+        ['php', 'bin/pest', '--parallel', '--processes=1', '--group=filtered', 'tests/Fixtures/Suites/ParallelGroupFilteredLastFile'],
+        dirname(__DIR__, 2),
+        ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
+    );
+
+    $process->run();
+
+    expect(removeAnsiEscapeSequences($process->getOutput()))->toContain('Tests:    1 passed (1 assertions)')
+        ->and($process->getExitCode())->toBe(0);
+})->skipOnWindows();
+
+test('parallel group-filtered run still fails when the selection matches no tests', function (): void {
+    $process = new Process(
+        ['php', 'bin/pest', '--parallel', '--processes=3', '--group=missing', 'tests/Fixtures/Suites/ParallelGroupFilteredLastFile'],
+        dirname(__DIR__, 2),
+        ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
+    );
+
+    $process->run();
+
+    expect(removeAnsiEscapeSequences($process->getOutput()))->toContain('No tests found.')
+        ->and($process->getExitCode())->toBe(1);
+})->skipOnWindows();
