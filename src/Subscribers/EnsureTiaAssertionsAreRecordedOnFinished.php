@@ -22,7 +22,7 @@ final readonly class EnsureTiaAssertionsAreRecordedOnFinished implements Finishe
 
         if ($test instanceof TestMethod) {
             $this->collector->recordAssertions(
-                $test->className().'::'.$test->methodName(),
+                $test->id(),
                 $event->numberOfAssertionsPerformed(),
             );
         }

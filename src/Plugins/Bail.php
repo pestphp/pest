@@ -14,9 +14,6 @@ final class Bail implements HandlesArguments
 {
     use HandleArguments;
 
-    /**
-     * Handles the arguments, adding the `--stop-on-defect` when the `--bail` argument is present.
-     */
     public function handleArguments(array $arguments): array
     {
         if ($this->hasArgument('--bail', $arguments)) {

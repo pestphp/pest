@@ -17,23 +17,14 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class EnsureTeamCityEnabled implements ConfiguredSubscriber
 {
-    /**
-     * Indicates if the TeamCity logger has already been registered.
-     */
     private static bool $registered = false;
 
-    /**
-     * Creates a new Configured Subscriber instance.
-     */
     public function __construct(
         private readonly InputInterface $input,
         private readonly OutputInterface $output,
         private readonly TestSuite $testSuite,
     ) {}
 
-    /**
-     * Runs the subscriber.
-     */
     public function notify(Configured $event): void
     {
         if (self::$registered) {

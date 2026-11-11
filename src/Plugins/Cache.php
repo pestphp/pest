@@ -6,6 +6,7 @@ namespace Pest\Plugins;
 
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Plugins\Concerns\HandleArguments;
+use PHPUnit\Event\Facade as EventFacade;
 use PHPUnit\TextUI\CliArguments\Builder as CliConfigurationBuilder;
 use PHPUnit\TextUI\CliArguments\XmlConfigurationFileFinder;
 use PHPUnit\TextUI\XmlConfiguration\DefaultConfiguration;
@@ -18,9 +19,6 @@ final class Cache implements HandlesArguments
 {
     use HandleArguments;
 
-    /**
-     * The temporary folder.
-     */
     private const string TEMPORARY_FOLDER = __DIR__
         .DIRECTORY_SEPARATOR
         .'..'
@@ -29,19 +27,16 @@ final class Cache implements HandlesArguments
         .DIRECTORY_SEPARATOR
         .'.temp';
 
-    /**
-     * Handles the arguments, adding the cache directory and the cache result arguments.
-     */
     public function handleArguments(array $arguments): array
     {
         if (! $this->hasArgument('--cache-directory', $arguments)) {
 
-            $cliConfiguration = (new CliConfigurationBuilder)->fromParameters([]);
+            $cliConfiguration = new CliConfigurationBuilder(EventFacade::emitter())->fromParameters([]);
             $configurationFile = (new XmlConfigurationFileFinder)->find($cliConfiguration);
             $xmlConfiguration = DefaultConfiguration::create();
 
             if (is_string($configurationFile)) {
-                $xmlConfiguration = (new Loader)->load($configurationFile);
+                $xmlConfiguration = new Loader(EventFacade::emitter())->load($configurationFile);
             }
 
             if (! $xmlConfiguration->phpunit()->hasCacheDirectory()) {
@@ -50,10 +45,18 @@ final class Cache implements HandlesArguments
             }
         }
 
-        if (! $this->hasArgument('--parallel', $arguments)) {
-            return $this->pushArgument('--cache-result', $arguments);
+        if (! $this->hasArgument('--parallel', $arguments) && ! $this->hasTestRunHistoryArgument($arguments)) {
+            return $this->pushArgument('--record-test-run-history', $arguments);
         }
 
         return $arguments;
+    }
+
+    /**
+     * @param  array<int, string>  $arguments
+     */
+    private function hasTestRunHistoryArgument(array $arguments): bool
+    {
+        return array_any(['--record-test-run-history', '--do-not-record-test-run-history', '--cache-result', '--do-not-cache-result'], fn (string $argument): bool => $this->hasArgument($argument, $arguments));
     }
 }

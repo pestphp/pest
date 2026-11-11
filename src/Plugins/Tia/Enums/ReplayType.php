@@ -29,7 +29,9 @@ enum ReplayType
             $status->isRisky() => self::Risky,
             $status->isSkipped() => self::Skipped,
             $status->isIncomplete() => self::Incomplete,
-            default => self::Failure,
+            $status->isNotice(), $status->isDeprecation(), $status->isWarning() => self::Pass,
+            $status->isFailure(), $status->isError() => self::Failure,
+            default => self::None,
         };
     }
 }

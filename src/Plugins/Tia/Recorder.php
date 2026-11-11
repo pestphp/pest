@@ -34,6 +34,8 @@ final class Recorder
 
     private bool $active = false;
 
+    private bool $captureCoverage = false;
+
     private bool $driverChecked = false;
 
     private bool $driverAvailable = false;
@@ -43,6 +45,12 @@ final class Recorder
     private ?SourceScope $sourceScope = null;
 
     public function activate(): void
+    {
+        $this->active = true;
+        $this->captureCoverage = true;
+    }
+
+    public function activateLinkTracking(): void
     {
         $this->active = true;
     }
@@ -55,7 +63,7 @@ final class Recorder
     public function driverAvailable(): bool
     {
         if (! $this->driverChecked) {
-            if (function_exists('pcov\\start')) {
+            if (function_exists('pcov\\start') && filter_var((string) ini_get('pcov.enabled'), FILTER_VALIDATE_BOOL)) {
                 $this->driver = 'pcov';
                 $this->driverAvailable = true;
             } elseif (function_exists('xdebug_start_code_coverage') && function_exists('xdebug_info')) {
@@ -75,7 +83,11 @@ final class Recorder
 
     public function beginTest(string $className, string $methodName, string $fallbackFile): void
     {
-        if (! $this->active || ! $this->driverAvailable()) {
+        if (! $this->active) {
+            return;
+        }
+
+        if ($this->captureCoverage && ! $this->driverAvailable()) {
             return;
         }
 
@@ -95,6 +107,10 @@ final class Recorder
             $this->perTestUsesDatabase[$file] = true;
         }
 
+        if (! $this->captureCoverage) {
+            return;
+        }
+
         if ($this->driver === 'pcov') {
             \pcov\clear();
             \pcov\start();
@@ -107,7 +123,13 @@ final class Recorder
 
     public function endTest(): void
     {
-        if (! $this->active || ! $this->driverAvailable() || $this->currentTestFile === null) {
+        if (! $this->active || $this->currentTestFile === null) {
+            return;
+        }
+
+        if (! $this->captureCoverage || ! $this->driverAvailable()) {
+            $this->currentTestFile = null;
+
             return;
         }
 
@@ -132,7 +154,15 @@ final class Recorder
             $data = \xdebug_get_code_coverage();
             \xdebug_stop_code_coverage(true);
 
-            $coveredFiles = array_keys($data);
+            $scope = $this->sourceScope();
+
+            foreach (array_keys($data) as $file) {
+                if (! $scope->contains($file)) {
+                    unset($data[$file]);
+                }
+            }
+
+            $coveredFiles = $this->filesWithExecutedLines($data);
         }
 
         foreach ($coveredFiles as $sourceFile) {
@@ -242,7 +272,7 @@ final class Recorder
         $out = [];
 
         foreach ($this->perTestTables as $testFile => $tables) {
-            $names = array_keys($tables);
+            $names = array_map(strval(...), array_keys($tables));
             sort($names);
             $out[$testFile] = $names;
         }
@@ -325,7 +355,9 @@ final class Recorder
             }
 
             $lineKeys = array_keys($lines);
-            if ($lineKeys !== [] && count($covered) === 1 && $covered[0] === max($lineKeys)) {
+            $reportsUnexecutedLines = count($covered) < count($lines);
+
+            if ($reportsUnexecutedLines && count($covered) === 1 && $covered[0] === max($lineKeys)) {
                 continue;
             }
 
@@ -351,5 +383,6 @@ final class Recorder
         $this->classUsesDatabaseCache = [];
         $this->sourceScope = null;
         $this->active = false;
+        $this->captureCoverage = false;
     }
 }

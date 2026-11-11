@@ -1,5 +1,5 @@
 <?php
 
-test('closure was bound to CustomTestCase', function () {
+test('closure was bound to CustomTestCase', function (): void {
     $this->assertCustomTrue();
 });

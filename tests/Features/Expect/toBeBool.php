@@ -1,20 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 use PHPUnit\Framework\ExpectationFailedException;
 
-test('pass', function () {
-    expect(true)->toBeBool();
-    expect(0)->not->toBeBool();
+test('pass', function (): void {
+    expect(true)->toBeBool()
+        ->and(0)->not->toBeBool();
 });
 
-test('failures', function () {
-    expect(null)->toBeBool();
+test('failures', function (): void {
+    expect()->toBeBool();
 })->throws(ExpectationFailedException::class);
 
-test('failures with custom message', function () {
-    expect(null)->toBeBool('oh no!');
+test('failures with custom message', function (): void {
+    expect()->toBeBool('oh no!');
 })->throws(ExpectationFailedException::class, 'oh no!');
 
-test('not failures', function () {
+test('not failures', function (): void {
     expect(false)->not->toBeBool();
 })->throws(ExpectationFailedException::class);

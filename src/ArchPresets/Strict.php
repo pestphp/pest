@@ -12,9 +12,6 @@ use Pest\Expectation;
  */
 final class Strict extends AbstractPreset
 {
-    /**
-     * Executes the arch preset.
-     */
     public function execute(): void
     {
         $this->eachUserNamespace(

@@ -2,8 +2,8 @@
 
 use Pest\Support\ExceptionTrace;
 
-it('ensures the given closures reports the correct class name', function () {
-    $closure = function () {
+it('ensures the given closures reports the correct class name', function (): void {
+    $closure = function (): void {
         throw new Exception('Call to undefined method P\Tests\IntentionallyNotExisting::testBasic().');
     };
 
@@ -13,7 +13,7 @@ it('ensures the given closures reports the correct class name', function () {
     'Call to undefined method Tests\IntentionallyNotExisting::testBasic().',
 );
 
-it('ensures the given closures reports the correct class name and suggests the [pest()] function', function () {
+it('ensures the given closures reports the correct class name and suggests the [pest()] function', function (): void {
     $this->get();
 })->throws(
     Error::class,

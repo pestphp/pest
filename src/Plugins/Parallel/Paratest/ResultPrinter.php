@@ -29,24 +29,12 @@ use function strlen;
  */
 final class ResultPrinter
 {
-    /**
-     * If the test should be marked as todo.
-     */
     public bool $lastWasTodo = false;
 
-    /**
-     * The "native" printer.
-     */
     public readonly Printer $printer;
 
-    /**
-     * The state.
-     */
     public int $passedTests = 0;
 
-    /**
-     * The "compact" printer.
-     */
     private readonly CompactPrinter $compactPrinter;
 
     /** @var resource|null */
@@ -120,10 +108,6 @@ final class ResultPrinter
 
         $unexpectedOutput = $this->tail($outputFile);
         if ($unexpectedOutput !== '') {
-            if (preg_match('/^T+$/', $unexpectedOutput) > 0) {
-                return;
-            }
-
             $this->output->write($unexpectedOutput);
         }
 

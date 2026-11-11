@@ -1,7 +1,7 @@
 
    PASS  Tests\Arch
   ✓ preset → php → ignoring ['Pest\Expectation', 'debug_backtrace', 'var_export', …]
-  ✓ preset → strict → ignoring ['Pest\Plugins\Tia\BaselineSync', 'usleep']
+  ✓ preset → strict → ignoring ['Pest\Plugins\Tia\BaselineSync', 'Pest\Plugins\Tia\Baselines\Gi…Remote', 'usleep']
   ✓ preset → security → ignoring ['eval', 'str_shuffle', 'exec', …]
   ✓ globals
 
@@ -82,6 +82,12 @@
    PASS  Tests\Features\Covers\ClassCoverage
   ✓ it uses the correct PHPUnit attribute for class
 
+   PASS  Tests\Features\Covers\CoversNothing
+  ✓ it uses the correct PHPUnit attribute for covers nothing
+  ✓ describe → it uses the correct PHPUnit attribute for covers nothing
+  ✓ it is not risky when coverage metadata is required
+  ✓ it does not conflict with covers in the same file
+
    PASS  Tests\Features\Covers\ExceptionHandling
   ✓ it throws exception if no class nor method has been found
 
@@ -135,6 +141,11 @@
   ✓ outer describe → outer test is unaffected by inner dataset
   ✓ describe()->with() preserves depends → first with (9)
   ✓ describe()->with() preserves depends → second with (9)
+
+   PASS  Tests\Features\DatasetProviderErrors
+  ✓ reports missing datasets as errors for a single file run
+  ✓ reports missing datasets as errors alongside passing tests
+  ✓ reports dataset closure exceptions as errors
 
    PASS  Tests\Features\DatasetsTests - 1 todo
   ✓ it throws exception if dataset does not exist
@@ -270,6 +281,7 @@
   ✓ dataset items can mix named and sequential styles with ('Taylor', 'taylor@laravel.com')
   ✓ dataset items can mix named and sequential styles with ('James', 'james@laravel.com') #1
   ✓ dataset items can mix named and sequential styles with ('James', 'james@laravel.com') #2
+  ✓ named parameters work with a single argument with ('Taylor')
 
    PASS  Tests\Features\Depends
   ✓ first
@@ -293,8 +305,8 @@
   ✓ it uses correct parent class
 
    DEPR  Tests\Features\Deprecated
-  ! deprecated → str_contains(): Passing null to parameter #1 ($haystack) of type string is deprecated // tests/Features/Deprecated.php:4
-  ! user deprecated → Since foo 1.0: This is a deprecation description // tests/Features/Deprecated.php:10
+  ✓ deprecated
+  ! user deprecated → Since foo 1.0: This is a deprecation description // tests/Features/Deprecated.php:12
 
    PASS  Tests\Features\Describe - 5 todos
   ✓ before each
@@ -434,6 +446,7 @@
   ✓ interceptor can be filter the expected parameter as well
   ✓ interceptor works with negated expectation
   ✓ intercept can add new parameters to the expectation
+  ✓ named arguments reach the pipes of an expectation
 
    PASS  Tests\Features\Expect\ray
   ✓ ray calls do not fail when ray is not installed
@@ -459,18 +472,31 @@
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeAlphaNumeric
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeArray
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeBase64
+  ✓ pass
+  ✓ failures
+  ✓ failures with invalid padding
+  ✓ failures with padding only
+  ✓ failures with malformed input
+  ✓ failures with invalid type
+  ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeBetween
@@ -511,12 +537,29 @@
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeDirectory
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeDomain
+  ✓ pass
+  ✓ failures
+  ✓ failures with leading dot
+  ✓ failures with invalid type
+  ✓ failures with custom message
+  ✓ failures with default message
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeEmail
+  ✓ pass
+  ✓ failures
+  ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeEmpty
@@ -574,6 +617,26 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toBeHexadecimal
+  ✓ pass
+  ✓ failures
+  ✓ failures with invalid characters
+  ✓ failures with zero-x prefix
+  ✓ failures with empty string
+  ✓ failures with invalid type
+  ✓ failures with custom message
+  ✓ failures with default message
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeHostname
+  ✓ pass
+  ✓ failures
+  ✓ failures with trailing hyphen
+  ✓ failures with invalid type
+  ✓ failures with custom message
+  ✓ failures with default message
+  ✓ not failures
+
    PASS  Tests\Features\Expect\toBeIn
   ✓ passes
   ✓ failures
@@ -609,6 +672,14 @@
   ✓ class is invokable via a trait
   ✓ failure when the class is not invokable
   ✓ class is not invokable
+
+   PASS  Tests\Features\Expect\toBeIpAddress
+  ✓ pass
+  ✓ failures
+  ✓ failures with invalid type
+  ✓ failures with custom message
+  ✓ failures with default message
+  ✓ not failures
 
    PASS  Tests\Features\Expect\toBeIterable
   ✓ pass
@@ -654,6 +725,15 @@
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
+  ✓ not failures
+
+   PASS  Tests\Features\Expect\toBeMacAddress
+  ✓ pass
+  ✓ failures
+  ✓ failures with invalid type
+  ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeNAN
@@ -754,10 +834,19 @@
   ✓ failures with custom message
   ✓ not failures
 
+   PASS  Tests\Features\Expect\toBeUlid
+  ✓ failures with wrong type
+  ✓ pass
+  ✓ failures
+  ✓ failures with message
+  ✓ failures with default message
+  ✓ not failures
+
    PASS  Tests\Features\Expect\toBeUppercase
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeUrl
@@ -772,6 +861,7 @@
   ✓ pass
   ✓ failures
   ✓ failures with message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeWritableDirectory
@@ -1053,6 +1143,17 @@
   ✓ multiple snapshot expectations with repeat @ repetition 8 of 10
   ✓ multiple snapshot expectations with repeat @ repetition 9 of 10
   ✓ multiple snapshot expectations with repeat @ repetition 10 of 10
+  ✓ pass with named snapshot
+  ✓ named snapshots do not depend on the order they are asserted in
+  ✓ named snapshots do not consume the ordinal of the unnamed ones
+  ✓ named snapshots require a name
+  ✓ ordinal snapshots start over once forgotten
+  ✓ ordinal snapshots start over on every repetition @ repetition 1 of 3
+  ✓ ordinal snapshots start over on every repetition @ repetition 2 of 3
+  ✓ ordinal snapshots start over on every repetition @ repetition 3 of 3
+  ✓ snapshots of a repeated test are recorded per repetition @ repetition 1 of 3
+  ✓ snapshots of a repeated test are recorded per repetition @ repetition 2 of 3
+  ✓ snapshots of a repeated test are recorded per repetition @ repetition 3 of 3
 
    PASS  Tests\Features\Expect\toStartWith
   ✓ pass
@@ -1155,9 +1256,11 @@
   ✓ it does not retry fails()
   ✓ it retries unexpected exceptions even with throws set
   ✓ it does not leak mock objects between retries
+  ✓ it resolves the same snapshot ordinals on every retry
+  ✓ it matches the same snapshot on every retry
   ✓ it does not stop retrying when snapshot changes are absent
   ✓ it does not leak dynamic properties between retries
-  ✓ it clears output buffer between retries when expectOutputString is used
+  ! it clears output buffer between retries when expectOutputString is used → Creation of dynamic property PHPUnit\Framework\TestCase\OutputBuffer::$expectedString is deprecated
   ✓ it preserves output between retries when no output expectation is set
 
    WARN  Tests\Features\Helpers
@@ -1189,6 +1292,12 @@
   ✓ it is not incompleted because of assert
   ✓ it is not incompleted because of test with assertions
   … a "describe" group of tests → it is incompleted
+
+   PASS  Tests\Features\Init
+  ✓ init creates a suite when the tests directory is missing
+  ✓ init creates a suite when --init is not the first argument
+  ✓ init creates a suite when --init is passed with a value
+  ✓ a missing tests directory does not crash while resolving tia state
 
    PASS  Tests\Features\Issue
   ✓ it may be associated with an issue #1, #2
@@ -1260,8 +1369,8 @@
   // This is another runtime note
 
    NOTI  Tests\Features\Notices
-  ! notice → This is a notice description // tests/Features/Notices.php:4
-  ! a "describe" group of tests → notice → This is a notice description // tests/Features/Notices.php:11
+  ! notice → This is a notice description // tests/Features/Notices.php:6
+  ! a "describe" group of tests → notice → This is a notice description // tests/Features/Notices.php:13
 
    PASS  Tests\Features\Pr
   ✓ it may be associated with an pr #1, #2
@@ -1386,6 +1495,14 @@
   ✓ multiple times with repeat iterator with multiple dataset ('c') / ('d') @ repetition 2 of 2
   ✓ multiple times with repeat iterator with multiple dataset ('c') / ('e') @ repetition 2 of 2
   ✓ multiple times with repeat iterator with multiple dataset ('c') / ('f') @ repetition 2 of 2
+  ✓ multiple times with named dataset arguments ('Taylor', 'taylor@laravel.com') @ repetition 1 of 2
+  ✓ multiple times with named dataset arguments ('Nuno', 'enunomaduro@gmail.com') @ repetition 1 of 2
+  ✓ multiple times with named dataset arguments ('Taylor', 'taylor@laravel.com') @ repetition 2 of 2
+  ✓ multiple times with named dataset arguments ('Nuno', 'enunomaduro@gmail.com') @ repetition 2 of 2
+  ✓ multiple times with named dataset arguments and repeat iterator ('Taylor', 'taylor@laravel.com') @ repetition 1 of 2
+  ✓ multiple times with named dataset arguments and repeat iterator ('Nuno', 'enunomaduro@gmail.com') @ repetition 1 of 2
+  ✓ multiple times with named dataset arguments and repeat iterator ('Taylor', 'taylor@laravel.com') @ repetition 2 of 2
+  ✓ multiple times with named dataset arguments and repeat iterator ('Nuno', 'enunomaduro@gmail.com') @ repetition 2 of 2
   ✓ describe blocks → multiple times @ repetition 1 of 3
   ✓ describe blocks → multiple times @ repetition 2 of 3
   ✓ describe blocks → multiple times @ repetition 3 of 3
@@ -1495,6 +1612,9 @@
   ✓ it allows access to the underlying expectNotToPerformAssertions method
   ✓ it allows performing no expectations without being risky
   ✓ a "describe" group of tests → it allows performing no expectations without being risky
+
+   PASS  Tests\Features\Tia
+  ✓ it does not run user hooks when replaying cached skipped and incomplete results
 
    PASS  Tests\Features\Ticket
   ✓ it may be associated with an ticket #1, #2
@@ -1692,10 +1812,13 @@
   ✓ it shows the correct description for long texts with newlines
   ✓ it shows the correct description for arrays with many elements
   ✓ it shows the correct description of datasets with html
+  ✓ it does not treat a two element dataset of class names as a callable
 
    PASS  Tests\Unit\Expectations\OppositeExpectation
   ✓ it throw expectation failed exception with string argument
   ✓ it throw expectation failed exception with array argument
+  ✓ it does not truncate long string arguments in error message
+  ✓ it does not truncate custom error message when using not()
 
    PASS  Tests\Unit\Overrides\ThrowableBuilder
   ✓ collision editor can be added to the stack trace
@@ -1707,6 +1830,8 @@
   ✓ method hasArgument with ('someValue', true)
   ✓ method hasArgument with ('--a', false)
   ✓ method hasArgument with ('--undefined-argument', false)
+  ✓ popArgument preserves duplicate values when removing a missing argument
+  ✓ popArgument preserves duplicate values when removing an existing argument
 
    PASS  Tests\Unit\Plugins\Environment
   ✓ environment is set to CI when --ci option is used
@@ -1714,6 +1839,58 @@
 
    PASS  Tests\Unit\Plugins\Retry
   ✓ it orders by defects and stop on defects if when --retry is used
+
+   PASS  Tests\Unit\Plugins\Shard
+  ✓ getShard → it parses valid shard format with ('1/2', 1, 2)
+  ✓ getShard → it parses valid shard format with ('2/2', 2, 2)
+  ✓ getShard → it parses valid shard format with ('1/4', 1, 4)
+  ✓ getShard → it parses valid shard format with ('4/4', 4, 4)
+  ✓ getShard → it parses valid shard format with ('1/10', 1, 10)
+  ✓ getShard → it parses valid shard format with ('10/10', 10, 10)
+  ✓ getShard → it parses valid shard format with ('5/100', 5, 100)
+  ✓ getShard → it throws exception for invalid format with (['test', '--shard', 'invalid'])
+  ✓ getShard → it throws exception for invalid format with (['test', '--shard', '1'])
+  ✓ getShard → it throws exception for invalid format with (['test', '--shard', '1/'])
+  ✓ getShard → it throws exception for invalid format with (['test', '--shard', '/2'])
+  ✓ getShard → it throws exception for invalid format with (['test', '--shard', 'a/b'])
+  ✓ getShard → it throws exception for invalid format with (['test', '--shard', '1.5/2'])
+  ✓ getShard → it throws exception for invalid index or total values with (['test', '--shard', '0/2'])
+  ✓ getShard → it throws exception for invalid index or total values with (['test', '--shard', '1/0'])
+  ✓ getShard → it throws exception for invalid index or total values with (['test', '--shard', '3/2'])
+  ✓ getShard → it throws exception for invalid index or total values with (['test', '--shard', '5/4'])
+  ✓ buildFilterArgument → it generates compact filter for single test
+  ✓ buildFilterArgument → it generates compact filter for multiple tests with common prefix
+  ✓ buildFilterArgument → it generates compact filter for tests with different namespaces
+  ✓ buildFilterArgument → it returns empty string for empty test list
+  ✓ buildFilterArgument → it generates compact filter for deeply nested namespaces
+  ✓ buildFilterArgument → it handles mix of nested and flat namespaces
+  ✓ buildFilterArgument → it does not match a class outside of the shard when another class name is its prefix
+  ✓ buildFilterArgument → it still matches dataset variants after the class boundary
+  ✓ buildFilterArgument → it keeps a class matchable when another class nests below its namespace
+  ✓ buildFilterArgument → it keeps the filter whole when the parallel runner passes it as --filter=VALUE
+  ✓ buildFilterArgument → it matches a class-based test of the shard
+  ✓ ensureFilterLengthIsSafe → it accepts filter within length limit
+  ✓ ensureFilterLengthIsSafe → it throws exception when filter exceeds default limit
+  ✓ ensureFilterLengthIsSafe → it respects custom limit from environment variable
+  ✓ ensureFilterLengthIsSafe → it accepts filter within custom limit
+  ✓ handleArguments → it returns original arguments when shard option is not present
+  ✓ handleArguments → it removes parallel arguments from test discovery
+  ✓ parseListTestsOutput → it parses Tests\ namespaced classes from --list-tests output
+  ✓ parseListTestsOutput → it deduplicates repeated class names from multiple test methods
+  ✓ parseListTestsOutput → it returns an empty list for output with no matching lines
+  ✓ parseListTestsOutput → it parses non-Tests namespaced classes
+  ✓ parseListTestsOutput → it parses module test classes living outside the tests directory
+  ✓ parseListTestsOutput → it parses unnamespaced top-level classes
+  ✓ parseListTestsOutput → it strips the P\ Pest prefix but keeps the rest of the FQCN
+  ✓ parseListTestsOutput → it ignores junk lines that lack the " - …::" framing
+  ✓ buildListTestsCommand → it builds the list-tests command with the forwarded --test-directory
+  ✓ buildListTestsCommand → it strips --parallel and -p when building the list-tests command
+  ✓ buildListTestsCommand → it forwards --test-directory even when input arguments include one
+  ✓ buildListTestsCommand → it strips --processes=N when building the list-tests command
+  ✓ buildListTestsCommand → it strips --processes N (space-separated) when building the list-tests command
+  ✓ addOutput → it displays shard information after test execution
+  ✓ addOutput → it uses singular form for single test file
+  ✓ addOutput → it returns original exit code when shard is not set
 
    PASS  Tests\Unit\Plugins\Tia\ContentHash
   ✓ of() → it returns false when file does not exist
@@ -1752,13 +1929,201 @@
   ✓ output format → it returns a 32-character hex xxh128 hash
   ✓ output format → it returns a stable hash for empty content
 
+   PASS  Tests\Unit\Plugins\Tia\CoverageReport
+  ✓ the merged coverage report round-trips binary coverage without var_export
+  ✓ the merged coverage report encodes a payload larger than one base64 chunk
+
+   WARN  Tests\Unit\Plugins\Tia\DeletedTestCoverage
+  - cached hits of a deleted test are dropped while a replayed test stays → Coverage is not available
+
+   PASS  Tests\Unit\Plugins\Tia\FileState
+  ✓ keysWithPrefix() → it lists keys matching the prefix
+  ✓ keysWithPrefix() → it ignores in-flight temporary files from concurrent writes
+
+   PASS  Tests\Unit\Plugins\Tia\Graph
+  ✓ shouldRerunStatus() → it re-runs failures and errors, replays successes
+  ✓ applyMigrationChanges() → it selects tests whose recorded tables intersect the changed migration
+  ✓ applyMigrationChanges() → it falls back to watch patterns when no table usage was recorded at all
+  ✓ rerun tracking → it reruns cached failures via their file
+  ✓ rerun tracking → it flags cached failures whose file is unknown
+  ✓ applyBladeStaticChanges() → it maps an anonymous index component to the views that render it
+  ✓ applyBladeStaticChanges() → it falls back to watch patterns for components with no matched usage
+  ✓ Livewire component views → it maps a changed component to generated views from different workers
+  ✓ Livewire component views → it maps documented SFC locations with dataset "default pages namespace"
+  ✓ Livewire component views → it maps documented SFC locations with dataset "default layouts namespace without emoji"
+  ✓ Livewire component views → it maps documented SFC locations with dataset "additional component location"
+  ✓ Livewire component views → it maps documented MFC locations using the component directory hash with dataset "default component location"
+  ✓ Livewire component views → it maps documented MFC locations using the component directory hash with dataset "default component location without emoji"
+  ✓ Livewire component views → it maps documented MFC locations using the component directory hash with dataset "index convention"
+  ✓ Livewire component views → it maps a changed MFC sibling through the component directory hash with dataset "class sibling via the generated class"
+  ✓ Livewire component views → it maps a changed MFC sibling through the component directory hash with dataset "class sibling via the generated view"
+  ✓ Livewire component views → it maps a changed MFC sibling through the component directory hash with dataset "asset sibling via the generated view"
+  ✓ Livewire component views → it preserves direct view edges for class-based components
+  ✓ Livewire component views → it falls back to watch patterns when no generated view matches
+  ✓ markKnownTestFiles() → it makes a test file with no edges known
+  ✓ markKnownTestFiles() → it does not clobber edges of an already-known test file
+  ✓ markKnownTestFiles() → it ignores paths outside the project root
+  ✓ clearResults() → it drops the results of the fallback branch too
+
    PASS  Tests\Unit\Plugins\Tia\IsEnabledForRun
   ✓ does not throw when an integer --random-order-seed is passed as a separate argv element
   ✓ still detects --tia when an integer argument is present
+  ✓ locally configured tia runs outside CI
+  ✓ locally configured tia stays off when CI is detected with ('CI')
+  ✓ locally configured tia stays off when CI is detected with ('GITHUB_ACTIONS')
+
+   PASS  Tests\Unit\Plugins\Tia\JsModuleGraph
+  ✓ it accepts a page directory candidate only when every segment matches the casing on disk with dataset "exact"
+  ✓ it accepts a page directory candidate only when every segment matches the casing on disk with dataset "wrong leaf"
+  ✓ it accepts a page directory candidate only when every segment matches the casing on disk with dataset "wrong parent"
+  ✓ it accepts a page directory candidate only when every segment matches the casing on disk with dataset "absent"
+  ✓ it resolves the pages directory with the casing it has on disk
+  ✓ it fingerprints a project whose js tree holds a directory it cannot open
+
+   PASS  Tests\Unit\Plugins\Tia\Lockfiles\PackageLock
+  ✓ it applies only to package-lock.json
+  ✓ it returns null for contents that are not an npm lockfile
+  ✓ it is stable when the directory-derived top-level name changes
+  ✓ it ignores platform-specific native binaries added or dropped per OS
+  ✓ it ignores libc-constrained variants
+  ✓ it ignores runtime deps bundled beneath a platform-specific package
+  ✓ it detects a real dependency version change
+  ✓ it detects an added or removed non-platform dependency
+  ✓ it is independent of package ordering
+
+   PASS  Tests\Unit\Plugins\Tia\NumericTableDependencies
+  ✓ it exports numeric table dependencies from the recorder as strings
+  ✓ it persists numeric tables as JSON strings and selects only their migration readers after reload
+  ✓ it preserves numeric worker tables through payload cleaning union and graph reload
+  ✓ it preserves observed and migration added numeric tables when augmenting database tests
+
+   PASS  Tests\Unit\Plugins\Tia\Recorder
+  ✓ activateLinkTracking() → it tracks tables without a coverage driver
+  ✓ activateLinkTracking() → it tracks inertia components without a coverage driver
+  ✓ activateLinkTracking() → it tracks linked sources across consecutive tests
+  ✓ activateLinkTracking() → it records nothing while inactive
+
+   PASS  Tests\Unit\Plugins\Tia\ResultKey
+  ✓ it keys a result per dataset row rather than per method
+  ✓ it records assertions against the same per-dataset key
+  ✓ it leaves a test without a dataset keyed by class and method
+
+   WARN  Tests\Unit\Plugins\Tia\StaleCoverageLines
+  - a remeasured file drops line numbers that the current file no longer has → Coverage is not available
+
+   PASS  Tests\Unit\Plugins\Tia\Storage
+  ✓ it uses a project-relative configured directory
+  ✓ it uses an absolute configured directory
+
+   PASS  Tests\Unit\Plugins\Tia\TableExtractor
+  ✓ fromSql() → it extracts tables from plain DML
+  ✓ fromSql() → it extracts tables from joins
+  ✓ fromSql() → it extracts tables from CTE queries
+  ✓ fromSql() → it extracts tables from REPLACE INTO
+  ✓ fromSql() → it records the table, not the schema, for qualified identifiers
+  ✓ fromSql() → it handles quoted identifiers
+  ✓ fromSql() → it ignores schema metadata tables
+  ✓ fromSql() → it does not leak int keys for numeric identifiers
+  ✓ fromSql() → it returns nothing for non-DML statements
+  ✓ fromMigrationSource() → it extracts tables from Schema builder calls
+  ✓ fromMigrationSource() → it extracts tables from raw DDL statements
+  ✓ fromMigrationSource() → it records the table, not the schema, in qualified DDL and DML
+  ✓ fromMigrationSource() → it does not leak int keys for numeric table names
+  ✓ fromMigrationSource() → it extracts tables from DB::table calls
+
+   PASS  Tests\Unit\Plugins\Tia\TestPaths
+  ✓ isTestFile() → it matches a standard test file under a configured directory
+  ✓ isTestFile() → it does not match a non-test file that shares the directory
+  ✓ isTestFile() → it does not match files outside the configured directories
+  ✓ isTestFile() → it matches an explicitly listed file
+  ✓ isTestFile() → it honours a bare .php suffix
+  ✓ isTestFile() → it does not require a dot before the suffix
+
+   PASS  Tests\Unit\Plugins\Tia\ViteDepsHelper
+  ✓ it strips JSONC down to something JSON.parse accepts with ('plain-object')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('plain-array')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('nested')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('empty-object')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('empty-array')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('line-comment-own-line')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('line-comment-trailing')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('leading-line-comments')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('line-comment-eof-no-newline')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('block-comment-leading')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('block-comment-inline')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('block-comment-multiline')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('block-comment-eof')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('jsdoc-style-block')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('block-contains-double-slash')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('line-then-block')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('comment-with-quotes')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('comment-with-braces-commas')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('trailing-comma-object')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('trailing-comma-array')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('trailing-comma-nested')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('trailing-comma-newline')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('trailing-comma-then-block')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('trailing-comma-then-line')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('crlf-line-comment')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('tabs-whitespace')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('url-in-string')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('glob-in-string')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('path-alias-in-string')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('block-open-in-string')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('block-close-in-string')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('block-both-in-string')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('star-in-string')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('single-slashes-in-string')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('escaped-quote-in-string')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('escaped-backslash-in-string')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('backslash-then-slash')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('newline-escape-in-string')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('unicode-in-string')
+  ✓ it strips JSONC down to something JSON.parse accepts with ('block-secret')
+  ✓ it never touches comment-looking sequences inside string values
+  ✓ it removes the comment body entirely
+  ✓ it builds the expected alias map from a tsconfig with ('basic')
+  ✓ it builds the expected alias map from a tsconfig with ('multiple-aliases')
+  ✓ it builds the expected alias map from a tsconfig with ('default-baseUrl')
+  ✓ it builds the expected alias map from a tsconfig with ('baseUrl-subdir')
+  ✓ it builds the expected alias map from a tsconfig with ('jsconfig-fallback')
+  ✓ it builds the expected alias map from a tsconfig with ('first-target-wins')
+  ✓ it builds the expected alias map from a tsconfig with ('multiple-keys-mixed')
+  ✓ it builds the expected alias map from a tsconfig with ('no-paths')
+  ✓ it builds the expected alias map from a tsconfig with ('no-compiler-options')
+  ✓ it builds the expected alias map from a tsconfig with ('key-without-glob')
+  ✓ it builds the expected alias map from a tsconfig with ('target-without-glob')
+  ✓ it builds the expected alias map from a tsconfig with ('target-not-array')
+  ✓ it builds the expected alias map from a tsconfig with ('target-empty-array')
+  ✓ it builds the expected alias map from a tsconfig with ('commented-tsconfig')
+  ✓ it builds the expected alias map from a tsconfig with ('trailing-comma-paths')
+  ✓ it builds the expected alias map from a tsconfig with ('malformed-json')
+  ✓ it builds the expected alias map from a tsconfig with ('missing-config')
+  ✓ it builds the expected alias map from a tsconfig with ('tsconfig-precedence')
+  ✓ it builds the expected alias map from a vite config with ('root-slash-literal')
+  ✓ it builds the expected alias map from a vite config with ('path-resolve')
+  ✓ it builds the expected alias map from a vite config with ('file-url')
+  ✓ it builds the expected alias map from a vite config with ('tilde-alias')
+  ✓ it builds the expected alias map from a vite config with ('multiple-aliases')
+  ✓ it builds the expected alias map from a vite config with ('laravel-plugin-default')
+  ✓ it builds the expected alias map from a vite config with ('no-alias-no-plugin')
+  ✓ it builds the expected alias map from a vite config with ('no-config')
+  ✓ it accepts a page directory candidate only when it matches the casing on disk with ('exact')
+  ✓ it accepts a page directory candidate only when it matches the casing on disk with ('wrong leaf')
+  ✓ it accepts a page directory candidate only when it matches the casing on disk with ('wrong parent')
+  ✓ it accepts a page directory candidate only when it matches the casing on disk with ('absent')
+
+   PASS  Tests\Unit\Plugins\Tia\WorkerToken
+  ✓ prefers the per-process UNIQUE_TEST_TOKEN over the per-slot TEST_TOKEN, so two workers recycled into the same slot get different tokens
+  ✓ falls back to TEST_TOKEN when UNIQUE_TEST_TOKEN is absent
 
    PASS  Tests\Unit\Preset
   ✓ preset invalid name
   ✓ preset → myFramework
+
+   PASS  Tests\Unit\Restarters\PcovRestarter
+  ✓ it preserves the active memory limit in the restarted process
+  ✓ it preserves pcov.enabled in the restarted process
 
    PASS  Tests\Unit\Support\Arr
   ✓ last → it should return false for an empty arary
@@ -1822,6 +2187,8 @@
   ✓ it gets property values
   ✓ it gets properties from classes
   ✓ it gets methods from classes
+  ✓ it calls instance methods
+  ✓ it calls static methods without passing an object
 
    PASS  Tests\Unit\Support\Str
   ✓ it evaluates the code with ('version()', '__pest_evaluable_version__')
@@ -1888,6 +2255,7 @@
   ✓ it does not allow to add the same test description twice
   ✓ it does not allow static closures
   ✓ it alerts users about tests with arguments but no input
+  ✓ it can look up registered test methods by evaluable name
   ✓ it can return an array of all test suite filenames
 
    PASS  Tests\Visual\BeforeEachTestName
@@ -1896,6 +2264,9 @@
 
    PASS  Tests\Visual\Collision
   ✓ collision with ([''])
+
+   PASS  Tests\Visual\FailingBoot
+  ✓ a failure in the boot files renders only that failure
 
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
@@ -1925,6 +2296,17 @@
   ✓ parallel honors --stop-on-* with dataset "notice"
   ✓ parallel honors --stop-on-* with dataset "deprecation"
   ✓ parallel honors --stop-on-* with dataset "skipped"
+  ✓ parallel lets extensions register event subscribers
+  ✓ parallel can have multiple exclude-groups
+  ✓ parallel can have multiple groups
+  ✓ parallel accepts the options that the workers ignore with ('--no-results')
+  ✓ parallel accepts the options that the workers ignore with ('--do-not-cache-result')
+  ✓ parallel accepts the options that the workers ignore with ('--do-not-record-test-run-history')
+  ✓ parallel records the test run history
+  ✓ parallel does not record the test run history when asked not to with ('--do-not-cache-result')
+  ✓ parallel does not record the test run history when asked not to with ('--do-not-record-test-run-history')
+  ✓ parallel group-filtered run is not considered empty when a worker ends on a fully filtered file
+  ✓ parallel group-filtered run still fails when the selection matches no tests
 
    PASS  Tests\Visual\ParallelNestedDatasets
   ✓ parallel loads nested datasets from nested directories
@@ -1958,4 +2340,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 35 skipped, 1347 passed (3027 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1667 passed (3670 assertions)

@@ -7,6 +7,7 @@ namespace Pest\Plugins\Parallel\Support;
 use NunoMaduro\Collision\Adapters\Phpunit\State;
 use NunoMaduro\Collision\Adapters\Phpunit\Style;
 use ParaTest\Options;
+use PHPUnit\Event\Telemetry\CpuTime;
 use PHPUnit\Event\Telemetry\GarbageCollectorStatus;
 use PHPUnit\Event\Telemetry\HRTime;
 use PHPUnit\Event\Telemetry\Info;
@@ -26,9 +27,6 @@ use function Termwind\terminal;
  */
 final class CompactPrinter
 {
-    /**
-     * The number of processed tests.
-     */
     private int $processed = 0;
 
     /**
@@ -47,21 +45,15 @@ final class CompactPrinter
         'F' => ['red', '⨯'],
     ];
 
-    /**
-     * Creates a new instance of the Compact Printer.
-     */
     public function __construct(
         private readonly Terminal $terminal,
         private readonly OutputInterface $output,
         private readonly Style $style,
         private readonly int $compactSymbolsPerLine,
     ) {
-        // ..
+        //
     }
 
-    /**
-     * Creates a new instance of the Compact Printer.
-     */
     public static function default(bool $decorated = true): self
     {
         return new self(
@@ -72,17 +64,11 @@ final class CompactPrinter
         );
     }
 
-    /**
-     * Output an empty line in the console. Useful for providing a little breathing room.
-     */
     public function newLine(): void
     {
         render('<div class="py-1"></div>');
     }
 
-    /**
-     * Outputs the given description item from the ProgressPrinter as a gorgeous, colored symbol.
-     */
     public function descriptionItem(string $item): void
     {
         [$color, $icon] = self::LOOKUP_TABLE[$item] ?? self::LOOKUP_TABLE['.'];
@@ -103,9 +89,6 @@ final class CompactPrinter
         $this->processed++;
     }
 
-    /**
-     * Outputs all errors from the given state using Collision's beautiful error output.
-     */
     public function errors(State $state): void
     {
         $this->output->writeln('');
@@ -113,9 +96,6 @@ final class CompactPrinter
         $this->style->writeErrorsSummary($state);
     }
 
-    /**
-     * Outputs a clean recap of the test run, including the number of tests, assertions, and failures.
-     */
     public function recap(State $state, PHPUnitTestResult $testResult, Duration $duration, Options $options): void
     {
         assert($this->output instanceof ConsoleOutput);
@@ -147,11 +127,20 @@ final class CompactPrinter
                 MemoryUsage::fromBytes(0),
                 MemoryUsage::fromBytes(0),
                 $garbageCollectorStatus,
+                CpuTime::fromSecondsAndNanoseconds(0, 0),
+                CpuTime::fromSecondsAndNanoseconds(0, 0),
+                CpuTime::fromSecondsAndNanoseconds(0, 0),
             ),
             $telemetryDuration,
             MemoryUsage::fromBytes(0),
             \PHPUnit\Event\Telemetry\Duration::fromSecondsAndNanoseconds(0, 0),
             MemoryUsage::fromBytes(0),
+            CpuTime::fromSecondsAndNanoseconds(0, 0),
+            CpuTime::fromSecondsAndNanoseconds(0, 0),
+            CpuTime::fromSecondsAndNanoseconds(0, 0),
+            CpuTime::fromSecondsAndNanoseconds(0, 0),
+            CpuTime::fromSecondsAndNanoseconds(0, 0),
+            CpuTime::fromSecondsAndNanoseconds(0, 0),
         );
 
         $this->style->writeRecap($state, $telemetry, $testResult);

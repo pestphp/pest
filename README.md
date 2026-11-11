@@ -1,7 +1,7 @@
 <p align="center">
-    <img src="https://raw.githubusercontent.com/pestphp/art/master/v4/social.png" width="600" alt="PEST">
+    <img src="https://raw.githubusercontent.com/pestphp/art/master/v5/social.png" width="600" alt="PEST">
     <p align="center">
-        <a href="https://github.com/pestphp/pest/actions"><img alt="GitHub Workflow Status (4.x)" src="https://img.shields.io/github/actions/workflow/status/pestphp/pest/tests.yml?branch=4.x&label=Tests%204.x"></a>
+        <a href="https://github.com/pestphp/pest/actions"><img alt="GitHub Workflow Status (5.x)" src="https://img.shields.io/github/actions/workflow/status/pestphp/pest/tests.yml?branch=5.x&label=Tests%205.x"></a>
         <a href="https://packagist.org/packages/pestphp/pest"><img alt="Total Downloads" src="https://img.shields.io/packagist/dt/pestphp/pest"></a>
         <a href="https://packagist.org/packages/pestphp/pest"><img alt="Latest Version" src="https://img.shields.io/packagist/v/pestphp/pest"></a>
         <a href="https://packagist.org/packages/pestphp/pest"><img alt="License" src="https://img.shields.io/packagist/l/pestphp/pest"></a>
@@ -12,9 +12,9 @@
 
 ------
 
-> Pest v4 Now Available: **[Read the announcement »](https://pestphp.com/docs/pest-v4-is-here-now-with-browser-testing)**.
+> Pest v5 Now Available: **[Read the announcement »](https://pestphp.com/docs/pest5-now-available)**.
 
-**Pest** is an elegant PHP testing Framework with a focus on simplicity, meticulously designed to bring back the joy of testing in PHP.
+**Pest** is an elegant testing framework for PHP developers and AI agents.
 
 - Explore our docs at **[pestphp.com »](https://pestphp.com)**
 - Follow the creator Nuno Maduro:
@@ -29,26 +29,19 @@
 
 We cannot thank our sponsors enough for their incredible support in funding Pest's development. Their contributions have been instrumental in making Pest the best it can be. For those who are interested in becoming a sponsor, please visit Nuno Maduro's Sponsor page at **[github.com/sponsors/nunomaduro](https://github.com/sponsors/nunomaduro)**.
 
-
-### Platinum Sponsors
-
-- **[CodeRabbit](https://coderabbit.ai/?ref=pestphp)**
-- **[Mailtrap](https://l.rw.rw/pestphp)**
+- **[PhpStorm](https://jb.gg/nuno)**
+- **[CodeRabbit](https://coderabbit.link/nunomaduro)**
 - **[SerpApi](https://serpapi.com/?ref=nunomaduro)**
-- **[Tighten](https://tighten.com/?ref=nunomaduro)**
+- **[Bento](https://bentonow.com/?ref=nunomaduro)**
+- **[CMS Max](https://cmsmax.com/?ref=nunomaduro)**
 - **[Redberry](https://redberry.international/laravel-development/?utm_source=pest&utm_medium=banner&utm_campaign=pest_sponsorship)**
-
-### Gold Sponsors
-
-- **[CMS Max](https://cmsmax.com/?ref=pestphp)**
-
-### Premium Sponsors
-
-- [Zapiet](https://zapiet.com/?ref=pestphp)
-- [Load Forge](https://loadforge.com/?ref=pestphp)
-- [Route4Me](https://route4me.com/pt?ref=pestphp)
-- [Nerdify](https://getnerdify.com/?ref=pestphp)
-- [Akaunting](https://akaunting.com/?ref=pestphp)
+- **[Typesense](https://typesense.org/?ref=nunomaduro)**
+- **[Pixel](https://wearepixel.com.au/?ref=nunomaduro)**
+- **[NativePHP](https://nativephp.com/?ref=nunomaduro)**
 - [TestMu AI](https://www.testmuai.com/?utm_medium=sponsor&utm_source=pest)
+- [Zapiet](https://zapiet.com/?ref=nunomaduro)
+- [LoadForge](https://loadforge.com/?ref=nunomaduro)
+- [Route4Me](https://route4me.com/?ref=nunomaduro)
+- [Nerdify](https://getnerdify.com/?ref=nunomaduro)
 
 Pest is an open-sourced software licensed under the **[MIT license](https://opensource.org/licenses/MIT)**.

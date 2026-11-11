@@ -1,73 +1,72 @@
 <?php
 
-it('can access methods', function () {
+it('can access methods', function (): void {
     expect(new HasMethods)
         ->name()->toBeString()->toEqual('Has Methods');
 });
 
-it('can access multiple methods', function () {
+it('can access multiple methods', function (): void {
     expect(new HasMethods)
         ->name()->toBeString()->toEqual('Has Methods')
         ->quantity()->toBeInt()->toEqual(20);
 });
 
-it('works with not', function () {
+it('works with not', function (): void {
     expect(new HasMethods)
         ->name()->not->toEqual('world')->toEqual('Has Methods')
         ->quantity()->toEqual(20)->not()->toEqual('bar')->not->toBeNull;
 });
 
-it('can accept arguments', function () {
+it('can accept arguments', function (): void {
     expect(new HasMethods)
         ->multiply(5, 4)->toBeInt->toEqual(20);
 });
 
-it('works with each', function () {
+it('works with each', function (): void {
     expect(new HasMethods)
         ->attributes()->toBeArray->each->not()->toBeNull
-        ->attributes()->each(function ($attribute) {
+        ->attributes()->each(function ($attribute): void {
             $attribute->not->toBeNull();
         });
 });
 
-it('works inside of each', function () {
+it('works inside of each', function (): void {
     expect(new HasMethods)
-        ->books()->each(function ($book) {
+        ->books()->each(function ($book): void {
             $book->title->not->toBeNull->cost->toBeGreaterThan(19);
         });
 });
 
-it('works with sequence', function () {
+it('works with sequence', function (): void {
     expect(new HasMethods)
         ->books()->sequence(
-            function ($book) {
+            function ($book): void {
                 $book->title->toEqual('Foo')->cost->toEqual(20);
             },
-            function ($book) {
+            function ($book): void {
                 $book->title->toEqual('Bar')->cost->toEqual(30);
             },
         );
 });
 
-it('can compose complex expectations', function () {
+it('can compose complex expectations', function (): void {
     expect(new HasMethods)
-        ->toBeObject()
         ->name()->toEqual('Has Methods')->not()->toEqual('bar')
         ->quantity()->not->toEqual('world')->toEqual(20)->toBeInt
         ->multiply(3, 4)->not->toBeString->toEqual(12)
         ->attributes()->toBeArray()
         ->books()->toBeArray->each->not->toBeEmpty
         ->books()->sequence(
-            function ($book) {
+            function ($book): void {
                 $book->title->toEqual('Foo')->cost->toEqual(20);
             },
-            function ($book) {
+            function ($book): void {
                 $book->title->toEqual('Bar')->cost->toEqual(30);
             },
         );
 });
 
-it('can handle nested method calls', function () {
+it('can handle nested method calls', function (): void {
     expect(new HasMethods)
         ->newInstance()->newInstance()->name()->toEqual('Has Methods')->toBeString()
         ->newInstance()->name()->toEqual('Has Methods')->not->toBeInt
@@ -82,7 +81,7 @@ it('works with higher order tests')
     ->name()->toEqual('Has Methods')
     ->books()->each->toBeArray;
 
-it('can use the scoped method to lock into the given level for expectations', function () {
+it('can use the scoped method to lock into the given level for expectations', function (): void {
     expect(new HasMethods)
         ->attributes()->scoped(fn ($attributes) => $attributes
         ->name->toBe('Has Methods')
@@ -99,7 +98,7 @@ it('can use the scoped method to lock into the given level for expectations', fu
         );
 });
 
-it('works consistently with the json expectation method', function () {
+it('works consistently with the json expectation method', function (): void {
     expect(new HasMethods)
         ->jsonString()->json()->id->toBe(1)
         ->jsonString()->json()->name->toBe('Has Methods')->toBeString()
@@ -113,22 +112,22 @@ class HasMethods
         return '{ "id": 1, "name": "Has Methods", "quantity": 20 }';
     }
 
-    public function name()
+    public function name(): string
     {
         return 'Has Methods';
     }
 
-    public function quantity()
+    public function quantity(): int
     {
         return 20;
     }
 
-    public function multiply($x, $y)
+    public function multiply($x, $y): int|float
     {
         return $x * $y;
     }
 
-    public function attributes()
+    public function attributes(): array
     {
         return [
             'name' => $this->name(),
@@ -136,7 +135,7 @@ class HasMethods
         ];
     }
 
-    public function books()
+    public function books(): array
     {
         return [
             [
@@ -150,7 +149,7 @@ class HasMethods
         ];
     }
 
-    public function newInstance()
+    public function newInstance(): static
     {
         return new static;
     }

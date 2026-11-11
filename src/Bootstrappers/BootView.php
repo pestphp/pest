@@ -4,29 +4,34 @@ declare(strict_types=1);
 
 namespace Pest\Bootstrappers;
 
+use Closure;
 use Pest\Contracts\Bootstrapper;
 use Pest\Support\View;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Terminal;
 
 /**
  * @internal
  */
 final readonly class BootView implements Bootstrapper
 {
-    /**
-     * Creates a new instance of the Boot View.
-     */
     public function __construct(
         private OutputInterface $output
     ) {
-        // ..
+        //
     }
 
-    /**
-     * Boots the view renderer.
-     */
     public function boot(): void
     {
         View::renderUsing($this->output);
+
+        if (getenv('COLUMNS') === false && property_exists(Terminal::class, 'width') && property_exists(Terminal::class, 'height')) {
+            (new Terminal)->getWidth();
+
+            Closure::bind(static function (): void {
+                Terminal::$width ??= 0;
+                Terminal::$height ??= 0;
+            }, null, Terminal::class)();
+        }
     }
 }

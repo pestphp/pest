@@ -2,11 +2,11 @@
 
 use PHPUnit\Framework\ExpectationFailedException;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->matched = null;
 });
 
-it('pass', function () {
+it('pass', function (): void {
     expect('baz')
         ->match('foo', [
             'bar' => function ($value) {
@@ -21,25 +21,20 @@ it('pass', function () {
             },
         ]
         )
-        ->toEqual($this->matched);
-
-    expect(static::getCount())->toBe(2);
+        ->toEqual($this->matched)
+        ->and(static::getCount())->toBe(2);
 });
 
-it('failures', function () {
+it('failures', function (): void {
     expect(true)
         ->match('foo', [
-            'bar' => function ($value) {
-                return $value->toBeTrue();
-            },
-            'foo' => function ($value) {
-                return $value->toBeFalse();
-            },
+            'bar' => fn ($value) => $value->toBeTrue(),
+            'foo' => fn ($value) => $value->toBeFalse(),
         ]
         );
 })->throws(ExpectationFailedException::class, 'true is false');
 
-it('runs with truthy', function () {
+it('runs with truthy', function (): void {
     expect('foo')
         ->match(1, [
             'bar' => function ($value) {
@@ -54,12 +49,11 @@ it('runs with truthy', function () {
             },
         ]
         )
-        ->toEqual($this->matched);
-
-    expect(static::getCount())->toBe(2);
+        ->toEqual($this->matched)
+        ->and(static::getCount())->toBe(2);
 });
 
-it('runs with falsy', function () {
+it('runs with falsy', function (): void {
     expect('foo')
         ->match(false, [
             'bar' => function ($value) {
@@ -74,17 +68,14 @@ it('runs with falsy', function () {
             },
         ]
         )
-        ->toEqual($this->matched);
-
-    expect(static::getCount())->toBe(2);
+        ->toEqual($this->matched)
+        ->and(static::getCount())->toBe(2);
 });
 
-it('runs with truthy closure condition', function () {
+it('runs with truthy closure condition', function (): void {
     expect('foo')
         ->match(
-            function () {
-                return '1';
-            }, [
+            fn (): string => '1', [
                 'bar' => function ($value) {
                     $this->matched = 'bar';
 
@@ -97,17 +88,14 @@ it('runs with truthy closure condition', function () {
                 },
             ]
         )
-        ->toEqual($this->matched);
-
-    expect(static::getCount())->toBe(2);
+        ->toEqual($this->matched)
+        ->and(static::getCount())->toBe(2);
 });
 
-it('runs with falsy closure condition', function () {
+it('runs with falsy closure condition', function (): void {
     expect('foo')
         ->match(
-            function () {
-                return '0';
-            }, [
+            fn (): string => '0', [
                 'bar' => function ($value) {
                     $this->matched = 'bar';
 
@@ -120,12 +108,11 @@ it('runs with falsy closure condition', function () {
                 },
             ]
         )
-        ->toEqual($this->matched);
-
-    expect(static::getCount())->toBe(2);
+        ->toEqual($this->matched)
+        ->and(static::getCount())->toBe(2);
 });
 
-it('can be passed non-callable values', function () {
+it('can be passed non-callable values', function (): void {
     expect('foo')
         ->match('pest', [
             'bar' => 'foo',
@@ -134,21 +121,15 @@ it('can be passed non-callable values', function () {
         );
 })->throws(ExpectationFailedException::class, 'two strings are equal');
 
-it('fails with unhandled match', function () {
+it('fails with unhandled match', function (): void {
     expect('foo')->match('bar', []);
 })->throws(ExpectationFailedException::class, 'Unhandled match value.');
 
 it('can be used in higher order tests')
     ->expect(true)
     ->match(
-        function () {
-            return true;
-        }, [
-            false => function ($value) {
-                return $value->toBeFalse();
-            },
-            true => function ($value) {
-                return $value->toBeTrue();
-            },
+        fn (): true => true, [
+            false => fn ($value) => $value->toBeFalse(),
+            true => fn ($value) => $value->toBeTrue(),
         ]
     );

@@ -15,22 +15,14 @@ use function Termwind\renderUsing;
  */
 final class View
 {
-    /**
-     * The implementation of the output.
-     */
     private static OutputInterface $output;
 
-    /**
-     * Renders views using the given Output instance.
-     */
     public static function renderUsing(OutputInterface $output): void
     {
         self::$output = $output;
     }
 
     /**
-     * Renders the given view.
-     *
      * @param  array<string, mixed>  $data
      */
     public static function render(string $path, array $data = []): void
@@ -49,8 +41,6 @@ final class View
     }
 
     /**
-     * Compiles the given view.
-     *
      * @param  array<string, mixed>  $data
      */
     private static function compile(string $path, array $data): string

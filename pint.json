@@ -1,0 +1,8 @@
+{
+    "exclude": [
+        "tests/Fixtures/Suites"
+    ],
+    "rules": {
+        "Pint/phpdoc_type_annotations_only": true
+    }
+}

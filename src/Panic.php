@@ -14,18 +14,12 @@ use Whoops\Exception\Inspector;
 
 final readonly class Panic
 {
-    /**
-     * Creates a new Panic instance.
-     */
     private function __construct(
         private Throwable $throwable
     ) {
-        // ...
+        //
     }
 
-    /**
-     * Creates a new Panic instance, and exits the application.
-     */
     public static function with(Throwable $throwable): never
     {
         if ($throwable instanceof TestDescriptionMissing && ! is_null($previous = $throwable->getPrevious())) {
@@ -39,9 +33,6 @@ final readonly class Panic
         exit(1);
     }
 
-    /**
-     * Handles the panic.
-     */
     private function handle(): void
     {
         try {

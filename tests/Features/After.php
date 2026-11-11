@@ -1,10 +1,10 @@
 <?php
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->count = 0;
 });
 
-afterEach(function () {
+afterEach(function (): void {
     match ($this->name()) {
         '__pest_evaluable_it_can_run_after_test' => expect($this->count)->toBe(1),
         '__pest_evaluable_it_can_run_after_test_twice' => expect($this->count)->toBe(1),
@@ -21,37 +21,37 @@ afterEach(function () {
     $this->count++;
 });
 
-it('can run after test', function () {
+it('can run after test', function (): void {
     expect($this->count)->toBe(0);
 
     $this->count++;
-})->after(function () {
+})->after(function (): void {
     expect($this->count)->toBe(2);
 
     $this->count++;
 });
 
-it('can run after test twice', function () {
+it('can run after test twice', function (): void {
     expect($this->count)->toBe(0);
 
     $this->count++;
-})->after(function () {
+})->after(function (): void {
     expect($this->count)->toBe(2);
 
     $this->count++;
-})->after(function () {
+})->after(function (): void {
     expect($this->count)->toBe(3);
 
     $this->count++;
 });
 
-it('does not run when skipped', function () {
+it('does not run when skipped', function (): void {
     dd('This should not run 1');
-})->skip()->after(function () {
+})->skip()->after(function (): void {
     dd('This should not run 2');
 });
 
-afterEach(function () {
+afterEach(function (): void {
     match ($this->name()) {
         '__pest_evaluable_it_can_run_after_test' => expect($this->count)->toBe(3),
         '__pest_evaluable_it_can_run_after_test_twice' => expect($this->count)->toBe(4),
@@ -70,7 +70,7 @@ afterEach(function () {
     $this->count++;
 });
 
-afterEach(function () {
+afterEach(function (): void {
     match ($this->name()) {
         '__pest_evaluable_it_can_run_after_test' => expect($this->count)->toBe(4),
         '__pest_evaluable_it_can_run_after_test_twice' => expect($this->count)->toBe(5),
@@ -87,47 +87,47 @@ afterEach(function () {
     $this->count++;
 });
 
-describe('something', function () {
-    it('does not run when skipped', function () {
+describe('something', function (): void {
+    it('does not run when skipped', function (): void {
         dd('This should not run 3');
-    })->skip()->after(function () {
+    })->skip()->after(function (): void {
         dd('This should not run 4');
     });
 
-    it('can run after test', function () {
+    it('can run after test', function (): void {
         expect($this->count)->toBe(0);
 
         $this->count++;
-    })->after(function () {
+    })->after(function (): void {
         expect($this->count)->toBe(5);
 
         $this->count++;
-    })->after(function () {
+    })->after(function (): void {
         expect($this->count)->toBe(6);
 
         $this->count++;
     });
-})->after(function () {
+})->after(function (): void {
     expect($this->count)->toBe(4);
 
     $this->count++;
 });
 
-describe('something 2', function () {
-    it('can run after test', function () {
+describe('something 2', function (): void {
+    it('can run after test', function (): void {
         expect($this->count)->toBe(0);
 
         $this->count++;
-    })->after(function () {
+    })->after(function (): void {
         expect($this->count)->toBe(6);
 
         $this->count++;
     });
-})->after(function () {
+})->after(function (): void {
     expect($this->count)->toBe(4);
 
     $this->count++;
-})->after(function () {
+})->after(function (): void {
     expect($this->count)->toBe(5);
 
     $this->count++;
@@ -136,7 +136,7 @@ describe('something 2', function () {
 test('high order test')
     ->defer(fn () => $this->count++)
     ->expect(fn () => $this->count)->toBe(1)
-    ->after(function () {
+    ->after(function (): void {
         expect($this->count)->toBe(4);
 
         $this->count++;
@@ -146,7 +146,7 @@ test('high order test with skip')
     ->skip()
     ->defer(fn () => $this->count++)
     ->expect(fn () => $this->count)->toBe(1)
-    ->after(function () {
+    ->after(function (): void {
         dd('This should not run 5');
     });
 

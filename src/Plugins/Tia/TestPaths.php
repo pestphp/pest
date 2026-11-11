@@ -9,10 +9,6 @@ use PHPUnit\TextUI\Configuration\Registry;
 use Throwable;
 
 /**
- * Resolves the set of project-relative paths that are considered test files,
- * driven by phpunit.xml's <testsuites>. Falls back to the runtime TestSuite
- * configuration when no config file is present.
- *
  * @internal
  */
 final readonly class TestPaths
@@ -39,17 +35,15 @@ final readonly class TestPaths
 
             foreach ($configuration->testSuite() as $suite) {
                 foreach ($suite->directories() as $directory) {
-                    $rel = self::toRelative($directory->path(), $projectRoot);
+                    foreach (self::expandWildcards($directory->path()) as $path) {
+                        $rel = self::toRelative($path, $projectRoot);
 
-                    if ($rel !== null) {
-                        $directories[] = $rel;
+                        if ($rel !== null) {
+                            $directories[] = $rel;
+                        }
                     }
 
-                    $suffix = $directory->suffix();
-
-                    if ($suffix !== '') {
-                        $suffixes[] = str_starts_with($suffix, '.') ? $suffix : '.'.$suffix;
-                    }
+                    $suffixes[] = $directory->suffix();
                 }
 
                 foreach ($suite->files() as $file) {
@@ -63,11 +57,11 @@ final readonly class TestPaths
 
             if ($suffixes === []) {
                 foreach ($configuration->testSuffixes() as $suffix) {
-                    $suffixes[] = str_starts_with($suffix, '.') ? $suffix : '.'.$suffix;
+                    $suffixes[] = $suffix;
                 }
             }
         } catch (Throwable) {
-            // Registry not initialized — fall through to defaults.
+            //
         }
 
         if ($suffixes === []) {
@@ -94,15 +88,7 @@ final readonly class TestPaths
         if (in_array($relativePath, $this->files, true)) {
             return true;
         }
-
-        $matchesSuffix = false;
-        foreach ($this->suffixes as $suffix) {
-            if (str_ends_with($relativePath, $suffix)) {
-                $matchesSuffix = true;
-
-                break;
-            }
-        }
+        $matchesSuffix = array_any($this->suffixes, fn (string $suffix): bool => str_ends_with($relativePath, $suffix));
 
         if (! $matchesSuffix) {
             return false;
@@ -118,6 +104,18 @@ final readonly class TestPaths
         }
 
         return false;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function expandWildcards(string $path): array
+    {
+        if (! str_contains($path, '*')) {
+            return [$path];
+        }
+
+        return glob($path, GLOB_ONLYDIR) ?: [$path];
     }
 
     private static function toRelative(string $value, string $projectRoot): ?string

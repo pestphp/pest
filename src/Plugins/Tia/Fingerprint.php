@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
+use Pest\Plugins\Tia\Contracts\Lockfile;
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -11,7 +12,14 @@ use Symfony\Component\Finder\Finder;
  */
 final readonly class Fingerprint
 {
-    private const int SCHEMA_VERSION = 17;
+    private const int SCHEMA_VERSION = 18;
+
+    /**
+     * @var array<int, class-string<Lockfile>>
+     */
+    private const array LOCKFILES = [
+        Lockfiles\PackageLock::class,
+    ];
 
     /**
      * @return array{
@@ -27,19 +35,13 @@ final readonly class Fingerprint
                 'composer_lock' => self::composerLockHash($projectRoot),
                 'phpunit_xml' => self::trackedHash($projectRoot, 'phpunit.xml'),
                 'phpunit_xml_dist' => self::trackedHash($projectRoot, 'phpunit.xml.dist'),
-                // 'pest_factory' => self::contentHashOrNull(__DIR__.'/../../Factories/TestCaseFactory.php'),
-                // 'pest_method_factory' => self::contentHashOrNull(__DIR__.'/../../Factories/TestCaseMethodFactory.php'),
                 'vite_config' => self::viteConfigHash($projectRoot),
-                // 'package_json' => self::packageJsonHash($projectRoot),
                 'package_lock' => self::packageLockHash($projectRoot),
                 'js_config' => self::jsConfigHash($projectRoot),
-                // 'composer_json' => self::composerJsonHash($projectRoot),
             ],
             'environmental' => [
-                'php_minor' => PHP_MAJOR_VERSION,
+                'php_minor' => PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION,
 
-                // 'extensions' => self::extensionsFingerprint($projectRoot),
-                // 'env_files' => self::envFilesHash($projectRoot),
             ],
         ];
     }
@@ -205,7 +207,11 @@ final readonly class Fingerprint
         $parts = [];
 
         foreach (['package-lock.json', 'pnpm-lock.yaml', 'yarn.lock', 'bun.lock', 'bun.lockb'] as $name) {
-            $hash = self::trackedHash($projectRoot, $name);
+            if (! self::isTrackedByGit($projectRoot, $name)) {
+                continue;
+            }
+
+            $hash = self::lockfileHash($projectRoot.'/'.$name, $name);
 
             if ($hash !== null) {
                 $parts[] = $name.':'.$hash;
@@ -213,6 +219,37 @@ final readonly class Fingerprint
         }
 
         return $parts === [] ? null : hash('xxh128', implode("\n", $parts));
+    }
+
+    private static function lockfileHash(string $path, string $name): ?string
+    {
+        if (! is_file($path)) {
+            return null;
+        }
+
+        $contents = @file_get_contents($path);
+
+        if ($contents === false) {
+            return null;
+        }
+
+        foreach (self::LOCKFILES as $class) {
+            $handler = new $class;
+
+            if (! $handler->applies($name)) {
+                continue;
+            }
+
+            $fingerprint = $handler->fingerprint($contents);
+
+            if ($fingerprint !== null) {
+                return $fingerprint;
+            }
+
+            break;
+        }
+
+        return hash('xxh128', $contents);
     }
 
     private static function trackedHash(string $projectRoot, string $relativePath): ?string
@@ -224,13 +261,6 @@ final readonly class Fingerprint
         return self::hashIfExists($projectRoot.'/'.$relativePath);
     }
 
-    /**
-     * Returns true when the file exists and is not gitignored.
-     *
-     * Gitignored lockfiles (e.g. `package-lock.json` excluded from the repo)
-     * regenerate per-machine with OS-specific optional deps, which would
-     * otherwise force a fingerprint mismatch on every fetched baseline.
-     */
     private static function isTrackedByGit(string $projectRoot, string $relativePath): bool
     {
         if (! is_file($projectRoot.'/'.$relativePath)) {

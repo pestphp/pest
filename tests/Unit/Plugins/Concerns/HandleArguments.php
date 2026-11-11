@@ -2,7 +2,7 @@
 
 use Pest\Plugins\Concerns\HandleArguments;
 
-test('method hasArgument', function (string $argument, bool $expectedResult) {
+test('method hasArgument', function (string $argument, bool $expectedResult): void {
     $obj = new class
     {
         use HandleArguments;
@@ -24,3 +24,27 @@ test('method hasArgument', function (string $argument, bool $expectedResult) {
     ['--a', false],
     ['--undefined-argument', false],
 ]);
+
+test('popArgument preserves duplicate values when removing a missing argument', function (): void {
+    $obj = new class
+    {
+        use HandleArguments;
+    };
+
+    $arguments = ['--verbose', '--exclude-group', 'firstGroup', '--exclude-group', 'secondGroup', '--filter=MyTest'];
+    $result = $obj->popArgument('--missingitem', $arguments);
+
+    expect($result)->toBe($arguments);
+});
+
+test('popArgument preserves duplicate values when removing an existing argument', function (): void {
+    $obj = new class
+    {
+        use HandleArguments;
+    };
+
+    $arguments = ['--verbose', '--exclude-group', 'firstGroup', '--exclude-group', 'secondGroup', '--filter=MyTest'];
+    $result = $obj->popArgument('--verbose', $arguments);
+
+    expect($result)->toBe(['--exclude-group', 'firstGroup', '--exclude-group', 'secondGroup', '--filter=MyTest']);
+});

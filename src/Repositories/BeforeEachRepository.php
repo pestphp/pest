@@ -19,9 +19,6 @@ final class BeforeEachRepository
      */
     private array $state = [];
 
-    /**
-     * Sets a before each closure.
-     */
     public function set(string $filename, BeforeEachCall $beforeEachCall, Closure $beforeEachTestCall, Closure $beforeEachTestCase): void
     {
         if (array_key_exists($filename, $this->state)) {
@@ -36,8 +33,6 @@ final class BeforeEachRepository
     }
 
     /**
-     * Gets a before each closure by the given filename.
-     *
      * @return array{0: Closure, 1: Closure}
      */
     public function get(string $filename): array

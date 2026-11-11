@@ -11,9 +11,7 @@ it('is capable doing multiple assertions')
     ->assertFalse(false);
 
 it('resolves expect callables correctly')
-    ->expect(function () {
-        return 'foo';
-    })
+    ->expect(fn (): string => 'foo')
     ->toBeString()
     ->toBe('foo')
     ->and('bar')
@@ -25,7 +23,7 @@ test('does not treat method names as callables')
 
 it('can defer a method until after test setup')
     ->expect('foo')->toBeString()
-    ->defer(function () {
+    ->defer(function (): void {
         expect($this)->toBeInstanceOf(TestCase::class);
     })
     ->toBe('foo')
@@ -33,28 +31,20 @@ it('can defer a method until after test setup')
 
 it('can pass datasets into the expect callables')
     ->with([[1, 2, 3]])
-    ->expect(function (...$numbers) {
-        return $numbers;
-    })->toBe([1, 2, 3])
-    ->and(function (...$numbers) {
-        return $numbers;
-    })->toBe([1, 2, 3]);
+    ->expect(fn (...$numbers): array => $numbers)->toBe([1, 2, 3])
+    ->and(fn (...$numbers): array => $numbers)->toBe([1, 2, 3]);
 
 it('can pass datasets into the defer callable')
     ->with([[1, 2, 3]])
-    ->defer(function (...$numbers) {
+    ->defer(function (...$numbers): void {
         expect($numbers)->toBe([1, 2, 3]);
     });
 
 it('can pass shared datasets into callables')
     ->with('numbers.closure.wrapped')
-    ->expect(function ($value) {
-        return $value;
-    })
-    ->and(function ($value) {
-        return $value;
-    })
-    ->defer(function ($value) {
+    ->expect(fn ($value) => $value)
+    ->and(fn ($value) => $value)
+    ->defer(function ($value): void {
         expect($value)->toBeInt();
     })
     ->toBeInt();

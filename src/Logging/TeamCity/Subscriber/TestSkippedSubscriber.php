@@ -14,6 +14,10 @@ final class TestSkippedSubscriber extends Subscriber implements SkippedSubscribe
 {
     public function notify(Skipped $event): void
     {
+        if ($event->message() === '__TODO__') {
+            return;
+        }
+
         $this->logger()->testSkipped($event);
     }
 }

@@ -16,6 +16,6 @@ final class InvalidExpectationValue extends InvalidArgumentException
      */
     public static function expected(string $type): never
     {
-        throw new self(sprintf('Invalid expectation value type. Expected [%s].', $type));
+        throw new self(sprintf('This expectation may only be used on a value of type [%s].', $type));
     }
 }

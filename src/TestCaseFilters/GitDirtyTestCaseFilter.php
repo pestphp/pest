@@ -8,8 +8,8 @@ use Pest\Contracts\TestCaseFilter;
 use Pest\Exceptions\MissingDependency;
 use Pest\Exceptions\NoDirtyTestsFound;
 use Pest\Panic;
+use Pest\Support\Git;
 use Pest\TestSuite;
-use Symfony\Component\Process\Process;
 
 final class GitDirtyTestCaseFilter implements TestCaseFilter
 {
@@ -18,12 +18,9 @@ final class GitDirtyTestCaseFilter implements TestCaseFilter
      */
     private ?array $changedFiles = null;
 
-    /**
-     * Creates a new instance of the filter.
-     */
     public function __construct(private readonly string $projectRoot)
     {
-        // ...
+        //
     }
 
     /**
@@ -47,19 +44,15 @@ final class GitDirtyTestCaseFilter implements TestCaseFilter
         return in_array($relativePath, $this->changedFiles, true);
     }
 
-    /**
-     * Loads the changed files.
-     */
     private function loadChangedFiles(): void
     {
-        $process = new Process(['git', 'status', '--short', '--', '*.php']);
-        $process->run();
+        $status = new Git(timeout: 60.0)->raw(['status', '--short', '--', '*.php']);
 
-        if (! $process->isSuccessful()) {
+        if ($status === null) {
             throw new MissingDependency('Filter by dirty files', 'git');
         }
 
-        $output = preg_split('/\R+/', $process->getOutput(), flags: PREG_SPLIT_NO_EMPTY);
+        $output = preg_split('/\R+/', $status, flags: PREG_SPLIT_NO_EMPTY);
         assert(is_array($output));
 
         $dirtyFiles = [];

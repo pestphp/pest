@@ -8,8 +8,5 @@ use Pest\Factories\TestCaseMethodFactory;
 
 interface TestCaseMethodFilter
 {
-    /**
-     * Whether the test case method is accepted.
-     */
     public function accept(TestCaseMethodFactory $factory): bool;
 }

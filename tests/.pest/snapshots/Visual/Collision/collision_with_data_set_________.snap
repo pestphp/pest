@@ -6,18 +6,18 @@
    FAILED  Tests\Fixtures\CollisionTest > error                     Exception   
   error
 
-  at tests/Fixtures/CollisionTest.php:4
-      1▕ <?php
+  at tests/Fixtures/CollisionTest.php:6
       2▕ 
-      3▕ test('error', function () {
-  ➜   4▕     throw new Exception('error');
-      5▕ })->skip(! isset($_SERVER['COLLISION_TEST']));
-      6▕ 
-      7▕ test('success', function () {
-      8▕     expect(true)->toBeTrue();
-      9▕ })->skip(! isset($_SERVER['COLLISION_TEST']));
+      3▕ declare(strict_types=1);
+      4▕ 
+      5▕ test('error', function (): void {
+  ➜   6▕     throw new Exception('error');
+      7▕ })->skip(! isset($_SERVER['COLLISION_TEST']));
+      8▕ 
+      9▕ test('success', function (): void {
+     10▕     expect(true)->toBeTrue();
 
-  1   tests/Fixtures/CollisionTest.php:4
+  1   tests/Fixtures/CollisionTest.php:6
 
 
   Tests:    1 failed, 1 passed (1 assertions)

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Plugins;
 
 use Pest\Contracts\Plugins\HandlesArguments;
+use Pest\Support\Ci;
 use Pest\TestSuite;
 
 /**
@@ -14,10 +15,12 @@ final class Snapshot implements HandlesArguments
 {
     use Concerns\HandleArguments;
 
-    /**
-     * Whether snapshots should be updated on this run.
-     */
     public static bool $updateSnapshots = false;
+
+    public static function shouldCreateMissingSnapshots(): bool
+    {
+        return self::$updateSnapshots || ! Ci::isRunning();
+    }
 
     /**
      * {@inheritDoc}
@@ -48,8 +51,6 @@ final class Snapshot implements HandlesArguments
     }
 
     /**
-     * Options that take a value as the next argument (rather than via "=value").
-     *
      * @var list<string>
      */
     private const array FLAGS_WITH_VALUES = [
@@ -89,8 +90,6 @@ final class Snapshot implements HandlesArguments
     ];
 
     /**
-     * Determines whether the command targets the entire suite (no filter, no path).
-     *
      * @param  array<int, string>  $arguments
      */
     private function isFullRun(array $arguments): bool

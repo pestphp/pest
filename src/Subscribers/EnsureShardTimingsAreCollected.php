@@ -14,22 +14,15 @@ use PHPUnit\Event\TestSuite\Started;
 final class EnsureShardTimingsAreCollected
 {
     /**
-     * The start times for each test class.
-     *
      * @var array<string, HRTime>
      */
     private static array $startTimes = [];
 
     /**
-     * The collected timings for each test class.
-     *
      * @var array<string, float>
      */
     private static array $timings = [];
 
-    /**
-     * Records the start time for a test suite.
-     */
     public static function started(Started $event): void
     {
         if (! $event->testSuite()->isForTestClass()) {
@@ -43,9 +36,6 @@ final class EnsureShardTimingsAreCollected
         }
     }
 
-    /**
-     * Records the duration for a test suite.
-     */
     public static function finished(Finished $event): void
     {
         if (! $event->testSuite()->isForTestClass()) {
@@ -64,8 +54,6 @@ final class EnsureShardTimingsAreCollected
     }
 
     /**
-     * Returns the collected timings.
-     *
      * @return array<string, float>
      */
     public static function timings(): array

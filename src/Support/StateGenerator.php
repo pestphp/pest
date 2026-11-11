@@ -10,6 +10,10 @@ use NunoMaduro\Collision\Exceptions\TestOutcome;
 use PHPUnit\Event\Code\TestDoxBuilder;
 use PHPUnit\Event\Code\TestMethod;
 use PHPUnit\Event\Code\ThrowableBuilder;
+use PHPUnit\Event\Test\AfterLastTestMethodErrored;
+use PHPUnit\Event\Test\AfterLastTestMethodFailed;
+use PHPUnit\Event\Test\BeforeFirstTestMethodErrored;
+use PHPUnit\Event\Test\BeforeFirstTestMethodFailed;
 use PHPUnit\Event\Test\Errored;
 use PHPUnit\Event\Test\Failed;
 use PHPUnit\Event\Test\PhpunitDeprecationTriggered;
@@ -35,8 +39,7 @@ final class StateGenerator
                     $testResultEvent->throwable()
                 ));
             } else {
-                // @phpstan-ignore-next-line
-                $state->add(TestResult::fromBeforeFirstTestMethodErrored($testResultEvent));
+                $this->addClassLevelEvent($state, $testResultEvent);
             }
         }
 
@@ -48,8 +51,7 @@ final class StateGenerator
                     $testResultEvent->throwable()
                 ));
             } else {
-                // @phpstan-ignore-next-line
-                $state->add(TestResult::fromBeforeFirstTestMethodErrored($testResultEvent));
+                $this->addClassLevelEvent($state, $testResultEvent);
             }
         }
 
@@ -165,7 +167,6 @@ final class StateGenerator
             }
         }
 
-        // for each test that passed, we need to add it to the state
         for ($i = 0; $i < $passedTests; $i++) {
             $state->add(TestResult::fromPestParallelTestCase(
                 new TestMethod(
@@ -182,6 +183,31 @@ final class StateGenerator
         }
 
         return $state;
+    }
+
+    private function addClassLevelEvent(State $state, AfterLastTestMethodErrored|AfterLastTestMethodFailed|BeforeFirstTestMethodErrored|BeforeFirstTestMethodFailed $event): void
+    {
+        if ($event instanceof BeforeFirstTestMethodErrored) {
+            $state->add(TestResult::fromBeforeFirstTestMethodErrored($event));
+
+            return;
+        }
+
+        $methodName = $event instanceof BeforeFirstTestMethodFailed ? 'beforeAll' : 'afterAll';
+
+        $state->add(TestResult::fromPestParallelTestCase(
+            new TestMethod(
+                $event->testClassName(), // @phpstan-ignore-line
+                $methodName,
+                '', // @phpstan-ignore-line
+                1,
+                TestDoxBuilder::fromClassNameAndMethodName($event->testClassName(), $methodName), // @phpstan-ignore-line
+                MetadataCollection::fromArray([]),
+                TestDataCollection::fromArray([])
+            ),
+            TestResult::FAIL,
+            $event->throwable()
+        ));
     }
 
     /**

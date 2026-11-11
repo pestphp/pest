@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 test('enum is backed by int')
     ->expect('Tests\Fixtures\Arch\ToBeIntBackedEnum\HasIntBacking')
     ->toBeIntBackedEnum();

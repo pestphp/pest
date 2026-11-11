@@ -18,18 +18,10 @@ final readonly class Help implements HandlesArguments
 {
     use Concerns\HandleArguments;
 
-    /**
-     * Creates a new Plugin instance.
-     */
     public function __construct(
         private OutputInterface $output
-    ) {
-        // ..
-    }
+    ) {}
 
-    /**
-     * {@inheritDoc}
-     */
     public function handleArguments(array $arguments): array
     {
         if ($this->hasArgument('--help', $arguments)) {
@@ -59,8 +51,6 @@ final readonly class Help implements HandlesArguments
                         'desc' => $description,
                     ] = $option;
 
-                    assert(is_string($argument));
-
                     if (trim($argument) === '--process-isolation') {
                         continue;
                     }
@@ -80,9 +70,6 @@ final readonly class Help implements HandlesArguments
         return $arguments;
     }
 
-    /**
-     * Colorizes the given string options.
-     */
     private function colorizeOptions(string $argument): string
     {
         return (string) preg_replace(
@@ -93,13 +80,12 @@ final readonly class Help implements HandlesArguments
     }
 
     /**
-     * @return array<string, array<int, array<'arg'|'desc'|int, array{arg: string, desc: string}|string>>>
+     * @return array<non-empty-string, non-empty-list<array{}|array{arg: non-empty-string, desc: non-empty-string}|array{spacer: ''}|array{text: non-empty-string}>>
      */
     private function getContent(): array
     {
         $helpReflection = new PHPUnitHelp;
 
-        // @phpstan-ignore-next-line
         $content = (fn (): array => $this->elements())->call($helpReflection);
 
         $content['Configuration'] = [...[[
@@ -111,6 +97,41 @@ final readonly class Help implements HandlesArguments
             [
                 'arg' => '--ai',
                 'desc' => 'Run a code snippet as a fully scaffolded test for AI verification',
+            ],
+        ];
+
+        $content['Tia'] = [
+            [
+                'arg' => '--tia',
+                'desc' => 'Re-run only the tests affected by your changes, replaying the rest from cache',
+            ],
+            [
+                'arg' => '--no-tia',
+                'desc' => 'Disable test impact analysis for this run',
+            ],
+            [
+                'arg' => '--tia --fresh',
+                'desc' => 'Discard the recorded dependency graph and record it again',
+            ],
+            [
+                'arg' => '--tia --filtered',
+                'desc' => 'Narrow the run to the affected test files only',
+            ],
+            [
+                'arg' => '--tia --locally',
+                'desc' => 'Enable test impact analysis on local machines only',
+            ],
+            [
+                'arg' => '--tia --baselined',
+                'desc' => 'Fetch the shared dependency graph recorded by the CI baseline',
+            ],
+            [
+                'arg' => '--tia --refetch',
+                'desc' => 'Force a fresh fetch of the shared dependency graph',
+            ],
+            [
+                'arg' => '--baseline',
+                'desc' => 'Output to standard output the test impact analysis storage directory',
             ],
         ];
 

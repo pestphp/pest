@@ -8,6 +8,9 @@ use Pest\Plugins\Tia;
 use Pest\Plugins\Tia\Contracts\State;
 use Pest\Support\Container;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
+use SebastianBergmann\CodeCoverage\Driver\Selector;
+use SebastianBergmann\CodeCoverage\Filter;
+use SebastianBergmann\CodeCoverage\Serialization\Unserializer;
 use Throwable;
 
 /**
@@ -47,6 +50,7 @@ final class CoverageMerger
         }
 
         $cached = self::unserializeCoverage($decoded);
+        unset($decoded);
         $current = self::requireCoverage($reportPath);
 
         if (! $cached instanceof CodeCoverage || ! $current instanceof CodeCoverage) {
@@ -54,24 +58,70 @@ final class CoverageMerger
         }
 
         self::primeUncoveredFiles($cached);
-        self::primeUncoveredFiles($current);
+        self::discardUnexercisedFiles($current);
 
         self::stripCurrentTestsFromCached($cached, $current);
+        self::dropLinesMissingFromCurrent($cached, $current);
 
         $cached->merge($current);
+        unset($current);
 
         $serialised = serialize($cached);
+        unset($cached);
 
-        @file_put_contents(
-            $reportPath,
-            '<?php return unserialize('.var_export($serialised, true).");\n",
-        );
+        self::writeUnserializeReport($reportPath, $serialised);
         $state->write(Tia::KEY_COVERAGE_CACHE, self::compress($serialised));
+    }
+
+    private static function writeUnserializeReport(string $reportPath, string $serialised): void
+    {
+        $handle = @fopen($reportPath, 'wb');
+
+        if ($handle === false) {
+            return;
+        }
+
+        fwrite($handle, '<?php return unserialize(base64_decode(\'');
+
+        $length = strlen($serialised);
+        $offset = 0;
+        $chunkSize = 3 * 64 * 1024;
+
+        while ($offset < $length) {
+            $chunk = substr($serialised, $offset, $chunkSize);
+            fwrite($handle, base64_encode($chunk));
+            $offset += strlen($chunk);
+        }
+
+        fwrite($handle, "'));\n");
+        fclose($handle);
     }
 
     private static function primeUncoveredFiles(CodeCoverage $coverage): void
     {
         $coverage->getData(false);
+    }
+
+    private static function discardUnexercisedFiles(CodeCoverage $coverage): void
+    {
+        $data = $coverage->getData(true);
+        $lineCoverage = $data->lineCoverage();
+        $discarded = false;
+
+        foreach ($lineCoverage as $file => $lines) {
+            foreach ($lines as $hits) {
+                if (is_array($hits) && $hits !== []) {
+                    continue 2;
+                }
+            }
+
+            unset($lineCoverage[$file]);
+            $discarded = true;
+        }
+
+        if ($discarded) {
+            $data->setLineCoverage($lineCoverage);
+        }
     }
 
     private static function compress(string $bytes): string
@@ -91,25 +141,33 @@ final class CoverageMerger
     private static function stripCurrentTestsFromCached(CodeCoverage $cached, CodeCoverage $current): void
     {
         $currentIds = self::collectTestIds($current);
+        $cachedData = $cached->getData();
 
-        if ($currentIds === []) {
+        $staleIndexes = [];
+
+        foreach ($cachedData->testIds() as $index => $id) {
+            if (in_array($id, $currentIds, true) || ! self::testExists($id)) {
+                $staleIndexes[$index] = true;
+            }
+        }
+
+        if ($staleIndexes === []) {
             return;
         }
 
-        $cachedData = $cached->getData();
         $lineCoverage = $cachedData->lineCoverage();
 
         foreach ($lineCoverage as $file => $lines) {
-            foreach ($lines as $line => $ids) {
-                if ($ids === null) {
+            foreach ($lines as $line => $hits) {
+                if ($hits === null) {
                     continue;
                 }
-                if ($ids === []) {
+                if ($hits === []) {
                     continue;
                 }
-                $filtered = array_values(array_diff($ids, $currentIds));
+                $filtered = array_diff_key($hits, $staleIndexes);
 
-                if ($filtered !== $ids) {
+                if ($filtered !== $hits) {
                     $lineCoverage[$file][$line] = $filtered;
                 }
             }
@@ -118,26 +176,78 @@ final class CoverageMerger
         $cachedData->setLineCoverage($lineCoverage);
     }
 
+    private static function testExists(string $id): bool
+    {
+        $name = explode('#', $id, 2)[0];
+
+        if (! str_contains($name, '::')) {
+            return true;
+        }
+
+        [$class, $method] = explode('::', $name, 2);
+
+        return method_exists($class, $method);
+    }
+
+    private static function dropLinesMissingFromCurrent(CodeCoverage $cached, CodeCoverage $current): void
+    {
+        $currentLines = $current->getData(true)->lineCoverage();
+        $cachedData = $cached->getData();
+        $lineCoverage = $cachedData->lineCoverage();
+        $changed = false;
+
+        foreach ($currentLines as $file => $lines) {
+            if (! isset($lineCoverage[$file])) {
+                continue;
+            }
+
+            foreach ($lineCoverage[$file] as $line => $hits) {
+                if (array_key_exists($line, $lines)) {
+                    continue;
+                }
+
+                unset($lineCoverage[$file][$line]);
+                $changed = true;
+            }
+
+            if ($lineCoverage[$file] === []) {
+                unset($lineCoverage[$file]);
+                $changed = true;
+            }
+        }
+
+        if ($changed) {
+            $cachedData->setLineCoverage($lineCoverage);
+        }
+    }
+
     /**
      * @return array<int, string>
      */
     private static function collectTestIds(CodeCoverage $coverage): array
     {
+        $data = $coverage->getData(true);
+        $idByIndex = $data->testIds();
+
         $ids = [];
 
-        foreach ($coverage->getData()->lineCoverage() as $lines) {
+        foreach ($data->lineCoverage() as $lines) {
             foreach ($lines as $hits) {
                 if ($hits === null) {
                     continue;
                 }
 
-                foreach ($hits as $id) {
-                    $ids[$id] = true;
+                foreach (array_keys($hits) as $index) {
+                    if (! isset($idByIndex[$index])) {
+                        continue;
+                    }
+
+                    $ids[$index] = $idByIndex[$index];
                 }
             }
         }
 
-        return array_keys($ids);
+        return array_values($ids);
     }
 
     private static function state(): State
@@ -161,7 +271,55 @@ final class CoverageMerger
             return null;
         }
 
-        return $value instanceof CodeCoverage ? $value : null;
+        if ($value instanceof CodeCoverage) {
+            return $value;
+        }
+
+        return self::coverageFromSerializedData($reportPath);
+    }
+
+    private static function coverageFromSerializedData(string $reportPath): ?CodeCoverage
+    {
+        if ($reportPath === '') {
+            return null;
+        }
+
+        try {
+            $serialized = new Unserializer()->unserialize($reportPath);
+        } catch (Throwable) {
+            return null;
+        }
+
+        $data = $serialized['codeCoverage'];
+        $basePath = $serialized['basePath'];
+
+        if ($basePath !== '') {
+            foreach ($data->coveredFiles() as $relativePath) {
+                $data->renameFile($relativePath, $basePath.DIRECTORY_SEPARATOR.$relativePath);
+            }
+        }
+
+        $coverage = self::emptyCoverage();
+
+        if (! $coverage instanceof CodeCoverage) {
+            return null;
+        }
+
+        $coverage->setData($data);
+        $coverage->setTests($serialized['testResults']);
+
+        return $coverage;
+    }
+
+    private static function emptyCoverage(): ?CodeCoverage
+    {
+        try {
+            $filter = new Filter;
+
+            return new CodeCoverage(new Selector()->forLineCoverage($filter), $filter);
+        } catch (Throwable) {
+            return null;
+        }
     }
 
     private static function unserializeCoverage(string $bytes): ?CodeCoverage

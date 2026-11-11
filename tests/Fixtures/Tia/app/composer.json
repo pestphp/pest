@@ -1,0 +1,9 @@
+{
+    "name": "pest/tia-fixture",
+    "description": "Throwaway project the TIA scenario tests scaffold into a temp directory.",
+    "license": "MIT",
+    "require": {},
+    "config": {
+        "lock": true
+    }
+}

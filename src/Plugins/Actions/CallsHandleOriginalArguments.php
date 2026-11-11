@@ -13,10 +13,6 @@ use Pest\Plugin\Loader;
 final class CallsHandleOriginalArguments
 {
     /**
-     * Executes the Plugin action.
-     *
-     * Transform the input arguments by passing it to the relevant plugins.
-     *
      * @param  array<int, string>  $argv
      */
     public static function execute(array $argv): void

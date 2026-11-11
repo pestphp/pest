@@ -11,9 +11,6 @@ use NunoMaduro\Collision\Adapters\Phpunit\Printers\DefaultPrinter;
  */
 final readonly class Printer
 {
-    /**
-     * Sets the theme to compact.
-     */
     public function compact(): self
     {
         DefaultPrinter::compact(true);

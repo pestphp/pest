@@ -12,11 +12,6 @@ use Pest\Plugin\Loader;
  */
 final class CallsTerminable
 {
-    /**
-     * Executes the Plugin action.
-     *
-     * Provides an opportunity for any plugins to terminate.
-     */
     public static function execute(): void
     {
         $plugins = Loader::getPlugins(Plugins\Terminable::class);

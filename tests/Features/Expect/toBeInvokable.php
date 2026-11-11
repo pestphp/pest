@@ -1,29 +1,33 @@
 <?php
 
 use Pest\Arch\Exceptions\ArchExpectationFailedException;
+use Tests\Fixtures\Arch\ToBeInvokable\IsInvokable\InvokableClass;
+use Tests\Fixtures\Arch\ToBeInvokable\IsInvokable\InvokableClassViaParent;
+use Tests\Fixtures\Arch\ToBeInvokable\IsInvokable\InvokableClassViaTrait;
+use Tests\Fixtures\Arch\ToBeInvokable\IsNotInvokable\IsNotInvokableClass;
 
 test('class is invokable')
-    ->expect('Tests\\Fixtures\\Arch\\ToBeInvokable\\IsInvokable\\InvokableClass')
+    ->expect(InvokableClass::class)
     ->toBeInvokable();
 
 test('opposite class is invokable')
     ->throws(ArchExpectationFailedException::class)
-    ->expect('Tests\\Fixtures\\Arch\\ToBeInvokable\\IsInvokable\\InvokableClass')
+    ->expect(InvokableClass::class)
     ->not->toBeInvokable();
 
 test('class is invokable via a parent class')
-    ->expect('Tests\\Fixtures\\Arch\\ToBeInvokable\\IsInvokable\\InvokableClassViaParent')
+    ->expect(InvokableClassViaParent::class)
     ->toBeInvokable();
 
 test('class is invokable via a trait')
-    ->expect('Tests\\Fixtures\\Arch\\ToBeInvokable\\IsInvokable\\InvokableClassViaTrait')
+    ->expect(InvokableClassViaTrait::class)
     ->toBeInvokable();
 
 test('failure when the class is not invokable')
     ->throws(ArchExpectationFailedException::class)
-    ->expect('Tests\\Fixtures\\Arch\\ToBeInvokable\\IsNotInvokable\\IsNotInvokableClass')
+    ->expect(IsNotInvokableClass::class)
     ->toBeInvokable();
 
 test('class is not invokable')
-    ->expect('Tests\\Fixtures\\Arch\\ToBeInvokable\\IsNotInvokable\\IsNotInvokableClass')
+    ->expect(IsNotInvokableClass::class)
     ->not->toBeInvokable();

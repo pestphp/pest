@@ -1,37 +1,5 @@
 <?php
 
-/*
- * BSD 3-Clause License
- *
- * Copyright (c) 2001-2023, Sebastian Bergmann
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *
- * 3. Neither the name of the copyright holder nor the names of its
- *    contributors may be used to endorse or promote products derived from
- *    this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 declare(strict_types=1);
 /*
  * This file is part of PHPUnit.
@@ -48,6 +16,7 @@ use Pest\Plugins\Only;
 use Pest\Runner\Filter\EnsureTestCaseIsInitiatedFilter;
 use PHPUnit\Event;
 use PHPUnit\Framework\TestSuite;
+use PHPUnit\Metadata\Api\Groups;
 use PHPUnit\Runner\Filter\Factory;
 use PHPUnit\TextUI\Configuration\Configuration;
 use PHPUnit\TextUI\Configuration\FilterNotConfiguredException;
@@ -59,6 +28,8 @@ use function array_map;
  */
 final readonly class TestSuiteFilterProcessor
 {
+    public function __construct(private Event\Emitter $emitter) {}
+
     /**
      * @throws Event\RuntimeException
      * @throws FilterNotConfiguredException
@@ -102,7 +73,7 @@ final readonly class TestSuiteFilterProcessor
         if ($configuration->hasTestsCovering()) {
             $factory->addIncludeGroupFilter(
                 array_map(
-                    static fn (string $name): string => '__phpunit_covers_'.$name,
+                    Groups::virtualGroupForCovers(...),
                     $configuration->testsCovering(),
                 ),
             );
@@ -111,7 +82,7 @@ final readonly class TestSuiteFilterProcessor
         if ($configuration->hasTestsUsing()) {
             $factory->addIncludeGroupFilter(
                 array_map(
-                    static fn (string $name): string => '__phpunit_uses_'.$name,
+                    Groups::virtualGroupForUses(...),
                     $configuration->testsUsing(),
                 ),
             );
@@ -131,7 +102,7 @@ final readonly class TestSuiteFilterProcessor
 
         $suite->injectFilter($factory);
 
-        Event\Facade::emitter()->testSuiteFiltered(
+        $this->emitter->testSuiteFiltered(
             Event\TestSuite\TestSuiteBuilder::from($suite),
         );
     }

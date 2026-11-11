@@ -29,32 +29,25 @@ use Whoops\Exception\Inspector;
  */
 final class Kernel
 {
-    /**
-     * Either the kernel is terminated or not.
-     */
+    private bool $booted = false;
+
     private bool $terminated = false;
 
     /**
-     * The Kernel bootstrappers.
-     *
      * @var array<int, class-string>
      */
     private const array BOOTSTRAPPERS = [
         Bootstrappers\BootOverrides::class,
         Bootstrappers\BootPhpUnitConfiguration::class,
-        Plugins\Tia\Bootstrapper::class,
         Bootstrappers\BootSubscribers::class,
         Bootstrappers\BootFiles::class,
+        Plugins\Tia\Bootstrapper::class,
         Bootstrappers\BootView::class,
         Bootstrappers\BootKernelDump::class,
         Bootstrappers\BootExcludeList::class,
     ];
 
     /**
-     * The Kernel restarters — resolved and invoked from `bin/pest`
-     * before any other Pest class is touched, so the list is exposed
-     * on the Kernel rather than driven from `bin/pest` directly.
-     *
      * @var array<int, class-string<Contracts\Restarter>>
      */
     public const array RESTARTERS = [
@@ -62,14 +55,8 @@ final class Kernel
         Restarters\PcovRestarter::class,
     ];
 
-    /**
-     * Creates a new Kernel instance.
-     */
     public function __construct(private readonly Application $application, private readonly OutputInterface $output) {}
 
-    /**
-     * Boots the Kernel.
-     */
     public static function boot(TestSuite $testSuite, InputInterface $input, OutputInterface $output): self
     {
         $container = Container::getInstance();
@@ -96,14 +83,14 @@ final class Kernel
 
         CallsBoot::execute();
 
+        $kernel->booted = true;
+
         Container::getInstance()->add(self::class, $kernel);
 
         return $kernel;
     }
 
     /**
-     * Runs the application, and returns the exit code.
-     *
      * @param  array<int, string>  $originalArguments
      * @param  array<int, string>  $arguments
      */
@@ -135,9 +122,6 @@ final class Kernel
         return $result;
     }
 
-    /**
-     * Terminate the Kernel.
-     */
     public function terminate(): void
     {
         if ($this->terminated) {
@@ -152,12 +136,11 @@ final class Kernel
 
         $preBufferOutput->terminate();
 
-        CallsTerminable::execute();
+        if ($this->booted) {
+            CallsTerminable::execute();
+        }
     }
 
-    /**
-     * Shutdowns unexpectedly the Kernel.
-     */
     public function shutdown(): void
     {
         $this->terminate();

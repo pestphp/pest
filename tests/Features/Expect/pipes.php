@@ -12,7 +12,7 @@ class Number
     public function __construct(
         public int $value
     ) {
-        // ..
+        //
     }
 }
 
@@ -21,7 +21,7 @@ class Char
     public function __construct(
         public string $value
     ) {
-        // ..
+        //
     }
 }
 
@@ -30,7 +30,7 @@ class Symbol
     public function __construct(
         public string $value
     ) {
-        // ..
+        //
     }
 }
 
@@ -38,7 +38,7 @@ class State
 {
     public array $runCount = [];
 
-    public array $appliedCount = [];
+    public array $appliedCount;
 
     public function __construct()
     {
@@ -58,10 +58,7 @@ class State
 
 $state = new State;
 
-/*
- * Overrides toBe to assert two Characters are the same
- */
-expect()->pipe('toBe', function ($next, $expected) use ($state) {
+expect()->pipe('toBe', function ($next, $expected) use ($state): void {
     $state->runCount['char']++;
 
     if ($this->value instanceof Char) {
@@ -70,18 +67,13 @@ expect()->pipe('toBe', function ($next, $expected) use ($state) {
         assertInstanceOf(Char::class, $expected);
         assertEquals($this->value->value, $expected->value);
 
-        // returning nothing stops pipeline execution
         return;
     }
 
-    // calling $next(); let the pipeline to keep running
     $next();
 });
 
-/*
- * Overrides toBe to assert two Number objects are the same
- */
-expect()->intercept('toBe', Number::class, function ($expected) use ($state) {
+expect()->intercept('toBe', Number::class, function ($expected) use ($state): void {
     $state->runCount['number']++;
     $state->appliedCount['number']++;
 
@@ -89,18 +81,12 @@ expect()->intercept('toBe', Number::class, function ($expected) use ($state) {
     assertEquals($this->value->value, $expected->value);
 });
 
-/*
- * Overrides toBe to assert all integers are allowed if value is a wildcard (*)
- */
-expect()->intercept('toBe', fn ($value, $expected) => $value === '*' && is_numeric($expected), function ($expected) use ($state) {
+expect()->intercept('toBe', fn ($value, $expected) => $value === '*' && is_numeric($expected), function ($expected) use ($state): void {
     $state->runCount['wildcard']++;
     $state->appliedCount['wildcard']++;
 });
 
-/*
- * Overrides toBe to assert to Symbols are the same
- */
-expect()->pipe('toBe', function ($next, $expected) use ($state) {
+expect()->pipe('toBe', function ($next, $expected) use ($state): void {
     $state->runCount['symbol']++;
 
     if ($this->value instanceof Symbol) {
@@ -114,10 +100,7 @@ expect()->pipe('toBe', function ($next, $expected) use ($state) {
     $next();
 });
 
-/*
- * Overrides toBe to allow ignoring case when checking strings
- */
-expect()->intercept('toBe', fn ($value) => is_string($value), function ($expected, $ignoreCase = false) {
+expect()->intercept('toBe', fn ($value) => is_string($value), function ($expected, $ignoreCase = false): void {
     if ($ignoreCase) {
         assertEqualsIgnoringCase($expected, $this->value);
     } else {
@@ -125,7 +108,7 @@ expect()->intercept('toBe', fn ($value) => is_string($value), function ($expecte
     }
 });
 
-test('pipe is applied and can stop pipeline', function () use ($state) {
+test('pipe is applied and can stop pipeline', function () use ($state): void {
     $char = new Char('A');
 
     $state->reset();
@@ -146,7 +129,7 @@ test('pipe is applied and can stop pipeline', function () use ($state) {
         ]);
 });
 
-test('pipe is run and can let the pipeline keep going', function () use ($state) {
+test('pipe is run and can let the pipeline keep going', function () use ($state): void {
     $state->reset();
 
     expect(3)->toBe(3)
@@ -165,7 +148,7 @@ test('pipe is run and can let the pipeline keep going', function () use ($state)
         ]);
 });
 
-test('pipe works with negated expectation', function () use ($state) {
+test('pipe works with negated expectation', function () use ($state): void {
     $char = new Char('A');
 
     $state->reset();
@@ -186,7 +169,7 @@ test('pipe works with negated expectation', function () use ($state) {
         ]);
 });
 
-test('interceptor is applied', function () use ($state) {
+test('interceptor is applied', function () use ($state): void {
     $number = new Number(1);
 
     $state->reset();
@@ -197,7 +180,7 @@ test('interceptor is applied', function () use ($state) {
         ->appliedCount->toHaveKey('number', 1);
 });
 
-test('interceptor stops the pipeline', function () use ($state) {
+test('interceptor stops the pipeline', function () use ($state): void {
     $number = new Number(1);
 
     $state->reset();
@@ -218,7 +201,7 @@ test('interceptor stops the pipeline', function () use ($state) {
         ]);
 });
 
-test('interceptor is called only when filter is met', function () use ($state) {
+test('interceptor is called only when filter is met', function () use ($state): void {
     $state->reset();
 
     expect(1)->toBe(1)
@@ -227,7 +210,7 @@ test('interceptor is called only when filter is met', function () use ($state) {
         ->appliedCount->toHaveKey('number', 0);
 });
 
-test('interceptor can be filtered with a closure', function () use ($state) {
+test('interceptor can be filtered with a closure', function () use ($state): void {
     $state->reset();
 
     expect('*')->toBe(1)
@@ -236,7 +219,7 @@ test('interceptor can be filtered with a closure', function () use ($state) {
         ->appliedCount->toHaveKey('wildcard', 1);
 });
 
-test('interceptor can be filter the expected parameter as well', function () use ($state) {
+test('interceptor can be filter the expected parameter as well', function () use ($state): void {
     $state->reset();
 
     expect('*')->toBe('*')
@@ -245,14 +228,25 @@ test('interceptor can be filter the expected parameter as well', function () use
         ->appliedCount->toHaveKey('wildcard', 0);
 });
 
-test('interceptor works with negated expectation', function () {
+test('interceptor works with negated expectation', function (): void {
     $char = new Number(1);
 
     expect($char)->not->toBe(new Char('B'));
 });
 
-test('intercept can add new parameters to the expectation', function () {
+test('intercept can add new parameters to the expectation', function (): void {
     $ignoreCase = true;
 
     expect('Foo')->toBe('foo', $ignoreCase);
+});
+
+test('named arguments reach the pipes of an expectation', function () use ($state): void {
+    $char = new Char('A');
+
+    $state->reset();
+
+    expect($char)->toBe(expected: new Char('A'))
+        ->and($state)
+        ->runCount->toHaveKey('char', 1)
+        ->appliedCount->toHaveKey('char', 1);
 });

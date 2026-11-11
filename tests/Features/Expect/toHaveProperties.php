@@ -2,7 +2,7 @@
 
 use PHPUnit\Framework\ExpectationFailedException;
 
-test('pass', function () {
+test('pass', function (): void {
     $object = new stdClass;
     $object->name = 'John';
     $object->age = 21;
@@ -15,7 +15,7 @@ test('pass', function () {
         ]);
 });
 
-test('failures', function () {
+test('failures', function (): void {
     $object = new stdClass;
     $object->name = 'John';
 
@@ -27,7 +27,7 @@ test('failures', function () {
         ]);
 })->throws(ExpectationFailedException::class);
 
-test('failures with custom message', function () {
+test('failures with custom message', function (): void {
     $object = new stdClass;
     $object->name = 'John';
 
@@ -39,7 +39,7 @@ test('failures with custom message', function () {
         ], 'oh no!');
 })->throws(ExpectationFailedException::class, 'oh no!');
 
-test('not failures', function () {
+test('not failures', function (): void {
     $object = new stdClass;
     $object->name = 'John';
     $object->age = 21;

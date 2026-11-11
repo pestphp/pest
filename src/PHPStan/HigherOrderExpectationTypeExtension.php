@@ -15,12 +15,6 @@ use PHPStan\Type\ObjectType;
 use PHPStan\Type\Type;
 
 /**
- * Prevents native declared properties of HigherOrderExpectation (like $original,
- * $expectation, $opposite, $shouldReset) from being incorrectly resolved as
- * higher-order value property accesses by downstream ExpressionTypeResolverExtensions.
- *
- * This extension must be registered BEFORE the peststan HigherOrderExpectationTypeExtension.
- *
  * @internal
  */
 final readonly class HigherOrderExpectationTypeExtension implements ExpressionTypeResolverExtension
@@ -37,7 +31,7 @@ final readonly class HigherOrderExpectationTypeExtension implements ExpressionTy
 
         $varType = $scope->getType($expr->var);
 
-        if (! (new ObjectType(HigherOrderExpectation::class))->isSuperTypeOf($varType)->yes()) {
+        if (! new ObjectType(HigherOrderExpectation::class)->isSuperTypeOf($varType)->yes()) {
             return null;
         }
 

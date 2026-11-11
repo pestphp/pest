@@ -15,8 +15,8 @@ beforeEach(function () {
 });
 
 test('pass with dataset', function ($data) {
-    TestSuite::getInstance()->snapshots->save($this->snapshotable);
-    [$filename] = TestSuite::getInstance()->snapshots->get();
+    TestSuite::getInstance()->snapshots->current()->write($this->snapshotable);
+    $filename = TestSuite::getInstance()->snapshots->current()->path();
 
     expect($filename)->toStartWith('tests/.pest/snapshots-external/')
         ->toEndWith('pass_with_dataset_with_data_set____my_datas_set_value___.snap')
@@ -25,8 +25,8 @@ test('pass with dataset', function ($data) {
 
 describe('within describe', function () {
     test('pass with dataset', function ($data) {
-        TestSuite::getInstance()->snapshots->save($this->snapshotable);
-        [$filename] = TestSuite::getInstance()->snapshots->get();
+        TestSuite::getInstance()->snapshots->current()->write($this->snapshotable);
+        $filename = TestSuite::getInstance()->snapshots->current()->path();
 
         expect($filename)->toStartWith('tests/.pest/snapshots-external/')
             ->toEndWith('pass_with_dataset_with_data_set____my_datas_set_value___.snap')

@@ -14,36 +14,21 @@ use Pest\TestSuite;
 final class UsesCall
 {
     /**
-     * Contains a global before each hook closure to be executed.
-     *
-     * Array indices here matter. They are mapped as follows:
-     *
-     * - `0` => `beforeAll`
-     * - `1` => `beforeEach`
-     * - `2` => `afterEach`
-     * - `3` => `afterAll`
-     *
      * @var array<int, Closure>
      */
     private array $hooks = [];
 
     /**
-     * Holds the targets of the uses.
-     *
      * @var array<int, string>
      */
     private array $targets;
 
     /**
-     * Holds the groups of the uses.
-     *
      * @var array<int, string>
      */
     private array $groups = [];
 
     /**
-     * Creates a new Pending Call.
-     *
      * @param  array<int, string>  $classAndTraits
      */
     public function __construct(
@@ -53,9 +38,7 @@ final class UsesCall
         $this->targets = [$filename];
     }
 
-    /**
-     * @deprecated Use `pest()->printer()->compact()` instead.
-     */
+    #[\Deprecated(message: 'Use `pest()->printer()->compact()` instead.')]
     public function compact(): self
     {
         DefaultPrinter::compact(true);
@@ -64,8 +47,6 @@ final class UsesCall
     }
 
     /**
-     * Specifies the class or traits to use.
-     *
      * @alias extend
      */
     public function use(string ...$classAndTraits): self
@@ -73,9 +54,6 @@ final class UsesCall
         return $this->extend(...$classAndTraits);
     }
 
-    /**
-     * Specifies the class or traits to use.
-     */
     public function extend(string ...$classAndTraits): self
     {
         $this->classAndTraits = array_merge($this->classAndTraits, array_values($classAndTraits));
@@ -83,9 +61,6 @@ final class UsesCall
         return $this;
     }
 
-    /**
-     * The directories or file where the class or traits should be used.
-     */
     public function in(string ...$targets): self
     {
         $targets = array_map(function (string $path): string {
@@ -118,9 +93,6 @@ final class UsesCall
         return $this;
     }
 
-    /**
-     * Sets the test group(s).
-     */
     public function group(string ...$groups): self
     {
         $this->groups = array_values($groups);
@@ -128,9 +100,6 @@ final class UsesCall
         return $this;
     }
 
-    /**
-     * Sets the global beforeAll test hook.
-     */
     public function beforeAll(Closure $hook): self
     {
         $this->hooks[0] = $hook;
@@ -138,9 +107,6 @@ final class UsesCall
         return $this;
     }
 
-    /**
-     * Sets the global beforeEach test hook.
-     */
     public function beforeEach(Closure $hook): self
     {
         $this->hooks[1] = $hook;
@@ -148,9 +114,6 @@ final class UsesCall
         return $this;
     }
 
-    /**
-     * Sets the global afterEach test hook.
-     */
     public function afterEach(Closure $hook): self
     {
         $this->hooks[2] = $hook;
@@ -158,9 +121,6 @@ final class UsesCall
         return $this;
     }
 
-    /**
-     * Sets the global afterAll test hook.
-     */
     public function afterAll(Closure $hook): self
     {
         $this->hooks[3] = $hook;
@@ -168,9 +128,6 @@ final class UsesCall
         return $this;
     }
 
-    /**
-     * Creates the Call.
-     */
     public function __destruct()
     {
         TestSuite::getInstance()->tests->use(

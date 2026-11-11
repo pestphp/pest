@@ -17,14 +17,10 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final readonly class Init implements HandlesArguments
 {
-    /**
-     * The option the triggers the init job.
-     */
+    use Concerns\HandleArguments;
+
     private const string INIT_OPTION = '--init';
 
-    /**
-     * The files that will be created.
-     */
     private const array STUBS = [
         'phpunit.xml.stub' => 'phpunit.xml',
         'Pest.php.stub' => 'tests/Pest.php',
@@ -33,15 +29,12 @@ final readonly class Init implements HandlesArguments
         'Feature/ExampleTest.php.stub' => 'tests/Feature/ExampleTest.php',
     ];
 
-    /**
-     * Creates a new Plugin instance.
-     */
     public function __construct(
         private TestSuite $testSuite,
         private InputInterface $input,
         private OutputInterface $output
     ) {
-        // ..
+        //
     }
 
     /**
@@ -49,23 +42,15 @@ final readonly class Init implements HandlesArguments
      */
     public function handleArguments(array $arguments): array
     {
-        if (! array_key_exists(1, $arguments)) {
+        if (! $this->hasArgument(self::INIT_OPTION, $arguments)) {
             return $arguments;
         }
-        if ($arguments[1] !== self::INIT_OPTION) {
-            return $arguments;
-        }
-
-        unset($arguments[1]);
 
         $this->init();
 
         exit(0);
     }
 
-    /**
-     * Initializes the tests directory.
-     */
     public function init(): void
     {
         $testsBaseDir = "{$this->testSuite->rootPath}/tests";
@@ -114,9 +99,6 @@ final readonly class Init implements HandlesArguments
         (new Thanks($this->input, $this->output))();
     }
 
-    /**
-     * Checks if laravel is installed through Composer
-     */
     private function isLaravelInstalled(): bool
     {
         return InstalledVersions::isInstalled('laravel/framework');

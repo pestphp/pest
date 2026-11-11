@@ -1,6 +1,6 @@
 <?php
 
-function myDirectoryAssertTrue($value)
+function myDirectoryAssertTrue($value): void
 {
     test()->assertTrue($value);
 }

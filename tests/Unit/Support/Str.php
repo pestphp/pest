@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 use Pest\Support\Str;
 
-it('evaluates the code', function ($evaluatable, $expected) {
+it('evaluates the code', function (string $evaluatable, $expected): void {
     $code = Str::evaluable($evaluatable);
 
     expect($code)->toBe($expected);

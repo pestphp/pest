@@ -2,53 +2,43 @@
 
 use Symfony\Component\Process\Process;
 
-$run = function () {
+$run = function (): ?string {
     $process = new Process(
         array_merge(['php', 'bin/pest', '--parallel', '--processes=3'], func_get_args()),
         dirname(__DIR__, 2),
-        ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true'],
+        ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
     );
+
+    $process->setTimeout(300.0);
 
     $process->run();
 
     return removeAnsiEscapeSequences($process->getOutput());
 };
 
-test('parallel', function () use ($run) {
+test('parallel', function () use ($run): void {
     $output = $run('--exclude-group=integration');
-    $output = implode("\n", array_slice(explode("\n", $output), -10));
+    $output = implode("\n", array_slice(explode("\n", (string) $output), -10));
 
-    if (getenv('REBUILD_SNAPSHOTS')) {
-        preg_match('/Tests:\s+(.+\(\d+ assertions\))/', $output, $matches);
-
-        $file = file_get_contents(__FILE__);
-        $file = preg_replace(
-            '/\$expected = \'.*?\';/',
-            "\$expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1314 passed (2959 assertions)';",
-            $file,
-        );
-        file_put_contents(__FILE__, $file);
-    }
-
-    $expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 27 skipped, 1314 passed (2959 assertions)';
+    $expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 29 skipped, 1622 passed (3577 assertions)';
 
     expect($output)
         ->toContain("Tests:    {$expected}")
         ->toContain('Parallel: 3 processes');
 })->skipOnWindows();
 
-test('a parallel test can extend another test with same name', function () use ($run) {
+test('a parallel test can extend another test with same name', function () use ($run): void {
     expect($run('tests/Fixtures/Inheritance'))->toContain('Tests:    1 skipped, 1 passed (1 assertions)');
 })->skipOnWindows();
 
-test('parallel reports invalid datasets as failures', function () use ($run) {
-    expect($run('tests/.tests/ParallelInvalidDataset'))
-        ->toContain("A dataset with the name `missing.dataset` does not exist. You can create it using `dataset('missing.dataset', ['a', 'b']);`.")
+test('parallel reports invalid datasets as failures', function () use ($run): void {
+    expect($run('tests/Fixtures/Suites/ParallelInvalidDataset'))
+        ->toContain("A dataset named [missing.dataset] does not exist. You may create one using `dataset('missing.dataset', ['a', 'b']);`.")
         ->toContain('Tests:    1 failed, 1 passed (1 assertions)')
         ->toContain('Parallel: 3 processes');
 })->skipOnWindows();
 
-test('parallel stop-on-* fixture runs every case without a stop flag', function (string $testName) use ($run) {
+test('parallel stop-on-* fixture runs every case without a stop flag', function (string $testName) use ($run): void {
     $output = $run('--filter', "($testName|passes)", 'tests/.tests/ParallelStopOn');
     expect($output)->toContain('10 passed');
 })->with([
@@ -62,7 +52,7 @@ test('parallel stop-on-* fixture runs every case without a stop flag', function 
     'is skipped',
 ])->skipOnWindows();
 
-test('parallel honors --stop-on-*', function (string $flag, string $testName) use ($run) {
+test('parallel honors --stop-on-*', function (string $flag, string $testName) use ($run): void {
     $output = $run('--filter', "($testName|passes)", $flag, 'tests/.tests/ParallelStopOn');
     preg_match('/(\d+) passed/', $output, $matches);
     expect((int) ($matches[1] ?? 0))->toBeLessThan(10);
@@ -77,3 +67,97 @@ test('parallel honors --stop-on-*', function (string $flag, string $testName) us
     'deprecation' => ['--stop-on-deprecation', 'deprecates'],
     'skipped' => ['--stop-on-skipped', 'is skipped'],
 ])->skipOnWindows();
+
+test('parallel lets extensions register event subscribers', function (): void {
+    $process = new Process(
+        ['php', 'bin/pest', '--configuration', 'tests/Fixtures/Suites/ParallelExtensionSubscriber.xml', '--parallel', '--processes=2'],
+        dirname(__DIR__, 2),
+        ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
+    );
+
+    $process->run();
+
+    expect($process->getExitCode())->toBe(0)
+        ->and(removeAnsiEscapeSequences($process->getOutput()))
+        ->not->toContain('failed')
+        ->toContain('Parallel: 2 processes');
+})->skipOnWindows();
+
+test('parallel can have multiple exclude-groups', function () use ($run): void {
+    $singleExclude = $run('--exclude-group=integration');
+    $doubleExclude = $run('--exclude-group=integration', '--exclude-group=container');
+
+    preg_match('/(\d+) passed/', (string) $singleExclude, $singleMatch);
+    preg_match('/(\d+) passed/', (string) $doubleExclude, $doubleMatch);
+
+    expect((int) $doubleMatch[1])->toBeLessThan((int) $singleMatch[1])
+        ->and($doubleExclude)->toContain('Parallel: 3 processes');
+})->skipOnWindows();
+
+test('parallel can have multiple groups', function () use ($run): void {
+    $output = $run('tests/Fixtures/Suites/MultipleGroups', '--group=one', '--group=two');
+
+    expect($output)
+        ->toContain('Tests:    2 passed (2 assertions)')
+        ->toContain('Parallel: 3 processes');
+})->skipOnWindows();
+
+test('parallel accepts the options that the workers ignore', function (string $option) use ($run): void {
+    expect($run('tests/Fixtures/Inheritance', $option))
+        ->toContain('Tests:    1 skipped, 1 passed (1 assertions)')
+        ->toContain('Parallel: 3 processes');
+})->with([
+    '--no-results',
+    '--do-not-cache-result',
+    '--do-not-record-test-run-history',
+])->skipOnWindows();
+
+test('parallel records the test run history', function () use ($run): void {
+    $cacheDirectory = sys_get_temp_dir().'/pest-parallel-history-'.bin2hex(random_bytes(8));
+
+    $run('tests/Fixtures/Inheritance', '--cache-directory='.$cacheDirectory);
+
+    expect($cacheDirectory.'/test-run-history')->toBeFile();
+
+    unlink($cacheDirectory.'/test-run-history');
+    rmdir($cacheDirectory);
+})->skipOnWindows();
+
+test('parallel does not record the test run history when asked not to', function (string $option) use ($run): void {
+    $cacheDirectory = sys_get_temp_dir().'/pest-parallel-history-'.bin2hex(random_bytes(8));
+
+    expect($run('tests/Fixtures/Inheritance', '--cache-directory='.$cacheDirectory, $option))
+        ->toContain('Tests:    1 skipped, 1 passed (1 assertions)')
+        ->and($cacheDirectory.'/test-run-history')->not->toBeFile();
+
+    rmdir($cacheDirectory);
+})->with([
+    '--do-not-cache-result',
+    '--do-not-record-test-run-history',
+])->skipOnWindows();
+
+test('parallel group-filtered run is not considered empty when a worker ends on a fully filtered file', function (): void {
+    $process = new Process(
+        ['php', 'bin/pest', '--parallel', '--processes=1', '--group=filtered', 'tests/Fixtures/Suites/ParallelGroupFilteredLastFile'],
+        dirname(__DIR__, 2),
+        ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
+    );
+
+    $process->run();
+
+    expect(removeAnsiEscapeSequences($process->getOutput()))->toContain('Tests:    1 passed (1 assertions)')
+        ->and($process->getExitCode())->toBe(0);
+})->skipOnWindows();
+
+test('parallel group-filtered run still fails when the selection matches no tests', function (): void {
+    $process = new Process(
+        ['php', 'bin/pest', '--parallel', '--processes=3', '--group=missing', 'tests/Fixtures/Suites/ParallelGroupFilteredLastFile'],
+        dirname(__DIR__, 2),
+        ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
+    );
+
+    $process->run();
+
+    expect(removeAnsiEscapeSequences($process->getOutput()))->toContain('No tests found.')
+        ->and($process->getExitCode())->toBe(1);
+})->skipOnWindows();

@@ -27,8 +27,6 @@ use PHPUnit\Framework\TestCase;
 
 if (! function_exists('expect')) {
     /**
-     * Creates a new expectation.
-     *
      * @template TValue
      *
      * @param  TValue|null  $value
@@ -41,9 +39,6 @@ if (! function_exists('expect')) {
 }
 
 if (! function_exists('beforeAll')) {
-    /**
-     * Runs the given closure before all tests in the current file.
-     */
     function beforeAll(Closure $closure): void
     {
         if (DescribeCall::describing() !== []) {
@@ -58,8 +53,6 @@ if (! function_exists('beforeAll')) {
 
 if (! function_exists('beforeEach')) {
     /**
-     * Runs the given closure before each test in the current file.
-     *
      * @param-closure-this TestCall  $closure
      */
     function beforeEach(?Closure $closure = null): BeforeEachCall
@@ -72,8 +65,6 @@ if (! function_exists('beforeEach')) {
 
 if (! function_exists('dataset')) {
     /**
-     * Registers the given dataset.
-     *
      * @param  Closure|iterable<int|string, mixed>  $dataset
      */
     function dataset(string $name, Closure|iterable $dataset): void
@@ -85,11 +76,6 @@ if (! function_exists('dataset')) {
 }
 
 if (! function_exists('describe')) {
-    /**
-     * Adds the given closure as a group of tests. The first argument
-     * is the group description; the second argument is a closure
-     * that contains the group tests.
-     */
     function describe(string $description, Closure $tests): DescribeCall
     {
         $filename = Backtrace::testFile();
@@ -100,9 +86,6 @@ if (! function_exists('describe')) {
 
 if (! function_exists('uses')) {
     /**
-     * The uses function binds the given
-     * arguments to test closures.
-     *
      * @param  class-string  ...$classAndTraits
      */
     function uses(string ...$classAndTraits): UsesCall
@@ -114,9 +97,6 @@ if (! function_exists('uses')) {
 }
 
 if (! function_exists('pest')) {
-    /**
-     * Creates a new Pest configuration instance.
-     */
     function pest(): Configuration
     {
         return new Configuration(Backtrace::testFile());
@@ -125,10 +105,6 @@ if (! function_exists('pest')) {
 
 if (! function_exists('test')) {
     /**
-     * Adds the given closure as a test. The first argument
-     * is the test description; the second argument is
-     * a closure that contains the test expectations.
-     *
      * @param-closure-this TestCall  $closure
      *
      * @return ($description is string ? TestCall : HigherOrderTapProxy|TestCall)
@@ -147,10 +123,6 @@ if (! function_exists('test')) {
 
 if (! function_exists('it')) {
     /**
-     * Adds the given closure as a test. The first argument
-     * is the test description; the second argument is
-     * a closure that contains the test expectations.
-     *
      * @param-closure-this TestCall  $closure
      */
     function it(string $description, ?Closure $closure = null): TestCall
@@ -162,9 +134,6 @@ if (! function_exists('it')) {
 }
 
 if (! function_exists('todo')) {
-    /**
-     * Creates a new test that is marked as "todo".
-     */
     function todo(string $description): TestCall
     {
         return test($description)->todo();
@@ -173,8 +142,6 @@ if (! function_exists('todo')) {
 
 if (! function_exists('afterEach')) {
     /**
-     * Runs the given closure after each test in the current file.
-     *
      * @param-closure-this TestCall  $closure
      */
     function afterEach(?Closure $closure = null): AfterEachCall
@@ -186,9 +153,6 @@ if (! function_exists('afterEach')) {
 }
 
 if (! function_exists('afterAll')) {
-    /**
-     * Runs the given closure after all tests in the current file.
-     */
     function afterAll(Closure $closure): void
     {
         if (DescribeCall::describing() !== []) {
@@ -203,8 +167,6 @@ if (! function_exists('afterAll')) {
 
 if (! function_exists('covers')) {
     /**
-     * Specifies which classes, or functions, a test case covers.
-     *
      * @param  array<int, string>|string  $classesOrFunctions
      */
     function covers(array|string ...$classesOrFunctions): void
@@ -232,8 +194,6 @@ if (! function_exists('covers')) {
 
 if (! function_exists('mutates')) {
     /**
-     * Specifies which classes, enums, or traits a test case mutates.
-     *
      * @param  array<int, string>|string  $targets
      */
     function mutates(array|string ...$targets): void
@@ -266,9 +226,6 @@ if (! function_exists('mutates')) {
 }
 
 if (! function_exists('fixture')) {
-    /**
-     * Returns the absolute path to a fixture file.
-     */
     function fixture(string $file): string
     {
         $file = implode(DIRECTORY_SEPARATOR, [
@@ -292,8 +249,6 @@ if (! function_exists('fixture')) {
 
 if (! function_exists('visit')) {
     /**
-     * Browse to the given URL.
-     *
      * @template TUrl of array<int, string>|string
      *
      * @param  TUrl  $url

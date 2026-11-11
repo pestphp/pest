@@ -37,7 +37,7 @@ final class XdebugRestarter implements Restarter
             return;
         }
 
-        (new XdebugHandler('pest'))->check();
+        new XdebugHandler('pest')->check();
     }
 
     private function xdebugIsCoverageOnly(): bool
@@ -76,6 +76,10 @@ final class XdebugRestarter implements Restarter
             if ($value === '--fresh') {
                 return false;
             }
+        }
+
+        if (Tia::isMutationRun($arguments)) {
+            return false;
         }
 
         if (! Tia::isEnabledForRun($arguments)) {

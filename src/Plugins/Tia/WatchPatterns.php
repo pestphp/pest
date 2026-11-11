@@ -44,6 +44,12 @@ final class WatchPatterns
 
     private bool $baselined = false;
 
+    private ?string $defaultBranch = null;
+
+    private ?string $baselineWorkflow = null;
+
+    private ?string $baselineJob = null;
+
     public function useDefaults(string $projectRoot): void
     {
         $testPath = TestSuite::getInstance()->testPath;
@@ -177,6 +183,40 @@ final class WatchPatterns
         return $this->baselined;
     }
 
+    public function setDefaultBranch(string $branch): void
+    {
+        $this->defaultBranch = $branch;
+    }
+
+    public function defaultBranch(): ?string
+    {
+        return $this->defaultBranch;
+    }
+
+    public function setBaselineWorkflow(string $workflow): void
+    {
+        $workflow = trim($workflow);
+
+        $this->baselineWorkflow = $workflow === '' ? null : $workflow;
+    }
+
+    public function baselineWorkflow(): ?string
+    {
+        return $this->baselineWorkflow;
+    }
+
+    public function setBaselineJob(string $job): void
+    {
+        $job = trim($job);
+
+        $this->baselineJob = $job === '' ? null : $job;
+    }
+
+    public function baselineJob(): ?string
+    {
+        return $this->baselineJob;
+    }
+
     public function reset(): void
     {
         $this->patterns = [];
@@ -185,6 +225,9 @@ final class WatchPatterns
         $this->locally = false;
         $this->filtered = false;
         $this->baselined = false;
+        $this->defaultBranch = null;
+        $this->baselineWorkflow = null;
+        $this->baselineJob = null;
     }
 
     private function keyMatches(string $key, string $file): bool
@@ -253,35 +296,17 @@ final class WatchPatterns
 
     private function patternTargetsDotfiles(string $pattern): bool
     {
-        foreach (explode('/', str_replace('\\', '/', $pattern)) as $segment) {
-            if ($segment !== '' && $segment[0] === '.') {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any(explode('/', str_replace('\\', '/', $pattern)), fn (string $segment): bool => $segment !== '' && $segment[0] === '.');
     }
 
     private function touchesVcs(string $file): bool
     {
-        foreach (explode('/', $file) as $segment) {
-            if (in_array($segment, self::VCS_DIRS, true)) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any(explode('/', $file), fn (string $segment): bool => in_array($segment, self::VCS_DIRS, true));
     }
 
     private function touchesDotfile(string $file): bool
     {
-        foreach (explode('/', $file) as $segment) {
-            if ($segment !== '' && $segment[0] === '.') {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any(explode('/', $file), fn (string $segment): bool => $segment !== '' && $segment[0] === '.');
     }
 
     private function excludeMatches(string $exclude, string $file): bool

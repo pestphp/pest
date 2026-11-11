@@ -10,8 +10,6 @@ namespace Pest\Support;
 final class Arr
 {
     /**
-     * Checks if the given array has the given key.
-     *
      * @param  array<array-key, mixed>  $array
      */
     public static function has(array $array, string|int $key): bool
@@ -34,8 +32,6 @@ final class Arr
     }
 
     /**
-     * Gets the given key value.
-     *
      * @param  array<array-key, mixed>  $array
      */
     public static function get(array $array, string|int $key, mixed $default = null): mixed
@@ -62,8 +58,6 @@ final class Arr
     }
 
     /**
-     * Flatten a multi-dimensional associative array with dots.
-     *
      * @param  array<array-key, mixed>  $array
      * @return array<int|string, mixed>
      */
@@ -83,8 +77,6 @@ final class Arr
     }
 
     /**
-     * Returns the value of the last element or false for empty array
-     *
      * @param  array<array-key, mixed>  $array
      */
     public static function last(array $array): mixed

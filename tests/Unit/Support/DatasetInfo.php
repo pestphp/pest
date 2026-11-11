@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 use Pest\Support\DatasetInfo;
 
-it('can check if dataset is defined inside a Datasets directory', function (string $file, bool $inside) {
+it('can check if dataset is defined inside a Datasets directory', function (string $file, bool $inside): void {
     expect(DatasetInfo::isInsideADatasetsDirectory($file))->toBe($inside);
 })->with([
     ['file' => '/var/www/Datasets/project/tests/Datasets/Nested/Numbers.php', 'inside' => true],
@@ -17,7 +19,7 @@ it('can check if dataset is defined inside a Datasets directory', function (stri
     ['file' => '/var/www/project/tests/Features/Datasets.php', 'inside' => false],
 ]);
 
-it('can check if dataset is defined inside a Datasets.php file', function (string $file, bool $inside) {
+it('can check if dataset is defined inside a Datasets.php file', function (string $file, bool $inside): void {
     expect(DatasetInfo::isADatasetsFile($file))->toBe($inside);
 })->with([
     ['file' => '/var/www/project/tests/Datasets/Numbers.php', 'inside' => false],
@@ -27,7 +29,7 @@ it('can check if dataset is defined inside a Datasets.php file', function (strin
     ['file' => '/var/www/project/tests/Features/Datasets.php', 'inside' => true],
 ]);
 
-it('computes the dataset scope', function (string $file, string $scope) {
+it('computes the dataset scope', function (string $file, string $scope): void {
     expect(DatasetInfo::scope($file))->toBe($scope);
 })->with([
     ['file' => '/var/www/Datasets/project/tests/Datasets/Nested/Numbers.php', 'scope' => '/var/www/Datasets/project/tests'],

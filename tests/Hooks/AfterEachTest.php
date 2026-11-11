@@ -1,10 +1,10 @@
 <?php
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->ith = 0;
 });
 
-pest()->afterEach(function () {
+pest()->afterEach(function (): void {
     expect($this)
         ->toHaveProperty('ith')
         ->and($this->ith)
@@ -13,7 +13,7 @@ pest()->afterEach(function () {
     $this->ith++;
 });
 
-pest()->afterEach(function () {
+pest()->afterEach(function (): void {
     expect($this)
         ->toHaveProperty('ith')
         ->and($this->ith)
@@ -22,7 +22,7 @@ pest()->afterEach(function () {
     $this->ith++;
 });
 
-afterEach(function () {
+afterEach(function (): void {
     expect($this)
         ->toHaveProperty('ith')
         ->and($this->ith)
@@ -31,8 +31,8 @@ afterEach(function () {
     $this->ith++;
 });
 
-describe('nested', function () {
-    afterEach(function () {
+describe('nested', function (): void {
+    afterEach(function (): void {
         expect($this)
             ->toHaveProperty('ith')
             ->and($this->ith)
@@ -41,7 +41,7 @@ describe('nested', function () {
         $this->ith++;
     });
 
-    test('nested afterEach execution order', function () {
+    test('nested afterEach execution order', function (): void {
         expect($this)
             ->toHaveProperty('ith')
             ->and($this->ith)
@@ -50,7 +50,7 @@ describe('nested', function () {
         $this->ith++;
     });
 
-    afterEach(function () {
+    afterEach(function (): void {
         expect($this)
             ->toHaveProperty('ith')
             ->and($this->ith)
@@ -60,7 +60,7 @@ describe('nested', function () {
     });
 });
 
-afterEach(function () {
+afterEach(function (): void {
     expect($this)
         ->toHaveProperty('ith')
         ->and($this->ith)
@@ -69,7 +69,7 @@ afterEach(function () {
     $this->ith++;
 });
 
-test('global afterEach execution order', function () {
+test('global afterEach execution order', function (): void {
     expect($this)
         ->toHaveProperty('ith')
         ->and($this->ith)

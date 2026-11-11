@@ -12,11 +12,6 @@ use Pest\Plugin\Loader;
  */
 final class CallsAddsOutput
 {
-    /**
-     * Executes the Plugin action.
-     *
-     * Provides an opportunity for any plugins that want to provide additional output after test execution.
-     */
     public static function execute(int $exitCode): int
     {
         $plugins = Loader::getPlugins(Plugins\AddsOutput::class);

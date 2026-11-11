@@ -7,40 +7,56 @@ namespace Pest\Plugins\Parallel\Paratest;
 use const DIRECTORY_SEPARATOR;
 
 use NunoMaduro\Collision\Adapters\Phpunit\Support\ResultReflection;
-use ParaTest\Coverage\CoverageMerger;
 use ParaTest\JUnit\LogMerger;
 use ParaTest\JUnit\Writer;
 use ParaTest\Options;
 use ParaTest\RunnerInterface;
+use ParaTest\WrapperRunner\MissingResultsException;
 use ParaTest\WrapperRunner\SuiteLoader;
 use ParaTest\WrapperRunner\WrapperWorker;
+use Pest\Plugins\Parallel;
+use Pest\Plugins\Tia;
 use Pest\Result;
 use Pest\TestSuite;
 use PHPUnit\Event\Facade as EventFacade;
 use PHPUnit\Event\Test\AfterLastTestMethodFailed;
 use PHPUnit\Event\TestRunner\WarningTriggered;
 use PHPUnit\Runner\CodeCoverage;
-use PHPUnit\Runner\ResultCache\DefaultResultCache;
+use PHPUnit\Runner\TestRunHistory\DefaultTestRunHistory;
 use PHPUnit\TestRunner\TestResult\Facade as TestResultFacade;
 use PHPUnit\TestRunner\TestResult\TestResult;
 use PHPUnit\TextUI\Configuration\CodeCoverageFilterRegistry;
 use PHPUnit\Util\ExcludeList;
+use ReflectionProperty;
+use RuntimeException;
+use SebastianBergmann\CodeCoverage\Node\Builder;
+use SebastianBergmann\CodeCoverage\Serialization\Merger;
+use SebastianBergmann\CodeCoverage\StaticAnalysis\FileAnalyser;
+use SebastianBergmann\CodeCoverage\StaticAnalysis\ParsingSourceAnalyser;
 use SebastianBergmann\Timer\Timer;
 use SplFileInfo;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
 
+use function array_filter;
 use function array_merge;
 use function array_merge_recursive;
 use function array_shift;
 use function array_unique;
 use function array_values;
 use function assert;
+use function bin2hex;
 use function count;
 use function dirname;
 use function file_get_contents;
+use function filesize;
+use function is_file;
 use function max;
+use function mkdir;
+use function random_bytes;
 use function realpath;
+use function rmdir;
+use function sprintf;
 use function str_contains;
 use function str_starts_with;
 use function unlink;
@@ -52,32 +68,19 @@ use function usleep;
  */
 final class WrapperRunner implements RunnerInterface
 {
-    /**
-     * The time to sleep between cycles.
-     */
-    /**
-     * The merged test result from the parallel run.
-     */
+    public const string DO_NOT_RECORD_TEST_RUN_HISTORY = 'DO_NOT_RECORD_TEST_RUN_HISTORY';
+
     public static ?TestResult $result = null;
 
-    private const int CYCLE_SLEEP = 10000;
+    private const int CYCLE_SLEEP = 1000;
 
-    /**
-     * The result printer.
-     */
     private readonly ResultPrinter $printer;
 
-    /**
-     * The timer.
-     */
     private readonly Timer $timer;
 
     /** @var list<non-empty-string> */
     private array $pending = [];
 
-    /**
-     * The exit code.
-     */
     private int $exitcode = -1;
 
     /** @var array<positive-int,WrapperWorker> */
@@ -85,6 +88,18 @@ final class WrapperRunner implements RunnerInterface
 
     /** @var array<int,int> */
     private array $batches = [];
+
+    /** @var array<non-empty-string,true> */
+    private array $requiredTestResultFiles = [];
+
+    /** @var array<non-empty-string,true> */
+    private array $requiredCoverageFiles = [];
+
+    /** @var list<SplFileInfo> */
+    private array $statusFiles = [];
+
+    /** @var list<SplFileInfo> */
+    private array $progressFiles = [];
 
     /** @var list<SplFileInfo> */
     private array $unexpectedOutputFiles = [];
@@ -115,10 +130,10 @@ final class WrapperRunner implements RunnerInterface
 
     private bool $stopRequested = false;
 
-    /**
-     * The code coverage filter registry.
-     */
     private CodeCoverageFilterRegistry $codeCoverageFilterRegistry;
+
+    /** @var non-empty-string */
+    private string $runTmpDir;
 
     public function __construct(
         private readonly Options $options,
@@ -143,6 +158,7 @@ final class WrapperRunner implements RunnerInterface
 
         /** @var array<int, non-empty-string> $parameters */
         $parameters = $this->handleLaravelHerd($parameters);
+        $parameters = $this->handleTia($parameters);
 
         $parameters[] = $wrapper;
         $parameters[] = '--test-directory='.TestSuite::getInstance()->testPath;
@@ -155,8 +171,6 @@ final class WrapperRunner implements RunnerInterface
     {
         $directory = dirname(__DIR__);
         ExcludeList::addDirectory($directory);
-        TestResultFacade::init();
-        EventFacade::instance()->seal();
         $suiteLoader = new SuiteLoader(
             $this->options,
             $this->output,
@@ -168,6 +182,7 @@ final class WrapperRunner implements RunnerInterface
 
         $this->timer->start();
 
+        $this->runTmpDir = $this->createRunTmpDir();
         $this->startWorkers();
         $this->assignAllPendingTests();
         $this->waitForAllToFinish();
@@ -176,8 +191,6 @@ final class WrapperRunner implements RunnerInterface
     }
 
     /**
-     * Handles Laravel Herd's debug and coverage modes.
-     *
      * @param  array<string>  $parameters
      * @return array<string>
      */
@@ -188,6 +201,36 @@ final class WrapperRunner implements RunnerInterface
         }
 
         return $parameters;
+    }
+
+    /**
+     * @param  array<int, non-empty-string>  $parameters
+     * @return array<int, non-empty-string>
+     */
+    private function handleTia(array $parameters): array
+    {
+        if (! Tia::recordsEdgesInWorkers()) {
+            return $parameters;
+        }
+
+        return array_merge($parameters, ['-d', 'pcov.directory='.TestSuite::getInstance()->rootPath]);
+    }
+
+    /** @return non-empty-string */
+    private function createRunTmpDir(): string
+    {
+        $runTmpDir = sprintf(
+            '%s%sparatest_%s',
+            $this->options->tmpDir,
+            DIRECTORY_SEPARATOR,
+            bin2hex(random_bytes(16)),
+        );
+
+        if (! @mkdir($runTmpDir, 0700)) {
+            throw new RuntimeException(sprintf('Unable to create the private temporary directory [%s].', $runTmpDir));
+        }
+
+        return $runTmpDir;
     }
 
     private function startWorkers(): void
@@ -306,6 +349,18 @@ final class WrapperRunner implements RunnerInterface
 
     private function flushWorker(WrapperWorker $worker): void
     {
+        if ($worker->hasExecutedTests()) {
+            $testResultFile = $worker->testResultFile->getPathname();
+
+            if ($testResultFile !== '') {
+                $this->requiredTestResultFiles[$testResultFile] = true;
+            }
+
+            if (isset($worker->coverageFile) && $worker->coverageFile->getPathname() !== '') {
+                $this->requiredCoverageFiles[$worker->coverageFile->getPathname()] = true;
+            }
+        }
+
         $this->exitcode = max($this->exitcode, $worker->getExitCode());
         $this->printer->printFeedback(
             $worker->progressFile,
@@ -349,13 +404,19 @@ final class WrapperRunner implements RunnerInterface
             $this->options,
             $this->parameters,
             $token,
+            $this->runTmpDir,
         );
         $worker->start();
         $this->batches[$token] = 0;
 
-        $this->unexpectedOutputFiles[] = $worker->unexpectedOutputFile;
+        $this->statusFiles[] = $worker->statusFile;
+        $this->progressFiles[] = $worker->progressFile;
         $this->unexpectedOutputFiles[] = $worker->unexpectedOutputFile;
         $this->testResultFiles[] = $worker->testResultFile;
+
+        if (isset($worker->resultCacheFile)) {
+            $this->resultCacheFiles[] = $worker->resultCacheFile;
+        }
 
         if (isset($worker->junitFile)) {
             $this->junitFiles[] = $worker->junitFile;
@@ -379,7 +440,6 @@ final class WrapperRunner implements RunnerInterface
     private function destroyWorker(int $token): void
     {
         $this->workers[$token]->stop();
-        // We need to wait for ApplicationForWrapperWorker::end to end
         while ($this->workers[$token]->isRunning()) {
             usleep(self::CYCLE_SLEEP);
         }
@@ -389,6 +449,20 @@ final class WrapperRunner implements RunnerInterface
 
     private function complete(TestResult $testResultSum): int
     {
+        $missingTestResultFiles = [];
+
+        foreach ($this->requiredTestResultFiles as $filePath => $true) {
+            if (is_file($filePath)) {
+                continue;
+            }
+
+            $missingTestResultFiles[] = $filePath;
+        }
+
+        if ($missingTestResultFiles !== []) {
+            throw MissingResultsException::create($missingTestResultFiles, 'test_result');
+        }
+
         foreach ($this->testResultFiles as $testResultFile) {
             if (! $testResultFile->isFile()) {
                 continue;
@@ -403,7 +477,7 @@ final class WrapperRunner implements RunnerInterface
             $failedEvents = array_merge_recursive($testResultSum->testFailedEvents(), $testResult->testFailedEvents());
 
             $testResultSum = new TestResult(
-                (int) $testResultSum->hasTests() + (int) $testResult->hasTests(),
+                ResultReflection::numberOfTests($testResultSum) + self::numberOfTestsSeenByWorker($testResult),
                 $testResultSum->numberOfTestsRun() + $testResult->numberOfTestsRun(),
                 $testResultSum->numberOfAssertions() + $testResult->numberOfAssertions(),
                 array_merge_recursive($testResultSum->testErroredEvents(), $testResult->testErroredEvents()),
@@ -416,27 +490,26 @@ final class WrapperRunner implements RunnerInterface
                 array_merge_recursive($testResultSum->testTriggeredPhpunitErrorEvents(), $testResult->testTriggeredPhpunitErrorEvents()),
                 array_merge_recursive($testResultSum->testTriggeredPhpunitNoticeEvents(), $testResult->testTriggeredPhpunitNoticeEvents()),
                 array_merge_recursive($testResultSum->testTriggeredPhpunitWarningEvents(), $testResult->testTriggeredPhpunitWarningEvents()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->testRunnerTriggeredDeprecationEvents(), $testResult->testRunnerTriggeredDeprecationEvents()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->testRunnerTriggeredNoticeEvents(), $testResult->testRunnerTriggeredNoticeEvents()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->testRunnerTriggeredWarningEvents(), $testResult->testRunnerTriggeredWarningEvents()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->errors(), $testResult->errors()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->deprecations(), $testResult->deprecations()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->notices(), $testResult->notices()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->warnings(), $testResult->warnings()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->phpDeprecations(), $testResult->phpDeprecations()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->phpNotices(), $testResult->phpNotices()),
-                // @phpstan-ignore-next-line
-                array_merge_recursive($testResultSum->phpWarnings(), $testResult->phpWarnings()),
+                array_merge($testResultSum->testRunnerTriggeredDeprecationEvents(), $testResult->testRunnerTriggeredDeprecationEvents()),
+                array_merge($testResultSum->testRunnerTriggeredNoticeEvents(), $testResult->testRunnerTriggeredNoticeEvents()),
+                array_merge($testResultSum->testRunnerTriggeredWarningEvents(), $testResult->testRunnerTriggeredWarningEvents()),
+                array_merge($testResultSum->testRunnerTriggeredIssueDeprecationEvents(), $testResult->testRunnerTriggeredIssueDeprecationEvents()),
+                array_merge($testResultSum->testRunnerTriggeredIssueErrorEvents(), $testResult->testRunnerTriggeredIssueErrorEvents()),
+                array_merge($testResultSum->testRunnerTriggeredIssueNoticeEvents(), $testResult->testRunnerTriggeredIssueNoticeEvents()),
+                array_merge($testResultSum->testRunnerTriggeredIssuePhpDeprecationEvents(), $testResult->testRunnerTriggeredIssuePhpDeprecationEvents()),
+                array_merge($testResultSum->testRunnerTriggeredIssuePhpNoticeEvents(), $testResult->testRunnerTriggeredIssuePhpNoticeEvents()),
+                array_merge($testResultSum->testRunnerTriggeredIssuePhpWarningEvents(), $testResult->testRunnerTriggeredIssuePhpWarningEvents()),
+                array_merge($testResultSum->testRunnerTriggeredIssueWarningEvents(), $testResult->testRunnerTriggeredIssueWarningEvents()),
+                array_merge($testResultSum->errors(), $testResult->errors()),
+                array_merge($testResultSum->deprecations(), $testResult->deprecations()),
+                array_merge($testResultSum->notices(), $testResult->notices()),
+                array_merge($testResultSum->warnings(), $testResult->warnings()),
+                array_merge($testResultSum->phpDeprecations(), $testResult->phpDeprecations()),
+                array_merge($testResultSum->phpNotices(), $testResult->phpNotices()),
+                array_merge($testResultSum->phpWarnings(), $testResult->phpWarnings()),
                 $testResultSum->numberOfIssuesIgnoredByBaseline() + $testResult->numberOfIssuesIgnoredByBaseline(),
+                self::numberOfDeprecationsByTrigger($testResultSum, $testResult),
+                array_merge($testResultSum->retriedTests(), $testResult->retriedTests()),
             );
         }
 
@@ -458,8 +531,15 @@ final class WrapperRunner implements RunnerInterface
             $testResultSum->testRunnerTriggeredNoticeEvents(),
             array_values(array_filter(
                 $testResultSum->testRunnerTriggeredWarningEvents(),
-                fn (WarningTriggered $event): bool => ! str_contains($event->message(), 'No tests found')
+                fn (WarningTriggered $event): bool => ! str_contains($event->message(), 'No tests found in class')
             )),
+            $testResultSum->testRunnerTriggeredIssueDeprecationEvents(),
+            $testResultSum->testRunnerTriggeredIssueErrorEvents(),
+            $testResultSum->testRunnerTriggeredIssueNoticeEvents(),
+            $testResultSum->testRunnerTriggeredIssuePhpDeprecationEvents(),
+            $testResultSum->testRunnerTriggeredIssuePhpNoticeEvents(),
+            $testResultSum->testRunnerTriggeredIssuePhpWarningEvents(),
+            $testResultSum->testRunnerTriggeredIssueWarningEvents(),
             $testResultSum->errors(),
             $testResultSum->deprecations(),
             $testResultSum->notices(),
@@ -468,14 +548,16 @@ final class WrapperRunner implements RunnerInterface
             $testResultSum->phpNotices(),
             $testResultSum->phpWarnings(),
             $testResultSum->numberOfIssuesIgnoredByBaseline(),
+            self::numberOfDeprecationsByTrigger($testResultSum),
+            $testResultSum->retriedTests(),
         );
 
         self::$result = $testResultSum;
 
-        if ($this->options->configuration->cacheResult()) {
-            $resultCacheSum = new DefaultResultCache($this->options->configuration->testResultCacheFile());
+        if ($this->options->configuration->recordTestRunHistory() && Parallel::getGlobal(self::DO_NOT_RECORD_TEST_RUN_HISTORY) !== true) {
+            $resultCacheSum = new DefaultTestRunHistory($this->options->configuration->testRunHistoryFile());
             foreach ($this->resultCacheFiles as $resultCacheFile) {
-                $resultCache = new DefaultResultCache($resultCacheFile->getPathname());
+                $resultCache = new DefaultTestRunHistory($resultCacheFile->getPathname());
                 $resultCache->load();
 
                 $resultCacheSum->mergeWith($resultCache);
@@ -495,14 +577,45 @@ final class WrapperRunner implements RunnerInterface
 
         $exitcode = Result::exitCode($this->options->configuration, $testResultSum);
 
+        $this->clearFiles($this->statusFiles);
+        $this->clearFiles($this->progressFiles);
         $this->clearFiles($this->unexpectedOutputFiles);
         $this->clearFiles($this->testResultFiles);
+        $this->clearFiles($this->resultCacheFiles);
         $this->clearFiles($this->coverageFiles);
         $this->clearFiles($this->junitFiles);
         $this->clearFiles($this->teamcityFiles);
         $this->clearFiles($this->testdoxFiles);
+        rmdir($this->runTmpDir);
 
         return $exitcode;
+    }
+
+    private static function numberOfTestsSeenByWorker(TestResult $result): int
+    {
+        return max(ResultReflection::numberOfTests($result), $result->numberOfTestsRun());
+    }
+
+    /**
+     * @return array{self: non-negative-int, direct: non-negative-int, indirect: non-negative-int, unknown: non-negative-int}
+     */
+    private static function numberOfDeprecationsByTrigger(TestResult ...$results): array
+    {
+        $self = $direct = $indirect = $unknown = 0;
+
+        foreach ($results as $result) {
+            $self += max(0, $result->numberOfSelfDeprecations());
+            $direct += max(0, $result->numberOfDirectDeprecations());
+            $indirect += max(0, $result->numberOfIndirectDeprecations());
+            $unknown += max(0, $result->numberOfDeprecationsWithUnknownTrigger());
+        }
+
+        return [
+            'self' => $self,
+            'direct' => $direct,
+            'indirect' => $indirect,
+            'unknown' => $unknown,
+        ];
     }
 
     private function generateCodeCoverageReports(): void
@@ -511,7 +624,21 @@ final class WrapperRunner implements RunnerInterface
             return;
         }
 
-        $coverageManager = new CodeCoverage;
+        $missingCoverageFiles = [];
+
+        foreach ($this->requiredCoverageFiles as $filePath => $true) {
+            if (is_file($filePath) && filesize($filePath) !== 0) {
+                continue;
+            }
+
+            $missingCoverageFiles[] = $filePath;
+        }
+
+        if ($missingCoverageFiles !== []) {
+            throw MissingResultsException::create($missingCoverageFiles, 'coverage');
+        }
+
+        $coverageManager = new CodeCoverage(EventFacade::emitter());
         $coverageManager->init(
             $this->options->configuration,
             $this->codeCoverageFilterRegistry,
@@ -526,10 +653,33 @@ final class WrapperRunner implements RunnerInterface
 
             return;
         }
-        $coverageMerger = new CoverageMerger($coverageManager->codeCoverage());
-        foreach ($this->coverageFiles as $coverageFile) {
-            $coverageMerger->addCoverageFromFile($coverageFile);
+        $coverageFiles = [];
+        foreach ($this->coverageFiles as $fileInfo) {
+            $realPath = $fileInfo->getRealPath();
+            if ($realPath !== false && $realPath !== '') {
+                $coverageFiles[] = $realPath;
+            }
         }
+        $serializedCoverage = (new Merger)->merge($coverageFiles);
+
+        $report = (new Builder(new FileAnalyser(new ParsingSourceAnalyser, false, false)))->build(
+            $serializedCoverage['codeCoverage'],
+            $serializedCoverage['testResults'],
+            $serializedCoverage['basePath'],
+        );
+        $codeCoverage = $coverageManager->codeCoverage();
+        $codeCoverage->excludeUncoveredFiles();
+
+        $mergedData = $serializedCoverage['codeCoverage'];
+        $basePath = $serializedCoverage['basePath'];
+        if ($basePath !== '') {
+            foreach ($mergedData->coveredFiles() as $relativePath) {
+                $mergedData->renameFile($relativePath, $basePath.DIRECTORY_SEPARATOR.$relativePath);
+            }
+        }
+        $codeCoverage->setData($mergedData);
+        $codeCoverage->setTests($serializedCoverage['testResults']);
+        (new ReflectionProperty(\SebastianBergmann\CodeCoverage\CodeCoverage::class, 'cachedReport'))->setValue($codeCoverage, $report);
 
         $coverageManager->generateReports(
             $this->printer->printer,
@@ -564,13 +714,11 @@ final class WrapperRunner implements RunnerInterface
     }
 
     /**
-     * Returns the test files to be executed.
-     *
      * @return array<int, non-empty-string>
      */
     private function getTestFiles(SuiteLoader $suiteLoader): array
     {
-        /** @var array<string, null> $files */
+        /** @var array<non-empty-string, null> $files */
         $files = [];
 
         foreach (array_filter(
@@ -582,7 +730,7 @@ final class WrapperRunner implements RunnerInterface
         }
 
         foreach (TestSuite::getInstance()->tests->getFilenames() as $filename) {
-            if ($this->shouldIncludeBootstrappedTestFile($filename)) {
+            if ($filename !== '' && $this->shouldIncludeBootstrappedTestFile($filename)) {
                 $resolved = realpath($filename)
                     ?: realpath($this->options->cwd.DIRECTORY_SEPARATOR.$filename)
                     ?: $filename;
@@ -590,7 +738,7 @@ final class WrapperRunner implements RunnerInterface
             }
         }
 
-        return array_keys($files); // @phpstan-ignore-line
+        return array_keys($files);
     }
 
     private function shouldIncludeBootstrappedTestFile(string $filename): bool

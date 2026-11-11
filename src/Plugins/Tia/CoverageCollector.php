@@ -27,10 +27,12 @@ final class CoverageCollector
         }
 
         try {
-            $lineCoverage = PhpUnitCodeCoverage::instance()
+            $data = PhpUnitCodeCoverage::instance()
                 ->codeCoverage()
-                ->getData()
-                ->lineCoverage();
+                ->getData();
+
+            $lineCoverage = $data->lineCoverage();
+            $idByIndex = $data->testIds();
         } catch (Throwable) {
             return [];
         }
@@ -46,12 +48,16 @@ final class CoverageCollector
                     continue;
                 }
 
-                foreach ($hits as $id) {
-                    $testIds[$id] = true;
+                foreach (array_keys($hits) as $index) {
+                    if (! isset($idByIndex[$index])) {
+                        continue;
+                    }
+
+                    $testIds[$index] = $idByIndex[$index];
                 }
             }
 
-            foreach (array_keys($testIds) as $testId) {
+            foreach ($testIds as $testId) {
                 $testFile = $this->testIdToFile($testId);
 
                 if ($testFile === null) {

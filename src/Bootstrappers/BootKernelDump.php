@@ -14,18 +14,12 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final readonly class BootKernelDump implements Bootstrapper
 {
-    /**
-     * Creates a new Boot Kernel Dump instance.
-     */
     public function __construct(
         private OutputInterface $output,
     ) {
-        // ...
+        //
     }
 
-    /**
-     * Boots the kernel dump.
-     */
     public function boot(): void
     {
         Container::getInstance()->add(KernelDump::class, $kernelDump = new KernelDump(

@@ -10,8 +10,6 @@ namespace Pest\Plugins\Concerns;
 trait HandleArguments
 {
     /**
-     * Checks if the given argument exists on the arguments.
-     *
      * @param  array<int, string>  $arguments
      */
     public function hasArgument(string $argument, array $arguments): bool
@@ -30,8 +28,6 @@ trait HandleArguments
     }
 
     /**
-     * Adds the given argument and value to the list of arguments.
-     *
      * @param  array<int, string>  $arguments
      * @return array<int, string>
      */
@@ -43,23 +39,22 @@ trait HandleArguments
     }
 
     /**
-     * Pops the given argument from the arguments.
-     *
      * @param  array<int, string>  $arguments
-     * @return array<int, string>
+     * @return list<string>
      */
     public function popArgument(string $argument, array $arguments): array
     {
-        $arguments = array_flip($arguments);
+        $key = array_search($argument, $arguments, true);
 
-        unset($arguments[$argument]);
+        while ($key !== false) {
+            unset($arguments[$key]);
+            $key = array_search($argument, $arguments, true);
+        }
 
-        return array_values(array_flip($arguments));
+        return array_values($arguments);
     }
 
     /**
-     * Pops the given argument and its value from the arguments, returning the value.
-     *
      * @param  array<int, string>  $arguments
      */
     public function popArgumentValue(string $argument, array &$arguments): ?string

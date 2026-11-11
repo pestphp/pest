@@ -9,6 +9,7 @@ use Pest\Plugins\Tia\CoverageMerger;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\Node\Directory;
 use SebastianBergmann\CodeCoverage\Node\File;
+use SebastianBergmann\CodeCoverage\Report\Facade;
 use SebastianBergmann\Environment\Runtime;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -21,9 +22,6 @@ use function Termwind\terminal;
  */
 final class Coverage
 {
-    /**
-     * Returns the coverage path.
-     */
     public static function getPath(): string
     {
         return implode(DIRECTORY_SEPARATOR, [
@@ -33,9 +31,6 @@ final class Coverage
         ]);
     }
 
-    /**
-     * Runs true there is any code coverage driver available.
-     */
     public static function isAvailable(): bool
     {
         $runtime = new Runtime;
@@ -63,18 +58,11 @@ final class Coverage
         return in_array('coverage', xdebug_info('mode'), true);
     }
 
-    /**
-     * If the user is using Xdebug.
-     */
     public static function usingXdebug(): bool
     {
         return (new Runtime)->hasXdebug();
     }
 
-    /**
-     * Reports the code coverage report to the
-     * console and returns the result in float.
-     */
     public static function report(OutputInterface $output, bool $compact = false, bool $showOnlyCovered = false): float
     {
         if (! file_exists($reportPath = self::getPath())) {
@@ -86,7 +74,7 @@ final class Coverage
                 return 0.0;
             }
 
-            throw ShouldNotHappen::fromMessage(sprintf('Coverage not found in path: %s.', $reportPath));
+            throw ShouldNotHappen::fromMessage(sprintf('Coverage not found in path: [%s].', $reportPath));
         }
 
         CoverageMerger::applyIfMarked($reportPath);
@@ -95,10 +83,18 @@ final class Coverage
         $codeCoverage = require $reportPath;
         unlink($reportPath);
 
-        $totalCoverage = $codeCoverage->getReport()->percentageOfExecutedLines();
+        // @phpstan-ignore-next-line
+        if (is_array($codeCoverage)) {
+            $facade = Facade::fromSerializedData($codeCoverage);
 
-        /** @var Directory<File|Directory> $report */
-        $report = $codeCoverage->getReport();
+            /** @var Directory<File|Directory> $report */
+            $report = (fn (): Directory => $this->report)->call($facade);
+        } else {
+            /** @var Directory<File|Directory> $report */
+            $report = $codeCoverage->getReport();
+        }
+
+        $totalCoverage = $report->percentageOfExecutedLines();
 
         foreach ($report->getIterator() as $file) {
             if (! $file instanceof File) {
@@ -165,13 +161,6 @@ final class Coverage
     }
 
     /**
-     * Generates an array of missing coverage on the following format:.
-     *
-     * ```
-     * ['11', '20..25', '50', '60..80'];
-     * ```
-     *
-     *
      * @param  File  $file
      * @return array<int, string>
      */

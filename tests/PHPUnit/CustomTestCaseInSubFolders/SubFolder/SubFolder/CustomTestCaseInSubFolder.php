@@ -8,8 +8,8 @@ use PHPUnit\Framework\TestCase;
 
 class CustomTestCaseInSubFolder extends TestCase
 {
-    public function assertCustomInSubFolderTrue()
+    public function assertCustomInSubFolderTrue(): void
     {
-        $this->assertTrue(true);
+        expect(true)->toBeTrue();
     }
 }

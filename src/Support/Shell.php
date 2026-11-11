@@ -16,9 +16,6 @@ use Psy\VersionUpdater\Checker;
  */
 final class Shell
 {
-    /**
-     * Creates a new interactive shell.
-     */
     public static function open(): void
     {
         $config = new Configuration;
@@ -39,8 +36,6 @@ final class Shell
     }
 
     /**
-     * Returns the casters for the Psy Shell.
-     *
      * @return array<string, callable>
      */
     private static function casters(): array
@@ -72,9 +67,6 @@ final class Shell
         return array_merge($casters, (array) $config->get('tinker.casters', []));
     }
 
-    /**
-     * Tinkers the current shell, if the Tinker package is available.
-     */
     private static function tinkered(PsyShell $shell): ?object
     {
         if (function_exists('app') === false

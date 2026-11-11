@@ -1,23 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 use PHPUnit\Framework\ExpectationFailedException;
 
-test('pass', function () {
-    expect([])->toBeEmpty();
-    expect(null)->toBeEmpty();
+test('pass', function (): void {
+    expect([])->toBeEmpty()
+        ->and(null)->toBeEmpty();
 });
 
-test('failures', function () {
-    expect([1, 2])->toBeEmpty();
-    expect(' ')->toBeEmpty();
+test('failures', function (): void {
+    expect([1, 2])->toBeEmpty()
+        ->and(' ')->toBeEmpty();
 })->throws(ExpectationFailedException::class);
 
-test('failures with custom message', function () {
-    expect([1, 2])->toBeEmpty('oh no!');
-    expect(' ')->toBeEmpty('oh no!');
+test('failures with custom message', function (): void {
+    expect([1, 2])->toBeEmpty('oh no!')
+        ->and(' ')->toBeEmpty('oh no!');
 })->throws(ExpectationFailedException::class, 'oh no!');
 
-test('not failures', function () {
-    expect([])->not->toBeEmpty();
-    expect(null)->not->toBeEmpty();
+test('not failures', function (): void {
+    expect([])->not->toBeEmpty()
+        ->and(null)->not->toBeEmpty();
 })->throws(ExpectationFailedException::class);

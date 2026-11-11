@@ -14,11 +14,8 @@ use Symfony\Component\Console\Exception\ExceptionInterface;
  */
 final class BeforeAllAlreadyExist extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
 {
-    /**
-     * Creates a new Exception instance.
-     */
     public function __construct(string $filename)
     {
-        parent::__construct(sprintf('The beforeAll already exists in the filename `%s`.', $filename));
+        parent::__construct(sprintf('The [beforeAll] hook is already defined in [%s]. Each test file may only define it once.', $filename));
     }
 }

@@ -1,20 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 use PHPUnit\Framework\ExpectationFailedException;
 
-test('pass', function () {
-    expect(42)->toBeNumeric();
-    expect('A')->not->toBeNumeric();
+test('pass', function (): void {
+    expect(42)->toBeNumeric()
+        ->and('A')->not->toBeNumeric();
 });
 
-test('failures', function () {
-    expect(null)->toBeNumeric();
+test('failures', function (): void {
+    expect()->toBeNumeric();
 })->throws(ExpectationFailedException::class);
 
-test('failures with custom message', function () {
-    expect(null)->toBeNumeric('oh no!');
+test('failures with custom message', function (): void {
+    expect()->toBeNumeric('oh no!');
 })->throws(ExpectationFailedException::class, 'oh no!');
 
-test('not failures', function () {
+test('not failures', function (): void {
     expect(6 * 7)->not->toBeNumeric();
 })->throws(ExpectationFailedException::class);

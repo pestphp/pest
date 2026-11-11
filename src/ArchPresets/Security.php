@@ -9,9 +9,6 @@ namespace Pest\ArchPresets;
  */
 final class Security extends AbstractPreset
 {
-    /**
-     * Executes the arch preset.
-     */
     public function execute(): void
     {
         $this->expectations[] = expect([

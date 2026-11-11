@@ -15,14 +15,11 @@ use Symfony\Component\Console\Exception\ExceptionInterface;
  */
 final class TestClosureMustNotBeStatic extends InvalidArgumentException implements ExceptionInterface, RenderlessEditor, RenderlessTrace
 {
-    /**
-     * Creates a new Exception instance.
-     */
     public function __construct(TestCaseMethodFactory $method)
     {
         parent::__construct(
             sprintf(
-                'Test closure must not be static. Please remove the [static] keyword from the [%s] method in [%s].',
+                'Test closures may not be static. Please remove the [static] keyword from the test [%s] in [%s].',
                 $method->description,
                 $method->filename
             )

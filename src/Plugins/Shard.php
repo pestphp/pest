@@ -27,9 +27,11 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
 
     private const string SHARD_OPTION = 'shard';
 
+    private const int MAX_FILTER_LENGTH = 32768;
+
+    private const string CLASS_END = "\0";
+
     /**
-     * The shard index and total number of shards.
-     *
      * @var array{
      *     index: int,
      *     total: int,
@@ -39,43 +41,24 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      */
     private static ?array $shard = null;
 
-    /**
-     * Whether to update the shards.json file.
-     */
     private static bool $updateShards = false;
 
-    /**
-     * Whether time-balanced sharding was used.
-     */
     private static bool $timeBalanced = false;
 
-    /**
-     * Whether the shards.json file is outdated.
-     */
     private static bool $shardsOutdated = false;
 
-    /**
-     * Whether the test suite passed.
-     */
     private static bool $passed = false;
 
     /**
-     * Collected timings from workers or subscribers.
-     *
      * @var array<string, float>|null
      */
     private static ?array $collectedTimings = null;
 
     /**
-     * The canonical list of test classes from --list-tests.
-     *
      * @var list<string>|null
      */
     private static ?array $knownTests = null;
 
-    /**
-     * Creates a new Plugin instance.
-     */
     public function __construct(
         private readonly OutputInterface $output,
     ) {
@@ -104,8 +87,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             return $arguments;
         }
 
-        // @phpstan-ignore-next-line
-        $input = new ArgvInput($arguments);
+        $input = new ArgvInput(array_values($arguments));
 
         ['index' => $index, 'total' => $total] = self::getShard($input);
 
@@ -114,7 +96,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             $arguments,
         )));
 
-        /** @phpstan-ignore-next-line */
         $tests = $this->allTests($arguments);
 
         $timings = $this->loadShardsFile();
@@ -132,7 +113,8 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             self::$timeBalanced = true;
             self::$shardsOutdated = $newTests !== [];
         } else {
-            $testsToRun = (array_chunk($tests, max(1, (int) ceil(count($tests) / $total))))[$index - 1] ?? [];
+            $isInCurrentShard = fn (int $key): bool => $key % $total === ($index - 1);
+            $testsToRun = array_values(array_filter($tests, $isInCurrentShard, ARRAY_FILTER_USE_KEY));
         }
 
         self::$shard = [
@@ -146,12 +128,20 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             return $arguments;
         }
 
-        return [...$arguments, '--filter', $this->buildFilterArgument($testsToRun)];
+        $filter = $this->buildFilterArgument($testsToRun);
+
+        $this->ensureFilterLengthIsSafe($filter);
+
+        $arguments = [...$arguments, '--filter', $filter];
+
+        if ($this->hasArgument('--do-not-fail-on-empty-test-suite', $arguments) || $this->hasArgument('--fail-on-empty-test-suite', $arguments)) {
+            return $arguments;
+        }
+
+        return $this->pushArgument('--do-not-fail-on-empty-test-suite', $arguments);
     }
 
     /**
-     * Handles the --update-shards argument.
-     *
      * @param  array<int, string>  $arguments
      * @return array<int, string>
      */
@@ -165,7 +155,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
 
         self::$updateShards = true;
 
-        /** @phpstan-ignore-next-line */
         self::$knownTests = $this->allTests($arguments);
 
         if ($this->hasArgument('--parallel', $arguments) || $this->hasArgument('-p', $arguments)) {
@@ -180,22 +169,19 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Returns all tests that the test suite would run.
-     *
      * @param  list<string>  $arguments
      * @return list<string>
      */
     private function allTests(array $arguments): array
     {
-        $output = (new Process([
-            'php',
-            ...$this->removeParallelArguments($arguments),
-            '--list-tests',
-        ]))->setTimeout(120)->mustRun()->getOutput();
+        $command = $this->buildListTestsCommand(
+            $arguments,
+            TestSuite::getInstance()->testPath,
+        );
 
-        preg_match_all('/ - (?:P\\\\)?(Tests\\\\[^:]+)::/', $output, $matches);
+        $output = new Process($command)->setTimeout(120)->mustRun()->getOutput();
 
-        return array_values(array_unique($matches[1]));
+        return $this->parseListTestsOutput($output);
     }
 
     /**
@@ -204,20 +190,107 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      */
     private function removeParallelArguments(array $arguments): array
     {
-        return array_filter($arguments, fn (string $argument): bool => ! in_array($argument, ['--parallel', '-p'], strict: true));
+        return array_values(array_filter(
+            $arguments,
+            fn (string $argument): bool => ! in_array($argument, ['--parallel', '-p'], strict: true)
+                && ! str_starts_with($argument, '--processes'),
+        ));
     }
 
     /**
-     * Builds the filter argument for the given tests to run.
+     * @param  list<string>  $arguments
+     * @return list<string>
      */
-    private function buildFilterArgument(mixed $testsToRun): string
+    private function buildListTestsCommand(array $arguments, string $testPath): array
     {
-        return addslashes(implode('|', $testsToRun));
+        $filtered = $this->removeParallelArguments($arguments);
+
+        return [PHP_BINARY, ...$filtered, '--test-directory='.$testPath, '--list-tests'];
     }
 
     /**
-     * Adds output after the Test Suite execution.
+     * @return list<string>
      */
+    private function parseListTestsOutput(string $output): array
+    {
+        preg_match_all('/ - (?:P\\\\)?([A-Za-z_]\w*(?:\\\\[A-Za-z_]\w*)*)::/', $output, $matches);
+
+        return array_values(array_unique($matches[1]));
+    }
+
+    /**
+     * @param  array<int, string>  $testsToRun
+     */
+    private function buildFilterArgument(array $testsToRun): string
+    {
+        if ($testsToRun === []) {
+            return '';
+        }
+
+        /** @var array<string, mixed> $tree */
+        $tree = [];
+        foreach ($testsToRun as $class) {
+            $parts = explode('\\', $class);
+            $current = &$tree;
+            foreach ($parts as $part) {
+                $current[$part] ??= [];
+                $current = &$current[$part];
+            }
+            $current[self::CLASS_END] = true;
+        }
+
+        $buildRegex = function (array $tree) use (&$buildRegex): string {
+            $parts = [];
+            foreach ($tree as $key => $sub) {
+                if ($key === self::CLASS_END) {
+                    continue;
+                }
+
+                assert(is_array($sub));
+
+                $endsWithClass = isset($sub[self::CLASS_END]);
+                $sub = array_diff_key($sub, [self::CLASS_END => null]);
+                $subRegex = $sub === [] ? '' : $buildRegex($sub);
+
+                $segment = preg_quote($key, '/');
+
+                if ($subRegex !== '') {
+                    $segment .= '\\\\'.(count($sub) > 1 ? '('.$subRegex.')' : $subRegex);
+                }
+
+                if ($endsWithClass && $subRegex !== '') {
+                    $parts[] = '(?:'.preg_quote($key, '/').'::|'.$segment.')';
+
+                    continue;
+                }
+
+                $parts[] = $endsWithClass ? $segment.'::' : $segment;
+            }
+
+            return implode('|', $parts);
+        };
+
+        return $buildRegex($tree);
+    }
+
+    /**
+     * @throws InvalidOption
+     */
+    private function ensureFilterLengthIsSafe(string $filter): void
+    {
+        $maxLength = (int) (getenv('PEST_SHARD_MAX_FILTER_LENGTH') ?: self::MAX_FILTER_LENGTH);
+
+        if (strlen($filter) > $maxLength) {
+            throw new InvalidOption(sprintf(
+                'The generated filter for this shard is too long (%d characters). '.
+                'This can cause issues with some environments (limit is %d characters). '.
+                'Please increase the number of shards (e.g., use 1/4 instead of 1/2) to reduce the filter length.',
+                strlen($filter),
+                $maxLength
+            ));
+        }
+    }
+
     public function addOutput(int $exitCode): int
     {
         self::$passed = $exitCode === 0;
@@ -264,9 +337,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
         return $exitCode;
     }
 
-    /**
-     * Terminates the plugin.
-     */
     public function terminate(): void
     {
         if (! self::$updateShards) {
@@ -293,8 +363,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Collects timings from subscribers or worker temp files.
-     *
      * @return array<string, float>
      */
     private function collectTimings(): array
@@ -308,9 +376,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
         return EnsureShardTimingsAreCollected::timings();
     }
 
-    /**
-     * Writes the current worker's timing data to a temp file.
-     */
     private function writeWorkerTimings(): void
     {
         $timings = EnsureShardTimingsAreCollected::timings();
@@ -331,8 +396,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Reads and merges timing data from all worker temp files.
-     *
      * @return array<string, float>
      */
     private function readWorkerTimings(string $runId): array
@@ -365,9 +428,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
         return $merged;
     }
 
-    /**
-     * Returns the path to shards.json.
-     */
     private function shardsPath(): string
     {
         $testSuite = TestSuite::getInstance();
@@ -376,8 +436,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Loads the timings from shards.json.
-     *
      * @return array<string, float>|null
      */
     private function loadShardsFile(): ?array
@@ -404,8 +462,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Partitions tests across shards using the LPT (Longest Processing Time) algorithm.
-     *
      * @param  list<string>  $tests
      * @param  array<string, float>  $timings
      * @return list<list<string>>
@@ -443,8 +499,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Calculates the median of an array of floats.
-     *
      * @param  list<float>  $values
      */
     private function median(array $values): float
@@ -462,8 +516,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Writes the timings to shards.json.
-     *
      * @param  array<string, float>  $timings
      */
     private function writeTimings(array $timings): void
@@ -493,8 +545,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
-     * Returns the shard information.
-     *
      * @return array{index: int, total: int}
      */
     public static function getShard(InputInterface $input): array

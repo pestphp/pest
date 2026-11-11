@@ -12,15 +12,11 @@ use Pest\Support\Description;
 trait Describable
 {
     /**
-     * Note: this is property is not used; however, it gets added automatically by rector php.
-     *
      * @var array<int, Description>
      */
     public array $__describing;
 
     /**
-     * The describing of the test case.
-     *
      * @var array<int, Description>
      */
     public array $describing = [];

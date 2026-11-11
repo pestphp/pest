@@ -15,11 +15,6 @@ use PHPUnit\Event\Test\AfterLastTestMethodErrored;
 use PHPUnit\Event\Test\AfterLastTestMethodFailed;
 use PHPUnit\Event\Test\BeforeFirstTestMethodErrored;
 use PHPUnit\Event\Test\BeforeFirstTestMethodFailed;
-use PHPUnit\Event\Test\ConsideredRisky;
-use PHPUnit\Event\Test\Errored;
-use PHPUnit\Event\Test\Failed;
-use PHPUnit\Event\Test\MarkedIncomplete;
-use PHPUnit\Event\Test\Skipped;
 use PHPUnit\Event\TestSuite\TestSuite;
 use PHPUnit\Event\TestSuite\TestSuiteForTestMethodWithDataProvider;
 use PHPUnit\Framework\Exception as FrameworkException;
@@ -30,28 +25,16 @@ use PHPUnit\TestRunner\TestResult\TestResult as PhpUnitTestResult;
  */
 final readonly class Converter
 {
-    /**
-     * The prefix for the test suite name.
-     */
     private const string PREFIX = 'P\\';
 
-    /**
-     *  The state generator.
-     */
     private StateGenerator $stateGenerator;
 
-    /**
-     * Creates a new instance of the Converter.
-     */
     public function __construct(
         private string $rootPath,
     ) {
         $this->stateGenerator = new StateGenerator;
     }
 
-    /**
-     * Gets the test case method name.
-     */
     public function getTestCaseMethodName(Test $test): string
     {
         if (! $test instanceof TestMethod) {
@@ -61,9 +44,6 @@ final readonly class Converter
         return $test->testDox()->prettifiedMethodName();
     }
 
-    /**
-     * Gets the test case location.
-     */
     public function getTestCaseLocation(Test $test): string
     {
         if (! $test instanceof TestMethod) {
@@ -73,15 +53,11 @@ final readonly class Converter
         $path = $test->testDox()->prettifiedClassName();
         $relativePath = $this->toRelativePath($path);
 
-        // TODO: Get the description without the dataset.
         $description = $test->testDox()->prettifiedMethodName();
 
         return "$relativePath::$description";
     }
 
-    /**
-     * Gets the exception message.
-     */
     public function getExceptionMessage(Throwable $throwable): string
     {
         if (is_a($throwable->className(), FrameworkException::class, true)) {
@@ -98,9 +74,6 @@ final readonly class Converter
         return $buffer;
     }
 
-    /**
-     * Gets the exception details.
-     */
     public function getExceptionDetails(Throwable $throwable): string
     {
         $buffer = $this->getStackTrace($throwable);
@@ -118,26 +91,19 @@ final readonly class Converter
         return $buffer;
     }
 
-    /**
-     * Gets the stack trace.
-     */
     public function getStackTrace(Throwable $throwable): string
     {
         $stackTrace = $throwable->stackTrace();
 
-        // Split stacktrace per frame.
         $frames = explode("\n", $stackTrace);
 
-        // Remove empty lines
         $frames = array_filter($frames);
 
-        // clean the paths of each frame.
         $frames = array_map(
             $this->toRelativePath(...),
             $frames
         );
 
-        // Format stacktrace as `at <path>`
         $frames = array_map(
             fn (string $frame): string => "at $frame",
             $frames
@@ -146,9 +112,6 @@ final readonly class Converter
         return implode("\n", $frames);
     }
 
-    /**
-     * Gets the test suite name.
-     */
     public function getTestSuiteName(TestSuite $testSuite): string
     {
         if ($testSuite instanceof TestSuiteForTestMethodWithDataProvider) {
@@ -167,17 +130,11 @@ final readonly class Converter
         return Str::after($name, self::PREFIX);
     }
 
-    /**
-     * Gets the trimmed test class name.
-     */
     public function getTrimmedTestClassName(TestMethod $test): string
     {
         return Str::after($test->className(), self::PREFIX);
     }
 
-    /**
-     * Gets the test suite location.
-     */
     public function getTestSuiteLocation(TestSuite $testSuite): ?string
     {
         $firstTest = $this->getFirstTest($testSuite);
@@ -196,22 +153,15 @@ final readonly class Converter
         return $classRelativePath;
     }
 
-    /**
-     * Gets the prettified test method name without dataset-related suffix.
-     */
     private function getTestMethodNameWithoutDatasetSuffix(TestMethod $testMethod): string
     {
         return Str::beforeLast($testMethod->testDox()->prettifiedMethodName(), ' with data set ');
     }
 
-    /**
-     * Gets the first test from the test suite.
-     */
     private function getFirstTest(TestSuite $testSuite): ?TestMethod
     {
         $tests = $testSuite->tests()->asArray();
 
-        // TODO: figure out how to get the file path without a test being there.
         if ($tests === []) {
             return null;
         }
@@ -224,26 +174,16 @@ final readonly class Converter
         return $firstTest;
     }
 
-    /**
-     * Gets the test suite size.
-     */
     public function getTestSuiteSize(TestSuite $testSuite): int
     {
         return $testSuite->count();
     }
 
-    /**
-     * Transforms the given path in relative path.
-     */
     private function toRelativePath(string $path): string
     {
-        // Remove cwd from the path.
         return str_replace("$this->rootPath".DIRECTORY_SEPARATOR, '', $path);
     }
 
-    /**
-     * Get the test result.
-     */
     public function getStateFromResult(PhpUnitTestResult $result): State
     {
         $events = [
@@ -254,25 +194,27 @@ final readonly class Converter
             ...$result->testMarkedIncompleteEvents(),
         ];
 
-        $numberOfNotPassedTests = count(
-            array_unique(
-                array_map(
-                    function (AfterLastTestMethodErrored|AfterLastTestMethodFailed|BeforeFirstTestMethodErrored|BeforeFirstTestMethodFailed|Errored|Failed|Skipped|ConsideredRisky|MarkedIncomplete $event): string {
-                        if ($event instanceof BeforeFirstTestMethodErrored
-                            || $event instanceof AfterLastTestMethodErrored
-                            || $event instanceof BeforeFirstTestMethodFailed
-                            || $event instanceof AfterLastTestMethodFailed) {
-                            return $event->testClassName();
-                        }
+        $notPassedTests = [];
 
-                        return $this->getTestCaseLocation($event->test());
-                    },
-                    $events
-                )
-            )
-        );
+        foreach ($events as $event) {
+            if ($event instanceof AfterLastTestMethodErrored) {
+                continue;
+            }
+            if ($event instanceof AfterLastTestMethodFailed) {
+                continue;
+            }
+            if ($event instanceof BeforeFirstTestMethodErrored || $event instanceof BeforeFirstTestMethodFailed) {
+                $notPassedTests[] = $event->testClassName();
 
-        $numberOfPassedTests = $result->numberOfTestsRun() - $numberOfNotPassedTests;
+                continue;
+            }
+
+            $notPassedTests[] = $this->getTestCaseLocation($event->test());
+        }
+
+        $numberOfPassedTests = $result->numberOfTestsRun()
+            - count(array_unique($notPassedTests))
+            - $result->numberOfTestSkippedByTestSuiteSkippedEvents();
 
         return $this->stateGenerator->fromPhpUnitTestResult($numberOfPassedTests, $result);
     }

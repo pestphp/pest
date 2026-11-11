@@ -1,0 +1,37 @@
+<?php
+
+declare(strict_types=1);
+
+use Pest\Exceptions\InvalidExpectationValue;
+use PHPUnit\Framework\ExpectationFailedException;
+
+test('pass', function (): void {
+    expect('example')->toBeHostname()
+        ->and('example.com')->toBeHostname()
+        ->and('sub.example.com')->toBeHostname()
+        ->and('my-host')->toBeHostname();
+});
+
+test('failures', function (): void {
+    expect('-example')->toBeHostname();
+})->throws(ExpectationFailedException::class);
+
+test('failures with trailing hyphen', function (): void {
+    expect('example-')->toBeHostname();
+})->throws(ExpectationFailedException::class);
+
+test('failures with invalid type', function (): void {
+    expect([])->toBeHostname();
+})->throws(InvalidExpectationValue::class, 'This expectation may only be used on a value of type [string].');
+
+test('failures with custom message', function (): void {
+    expect('-example')->toBeHostname('oh no!');
+})->throws(ExpectationFailedException::class, 'oh no!');
+
+test('failures with default message', function (): void {
+    expect('-example')->toBeHostname();
+})->throws(ExpectationFailedException::class, 'Failed asserting that -example is a hostname.');
+
+test('not failures', function (): void {
+    expect('example.com')->not->toBeHostname();
+})->throws(ExpectationFailedException::class);

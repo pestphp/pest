@@ -12,33 +12,24 @@ use ReflectionClass;
  */
 final class HigherOrderTapProxy
 {
-    /**
-     * Create a new tap proxy instance.
-     */
     public function __construct(
         public TestCase $target
     ) {
-        // ..
+        //
     }
 
-    /**
-     * Dynamically sets properties on the target.
-     */
     public function __set(string $property, mixed $value): void
     {
         $this->target->{$property} = $value;
     }
 
-    /**
-     * Dynamically pass properties gets to the target.
-     */
     public function __get(string $property): mixed
     {
         if (property_exists($this->target, $property)) {
             return $this->target->{$property};
         }
 
-        $className = (new ReflectionClass($this->target))->getName();
+        $className = new ReflectionClass($this->target)->getName();
 
         if (str_starts_with($className, 'P\\')) {
             $className = substr($className, 2);
@@ -50,8 +41,6 @@ final class HigherOrderTapProxy
     }
 
     /**
-     * Dynamically pass method calls to the target.
-     *
      * @param  array<int, mixed>  $arguments
      * @return mixed
      */
@@ -60,7 +49,7 @@ final class HigherOrderTapProxy
         $filename = Backtrace::file();
         $line = Backtrace::line();
 
-        return (new HigherOrderMessage($filename, $line, $methodName, $arguments))
+        return new HigherOrderMessage($filename, $line, $methodName, $arguments)
             ->call($this->target);
     }
 }

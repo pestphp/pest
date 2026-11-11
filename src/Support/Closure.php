@@ -13,8 +13,6 @@ use Pest\Exceptions\ShouldNotHappen;
 final class Closure
 {
     /**
-     * Binds the given closure to the given "this".
-     *
      * @throws ShouldNotHappen
      */
     public static function bind(?BaseClosure $closure, ?object $newThis, object|string|null $newScope = 'static'): BaseClosure

@@ -18,8 +18,6 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 final readonly class Thanks
 {
     /**
-     * The support options.
-     *
      * @var array<string, string>
      */
     private const array FUNDING_MESSAGES = [
@@ -33,19 +31,13 @@ final readonly class Thanks
         'Sponsor' => 'https://github.com/sponsors/nunomaduro',
     ];
 
-    /**
-     * Creates a new Console Command instance.
-     */
     public function __construct(
         private InputInterface $input,
         private OutputInterface $output
     ) {
-        // ..
+        //
     }
 
-    /**
-     * Executes the Console Command.
-     */
     public function __invoke(): void
     {
         $bootstrapper = new BootView($this->output);

@@ -2,7 +2,7 @@
 
 use Pest\Support\HigherOrderMessage;
 
-test('undefined method exceptions', function () {
+test('undefined method exceptions', function (): void {
     $message = new HigherOrderMessage(
         __FILE__,
         1,
@@ -10,7 +10,7 @@ test('undefined method exceptions', function () {
         []
     );
 
-    expect(fn () => $message->call($this))->toThrow(function (ReflectionException $exception) {
+    expect(fn () => $message->call($this))->toThrow(function (ReflectionException $exception): void {
         expect($exception)
             ->getMessage()->toBe('Call to undefined method PHPUnit\Framework\TestCase::foqwdqwd()')
             ->getLine()->toBe(1)

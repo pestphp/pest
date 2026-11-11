@@ -16,7 +16,7 @@ $run = function (bool $parallel = false): array {
     }
 
     $process = new Process($command, dirname(__DIR__, 2),
-        ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true'],
+        ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
     );
 
     $process->run();
@@ -27,7 +27,7 @@ $run = function (bool $parallel = false): array {
     ];
 };
 
-test('parallel loads nested datasets from nested directories', function () use ($run) {
+test('parallel loads nested datasets from nested directories', function () use ($run): void {
     $serial = $run();
     $parallel = $run(true);
 

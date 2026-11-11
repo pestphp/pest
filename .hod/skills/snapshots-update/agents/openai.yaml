@@ -1,0 +1,5 @@
+interface:
+  display_name: "Snapshots Update"
+  short_description: "Write each snapshot of this project again"
+policy:
+  allow_implicit_invocation: false
