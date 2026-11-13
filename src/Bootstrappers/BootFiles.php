@@ -7,6 +7,7 @@ namespace Pest\Bootstrappers;
 use Pest\Contracts\Bootstrapper;
 use Pest\Exceptions\FatalException;
 use Pest\Plugins\Concerns\HandleArguments;
+use Pest\Support\BootstrappedFiles;
 use Pest\Support\DatasetInfo;
 use Pest\Support\Str;
 use Pest\TestSuite;
@@ -89,7 +90,13 @@ final class BootFiles implements Bootstrapper
         if (! file_exists($filename)) {
             return;
         }
+
+        $before = get_included_files();
         include_once $filename;
+
+        foreach (array_diff(get_included_files(), $before) as $included) {
+            BootstrappedFiles::add($included);
+        }
     }
 
     private function bootDatasets(string $testsPath): void
