@@ -2268,6 +2268,11 @@
    PASS  Tests\Visual\FailingBoot
   ✓ a failure in the boot files renders only that failure
 
+   PASS  Tests\Visual\FilterTrailingSpace
+  ✓ filter matches a test name with a trailing space
+  ✓ filter without a trailing space does not match a test name with a trailing space
+  ✓ filter matches a dataset test name with a trailing space
+
    PASS  Tests\Visual\Help
   ✓ visual snapshot of help command output
 
@@ -2323,4 +2328,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1650 passed (3653 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1653 passed (3660 assertions)
