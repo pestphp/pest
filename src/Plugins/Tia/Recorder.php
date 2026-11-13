@@ -103,6 +103,8 @@ final class Recorder
 
         $this->currentTestFile = $file;
 
+        ReadCapture::start($this);
+
         if ($this->classUsesDatabase($className)) {
             $this->perTestUsesDatabase[$file] = true;
         }
@@ -126,6 +128,8 @@ final class Recorder
         if (! $this->active || $this->currentTestFile === null) {
             return;
         }
+
+        ReadCapture::stop();
 
         if (! $this->captureCoverage || ! $this->driverAvailable()) {
             $this->currentTestFile = null;
@@ -187,6 +191,17 @@ final class Recorder
         }
 
         $this->perTestFiles[$this->currentTestFile][$sourceFile] = true;
+    }
+
+    public function linkRead(string $path): void
+    {
+        $real = realpath($path);
+
+        if ($real === false || ! is_file($real) || ! $this->sourceScope()->contains($real)) {
+            return;
+        }
+
+        $this->linkSource($real);
     }
 
     private function classUsesDatabase(string $className): bool
@@ -374,6 +389,8 @@ final class Recorder
 
     public function reset(): void
     {
+        ReadCapture::stop();
+
         $this->currentTestFile = null;
         $this->perTestFiles = [];
         $this->perTestTables = [];
