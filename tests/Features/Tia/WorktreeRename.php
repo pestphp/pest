@@ -19,7 +19,7 @@ test('a worktree rename recorded as intent-to-add keeps both paths', function ()
     $project->git()->run(['add', '-N', 'lib/Stub.php']);
     unlink($project->path('app/Stub.php'));
 
-    $changed = (new ChangedFiles($project->path()))->since(null);
+    $changed = new ChangedFiles($project->path())->since(null);
 
     expect($changed)->toContain('app/Stub.php')
         ->and($changed)->toContain('lib/Stub.php');
