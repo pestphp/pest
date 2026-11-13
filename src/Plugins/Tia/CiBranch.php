@@ -9,7 +9,7 @@ use Pest\Plugins\Tia\Contracts\Ci;
 /**
  * @internal
  */
-final class CiDefaultBranch
+final class CiBranch
 {
     /**
      * @var array<int, class-string<Ci>>
@@ -19,7 +19,20 @@ final class CiDefaultBranch
         Cis\GitHub::class,
     ];
 
-    public static function detect(): ?string
+    public static function detectCurrent(): ?string
+    {
+        foreach (self::CIS as $class) {
+            $branch = (new $class)->currentBranch();
+
+            if ($branch !== null) {
+                return $branch;
+            }
+        }
+
+        return null;
+    }
+
+    public static function detectDefault(): ?string
     {
         foreach (self::CIS as $class) {
             $branch = (new $class)->defaultBranch();

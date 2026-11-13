@@ -16,7 +16,11 @@ if [ "$1" = "run" ] && [ "$2" = "list" ]; then
 fi
 
 if [ "$1" = "api" ]; then
-  echo 2048
+  case "$2" in
+    repos/*/actions/runs/*/artifacts) echo 2048 ;;
+    repos/*) printf '{"default_branch":"master"}' ;;
+    *) echo 2048 ;;
+  esac
   exit 0
 fi
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 beforeEach(function (): void {
     expect(true)->toBeTrue();
 })->pr(1);

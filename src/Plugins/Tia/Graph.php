@@ -18,6 +18,8 @@ use PHPUnit\TextUI\Configuration\Registry;
  */
 final class Graph
 {
+    public const string WORKSPACE_BRANCH_PREFIX = '@workspace:';
+
     /**
      * @var array<string, string>
      */
@@ -353,8 +355,6 @@ final class Graph
             $pages = $freshMap[$rel] ?? [];
 
             if ($pages === []) {
-                $sharedFilesResolved[$rel] = true;
-
                 continue;
             }
 
@@ -943,10 +943,11 @@ final class Graph
         $this->baselines[$branch]['tree'] = $tree;
     }
 
-    public function clearResults(string $branch): void
+    public function clearResults(): void
     {
-        $this->ensureBaseline($branch);
-        $this->baselines[$branch]['results'] = [];
+        foreach (array_keys($this->baselines) as $branch) {
+            $this->baselines[$branch]['results'] = [];
+        }
     }
 
     /**
@@ -1020,14 +1021,11 @@ final class Graph
 
     private function ensureBaseline(string $branch): void
     {
-        if (! isset($this->baselines[$branch])) {
-            $this->baselines[$branch] = ['sha' => null, 'tree' => [], 'results' => []];
-        }
+        $this->baselines[$branch] ??= ['sha' => null, 'tree' => [], 'results' => []];
     }
 
     /**
      * @param  array<string, array<int, string>>  $testToFiles
-     * @param  bool  $keepExisting  Leave already-recorded edge sets alone.
      */
     public function replaceEdges(array $testToFiles, bool $keepExisting = false): void
     {
@@ -1038,11 +1036,7 @@ final class Graph
                 continue;
             }
 
-            if ($keepExisting && ($this->edges[$testRel] ?? []) !== []) {
-                continue;
-            }
-
-            $this->edges[$testRel] = [];
+            $this->edges[$testRel] = $keepExisting ? ($this->edges[$testRel] ?? []) : [];
 
             foreach ($sources as $source) {
                 $this->link($testFile, $source);
@@ -1067,9 +1061,7 @@ final class Graph
                 continue;
             }
 
-            if (! isset($this->edges[$rel])) {
-                $this->edges[$rel] = [];
-            }
+            $this->edges[$rel] ??= [];
         }
     }
 
@@ -1095,7 +1087,7 @@ final class Graph
                 }
             }
 
-            $names = array_keys($normalised);
+            $names = array_map(strval(...), array_keys($normalised));
             sort($names);
 
             $this->testTables[$testRel] = $names;
@@ -1632,6 +1624,10 @@ final class Graph
         $survivors = array_fill_keys($keep, true);
 
         foreach (array_keys($this->baselines) as $branch) {
+            if (str_starts_with($branch, self::WORKSPACE_BRANCH_PREFIX)) {
+                continue;
+            }
+
             if (! isset($survivors[$branch])) {
                 unset($this->baselines[$branch]);
             }

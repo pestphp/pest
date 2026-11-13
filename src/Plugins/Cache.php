@@ -6,6 +6,7 @@ namespace Pest\Plugins;
 
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Plugins\Concerns\HandleArguments;
+use PHPUnit\Event\Facade as EventFacade;
 use PHPUnit\TextUI\CliArguments\Builder as CliConfigurationBuilder;
 use PHPUnit\TextUI\CliArguments\XmlConfigurationFileFinder;
 use PHPUnit\TextUI\XmlConfiguration\DefaultConfiguration;
@@ -30,12 +31,12 @@ final class Cache implements HandlesArguments
     {
         if (! $this->hasArgument('--cache-directory', $arguments)) {
 
-            $cliConfiguration = (new CliConfigurationBuilder)->fromParameters([]);
+            $cliConfiguration = new CliConfigurationBuilder(EventFacade::emitter())->fromParameters([]);
             $configurationFile = (new XmlConfigurationFileFinder)->find($cliConfiguration);
             $xmlConfiguration = DefaultConfiguration::create();
 
             if (is_string($configurationFile)) {
-                $xmlConfiguration = (new Loader)->load($configurationFile);
+                $xmlConfiguration = new Loader(EventFacade::emitter())->load($configurationFile);
             }
 
             if (! $xmlConfiguration->phpunit()->hasCacheDirectory()) {

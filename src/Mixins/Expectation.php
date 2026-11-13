@@ -14,7 +14,7 @@ use InvalidArgumentException;
 use JsonSerializable;
 use Pest\Exceptions\InvalidExpectationValue;
 use Pest\Matchers\Any;
-use Pest\Plugins\Snapshot;
+use Pest\Plugins\Snapshot as SnapshotPlugin;
 use Pest\Support\Arr;
 use Pest\Support\Exporter;
 use Pest\Support\NullClosure;
@@ -447,6 +447,10 @@ final class Expectation
      */
     public function toBeDigits(string $message = ''): self
     {
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} contains only digits.";
+        }
+
         Assert::assertTrue(ctype_digit((string) $this->value), $message);
 
         return $this;
@@ -712,10 +716,11 @@ final class Expectation
     /**
      * @return self<TValue>
      */
-    public function toMatchSnapshot(string $message = ''): self
+    public function toMatchSnapshot(string $message = '', ?string $as = null): self
     {
         $snapshots = TestSuite::getInstance()->snapshots;
-        $snapshots->startNewExpectation();
+
+        $snapshot = $as === null ? $snapshots->next() : $snapshots->named($as);
 
         $testCase = TestSuite::getInstance()->test;
         assert($testCase instanceof TestCase);
@@ -733,38 +738,35 @@ final class Expectation
             default => InvalidExpectationValue::expected('array|object|string'),
         };
 
-        if (! $snapshots->has()) {
-            if (! Snapshot::shouldCreateMissingSnapshots()) {
-                $filename = $snapshots->filename();
-
-                Assert::fail($message === '' ? "Snapshot is missing at [$filename]. Run Pest with --update-snapshots to create it." : $message);
+        if (! $snapshot->exists()) {
+            if (! SnapshotPlugin::shouldCreateMissingSnapshots()) {
+                Assert::fail($message === '' ? "Snapshot is missing at [{$snapshot->path()}]. Run Pest with --update-snapshots to create it." : $message);
             }
 
-            $filename = $snapshots->save($string);
+            $snapshot->write($string);
 
-            TestSuite::getInstance()->registerSnapshotChange("Snapshot created at [$filename]");
-        } else {
-            [$filename, $content] = $snapshots->get();
+            TestSuite::getInstance()->registerSnapshotChange("Snapshot created at [{$snapshot->path()}]");
 
-            $normalizedContent = strtr($content, ["\r\n" => "\n", "\r" => "\n"]);
-            $normalizedString = strtr($string, ["\r\n" => "\n", "\r" => "\n"]);
-
-            if (Snapshot::$updateSnapshots && $normalizedContent !== $normalizedString) {
-                $snapshots->save($string);
-
-                TestSuite::getInstance()->registerSnapshotChange("Snapshot updated at [$filename]");
-            } else {
-                if (Snapshot::$updateSnapshots) {
-                    TestSuite::getInstance()->registerSnapshotChange("Snapshot unchanged at [$filename]");
-                }
-
-                Assert::assertSame(
-                    $normalizedContent,
-                    $normalizedString,
-                    $message === '' ? "Failed asserting that the string value matches its snapshot ($filename)." : $message
-                );
-            }
+            return $this;
         }
+
+        if (SnapshotPlugin::$updateSnapshots) {
+            if (! $snapshot->matches($string)) {
+                $snapshot->write($string);
+
+                TestSuite::getInstance()->registerSnapshotChange("Snapshot updated at [{$snapshot->path()}]");
+
+                return $this;
+            }
+
+            TestSuite::getInstance()->registerSnapshotChange("Snapshot unchanged at [{$snapshot->path()}]");
+        }
+
+        Assert::assertSame(
+            $snapshot->normalize($snapshot->read()),
+            $snapshot->normalize($string),
+            $message === '' ? "Failed asserting that the string value matches its snapshot ({$snapshot->path()})." : $message
+        );
 
         return $this;
     }
@@ -808,7 +810,9 @@ final class Expectation
     }
 
     /**
-     * @param  (Closure(Throwable): mixed)|string  $exception
+     * @template T of Throwable
+     *
+     * @param  (Closure(T): mixed)|string|T  $exception
      * @return self<TValue>
      */
     public function toThrow(callable|string|Throwable $exception, ?string $exceptionMessage = null, string $message = ''): self
@@ -889,6 +893,10 @@ final class Expectation
      */
     public function toBeUppercase(string $message = ''): self
     {
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is uppercase.";
+        }
+
         Assert::assertTrue(ctype_upper((string) $this->value), $message);
 
         return $this;
@@ -899,6 +907,10 @@ final class Expectation
      */
     public function toBeLowercase(string $message = ''): self
     {
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is lowercase.";
+        }
+
         Assert::assertTrue(ctype_lower((string) $this->value), $message);
 
         return $this;
@@ -909,6 +921,10 @@ final class Expectation
      */
     public function toBeAlphaNumeric(string $message = ''): self
     {
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is alphanumeric.";
+        }
+
         Assert::assertTrue(ctype_alnum((string) $this->value), $message);
 
         return $this;
@@ -919,6 +935,10 @@ final class Expectation
      */
     public function toBeAlpha(string $message = ''): self
     {
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is alphabetic.";
+        }
+
         Assert::assertTrue(ctype_alpha((string) $this->value), $message);
 
         return $this;
@@ -997,6 +1017,10 @@ final class Expectation
             InvalidExpectationValue::expected('string');
         }
 
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is a UUID.";
+        }
+
         Assert::assertTrue(Str::isUuid($this->value), $message);
 
         return $this;
@@ -1009,6 +1033,10 @@ final class Expectation
     {
         if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
+        }
+
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is a ULID.";
         }
 
         Assert::assertTrue(Str::isUlid($this->value), $message);
@@ -1079,6 +1107,10 @@ final class Expectation
             InvalidExpectationValue::expected('string');
         }
 
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is an IP address.";
+        }
+
         Assert::assertTrue((bool) filter_var($this->value, FILTER_VALIDATE_IP), $message);
 
         return $this;
@@ -1091,6 +1123,10 @@ final class Expectation
     {
         if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
+        }
+
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is a MAC address.";
         }
 
         Assert::assertTrue((bool) filter_var($this->value, FILTER_VALIDATE_MAC), $message);
@@ -1107,6 +1143,10 @@ final class Expectation
             InvalidExpectationValue::expected('string');
         }
 
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is a hostname.";
+        }
+
         Assert::assertTrue((bool) filter_var($this->value, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME), $message);
 
         return $this;
@@ -1119,6 +1159,10 @@ final class Expectation
     {
         if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
+        }
+
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is a domain.";
         }
 
         $isValid = filter_var($this->value, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) !== false
@@ -1138,6 +1182,10 @@ final class Expectation
             InvalidExpectationValue::expected('string');
         }
 
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is a base64 string.";
+        }
+
         $decoded = base64_decode($this->value, true);
         Assert::assertTrue($decoded !== false && base64_encode($decoded) === $this->value, $message);
 
@@ -1151,6 +1199,10 @@ final class Expectation
     {
         if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
+        }
+
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is a hexadecimal string.";
         }
 
         Assert::assertTrue(ctype_xdigit($this->value), $message);

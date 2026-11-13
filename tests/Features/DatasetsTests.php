@@ -494,3 +494,9 @@ test('dataset items can mix named and sequential styles', function (string $name
     ['James', 'james@laravel.com'],
     ['James', 'email' => 'james@laravel.com'],
 ]);
+
+test('named parameters work with a single argument', function (string $name): void {
+    expect($name)->toBe('Taylor');
+})->with([
+    ['name' => 'Taylor'],
+]);

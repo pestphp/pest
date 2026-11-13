@@ -8,7 +8,7 @@ afterEach(function (): void {
     Project::destroyAll();
 });
 
-test('a detached HEAD does not purge the graph on structural drift', function (array $arguments): void {
+test('a detached HEAD can rebuild the graph on structural drift', function (array $arguments): void {
     $project = Project::make('master');
     $project->seed('master');
 
@@ -25,10 +25,10 @@ test('a detached HEAD does not purge the graph on structural drift', function (a
 
     expect($result->exitCode)->toBe(0, $result->describe())
         ->and($project->graphExists())->toBeTrue('the detached run deleted graph.json')
-        ->and($delta->isHardSuppressed())->toBeTrue($delta->summary());
+        ->and($delta->structureMoved())->toBeTrue($delta->summary());
 })->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
 
-test('a detached HEAD does not purge the graph with --fresh either', function (array $arguments): void {
+test('a detached HEAD can rebuild the graph with --fresh', function (array $arguments): void {
     $project = Project::make('master');
     $project->seed('master');
 
@@ -39,10 +39,10 @@ test('a detached HEAD does not purge the graph with --fresh either', function (a
 
     expect($result->exitCode)->toBe(0, $result->describe())
         ->and($project->graphExists())->toBeTrue('the detached --fresh run deleted graph.json')
-        ->and($delta->isHardSuppressed())->toBeTrue($delta->summary());
+        ->and($delta->structureMoved())->toBeTrue($delta->summary());
 })->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
 
-test('a detached HEAD leaves an unreadable graph for a checkout that can rebuild it', function (): void {
+test('a detached HEAD can replace an unreadable graph for a checkout that can rebuild it', function (): void {
     $project = Project::make('master');
     $project->seed('master');
 
@@ -54,7 +54,7 @@ test('a detached HEAD leaves an unreadable graph for a checkout that can rebuild
 
     expect($result->exitCode)->toBe(0, $result->describe())
         ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed')
-        ->and(file_get_contents($project->graphDir().'/graph.json'))->toBe('{not json');
+        ->and(file_get_contents($project->graphDir().'/graph.json'))->not->toBe('{not json');
 })->skipOnWindows();
 
 test('a cached failure whose test file was deleted stops widening later runs', function (array $arguments): void {
@@ -355,6 +355,33 @@ test('a graph whose recorded commit is gone is re-anchored, not warned about for
     $delta = $project->delta();
 
     expect($second->output)->not->toContain('no longer reachable')
+        ->and($second->replayed())->toBe(Project::TOTAL_TESTS, $second->describe())
+        ->and($delta->writtenCount())->toBe(0, $delta->summary());
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
+
+test('a full suite run without a coverage driver clears the tree it could not refresh', function (array $arguments): void {
+    $project = Project::make('master');
+    $project->seed('master');
+
+    $project->mutateGraph(function (array $graph): array {
+        $graph['baselines']['master']['tree'] = ['app/Calculator.php' => 'deadbeefdeadbeefdeadbeefdeadbeef'];
+
+        return $graph;
+    });
+
+    $environment = ['XDEBUG_MODE' => 'off'];
+
+    $first = $project->pestWithEnvironment($project->path(), $environment, '--tia', ...$arguments);
+
+    expect($first->exitCode)->toBe(0, $first->describe())
+        ->and($first->output)->toContain('no coverage driver is available')
+        ->and($first->tally())->toContain(Project::TOTAL_TESTS.' passed');
+
+    $project->snapshot();
+    $second = $project->pestWithEnvironment($project->path(), $environment, '--tia', ...$arguments);
+    $delta = $project->delta();
+
+    expect($second->output)->not->toContain('no coverage driver is available')
         ->and($second->replayed())->toBe(Project::TOTAL_TESTS, $second->describe())
         ->and($delta->writtenCount())->toBe(0, $delta->summary());
 })->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();

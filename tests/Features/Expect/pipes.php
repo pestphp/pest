@@ -239,3 +239,14 @@ test('intercept can add new parameters to the expectation', function (): void {
 
     expect('Foo')->toBe('foo', $ignoreCase);
 });
+
+test('named arguments reach the pipes of an expectation', function () use ($state): void {
+    $char = new Char('A');
+
+    $state->reset();
+
+    expect($char)->toBe(expected: new Char('A'))
+        ->and($state)
+        ->runCount->toHaveKey('char', 1)
+        ->appliedCount->toHaveKey('char', 1);
+});
