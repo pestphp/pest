@@ -1942,6 +1942,11 @@
   ✓ keysWithPrefix() → it lists keys matching the prefix
   ✓ keysWithPrefix() → it ignores in-flight temporary files from concurrent writes
 
+   PASS  Tests\Unit\Plugins\Tia\Fingerprint
+  ✓ compute() → it fingerprints tracked structural files in a regular clone
+  ✓ compute() → it fingerprints tracked structural files inside a linked git worktree
+  ✓ compute() → it excludes gitignored untracked files from the fingerprint
+
    PASS  Tests\Unit\Plugins\Tia\Graph
   ✓ shouldRerunStatus() → it re-runs failures and errors, replays successes
   ✓ applyMigrationChanges() → it selects tests whose recorded tables intersect the changed migration
@@ -2325,4 +2330,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1652 passed (3655 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1655 passed (3663 assertions)
