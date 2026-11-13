@@ -1888,6 +1888,8 @@
   ✓ buildListTestsCommand → it forwards --test-directory even when input arguments include one
   ✓ buildListTestsCommand → it strips --processes=N when building the list-tests command
   ✓ buildListTestsCommand → it strips --processes N (space-separated) when building the list-tests command
+  ✓ buildListTestsCommand → it strips --runner when building the list-tests command
+  ✓ buildListTestsCommand → it strips a space-separated --runner and its value when building the list-tests command
   ✓ addOutput → it displays shard information after test execution
   ✓ addOutput → it uses singular form for single test file
   ✓ addOutput → it returns original exit code when shard is not set
@@ -2288,6 +2290,8 @@
   ✓ parallel records the test run history
   ✓ parallel does not record the test run history when asked not to with ('--do-not-cache-result')
   ✓ parallel does not record the test run history when asked not to with ('--do-not-record-test-run-history')
+  ✓ parallel group-filtered run is not considered empty when a worker ends on a fully filtered file
+  ✓ parallel group-filtered run still fails when the selection matches no tests
 
    PASS  Tests\Visual\ParallelNestedDatasets
   ✓ parallel loads nested datasets from nested directories
@@ -2321,4 +2325,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1648 passed (3649 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1652 passed (3655 assertions)

@@ -363,7 +363,7 @@ final readonly class ChangedFiles
             $status = substr($record, 0, 2);
             $path = substr($record, 3);
 
-            if ($status[0] === 'R' || $status[0] === 'C') {
+            if (str_contains($status, 'R') || str_contains($status, 'C')) {
                 $files[] = $path;
 
                 if (isset($records[$i + 1]) && $records[$i + 1] !== '') {
