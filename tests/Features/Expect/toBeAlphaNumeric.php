@@ -17,6 +17,10 @@ test('failures with custom message', function (): void {
     expect('-')->toBeAlphaNumeric('oh no!');
 })->throws(ExpectationFailedException::class, 'oh no!');
 
+test('failures with default message', function (): void {
+    expect('-')->toBeAlphaNumeric();
+})->throws(ExpectationFailedException::class, 'Failed asserting that - is alphanumeric.');
+
 test('not failures', function (): void {
     expect('abc123')->not->toBeAlphaNumeric();
 })->throws(ExpectationFailedException::class);

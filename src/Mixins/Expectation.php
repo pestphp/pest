@@ -447,6 +447,10 @@ final class Expectation
      */
     public function toBeDigits(string $message = ''): self
     {
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} contains only digits.";
+        }
+
         Assert::assertTrue(ctype_digit((string) $this->value), $message);
 
         return $this;
@@ -806,7 +810,9 @@ final class Expectation
     }
 
     /**
-     * @param  (Closure(Throwable): mixed)|string  $exception
+     * @template T of Throwable
+     *
+     * @param  (Closure(T): mixed)|string|T  $exception
      * @return self<TValue>
      */
     public function toThrow(callable|string|Throwable $exception, ?string $exceptionMessage = null, string $message = ''): self
@@ -887,6 +893,10 @@ final class Expectation
      */
     public function toBeUppercase(string $message = ''): self
     {
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is uppercase.";
+        }
+
         Assert::assertTrue(ctype_upper((string) $this->value), $message);
 
         return $this;
@@ -897,6 +907,10 @@ final class Expectation
      */
     public function toBeLowercase(string $message = ''): self
     {
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is lowercase.";
+        }
+
         Assert::assertTrue(ctype_lower((string) $this->value), $message);
 
         return $this;
@@ -907,6 +921,10 @@ final class Expectation
      */
     public function toBeAlphaNumeric(string $message = ''): self
     {
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is alphanumeric.";
+        }
+
         Assert::assertTrue(ctype_alnum((string) $this->value), $message);
 
         return $this;
@@ -917,6 +935,10 @@ final class Expectation
      */
     public function toBeAlpha(string $message = ''): self
     {
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is alphabetic.";
+        }
+
         Assert::assertTrue(ctype_alpha((string) $this->value), $message);
 
         return $this;
@@ -995,6 +1017,10 @@ final class Expectation
             InvalidExpectationValue::expected('string');
         }
 
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is a UUID.";
+        }
+
         Assert::assertTrue(Str::isUuid($this->value), $message);
 
         return $this;
@@ -1007,6 +1033,10 @@ final class Expectation
     {
         if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
+        }
+
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is a ULID.";
         }
 
         Assert::assertTrue(Str::isUlid($this->value), $message);
@@ -1077,6 +1107,10 @@ final class Expectation
             InvalidExpectationValue::expected('string');
         }
 
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is an IP address.";
+        }
+
         Assert::assertTrue((bool) filter_var($this->value, FILTER_VALIDATE_IP), $message);
 
         return $this;
@@ -1089,6 +1123,10 @@ final class Expectation
     {
         if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
+        }
+
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is a MAC address.";
         }
 
         Assert::assertTrue((bool) filter_var($this->value, FILTER_VALIDATE_MAC), $message);
@@ -1105,6 +1143,10 @@ final class Expectation
             InvalidExpectationValue::expected('string');
         }
 
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is a hostname.";
+        }
+
         Assert::assertTrue((bool) filter_var($this->value, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME), $message);
 
         return $this;
@@ -1117,6 +1159,10 @@ final class Expectation
     {
         if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
+        }
+
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is a domain.";
         }
 
         $isValid = filter_var($this->value, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) !== false
@@ -1136,6 +1182,10 @@ final class Expectation
             InvalidExpectationValue::expected('string');
         }
 
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is a base64 string.";
+        }
+
         $decoded = base64_decode($this->value, true);
         Assert::assertTrue($decoded !== false && base64_encode($decoded) === $this->value, $message);
 
@@ -1149,6 +1199,10 @@ final class Expectation
     {
         if (! is_string($this->value)) {
             InvalidExpectationValue::expected('string');
+        }
+
+        if ($message === '') {
+            $message = "Failed asserting that {$this->value} is a hexadecimal string.";
         }
 
         Assert::assertTrue(ctype_xdigit($this->value), $message);
