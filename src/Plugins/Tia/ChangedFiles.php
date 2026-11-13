@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 use Pest\Exceptions\MissingDependency;
+use Pest\Exceptions\TiaGitFailed;
 use Pest\Support\Git;
+use Symfony\Component\Process\ExecutableFinder;
 
 /**
  * @internal
@@ -179,7 +181,7 @@ final readonly class ChangedFiles
         );
 
         if ($result['exitCode'] !== 0 && $result['exitCode'] !== 1) {
-            throw new MissingDependency('Tia mode', 'git');
+            throw $this->gitFailure($result);
         }
 
         $output = $result['output'];
@@ -199,13 +201,13 @@ final readonly class ChangedFiles
 
     public function currentBranch(): ?string
     {
-        $output = $this->git->raw(['rev-parse', '--abbrev-ref', 'HEAD']);
+        $result = $this->git->result(['rev-parse', '--abbrev-ref', 'HEAD']);
 
-        if ($output === null) {
-            throw new MissingDependency('Tia mode', 'git');
+        if ($result['exitCode'] !== 0) {
+            throw $this->gitFailure($result);
         }
 
-        $branch = trim($output);
+        $branch = trim($result['output']);
 
         return $branch === '' || $branch === 'HEAD' ? null : $branch;
     }
@@ -321,13 +323,13 @@ final readonly class ChangedFiles
      */
     private function diffSinceSha(string $sha): array
     {
-        $output = $this->scan()->raw(['diff', '--name-only', '--no-renames', $sha.'..HEAD']);
+        $result = $this->scan()->result(['diff', '--name-only', '--no-renames', $sha.'..HEAD']);
 
-        if ($output === null) {
-            throw new MissingDependency('Tia mode', 'git');
+        if ($result['exitCode'] !== 0) {
+            throw $this->gitFailure($result);
         }
 
-        return $this->splitLines($output);
+        return $this->splitLines($result['output']);
     }
 
     /**
@@ -335,11 +337,13 @@ final readonly class ChangedFiles
      */
     private function workingTreeChanges(): array
     {
-        $output = $this->scan()->raw(['status', '--porcelain', '-z', '--untracked-files=all']);
+        $result = $this->scan()->result(['status', '--porcelain', '-z', '--untracked-files=all']);
 
-        if ($output === null) {
-            throw new MissingDependency('Tia mode', 'git');
+        if ($result['exitCode'] !== 0) {
+            throw $this->gitFailure($result);
         }
+
+        $output = $result['output'];
 
         if ($output === '') {
             return [];
@@ -378,15 +382,29 @@ final readonly class ChangedFiles
 
     public function currentSha(): ?string
     {
-        $output = $this->git->raw(['rev-parse', 'HEAD']);
+        $result = $this->git->result(['rev-parse', 'HEAD']);
 
-        if ($output === null) {
-            throw new MissingDependency('Tia mode', 'git');
+        if ($result['exitCode'] !== 0) {
+            throw $this->gitFailure($result);
         }
 
-        $sha = trim($output);
+        $sha = trim($result['output']);
 
         return $sha === '' ? null : $sha;
+    }
+
+    /**
+     * @param  array{exitCode: int, output: string, errorOutput: string}  $result
+     */
+    private function gitFailure(array $result): MissingDependency|TiaGitFailed
+    {
+        $error = trim($result['errorOutput']);
+
+        if ((new ExecutableFinder)->find('git') === null || str_contains($error, 'not a git repository')) {
+            return new MissingDependency('Tia mode', 'git');
+        }
+
+        return new TiaGitFailed($error !== '' ? $error : sprintf('Git exited with code %d.', $result['exitCode']));
     }
 
     /**
