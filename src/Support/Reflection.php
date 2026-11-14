@@ -33,7 +33,7 @@ final class Reflection
         try {
             $reflectionMethod = $reflectionClass->getMethod($method);
 
-            return $reflectionMethod->invoke($object, ...$args);
+            return $reflectionMethod->invoke($reflectionMethod->isStatic() ? null : $object, ...$args);
         } catch (ReflectionException $exception) {
             if (method_exists($object, '__call')) {
                 return $object->__call($method, $args);

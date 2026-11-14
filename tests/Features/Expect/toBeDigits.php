@@ -17,6 +17,10 @@ test('failures with custom message', function (): void {
     expect('123.14')->toBeDigits('oh no!');
 })->throws(ExpectationFailedException::class, 'oh no!');
 
+test('failures with default message', function (): void {
+    expect('123.14')->toBeDigits();
+})->throws(ExpectationFailedException::class, 'Failed asserting that 123.14 contains only digits.');
+
 test('not failures', function (): void {
     expect('445')->not->toBeDigits();
 })->throws(ExpectationFailedException::class);

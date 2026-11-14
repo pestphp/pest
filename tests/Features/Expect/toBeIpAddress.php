@@ -23,6 +23,10 @@ test('failures with custom message', function (): void {
     expect('not-an-ip')->toBeIpAddress('oh no!');
 })->throws(ExpectationFailedException::class, 'oh no!');
 
+test('failures with default message', function (): void {
+    expect('not-an-ip')->toBeIpAddress();
+})->throws(ExpectationFailedException::class, 'Failed asserting that not-an-ip is an IP address.');
+
 test('not failures', function (): void {
     expect('192.168.1.1')->not->toBeIpAddress();
 })->throws(ExpectationFailedException::class);

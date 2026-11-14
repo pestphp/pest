@@ -23,6 +23,10 @@ test('failures with message', function (): void {
     expect('bar')->toBeUlid('oh no!');
 })->throws(ExpectationFailedException::class, 'oh no!');
 
+test('failures with default message', function (): void {
+    expect('foo')->toBeUlid();
+})->throws(ExpectationFailedException::class, 'Failed asserting that foo is a ULID.');
+
 test('not failures', function (): void {
     expect('foo')->not->toBeUlid();
 });

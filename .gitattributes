@@ -1,4 +1,3 @@
-/docker                  export-ignore
 /docs                    export-ignore
 /tests                   export-ignore
 /scripts                 export-ignore
@@ -13,8 +12,6 @@
 /AGENTS.md               export-ignore
 /CLAUDE.md               export-ignore
 /CONTRIBUTING.md         export-ignore
-/docker-compose.yml      export-ignore
-/Makefile                export-ignore
 /rector.php              export-ignore
 /README.md               export-ignore
 /RELEASE.md              export-ignore
