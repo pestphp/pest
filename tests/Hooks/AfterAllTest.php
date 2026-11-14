@@ -5,21 +5,21 @@ use function PHPUnit\Framework\assertSame;
 $_SERVER['globalHook']->calls->afterAllInFile = 0;
 $_SERVER['globalHook']->calls->afterAllTestsRan = 0;
 
-pest()->afterAll(function () {
+pest()->afterAll(function (): void {
     $_SERVER['globalHook']->calls->afterAllInFile++;
 });
 
-it('does not get called before all tests 1', function () {
+it('does not get called before all tests 1', function (): void {
     $_SERVER['globalHook']->calls->afterAllTestsRan++;
     expect($_SERVER['globalHook']->calls->afterAllInFile)->toBe(0);
 })->repeat(2);
 
-it('does not get called before all tests 2', function () {
+it('does not get called before all tests 2', function (): void {
     $_SERVER['globalHook']->calls->afterAllTestsRan++;
     expect($_SERVER['globalHook']->calls->afterAllInFile)->toBe(0);
 });
 
-register_shutdown_function(function () {
+register_shutdown_function(function (): void {
     if ($_SERVER['globalHook']->calls->afterAllTestsRan === 0) {
         return;
     }

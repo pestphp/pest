@@ -1715,6 +1715,11 @@
    PASS  Tests\Helpers\TestInHelpers
   ✓ it executes tests in the Helpers directory
 
+   PASS  Tests\Hooks\AfterAllTest
+  ✓ it does not get called before all tests 1 @ repetition 1 of 2
+  ✓ it does not get called before all tests 1 @ repetition 2 of 2
+  ✓ it does not get called before all tests 2
+
    PASS  Tests\Hooks\AfterEachTest
   ✓ nested → nested afterEach execution order
   ✓ global afterEach execution order
@@ -2265,6 +2270,9 @@
   ✓ it can look up registered test methods by evaluable name
   ✓ it can return an array of all test suite filenames
 
+   PASS  Tests\Visual\AfterAll
+  ✓ afterAll hooks run once after all tests of the file
+
    PASS  Tests\Visual\BeforeEachTestName
   ✓ description
   ✓ latest description
@@ -2330,4 +2338,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1655 passed (3663 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1659 passed (3677 assertions)
