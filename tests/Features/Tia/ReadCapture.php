@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Pest\Support\Coverage;
 use Tests\Fixtures\Tia\Project;
 
 afterEach(function (): void {
@@ -36,7 +37,7 @@ test('a test that reads a file records an edge to it', function (array $argument
     );
 
     expect($files)->toContain('app/Greeter.php');
-})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows()->skip(! Coverage::isAvailable(), 'Coverage is not available');
 
 test('a changed file selects the test that reads it', function (array $arguments): void {
     $project = Project::make('master');
@@ -69,7 +70,7 @@ test('a changed file selects the test that reads it', function (array $arguments
     expect($result->exitCode)->toBe(0, $result->describe())
         ->and($result->affected())->toBe(3, $result->describe())
         ->and($result->replayed())->toBe(4, $result->describe());
-})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows()->skip(! Coverage::isAvailable(), 'Coverage is not available');
 
 test('a file a test reads does not select it when another file changes', function (): void {
     $project = Project::make('master');
@@ -106,4 +107,4 @@ test('a file a test reads does not select it when another file changes', functio
 
     expect($result->affected())->toBe(4, $result->describe())
         ->and($result->replayed())->toBe(3, $result->describe());
-})->skipOnWindows();
+})->skipOnWindows()->skip(! Coverage::isAvailable(), 'Coverage is not available');
