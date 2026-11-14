@@ -35,10 +35,12 @@ final readonly class TestPaths
 
             foreach ($configuration->testSuite() as $suite) {
                 foreach ($suite->directories() as $directory) {
-                    $rel = self::toRelative($directory->path(), $projectRoot);
+                    foreach (self::expandWildcards($directory->path()) as $path) {
+                        $rel = self::toRelative($path, $projectRoot);
 
-                    if ($rel !== null) {
-                        $directories[] = $rel;
+                        if ($rel !== null) {
+                            $directories[] = $rel;
+                        }
                     }
 
                     $suffixes[] = $directory->suffix();
@@ -102,6 +104,18 @@ final readonly class TestPaths
         }
 
         return false;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function expandWildcards(string $path): array
+    {
+        if (! str_contains($path, '*')) {
+            return [$path];
+        }
+
+        return glob($path, GLOB_ONLYDIR) ?: [$path];
     }
 
     private static function toRelative(string $value, string $projectRoot): ?string

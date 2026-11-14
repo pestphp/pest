@@ -37,6 +37,10 @@ test('failures with custom message', function (): void {
     expect('xyz')->toBeHexadecimal('oh no!');
 })->throws(ExpectationFailedException::class, 'oh no!');
 
+test('failures with default message', function (): void {
+    expect('xyz')->toBeHexadecimal();
+})->throws(ExpectationFailedException::class, 'Failed asserting that xyz is a hexadecimal string.');
+
 test('not failures', function (): void {
     expect('abcdef')->not->toBeHexadecimal();
 })->throws(ExpectationFailedException::class);
