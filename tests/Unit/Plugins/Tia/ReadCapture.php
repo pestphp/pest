@@ -59,32 +59,32 @@ function tiaReadCaptureWrapperClass(): ?string
 
 describe('reads', function (): void {
     it('links a project file the test reads', function (Closure $read): void {
-        $source = (string) realpath(dirname(__DIR__, 4).'/src/Plugins/Tia/ReadCapture.php');
+        $source = (string) realpath(dirname(__DIR__, 4) . '/src/Plugins/Tia/ReadCapture.php');
 
-        expect(tiaReadCaptureLinks(fn () => $read($source)))->toBe([$source]);
+        expect(tiaReadCaptureLinks(fn() => $read($source)))->toBe([$source]);
     })->with([
-        'file_get_contents' => fn (string $path): string|false => file_get_contents($path),
-        'file' => fn (string $path): array|false => file($path),
-        'fopen' => fn (string $path): bool => fclose(fopen($path, 'rb')),
-        'SplFileObject' => fn (string $path): string|false => new SplFileObject($path)->fgets(),
+        'file_get_contents' => fn(string $path): string|false => file_get_contents($path),
+        'file' => fn(string $path): array|false => file($path),
+        'fopen' => fn(string $path): bool => fclose(fopen($path, 'rb')),
+        'SplFileObject' => fn(string $path): string|false => new SplFileObject($path)->fgets(),
     ]);
 
     it('does not link a file the test only writes', function (): void {
-        $path = __DIR__.'/read-capture-'.bin2hex(random_bytes(8)).'.txt';
+        $path = __DIR__ . '/read-capture-' . bin2hex(random_bytes(8)) . '.txt';
 
         try {
-            expect(tiaReadCaptureLinks(fn (): int|false => file_put_contents($path, 'written')))->toBeEmpty();
+            expect(tiaReadCaptureLinks(fn(): int|false => file_put_contents($path, 'written')))->toBeEmpty();
         } finally {
             @unlink($path);
         }
     });
 
     it('does not link a file the test includes', function (): void {
-        $path = __DIR__.'/read-capture-'.bin2hex(random_bytes(8)).'.php';
+        $path = __DIR__ . '/read-capture-' . bin2hex(random_bytes(8)) . '.php';
         file_put_contents($path, "<?php\n\nreturn 1;\n");
 
         try {
-            expect(tiaReadCaptureLinks(fn (): mixed => require $path))->toBeEmpty();
+            expect(tiaReadCaptureLinks(fn(): mixed => require $path))->toBeEmpty();
         } finally {
             @unlink($path);
         }
@@ -95,14 +95,14 @@ describe('reads', function (): void {
         file_put_contents($path, 'outside');
 
         try {
-            expect(tiaReadCaptureLinks(fn (): string|false => file_get_contents($path)))->toBeEmpty();
+            expect(tiaReadCaptureLinks(fn(): string|false => file_get_contents($path)))->toBeEmpty();
         } finally {
             @unlink($path);
         }
     });
 
     it('does not link a directory the test lists', function (): void {
-        expect(tiaReadCaptureLinks(fn (): array|false => scandir(__DIR__)))->toBeEmpty();
+        expect(tiaReadCaptureLinks(fn(): array|false => scandir(__DIR__)))->toBeEmpty();
     });
 
     it('records nothing while inactive', function (): void {
@@ -140,20 +140,20 @@ describe('the file wrapper', function (): void {
     });
 
     it('passes filesystem operations through while a test records', function (): void {
-        $directory = sys_get_temp_dir().DIRECTORY_SEPARATOR.'pest-read-capture-'.bin2hex(random_bytes(8));
+        $directory = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'pest-read-capture-' . bin2hex(random_bytes(8));
         $results = [];
 
         tiaReadCaptureLinks(function () use ($directory, &$results): void {
-            $results['mkdir'] = mkdir($directory.'/nested', 0755, true);
-            $results['write'] = file_put_contents($directory.'/nested/a.txt', 'abc');
-            $results['rename'] = rename($directory.'/nested/a.txt', $directory.'/nested/b.txt');
-            $results['touch'] = touch($directory.'/nested/b.txt', 1_000_000_000, 1_000_000_000);
-            $results['mtime'] = filemtime($directory.'/nested/b.txt');
-            $results['chmod'] = chmod($directory.'/nested/b.txt', 0644);
-            $results['exists'] = file_exists($directory.'/nested/b.txt');
-            $results['scandir'] = array_values(array_diff((array) scandir($directory.'/nested'), ['.', '..']));
+            $results['mkdir'] = mkdir($directory . '/nested', 0755, true);
+            $results['write'] = file_put_contents($directory . '/nested/a.txt', 'abc');
+            $results['rename'] = rename($directory . '/nested/a.txt', $directory . '/nested/b.txt');
+            $results['touch'] = touch($directory . '/nested/b.txt', 1_000_000_000, 1_000_000_000);
+            $results['mtime'] = filemtime($directory . '/nested/b.txt');
+            $results['chmod'] = chmod($directory . '/nested/b.txt', 0644);
+            $results['exists'] = file_exists($directory . '/nested/b.txt');
+            $results['scandir'] = array_values(array_diff((array) scandir($directory . '/nested'), ['.', '..']));
 
-            $handle = fopen($directory.'/nested/b.txt', 'r+b');
+            $handle = fopen($directory . '/nested/b.txt', 'r+b');
             assert(is_resource($handle));
             $results['lock'] = flock($handle, LOCK_EX);
             $results['seek'] = fseek($handle, 1);
@@ -163,8 +163,8 @@ describe('the file wrapper', function (): void {
             $results['unlock'] = flock($handle, LOCK_UN);
             fclose($handle);
 
-            $results['unlink'] = unlink($directory.'/nested/b.txt');
-            $results['rmdir'] = rmdir($directory.'/nested') && rmdir($directory);
+            $results['unlink'] = unlink($directory . '/nested/b.txt');
+            $results['rmdir'] = rmdir($directory . '/nested') && rmdir($directory);
         });
 
         expect($results)->toBe([
@@ -186,6 +186,51 @@ describe('the file wrapper', function (): void {
             'rmdir' => true,
         ]);
     });
+
+    it('reports symlinks as links while a test records', function (bool $targetExists, bool $expectedExists): void {
+        $directory = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'pest-read-capture-' . bin2hex(random_bytes(8));
+        mkdir($directory);
+
+        $target = $directory . '/target.txt';
+        $link = $directory . '/link.txt';
+
+        if ($targetExists) {
+            file_put_contents($target, 'abc');
+        }
+
+        symlink($target, $link);
+
+        $results = [];
+
+        try {
+            tiaReadCaptureLinks(function () use ($link, &$results): void {
+                clearstatcache();
+
+                $results['is_link'] = is_link($link);
+                $results['exists'] = file_exists($link);
+                $results['lstat'] = lstat($link) !== false;
+                $results['filetype'] = filetype($link);
+            });
+        } finally {
+            unlink($link);
+
+            if ($targetExists) {
+                unlink($target);
+            }
+
+            rmdir($directory);
+        }
+
+        expect($results)->toBe([
+            'is_link' => true,
+            'exists' => $expectedExists,
+            'lstat' => true,
+            'filetype' => 'link',
+        ]);
+    })->with([
+        'a link to an existing file' => [true, true],
+        'a dangling link' => [false, false],
+    ])->skipOnWindows();
 });
 
 describe('a wrapper already registered for file://', function (): void {
@@ -198,25 +243,25 @@ describe('a wrapper already registered for file://', function (): void {
     });
 
     it('opens reads through it and still links them', function (): void {
-        $source = (string) realpath(dirname(__DIR__, 4).'/src/Plugins/Tia/ReadCapture.php');
+        $source = (string) realpath(dirname(__DIR__, 4) . '/src/Plugins/Tia/ReadCapture.php');
 
-        expect(tiaReadCaptureLinks(fn (): string|false => file_get_contents($source)))->toBe([$source])
+        expect(tiaReadCaptureLinks(fn(): string|false => file_get_contents($source)))->toBe([$source])
             ->and(array_column(LoggingFileWrapper::$opened, 'path'))->toContain($source);
     });
 
     it('keeps the include flag for the files a test includes', function (): void {
-        $path = __DIR__.'/read-capture-'.bin2hex(random_bytes(8)).'.php';
+        $path = __DIR__ . '/read-capture-' . bin2hex(random_bytes(8)) . '.php';
         file_put_contents($path, "<?php\n\nreturn 1;\n");
 
         try {
-            $links = tiaReadCaptureLinks(fn (): mixed => require $path);
+            $links = tiaReadCaptureLinks(fn(): mixed => require $path);
         } finally {
             @unlink($path);
         }
 
         $includes = array_filter(
             LoggingFileWrapper::$opened,
-            fn (array $open): bool => $open['including'] && basename($open['path']) === basename($path),
+            fn(array $open): bool => $open['including'] && basename($open['path']) === basename($path),
         );
 
         expect($links)->toBeEmpty()

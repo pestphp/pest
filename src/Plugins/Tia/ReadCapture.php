@@ -131,7 +131,7 @@ final class ReadCapture
 
     public function dir_opendir(string $path): bool
     {
-        $handle = $this->withOriginalWrapper(fn () => opendir($path, $this->context));
+        $handle = $this->withOriginalWrapper(fn() => opendir($path, $this->context));
 
         if (! is_resource($handle)) {
             return false;
@@ -156,17 +156,17 @@ final class ReadCapture
 
     public function mkdir(string $path, int $mode, int $options): bool
     {
-        return $this->withOriginalWrapper(fn (): bool => mkdir($path, $mode, ($options & STREAM_MKDIR_RECURSIVE) !== 0, $this->context));
+        return $this->withOriginalWrapper(fn(): bool => mkdir($path, $mode, ($options & STREAM_MKDIR_RECURSIVE) !== 0, $this->context));
     }
 
     public function rename(string $pathFrom, string $pathTo): bool
     {
-        return $this->withOriginalWrapper(fn (): bool => rename($pathFrom, $pathTo, $this->context));
+        return $this->withOriginalWrapper(fn(): bool => rename($pathFrom, $pathTo, $this->context));
     }
 
     public function rmdir(string $path): bool
     {
-        return $this->withOriginalWrapper(fn (): bool => rmdir($path, $this->context));
+        return $this->withOriginalWrapper(fn(): bool => rmdir($path, $this->context));
     }
 
     /**
@@ -174,22 +174,22 @@ final class ReadCapture
      */
     public function stream_cast(int $castAs): mixed
     {
-        return $this->forward('stream_cast', fn (mixed $resource): mixed => $resource, $castAs);
+        return $this->forward('stream_cast', fn(mixed $resource): mixed => $resource, $castAs);
     }
 
     public function stream_close(): void
     {
-        $this->forward('stream_close', fn (mixed $resource): bool => fclose($resource));
+        $this->forward('stream_close', fn(mixed $resource): bool => fclose($resource));
     }
 
     public function stream_eof(): bool
     {
-        return $this->forward('stream_eof', fn (mixed $resource): bool => feof($resource)) === true;
+        return $this->forward('stream_eof', fn(mixed $resource): bool => feof($resource)) === true;
     }
 
     public function stream_flush(): bool
     {
-        return $this->forward('stream_flush', fn (mixed $resource): bool => fflush($resource)) === true;
+        return $this->forward('stream_flush', fn(mixed $resource): bool => fflush($resource)) === true;
     }
 
     /**
@@ -197,12 +197,12 @@ final class ReadCapture
      */
     public function stream_lock(int $operation): bool
     {
-        return $this->forward('stream_lock', fn (mixed $resource): bool => flock($resource, $operation), $operation) === true;
+        return $this->forward('stream_lock', fn(mixed $resource): bool => flock($resource, $operation), $operation) === true;
     }
 
     public function stream_metadata(string $path, int $option, mixed $value): bool
     {
-        return $this->withOriginalWrapper(fn (): bool => match ($option) {
+        return $this->withOriginalWrapper(fn(): bool => match ($option) {
             STREAM_META_TOUCH => is_array($value) && is_int($value[0] ?? null) && is_int($value[1] ?? null)
                 ? touch($path, $value[0], $value[1])
                 : touch($path),
@@ -218,19 +218,19 @@ final class ReadCapture
      */
     public function stream_read(int $count): string|false
     {
-        $data = $this->forward('stream_read', fn (mixed $resource): string|false => fread($resource, $count), $count);
+        $data = $this->forward('stream_read', fn(mixed $resource): string|false => fread($resource, $count), $count);
 
         return is_string($data) ? $data : false;
     }
 
     public function stream_seek(int $offset, int $whence = SEEK_SET): bool
     {
-        return $this->forward('stream_seek', fn (mixed $resource): bool => fseek($resource, $offset, $whence) === 0, $offset, $whence) === true;
+        return $this->forward('stream_seek', fn(mixed $resource): bool => fseek($resource, $offset, $whence) === 0, $offset, $whence) === true;
     }
 
     public function stream_set_option(int $option, int $arg1, ?int $arg2): bool
     {
-        return $this->forward('stream_set_option', fn (mixed $resource): bool => match ($option) {
+        return $this->forward('stream_set_option', fn(mixed $resource): bool => match ($option) {
             STREAM_OPTION_BLOCKING => stream_set_blocking($resource, (bool) $arg1),
             STREAM_OPTION_READ_TIMEOUT => stream_set_timeout($resource, $arg1, $arg2 ?? 0),
             STREAM_OPTION_WRITE_BUFFER => stream_set_write_buffer($resource, $arg1) === 0,
@@ -244,14 +244,14 @@ final class ReadCapture
      */
     public function stream_stat(): array|false
     {
-        $stat = $this->forward('stream_stat', fn (mixed $resource): array|false => fstat($resource));
+        $stat = $this->forward('stream_stat', fn(mixed $resource): array|false => fstat($resource));
 
         return is_array($stat) ? $stat : false;
     }
 
     public function stream_tell(): int|false
     {
-        $position = $this->forward('stream_tell', fn (mixed $resource): int|false => ftell($resource));
+        $position = $this->forward('stream_tell', fn(mixed $resource): int|false => ftell($resource));
 
         return is_int($position) ? $position : false;
     }
@@ -261,19 +261,19 @@ final class ReadCapture
      */
     public function stream_truncate(int $newSize): bool
     {
-        return $this->forward('stream_truncate', fn (mixed $resource): bool => ftruncate($resource, $newSize), $newSize) === true;
+        return $this->forward('stream_truncate', fn(mixed $resource): bool => ftruncate($resource, $newSize), $newSize) === true;
     }
 
     public function stream_write(string $data): int|false
     {
-        $written = $this->forward('stream_write', fn (mixed $resource): int|false => fwrite($resource, $data), $data);
+        $written = $this->forward('stream_write', fn(mixed $resource): int|false => fwrite($resource, $data), $data);
 
         return is_int($written) ? $written : false;
     }
 
     public function unlink(string $path): bool
     {
-        return $this->withOriginalWrapper(fn (): bool => unlink($path, $this->context));
+        return $this->withOriginalWrapper(fn(): bool => unlink($path, $this->context));
     }
 
     /**
@@ -282,11 +282,21 @@ final class ReadCapture
     public function url_stat(string $path, int $flags): array|false
     {
         return $this->withOriginalWrapper(function () use ($path, $flags): array|false {
-            if (($flags & STREAM_URL_STAT_QUIET) !== 0 && ! file_exists($path)) {
+            $isQuiet = ($flags & STREAM_URL_STAT_QUIET) !== 0;
+
+            if (($flags & STREAM_URL_STAT_LINK) !== 0) {
+                if ($isQuiet && ! is_link($path) && ! file_exists($path)) {
+                    return false;
+                }
+
+                return @lstat($path);
+            }
+
+            if ($isQuiet && ! file_exists($path)) {
                 return false;
             }
 
-            return ($flags & STREAM_URL_STAT_LINK) !== 0 ? @lstat($path) : @stat($path);
+            return @stat($path);
         });
     }
 
