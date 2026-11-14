@@ -355,7 +355,7 @@ final class Recorder
         $out = [];
 
         foreach ($data as $file => $lines) {
-            if (! is_array($lines)) {
+            if (! is_array($lines) || $lines === []) {
                 continue;
             }
             $covered = [];
