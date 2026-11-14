@@ -36,6 +36,20 @@ test('an explicit path turns filtered mode off', function (): void {
         ->and($delta->isResultsOnly())->toBeTrue($delta->summary());
 })->skipOnWindows();
 
+test('--list-tests lists the whole suite in filtered mode', function (): void {
+    $project = Project::make('master');
+    $project->seed('master');
+    $project->snapshot();
+
+    $result = $project->pest('--tia', '--filtered', '--list-tests');
+    $delta = $project->delta();
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and(substr_count($result->output, ' - '))->toBe(Project::TOTAL_TESTS, $result->describe())
+        ->and($result->output)->not->toContain('No affected tests found')
+        ->and($delta->writtenCount())->toBe(0, $delta->summary());
+})->skipOnWindows();
+
 test('filtered mode runs the whole suite when there is no baseline', function (): void {
     $project = Project::make('master');
 

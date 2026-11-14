@@ -1723,6 +1723,11 @@
    PASS  Tests\Helpers\TestInHelpers
   ✓ it executes tests in the Helpers directory
 
+   PASS  Tests\Hooks\AfterAllTest
+  ✓ it does not get called before all tests 1 @ repetition 1 of 2
+  ✓ it does not get called before all tests 1 @ repetition 2 of 2
+  ✓ it does not get called before all tests 2
+
    PASS  Tests\Hooks\AfterEachTest
   ✓ nested → nested afterEach execution order
   ✓ global afterEach execution order
@@ -1896,6 +1901,8 @@
   ✓ buildListTestsCommand → it forwards --test-directory even when input arguments include one
   ✓ buildListTestsCommand → it strips --processes=N when building the list-tests command
   ✓ buildListTestsCommand → it strips --processes N (space-separated) when building the list-tests command
+  ✓ buildListTestsCommand → it strips --runner when building the list-tests command
+  ✓ buildListTestsCommand → it strips a space-separated --runner and its value when building the list-tests command
   ✓ addOutput → it displays shard information after test execution
   ✓ addOutput → it uses singular form for single test file
   ✓ addOutput → it returns original exit code when shard is not set
@@ -1947,6 +1954,11 @@
    PASS  Tests\Unit\Plugins\Tia\FileState
   ✓ keysWithPrefix() → it lists keys matching the prefix
   ✓ keysWithPrefix() → it ignores in-flight temporary files from concurrent writes
+
+   PASS  Tests\Unit\Plugins\Tia\Fingerprint
+  ✓ compute() → it fingerprints tracked structural files in a regular clone
+  ✓ compute() → it fingerprints tracked structural files inside a linked git worktree
+  ✓ compute() → it excludes gitignored untracked files from the fingerprint
 
    PASS  Tests\Unit\Plugins\Tia\Graph
   ✓ shouldRerunStatus() → it re-runs failures and errors, replays successes
@@ -2266,6 +2278,9 @@
   ✓ it can look up registered test methods by evaluable name
   ✓ it can return an array of all test suite filenames
 
+   PASS  Tests\Visual\AfterAll
+  ✓ afterAll hooks run once after all tests of the file
+
    PASS  Tests\Visual\BeforeEachTestName
   ✓ description
   ✓ latest description
@@ -2296,6 +2311,8 @@
   ✓ parallel records the test run history
   ✓ parallel does not record the test run history when asked not to with ('--do-not-cache-result')
   ✓ parallel does not record the test run history when asked not to with ('--do-not-record-test-run-history')
+  ✓ parallel group-filtered run is not considered empty when a worker ends on a fully filtered file
+  ✓ parallel group-filtered run still fails when the selection matches no tests
 
    PASS  Tests\Visual\ParallelNestedDatasets
   ✓ parallel loads nested datasets from nested directories
@@ -2329,4 +2346,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1654 passed (3673 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1665 passed (3701 assertions)
