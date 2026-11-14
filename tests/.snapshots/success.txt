@@ -1984,6 +1984,7 @@
   ✓ markKnownTestFiles() → it does not clobber edges of an already-known test file
   ✓ markKnownTestFiles() → it ignores paths outside the project root
   ✓ clearResults() → it drops the results of the fallback branch too
+  ✓ branch baseline over the fallback → it reads results written after an earlier read
 
    PASS  Tests\Unit\Plugins\Tia\IsEnabledForRun
   ✓ does not throw when an integer --random-order-seed is passed as a separate argv element
@@ -2016,6 +2017,25 @@
   ✓ it persists numeric tables as JSON strings and selects only their migration readers after reload
   ✓ it preserves numeric worker tables through payload cleaning union and graph reload
   ✓ it preserves observed and migration added numeric tables when augmenting database tests
+
+   PASS  Tests\Unit\Plugins\Tia\ReadCapture
+  ✓ reads → it links a project file the test reads with dataset "file_get_contents"
+  ✓ reads → it links a project file the test reads with dataset "file"
+  ✓ reads → it links a project file the test reads with dataset "fopen"
+  ✓ reads → it links a project file the test reads with dataset "SplFileObject"
+  ✓ reads → it does not link a file the test only writes
+  ✓ reads → it does not link a file the test includes
+  ✓ reads → it does not link a file outside the project
+  ✓ reads → it does not link a directory the test lists
+  ✓ reads → it records nothing while inactive
+  ✓ the file wrapper → it is replaced while a test records and restored after it
+  ✓ the file wrapper → it is restored when the recorder resets
+  ✓ the file wrapper → it passes filesystem operations through while a test records
+  ✓ the file wrapper → it reports symlinks as links while a test records with dataset "a link to an existing file"
+  ✓ the file wrapper → it reports symlinks as links while a test records with dataset "a dangling link"
+  ✓ a wrapper already registered for file:// → it opens reads through it and still links them
+  ✓ a wrapper already registered for file:// → it keeps the include flag for the files a test includes
+  ✓ a wrapper already registered for file:// → it is registered again after the test
 
    PASS  Tests\Unit\Plugins\Tia\Recorder
   ✓ activateLinkTracking() → it tracks tables without a coverage driver
@@ -2346,4 +2366,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1665 passed (3701 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1683 passed (3728 assertions)
