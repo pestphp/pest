@@ -40,7 +40,7 @@ trait HandleArguments
 
     /**
      * @param  array<int, string>  $arguments
-     * @return array<int, string>
+     * @return list<string>
      */
     public function popArgument(string $argument, array $arguments): array
     {

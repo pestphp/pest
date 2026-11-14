@@ -81,6 +81,8 @@ final class PcovRestarter implements Restarter
                 '-d',
                 'memory_limit='.ini_get('memory_limit'),
                 '-d',
+                'pcov.enabled='.ini_get('pcov.enabled'),
+                '-d',
                 'pcov.directory='.$projectRoot,
             ],
             array_values($arguments),

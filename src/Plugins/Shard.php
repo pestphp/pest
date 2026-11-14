@@ -87,8 +87,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             return $arguments;
         }
 
-        // @phpstan-ignore-next-line
-        $input = new ArgvInput($arguments);
+        $input = new ArgvInput(array_values($arguments));
 
         ['index' => $index, 'total' => $total] = self::getShard($input);
 
@@ -97,7 +96,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             $arguments,
         )));
 
-        /** @phpstan-ignore-next-line */
         $tests = $this->allTests($arguments);
 
         $timings = $this->loadShardsFile();
@@ -157,7 +155,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
 
         self::$updateShards = true;
 
-        /** @phpstan-ignore-next-line */
         self::$knownTests = $this->allTests($arguments);
 
         if ($this->hasArgument('--parallel', $arguments) || $this->hasArgument('-p', $arguments)) {
@@ -193,11 +190,34 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      */
     private function removeParallelArguments(array $arguments): array
     {
-        return array_values(array_filter(
-            $arguments,
-            fn (string $argument): bool => ! in_array($argument, ['--parallel', '-p'], strict: true)
-                && ! str_starts_with($argument, '--processes'),
-        ));
+        $filtered = [];
+        $skipNext = false;
+
+        foreach ($arguments as $argument) {
+            if ($skipNext) {
+                $skipNext = false;
+
+                if (! str_starts_with($argument, '-')) {
+                    continue;
+                }
+            }
+
+            if ($argument === '--runner') {
+                $skipNext = true;
+
+                continue;
+            }
+
+            if (in_array($argument, ['--parallel', '-p'], strict: true)
+                || str_starts_with($argument, '--processes')
+                || str_starts_with($argument, '--runner=')) {
+                continue;
+            }
+
+            $filtered[] = $argument;
+        }
+
+        return $filtered;
     }
 
     /**
@@ -262,12 +282,12 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
                 }
 
                 if ($endsWithClass && $subRegex !== '') {
-                    $parts[] = '(?:'.preg_quote($key, '/').'(?=::)|'.$segment.')';
+                    $parts[] = '(?:'.preg_quote($key, '/').'::|'.$segment.')';
 
                     continue;
                 }
 
-                $parts[] = $endsWithClass ? $segment.'(?=::)' : $segment;
+                $parts[] = $endsWithClass ? $segment.'::' : $segment;
             }
 
             return implode('|', $parts);
