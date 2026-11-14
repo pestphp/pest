@@ -32,6 +32,11 @@ final class TestRepository
     private array $uses = [];
 
     /**
+     * @var array<string, bool>
+     */
+    private array $isDirectory = [];
+
+    /**
      * @var array<int, TestCaseFilter>
      */
     private array $testCaseFilters = [];
@@ -156,7 +161,9 @@ final class TestRepository
         foreach ($this->uses as $path => $uses) {
             [$classOrTraits, $groups, $hooks] = $uses;
 
-            if ((! is_dir($path) && $testCase->filename === $path) || (is_dir($path) && $startsWith($testCase->filename, $path))) {
+            $isDirectory = $this->isDirectory[$path] ??= is_dir($path);
+
+            if ((! $isDirectory && $testCase->filename === $path) || ($isDirectory && $startsWith($testCase->filename, $path))) {
                 foreach ($classOrTraits as $class) {
                     /** @var string $class */
                     if (class_exists($class)) {
