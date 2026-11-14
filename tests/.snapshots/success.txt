@@ -1983,6 +1983,12 @@
   ✓ markKnownTestFiles() → it makes a test file with no edges known
   ✓ markKnownTestFiles() → it does not clobber edges of an already-known test file
   ✓ markKnownTestFiles() → it ignores paths outside the project root
+  ✓ Laravel boot files → it applies the watch patterns to a boot file that the graph links to one test only with ('config/app.php')
+  ✓ Laravel boot files → it applies the watch patterns to a boot file that the graph links to one test only with ('config/services/mail.php')
+  ✓ Laravel boot files → it applies the watch patterns to a boot file that the graph links to one test only with ('bootstrap/providers.php')
+  ✓ Laravel boot files → it keeps the recorded edges of a boot file that no pattern watches
+  ✓ Laravel boot files → it does not treat the framework cache as a boot file
+  ✓ Laravel boot files → it watches the config and bootstrap files in the Laravel defaults
   ✓ clearResults() → it drops the results of the fallback branch too
   ✓ branch baseline over the fallback → it reads results written after an earlier read
 
@@ -2366,4 +2372,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1683 passed (3728 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1689 passed (3737 assertions)
