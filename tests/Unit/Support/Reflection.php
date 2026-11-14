@@ -74,3 +74,29 @@ it('gets methods from classes', function (): void {
         'getBar',
     ]);
 });
+
+it('calls instance methods', function (): void {
+    $class = new class
+    {
+        private string $foo = 'bar';
+
+        private function getFoo(): string
+        {
+            return $this->foo;
+        }
+    };
+
+    expect(Reflection::call($class, 'getFoo'))->toBe('bar');
+});
+
+it('calls static methods without passing an object', function (): void {
+    $class = new class
+    {
+        private static function concat(string $a, string $b): string
+        {
+            return $a.$b;
+        }
+    };
+
+    expect(Reflection::call($class, 'concat', ['foo', 'bar']))->toBe('foobar');
+});

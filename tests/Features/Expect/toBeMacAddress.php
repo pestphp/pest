@@ -23,6 +23,10 @@ test('failures with custom message', function (): void {
     expect('not-a-mac')->toBeMacAddress('oh no!');
 })->throws(ExpectationFailedException::class, 'oh no!');
 
+test('failures with default message', function (): void {
+    expect('not-a-mac')->toBeMacAddress();
+})->throws(ExpectationFailedException::class, 'Failed asserting that not-a-mac is a MAC address.');
+
 test('not failures', function (): void {
     expect('00:1a:2b:3c:4d:5e')->not->toBeMacAddress();
 })->throws(ExpectationFailedException::class);

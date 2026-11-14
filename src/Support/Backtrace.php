@@ -99,11 +99,7 @@ final class Backtrace
                 continue;
             }
 
-            if (($GLOBALS['__PEST_INTERNAL_TEST_SUITE'] ?? false) && str_contains($trace['file'], 'pest'.DIRECTORY_SEPARATOR.'src')) {
-                continue;
-            }
-
-            if (str_contains($trace['file'], DIRECTORY_SEPARATOR.'pestphp'.DIRECTORY_SEPARATOR.'pest'.DIRECTORY_SEPARATOR.'src')) {
+            if (str_starts_with($trace['file'], dirname(__DIR__).DIRECTORY_SEPARATOR)) {
                 continue;
             }
 
