@@ -101,7 +101,7 @@ final readonly class Git
 
     public function show(string $sha, string $path): ?string
     {
-        return $this->raw(['show', $sha.':'.$path]);
+        return $this->raw(['show', $sha.':./'.$path]);
     }
 
     public function subdirectoryPrefix(): ?string
