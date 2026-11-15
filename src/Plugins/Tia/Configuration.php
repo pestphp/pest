@@ -115,4 +115,17 @@ final class Configuration
 
         return $this;
     }
+
+    /**
+     * @param  list<string>|null  $patterns  project-relative globs of files whose reads create no edge; null turns read capture off
+     * @return $this
+     */
+    public function withoutReadCapture(?array $patterns = null): self
+    {
+        /** @var WatchPatterns $watchPatterns */
+        $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
+        $watchPatterns->excludeReads($patterns);
+
+        return $this;
+    }
 }
