@@ -197,6 +197,10 @@ final class ReadCapture
      */
     public function stream_lock(int $operation): bool
     {
+        if (($operation & ~LOCK_NB) === 0) {
+            return true;
+        }
+
         return $this->forward('stream_lock', fn (mixed $resource): bool => flock($resource, $operation), $operation) === true;
     }
 
