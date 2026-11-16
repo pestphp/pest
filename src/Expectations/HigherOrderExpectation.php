@@ -71,7 +71,7 @@ final class HigherOrderExpectation
     }
 
     /**
-     * @param  Closure(Expectation<TValue>): void  $expectation
+     * @param  Closure(Expectation<TValue>|EachExpectation<TValue>): void  $expectation
      * @return HigherOrderExpectation<TOriginalValue, TOriginalValue>
      */
     public function scoped(Closure $expectation): self

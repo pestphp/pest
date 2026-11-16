@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Pest\Plugins\Tia\Graph;
+use Pest\Plugins\Tia\WatchDefaults\Laravel;
 use Pest\Plugins\Tia\WatchPatterns;
 use Pest\Support\Container;
 use PHPUnit\Framework\TestStatus\TestStatus;
@@ -313,6 +314,68 @@ describe('markKnownTestFiles()', function (): void {
     });
 });
 
+describe('Laravel boot files', function (): void {
+    beforeEach(function (): void {
+        $this->projectRoot = sys_get_temp_dir().'/pest-tia-boot-'.bin2hex(random_bytes(4));
+
+        foreach (['config/app.php', 'config/services/mail.php', 'bootstrap/providers.php', 'bootstrap/cache/config.php', 'app/Other.php'] as $file) {
+            @mkdir(dirname($this->projectRoot.'/'.$file), 0755, true);
+            file_put_contents($this->projectRoot.'/'.$file, "<?php\n\nreturn [];\n");
+        }
+
+        $this->watchPatterns = new WatchPatterns;
+        Container::getInstance()->add(WatchPatterns::class, $this->watchPatterns);
+
+        $this->graph = new Graph($this->projectRoot);
+
+        foreach (['config/app.php', 'config/services/mail.php', 'bootstrap/providers.php', 'bootstrap/cache/config.php'] as $file) {
+            $this->graph->link('tests/Feature/FirstInWorkerTest.php', $file);
+        }
+
+        $this->graph->link('tests/Feature/OtherTest.php', 'app/Other.php');
+    });
+
+    afterEach(function (): void {
+        $files = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($this->projectRoot, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST,
+        );
+
+        foreach ($files as $file) {
+            assert($file instanceof SplFileInfo);
+
+            $file->isDir() ? @rmdir($file->getPathname()) : @unlink($file->getPathname());
+        }
+
+        @rmdir($this->projectRoot);
+
+        Container::getInstance()->add(WatchPatterns::class, new WatchPatterns);
+    });
+
+    it('applies the watch patterns to a boot file that the graph links to one test only', function (string $bootFile): void {
+        $this->watchPatterns->add(['config/**/*.php' => 'tests', 'bootstrap/*.php' => 'tests']);
+
+        expect($this->graph->affected([$bootFile]))
+            ->toEqualCanonicalizing(['tests/Feature/FirstInWorkerTest.php', 'tests/Feature/OtherTest.php']);
+    })->with(['config/app.php', 'config/services/mail.php', 'bootstrap/providers.php']);
+
+    it('keeps the recorded edges of a boot file that no pattern watches', function (): void {
+        expect($this->graph->affected(['config/app.php']))->toBe(['tests/Feature/FirstInWorkerTest.php']);
+    });
+
+    it('does not treat the framework cache as a boot file', function (): void {
+        $this->watchPatterns->add(['bootstrap/**' => 'tests']);
+
+        expect($this->graph->affected(['bootstrap/cache/config.php']))->toBe(['tests/Feature/FirstInWorkerTest.php']);
+    });
+
+    it('watches the config and bootstrap files in the Laravel defaults', function (): void {
+        expect(new Laravel()->defaults('/project', 'tests'))
+            ->toHaveKey('config/**/*.php', ['tests'])
+            ->toHaveKey('bootstrap/*.php', ['tests']);
+    });
+});
+
 describe('clearResults()', function (): void {
     it('drops the results of the fallback branch too', function (): void {
         $graph = new Graph(sys_get_temp_dir());
@@ -324,5 +387,25 @@ describe('clearResults()', function (): void {
         expect($graph->getResult('feature', 'Tests\FooTest::it passes'))->toBeNull()
             ->and($graph->getResult('feature', 'Tests\BarTest::it passes'))->toBeNull()
             ->and($graph->getResult('main', 'Tests\FooTest::it passes'))->toBeNull();
+    });
+});
+
+describe('branch baseline over the fallback', function (): void {
+    it('reads results written after an earlier read', function (): void {
+        $graph = new Graph(sys_get_temp_dir());
+        $graph->setResult('main', 'Tests\FooTest::it passes', 0, '', 0.1, 1, 'tests/Feature/FooTest.php');
+        $graph->setResult('main', 'Tests\BarTest::it passes', 0, '', 0.2, 1, 'tests/Feature/BarTest.php');
+        $graph->setResult('feature', 'Tests\FooTest::it passes', 0, '', 0.3, 1, 'tests/Feature/FooTest.php');
+        $graph->markBaselineComplete('feature');
+
+        expect($graph->getTime('feature', 'Tests\FooTest::it passes', 'main'))->toBe(0.3)
+            ->and($graph->getTime('feature', 'Tests\BarTest::it passes', 'main'))->toBe(0.2);
+
+        $graph->setResult('feature', 'Tests\FooTest::it passes', 7, 'boom', 0.4, 1, 'tests/Feature/FooTest.php');
+        $graph->setResult('main', 'Tests\BarTest::it passes', 0, '', 0.5, 1, 'tests/Feature/BarTest.php');
+
+        expect($graph->getTime('feature', 'Tests\FooTest::it passes', 'main'))->toBe(0.4)
+            ->and($graph->getResult('feature', 'Tests\FooTest::it passes', 'main')?->isFailure())->toBeTrue()
+            ->and($graph->getTime('feature', 'Tests\BarTest::it passes', 'main'))->toBe(0.5);
     });
 });

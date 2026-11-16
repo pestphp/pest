@@ -32,6 +32,18 @@ final class WatchPatterns
     private array $patterns = [];
 
     /**
+     * @var array<string, array<int, string>>
+     */
+    private array $defaultPatterns = [];
+
+    /**
+     * @var list<string>
+     */
+    private array $excludedDefaultPatterns = [];
+
+    private bool $defaultsEnabled = true;
+
+    /**
      * @var array<string, array{include: string, excludes: array<int, string>, allowDotfiles: bool}>
      */
     private array $parsed = [];
@@ -62,8 +74,8 @@ final class WatchPatterns
             }
 
             foreach ($default->defaults($projectRoot, $testPath) as $key => $dirs) {
-                $this->patterns[$key] = array_values(array_unique(
-                    array_merge($this->patterns[$key] ?? [], $dirs),
+                $this->defaultPatterns[$key] = array_values(array_unique(
+                    array_merge($this->defaultPatterns[$key] ?? [], $dirs),
                 ));
             }
         }
@@ -82,31 +94,75 @@ final class WatchPatterns
     }
 
     /**
+     * @param  list<string>|null  $patterns
+     */
+    public function excludeDefaults(?array $patterns = null): void
+    {
+        if ($patterns === null) {
+            $this->defaultsEnabled = false;
+
+            return;
+        }
+
+        $this->excludedDefaultPatterns = array_values(array_unique([
+            ...$this->excludedDefaultPatterns,
+            ...$patterns,
+        ]));
+    }
+
+    /**
      * @param  string  $projectRoot  Absolute path.
      * @param  array<int, string>  $changedFiles  Project-relative paths.
      * @return array<int, string> Project-relative test dirs/files.
      */
     public function matchedDirectories(string $projectRoot, array $changedFiles): array
     {
-        if ($this->patterns === []) {
-            return [];
-        }
-
         $matched = [];
 
         foreach ($changedFiles as $file) {
-            foreach ($this->patterns as $key => $dirs) {
-                if (! $this->keyMatches($key, $file)) {
-                    continue;
-                }
+            foreach ($this->matchingDirectories($this->patterns, $file) as $dir) {
+                $matched[$dir] = true;
+            }
 
-                foreach ($dirs as $dir) {
-                    $matched[$dir] = true;
-                }
+            if (! $this->usesDefaultsFor($file)) {
+                continue;
+            }
+
+            foreach ($this->matchingDirectories($this->defaultPatterns, $file) as $dir) {
+                $matched[$dir] = true;
             }
         }
 
         return array_keys($matched);
+    }
+
+    /**
+     * @param  array<string, array<int, string>>  $patterns
+     * @return list<string>
+     */
+    private function matchingDirectories(array $patterns, string $file): array
+    {
+        $matched = [];
+
+        foreach ($patterns as $key => $dirs) {
+            if (! $this->keyMatches($key, $file)) {
+                continue;
+            }
+
+            foreach ($dirs as $dir) {
+                $matched[$dir] = true;
+            }
+        }
+
+        return array_keys($matched);
+    }
+
+    private function usesDefaultsFor(string $file): bool
+    {
+        return $this->defaultsEnabled && ! array_any(
+            $this->excludedDefaultPatterns,
+            fn (string $pattern): bool => $this->keyMatches($pattern, $file),
+        );
     }
 
     /**
@@ -220,6 +276,9 @@ final class WatchPatterns
     public function reset(): void
     {
         $this->patterns = [];
+        $this->defaultPatterns = [];
+        $this->excludedDefaultPatterns = [];
+        $this->defaultsEnabled = true;
         $this->parsed = [];
         $this->enabled = false;
         $this->locally = false;
