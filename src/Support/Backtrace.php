@@ -30,7 +30,7 @@ final class Backtrace
         $fallback = null;
 
         foreach (debug_backtrace(self::BACKTRACE_OPTIONS) as $trace) {
-            if (! isset($trace[self::FILE]) || ! is_string($trace[self::FILE])) {
+            if (! isset($trace[self::FILE])) {
                 break;
             }
 
@@ -93,7 +93,7 @@ final class Backtrace
         $backtrace = debug_backtrace(self::BACKTRACE_OPTIONS);
 
         foreach ($backtrace as $trace) {
-            if (! isset($trace['file']) || ! is_string($trace['file'])) {
+            if (! isset($trace['file'])) {
                 continue;
             }
 
