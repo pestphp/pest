@@ -37,6 +37,10 @@ test('failures with custom message', function (): void {
     expect('!!invalid!!')->toBeBase64('oh no!');
 })->throws(ExpectationFailedException::class, 'oh no!');
 
+test('failures with default message', function (): void {
+    expect('!!invalid!!')->toBeBase64();
+})->throws(ExpectationFailedException::class, 'Failed asserting that !!invalid!! is a base64 string.');
+
 test('not failures', function (): void {
     expect('Zm9v')->not->toBeBase64();
 })->throws(ExpectationFailedException::class);
