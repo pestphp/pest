@@ -13,6 +13,7 @@ use Pest\Exceptions\InvalidOption;
 use Pest\Exceptions\MissingDependency;
 use Pest\Exceptions\NoAffectedTestsFound;
 use Pest\Exceptions\TiaBaselineCommitMissing;
+use Pest\Exceptions\TiaGitFailed;
 use Pest\Exceptions\TiaRequiresCommit;
 use Pest\Exceptions\TiaRequiresDefaultBranch;
 use Pest\Exceptions\TiaRequiresRemote;
@@ -139,6 +140,12 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         '--covers', '--uses', '--testsuite', '--exclude-testsuite', '--test-suffix',
         '--dirty', '--todo', '--todos', '--flaky', '--notes',
         '--assignee', '--issue', '--ticket', '--pr', '--pull-request',
+    ];
+
+    /** @var list<string> */
+    private const array LISTING_FLAGS = [
+        '--list-groups', '--list-suites', '--list-tests', '--list-tests-xml',
+        '--list-test-files', '--list-test-ids',
     ];
 
     private const array UNSUPPORTED_OPTIONS = [
@@ -494,7 +501,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         $hasExplicitPath = $this->hasExplicitPathArgument($arguments);
         $partial = ! $isWorker && ($hasExplicitPath || $this->hasPartialSelection($arguments));
-        $disabled = $disabled || $partial;
+        $disabled = $disabled || $partial || $this->hasListingOption($arguments);
 
         $mutating = self::isMutationRun($this->originalArguments);
 
@@ -861,7 +868,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         try {
             $this->resolveBranch($projectRoot);
-        } catch (MissingDependency $missingGit) {
+        } catch (MissingDependency|TiaGitFailed $missingGit) {
             $repository = new ChangedFiles($projectRoot);
 
             if ($repository->isRepository() && ! $repository->hasCommits()) {
@@ -1853,7 +1860,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         try {
             $this->resolveBranch($projectRoot);
-        } catch (MissingDependency) {
+        } catch (MissingDependency|TiaGitFailed) {
         }
 
         $graph->setFallbackBranch($this->fallbackBranch);
@@ -1985,6 +1992,14 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         }
 
         return false;
+    }
+
+    /**
+     * @param  array<int, string>  $arguments
+     */
+    private function hasListingOption(array $arguments): bool
+    {
+        return array_any(self::LISTING_FLAGS, fn (string $flag): bool => $this->hasArgument($flag, $arguments));
     }
 
     private function stoppedEarly(): bool

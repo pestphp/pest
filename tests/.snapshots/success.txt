@@ -435,6 +435,14 @@
    PASS  Tests\Features\Expect\not
   ✓ not property calls
 
+   PASS  Tests\Features\Expect\notToUse
+  ✓ single target negation fails when the target uses the dependency
+  ✓ single target negation passes when the target does not use the dependency
+  ✓ multi target negation fails when any target uses the dependency
+  ✓ multi target negation passes when no target uses the dependency
+  ✓ multi target negation fails when any target uses any listed dependency
+  ✓ positive to use still fails when one target skips the dependency
+
    PASS  Tests\Features\Expect\pipes
   ✓ pipe is applied and can stop pipeline
   ✓ pipe is run and can let the pipeline keep going
@@ -472,12 +480,14 @@
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeAlphaNumeric
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeArray
@@ -494,6 +504,7 @@
   ✓ failures with malformed input
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeBetween
@@ -534,6 +545,7 @@
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeDirectory
@@ -548,6 +560,7 @@
   ✓ failures with leading dot
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeEmail
@@ -620,6 +633,7 @@
   ✓ failures with empty string
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeHostname
@@ -628,6 +642,7 @@
   ✓ failures with trailing hyphen
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeIn
@@ -671,6 +686,7 @@
   ✓ failures
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeIterable
@@ -717,6 +733,7 @@
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeMacAddress
@@ -724,6 +741,7 @@
   ✓ failures
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeNAN
@@ -829,12 +847,14 @@
   ✓ pass
   ✓ failures
   ✓ failures with message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeUppercase
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeUrl
@@ -849,6 +869,7 @@
   ✓ pass
   ✓ failures
   ✓ failures with message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeWritableDirectory
@@ -1702,6 +1723,11 @@
    PASS  Tests\Helpers\TestInHelpers
   ✓ it executes tests in the Helpers directory
 
+   PASS  Tests\Hooks\AfterAllTest
+  ✓ it does not get called before all tests 1 @ repetition 1 of 2
+  ✓ it does not get called before all tests 1 @ repetition 2 of 2
+  ✓ it does not get called before all tests 2
+
    PASS  Tests\Hooks\AfterEachTest
   ✓ nested → nested afterEach execution order
   ✓ global afterEach execution order
@@ -1875,6 +1901,8 @@
   ✓ buildListTestsCommand → it forwards --test-directory even when input arguments include one
   ✓ buildListTestsCommand → it strips --processes=N when building the list-tests command
   ✓ buildListTestsCommand → it strips --processes N (space-separated) when building the list-tests command
+  ✓ buildListTestsCommand → it strips --runner when building the list-tests command
+  ✓ buildListTestsCommand → it strips a space-separated --runner and its value when building the list-tests command
   ✓ addOutput → it displays shard information after test execution
   ✓ addOutput → it uses singular form for single test file
   ✓ addOutput → it returns original exit code when shard is not set
@@ -1927,6 +1955,11 @@
   ✓ keysWithPrefix() → it lists keys matching the prefix
   ✓ keysWithPrefix() → it ignores in-flight temporary files from concurrent writes
 
+   PASS  Tests\Unit\Plugins\Tia\Fingerprint
+  ✓ compute() → it fingerprints tracked structural files in a regular clone
+  ✓ compute() → it fingerprints tracked structural files inside a linked git worktree
+  ✓ compute() → it excludes gitignored untracked files from the fingerprint
+
    PASS  Tests\Unit\Plugins\Tia\Graph
   ✓ shouldRerunStatus() → it re-runs failures and errors, replays successes
   ✓ applyMigrationChanges() → it selects tests whose recorded tables intersect the changed migration
@@ -1950,7 +1983,14 @@
   ✓ markKnownTestFiles() → it makes a test file with no edges known
   ✓ markKnownTestFiles() → it does not clobber edges of an already-known test file
   ✓ markKnownTestFiles() → it ignores paths outside the project root
+  ✓ Laravel boot files → it applies the watch patterns to a boot file that the graph links to one test only with ('config/app.php')
+  ✓ Laravel boot files → it applies the watch patterns to a boot file that the graph links to one test only with ('config/services/mail.php')
+  ✓ Laravel boot files → it applies the watch patterns to a boot file that the graph links to one test only with ('bootstrap/providers.php')
+  ✓ Laravel boot files → it keeps the recorded edges of a boot file that no pattern watches
+  ✓ Laravel boot files → it does not treat the framework cache as a boot file
+  ✓ Laravel boot files → it watches the config and bootstrap files in the Laravel defaults
   ✓ clearResults() → it drops the results of the fallback branch too
+  ✓ branch baseline over the fallback → it reads results written after an earlier read
 
    PASS  Tests\Unit\Plugins\Tia\IsEnabledForRun
   ✓ does not throw when an integer --random-order-seed is passed as a separate argv element
@@ -1983,6 +2023,25 @@
   ✓ it persists numeric tables as JSON strings and selects only their migration readers after reload
   ✓ it preserves numeric worker tables through payload cleaning union and graph reload
   ✓ it preserves observed and migration added numeric tables when augmenting database tests
+
+   PASS  Tests\Unit\Plugins\Tia\ReadCapture
+  ✓ reads → it links a project file the test reads with dataset "file_get_contents"
+  ✓ reads → it links a project file the test reads with dataset "file"
+  ✓ reads → it links a project file the test reads with dataset "fopen"
+  ✓ reads → it links a project file the test reads with dataset "SplFileObject"
+  ✓ reads → it does not link a file the test only writes
+  ✓ reads → it does not link a file the test includes
+  ✓ reads → it does not link a file outside the project
+  ✓ reads → it does not link a directory the test lists
+  ✓ reads → it records nothing while inactive
+  ✓ the file wrapper → it is replaced while a test records and restored after it
+  ✓ the file wrapper → it is restored when the recorder resets
+  ✓ the file wrapper → it passes filesystem operations through while a test records
+  ✓ the file wrapper → it reports symlinks as links while a test records with dataset "a link to an existing file"
+  ✓ the file wrapper → it reports symlinks as links while a test records with dataset "a dangling link"
+  ✓ a wrapper already registered for file:// → it opens reads through it and still links them
+  ✓ a wrapper already registered for file:// → it keeps the include flag for the files a test includes
+  ✓ a wrapper already registered for file:// → it is registered again after the test
 
    PASS  Tests\Unit\Plugins\Tia\Recorder
   ✓ activateLinkTracking() → it tracks tables without a coverage driver
@@ -2099,6 +2158,22 @@
   ✓ it accepts a page directory candidate only when it matches the casing on disk with ('wrong leaf')
   ✓ it accepts a page directory candidate only when it matches the casing on disk with ('wrong parent')
   ✓ it accepts a page directory candidate only when it matches the casing on disk with ('absent')
+
+   PASS  Tests\Unit\Plugins\Tia\WatchPatterns
+  ✓ it keeps the built-in fallbacks enabled by default
+  ✓ it excludes every overlapping default for a matching changed path
+  ✓ it retains custom watches when their matching defaults are excluded
+  ✓ it keeps watch additive when defaults are enabled
+  ✓ it disables all defaults without disabling custom watches
+  ✓ it retains exclusions when defaults are loaded after configuration
+  ✓ it accumulates exclusions from repeated calls
+  ✓ it does not disable defaults for an empty exclusion list
+  ✓ it supports exclusions within a changed-path pattern
+  ✓ it restores default watches and removes custom watches on reset
+  ✓ it does not select unrelated tests for an excluded unknown Vue page
+  ✓ it retains recorded Inertia dependencies when default watches are disabled
+  ✓ it retains recorded migration tables when default watches are disabled
+  ✓ it uses custom mappings for an unknown Vue page with defaults disabled
 
    PASS  Tests\Unit\Plugins\Tia\WorkerToken
   ✓ prefers the per-process UNIQUE_TEST_TOKEN over the per-slot TEST_TOKEN, so two workers recycled into the same slot get different tokens
@@ -2245,6 +2320,9 @@
   ✓ it can look up registered test methods by evaluable name
   ✓ it can return an array of all test suite filenames
 
+   PASS  Tests\Visual\AfterAll
+  ✓ afterAll hooks run once after all tests of the file
+
    PASS  Tests\Visual\BeforeEachTestName
   ✓ description
   ✓ latest description
@@ -2266,8 +2344,17 @@
   ✓ parallel
   ✓ a parallel test can extend another test with same name
   ✓ parallel reports invalid datasets as failures
+  ✓ parallel lets extensions register event subscribers
   ✓ parallel can have multiple exclude-groups
   ✓ parallel can have multiple groups
+  ✓ parallel accepts the options that the workers ignore with ('--no-results')
+  ✓ parallel accepts the options that the workers ignore with ('--do-not-cache-result')
+  ✓ parallel accepts the options that the workers ignore with ('--do-not-record-test-run-history')
+  ✓ parallel records the test run history
+  ✓ parallel does not record the test run history when asked not to with ('--do-not-cache-result')
+  ✓ parallel does not record the test run history when asked not to with ('--do-not-record-test-run-history')
+  ✓ parallel group-filtered run is not considered empty when a worker ends on a fully filtered file
+  ✓ parallel group-filtered run still fails when the selection matches no tests
 
    PASS  Tests\Visual\ParallelNestedDatasets
   ✓ parallel loads nested datasets from nested directories
@@ -2301,4 +2388,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1628 passed (3596 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1703 passed (3758 assertions)
