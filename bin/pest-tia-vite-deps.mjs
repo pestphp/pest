@@ -174,6 +174,42 @@ export async function loadAliasFromViteConfig(projectRoot = PROJECT_ROOT) {
   return alias
 }
 
+// Comments and string contents are blanked so a mention of `export default` in either is
+// not taken for a real one. Only used to detect the export, never handed to rolldown.
+export function stripJsCommentsAndStrings(code) {
+  let out = ''
+  let quote = ''
+
+  for (let i = 0; i < code.length; i++) {
+    const c = code[i]
+    const n = code[i + 1]
+
+    if (quote) {
+      if (c === '\\') { i++; continue }
+      if (c === quote) { quote = ''; out += c }
+      else if (c === '\n') out += c
+      continue
+    }
+    if (c === '"' || c === "'" || c === '`') { quote = c; out += c; continue }
+    if (c === '/' && n === '/') {
+      const end = code.indexOf('\n', i)
+      if (end === -1) break
+      i = end - 1
+      continue
+    }
+    if (c === '/' && n === '*') {
+      const end = code.indexOf('*/', i + 2)
+      if (end === -1) break
+      out += ' '
+      i = end + 1
+      continue
+    }
+    out += c
+  }
+
+  return out
+}
+
 // rolldown has no SFC handling, so a `.vue`/`.svelte` entry fails to parse at the first
 // byte of `<script>`. Only import specifiers are needed, so the markup is dropped.
 export function extractSfcScript(raw) {
@@ -190,7 +226,7 @@ export function extractSfcScript(raw) {
 
   // `<script setup>` and template-only components carry no literal `export default`,
   // which importers resolve against: without one rolldown fails with MISSING_EXPORT.
-  if (!/(^|[\s;}])export\s+default\b/.test(code)) code += '\nexport default {}\n'
+  if (!/(^|[\s;}])export\s+default\b/.test(stripJsCommentsAndStrings(code))) code += '\nexport default {}\n'
 
   return {
     code,
