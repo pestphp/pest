@@ -14,6 +14,7 @@ use ParaTest\RunnerInterface;
 use ParaTest\WrapperRunner\MissingResultsException;
 use ParaTest\WrapperRunner\SuiteLoader;
 use ParaTest\WrapperRunner\WrapperWorker;
+use Pest\Plugins\Parallel;
 use Pest\Plugins\Tia;
 use Pest\Result;
 use Pest\TestSuite;
@@ -64,6 +65,8 @@ use function usleep;
  */
 final class WrapperRunner implements RunnerInterface
 {
+    public const string DO_NOT_RECORD_TEST_RUN_HISTORY = 'DO_NOT_RECORD_TEST_RUN_HISTORY';
+
     public static ?TestResult $result = null;
 
     private const int CYCLE_SLEEP = 1000;
@@ -72,7 +75,7 @@ final class WrapperRunner implements RunnerInterface
 
     private readonly Timer $timer;
 
-    /** @var list<non-empty-string> */
+    /** @var list<non-empty-list<non-empty-string>> */
     private array $pending = [];
 
     private int $exitcode = -1;
@@ -160,8 +163,6 @@ final class WrapperRunner implements RunnerInterface
     {
         $directory = dirname(__DIR__);
         ExcludeList::addDirectory($directory);
-        TestResultFacade::init();
-        EventFacade::instance()->seal();
         $suiteLoader = new SuiteLoader(
             $this->options,
             $this->output,
@@ -247,7 +248,7 @@ final class WrapperRunner implements RunnerInterface
 
                 $this->flushWorker($worker);
 
-                if ($batchSize !== 0 && $this->batches[$token] === $batchSize) {
+                if ($batchSize !== 0 && $this->batches[$token] >= $batchSize) {
                     $this->destroyWorker($token);
                     $worker = $this->startWorker($token);
                 }
@@ -259,7 +260,7 @@ final class WrapperRunner implements RunnerInterface
                     $this->pending = [];
                 } elseif (($pending = array_shift($this->pending)) !== null) {
                     $worker->assign($pending);
-                    $this->batches[$token]++;
+                    $this->batches[$token] += count($pending);
                 }
             }
 
@@ -474,7 +475,7 @@ final class WrapperRunner implements RunnerInterface
 
         self::$result = $testResultSum;
 
-        if ($this->options->configuration->recordTestRunHistory()) {
+        if ($this->options->configuration->recordTestRunHistory() && Parallel::getGlobal(self::DO_NOT_RECORD_TEST_RUN_HISTORY) !== true) {
             $resultCacheSum = new DefaultTestRunHistory($this->options->configuration->testRunHistoryFile());
             foreach ($this->resultCacheFiles as $resultCacheFile) {
                 $resultCache = new DefaultTestRunHistory($resultCacheFile->getPathname());
@@ -634,19 +635,34 @@ final class WrapperRunner implements RunnerInterface
     }
 
     /**
-     * @return array<int, non-empty-string>
+     * @return list<non-empty-list<non-empty-string>>
      */
     private function getTestFiles(SuiteLoader $suiteLoader): array
     {
-        /** @var array<non-empty-string, null> $files */
+        /** @var array<non-empty-string, true> $files */
         $files = [];
 
-        foreach (array_filter(
-            $suiteLoader->tests,
-            fn (string $filename): bool => ! str_ends_with($filename, "eval()'d code")
-        ) as $filename) {
-            $resolved = realpath($filename) ?: $filename;
-            $files[$resolved] = null;
+        /** @var list<non-empty-list<non-empty-string>> $groups */
+        $groups = [];
+
+        foreach ($suiteLoader->tests as $tests) {
+            $group = [];
+
+            foreach (array_filter(
+                $tests,
+                fn (string $filename): bool => ! str_ends_with($filename, "eval()'d code")
+            ) as $filename) {
+                $resolved = realpath($filename) ?: $filename;
+
+                if (! isset($files[$resolved])) {
+                    $files[$resolved] = true;
+                    $group[] = $resolved;
+                }
+            }
+
+            if ($group !== []) {
+                $groups[] = $group;
+            }
         }
 
         foreach (TestSuite::getInstance()->tests->getFilenames() as $filename) {
@@ -654,11 +670,15 @@ final class WrapperRunner implements RunnerInterface
                 $resolved = realpath($filename)
                     ?: realpath($this->options->cwd.DIRECTORY_SEPARATOR.$filename)
                     ?: $filename;
-                $files[$resolved] = null;
+
+                if (! isset($files[$resolved])) {
+                    $files[$resolved] = true;
+                    $groups[] = [$resolved];
+                }
             }
         }
 
-        return array_keys($files);
+        return $groups;
     }
 
     private function shouldIncludeBootstrappedTestFile(string $filename): bool

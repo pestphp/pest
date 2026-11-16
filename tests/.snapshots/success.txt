@@ -1,7 +1,7 @@
 
    PASS  Tests\Arch
   ✓ preset → php → ignoring ['Pest\Expectation', 'debug_backtrace', 'var_export', …]
-  ✓ preset → strict → ignoring ['Pest\Plugins\Tia\BaselineSync', 'usleep']
+  ✓ preset → strict → ignoring ['Pest\Plugins\Tia\BaselineSync', 'Pest\Plugins\Tia\Baselines\Gi…Remote', 'usleep']
   ✓ preset → security → ignoring ['eval', 'str_shuffle', 'exec', …]
   ✓ globals
 
@@ -439,6 +439,14 @@
    PASS  Tests\Features\Expect\not
   ✓ not property calls
 
+   PASS  Tests\Features\Expect\notToUse
+  ✓ single target negation fails when the target uses the dependency
+  ✓ single target negation passes when the target does not use the dependency
+  ✓ multi target negation fails when any target uses the dependency
+  ✓ multi target negation passes when no target uses the dependency
+  ✓ multi target negation fails when any target uses any listed dependency
+  ✓ positive to use still fails when one target skips the dependency
+
    PASS  Tests\Features\Expect\pipes
   ✓ pipe is applied and can stop pipeline
   ✓ pipe is run and can let the pipeline keep going
@@ -476,12 +484,14 @@
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeAlphaNumeric
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeArray
@@ -498,6 +508,7 @@
   ✓ failures with malformed input
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeBetween
@@ -538,6 +549,7 @@
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeDirectory
@@ -552,6 +564,7 @@
   ✓ failures with leading dot
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeEmail
@@ -624,6 +637,7 @@
   ✓ failures with empty string
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeHostname
@@ -632,6 +646,7 @@
   ✓ failures with trailing hyphen
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeIn
@@ -675,6 +690,7 @@
   ✓ failures
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeIterable
@@ -721,6 +737,7 @@
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeMacAddress
@@ -728,6 +745,7 @@
   ✓ failures
   ✓ failures with invalid type
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeNAN
@@ -833,12 +851,14 @@
   ✓ pass
   ✓ failures
   ✓ failures with message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeUppercase
   ✓ pass
   ✓ failures
   ✓ failures with custom message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeUrl
@@ -853,6 +873,7 @@
   ✓ pass
   ✓ failures
   ✓ failures with message
+  ✓ failures with default message
   ✓ not failures
 
    PASS  Tests\Features\Expect\toBeWritableDirectory
@@ -1284,6 +1305,12 @@
   ✓ it is not incompleted because of test with assertions
   … a "describe" group of tests → it is incompleted
 
+   PASS  Tests\Features\Init
+  ✓ init creates a suite when the tests directory is missing
+  ✓ init creates a suite when --init is not the first argument
+  ✓ init creates a suite when --init is passed with a value
+  ✓ a missing tests directory does not crash while resolving tia state
+
    PASS  Tests\Features\Issue
   ✓ it may be associated with an issue #1, #2
   ✓ nested → it may be associated with an issue #1, #4, #5, #6, #3
@@ -1700,6 +1727,11 @@
    PASS  Tests\Helpers\TestInHelpers
   ✓ it executes tests in the Helpers directory
 
+   PASS  Tests\Hooks\AfterAllTest
+  ✓ it does not get called before all tests 1 @ repetition 1 of 2
+  ✓ it does not get called before all tests 1 @ repetition 2 of 2
+  ✓ it does not get called before all tests 2
+
    PASS  Tests\Hooks\AfterEachTest
   ✓ nested → nested afterEach execution order
   ✓ global afterEach execution order
@@ -1916,6 +1948,8 @@
   ✓ buildListTestsCommand → it forwards --test-directory even when input arguments include one
   ✓ buildListTestsCommand → it strips --processes=N when building the list-tests command
   ✓ buildListTestsCommand → it strips --processes N (space-separated) when building the list-tests command
+  ✓ buildListTestsCommand → it strips --runner when building the list-tests command
+  ✓ buildListTestsCommand → it strips a space-separated --runner and its value when building the list-tests command
   ✓ addOutput → it displays shard information after test execution
   ✓ addOutput → it uses singular form for single test file
   ✓ addOutput → it returns original exit code when shard is not set
@@ -1957,9 +1991,21 @@
   ✓ output format → it returns a 32-character hex xxh128 hash
   ✓ output format → it returns a stable hash for empty content
 
+   PASS  Tests\Unit\Plugins\Tia\CoverageReport
+  ✓ the merged coverage report round-trips binary coverage without var_export
+  ✓ the merged coverage report encodes a payload larger than one base64 chunk
+
+   WARN  Tests\Unit\Plugins\Tia\DeletedTestCoverage
+  - cached hits of a deleted test are dropped while a replayed test stays → Coverage is not available
+
    PASS  Tests\Unit\Plugins\Tia\FileState
   ✓ keysWithPrefix() → it lists keys matching the prefix
   ✓ keysWithPrefix() → it ignores in-flight temporary files from concurrent writes
+
+   PASS  Tests\Unit\Plugins\Tia\Fingerprint
+  ✓ compute() → it fingerprints tracked structural files in a regular clone
+  ✓ compute() → it fingerprints tracked structural files inside a linked git worktree
+  ✓ compute() → it excludes gitignored untracked files from the fingerprint
 
    PASS  Tests\Unit\Plugins\Tia\Graph
   ✓ shouldRerunStatus() → it re-runs failures and errors, replays successes
@@ -1984,10 +2030,21 @@
   ✓ markKnownTestFiles() → it makes a test file with no edges known
   ✓ markKnownTestFiles() → it does not clobber edges of an already-known test file
   ✓ markKnownTestFiles() → it ignores paths outside the project root
+  ✓ Laravel boot files → it applies the watch patterns to a boot file that the graph links to one test only with ('config/app.php')
+  ✓ Laravel boot files → it applies the watch patterns to a boot file that the graph links to one test only with ('config/services/mail.php')
+  ✓ Laravel boot files → it applies the watch patterns to a boot file that the graph links to one test only with ('bootstrap/providers.php')
+  ✓ Laravel boot files → it keeps the recorded edges of a boot file that no pattern watches
+  ✓ Laravel boot files → it does not treat the framework cache as a boot file
+  ✓ Laravel boot files → it watches the config and bootstrap files in the Laravel defaults
+  ✓ clearResults() → it drops the results of the fallback branch too
+  ✓ branch baseline over the fallback → it reads results written after an earlier read
 
    PASS  Tests\Unit\Plugins\Tia\IsEnabledForRun
   ✓ does not throw when an integer --random-order-seed is passed as a separate argv element
   ✓ still detects --tia when an integer argument is present
+  ✓ locally configured tia runs outside CI
+  ✓ locally configured tia stays off when CI is detected with ('CI')
+  ✓ locally configured tia stays off when CI is detected with ('GITHUB_ACTIONS')
 
    PASS  Tests\Unit\Plugins\Tia\JsModuleGraph
   ✓ it accepts a page directory candidate only when every segment matches the casing on disk with dataset "exact"
@@ -2008,6 +2065,32 @@
   ✓ it detects an added or removed non-platform dependency
   ✓ it is independent of package ordering
 
+   PASS  Tests\Unit\Plugins\Tia\NumericTableDependencies
+  ✓ it exports numeric table dependencies from the recorder as strings
+  ✓ it persists numeric tables as JSON strings and selects only their migration readers after reload
+  ✓ it preserves numeric worker tables through payload cleaning union and graph reload
+  ✓ it preserves observed and migration added numeric tables when augmenting database tests
+
+   PASS  Tests\Unit\Plugins\Tia\ReadCapture
+  ✓ reads → it links a project file the test reads with dataset "file_get_contents"
+  ✓ reads → it links a project file the test reads with dataset "file"
+  ✓ reads → it links a project file the test reads with dataset "fopen"
+  ✓ reads → it links a project file the test reads with dataset "SplFileObject"
+  ✓ reads → it does not link a file the test only writes
+  ✓ reads → it does not link a file the test includes
+  ✓ reads → it does not link a file outside the project
+  ✓ reads → it does not link a directory the test lists
+  ✓ reads → it records nothing while inactive
+  ✓ the file wrapper → it is replaced while a test records and restored after it
+  ✓ the file wrapper → it is restored when the recorder resets
+  ✓ the file wrapper → it passes filesystem operations through while a test records
+  ✓ the file wrapper → it writes with LOCK_EX while a test records
+  ✓ the file wrapper → it reports symlinks as links while a test records with dataset "a link to an existing file"
+  ✓ the file wrapper → it reports symlinks as links while a test records with dataset "a dangling link"
+  ✓ a wrapper already registered for file:// → it opens reads through it and still links them
+  ✓ a wrapper already registered for file:// → it keeps the include flag for the files a test includes
+  ✓ a wrapper already registered for file:// → it is registered again after the test
+
    PASS  Tests\Unit\Plugins\Tia\Recorder
   ✓ activateLinkTracking() → it tracks tables without a coverage driver
   ✓ activateLinkTracking() → it tracks inertia components without a coverage driver
@@ -2018,6 +2101,9 @@
   ✓ it keys a result per dataset row rather than per method
   ✓ it records assertions against the same per-dataset key
   ✓ it leaves a test without a dataset keyed by class and method
+
+   WARN  Tests\Unit\Plugins\Tia\StaleCoverageLines
+  - a remeasured file drops line numbers that the current file no longer has → Coverage is not available
 
    PASS  Tests\Unit\Plugins\Tia\Storage
   ✓ it uses a project-relative configured directory
@@ -2047,7 +2133,7 @@
   ✓ isTestFile() → it honours a bare .php suffix
   ✓ isTestFile() → it does not require a dot before the suffix
 
-   PASS  Tests\Unit\Plugins\Tia\ViteDepsHelper
+   WARN  Tests\Unit\Plugins\Tia\ViteDepsHelper
   ✓ it strips JSONC down to something JSON.parse accepts with ('plain-object')
   ✓ it strips JSONC down to something JSON.parse accepts with ('plain-array')
   ✓ it strips JSONC down to something JSON.parse accepts with ('nested')
@@ -2120,6 +2206,75 @@
   ✓ it accepts a page directory candidate only when it matches the casing on disk with ('wrong leaf')
   ✓ it accepts a page directory candidate only when it matches the casing on disk with ('wrong parent')
   ✓ it accepts a page directory candidate only when it matches the casing on disk with ('absent')
+  ✓ it keeps every import a single file component declares with ('script-setup')
+  ✓ it keeps every import a single file component declares with ('plain-script-with-default')
+  ✓ it keeps every import a single file component declares with ('typescript-lang')
+  ✓ it keeps every import a single file component declares with ('lang-tsx')
+  ✓ it keeps every import a single file component declares with ('lang-unquoted')
+  ✓ it keeps every import a single file component declares with ('both-script-blocks')
+  ✓ it keeps every import a single file component declares with ('template-only')
+  ✓ it keeps every import a single file component declares with ('style-block-ignored')
+  ✓ it keeps every import a single file component declares with ('dynamic-import')
+  ✓ it keeps every import a single file component declares with ('svelte-component')
+  ✓ it keeps every import a single file component declares with ('no-script-at-all')
+  ✓ it keeps every import a single file component declares with ('default-export-in-line-comment')
+  ✓ it keeps every import a single file component declares with ('default-export-in-block-comment')
+  ✓ it keeps every import a single file component declares with ('default-export-in-string')
+  ✓ it reports the script block language so the parser matches it with ('script-setup')
+  ✓ it reports the script block language so the parser matches it with ('plain-script-with-default')
+  ✓ it reports the script block language so the parser matches it with ('typescript-lang')
+  ✓ it reports the script block language so the parser matches it with ('lang-tsx')
+  ✓ it reports the script block language so the parser matches it with ('lang-unquoted')
+  ✓ it reports the script block language so the parser matches it with ('both-script-blocks')
+  ✓ it reports the script block language so the parser matches it with ('template-only')
+  ✓ it reports the script block language so the parser matches it with ('style-block-ignored')
+  ✓ it reports the script block language so the parser matches it with ('dynamic-import')
+  ✓ it reports the script block language so the parser matches it with ('svelte-component')
+  ✓ it reports the script block language so the parser matches it with ('no-script-at-all')
+  ✓ it reports the script block language so the parser matches it with ('default-export-in-line-comment')
+  ✓ it reports the script block language so the parser matches it with ('default-export-in-block-comment')
+  ✓ it reports the script block language so the parser matches it with ('default-export-in-string')
+  ✓ it always leaves a default export for importers to resolve against with ('script-setup')
+  ✓ it always leaves a default export for importers to resolve against with ('plain-script-with-default')
+  ✓ it always leaves a default export for importers to resolve against with ('typescript-lang')
+  ✓ it always leaves a default export for importers to resolve against with ('lang-tsx')
+  ✓ it always leaves a default export for importers to resolve against with ('lang-unquoted')
+  ✓ it always leaves a default export for importers to resolve against with ('both-script-blocks')
+  ✓ it always leaves a default export for importers to resolve against with ('template-only')
+  ✓ it always leaves a default export for importers to resolve against with ('style-block-ignored')
+  ✓ it always leaves a default export for importers to resolve against with ('dynamic-import')
+  ✓ it always leaves a default export for importers to resolve against with ('svelte-component')
+  ✓ it always leaves a default export for importers to resolve against with ('no-script-at-all')
+  ✓ it always leaves a default export for importers to resolve against with ('default-export-in-line-comment')
+  ✓ it always leaves a default export for importers to resolve against with ('default-export-in-block-comment')
+  ✓ it always leaves a default export for importers to resolve against with ('default-export-in-string')
+  ✓ it does not add a second default export when the block already has one
+  ✓ it drops template and style markup that the parser would reject
+  ✓ it stubs assets as JS modules so rolldown does not reject them as CSS with ('/app/resources/css/app.css')
+  ✓ it stubs assets as JS modules so rolldown does not reject them as CSS with ('/app/logo.svg')
+  ✓ it leaves source modules for the other loaders with ('/app/Page.vue')
+  ✓ it leaves source modules for the other loaders with ('/app/util.ts')
+  ✓ it keeps value imports that only a template uses through the TypeScript transform
+  ✓ it ignores a default export that only appears in a comment or string with ('default-export-in-line-comment')
+  ✓ it ignores a default export that only appears in a comment or string with ('default-export-in-block-comment')
+  ✓ it ignores a default export that only appears in a comment or string with ('default-export-in-string')
+  - it bundles a script setup component that mentions export default in a comment → rolldown is not resolvable.
+
+   PASS  Tests\Unit\Plugins\Tia\WatchPatterns
+  ✓ it keeps the built-in fallbacks enabled by default
+  ✓ it excludes every overlapping default for a matching changed path
+  ✓ it retains custom watches when their matching defaults are excluded
+  ✓ it keeps watch additive when defaults are enabled
+  ✓ it disables all defaults without disabling custom watches
+  ✓ it retains exclusions when defaults are loaded after configuration
+  ✓ it accumulates exclusions from repeated calls
+  ✓ it does not disable defaults for an empty exclusion list
+  ✓ it supports exclusions within a changed-path pattern
+  ✓ it restores default watches and removes custom watches on reset
+  ✓ it does not select unrelated tests for an excluded unknown Vue page
+  ✓ it retains recorded Inertia dependencies when default watches are disabled
+  ✓ it retains recorded migration tables when default watches are disabled
+  ✓ it uses custom mappings for an unknown Vue page with defaults disabled
 
    PASS  Tests\Unit\Plugins\Tia\WorkerToken
   ✓ prefers the per-process UNIQUE_TEST_TOKEN over the per-slot TEST_TOKEN, so two workers recycled into the same slot get different tokens
@@ -2131,6 +2286,7 @@
 
    PASS  Tests\Unit\Restarters\PcovRestarter
   ✓ it preserves the active memory limit in the restarted process
+  ✓ it preserves pcov.enabled in the restarted process
 
    PASS  Tests\Unit\Support\Arr
   ✓ last → it should return false for an empty arary
@@ -2265,6 +2421,9 @@
   ✓ it can look up registered test methods by evaluable name
   ✓ it can return an array of all test suite filenames
 
+   PASS  Tests\Visual\AfterAll
+  ✓ afterAll hooks run once after all tests of the file
+
    PASS  Tests\Visual\BeforeEachTestName
   ✓ description
   ✓ latest description
@@ -2286,8 +2445,17 @@
   ✓ parallel
   ✓ a parallel test can extend another test with same name
   ✓ parallel reports invalid datasets as failures
+  ✓ parallel lets extensions register event subscribers
   ✓ parallel can have multiple exclude-groups
   ✓ parallel can have multiple groups
+  ✓ parallel accepts the options that the workers ignore with ('--no-results')
+  ✓ parallel accepts the options that the workers ignore with ('--do-not-cache-result')
+  ✓ parallel accepts the options that the workers ignore with ('--do-not-record-test-run-history')
+  ✓ parallel records the test run history
+  ✓ parallel does not record the test run history when asked not to with ('--do-not-cache-result')
+  ✓ parallel does not record the test run history when asked not to with ('--do-not-record-test-run-history')
+  ✓ parallel group-filtered run is not considered empty when a worker ends on a fully filtered file
+  ✓ parallel group-filtered run still fails when the selection matches no tests
 
    PASS  Tests\Visual\ParallelNestedDatasets
   ✓ parallel loads nested datasets from nested directories
@@ -2321,4 +2489,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1658 passed (3595 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 40 skipped, 1801 passed (3893 assertions)
