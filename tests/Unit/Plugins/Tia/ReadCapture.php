@@ -202,6 +202,27 @@ describe('the file wrapper', function (): void {
         }
     });
 
+    it('reports a missing path as missing while a test records', function (): void {
+        $missing = sys_get_temp_dir().DIRECTORY_SEPARATOR.'pest-read-capture-missing-'.bin2hex(random_bytes(8));
+        $results = [];
+
+        tiaReadCaptureLinks(function () use ($missing, &$results): void {
+            clearstatcache();
+
+            $results['exists'] = file_exists($missing);
+            $results['is_file'] = is_file($missing);
+            $results['is_link'] = is_link($missing);
+            $results['lstat'] = @lstat($missing);
+        });
+
+        expect($results)->toBe([
+            'exists' => false,
+            'is_file' => false,
+            'is_link' => false,
+            'lstat' => false,
+        ]);
+    });
+
     it('reports symlinks as links while a test records', function (bool $targetExists, bool $expectedExists): void {
         $directory = sys_get_temp_dir().DIRECTORY_SEPARATOR.'pest-read-capture-'.bin2hex(random_bytes(8));
         mkdir($directory);

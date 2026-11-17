@@ -285,23 +285,9 @@ final class ReadCapture
      */
     public function url_stat(string $path, int $flags): array|false
     {
-        return $this->withOriginalWrapper(function () use ($path, $flags): array|false {
-            $isQuiet = ($flags & STREAM_URL_STAT_QUIET) !== 0;
-
-            if (($flags & STREAM_URL_STAT_LINK) !== 0) {
-                if ($isQuiet && ! is_link($path) && ! file_exists($path)) {
-                    return false;
-                }
-
-                return @lstat($path);
-            }
-
-            if ($isQuiet && ! file_exists($path)) {
-                return false;
-            }
-
-            return @stat($path);
-        });
+        return $this->withOriginalWrapper(fn (): array|false => ($flags & STREAM_URL_STAT_LINK) !== 0
+            ? @lstat($path)
+            : @stat($path));
     }
 
     /**
