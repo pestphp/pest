@@ -741,7 +741,8 @@ describe('units', function (): void {
         $reflection->getProperty('externalTimings')->setValue(null, null);
         $reflection->getProperty('collectedTimings')->setValue(null, null);
         $reflection->getProperty('knownTests')->setValue(null, null);
-        $reflection->getProperty('selectedUnits')->setValue(null, []);
+        $reflection->getProperty('ownership')->setValue(null, null);
+        $reflection->getProperty('shardsOutdated')->setValue(null, false);
     });
 
     it('treats a bare timing as a unit bundling only its own test class', function (): void {
@@ -769,6 +770,41 @@ describe('units', function (): void {
 
         expect(array_keys($partitions[0]))->toBe(['app/Heavy.php'])
             ->and(array_keys($partitions[1]))->toBe(['app/Medium.php', 'app/Light.php']);
+    });
+
+    it('owns every unit when the run is not time-balanced', function (): void {
+        expect(Shard::owns('app/Anything.php'))->toBeTrue();
+    });
+
+    it('owns only the units allocated to the current shard', function (): void {
+        new ReflectionClass(Shard::class)->getProperty('ownership')->setValue(null, [
+            'app/Mine.php' => true,
+            'app/Theirs.php' => false,
+        ]);
+
+        expect(Shard::owns('app/Mine.php'))->toBeTrue()
+            ->and(Shard::owns('app/Theirs.php'))->toBeFalse()
+            ->and(new ReflectionClass(Shard::class)->getProperty('shardsOutdated')->getValue())->toBeFalse();
+    });
+
+    it('owns a unit the timings file does not know in every shard, and reports the file as out of date', function (): void {
+        $reflection = new ReflectionClass(Shard::class);
+        $reflection->getProperty('ownership')->setValue(null, ['app/Theirs.php' => false]);
+
+        expect(Shard::owns('app/New.php'))->toBeTrue()
+            ->and($reflection->getProperty('shardsOutdated')->getValue())->toBeTrue();
+    });
+
+    it('keeps a unit that bundles no test class when writing', function (): void {
+        $shard = new Shard(new BufferedOutput);
+
+        $reflection = new ReflectionClass($shard);
+        $reflection->getProperty('knownTests')->setValue(null, ['Tests\\Unit\\FooTest']);
+
+        expect(array_keys($reflection->getMethod('unitsToWrite')->invoke($shard, [
+            'app/Uncovered.php' => ['time' => 0.0, 'tests' => []],
+            'app/Gone.php' => ['time' => 1.0, 'tests' => ['Tests\\Unit\\GoneTest']],
+        ])))->toBe(['app/Uncovered.php', 'Tests\\Unit\\FooTest']);
     });
 
     it('collects every test class the given units bundle', function (): void {

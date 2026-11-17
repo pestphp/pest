@@ -51,9 +51,9 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     private static ?array $externalTimings = null;
 
     /**
-     * @var list<string>
+     * @var array<string, bool>|null
      */
-    private static array $selectedUnits = [];
+    private static ?array $ownership = null;
 
     /**
      * @var array<string, scalar>
@@ -109,12 +109,19 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
         return self::$metadata;
     }
 
-    /**
-     * @return list<string>
-     */
-    public static function selectedUnits(): array
+    public static function owns(string $unit): bool
     {
-        return self::$selectedUnits;
+        if (self::$ownership === null) {
+            return true;
+        }
+
+        if (! isset(self::$ownership[$unit])) {
+            self::$shardsOutdated = true;
+
+            return true;
+        }
+
+        return self::$ownership[$unit];
     }
 
     /**
@@ -164,7 +171,11 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
 
             $selected = $partitions[$index - 1] ?? [];
 
-            self::$selectedUnits = array_keys($selected);
+            self::$ownership = [];
+
+            foreach ($partitions as $i => $partition) {
+                self::$ownership += array_fill_keys(array_keys($partition), $i === $index - 1);
+            }
             self::$timeBalanced = true;
             self::$shardsOutdated = $newTests !== [];
 
@@ -376,7 +387,9 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
 
         if (self::$updateShards && (self::$passed || self::$externalTimings !== null) && ! Parallel::isWorker()) {
             self::$collectedTimings = $this->collectTimings();
+        }
 
+        if (self::$collectedTimings !== null && self::$collectedTimings !== []) {
             $count = count($this->unitsToWrite(self::$collectedTimings));
 
             $this->output->writeln(sprintf(
@@ -448,17 +461,13 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      */
     private function collectTimings(): array
     {
-        if (self::$externalTimings !== null) {
-            return self::$externalTimings;
-        }
-
         $runId = Parallel::getGlobal('SHARD_RUN_ID');
 
-        if (is_string($runId)) {
-            return $this->readWorkerTimings($runId);
-        }
+        $collected = is_string($runId)
+            ? $this->readWorkerTimings($runId)
+            : EnsureShardTimingsAreCollected::timings();
 
-        return EnsureShardTimingsAreCollected::timings();
+        return self::$externalTimings ?? $collected;
     }
 
     private function writeWorkerTimings(): void
@@ -669,7 +678,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
 
         $known = self::$knownTests;
 
-        $units = array_filter($units, fn (array $unit): bool => array_intersect($unit['tests'], $known) !== []);
+        $units = array_filter($units, fn (array $unit): bool => $unit['tests'] === [] || array_intersect($unit['tests'], $known) !== []);
 
         foreach (array_diff($known, $this->testsOf($units)) as $test) {
             $units[$test] = ['time' => 0.0, 'tests' => [$test]];
