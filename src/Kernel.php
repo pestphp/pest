@@ -29,6 +29,8 @@ use Whoops\Exception\Inspector;
  */
 final class Kernel
 {
+    private bool $booted = false;
+
     private bool $terminated = false;
 
     /**
@@ -81,6 +83,8 @@ final class Kernel
 
         CallsBoot::execute();
 
+        $kernel->booted = true;
+
         Container::getInstance()->add(self::class, $kernel);
 
         return $kernel;
@@ -132,7 +136,9 @@ final class Kernel
 
         $preBufferOutput->terminate();
 
-        CallsTerminable::execute();
+        if ($this->booted) {
+            CallsTerminable::execute();
+        }
     }
 
     public function shutdown(): void

@@ -161,7 +161,11 @@ trait Testable
             $afterAll = ChainableClosure::boundStatically(self::$__afterAll, $afterAll);
         }
 
-        call_user_func(Closure::bind($afterAll, null, self::class));
+        try {
+            call_user_func(Closure::bind($afterAll, null, self::class));
+        } finally {
+            self::flush();
+        }
 
         parent::tearDownAfterClass();
     }
@@ -292,9 +296,6 @@ trait Testable
             parent::tearDown();
 
             TestSuite::getInstance()->test = null;
-
-            $method = TestSuite::getInstance()->tests->get(self::$__filename)->getMethod($this->name());
-            $method->tearDown($this);
         }
     }
 
@@ -346,7 +347,7 @@ trait Testable
 
                     TestSuite::getInstance()->snapshots->forget();
 
-                    Closure::bind(fn (): array => $this->mockObjects = [], $this, TestCase::class)();
+                    Closure::bind(fn () => $this->mockObjectRegistry->clear(), $this, TestCase::class)();
 
                     foreach (array_keys(array_diff_key(get_object_vars($this), $initialProperties)) as $property) {
                         unset($this->{$property});

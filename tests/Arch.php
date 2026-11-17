@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Pest\Expectation;
+use Pest\Plugins\Tia\Baselines\GitHubRemote;
 use Pest\Plugins\Tia\BaselineSync;
 
 arch()->preset()->php()->ignoring([
@@ -17,6 +18,7 @@ arch()->preset()->php()->ignoring([
 
 arch()->preset()->strict()->ignoring([
     BaselineSync::class,
+    GitHubRemote::class,
     'usleep',
 ]);
 
