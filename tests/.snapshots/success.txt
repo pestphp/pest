@@ -1907,6 +1907,12 @@
   ✓ addOutput → it uses singular form for single test file
   ✓ addOutput → it returns original exit code when shard is not set
 
+   PASS  Tests\Unit\Plugins\Tia\ConfigurationFile
+  ✓ it fingerprints the path and the content of the configuration file
+  ✓ it tells an identical copy under another name apart from the original
+  ✓ it resolves a configuration directory the way PHPUnit does
+  ✓ it gives a run with --no-configuration its own fingerprint
+
    PASS  Tests\Unit\Plugins\Tia\ContentHash
   ✓ of() → it returns false when file does not exist
   ✓ of() → it hashes an existing file
@@ -2037,6 +2043,7 @@
   ✓ the file wrapper → it is replaced while a test records and restored after it
   ✓ the file wrapper → it is restored when the recorder resets
   ✓ the file wrapper → it passes filesystem operations through while a test records
+  ✓ the file wrapper → it writes with LOCK_EX while a test records
   ✓ the file wrapper → it reports symlinks as links while a test records with dataset "a link to an existing file"
   ✓ the file wrapper → it reports symlinks as links while a test records with dataset "a dangling link"
   ✓ a wrapper already registered for file:// → it opens reads through it and still links them
@@ -2090,7 +2097,7 @@
   ✓ isTestFile() → it honours a bare .php suffix
   ✓ isTestFile() → it does not require a dot before the suffix
 
-   PASS  Tests\Unit\Plugins\Tia\ViteDepsHelper
+   WARN  Tests\Unit\Plugins\Tia\ViteDepsHelper
   ✓ it strips JSONC down to something JSON.parse accepts with ('plain-object')
   ✓ it strips JSONC down to something JSON.parse accepts with ('plain-array')
   ✓ it strips JSONC down to something JSON.parse accepts with ('nested')
@@ -2163,6 +2170,59 @@
   ✓ it accepts a page directory candidate only when it matches the casing on disk with ('wrong leaf')
   ✓ it accepts a page directory candidate only when it matches the casing on disk with ('wrong parent')
   ✓ it accepts a page directory candidate only when it matches the casing on disk with ('absent')
+  ✓ it keeps every import a single file component declares with ('script-setup')
+  ✓ it keeps every import a single file component declares with ('plain-script-with-default')
+  ✓ it keeps every import a single file component declares with ('typescript-lang')
+  ✓ it keeps every import a single file component declares with ('lang-tsx')
+  ✓ it keeps every import a single file component declares with ('lang-unquoted')
+  ✓ it keeps every import a single file component declares with ('both-script-blocks')
+  ✓ it keeps every import a single file component declares with ('template-only')
+  ✓ it keeps every import a single file component declares with ('style-block-ignored')
+  ✓ it keeps every import a single file component declares with ('dynamic-import')
+  ✓ it keeps every import a single file component declares with ('svelte-component')
+  ✓ it keeps every import a single file component declares with ('no-script-at-all')
+  ✓ it keeps every import a single file component declares with ('default-export-in-line-comment')
+  ✓ it keeps every import a single file component declares with ('default-export-in-block-comment')
+  ✓ it keeps every import a single file component declares with ('default-export-in-string')
+  ✓ it reports the script block language so the parser matches it with ('script-setup')
+  ✓ it reports the script block language so the parser matches it with ('plain-script-with-default')
+  ✓ it reports the script block language so the parser matches it with ('typescript-lang')
+  ✓ it reports the script block language so the parser matches it with ('lang-tsx')
+  ✓ it reports the script block language so the parser matches it with ('lang-unquoted')
+  ✓ it reports the script block language so the parser matches it with ('both-script-blocks')
+  ✓ it reports the script block language so the parser matches it with ('template-only')
+  ✓ it reports the script block language so the parser matches it with ('style-block-ignored')
+  ✓ it reports the script block language so the parser matches it with ('dynamic-import')
+  ✓ it reports the script block language so the parser matches it with ('svelte-component')
+  ✓ it reports the script block language so the parser matches it with ('no-script-at-all')
+  ✓ it reports the script block language so the parser matches it with ('default-export-in-line-comment')
+  ✓ it reports the script block language so the parser matches it with ('default-export-in-block-comment')
+  ✓ it reports the script block language so the parser matches it with ('default-export-in-string')
+  ✓ it always leaves a default export for importers to resolve against with ('script-setup')
+  ✓ it always leaves a default export for importers to resolve against with ('plain-script-with-default')
+  ✓ it always leaves a default export for importers to resolve against with ('typescript-lang')
+  ✓ it always leaves a default export for importers to resolve against with ('lang-tsx')
+  ✓ it always leaves a default export for importers to resolve against with ('lang-unquoted')
+  ✓ it always leaves a default export for importers to resolve against with ('both-script-blocks')
+  ✓ it always leaves a default export for importers to resolve against with ('template-only')
+  ✓ it always leaves a default export for importers to resolve against with ('style-block-ignored')
+  ✓ it always leaves a default export for importers to resolve against with ('dynamic-import')
+  ✓ it always leaves a default export for importers to resolve against with ('svelte-component')
+  ✓ it always leaves a default export for importers to resolve against with ('no-script-at-all')
+  ✓ it always leaves a default export for importers to resolve against with ('default-export-in-line-comment')
+  ✓ it always leaves a default export for importers to resolve against with ('default-export-in-block-comment')
+  ✓ it always leaves a default export for importers to resolve against with ('default-export-in-string')
+  ✓ it does not add a second default export when the block already has one
+  ✓ it drops template and style markup that the parser would reject
+  ✓ it stubs assets as JS modules so rolldown does not reject them as CSS with ('/app/resources/css/app.css')
+  ✓ it stubs assets as JS modules so rolldown does not reject them as CSS with ('/app/logo.svg')
+  ✓ it leaves source modules for the other loaders with ('/app/Page.vue')
+  ✓ it leaves source modules for the other loaders with ('/app/util.ts')
+  ✓ it keeps value imports that only a template uses through the TypeScript transform
+  ✓ it ignores a default export that only appears in a comment or string with ('default-export-in-line-comment')
+  ✓ it ignores a default export that only appears in a comment or string with ('default-export-in-block-comment')
+  ✓ it ignores a default export that only appears in a comment or string with ('default-export-in-string')
+  - it bundles a script setup component that mentions export default in a comment → rolldown is not resolvable.
 
    PASS  Tests\Unit\Plugins\Tia\WatchPatterns
   ✓ it keeps the built-in fallbacks enabled by default
@@ -2364,6 +2424,74 @@
    PASS  Tests\Visual\ParallelNestedDatasets
   ✓ parallel loads nested datasets from nested directories
 
+   PASS  Tests\Visual\ParallelStopOn
+  ✓ parallel stop-on fixtures run completely without a stop flag with dataset "failure"
+  ✓ parallel stop-on fixtures run completely without a stop flag with dataset "error"
+  ✓ parallel stop-on fixtures run completely without a stop flag with dataset "risky"
+  ✓ parallel stop-on fixtures run completely without a stop flag with dataset "incomplete"
+  ✓ parallel stop-on fixtures run completely without a stop flag with dataset "warning"
+  ✓ parallel stop-on fixtures run completely without a stop flag with dataset "notice"
+  ✓ parallel stop-on fixtures run completely without a stop flag with dataset "deprecation"
+  ✓ parallel stop-on fixtures run completely without a stop flag with dataset "skipped"
+  ✓ parallel honors stop-on flags with worker recycling with dataset "failure" / (0)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "failure" / (1)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "defect" / (0)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "defect" / (1)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "error" / (0)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "error" / (1)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "risky" / (0)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "risky" / (1)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "incomplete" / (0)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "incomplete" / (1)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "warning" / (0)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "warning" / (1)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "notice" / (0)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "notice" / (1)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "deprecation" / (0)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "deprecation" / (1)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "skipped" / (0)
+  ✓ parallel honors stop-on flags with worker recycling with dataset "skipped" / (1)
+  ✓ parallel honors numeric stop-on thresholds with dataset "failure" / (0)
+  ✓ parallel honors numeric stop-on thresholds with dataset "failure" / (1)
+  ✓ parallel honors numeric stop-on thresholds with dataset "defect" / (0)
+  ✓ parallel honors numeric stop-on thresholds with dataset "defect" / (1)
+  ✓ parallel honors numeric stop-on thresholds with dataset "error" / (0)
+  ✓ parallel honors numeric stop-on thresholds with dataset "error" / (1)
+  ✓ parallel honors numeric stop-on thresholds with dataset "risky" / (0)
+  ✓ parallel honors numeric stop-on thresholds with dataset "risky" / (1)
+  ✓ parallel honors numeric stop-on thresholds with dataset "incomplete" / (0)
+  ✓ parallel honors numeric stop-on thresholds with dataset "incomplete" / (1)
+  ✓ parallel honors numeric stop-on thresholds with dataset "warning" / (0)
+  ✓ parallel honors numeric stop-on thresholds with dataset "warning" / (1)
+  ✓ parallel honors numeric stop-on thresholds with dataset "notice" / (0)
+  ✓ parallel honors numeric stop-on thresholds with dataset "notice" / (1)
+  ✓ parallel honors numeric stop-on thresholds with dataset "deprecation" / (0)
+  ✓ parallel honors numeric stop-on thresholds with dataset "deprecation" / (1)
+  ✓ parallel honors numeric stop-on thresholds with dataset "skipped" / (0)
+  ✓ parallel honors numeric stop-on thresholds with dataset "skipped" / (1)
+  ✓ parallel stop-on-defect includes errors warnings and risky tests with ('errors', 'failed', 2)
+  ✓ parallel stop-on-defect includes errors warnings and risky tests with ('warns', 'warning', 0)
+  ✓ parallel stop-on-defect includes errors warnings and risky tests with ('is risky', 'risky', 1)
+  ✓ parallel stop-on-defect allows incomplete and skipped tests with ('is incomplete', 'incomplete')
+  ✓ parallel stop-on-defect allows incomplete and skipped tests with ('is skipped', 'skipped')
+  ✓ parallel does not count the same failure twice with (0)
+  ✓ parallel does not count the same failure twice with (1)
+  ✓ parallel counts issues hidden by the progress output with ('--stop-on-warning', 'has combined issues', 'failed', …)
+  ✓ parallel counts issues hidden by the progress output with ('--stop-on-defect=2', 'has combined issues', 'failed', …)
+  ✓ parallel counts issues hidden by the progress output with ('--stop-on-warning=2', 'has repeated warnings', 'warning', …)
+  ✓ parallel counts issues hidden by the progress output with ('--stop-on-notice=2', 'has repeated notifications', 'notice', …)
+  ✓ parallel stops only on the requested deprecation message with ('user deprecation', 1)
+  ✓ parallel stops only on the requested deprecation message with ('another deprecation', 2)
+  ✓ parallel honors stop-on flags from XML
+  ✓ parallel CLI thresholds override XML stop-on flags
+  ✓ parallel clamps empty and non-positive thresholds like PHPUnit with ('')
+  ✓ parallel clamps empty and non-positive thresholds like PHPUnit with ('0')
+  ✓ parallel clamps empty and non-positive thresholds like PHPUnit with ('-2')
+  ✓ parallel counts a shared issue only once across recycled workers with ('warning', 'shares warning', 'warning')
+  ✓ parallel counts a shared issue only once across recycled workers with ('defect', 'shares warning', 'warning')
+  ✓ parallel counts a shared issue only once across recycled workers with ('notice', 'shares notice', 'notice')
+  ✓ parallel combines stop-on counts from different workers and cleans up their files
+
    PASS  Tests\Visual\SingleTestOrDirectory
   ✓ allows to run a single test
   ✓ allows to run a directory
@@ -2393,4 +2521,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 37 skipped, 1706 passed (3764 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1829 passed (4146 assertions)
