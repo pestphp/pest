@@ -2390,6 +2390,11 @@
    PASS  Tests\Visual\Collision
   ✓ collision with ([''])
 
+   PASS  Tests\Visual\Dirty
+  ✓ dirty selects paths with spaces and Unicode with dataset "repository root"
+  ✓ dirty selects paths with spaces and Unicode with dataset "project subdirectory"
+  ✓ dirty selects paths with spaces and Unicode with dataset "subdirectory with leading space"
+
    PASS  Tests\Visual\FailingBoot
   ✓ a failure in the boot files renders only that failure
 
@@ -2516,4 +2521,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1826 passed (4140 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1829 passed (4158 assertions)

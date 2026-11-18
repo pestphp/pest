@@ -46,28 +46,24 @@ final class GitDirtyTestCaseFilter implements TestCaseFilter
 
     private function loadChangedFiles(): void
     {
-        $status = new Git(timeout: 60.0)->raw(['status', '--short', '--', '*.php']);
+        $git = new Git($this->projectRoot, timeout: 60.0);
+        $status = $git->raw(['status', '--porcelain=v1', '-z', '--no-renames', '--', '*.php']);
+        $prefix = $git->raw(['rev-parse', '--show-prefix']);
 
-        if ($status === null) {
+        if ($status === null || $prefix === null) {
             throw new MissingDependency('Filter by dirty files', 'git');
         }
 
-        $output = preg_split('/\R+/', $status, flags: PREG_SPLIT_NO_EMPTY);
-        assert(is_array($output));
-
+        $pathOffset = 3 + strlen(rtrim($prefix, "\r\n"));
         $dirtyFiles = [];
 
-        foreach ($output as $dirtyFile) {
-            $dirtyFiles[substr($dirtyFile, 3)] = trim(substr($dirtyFile, 0, 3));
+        foreach (explode("\0", $status) as $entry) {
+            if ($entry === '' || trim(substr($entry, 0, 2)) === 'D') {
+                continue;
+            }
+
+            $dirtyFiles[] = substr($entry, $pathOffset);
         }
-
-        $dirtyFiles = array_filter($dirtyFiles, fn (string $status): bool => $status !== 'D');
-
-        $dirtyFiles = array_map(
-            fn (string $file, string $status): string => in_array($status, ['R', 'RM'], true)
-                ? explode(' -> ', $file)[1]
-                : $file, array_keys($dirtyFiles), $dirtyFiles,
-        );
 
         $dirtyFiles = array_filter(
             $dirtyFiles,
