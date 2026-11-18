@@ -73,6 +73,14 @@
   ↓ is marked as todo 3
   ↓ shouldBeMarkedAsTodo
 
+   PASS  Tests\Features\Configuration
+  ✓ preserves an existing .pest.xml file with dataset "explicit configuration"
+  ✓ preserves an existing .pest.xml file with dataset "discovered configuration"
+  ✓ preserves an existing .pest.xml file with dataset "generated configuration"
+  ✓ removes the generated configuration when it finishes with dataset "sequential"
+  ✓ removes the generated configuration when it finishes with dataset "parallel"
+  ✓ preserves a replacement for the generated configuration
+
    WARN  Tests\Features\Coverage
   ✓ it has plugin
   - it adds coverage if --coverage exist → Coverage is not available
@@ -2521,4 +2529,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1829 passed (4146 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1835 passed (4170 assertions)
