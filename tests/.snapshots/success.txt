@@ -1880,7 +1880,7 @@
   ✓ buildFilterArgument → it generates compact filter for single test
   ✓ buildFilterArgument → it generates compact filter for multiple tests with common prefix
   ✓ buildFilterArgument → it generates compact filter for tests with different namespaces
-  ✓ buildFilterArgument → it returns empty string for empty test list
+  ✓ buildFilterArgument → it generates a filter that selects no tests for an empty test list
   ✓ buildFilterArgument → it generates compact filter for deeply nested namespaces
   ✓ buildFilterArgument → it handles mix of nested and flat namespaces
   ✓ buildFilterArgument → it does not match a class outside of the shard when another class name is its prefix
@@ -2498,6 +2498,14 @@
   ✓ parallel counts a shared issue only once across recycled workers with ('notice', 'shares notice', 'notice')
   ✓ parallel combines stop-on counts from different workers and cleans up their files
 
+   PASS  Tests\Visual\Shard
+  ✓ an empty shard runs no tests with dataset "sequential"
+  ✓ an empty shard runs no tests with dataset "parallel"
+  ✓ an empty shard runs no tests with dataset "sequential with fail-on-empty-test-suite"
+  ✓ an empty shard runs no tests with dataset "parallel with fail-on-empty-test-suite"
+  ✓ an empty shard lists no tests
+  ✓ a non-empty shard runs its assigned test
+
    PASS  Tests\Visual\SingleTestOrDirectory
   ✓ allows to run a single test
   ✓ allows to run a directory
@@ -2529,4 +2537,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1833 passed (4181 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1839 passed (4203 assertions)
