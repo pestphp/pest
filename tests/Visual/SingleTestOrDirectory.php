@@ -34,6 +34,23 @@ test('allows to run a single test using its namespace', function () use ($run, $
     expect($run('Tests\\Fixtures\\DirectoryWithTests\\ExampleTest'))->toContain($snapshot('allows-to-run-a-single-test'));
 })->skipOnWindows();
 
+test('keeps namespace filters unchanged', function () use ($snapshot): void {
+    $process = new Process([
+        'php',
+        'bin/pest',
+        'tests/Fixtures/DirectoryWithTests',
+        '--filter',
+        'Tests\\\\Fixtures\\\\DirectoryWithTests\\\\ExampleTest',
+        '--colors=never',
+    ], dirname(__DIR__, 2),
+        ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
+    );
+
+    $process->run();
+
+    expect(removeAnsiEscapeSequences($process->getOutput()))->toContain($snapshot('allows-to-run-a-single-test'));
+})->skipOnWindows();
+
 it('disable decorating printer when colors is set to never', function () use ($snapshot): void {
     $process = new Process([
         'php',
