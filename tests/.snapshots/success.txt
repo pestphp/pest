@@ -2507,6 +2507,8 @@
    WARN  Tests\Visual\TeamCity
   - visual snapshot of team city with ('Failure.php')
   - visual snapshot of team city with ('SuccessOnly.php')
+  ✓ preserves TeamCity text in a test filter with dataset "attached value"
+  ✓ preserves TeamCity text in a test filter with dataset "separate value"
 
    WARN  Tests\Visual\Todo
   - todos
@@ -2525,4 +2527,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1831 passed (4154 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1833 passed (4158 assertions)
