@@ -401,6 +401,9 @@
   ✓ it works with nested properties
   ✓ it works with higher order tests
 
+   PASS  Tests\Features\Expect\LongSnapshotNames
+  ✓ creates and matches snapshots with long dataset labels
+
    PASS  Tests\Features\Expect\each
   ✓ an exception is thrown if the the type is not iterable
   ✓ it expects on each item
@@ -2521,4 +2524,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1829 passed (4146 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1830 passed (4171 assertions)
