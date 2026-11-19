@@ -1394,6 +1394,10 @@
   ! notice → This is a notice description // tests/Features/Notices.php:6
   ! a "describe" group of tests → notice → This is a notice description // tests/Features/Notices.php:13
 
+   PASS  Tests\Features\Only
+  ✓ limits focus to the invocation that discovers it with dataset "sequential"
+  ✓ limits focus to the invocation that discovers it with dataset "parallel"
+
    PASS  Tests\Features\Pr
   ✓ it may be associated with an pr #1, #2
   ✓ nested → it may be associated with an pr #1, #4, #5, #6, #3
@@ -2553,4 +2557,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1851 passed (4255 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1853 passed (4263 assertions)
