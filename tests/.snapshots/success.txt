@@ -2431,6 +2431,11 @@
   ✓ junit output
   ✓ junit with parallel
 
+   PASS  Tests\Visual\NestedVendorDirectory
+  ✓ runs with a nested Composer vendor directory with dataset "Composer proxy"
+  ✓ runs with a nested Composer vendor directory with dataset "Composer proxy with workers"
+  ✓ runs with a nested Composer vendor directory with dataset "direct execution with workers"
+
    PASS  Tests\Visual\Parallel
   ✓ parallel
   ✓ a parallel test can extend another test with same name
@@ -2557,4 +2562,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1853 passed (4263 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1856 passed (4269 assertions)
