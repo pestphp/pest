@@ -46,3 +46,17 @@ test('visual snapshot of team city', function (string $testFile): void {
     'Failure.php',
     'SuccessOnly.php',
 ])->skip(! getenv('REBUILD_SNAPSHOTS') && getenv('EXCLUDE'));
+
+test('preserves TeamCity text in a test filter', function (array $filterArguments): void {
+    $process = new Process(
+        [PHP_BINARY, 'bin/pest', '--colors=never', 'tests/Fixtures/Suites/SuccessOnly.php', ...$filterArguments],
+        dirname(__DIR__, 2),
+        ['PARATEST' => '0', 'PAO_DISABLE' => '1'],
+    );
+
+    expect($process->run())->toBe(0)
+        ->and($process->getOutput())->toContain('1 passed (1 assertions)');
+})->with([
+    'attached value' => [['--filter=can pass with comparison|--teamcity']],
+    'separate value' => [['--filter', 'can pass with comparison|--teamcity']],
+]);

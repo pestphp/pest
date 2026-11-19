@@ -121,7 +121,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
             }
         }
 
-        if (str_contains($value, '--teamcity')) {
+        if ($value === '--teamcity') {
             unset($arguments[$key]);
             $arguments[] = '--no-output';
             unset($_SERVER['COLLISION_PRINTER']);

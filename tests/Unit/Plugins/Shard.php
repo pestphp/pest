@@ -376,6 +376,28 @@ OUT;
         ]);
     });
 
+    it('parses module test classes living outside the tests directory', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('parseListTestsOutput');
+
+        $listOutput = <<<'OUT'
+ INFO  Available tests:
+
+ - P\Tests\Unit\Foo::__pest_evaluable_it_works
+ - P\Modules\Example\tests\ShardModuleExample::__pest_evaluable_module_test_is_listed
+ - P\Modules\Billing\Tests\Feature\InvoiceTest::__pest_evaluable_it_creates_invoices
+OUT;
+
+        expect($method->invoke($shard, $listOutput))->toBe([
+            'Tests\\Unit\\Foo',
+            'Modules\\Example\\tests\\ShardModuleExample',
+            'Modules\\Billing\\Tests\\Feature\\InvoiceTest',
+        ]);
+    });
+
     it('parses unnamespaced top-level classes', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
@@ -502,6 +524,44 @@ describe('buildListTestsCommand', function (): void {
         expect($command)->not->toContain('--processes')
             ->and($command)->toContain('--update-shards')
             ->and($command)->toContain('--test-directory=tests');
+    });
+
+    it('strips --runner when building the list-tests command', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('buildListTestsCommand');
+
+        $command = $method->invoke($shard, ['artisan', 'test', '--runner=\\Illuminate\\Testing\\ParallelRunner', '--shard=1/3'], 'tests');
+
+        expect($command)->toBe([
+            PHP_BINARY,
+            'artisan',
+            'test',
+            '--shard=1/3',
+            '--test-directory=tests',
+            '--list-tests',
+        ]);
+    });
+
+    it('strips a space-separated --runner and its value when building the list-tests command', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('buildListTestsCommand');
+
+        $command = $method->invoke($shard, ['artisan', 'test', '--runner', '\\Illuminate\\Testing\\ParallelRunner', '--shard=1/3'], 'tests');
+
+        expect($command)->toBe([
+            PHP_BINARY,
+            'artisan',
+            'test',
+            '--shard=1/3',
+            '--test-directory=tests',
+            '--list-tests',
+        ]);
     });
 });
 

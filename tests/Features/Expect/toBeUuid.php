@@ -28,6 +28,10 @@ test('failures with message', function (): void {
     expect('bar')->toBeUuid('oh no!');
 })->throws(ExpectationFailedException::class, 'oh no!');
 
+test('failures with default message', function (): void {
+    expect('foo')->toBeUuid();
+})->throws(ExpectationFailedException::class, 'Failed asserting that foo is a UUID.');
+
 test('not failures', function (): void {
     expect('foo')->not->toBeUuid();
 });
