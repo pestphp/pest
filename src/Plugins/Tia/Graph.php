@@ -655,13 +655,7 @@ final class Graph
             if (isset($handledBlade[$rel])) {
                 continue;
             }
-            if (! isset($this->fileIds[$rel])) {
-                if (! is_file($this->projectRoot.'/'.$rel)) {
-                    continue;
-                }
-
-                $watchedPaths[] = $rel;
-            } elseif ($this->isFrameworkBootPath($rel)) {
+            if (! isset($this->fileIds[$rel]) || $this->isFrameworkBootPath($rel)) {
                 $watchedPaths[] = $rel;
             }
         }
