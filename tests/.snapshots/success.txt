@@ -73,6 +73,14 @@
   ↓ is marked as todo 3
   ↓ shouldBeMarkedAsTodo
 
+   PASS  Tests\Features\Configuration
+  ✓ preserves an existing .pest.xml file with dataset "explicit configuration"
+  ✓ preserves an existing .pest.xml file with dataset "discovered configuration"
+  ✓ preserves an existing .pest.xml file with dataset "generated configuration"
+  ✓ removes the generated configuration when it finishes with dataset "sequential"
+  ✓ removes the generated configuration when it finishes with dataset "parallel"
+  ✓ preserves a replacement for the generated configuration
+
    WARN  Tests\Features\Coverage
   ✓ it has plugin
   - it adds coverage if --coverage exist → Coverage is not available
@@ -400,6 +408,12 @@
   ✓ it works with objects
   ✓ it works with nested properties
   ✓ it works with higher order tests
+
+   PASS  Tests\Features\Expect\LongSnapshotNames
+  ✓ creates and matches snapshots with long dataset labels
+
+   PASS  Tests\Features\Expect\SnapshotWriteFailure
+  ✓ reports a missing snapshot that cannot be written
 
    PASS  Tests\Features\Expect\each
   ✓ an exception is thrown if the the type is not iterable
@@ -1302,7 +1316,7 @@
   … a "describe" group of tests → it is incompleted
 
    PASS  Tests\Features\Init
-  ✓ init creates a suite when the tests directory is missing
+  ✓ init creates a runnable suite when the tests directory is missing
   ✓ init creates a suite when --init is not the first argument
   ✓ init creates a suite when --init is passed with a value
   ✓ a missing tests directory does not crash while resolving tia state
@@ -1379,6 +1393,10 @@
    NOTI  Tests\Features\Notices
   ! notice → This is a notice description // tests/Features/Notices.php:6
   ! a "describe" group of tests → notice → This is a notice description // tests/Features/Notices.php:13
+
+   PASS  Tests\Features\Only
+  ✓ limits focus to the invocation that discovers it with dataset "sequential"
+  ✓ limits focus to the invocation that discovers it with dataset "parallel"
 
    PASS  Tests\Features\Pr
   ✓ it may be associated with an pr #1, #2
@@ -1876,7 +1894,7 @@
   ✓ buildFilterArgument → it generates compact filter for single test
   ✓ buildFilterArgument → it generates compact filter for multiple tests with common prefix
   ✓ buildFilterArgument → it generates compact filter for tests with different namespaces
-  ✓ buildFilterArgument → it returns empty string for empty test list
+  ✓ buildFilterArgument → it generates a filter that selects no tests for an empty test list
   ✓ buildFilterArgument → it generates compact filter for deeply nested namespaces
   ✓ buildFilterArgument → it handles mix of nested and flat namespaces
   ✓ buildFilterArgument → it does not match a class outside of the shard when another class name is its prefix
@@ -2397,6 +2415,14 @@
    PASS  Tests\Visual\Collision
   ✓ collision with ([''])
 
+   PASS  Tests\Visual\Dirty
+  ✓ dirty selects paths with spaces and Unicode with dataset "repository root"
+  ✓ dirty selects paths with spaces and Unicode with dataset "project subdirectory"
+  ✓ dirty selects paths with spaces and Unicode with dataset "subdirectory with leading space"
+  ✓ dirty ignores a test removed after staging a modification with dataset "sequential"
+  ✓ dirty ignores a test removed after staging a modification with dataset "parallel"
+  ✓ dirty selects an unresolved test only while its file exists
+
    PASS  Tests\Visual\FailingBoot
   ✓ a failure in the boot files renders only that failure
 
@@ -2406,6 +2432,11 @@
    PASS  Tests\Visual\JUnit
   ✓ junit output
   ✓ junit with parallel
+
+   PASS  Tests\Visual\NestedVendorDirectory
+  ✓ runs with a nested Composer vendor directory with dataset "Composer proxy"
+  ✓ runs with a nested Composer vendor directory with dataset "Composer proxy with workers"
+  ✓ runs with a nested Composer vendor directory with dataset "direct execution with workers"
 
    PASS  Tests\Visual\Parallel
   ✓ parallel
@@ -2494,6 +2525,14 @@
   ✓ parallel counts a shared issue only once across recycled workers with ('notice', 'shares notice', 'notice')
   ✓ parallel combines stop-on counts from different workers and cleans up their files
 
+   PASS  Tests\Visual\Shard
+  ✓ an empty shard runs no tests with dataset "sequential"
+  ✓ an empty shard runs no tests with dataset "parallel"
+  ✓ an empty shard runs no tests with dataset "sequential with fail-on-empty-test-suite"
+  ✓ an empty shard runs no tests with dataset "parallel with fail-on-empty-test-suite"
+  ✓ an empty shard lists no tests
+  ✓ a non-empty shard runs its assigned test
+
    PASS  Tests\Visual\SingleTestOrDirectory
   ✓ allows to run a single test
   ✓ allows to run a directory
@@ -2525,4 +2564,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1831 passed (4150 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1858 passed (4273 assertions)

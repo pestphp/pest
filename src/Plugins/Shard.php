@@ -124,10 +124,6 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             'testsCount' => count($tests),
         ];
 
-        if ($testsToRun === []) {
-            return $arguments;
-        }
-
         $filter = $this->buildFilterArgument($testsToRun);
 
         $this->ensureFilterLengthIsSafe($filter);
@@ -175,7 +171,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     private function allTests(array $arguments): array
     {
         $command = $this->buildListTestsCommand(
-            $arguments,
+            $this->popArgument('--list-tests', $arguments),
             TestSuite::getInstance()->testPath,
         );
 
@@ -247,7 +243,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     private function buildFilterArgument(array $testsToRun): string
     {
         if ($testsToRun === []) {
-            return '';
+            return '(?!)';
         }
 
         /** @var array<string, mixed> $tree */
