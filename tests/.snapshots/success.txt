@@ -401,6 +401,12 @@
   ✓ it works with nested properties
   ✓ it works with higher order tests
 
+   PASS  Tests\Features\Expect\LongSnapshotNames
+  ✓ creates and matches snapshots with long dataset labels
+
+   PASS  Tests\Features\Expect\SnapshotWriteFailure
+  ✓ reports a missing snapshot that cannot be written
+
    PASS  Tests\Features\Expect\each
   ✓ an exception is thrown if the the type is not iterable
   ✓ it expects on each item
@@ -1302,7 +1308,7 @@
   … a "describe" group of tests → it is incompleted
 
    PASS  Tests\Features\Init
-  ✓ init creates a suite when the tests directory is missing
+  ✓ init creates a runnable suite when the tests directory is missing
   ✓ init creates a suite when --init is not the first argument
   ✓ init creates a suite when --init is passed with a value
   ✓ a missing tests directory does not crash while resolving tia state
@@ -2531,4 +2537,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1837 passed (4172 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1839 passed (4203 assertions)
