@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Repositories;
 
 use Pest\Exceptions\ShouldNotHappen;
+use RuntimeException;
 
 /**
  * @internal
@@ -48,7 +49,9 @@ final readonly class Snapshot
             @mkdir($directory, 0755, true);
         }
 
-        file_put_contents($this->filename, $contents);
+        if (@file_put_contents($this->filename, $contents) !== strlen($contents)) {
+            throw new RuntimeException(sprintf('Unable to write snapshot at [%s].', $this->path()));
+        }
 
         return $this;
     }
