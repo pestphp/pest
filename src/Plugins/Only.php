@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Plugins;
 
+use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Contracts\Plugins\Terminable;
 use Pest\Factories\Attribute;
 use Pest\Factories\TestCaseMethodFactory;
@@ -13,17 +14,24 @@ use PHPUnit\Framework\Attributes\Group;
 /**
  * @internal
  */
-final class Only implements Terminable
+final class Only implements HandlesArguments, Terminable
 {
-    private const string TEMPORARY_FOLDER = __DIR__
-        .DIRECTORY_SEPARATOR
-        .'..'
-        .DIRECTORY_SEPARATOR
-        .'..'
-        .DIRECTORY_SEPARATOR
-        .'.temp';
+    private const string DEFAULT_GROUP = '__pest_only';
 
-    public static function enable(TestCall|TestCaseMethodFactory $testCall, string $group = '__pest_only'): void
+    private const string WORKER_GROUP = 'ONLY_GROUP';
+
+    private static ?string $group = null;
+
+    public function handleArguments(array $arguments): array
+    {
+        if (! Parallel::isWorker()) {
+            self::shareGroupWithWorkers();
+        }
+
+        return $arguments;
+    }
+
+    public static function enable(TestCall|TestCaseMethodFactory $testCall, string $group = self::DEFAULT_GROUP): void
     {
         if ($testCall instanceof TestCall) {
             $testCall->group($group);
@@ -38,52 +46,43 @@ final class Only implements Terminable
             return;
         }
 
-        $lockFile = self::TEMPORARY_FOLDER.DIRECTORY_SEPARATOR.'only.lock';
-
-        if (file_exists($lockFile) && $group === '__pest_only') {
-            file_put_contents($lockFile, $group);
-
-            return;
-        }
-
-        if (! file_exists($lockFile)) {
-            touch($lockFile);
-
-            file_put_contents($lockFile, $group);
+        if (self::$group === null || $group === self::DEFAULT_GROUP) {
+            self::$group = $group;
+            self::shareGroupWithWorkers();
         }
     }
 
     public static function isEnabled(): bool
     {
-        $lockFile = self::TEMPORARY_FOLDER.DIRECTORY_SEPARATOR.'only.lock';
-
-        return file_exists($lockFile);
+        return self::selectedGroup() !== null;
     }
 
     public static function group(): string
     {
-        $lockFile = self::TEMPORARY_FOLDER.DIRECTORY_SEPARATOR.'only.lock';
-
-        if (! file_exists($lockFile)) {
-            return '__pest_only';
-        }
-
-        return file_get_contents($lockFile) ?: '__pest_only'; // @phpstan-ignore-line
+        return self::selectedGroup() ?: self::DEFAULT_GROUP;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function terminate(): void
     {
-        if (Parallel::isWorker()) {
-            return;
+        self::$group = null;
+        self::shareGroupWithWorkers();
+    }
+
+    private static function selectedGroup(): ?string
+    {
+        if (! Parallel::isWorker()) {
+            return self::$group;
         }
 
-        $lockFile = self::TEMPORARY_FOLDER.DIRECTORY_SEPARATOR.'only.lock';
+        $group = Parallel::getGlobal(self::WORKER_GROUP);
 
-        if (file_exists($lockFile)) {
-            unlink($lockFile);
+        return is_string($group) ? base64_decode($group) : null;
+    }
+
+    private static function shareGroupWithWorkers(): void
+    {
+        if (Parallel::isEnabled()) {
+            Parallel::setGlobal(self::WORKER_GROUP, self::$group === null ? false : base64_encode(self::$group));
         }
     }
 }
