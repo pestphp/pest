@@ -3,48 +3,24 @@
 use Symfony\Component\Process\Process;
 
 test('visual snapshot of test suite on success', function (): void {
-    $testsPath = dirname(__DIR__);
-    $snapshot = implode(DIRECTORY_SEPARATOR, [
-        $testsPath,
-        '.snapshots',
-        'success.txt',
-    ]);
+    $snapshot = __DIR__.'/../.snapshots/success.txt';
 
-    $output = function () use ($testsPath): ?string {
-        $process = (new Process(
-            ['php', '-d', 'memory_limit=-1', 'bin/pest', '--exclude-group=tia'],
-            dirname($testsPath),
-            ['EXCLUDE' => 'integration', 'REBUILD_SNAPSHOTS' => false, 'PARATEST' => 0, 'COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
-        ));
+    $process = new Process(
+        ['php', 'bin/pest', 'tests/Fixtures/Suites/SuccessfulRun'],
+        dirname(__DIR__, 2),
+        ['REBUILD_SNAPSHOTS' => false, 'PARATEST' => 0, 'COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
+    );
+    $process->setTimeout(300.0);
+    $process->mustRun();
 
-        $process->setTimeout(300.0);
-
-        $process->run();
-
-        return preg_replace([
-            '#\\x1b[[][^A-Za-z]*[A-Za-z]#',
-            '#\\x1b\\]8;[^\\x1b\\x07]*(?:\\x1b\\\\|\\x07)#',
-            '/(Tests\\\PHPUnit\\\CustomAffixes\\\InvalidTestName)([A-Za-z0-9]*)/',
-        ], [
-            '',
-            '',
-            '$1',
-        ], $process->getOutput());
-    };
+    $output = preg_replace('/Duration: \d+\.\d+s/', 'Duration: x.xxs', (string) removeAnsiEscapeSequences($process->getOutput()));
+    $output = rtrim((string) $output, "\n")."\n";
 
     if (getenv('REBUILD_SNAPSHOTS')) {
-        $outputContent = explode("\n", (string) $output());
-        array_pop($outputContent);
-        array_pop($outputContent);
-        array_pop($outputContent);
+        expect(file_put_contents($snapshot, $output))->toBe(strlen($output));
 
-        file_put_contents($snapshot, implode("\n", $outputContent));
-    } elseif (! getenv('EXCLUDE')) {
-        $output = explode("\n", (string) $output());
-        array_pop($output);
-        array_pop($output);
-
-        expect(implode("\n", $output))->toContain(file_get_contents($snapshot));
+        return;
     }
-})->skip(! getenv('REBUILD_SNAPSHOTS') && getenv('EXCLUDE'))
-    ->skipOnWindows();
+
+    expect($output)->toBe(file_get_contents($snapshot));
+})->skipOnWindows();
