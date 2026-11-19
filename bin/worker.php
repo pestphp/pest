@@ -7,6 +7,7 @@ use ParaTest\WrapperRunner\WrapperWorker;
 use Pest\Kernel;
 use Pest\Plugins\Actions\CallsHandleArguments;
 use Pest\Plugins\Parallel\Paratest\StopConditions;
+use Pest\Support\ComposerProject;
 use Pest\Support\Container;
 use Pest\TestSuite;
 use PHPUnit\TextUI\Configuration\Registry as ConfigurationRegistry;
@@ -14,10 +15,9 @@ use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
-$bootPest = (static function (): void {
+$bootPest = (static function (string $rootPath): void {
     $workerArgv = new ArgvInput;
 
-    $rootPath = dirname(PHPUNIT_COMPOSER_INSTALL, 2);
     $testSuite = TestSuite::getInstance($rootPath, $workerArgv->getParameterOption(
         '--test-directory',
         'tests'
@@ -56,13 +56,14 @@ $bootPest = (static function (): void {
         if (file_exists($file)) {
             require_once $file;
             define('PHPUNIT_COMPOSER_INSTALL', $file);
+            $GLOBALS['_composer_bin_dir'] ??= dirname($file).'/bin';
 
             break;
         }
     }
 
     $container = Container::getInstance();
-    $rootPath = dirname(PHPUNIT_COMPOSER_INSTALL, 2);
+    $rootPath = ComposerProject::rootPath(PHPUNIT_COMPOSER_INSTALL);
 
     foreach (Kernel::RESTARTERS as $restarterClass) {
         $restarter = $container->get($restarterClass);
@@ -85,7 +86,7 @@ $bootPest = (static function (): void {
     $phpunitArgv = unserialize($getopt['phpunit-argv'], ['allowed_classes' => false]);
     assert(is_array($phpunitArgv));
 
-    $bootPest();
+    $bootPest($rootPath);
 
     $phpunitArgv = CallsHandleArguments::execute($phpunitArgv);
 
