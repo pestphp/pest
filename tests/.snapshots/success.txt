@@ -2503,6 +2503,8 @@
    WARN  Tests\Visual\TeamCity
   - visual snapshot of team city with ('Failure.php')
   - visual snapshot of team city with ('SuccessOnly.php')
+  ✓ preserves TeamCity text in a test filter with dataset "attached value"
+  ✓ preserves TeamCity text in a test filter with dataset "separate value"
 
    WARN  Tests\Visual\Todo
   - todos
