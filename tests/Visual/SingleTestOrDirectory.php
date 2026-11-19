@@ -51,6 +51,23 @@ test('keeps namespace filters unchanged', function () use ($snapshot): void {
     expect(removeAnsiEscapeSequences($process->getOutput()))->toContain($snapshot('allows-to-run-a-single-test'));
 })->skipOnWindows();
 
+test('converts a namespace after the retry flag', function () use ($snapshot): void {
+    $process = new Process([
+        'php',
+        'bin/pest',
+        '--retry',
+        'Tests\\Fixtures\\DirectoryWithTests\\ExampleTest',
+        '--colors=never',
+    ], dirname(__DIR__, 2),
+        ['COLLISION_PRINTER' => 'DefaultPrinter', 'COLLISION_IGNORE_DURATION' => 'true', 'PAO_DISABLE' => '1'],
+    );
+
+    $process->run();
+
+    expect($process->getExitCode())->toBe(0)
+        ->and(removeAnsiEscapeSequences($process->getOutput()))->toContain($snapshot('allows-to-run-a-single-test'));
+})->skipOnWindows();
+
 it('disable decorating printer when colors is set to never', function () use ($snapshot): void {
     $process = new Process([
         'php',

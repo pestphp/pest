@@ -134,7 +134,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
         '--coverage-jsonl', '--coverage-openclover', '--coverage-php', '--coverage-xml', '--default-time-limit',
         '--diff-context', '--exclude-group', '--filter', '--exclude-filter', '--generate-baseline', '--use-baseline',
         '--group', '--covers', '--uses', '--requires-php-extension', '--include-path', '--list-tests-xml',
-        '--log-junit', '--log-otr', '--log-teamcity', '--order-by', '--random-order-seed', '--repeat', '--retry',
+        '--log-junit', '--log-otr', '--log-teamcity', '--order-by', '--random-order-seed', '--repeat',
         '--timeout', '--testdox-html', '--testdox-text', '--test-suffix', '--testsuite', '--exclude-testsuite',
         '--test-files-file', '--test-id-filter-file', '--run-test-id', '--log-events-text',
         '--log-events-verbose-text', '--extension',
