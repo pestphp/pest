@@ -67,8 +67,10 @@ final class GitDirtyTestCaseFilter implements TestCaseFilter
 
         $dirtyFiles = array_filter(
             $dirtyFiles,
-            fn (string $file): bool => str_starts_with('.'.DIRECTORY_SEPARATOR.$file, TestSuite::getInstance()->testPath)
+            fn (string $file): bool => (
+                str_starts_with('.'.DIRECTORY_SEPARATOR.$file, TestSuite::getInstance()->testPath)
                 || str_starts_with($file, TestSuite::getInstance()->testPath)
+            ) && is_file($this->projectRoot.DIRECTORY_SEPARATOR.$file)
         );
 
         $dirtyFiles = array_values($dirtyFiles);

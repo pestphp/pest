@@ -2399,6 +2399,9 @@
   ✓ dirty selects paths with spaces and Unicode with dataset "repository root"
   ✓ dirty selects paths with spaces and Unicode with dataset "project subdirectory"
   ✓ dirty selects paths with spaces and Unicode with dataset "subdirectory with leading space"
+  ✓ dirty ignores a test removed after staging a modification with dataset "sequential"
+  ✓ dirty ignores a test removed after staging a modification with dataset "parallel"
+  ✓ dirty selects an unresolved test only while its file exists
 
    PASS  Tests\Visual\FailingBoot
   ✓ a failure in the boot files renders only that failure
@@ -2526,4 +2529,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1832 passed (4164 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1835 passed (4174 assertions)
