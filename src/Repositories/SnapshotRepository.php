@@ -13,6 +13,8 @@ use Pest\TestSuite;
  */
 final class SnapshotRepository
 {
+    private const int MAX_FILENAME_BYTES = 255;
+
     private static ?string $key = null;
 
     private static int $ordinal = 0;
@@ -95,15 +97,18 @@ final class SnapshotRepository
         $relativePath = substr($testFile, strlen($startPath));
         $relativePath = substr($relativePath, 0, (int) strrpos($relativePath, '.'));
 
-        return new Snapshot(
-            sprintf(
-                '%s/%s%s.snap',
-                $this->testsPath.'/'.$this->snapshotsPath.$relativePath,
-                TestSuite::getInstance()->getDescription(),
-                $suffix,
-            ),
-            dirname($this->testsPath).'/',
-        );
+        $directory = $this->testsPath.'/'.$this->snapshotsPath.$relativePath;
+        $description = TestSuite::getInstance()->getDescription().$suffix;
+        $extension = '.snap';
+        $filename = $description.$extension;
+
+        if (strlen($filename) > self::MAX_FILENAME_BYTES && ! is_file($directory.'/'.$filename)) {
+            $digest = '__'.hash('xxh128', $description);
+            $prefix = mb_strcut($description, 0, self::MAX_FILENAME_BYTES - strlen($digest.$extension), 'UTF-8');
+            $filename = $prefix.$digest.$extension;
+        }
+
+        return new Snapshot($directory.'/'.$filename, dirname($this->testsPath).'/');
     }
 
     private function synchronize(): void
