@@ -2559,9 +2559,11 @@
 
    WARN  Tests\Visual\Version
   - visual snapshot of help command output
+  ✓ prints information when the tests directory is missing with dataset "help"
+  ✓ prints information when the tests directory is missing with dataset "version"
 
    PASS  Testsexternal\Features\Expect\toMatchSnapshot
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1858 passed (4273 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1860 passed (4277 assertions)

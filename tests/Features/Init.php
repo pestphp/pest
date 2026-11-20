@@ -63,7 +63,7 @@ test('a missing tests directory does not crash while resolving tia state', funct
     $root = makeInitProject();
 
     try {
-        $process = runInitProject($root, '--version');
+        $process = runInitProject($root);
 
         expect($process->getExitCode())->not->toBe(0)
             ->and($process->getOutput())->toContain('does not exist')
@@ -109,10 +109,6 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 require {$autoload};
 
 \$arguments = array_slice(\$argv, 1);
-
-if (\$arguments === []) {
-    \$arguments = ['--version'];
-}
 
 \$GLOBALS['_composer_bin_dir'] = getcwd().'/vendor/bin';
 
