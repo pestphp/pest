@@ -89,13 +89,14 @@ final class ReadCapture
 
     private static function disable(): void
     {
+        stream_wrapper_unregister(self::PROTOCOL);
+
         if (self::$previousWrapper === null) {
             stream_wrapper_restore(self::PROTOCOL);
 
             return;
         }
 
-        stream_wrapper_unregister(self::PROTOCOL);
         stream_wrapper_register(self::PROTOCOL, self::$previousWrapper);
     }
 
