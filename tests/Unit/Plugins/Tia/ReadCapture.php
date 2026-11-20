@@ -238,6 +238,80 @@ describe('the file wrapper', function (): void {
         ]);
     });
 
+    it('keeps no memory for each filesystem call while a test records', function (): void {
+        $growth = 0;
+
+        tiaReadCaptureLinks(function () use (&$growth): void {
+            clearstatcache();
+            file_exists(__FILE__);
+
+            $before = memory_get_usage();
+
+            for ($i = 0; $i < 10_000; $i++) {
+                clearstatcache();
+                file_exists(__FILE__);
+            }
+
+            $growth = memory_get_usage() - $before;
+        });
+
+        expect($growth)->toBeLessThan(100_000);
+    });
+
+    it('keeps no memory for each test it records', function (): void {
+        tiaReadCaptureLinks(fn (): bool => true);
+
+        $before = memory_get_usage();
+
+        for ($i = 0; $i < 5_000; $i++) {
+            tiaReadCaptureLinks(fn (): bool => true);
+        }
+
+        expect(memory_get_usage() - $before)->toBeLessThan(100_000);
+    });
+
+    it('is restored quietly when the test already restored it', function (): void {
+        $errors = [];
+
+        set_error_handler(function (int $level, string $message) use (&$errors): bool {
+            $errors[] = $message;
+
+            return true;
+        });
+
+        try {
+            tiaReadCaptureLinks(fn (): bool => stream_wrapper_restore('file'));
+        } finally {
+            restore_error_handler();
+        }
+
+        expect($errors)->toBeEmpty()
+            ->and(tiaReadCaptureWrapperType())->toBe('plainfile');
+    });
+
+    it('is restored quietly when the test unregistered it', function (): void {
+        $errors = [];
+
+        set_error_handler(function (int $level, string $message) use (&$errors): bool {
+            $errors[] = $message;
+
+            return true;
+        });
+
+        try {
+            tiaReadCaptureLinks(fn (): bool => stream_wrapper_unregister('file'));
+        } finally {
+            restore_error_handler();
+
+            if (! in_array('file', stream_get_wrappers(), true)) {
+                stream_wrapper_restore('file');
+            }
+        }
+
+        expect($errors)->toBeEmpty()
+            ->and(tiaReadCaptureWrapperType())->toBe('plainfile');
+    });
+
     it('reports symlinks as links while a test records', function (bool $targetExists, bool $expectedExists): void {
         $directory = sys_get_temp_dir().DIRECTORY_SEPARATOR.'pest-read-capture-'.bin2hex(random_bytes(8));
         mkdir($directory);
