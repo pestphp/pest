@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
+use Pest\Support\Container;
 use Pest\TestSuite;
 use ReflectionClass;
 
@@ -103,7 +104,9 @@ final class Recorder
 
         $this->currentTestFile = $file;
 
-        ReadCapture::start($this);
+        if ($this->watchPatterns()->isReadCaptureEnabled()) {
+            ReadCapture::start($this);
+        }
 
         if ($this->classUsesDatabase($className)) {
             $this->perTestUsesDatabase[$file] = true;
@@ -201,7 +204,32 @@ final class Recorder
             return;
         }
 
+        $relative = $this->projectRelative($real);
+
+        if ($relative !== null && $this->watchPatterns()->excludesRead($relative)) {
+            return;
+        }
+
         $this->linkSource($real);
+    }
+
+    private function projectRelative(string $realPath): ?string
+    {
+        $root = rtrim(TestSuite::getInstance()->rootPath, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
+
+        if (! str_starts_with($realPath, $root)) {
+            return null;
+        }
+
+        return str_replace(DIRECTORY_SEPARATOR, '/', substr($realPath, strlen($root)));
+    }
+
+    private function watchPatterns(): WatchPatterns
+    {
+        $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
+        assert($watchPatterns instanceof WatchPatterns);
+
+        return $watchPatterns;
     }
 
     private function classUsesDatabase(string $className): bool

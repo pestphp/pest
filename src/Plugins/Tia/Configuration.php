@@ -115,4 +115,17 @@ final class Configuration
 
         return $this;
     }
+
+    /**
+     * @param  list<string>|null  $patterns  Project-relative globs to exclude, or null to disable read capture. Use watch() for excluded files that an existing watch pattern does not cover.
+     * @return $this
+     */
+    public function withoutReadCapture(?array $patterns = null): self
+    {
+        /** @var WatchPatterns $watchPatterns */
+        $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
+        $watchPatterns->excludeReads($patterns);
+
+        return $this;
+    }
 }
