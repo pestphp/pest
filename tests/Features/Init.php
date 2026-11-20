@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Symfony\Component\Process\Process;
 
-test('init creates a suite when the tests directory is missing', function (): void {
+test('init creates a runnable suite when the tests directory is missing', function (): void {
     $root = makeInitProject();
 
     try {
@@ -17,6 +17,11 @@ test('init creates a suite when the tests directory is missing', function (): vo
             ->and($root.DIRECTORY_SEPARATOR.'tests'.DIRECTORY_SEPARATOR.'Pest.php')->toBeFile()
             ->and($root.DIRECTORY_SEPARATOR.'tests'.DIRECTORY_SEPARATOR.'TestCase.php')->toBeFile()
             ->and($root.DIRECTORY_SEPARATOR.'tests'.DIRECTORY_SEPARATOR.'Unit'.DIRECTORY_SEPARATOR.'ExampleTest.php')->toBeFile();
+
+        $suite = runInitProject($root, '--colors=never');
+
+        expect($suite->getExitCode())->toBe(0)
+            ->and($suite->getOutput())->toContain('2 passed (2 assertions)');
     } finally {
         removeInitProject($root);
     }
@@ -58,7 +63,7 @@ test('a missing tests directory does not crash while resolving tia state', funct
     $root = makeInitProject();
 
     try {
-        $process = runInitProject($root, '--version');
+        $process = runInitProject($root);
 
         expect($process->getExitCode())->not->toBe(0)
             ->and($process->getOutput())->toContain('does not exist')
@@ -85,6 +90,11 @@ function makeInitProject(): string
         true,
     );
 
+    file_put_contents(
+        $root.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'autoload.php',
+        "<?php\n\nreturn require_once {$autoload};\n",
+    );
+
     file_put_contents($root.DIRECTORY_SEPARATOR.'run.php', <<<PHP
 <?php
 
@@ -99,10 +109,6 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 require {$autoload};
 
 \$arguments = array_slice(\$argv, 1);
-
-if (\$arguments === []) {
-    \$arguments = ['--version'];
-}
 
 \$GLOBALS['_composer_bin_dir'] = getcwd().'/vendor/bin';
 

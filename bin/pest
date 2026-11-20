@@ -6,6 +6,7 @@ declare(strict_types=1);
 use Pest\Contracts\Restarter;
 use Pest\Kernel;
 use Pest\Panic;
+use Pest\Support\ComposerProject;
 use Pest\Support\Container;
 use Pest\TestCaseFilters\GitDirtyTestCaseFilter;
 use Pest\TestCaseMethodFilters\AssigneeTestCaseFilter;
@@ -183,21 +184,16 @@ use Symfony\Component\Console\Output\ConsoleOutput;
     }
 
     // Used when Pest is required using composer.
-    $vendorPath = dirname(__DIR__, 4).'/vendor/autoload.php';
+    $autoloadPath = $GLOBALS['_composer_autoload_path'] ?? dirname(__DIR__, 3).'/autoload.php';
 
-    // Used when Pest maintainers are running Pest tests.
-    $localPath = dirname(__DIR__).'/vendor/autoload.php';
-
-    if (file_exists($vendorPath)) {
-        include_once $vendorPath;
-        $autoloadPath = $vendorPath;
-    } else {
-        include_once $localPath;
-        $autoloadPath = $localPath;
+    if (! is_file($autoloadPath)) {
+        $autoloadPath = dirname(__DIR__).'/vendor/autoload.php';
     }
 
-    // Get $rootPath based on $autoloadPath
-    $rootPath = dirname($autoloadPath, 2);
+    include_once $autoloadPath;
+
+    $GLOBALS['_composer_bin_dir'] ??= dirname($autoloadPath).'/bin';
+    $rootPath = ComposerProject::rootPath($autoloadPath);
 
     $input = new ArgvInput;
 
