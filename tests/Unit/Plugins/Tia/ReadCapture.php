@@ -263,7 +263,7 @@ describe('the file wrapper', function (): void {
 
         $before = memory_get_usage();
 
-        for ($i = 0; $i < 2_000; $i++) {
+        for ($i = 0; $i < 5_000; $i++) {
             tiaReadCaptureLinks(fn (): bool => true);
         }
 
@@ -283,6 +283,29 @@ describe('the file wrapper', function (): void {
             tiaReadCaptureLinks(fn (): bool => stream_wrapper_restore('file'));
         } finally {
             restore_error_handler();
+        }
+
+        expect($errors)->toBeEmpty()
+            ->and(tiaReadCaptureWrapperType())->toBe('plainfile');
+    });
+
+    it('is restored quietly when the test unregistered it', function (): void {
+        $errors = [];
+
+        set_error_handler(function (int $level, string $message) use (&$errors): bool {
+            $errors[] = $message;
+
+            return true;
+        });
+
+        try {
+            tiaReadCaptureLinks(fn (): bool => stream_wrapper_unregister('file'));
+        } finally {
+            restore_error_handler();
+
+            if (! in_array('file', stream_get_wrappers(), true)) {
+                stream_wrapper_restore('file');
+            }
         }
 
         expect($errors)->toBeEmpty()

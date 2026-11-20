@@ -2104,6 +2104,7 @@
   ✓ the file wrapper → it keeps no memory for each filesystem call while a test records
   ✓ the file wrapper → it keeps no memory for each test it records
   ✓ the file wrapper → it is restored quietly when the test already restored it
+  ✓ the file wrapper → it is restored quietly when the test unregistered it
   ✓ the file wrapper → it reports symlinks as links while a test records with dataset "a link to an existing file"
   ✓ the file wrapper → it reports symlinks as links while a test records with dataset "a dangling link"
   ✓ a wrapper already registered for file:// → it opens reads through it and still links them
@@ -2626,4 +2627,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1918 passed (4372 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1919 passed (4374 assertions)
