@@ -323,7 +323,7 @@ final readonly class ChangedFiles
      */
     private function diffSinceSha(string $sha): array
     {
-        $result = $this->scan()->result(['diff', '--name-only', '--no-renames', $sha.'..HEAD']);
+        $result = $this->scan()->result(['diff', '--name-only', '--relative', '--no-renames', $sha.'..HEAD']);
 
         if ($result['exitCode'] !== 0) {
             throw $this->gitFailure($result);
@@ -349,6 +349,9 @@ final readonly class ChangedFiles
             return [];
         }
 
+        $prefix = $this->git->subdirectoryPrefix();
+        $prefix = $prefix === null || $prefix === '' ? '' : $prefix.'/';
+
         $records = explode("\x00", rtrim($output, "\x00"));
         $files = [];
         $count = count($records);
@@ -363,18 +366,22 @@ final readonly class ChangedFiles
             $status = substr($record, 0, 2);
             $path = substr($record, 3);
 
-            if (str_contains($status, 'R') || str_contains($status, 'C')) {
-                $files[] = $path;
+            $paths = [$path];
 
+            if (str_contains($status, 'R') || str_contains($status, 'C')) {
                 if (isset($records[$i + 1]) && $records[$i + 1] !== '') {
-                    $files[] = $records[$i + 1];
+                    $paths[] = $records[$i + 1];
                     $i++;
                 }
-
-                continue;
             }
 
-            $files[] = $path;
+            foreach ($paths as $candidate) {
+                if ($prefix === '') {
+                    $files[] = $candidate;
+                } elseif (str_starts_with($candidate, $prefix)) {
+                    $files[] = substr($candidate, strlen($prefix));
+                }
+            }
         }
 
         return $files;
