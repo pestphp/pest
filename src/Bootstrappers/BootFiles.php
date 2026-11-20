@@ -36,7 +36,7 @@ final class BootFiles implements Bootstrapper
 
     public function boot(): void
     {
-        if ($this->runningInit()) {
+        if ($this->hasCliOption('--init')) {
             return;
         }
 
@@ -44,6 +44,10 @@ final class BootFiles implements Bootstrapper
         $testsPath = $rootPath.DIRECTORY_SEPARATOR.testDirectory();
 
         if (! is_dir($testsPath)) {
+            if ($this->hasCliOption('--help', '--version')) {
+                return;
+            }
+
             throw new FatalException(sprintf('The test directory [%s] does not exist.', $testsPath));
         }
 
@@ -69,7 +73,7 @@ final class BootFiles implements Bootstrapper
         $this->bootDatasets($testsPath);
     }
 
-    private function runningInit(): bool
+    private function hasCliOption(string ...$options): bool
     {
         $arguments = $_SERVER['argv'] ?? null;
 
@@ -78,7 +82,7 @@ final class BootFiles implements Bootstrapper
         }
 
         /** @var array<int, string> $arguments */
-        return $this->hasArgument('--init', $arguments);
+        return array_any($options, fn (string $option): bool => $this->hasArgument($option, $arguments));
     }
 
     private function load(string $filename): void

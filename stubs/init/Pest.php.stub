@@ -13,6 +13,10 @@ use Tests\TestCase;
 |
 */
 
+if (! class_exists(TestCase::class)) {
+    require_once __DIR__.'/TestCase.php';
+}
+
 pest()->extend(TestCase::class)->in('Feature');
 
 /*

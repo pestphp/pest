@@ -35,7 +35,7 @@ final class SourceScope
 
     /**
      * @param  list<string>  $includes  Absolute, normalised directory paths.
-     * @param  list<string>  $excludes  Absolute, normalised directory paths.
+     * @param  list<array{path: string, prefix: string, suffix: string}>  $excludes  Absolute, normalised directory paths with the file name prefix and suffix they apply to.
      */
     public function __construct(
         private readonly array $includes,
@@ -55,7 +55,11 @@ final class SourceScope
             }
 
             foreach ($source->excludeDirectories() as $dir) {
-                $phpunitExcludes[] = self::normalise($dir->path());
+                $phpunitExcludes[] = [
+                    'path' => self::normalise(@realpath($dir->path()) ?: $dir->path()),
+                    'prefix' => $dir->prefix(),
+                    'suffix' => $dir->suffix(),
+                ];
             }
         } catch (Throwable) {
             //
@@ -64,10 +68,10 @@ final class SourceScope
         $rootIncludes = self::topLevelProjectDirs($projectRoot);
 
         $includes = array_values(array_unique([...$phpunitIncludes, ...$rootIncludes]));
-        $excludes = array_values(array_unique([
+        $excludes = [
             ...$phpunitExcludes,
             ...self::nestedNoiseDirs($projectRoot),
-        ]));
+        ];
 
         if ($includes === []) {
             $includes = [self::normalise($projectRoot)];
@@ -111,7 +115,9 @@ final class SourceScope
         $candidate = self::normalise($candidate);
 
         foreach ($this->excludes as $excluded) {
-            if ($this->startsWithDir($candidate, $excluded)) {
+            if ($this->startsWithDir($candidate, $excluded['path'])
+                && str_starts_with(basename($candidate), $excluded['prefix'])
+                && str_ends_with(basename($candidate), $excluded['suffix'])) {
                 return $this->containsCache[$absoluteFile] = false;
             }
         }
@@ -166,7 +172,7 @@ final class SourceScope
     }
 
     /**
-     * @return list<string>
+     * @return list<array{path: string, prefix: string, suffix: string}>
      */
     private static function nestedNoiseDirs(string $projectRoot): array
     {
@@ -174,7 +180,7 @@ final class SourceScope
 
         foreach (self::NESTED_NOISE as $relative) {
             $abs = $projectRoot.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relative);
-            $out[] = self::normalise(@realpath($abs) ?: $abs);
+            $out[] = ['path' => self::normalise(@realpath($abs) ?: $abs), 'prefix' => '', 'suffix' => ''];
         }
 
         return $out;

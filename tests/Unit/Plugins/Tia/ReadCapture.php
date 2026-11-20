@@ -190,6 +190,21 @@ describe('the file wrapper', function (): void {
         ]);
     });
 
+    it('writes with LOCK_EX while a test records', function (): void {
+        $path = sys_get_temp_dir().DIRECTORY_SEPARATOR.'pest-read-capture-lock-'.bin2hex(random_bytes(8));
+
+        try {
+            tiaReadCaptureLinks(function () use ($path, &$written): void {
+                $written = file_put_contents($path, 'locked', LOCK_EX);
+            });
+
+            expect($written)->toBe(6)
+                ->and(file_get_contents($path))->toBe('locked');
+        } finally {
+            @unlink($path);
+        }
+    });
+
     it('reports symlinks as links while a test records', function (bool $targetExists, bool $expectedExists): void {
         $directory = sys_get_temp_dir().DIRECTORY_SEPARATOR.'pest-read-capture-'.bin2hex(random_bytes(8));
         mkdir($directory);
