@@ -159,6 +159,8 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
 
         $units = $this->loadShardsFile();
         if ($units !== null) {
+            $units = $this->withoutRemovedTests($units, $tests);
+
             $newTests = array_values(array_diff($tests, $this->testsOf($units)));
 
             $partitions = $this->partitionByTime($units, $total);
@@ -290,12 +292,30 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      */
     private function buildListTestsCommand(array $arguments, string $testPath): array
     {
-        $filtered = array_filter(
-            $this->removeParallelArguments($arguments),
-            fn (string $argument): bool => ! str_starts_with($argument, '--coverage'),
-        );
+        $filtered = [];
+        $skipNext = false;
 
-        return [PHP_BINARY, ...array_values($filtered), '--test-directory='.$testPath, '--list-tests'];
+        foreach ($this->removeParallelArguments($arguments) as $argument) {
+            if ($skipNext) {
+                $skipNext = false;
+
+                if (! str_starts_with($argument, '-')) {
+                    continue;
+                }
+            }
+
+            if (preg_match('/^--coverage-(?:php|html|clover|xml|cobertura|crap4j|openclover)$/', $argument) === 1) {
+                $skipNext = true;
+
+                continue;
+            }
+
+            if (! str_starts_with($argument, '--coverage')) {
+                $filtered[] = $argument;
+            }
+        }
+
+        return [PHP_BINARY, ...$filtered, '--test-directory='.$testPath, '--list-tests'];
     }
 
     /**
@@ -594,6 +614,26 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
         }
 
         return $this->normaliseUnits($units);
+    }
+
+    /**
+     * @param  array<string, array{time: float, tests: list<string>}>  $units
+     * @param  list<string>  $tests
+     * @return array<string, array{time: float, tests: list<string>}>
+     */
+    private function withoutRemovedTests(array $units, array $tests): array
+    {
+        $live = [];
+
+        foreach ($units as $key => $unit) {
+            $unit['tests'] = array_values(array_intersect($unit['tests'], $tests));
+
+            if ($unit['tests'] !== []) {
+                $live[$key] = $unit;
+            }
+        }
+
+        return $live;
     }
 
     /**

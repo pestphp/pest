@@ -732,6 +732,41 @@ describe('timings file', function (): void {
             '--list-tests',
         ]);
     });
+
+    it('strips the separate path of a coverage argument when building the list-tests command', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $method = new ReflectionClass($shard)->getMethod('buildListTestsCommand');
+
+        $command = $method->invoke($shard, ['bin/pest', '--coverage-php', '/tmp/coverage.php', '--update-shards'], 'tests');
+
+        expect($command)->toBe([
+            PHP_BINARY,
+            'bin/pest',
+            '--update-shards',
+            '--test-directory=tests',
+            '--list-tests',
+        ]);
+    });
+
+    it('drops test classes that no longer exist from the stored units', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $method = new ReflectionClass($shard)->getMethod('withoutRemovedTests');
+
+        $units = [
+            'Tests\\Unit\\AliveTest' => ['time' => 1.0, 'tests' => ['Tests\\Unit\\AliveTest']],
+            'Tests\\Unit\\RemovedTest' => ['time' => 100.0, 'tests' => ['Tests\\Unit\\RemovedTest']],
+            'src/Bundle.php' => ['time' => 2.0, 'tests' => ['Tests\\Unit\\AliveTest', 'Tests\\Unit\\RemovedTest']],
+        ];
+
+        expect($method->invoke($shard, $units, ['Tests\\Unit\\AliveTest']))->toBe([
+            'Tests\\Unit\\AliveTest' => ['time' => 1.0, 'tests' => ['Tests\\Unit\\AliveTest']],
+            'src/Bundle.php' => ['time' => 2.0, 'tests' => ['Tests\\Unit\\AliveTest']],
+        ]);
+    });
 });
 
 describe('units', function (): void {
