@@ -1870,6 +1870,8 @@
 
    PASS  Tests\Unit\Plugins\Retry
   ✓ it orders by defects and stop on defects if when --retry is used
+  ✓ it rejects retry with a parallel flag with ('--parallel')
+  ✓ it rejects retry with a parallel flag with ('-p')
 
    PASS  Tests\Unit\Plugins\Shard
   ✓ getShard → it parses valid shard format with ('1/2', 1, 2)
@@ -2564,4 +2566,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1858 passed (4273 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1860 passed (4277 assertions)

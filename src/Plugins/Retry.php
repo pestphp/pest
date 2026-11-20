@@ -23,7 +23,7 @@ final class Retry implements HandlesArguments
             return $arguments;
         }
 
-        if ($this->hasArgument('--parallel', $arguments)) {
+        if ($this->hasArgument('--parallel', $arguments) || in_array('-p', $arguments, true)) {
             throw new InvalidOption('The [--retry] option is not supported when running in parallel.');
         }
 
