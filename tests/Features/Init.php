@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Symfony\Component\Process\Process;
 
-test('init creates a suite when the tests directory is missing', function (): void {
+test('init creates a runnable suite when the tests directory is missing', function (): void {
     $root = makeInitProject();
 
     try {
@@ -17,6 +17,11 @@ test('init creates a suite when the tests directory is missing', function (): vo
             ->and($root.DIRECTORY_SEPARATOR.'tests'.DIRECTORY_SEPARATOR.'Pest.php')->toBeFile()
             ->and($root.DIRECTORY_SEPARATOR.'tests'.DIRECTORY_SEPARATOR.'TestCase.php')->toBeFile()
             ->and($root.DIRECTORY_SEPARATOR.'tests'.DIRECTORY_SEPARATOR.'Unit'.DIRECTORY_SEPARATOR.'ExampleTest.php')->toBeFile();
+
+        $suite = runInitProject($root, '--colors=never');
+
+        expect($suite->getExitCode())->toBe(0)
+            ->and($suite->getOutput())->toContain('2 passed (2 assertions)');
     } finally {
         removeInitProject($root);
     }
@@ -83,6 +88,11 @@ function makeInitProject(): string
     $autoload = var_export(
         dirname(__DIR__, 2).DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'autoload.php',
         true,
+    );
+
+    file_put_contents(
+        $root.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'autoload.php',
+        "<?php\n\nreturn require_once {$autoload};\n",
     );
 
     file_put_contents($root.DIRECTORY_SEPARATOR.'run.php', <<<PHP
