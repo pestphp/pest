@@ -750,6 +750,56 @@ describe('timings file', function (): void {
         ]);
     });
 
+    it('strips the separate value of a coverage option when building the list-tests command', function (string $option): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $method = new ReflectionClass($shard)->getMethod('buildListTestsCommand');
+
+        $command = $method->invoke($shard, ['bin/pest', $option, '/tmp/value', '--update-shards'], 'tests');
+
+        expect($command)->toBe([
+            PHP_BINARY,
+            'bin/pest',
+            '--update-shards',
+            '--test-directory=tests',
+            '--list-tests',
+        ]);
+    })->with(['--coverage-jsonl', '--coverage-filter', '--min', '--exactly']);
+
+    it('strips the separate value of the parallel processes option when building the list-tests command', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $method = new ReflectionClass($shard)->getMethod('buildListTestsCommand');
+
+        $command = $method->invoke($shard, ['bin/pest', '--parallel', '--processes', '4', '--update-shards'], 'tests');
+
+        expect($command)->toBe([
+            PHP_BINARY,
+            'bin/pest',
+            '--update-shards',
+            '--test-directory=tests',
+            '--list-tests',
+        ]);
+    });
+
+    it('keeps a unit saved with no test classes, but drops one emptied by removed classes', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $method = new ReflectionClass($shard)->getMethod('withoutRemovedTests');
+
+        $units = [
+            'src/Explicit.php' => ['time' => 1.0, 'tests' => []],
+            'src/Emptied.php' => ['time' => 2.0, 'tests' => ['Tests\\Unit\\RemovedTest']],
+        ];
+
+        expect($method->invoke($shard, $units, ['Tests\\Unit\\AliveTest']))->toBe([
+            'src/Explicit.php' => ['time' => 1.0, 'tests' => []],
+        ]);
+    });
+
     it('drops test classes that no longer exist from the stored units', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);

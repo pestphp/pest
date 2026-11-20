@@ -159,6 +159,8 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
 
         $units = $this->loadShardsFile();
         if ($units !== null) {
+            $hasRemovedTests = array_diff($this->testsOf($units), $tests) !== [];
+
             $units = $this->withoutRemovedTests($units, $tests);
 
             $newTests = array_values(array_diff($tests, $this->testsOf($units)));
@@ -179,7 +181,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
                 self::$ownership += array_fill_keys(array_keys($partition), $i === $index - 1);
             }
             self::$timeBalanced = true;
-            self::$shardsOutdated = $newTests !== [];
+            self::$shardsOutdated = $newTests !== [] || $hasRemovedTests;
 
             $testsToRun = array_values(array_intersect($tests, $this->testsOf($selected)));
         } else {
@@ -268,7 +270,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
                 }
             }
 
-            if ($argument === '--runner') {
+            if (in_array($argument, ['--runner', '--processes'], strict: true)) {
                 $skipNext = true;
 
                 continue;
@@ -304,7 +306,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
                 }
             }
 
-            if (preg_match('/^--coverage-(?:php|html|clover|xml|cobertura|crap4j|openclover)$/', $argument) === 1) {
+            if (preg_match('/^--(?:coverage-(?:php|html|clover|xml|cobertura|crap4j|openclover|jsonl|filter)|min|exactly)$/', $argument) === 1) {
                 $skipNext = true;
 
                 continue;
@@ -626,9 +628,10 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
         $live = [];
 
         foreach ($units as $key => $unit) {
-            $unit['tests'] = array_values(array_intersect($unit['tests'], $tests));
+            $declared = $unit['tests'];
+            $unit['tests'] = array_values(array_intersect($declared, $tests));
 
-            if ($unit['tests'] !== []) {
+            if ($declared === [] || $unit['tests'] !== []) {
                 $live[$key] = $unit;
             }
         }
