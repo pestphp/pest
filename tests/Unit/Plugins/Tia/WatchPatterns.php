@@ -181,3 +181,88 @@ it('uses custom mappings for an unknown Vue page with defaults disabled', functi
 
     expect($graph->affected(['resources/js/Pages/Enroll.vue']))->toBe(['tests/Unit/CalculatorTest.php']);
 });
+
+it('captures every read by default', function (): void {
+    expect($this->watchPatterns->isReadCaptureEnabled())->toBeTrue()
+        ->and($this->watchPatterns->excludesRead('lang/fr.json'))->toBeFalse();
+});
+
+it('excludes reads of files matching a glob', function (): void {
+    $configuration = new Configuration;
+
+    expect($configuration->withoutReadCapture(['lang/*.json']))->toBe($configuration)
+        ->and($this->watchPatterns->isReadCaptureEnabled())->toBeTrue()
+        ->and($this->watchPatterns->excludesRead('lang/fr.json'))->toBeTrue()
+        ->and($this->watchPatterns->excludesRead('lang/vendor/package/fr.json'))->toBeFalse()
+        ->and($this->watchPatterns->excludesRead('resources/lang/fr.json'))->toBeFalse()
+        ->and($this->watchPatterns->excludesRead('lang/fr.php'))->toBeFalse();
+});
+
+it('matches read globs like watch patterns', function (): void {
+    (new Configuration)->withoutReadCapture([
+        'lang/**/*.json !lang/vendor/keep/**',
+        'tests/Fixtures/*.csv',
+        '.env.testing',
+    ]);
+
+    expect($this->watchPatterns->excludesRead('lang/vendor/package/fr.json'))->toBeTrue()
+        ->and($this->watchPatterns->excludesRead('lang/vendor/keep/fr.json'))->toBeFalse()
+        ->and($this->watchPatterns->excludesRead('tests/Fixtures/orders.csv'))->toBeTrue()
+        ->and($this->watchPatterns->excludesRead('tests/Fixtures/nested/orders.csv'))->toBeFalse()
+        ->and($this->watchPatterns->excludesRead('.env.testing'))->toBeTrue()
+        ->and($this->watchPatterns->excludesRead('.env.local'))->toBeFalse();
+});
+
+it('does not exclude a dotfile unless the glob names it', function (): void {
+    (new Configuration)->withoutReadCapture(['**']);
+
+    expect($this->watchPatterns->excludesRead('lang/fr.json'))->toBeTrue()
+        ->and($this->watchPatterns->excludesRead('.env.testing'))->toBeFalse();
+});
+
+it('accumulates read exclusions from repeated calls', function (): void {
+    (new Configuration)
+        ->withoutReadCapture(['lang/*.json'])
+        ->withoutReadCapture(['resources/lang/*.json']);
+
+    expect($this->watchPatterns->excludesRead('lang/fr.json'))->toBeTrue()
+        ->and($this->watchPatterns->excludesRead('resources/lang/fr.json'))->toBeTrue();
+});
+
+it('does not turn read capture off for an empty exclusion list', function (): void {
+    (new Configuration)->withoutReadCapture([]);
+
+    expect($this->watchPatterns->isReadCaptureEnabled())->toBeTrue()
+        ->and($this->watchPatterns->excludesRead('lang/fr.json'))->toBeFalse();
+});
+
+it('turns read capture off without a list of globs', function (): void {
+    (new Configuration)->withoutReadCapture();
+
+    expect($this->watchPatterns->isReadCaptureEnabled())->toBeFalse();
+});
+
+it('keeps read capture off when globs are added afterwards', function (): void {
+    (new Configuration)
+        ->withoutReadCapture()
+        ->withoutReadCapture(['lang/*.json']);
+
+    expect($this->watchPatterns->isReadCaptureEnabled())->toBeFalse();
+});
+
+it('captures reads again on reset', function (): void {
+    (new Configuration)
+        ->withoutReadCapture()
+        ->withoutReadCapture(['lang/*.json']);
+
+    $this->watchPatterns->reset();
+
+    expect($this->watchPatterns->isReadCaptureEnabled())->toBeTrue()
+        ->and($this->watchPatterns->excludesRead('lang/fr.json'))->toBeFalse();
+});
+
+it('does not change the default watch fallbacks of an excluded read', function (): void {
+    (new Configuration)->withoutReadCapture(['.env.testing']);
+
+    expect($this->watchPatterns->matchedDirectories(getcwd(), ['.env.testing']))->toBe(['tests']);
+});
