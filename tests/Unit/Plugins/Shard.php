@@ -94,7 +94,7 @@ describe('buildFilterArgument', function (): void {
         expect($filter)->toBe('Tests\\\\(Unit\\\\FooTest::|Feature\\\\BarTest::)');
     });
 
-    it('returns empty string for empty test list', function (): void {
+    it('generates a filter that selects no tests for an empty test list', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -103,7 +103,7 @@ describe('buildFilterArgument', function (): void {
 
         $filter = $method->invoke($shard, []);
 
-        expect($filter)->toBeEmpty();
+        expect('Tests\\Unit\\ExampleTest::testExample')->not->toMatch('/'.$filter.'/');
     });
 
     it('generates compact filter for deeply nested namespaces', function (): void {

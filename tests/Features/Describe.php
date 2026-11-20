@@ -108,3 +108,17 @@ describe('with test after describe', function (): void {
         expect($this->count)->toBe(2);
     });
 });
+
+describe('sibling describes may share the same it() description', function (): void {
+    describe('block one', function (): void {
+        it('can be created', function (): void {
+            expect(true)->toBeTrue();
+        });
+    });
+
+    describe('block two', function (): void {
+        it('can be created', function (): void {
+            expect(true)->toBeTrue();
+        });
+    });
+});

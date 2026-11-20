@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
+use Pest\Plugins\Tia\Configuration;
 use Pest\Plugins\Tia\ReadCapture;
 use Pest\Plugins\Tia\Recorder;
+use Pest\Plugins\Tia\WatchPatterns;
+use Pest\Support\Container;
 use Tests\Fixtures\Tia\LoggingFileWrapper;
 
 /**
@@ -187,6 +190,21 @@ describe('the file wrapper', function (): void {
         ]);
     });
 
+    it('writes with LOCK_EX while a test records', function (): void {
+        $path = sys_get_temp_dir().DIRECTORY_SEPARATOR.'pest-read-capture-lock-'.bin2hex(random_bytes(8));
+
+        try {
+            tiaReadCaptureLinks(function () use ($path, &$written): void {
+                $written = file_put_contents($path, 'locked', LOCK_EX);
+            });
+
+            expect($written)->toBe(6)
+                ->and(file_get_contents($path))->toBe('locked');
+        } finally {
+            @unlink($path);
+        }
+    });
+
     it('reports symlinks as links while a test records', function (bool $targetExists, bool $expectedExists): void {
         $directory = sys_get_temp_dir().DIRECTORY_SEPARATOR.'pest-read-capture-'.bin2hex(random_bytes(8));
         mkdir($directory);
@@ -277,5 +295,102 @@ describe('a wrapper already registered for file://', function (): void {
 
         expect($during)->toBe(ReadCapture::class)
             ->and(tiaReadCaptureWrapperClass())->toBe(LoggingFileWrapper::class);
+    });
+});
+
+describe('withoutReadCapture()', function (): void {
+    beforeEach(function (): void {
+        Container::getInstance()->add(WatchPatterns::class, new WatchPatterns);
+
+        $this->excluded = (string) realpath(dirname(__DIR__, 4).'/src/Plugins/Tia/ReadCapture.php');
+        $this->kept = (string) realpath(dirname(__DIR__, 4).'/src/Plugins/Tia/Recorder.php');
+    });
+
+    afterEach(function (): void {
+        Container::getInstance()->add(WatchPatterns::class, new WatchPatterns);
+    });
+
+    it('does not link a file matching an excluded glob', function (): void {
+        (new Configuration)->withoutReadCapture(['src/Plugins/Tia/Read*.php']);
+
+        expect(tiaReadCaptureLinks(fn (): string|false => file_get_contents($this->excluded)))->toBeEmpty();
+    });
+
+    it('still links a file outside the excluded globs', function (): void {
+        (new Configuration)->withoutReadCapture(['src/Plugins/Tia/Read*.php']);
+
+        $links = tiaReadCaptureLinks(function (): void {
+            file_get_contents($this->excluded);
+            file_get_contents($this->kept);
+        });
+
+        expect($links)->toBe([$this->kept]);
+    });
+
+    it('keeps the file wrapper registered while globs are excluded', function (): void {
+        (new Configuration)->withoutReadCapture(['src/Plugins/Tia/Read*.php']);
+
+        $during = '';
+
+        tiaReadCaptureLinks(function () use (&$during): void {
+            $during = tiaReadCaptureWrapperType();
+        });
+
+        expect($during)->toBe('user-space');
+    });
+
+    it('links every read when the list of globs is empty', function (): void {
+        (new Configuration)->withoutReadCapture([]);
+
+        expect(tiaReadCaptureLinks(fn (): string|false => file_get_contents($this->excluded)))->toBe([$this->excluded]);
+    });
+
+    it('registers no wrapper and links no read when called without globs', function (): void {
+        (new Configuration)->withoutReadCapture();
+
+        $during = '';
+
+        $links = tiaReadCaptureLinks(function () use (&$during): void {
+            $during = tiaReadCaptureWrapperType();
+            file_get_contents($this->kept);
+        });
+
+        expect($during)->toBe('plainfile')
+            ->and($links)->toBeEmpty()
+            ->and(tiaReadCaptureWrapperType())->toBe('plainfile');
+    });
+
+    it('keeps the explicit links when called without globs', function (): void {
+        (new Configuration)->withoutReadCapture();
+
+        $recorder = new Recorder;
+        $recorder->activateLinkTracking();
+
+        $recorder->beginTest('Some\Missing\TestClass', 'it links', '/project/tests/Feature/LinksTest.php');
+        $recorder->linkSource('/project/resources/views/welcome.blade.php');
+        $recorder->endTest();
+
+        expect($recorder->perTestFiles())
+            ->toBe(['/project/tests/Feature/LinksTest.php' => ['/project/resources/views/welcome.blade.php']]);
+    });
+
+    it('leaves a wrapper already registered for file:// untouched when called without globs', function (): void {
+        (new Configuration)->withoutReadCapture();
+
+        LoggingFileWrapper::enable();
+
+        try {
+            $during = null;
+
+            $links = tiaReadCaptureLinks(function () use (&$during): void {
+                $during = tiaReadCaptureWrapperClass();
+                file_get_contents($this->kept);
+            });
+        } finally {
+            LoggingFileWrapper::disable();
+        }
+
+        expect($during)->toBe(LoggingFileWrapper::class)
+            ->and($links)->toBeEmpty();
     });
 });

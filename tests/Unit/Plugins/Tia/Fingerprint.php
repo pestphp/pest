@@ -56,7 +56,7 @@ describe('compute()', function (): void {
             $fingerprint = Fingerprint::compute($clone);
 
             expect($fingerprint['structural']['composer_lock'])->not->toBeNull()
-                ->and($fingerprint['structural']['phpunit_xml'])->not->toBeNull();
+                ->and($fingerprint['structural']['phpunit_configuration'])->not->toBeNull();
         } finally {
             fingerprintRemoveDirectory($clone);
         }
@@ -79,9 +79,9 @@ describe('compute()', function (): void {
             $worktreeFingerprint = Fingerprint::compute($worktree);
 
             expect($worktreeFingerprint['structural']['composer_lock'])->not->toBeNull()
-                ->and($worktreeFingerprint['structural']['phpunit_xml'])->not->toBeNull()
+                ->and($worktreeFingerprint['structural']['phpunit_configuration'])->not->toBeNull()
                 ->and($worktreeFingerprint['structural']['composer_lock'])->toBe($cloneFingerprint['structural']['composer_lock'])
-                ->and($worktreeFingerprint['structural']['phpunit_xml'])->toBe($cloneFingerprint['structural']['phpunit_xml']);
+                ->and($worktreeFingerprint['structural']['phpunit_configuration'])->toBe($cloneFingerprint['structural']['phpunit_configuration']);
         } finally {
             fingerprintRemoveDirectory($clone);
         }
@@ -91,17 +91,17 @@ describe('compute()', function (): void {
         $clone = fingerprintRepository();
 
         try {
-            file_put_contents($clone.'/composer.lock', '{"packages": []}');
-            file_put_contents($clone.'/.gitignore', "phpunit.xml\n");
+            file_put_contents($clone.'/phpunit.xml', '<phpunit/>');
+            file_put_contents($clone.'/.gitignore', "composer.lock\n");
             fingerprintGit($clone, 'add', '-A');
             fingerprintGit($clone, 'commit', '-q', '-m', 'init');
 
-            file_put_contents($clone.'/phpunit.xml', '<phpunit/>');
+            file_put_contents($clone.'/composer.lock', '{"packages": []}');
 
             $fingerprint = Fingerprint::compute($clone);
 
-            expect($fingerprint['structural']['phpunit_xml'])->toBeNull()
-                ->and($fingerprint['structural']['composer_lock'])->not->toBeNull();
+            expect($fingerprint['structural']['composer_lock'])->toBeNull()
+                ->and($fingerprint['structural']['phpunit_configuration'])->not->toBeNull();
         } finally {
             fingerprintRemoveDirectory($clone);
         }

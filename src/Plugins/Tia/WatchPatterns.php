@@ -44,6 +44,13 @@ final class WatchPatterns
     private bool $defaultsEnabled = true;
 
     /**
+     * @var list<string>
+     */
+    private array $excludedReadPatterns = [];
+
+    private bool $readCaptureEnabled = true;
+
+    /**
      * @var array<string, array{include: string, excludes: array<int, string>, allowDotfiles: bool}>
      */
     private array $parsed = [];
@@ -108,6 +115,39 @@ final class WatchPatterns
             ...$this->excludedDefaultPatterns,
             ...$patterns,
         ]));
+    }
+
+    /**
+     * @param  list<string>|null  $patterns
+     */
+    public function excludeReads(?array $patterns = null): void
+    {
+        if ($patterns === null) {
+            $this->readCaptureEnabled = false;
+
+            return;
+        }
+
+        $this->excludedReadPatterns = array_values(array_unique([
+            ...$this->excludedReadPatterns,
+            ...$patterns,
+        ]));
+    }
+
+    public function isReadCaptureEnabled(): bool
+    {
+        return $this->readCaptureEnabled;
+    }
+
+    /**
+     * @param  string  $file  Project-relative path.
+     */
+    public function excludesRead(string $file): bool
+    {
+        return array_any(
+            $this->excludedReadPatterns,
+            fn (string $pattern): bool => $this->keyMatches($pattern, $file),
+        );
     }
 
     /**
@@ -279,6 +319,8 @@ final class WatchPatterns
         $this->defaultPatterns = [];
         $this->excludedDefaultPatterns = [];
         $this->defaultsEnabled = true;
+        $this->excludedReadPatterns = [];
+        $this->readCaptureEnabled = true;
         $this->parsed = [];
         $this->enabled = false;
         $this->locally = false;

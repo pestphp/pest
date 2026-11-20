@@ -32,16 +32,14 @@ We cannot thank our sponsors enough for their incredible support in funding Pest
 - **[PhpStorm](https://jb.gg/nuno)**
 - **[CodeRabbit](https://coderabbit.link/nunomaduro)**
 - **[SerpApi](https://serpapi.com/?ref=nunomaduro)**
-- **[Bento](https://bentonow.com/?ref=nunomaduro)**
-- **[CMS Max](https://cmsmax.com/?ref=nunomaduro)**
 - **[Redberry](https://redberry.international/laravel-development/?utm_source=pest&utm_medium=banner&utm_campaign=pest_sponsorship)**
 - **[Typesense](https://typesense.org/?ref=nunomaduro)**
 - **[Pixel](https://wearepixel.com.au/?ref=nunomaduro)**
 - **[NativePHP](https://nativephp.com/?ref=nunomaduro)**
 - [TestMu AI](https://www.testmuai.com/?utm_medium=sponsor&utm_source=pest)
 - [Zapiet](https://zapiet.com/?ref=nunomaduro)
-- [LoadForge](https://loadforge.com/?ref=nunomaduro)
 - [Route4Me](https://route4me.com/?ref=nunomaduro)
-- [Nerdify](https://getnerdify.com/?ref=nunomaduro)
+- [Pushery](https://www.pushery.com/?ref=nunomaduro)
+- [LFCarry](https://lfcarry.com/?ref=nunomaduro)
 
 Pest is an open-sourced software licensed under the **[MIT license](https://opensource.org/licenses/MIT)**.

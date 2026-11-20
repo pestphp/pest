@@ -65,6 +65,7 @@
         "pestphp/pest-plugin-phpstan": "^5.3.1",
         "pestphp/pest-plugin-rector": "^5.0.6",
         "pestphp/pest-plugin-type-coverage": "^5.1.0",
+        "phpstan/phpstan": "^2.3.5 <2.3.6",
         "psy/psysh": "^0.12.24"
     },
     "minimum-stability": "dev",
