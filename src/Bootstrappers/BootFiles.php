@@ -6,6 +6,7 @@ namespace Pest\Bootstrappers;
 
 use Pest\Contracts\Bootstrapper;
 use Pest\Exceptions\FatalException;
+use Pest\Plugins\Concerns\HandleArguments;
 use Pest\Support\DatasetInfo;
 use Pest\Support\Str;
 use Pest\TestSuite;
@@ -20,6 +21,8 @@ use function Pest\testDirectory;
  */
 final class BootFiles implements Bootstrapper
 {
+    use HandleArguments;
+
     /**
      * @var array<int, string>
      */
@@ -33,10 +36,18 @@ final class BootFiles implements Bootstrapper
 
     public function boot(): void
     {
+        if ($this->hasCliOption('--init')) {
+            return;
+        }
+
         $rootPath = TestSuite::getInstance()->rootPath;
         $testsPath = $rootPath.DIRECTORY_SEPARATOR.testDirectory();
 
         if (! is_dir($testsPath)) {
+            if ($this->hasCliOption('--help', '--version')) {
+                return;
+            }
+
             throw new FatalException(sprintf('The test directory [%s] does not exist.', $testsPath));
         }
 
@@ -60,6 +71,18 @@ final class BootFiles implements Bootstrapper
         }
 
         $this->bootDatasets($testsPath);
+    }
+
+    private function hasCliOption(string ...$options): bool
+    {
+        $arguments = $_SERVER['argv'] ?? null;
+
+        if (! is_array($arguments)) {
+            return false;
+        }
+
+        /** @var array<int, string> $arguments */
+        return array_any($options, fn (string $option): bool => $this->hasArgument($option, $arguments));
     }
 
     private function load(string $filename): void

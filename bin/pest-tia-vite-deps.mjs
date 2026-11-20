@@ -12,6 +12,8 @@ const PAGE_EXTENSIONS = new Set([
   '.ts', '.js',
   '.mts', '.cts', '.mjs', '.cjs',
 ])
+const SFC_RE = /\.(vue|svelte)$/i
+const SCRIPT_BLOCK_RE = /<script\b([^>]*)>([\s\S]*?)<\/script>/gi
 const ASSET_EXT_RE = /\.(css|scss|sass|less|styl|stylus|svg|png|jpe?g|gif|webp|avif|ico|bmp|woff2?|ttf|eot|otf|md|mdx|txt|html|mp4|webm|mp3|wav|ogg|m4a|pdf|wasm|glsl|frag|vert)$/i
 const PROJECT_ROOT = resolve(process.argv[2] ?? process.cwd())
 const PAGE_DIR_CANDIDATES = [
@@ -172,6 +174,79 @@ export async function loadAliasFromViteConfig(projectRoot = PROJECT_ROOT) {
   return alias
 }
 
+// Comments and string contents are blanked so a mention of `export default` in either is
+// not taken for a real one. Only used to detect the export, never handed to rolldown.
+export function stripJsCommentsAndStrings(code) {
+  let out = ''
+  let quote = ''
+
+  for (let i = 0; i < code.length; i++) {
+    const c = code[i]
+    const n = code[i + 1]
+
+    if (quote) {
+      if (c === '\\') { i++; continue }
+      if (c === quote) { quote = ''; out += c }
+      else if (c === '\n') out += c
+      continue
+    }
+    if (c === '"' || c === "'" || c === '`') { quote = c; out += c; continue }
+    if (c === '/' && n === '/') {
+      const end = code.indexOf('\n', i)
+      if (end === -1) break
+      i = end - 1
+      continue
+    }
+    if (c === '/' && n === '*') {
+      const end = code.indexOf('*/', i + 2)
+      if (end === -1) break
+      out += ' '
+      i = end + 1
+      continue
+    }
+    out += c
+  }
+
+  return out
+}
+
+// rolldown has no SFC handling, so a `.vue`/`.svelte` entry fails to parse at the first
+// byte of `<script>`. Only import specifiers are needed, so the markup is dropped.
+export function extractSfcScript(raw) {
+  let code = ''
+  let lang = null
+
+  for (const m of raw.matchAll(SCRIPT_BLOCK_RE)) {
+    if (lang === null) {
+      const l = /\blang\s*=\s*["']?([\w-]+)/i.exec(m[1] || '')
+      if (l) lang = l[1].toLowerCase()
+    }
+    code += m[2] + '\n'
+  }
+
+  // `<script setup>` and template-only components carry no literal `export default`,
+  // which importers resolve against: without one rolldown fails with MISSING_EXPORT.
+  if (!/(^|[\s;}])export\s+default\b/.test(stripJsCommentsAndStrings(code))) code += '\nexport default {}\n'
+
+  return {
+    code,
+    moduleType: lang === 'ts' || lang === 'tsx' ? 'ts' : 'js',
+    moduleSideEffects: false,
+  }
+}
+
+// rolldown no longer bundles CSS, so a stub without an explicit `moduleType` is
+// rejected as an unsupported module and fails the whole build.
+export function stubAsset(id) {
+  if (!id || !ASSET_EXT_RE.test(id)) return null
+
+  return { code: 'export default null', moduleType: 'js', moduleSideEffects: false }
+}
+
+// A component used only in a `<template>` has no binding the extracted script reads,
+// so TypeScript elision would drop its import and the edge with it.
+export const TRANSFORM_OPTIONS = { jsx: 'preserve', typescript: { onlyRemoveTypeImports: true } }
+
 async function listPageFiles(pagesDir) {
   if (!existsSync(pagesDir)) return []
 
@@ -289,15 +364,21 @@ async function main() {
     },
   }
 
+  const sfcScript = {
+    name: 'pest-tia-sfc-script',
+    async load(id) {
+      if (!id || !SFC_RE.test(id)) return null
+
+      let raw
+      try { raw = await readFile(id, 'utf8') } catch { return null }
+
+      return extractSfcScript(raw)
+    },
+  }
+
   const assetStub = {
     name: 'pest-tia-asset-stub',
-    load(id) {
-      if (!id) return null
-      if (ASSET_EXT_RE.test(id)) {
-        return { code: 'export default null', moduleSideEffects: false }
-      }
-      return null
-    },
+    load: stubAsset,
   }
 
   const input = Object.create(null)
@@ -310,9 +391,9 @@ async function main() {
       alias,
       extensions: ['.tsx', '.ts', '.jsx', '.js', '.mts', '.cts', '.mjs', '.cjs', '.json', '.vue', '.svelte'],
     },
-    transform: { jsx: 'preserve' },
+    transform: TRANSFORM_OPTIONS,
     treeshake: false,
-    plugins: [externalBare, assetStub, collector],
+    plugins: [externalBare, assetStub, sfcScript, collector],
     logLevel: 'silent',
     onLog: () => {},
   })

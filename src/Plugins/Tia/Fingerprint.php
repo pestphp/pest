@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 use Pest\Plugins\Tia\Contracts\Lockfile;
-use Symfony\Component\Finder\Finder;
+use Symfony\Component\Process\Exception\ExceptionInterface as ProcessException;
+use Symfony\Component\Process\Process;
 
 /**
  * @internal
  */
 final readonly class Fingerprint
 {
-    private const int SCHEMA_VERSION = 18;
+    private const int SCHEMA_VERSION = 19;
 
     /**
      * @var array<int, class-string<Lockfile>>
@@ -27,14 +28,13 @@ final readonly class Fingerprint
      *     environmental: array<string, int|string|null>,
      * }
      */
-    public static function compute(string $projectRoot): array
+    public static function compute(string $projectRoot, ?ConfigurationFile $configuration = null): array
     {
         return [
             'structural' => [
                 'schema' => self::SCHEMA_VERSION,
                 'composer_lock' => self::composerLockHash($projectRoot),
-                'phpunit_xml' => self::trackedHash($projectRoot, 'phpunit.xml'),
-                'phpunit_xml_dist' => self::trackedHash($projectRoot, 'phpunit.xml.dist'),
+                'phpunit_configuration' => ($configuration ?? ConfigurationFile::projectDefault())->fingerprint($projectRoot),
                 'vite_config' => self::viteConfigHash($projectRoot),
                 'package_lock' => self::packageLockHash($projectRoot),
                 'js_config' => self::jsConfigHash($projectRoot),
@@ -279,13 +279,16 @@ final readonly class Fingerprint
             return $cache[$key] = true;
         }
 
-        $finder = (new Finder)
-            ->in($projectRoot)
-            ->depth('== 0')
-            ->name($relativePath)
-            ->ignoreVCSIgnored(true);
+        $process = new Process(['git', 'check-ignore', '-q', '--', $relativePath], $projectRoot);
+        $process->setTimeout(5.0);
 
-        return $cache[$key] = $finder->hasResults();
+        try {
+            $process->run();
+        } catch (ProcessException) {
+            return $cache[$key] = true;
+        }
+
+        return $cache[$key] = $process->getExitCode() !== 0;
     }
 
     private static function contentHashOrNull(string $path): ?string

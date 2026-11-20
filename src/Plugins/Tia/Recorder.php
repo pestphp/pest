@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
+use Pest\Support\Container;
 use Pest\TestSuite;
 use ReflectionClass;
 
@@ -103,6 +104,10 @@ final class Recorder
 
         $this->currentTestFile = $file;
 
+        if ($this->watchPatterns()->isReadCaptureEnabled()) {
+            ReadCapture::start($this);
+        }
+
         if ($this->classUsesDatabase($className)) {
             $this->perTestUsesDatabase[$file] = true;
         }
@@ -126,6 +131,8 @@ final class Recorder
         if (! $this->active || $this->currentTestFile === null) {
             return;
         }
+
+        ReadCapture::stop();
 
         if (! $this->captureCoverage || ! $this->driverAvailable()) {
             $this->currentTestFile = null;
@@ -187,6 +194,42 @@ final class Recorder
         }
 
         $this->perTestFiles[$this->currentTestFile][$sourceFile] = true;
+    }
+
+    public function linkRead(string $path): void
+    {
+        $real = realpath($path);
+
+        if ($real === false || ! is_file($real) || ! $this->sourceScope()->contains($real)) {
+            return;
+        }
+
+        $relative = $this->projectRelative($real);
+
+        if ($relative !== null && $this->watchPatterns()->excludesRead($relative)) {
+            return;
+        }
+
+        $this->linkSource($real);
+    }
+
+    private function projectRelative(string $realPath): ?string
+    {
+        $root = rtrim(TestSuite::getInstance()->rootPath, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
+
+        if (! str_starts_with($realPath, $root)) {
+            return null;
+        }
+
+        return str_replace(DIRECTORY_SEPARATOR, '/', substr($realPath, strlen($root)));
+    }
+
+    private function watchPatterns(): WatchPatterns
+    {
+        $watchPatterns = Container::getInstance()->get(WatchPatterns::class);
+        assert($watchPatterns instanceof WatchPatterns);
+
+        return $watchPatterns;
     }
 
     private function classUsesDatabase(string $className): bool
@@ -272,7 +315,7 @@ final class Recorder
         $out = [];
 
         foreach ($this->perTestTables as $testFile => $tables) {
-            $names = array_keys($tables);
+            $names = array_map(strval(...), array_keys($tables));
             sort($names);
             $out[$testFile] = $names;
         }
@@ -340,7 +383,7 @@ final class Recorder
         $out = [];
 
         foreach ($data as $file => $lines) {
-            if (! is_array($lines)) {
+            if (! is_array($lines) || $lines === []) {
                 continue;
             }
             $covered = [];
@@ -374,6 +417,8 @@ final class Recorder
 
     public function reset(): void
     {
+        ReadCapture::stop();
+
         $this->currentTestFile = null;
         $this->perTestFiles = [];
         $this->perTestTables = [];
