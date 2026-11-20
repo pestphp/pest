@@ -285,9 +285,15 @@ final class ReadCapture
      */
     public function url_stat(string $path, int $flags): array|false
     {
-        return $this->withOriginalWrapper(fn (): array|false => ($flags & STREAM_URL_STAT_LINK) !== 0
-            ? @lstat($path)
-            : @stat($path));
+        return $this->withOriginalWrapper(function () use ($path, $flags): array|false {
+            set_error_handler(static fn (): bool => true);
+
+            try {
+                return ($flags & STREAM_URL_STAT_LINK) !== 0 ? lstat($path) : stat($path);
+            } finally {
+                restore_error_handler();
+            }
+        });
     }
 
     /**

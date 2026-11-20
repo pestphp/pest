@@ -202,24 +202,36 @@ describe('the file wrapper', function (): void {
         }
     });
 
-    it('reports a missing path as missing while a test records', function (): void {
+    it('reports a missing path to the error handler as plain PHP does while a test records', function (): void {
         $missing = sys_get_temp_dir().DIRECTORY_SEPARATOR.'pest-read-capture-missing-'.bin2hex(random_bytes(8));
+        $warnings = [];
         $results = [];
 
-        tiaReadCaptureLinks(function () use ($missing, &$results): void {
-            clearstatcache();
+        set_error_handler(function (int $level, string $message) use (&$warnings): bool {
+            $warnings[] = $message;
 
-            $results['exists'] = file_exists($missing);
-            $results['is_file'] = is_file($missing);
-            $results['is_link'] = is_link($missing);
-            $results['lstat'] = @lstat($missing);
+            return true;
         });
 
+        try {
+            tiaReadCaptureLinks(function () use ($missing, &$warnings, &$results): void {
+                clearstatcache();
+
+                $results['quiet'] = [file_exists($missing), is_file($missing), is_dir($missing), is_link($missing)];
+                $results['warnings after quiet probes'] = count($warnings);
+
+                $results['stat'] = stat($missing);
+                $results['warnings after stat'] = count($warnings);
+            });
+        } finally {
+            restore_error_handler();
+        }
+
         expect($results)->toBe([
-            'exists' => false,
-            'is_file' => false,
-            'is_link' => false,
-            'lstat' => false,
+            'quiet' => [false, false, false, false],
+            'warnings after quiet probes' => 0,
+            'stat' => false,
+            'warnings after stat' => 1,
         ]);
     });
 
