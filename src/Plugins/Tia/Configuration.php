@@ -117,7 +117,7 @@ final class Configuration
     }
 
     /**
-     * @param  list<string>|null  $patterns  project-relative globs of files whose reads create no edge; null turns read capture off
+     * @param  list<string>|null  $patterns  Project-relative globs to exclude, or null to disable read capture. Use watch() for excluded files that an existing watch pattern does not cover.
      * @return $this
      */
     public function withoutReadCapture(?array $patterns = null): self

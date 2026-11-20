@@ -153,3 +153,36 @@ test('no read records an edge when read capture is off', function (array $argume
     expect(tiaEdgeFiles($project, 'tests/Unit/GreeterTest.php'))->toContain('app/Greeter.php')
         ->and(tiaEdgeFiles($project, 'tests/Unit/GreeterSourceTest.php'))->not->toContain('app/Greeter.php');
 })->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows()->skip(! Coverage::isAvailable(), 'Coverage is not available');
+
+test('a watch pattern reruns tests after an excluded file changes', function (array $arguments): void {
+    $project = Project::make('master');
+
+    $project->write('tests/Pest.php', file_get_contents($project->path('tests/Pest.php')).<<<'PHP'
+
+        pest()->tia()
+            ->withoutReadCapture(['data/*.json'])
+            ->watch(['data/*.json' => 'tests/Unit/GreeterTest.php']);
+
+        PHP);
+    $project->write('data/status.json', '"ready"');
+
+    $testFile = 'tests/Unit/GreeterTest.php';
+    $project->write($testFile, str_replace(
+        '    expect((new Greeter)->greet(\'Nuno\'))->toBe(\'Hello, Nuno!\');',
+        '    expect(file_get_contents(__DIR__.\'/../../data/status.json\'))->toBe(\'"ready"\');',
+        file_get_contents($project->path($testFile)),
+    ));
+
+    $project->git()->commit('add a watched JSON fixture');
+    $project->seed('master');
+
+    $project->write('data/status.json', '"broken"');
+    $project->git()->commit('change the watched fixture');
+
+    $result = $project->pest('--tia', ...$arguments);
+
+    expect($result->exitCode)->toBe(1, $result->describe())
+        ->and($result->affected())->toBe(2, $result->describe())
+        ->and($result->replayed())->toBe(4, $result->describe())
+        ->and($result->output)->toContain('greets a person', 'broken');
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();

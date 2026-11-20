@@ -2069,6 +2069,13 @@
   ✓ a wrapper already registered for file:// → it opens reads through it and still links them
   ✓ a wrapper already registered for file:// → it keeps the include flag for the files a test includes
   ✓ a wrapper already registered for file:// → it is registered again after the test
+  ✓ withoutReadCapture() → it does not link a file matching an excluded glob
+  ✓ withoutReadCapture() → it still links a file outside the excluded globs
+  ✓ withoutReadCapture() → it keeps the file wrapper registered while globs are excluded
+  ✓ withoutReadCapture() → it links every read when the list of globs is empty
+  ✓ withoutReadCapture() → it registers no wrapper and links no read when called without globs
+  ✓ withoutReadCapture() → it keeps the explicit links when called without globs
+  ✓ withoutReadCapture() → it leaves a wrapper already registered for file:// untouched when called without globs
 
    PASS  Tests\Unit\Plugins\Tia\Recorder
   ✓ activateLinkTracking() → it tracks tables without a coverage driver
@@ -2259,6 +2266,16 @@
   ✓ it retains recorded Inertia dependencies when default watches are disabled
   ✓ it retains recorded migration tables when default watches are disabled
   ✓ it uses custom mappings for an unknown Vue page with defaults disabled
+  ✓ it captures every read by default
+  ✓ it excludes reads of files matching a glob
+  ✓ it matches read globs like watch patterns
+  ✓ it does not exclude a dotfile unless the glob names it
+  ✓ it accumulates read exclusions from repeated calls
+  ✓ it does not turn read capture off for an empty exclusion list
+  ✓ it turns read capture off without a list of globs
+  ✓ it keeps read capture off when globs are added afterwards
+  ✓ it captures reads again on reset
+  ✓ it does not change the default watch fallbacks of an excluded read
 
    PASS  Tests\Unit\Plugins\Tia\WorkerToken
   ✓ prefers the per-process UNIQUE_TEST_TOKEN over the per-slot TEST_TOKEN, so two workers recycled into the same slot get different tokens
@@ -2569,4 +2586,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1863 passed (4281 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1880 passed (4316 assertions)
