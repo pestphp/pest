@@ -11,12 +11,12 @@ afterEach(function (): void {
 /**
  * @return array{0: Project, 1: string}
  */
-function tiaMonorepo(): array
+function tiaMonorepo(string $directory = 'nested'): array
 {
     $project = Project::make('master');
-    $nested = $project->nested();
+    $nested = $project->nested($directory);
 
-    $project->write('nested/resources/views/greeting.blade.php', "<p>Hello</p>\n");
+    $project->write($directory.'/resources/views/greeting.blade.php', "<p>Hello</p>\n");
     $project->write('frontend/widget.php', "<?php\n\n\$widget = 1;\n");
     $project->git()->commit('add the nested project and a sibling');
 
@@ -60,6 +60,20 @@ test('a committed change inside the subdirectory selects the tests that depend o
     [$project, $nested] = tiaMonorepo();
 
     $project->write('nested/resources/views/greeting.blade.php', "<p>Hi</p>\n");
+    $project->git()->commit('reword the greeting');
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->affected())->toBe(2, $result->describe())
+        ->and($result->replayed())->toBe(4, $result->describe());
+})->skipOnWindows();
+
+test('a project in a directory whose name begins with a space sees its own changes', function (): void {
+    [$project, $nested] = tiaMonorepo(' backend');
+
+    $project->write(' backend/resources/views/greeting.blade.php', "<p>Hi</p>\n");
     $project->git()->commit('reword the greeting');
     $project->snapshot();
 

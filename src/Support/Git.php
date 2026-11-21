@@ -52,6 +52,22 @@ final readonly class Git
     /**
      * @param  array<int, string>  $arguments
      */
+    private function outputLine(array $arguments): ?string
+    {
+        $output = $this->raw($arguments);
+
+        if ($output === null) {
+            return null;
+        }
+
+        $line = str_ends_with($output, "\n") ? substr($output, 0, -1) : $output;
+
+        return $line === '' ? null : $line;
+    }
+
+    /**
+     * @param  array<int, string>  $arguments
+     */
     public function succeeds(array $arguments): bool
     {
         return $this->result($arguments)['exitCode'] === 0;
@@ -106,20 +122,20 @@ final readonly class Git
 
     public function repositoryRoot(): ?string
     {
-        $root = $this->output(['rev-parse', '--show-toplevel']);
+        $root = $this->outputLine(['rev-parse', '--show-toplevel']);
 
         return $root === null ? null : rtrim(str_replace(DIRECTORY_SEPARATOR, '/', $root), '/');
     }
 
     public function pathPrefix(): string
     {
-        $prefix = $this->output(['rev-parse', '--show-prefix']);
+        $prefix = $this->outputLine(['rev-parse', '--show-prefix']);
 
         if ($prefix === null) {
             return '';
         }
 
-        $prefix = trim(str_replace(DIRECTORY_SEPARATOR, '/', $prefix), '/');
+        $prefix = rtrim(str_replace(DIRECTORY_SEPARATOR, '/', $prefix), '/');
 
         return $prefix === '' ? '' : $prefix.'/';
     }

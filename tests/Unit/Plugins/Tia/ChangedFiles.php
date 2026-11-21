@@ -60,6 +60,47 @@ it('resolves the project prefix inside the repository', function (): void {
         ->and(new ChangedFiles($monorepo['root'])->gitPrefix())->toBeEmpty();
 })->skipOnWindows();
 
+it('keeps a space that begins the name of the project directory', function (): void {
+    $root = sys_get_temp_dir().DIRECTORY_SEPARATOR.'pest-tia-monorepo-'.bin2hex(random_bytes(8));
+
+    mkdir($root.'/ backend/app', 0755, true);
+    file_put_contents($root.'/ backend/app/Service.php', "<?php\n\$service = 1;\n");
+
+    tiaMonorepoRoots($root);
+
+    $repo = new GitRepo($root);
+    $repo->init('master');
+
+    file_put_contents($root.'/ backend/app/Service.php', "<?php\n\$service = 2;\n");
+
+    $project = new ChangedFiles($root.'/ backend');
+
+    expect($project->gitPrefix())->toBe(' backend/')
+        ->and($project->since($repo->sha()))->toBe(['app/Service.php']);
+})->skipOnWindows();
+
+it('keeps the character that ends the name of the repository root', function (string $lastCharacter): void {
+    $root = sys_get_temp_dir().DIRECTORY_SEPARATOR.'pest-tia-monorepo-'.bin2hex(random_bytes(8)).$lastCharacter;
+
+    mkdir($root.'/backend/app', 0755, true);
+    mkdir($root.'/frontend', 0755, true);
+    file_put_contents($root.'/backend/app/Service.php', "<?php\n\$service = 1;\n");
+    file_put_contents($root.'/frontend/widget.php', "<?php\n\$widget = 1;\n");
+
+    tiaMonorepoRoots($root);
+
+    $repo = new GitRepo($root);
+    $repo->init('master');
+
+    file_put_contents($root.'/backend/app/Service.php', "<?php\n\$service = 2;\n");
+    file_put_contents($root.'/frontend/widget.php', "<?php\n\$widget = 2;\n");
+
+    $project = new ChangedFiles($root.'/backend');
+
+    expect($project->since($repo->sha()))->toBe(['app/Service.php'])
+        ->and($project->outsideProject())->toBe(['frontend/widget.php']);
+})->with(['a space' => ' ', 'a carriage return' => "\r"])->skipOnWindows();
+
 it('reports working tree changes relative to the project, dropping siblings', function (): void {
     $monorepo = tiaMonorepoRepository();
 
