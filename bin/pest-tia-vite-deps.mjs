@@ -25,8 +25,8 @@ const PAGE_DIR_CANDIDATES = [
   'assets/pages',
 ]
 
-async function loadRolldown() {
-  const projectRequire = createRequire(join(PROJECT_ROOT, 'package.json'))
+export async function loadRolldown(projectRoot = PROJECT_ROOT) {
+  const projectRequire = createRequire(join(projectRoot, 'package.json'))
   let path = null
 
   try { path = projectRequire.resolve('rolldown') } catch {}
@@ -38,6 +38,10 @@ async function loadRolldown() {
       const viteRequire = createRequire(projectRequire.resolve('vite/package.json'))
       path = viteRequire.resolve('rolldown')
     } catch {}
+  }
+
+  if (path === null) {
+    try { path = projectRequire.resolve('vite/rolldown') } catch {}
   }
 
   if (path === null) return null
