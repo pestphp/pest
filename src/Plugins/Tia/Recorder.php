@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
+use Pest\Support\Arr;
 use Pest\Support\Container;
 use Pest\TestSuite;
 use ReflectionClass;
@@ -329,7 +330,7 @@ final class Recorder
         $out = [];
 
         foreach ($this->perTestInertiaComponents as $testFile => $components) {
-            $names = array_keys($components);
+            $names = Arr::stringKeys($components);
             sort($names);
             $out[$testFile] = $names;
         }

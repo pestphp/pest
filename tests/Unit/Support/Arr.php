@@ -49,3 +49,9 @@ describe('last', function (): void {
             ->and(current($array))->toBe(2);
     });
 });
+
+describe('stringKeys', function (): void {
+    it('returns every key as a string', function (): void {
+        expect(Arr::stringKeys(['123' => true, 'app/Service.php' => true]))->toBe(['123', 'app/Service.php']);
+    });
+});
