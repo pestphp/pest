@@ -6,6 +6,7 @@ namespace Pest\Plugins\Tia;
 
 use Pest\Factories\TestCaseFactory;
 use Pest\Factories\TestCaseMethodFactory;
+use Pest\Support\Arr;
 use Pest\Support\Container;
 use Pest\Support\View;
 use Pest\TestSuite;
@@ -1646,7 +1647,7 @@ final class Graph
     {
         $survivors = array_fill_keys($keep, true);
 
-        foreach (array_keys($this->baselines) as $branch) {
+        foreach (Arr::stringKeys($this->baselines) as $branch) {
             if (str_starts_with($branch, self::WORKSPACE_BRANCH_PREFIX)) {
                 continue;
             }
@@ -1712,8 +1713,8 @@ final class Graph
 
         $branches = [];
 
-        foreach (array_keys($data['baselines']) as $branch) {
-            if (is_string($branch) && $branch !== '') {
+        foreach (Arr::stringKeys($data['baselines']) as $branch) {
+            if ($branch !== '') {
                 $branches[] = $branch;
             }
         }
@@ -1824,8 +1825,8 @@ final class Graph
 
             if (is_array($baseline['tree'] ?? null)) {
                 foreach ($baseline['tree'] as $path => $hash) {
-                    if (is_string($path) && is_string($hash)) {
-                        $tree[$path] = $hash;
+                    if (is_string($hash)) {
+                        $tree[(string) $path] = $hash;
                     }
                 }
             }

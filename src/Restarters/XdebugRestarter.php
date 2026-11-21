@@ -115,7 +115,7 @@ final class XdebugRestarter implements Restarter
 
         return Fingerprint::structuralMatches(
             $graph->fingerprint(),
-            Fingerprint::compute($projectRoot, ConfigurationFile::fromArguments($arguments)),
+            Fingerprint::compute($projectRoot, ConfigurationFile::fromArguments($arguments), $arguments),
         );
     }
 }

@@ -24,12 +24,13 @@ final readonly class Fingerprint
     ];
 
     /**
+     * @param  array<int, string>  $arguments
      * @return array{
      *     structural: array<string, int|string|null>,
      *     environmental: array<string, int|string|null>,
      * }
      */
-    public static function compute(string $projectRoot, ?ConfigurationFile $configuration = null): array
+    public static function compute(string $projectRoot, ?ConfigurationFile $configuration = null, array $arguments = []): array
     {
         $structural = [
             'schema' => self::SCHEMA_VERSION,
@@ -44,6 +45,12 @@ final readonly class Fingerprint
 
         if ($prefix !== '') {
             $structural['project_prefix'] = $prefix;
+        }
+
+        $externalRoots = ExternalSources::rootsFor($projectRoot, $arguments);
+
+        if ($externalRoots !== []) {
+            $structural['external_roots'] = implode("\n", $externalRoots);
         }
 
         return [

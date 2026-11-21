@@ -25,6 +25,7 @@ use Pest\Plugins\Tia\CiBranch;
 use Pest\Plugins\Tia\ConfigurationFile;
 use Pest\Plugins\Tia\Contracts\State;
 use Pest\Plugins\Tia\CoverageCollector;
+use Pest\Plugins\Tia\ExternalSources;
 use Pest\Plugins\Tia\Fingerprint;
 use Pest\Plugins\Tia\Graph;
 use Pest\Plugins\Tia\JsModuleGraph;
@@ -200,6 +201,11 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     private bool $filteredMode = false;
 
     private bool $writesSuppressed = false;
+
+    private bool $dirtyExternalSourcesResolved = false;
+
+    /** @var array<int, string>|null */
+    private ?array $dirtyExternalSources = null;
 
     private bool $resultsOnlyWrites = false;
 
@@ -476,6 +482,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         }
 
         $this->configuration = ConfigurationFile::fromArguments($arguments);
+        ExternalSources::pinWorkingDirectory(TestSuite::getInstance()->rootPath);
 
         $isWorker = Parallel::isWorker();
         $recordingGlobal = $isWorker && (string) Parallel::getGlobal(self::RECORDING_GLOBAL) === '1';
@@ -635,7 +642,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $changedFiles = new ChangedFiles($projectRoot);
         $currentSha = $changedFiles->currentSha();
 
-        $currentFingerprint = Fingerprint::compute($projectRoot, $this->configuration);
+        $currentFingerprint = Fingerprint::compute($projectRoot, $this->configuration, $this->originalArguments);
 
         if ($this->structuralFingerprintShifted($currentFingerprint)) {
             $this->renderBadge('WARN', 'Project files changed during the run — discarding recorded edges.');
@@ -648,6 +655,14 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         if ($this->headMovedDuringRun($currentSha)) {
             $this->renderHeadMovedDuringRun('discarding recorded edges');
+            $recorder->reset();
+            $this->coverageCollector->reset();
+
+            return;
+        }
+
+        if ($this->externalSourcesChangedDuringRun($projectRoot)) {
+            $this->renderExternalSourcesChangedDuringRun('discarding recorded edges');
             $recorder->reset();
             $this->coverageCollector->reset();
 
@@ -729,7 +744,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $changedFiles = new ChangedFiles($projectRoot);
         $currentSha = $changedFiles->currentSha();
 
-        $currentFingerprint = Fingerprint::compute($projectRoot, $this->configuration);
+        $currentFingerprint = Fingerprint::compute($projectRoot, $this->configuration, $this->originalArguments);
 
         if ($this->structuralFingerprintShifted($currentFingerprint)) {
             $this->renderBadge('WARN', 'Project files changed during the run — discarding recorded edges.');
@@ -744,6 +759,16 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         if ($this->headMovedDuringRun($currentSha)) {
             $this->renderHeadMovedDuringRun('discarding recorded edges');
+
+            foreach ($partialKeys as $key) {
+                $this->state->delete($key);
+            }
+
+            return $exitCode;
+        }
+
+        if ($this->externalSourcesChangedDuringRun($projectRoot)) {
+            $this->renderExternalSourcesChangedDuringRun('discarding recorded edges');
 
             foreach ($partialKeys as $key) {
                 $this->state->delete($key);
@@ -874,7 +899,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
                 : new TiaRequiresRemote);
         }
 
-        $fingerprint = Fingerprint::compute($projectRoot, $this->configuration);
+        $fingerprint = Fingerprint::compute($projectRoot, $this->configuration, $this->originalArguments);
         $this->startFingerprint = $fingerprint;
         $this->startSha = new ChangedFiles($projectRoot)->currentSha();
 
@@ -912,6 +937,10 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             }
         }
 
+        if ($this->holdsDirtyExternalSources($projectRoot)) {
+            return $arguments;
+        }
+
         $coverageCacheOwned = $this->piggybackCoverage && $this->pestCoverageActive();
 
         if ($coverageCacheOwned) {
@@ -937,6 +966,84 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         }
 
         return $this->enterRecordMode($arguments);
+    }
+
+    private function holdsDirtyExternalSources(string $projectRoot): bool
+    {
+        $dirty = $this->dirtyExternalSources($projectRoot);
+
+        if ($dirty === []) {
+            return false;
+        }
+
+        $this->writesSuppressed = true;
+
+        if ($dirty === null) {
+            $this->renderBadge('WARN', 'Git could not read the working tree of the code this project loads from outside its root.');
+            $this->renderChild('Running the full suite, and recording nothing.');
+
+            return true;
+        }
+
+        $this->renderBadge('WARN', sprintf(
+            'Detected %d uncommitted change%s this project loads from outside its root.',
+            count($dirty),
+            count($dirty) === 1 ? '' : 's',
+        ));
+
+        foreach (array_slice($dirty, 0, $this->output->isVerbose() ? count($dirty) : 5) as $file) {
+            $this->output->writeln(sprintf('  <fg=gray>%s</>', $file));
+        }
+
+        $this->renderChild('Running the full suite, and recording nothing — git stops reporting such an edit once it is undone.');
+        $this->renderChild('Commit what you changed there to let a run leave a baseline behind.');
+
+        return true;
+    }
+
+    private function externalSourcesChangedDuringRun(string $projectRoot): bool
+    {
+        $this->dirtyExternalSourcesResolved = false;
+
+        return $this->dirtyExternalSources($projectRoot) !== [];
+    }
+
+    private function renderExternalSourcesChangedDuringRun(string $consequence): void
+    {
+        $this->renderBadge('WARN', 'Code this project loads from outside its root changed during the run — '.$consequence.'.');
+        $this->renderChild('Re-run --tia after your edits settle to record a fresh dependency graph.');
+    }
+
+    /**
+     * @return array<int, string>|null
+     */
+    private function dirtyExternalSources(string $projectRoot): ?array
+    {
+        if ($this->dirtyExternalSourcesResolved) {
+            return $this->dirtyExternalSources;
+        }
+
+        $this->dirtyExternalSourcesResolved = true;
+
+        if (ExternalSources::rootsFor($projectRoot, $this->originalArguments) === []) {
+            return $this->dirtyExternalSources = [];
+        }
+
+        $changedFiles = new ChangedFiles($projectRoot);
+
+        try {
+            $changedFiles->since(null);
+        } catch (MissingDependency) {
+            return $this->dirtyExternalSources = [];
+        } catch (TiaGitFailed) {
+            return $this->dirtyExternalSources = null;
+        }
+
+        return $this->dirtyExternalSources = ExternalSources::matching(
+            $projectRoot,
+            $changedFiles->outsideProjectDirty(),
+            $this->originalArguments,
+        );
     }
 
     private function purgeState(): void
@@ -1098,11 +1205,70 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             $graph->lastRunTree($this->branch),
         );
 
+        $unverifiable = ExternalSources::unverifiable($projectRoot, $this->originalArguments);
+
+        if ($unverifiable !== []) {
+            $this->renderBadge('WARN', sprintf(
+                'This project loads %d path%s from outside its repository.',
+                count($unverifiable),
+                count($unverifiable) === 1 ? '' : 's',
+            ));
+
+            foreach (array_slice($unverifiable, 0, $this->output->isVerbose() ? count($unverifiable) : 5) as $path) {
+                $this->output->writeln(sprintf('  <fg=gray>%s</>', $path));
+            }
+
+            $this->renderChild('Running the full suite — git reports no change there, so a replay could not stand behind its results.');
+            $this->renderChild('Move what the project loads into the repository to let TIA select tests again.');
+
+            return $arguments;
+        }
+
+        $externalChanges = ExternalSources::matching($projectRoot, $outsideProject, $this->originalArguments);
+
+        if ($externalChanges !== []) {
+            $this->renderBadge('WARN', sprintf(
+                'Detected changes in %d file%s this project loads from outside its root.',
+                count($externalChanges),
+                count($externalChanges) === 1 ? '' : 's',
+            ));
+
+            foreach (array_slice($externalChanges, 0, $this->output->isVerbose() ? count($externalChanges) : 5) as $file) {
+                $this->output->writeln(sprintf('  <fg=gray>%s</>', $file));
+            }
+
+            if ($this->canRebuildGraph()) {
+                $this->deleteState(self::KEY_GRAPH);
+                $this->deleteState(self::KEY_COVERAGE_CACHE);
+
+                $this->freshGraphReason = 'code this project loads from outside its root changed';
+
+                return $this->enterRecordMode($arguments);
+            }
+
+            $this->requestWorkerResults();
+
+            $this->renderChild('Running the full suite — the dependency graph only reaches files under the project root.');
+
+            if ($this->piggybackCoverage) {
+                $this->renderChild('Run --tia without --coverage to record a fresh dependency graph.');
+
+                return $arguments;
+            }
+
+            $this->fullSuiteFallbackRan = true;
+
+            $this->renderChild('Install / enable pcov or xdebug (mode: coverage) so edges can be safely refreshed after changes outside the project root.');
+
+            return $arguments;
+        }
+
         $hasProjectPhpSourceChanges = $this->hasProjectPhpSourceChanges($changed);
         $coverageAvailable = $this->piggybackCoverage || $this->recorder->driverAvailable();
 
         if ($hasProjectPhpSourceChanges && ! $coverageAvailable) {
             $this->fullSuiteFallbackRan = true;
+            $this->requestWorkerResults();
 
             $this->renderBadge('WARN', 'Detected PHP source changes but no coverage driver is available.');
             $this->renderChild('Running the full suite to avoid using a stale dependency graph.');
@@ -1744,6 +1910,12 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return;
         }
 
+        if ($this->externalSourcesChangedDuringRun($projectRoot)) {
+            $this->renderExternalSourcesChangedDuringRun('keeping the baseline from before the run');
+
+            return;
+        }
+
         if ($currentSha !== null) {
             $graph->setRecordedAtSha($this->branch, $currentSha);
         }
@@ -1870,6 +2042,12 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $graph = $this->loadGraph($projectRoot);
 
         if (! $graph instanceof Graph) {
+            return;
+        }
+
+        if ($this->externalSourcesChangedDuringRun($projectRoot)) {
+            $collector->reset();
+
             return;
         }
 
@@ -2257,6 +2435,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             'pest_factory' => 'Pest internals',
             'pest_method_factory' => 'Pest internals',
             'project_prefix' => 'project location in the repository',
+            'external_roots' => 'the roots this project loads from outside itself',
         ];
 
         $seen = [];

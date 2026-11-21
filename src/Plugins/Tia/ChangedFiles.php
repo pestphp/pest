@@ -6,6 +6,7 @@ namespace Pest\Plugins\Tia;
 
 use Pest\Exceptions\MissingDependency;
 use Pest\Exceptions\TiaGitFailed;
+use Pest\Support\Arr;
 use Pest\Support\Git;
 use Symfony\Component\Process\ExecutableFinder;
 
@@ -23,6 +24,11 @@ final class ChangedFiles
      */
     private array $outsideProject = [];
 
+    /**
+     * @var array<string, true>
+     */
+    private array $outsideProjectDirty = [];
+
     public function __construct(private readonly string $projectRoot)
     {
         $this->git = new Git($projectRoot);
@@ -37,7 +43,7 @@ final class ChangedFiles
      * @param  array<int, string>  $files  repository-relative paths, as printed by git.
      * @return array<int, string> project-relative paths; paths outside the project are dropped.
      */
-    private function toProjectRelative(array $files): array
+    private function toProjectRelative(array $files, bool $fromWorkingTree = false): array
     {
         $prefix = $this->gitPrefix();
 
@@ -59,6 +65,10 @@ final class ChangedFiles
             }
 
             $this->outsideProject[$file] = true;
+
+            if ($fromWorkingTree) {
+                $this->outsideProjectDirty[$file] = true;
+            }
         }
 
         return $projectFiles;
@@ -67,9 +77,17 @@ final class ChangedFiles
     /**
      * @return array<int, string>
      */
+    public function outsideProjectDirty(): array
+    {
+        return Arr::stringKeys($this->outsideProjectDirty);
+    }
+
+    /**
+     * @return array<int, string>
+     */
     public function outsideProject(): array
     {
-        return array_keys($this->outsideProject);
+        return Arr::stringKeys($this->outsideProject);
     }
 
     /**
@@ -85,13 +103,13 @@ final class ChangedFiles
 
         $candidates = array_fill_keys($files, true);
 
-        foreach (array_keys($lastRunTree) as $snapshotted) {
+        foreach (Arr::stringKeys($lastRunTree) as $snapshotted) {
             $candidates[$snapshotted] = true;
         }
 
         $remaining = [];
 
-        foreach (array_keys($candidates) as $file) {
+        foreach (Arr::stringKeys($candidates) as $file) {
             $snapshot = $lastRunTree[$file] ?? null;
             $current = $this->currentHash($file);
 
@@ -149,6 +167,7 @@ final class ChangedFiles
     public function since(?string $sha): ?array
     {
         $this->outsideProject = [];
+        $this->outsideProjectDirty = [];
 
         $files = [];
 
@@ -171,7 +190,7 @@ final class ChangedFiles
             $unique[$file] = true;
         }
 
-        $candidates = array_keys($this->filterIgnored($unique));
+        $candidates = Arr::stringKeys($this->filterIgnored($unique));
 
         $this->filterIgnoredOutsideProject();
 
@@ -235,6 +254,7 @@ final class ChangedFiles
         $git = new Git($repositoryRoot);
 
         $this->outsideProject = $this->filterIgnoredWith($git, $this->outsideProject);
+        $this->outsideProjectDirty = array_intersect_key($this->outsideProjectDirty, $this->outsideProject);
     }
 
     /**
@@ -355,7 +375,7 @@ final class ChangedFiles
             }
         }
 
-        return array_keys($names);
+        return Arr::stringKeys($names);
     }
 
     public function hasRemote(): bool
@@ -458,7 +478,7 @@ final class ChangedFiles
             $files[] = $path;
         }
 
-        return $this->toProjectRelative($files);
+        return $this->toProjectRelative($files, fromWorkingTree: true);
     }
 
     public function currentSha(): ?string
