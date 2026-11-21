@@ -43,9 +43,11 @@ $bootPest = (static function (string $rootPath): void {
         'testdox-columns:',
         'testdox-summary',
         'phpunit-argv:',
+        'composer-autoload:',
     ]);
 
     $composerAutoloadFiles = [
+        ...(isset($getopt['composer-autoload']) && is_string($getopt['composer-autoload']) ? [$getopt['composer-autoload']] : []),
         dirname(__DIR__, 3).DIRECTORY_SEPARATOR.'autoload.php',
         dirname(__DIR__, 2).DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'autoload.php',
         dirname(__DIR__).DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'autoload.php',
