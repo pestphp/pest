@@ -42,6 +42,11 @@ final class Configuration implements HandlesArguments, Terminable
         return $this->pushArgument((string) realpath($this->fromGeneratedConfigurationFile()), $arguments);
     }
 
+    public function generatedConfigurationPath(): ?string
+    {
+        return $this->generatedConfiguration['path'] ?? null;
+    }
+
     private function fromGeneratedConfigurationFile(): string
     {
         $directory = getcwd();
