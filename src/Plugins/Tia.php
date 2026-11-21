@@ -1116,6 +1116,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         if ($hasProjectPhpSourceChanges && ! $coverageAvailable) {
             $this->fullSuiteFallbackRan = true;
+            $this->requestWorkerResults();
 
             $this->renderBadge('WARN', 'Detected PHP source changes but no coverage driver is available.');
             $this->renderChild('Running the full suite to avoid using a stale dependency graph.');
