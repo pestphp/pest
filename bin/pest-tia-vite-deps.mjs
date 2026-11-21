@@ -333,7 +333,7 @@ async function main() {
     return
   }
 
-  const loaded = await loadRolldown(PROJECT_ROOT)
+  const loaded = await loadRolldown()
 
   if (loaded === null) {
     process.stdout.write('{}')
