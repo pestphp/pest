@@ -156,6 +156,10 @@ final class WrapperRunner implements RunnerInterface
         $parameters[] = $wrapper;
         $parameters[] = '--test-directory='.TestSuite::getInstance()->testPath;
 
+        if (is_string($GLOBALS['_composer_autoload_path'] ?? null)) {
+            $parameters[] = '--composer-autoload='.$GLOBALS['_composer_autoload_path'];
+        }
+
         $this->parameters = $parameters;
         $this->codeCoverageFilterRegistry = new CodeCoverageFilterRegistry;
     }
