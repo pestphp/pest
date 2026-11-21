@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia\WatchDefaults;
 
-use Composer\InstalledVersions;
 use Pest\Browser\Support\BrowserTestIdentifier;
 use Pest\Factories\TestCaseFactory;
 use Pest\Plugins\Tia\Contracts\WatchDefault;
+use Pest\Support\InstalledPackages;
 use Pest\TestSuite;
 
 /**
@@ -17,8 +17,7 @@ final readonly class Browser implements WatchDefault
 {
     public function applicable(): bool
     {
-        return class_exists(InstalledVersions::class)
-            && InstalledVersions::isInstalled('pestphp/pest-plugin-browser');
+        return InstalledPackages::has('pestphp/pest-plugin-browser');
     }
 
     public function defaults(string $projectRoot, string $testPath): array
