@@ -242,14 +242,12 @@ describe('the file wrapper', function (): void {
         $growth = 0;
 
         tiaReadCaptureLinks(function () use (&$growth): void {
-            clearstatcache();
-            file_exists(__FILE__);
+            fclose(fopen(__FILE__, 'rb'));
 
             $before = memory_get_usage();
 
             for ($i = 0; $i < 10_000; $i++) {
-                clearstatcache();
-                file_exists(__FILE__);
+                fclose(fopen(__FILE__, 'rb'));
             }
 
             $growth = memory_get_usage() - $before;
