@@ -2579,6 +2579,9 @@
   ✓ parallel counts a shared issue only once across recycled workers with ('notice', 'shares notice', 'notice')
   ✓ parallel combines stop-on counts from different workers and cleans up their files
 
+   PASS  Tests\Visual\ParallelWorkerAutoload
+  ✓ loads the autoloader of the parent process in a parallel worker
+
    PASS  Tests\Visual\Shard
   ✓ an empty shard runs no tests with dataset "sequential"
   ✓ an empty shard runs no tests with dataset "parallel"
@@ -2623,4 +2626,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1915 passed (4368 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1916 passed (4370 assertions)
