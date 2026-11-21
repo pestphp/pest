@@ -409,3 +409,29 @@ describe('branch baseline over the fallback', function (): void {
             ->and($graph->getTime('feature', 'Tests\BarTest::it passes', 'main'))->toBe(0.5);
     });
 });
+
+describe('pruneMissingBranches()', function (): void {
+    it('keeps a branch whose name is a number', function (): void {
+        $graph = new Graph(sys_get_temp_dir());
+        $graph->setRecordedAtSha('123', 'abc');
+        $graph->setRecordedAtSha('gone', 'def');
+
+        $graph->pruneMissingBranches(['123']);
+
+        expect($graph->recordedAtSha('123'))->toBe('abc')
+            ->and($graph->recordedAtSha('gone'))->toBeNull()
+            ->and(Graph::branchesIn((string) $graph->encode()))->toBe(['123']);
+    });
+});
+
+describe('decode()', function (): void {
+    it('keeps a file of the last run tree whose name is a number', function (): void {
+        $graph = new Graph(sys_get_temp_dir());
+        $graph->setRecordedAtSha('master', 'abc');
+        $graph->setLastRunTree('master', ['123' => 'hash']);
+
+        $decoded = Graph::decode((string) $graph->encode(), sys_get_temp_dir());
+
+        expect($decoded?->lastRunTree('master'))->toBe([123 => 'hash']);
+    });
+});

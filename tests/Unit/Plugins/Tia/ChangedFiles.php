@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Pest\Plugins\Tia\ChangedFiles;
+use Pest\Plugins\Tia\ExternalSources;
 use Pest\Plugins\Tia\Fingerprint;
 use Symfony\Component\Process\Process;
 use Tests\Fixtures\Tia\GitRepo;
@@ -284,4 +285,63 @@ it('reads committed paths from the repository root even when git is told to be r
 
     expect($changedFiles->since($monorepo['sha']))->toBe(['app/Service.php'])
         ->and($changedFiles->outsideProject())->toBe(['frontend/widget.php']);
+})->skipOnWindows();
+
+it('tells a working tree change outside the project from a committed one', function (): void {
+    $monorepo = tiaMonorepoRepository();
+
+    file_put_contents($monorepo['root'].'/frontend/widget.php', "<?php\n\$widget = 2;\n");
+    $monorepo['repo']->commit('rework the widget');
+
+    file_put_contents($monorepo['root'].'/frontend/other.php', "<?php\n\$other = 1;\n");
+
+    $changedFiles = new ChangedFiles($monorepo['project']);
+    $changedFiles->since($monorepo['sha']);
+
+    expect($changedFiles->outsideProject())->toBe(['frontend/widget.php', 'frontend/other.php'])
+        ->and($changedFiles->outsideProjectDirty())->toBe(['frontend/other.php']);
+})->skipOnWindows();
+
+it('keeps a changed file whose name is a number as a string', function (): void {
+    $monorepo = tiaMonorepoRepository();
+
+    file_put_contents($monorepo['root'].'/123', "outside\n");
+    file_put_contents($monorepo['project'].'/123', "inside\n");
+    $monorepo['repo']->commit('add files with a numeric name');
+
+    $changedFiles = new ChangedFiles($monorepo['project']);
+
+    expect($changedFiles->since($monorepo['sha']))->toBe(['123'])
+        ->and($changedFiles->outsideProject())->toBe(['123']);
+})->skipOnWindows();
+
+it('matches no external root for a changed file whose name is a number', function (): void {
+    $monorepo = tiaMonorepoRepository();
+    $previous = (string) getcwd();
+
+    mkdir($monorepo['root'].'/packages/shared/src', 0755, true);
+    file_put_contents($monorepo['root'].'/packages/shared/src/Shared.php', "<?php\n\$shared = 1;\n");
+    file_put_contents($monorepo['project'].'/composer.json', (string) json_encode([
+        'autoload' => ['psr-4' => ['Shared\\' => '../packages/shared/src']],
+    ], JSON_PRETTY_PRINT));
+    $monorepo['repo']->commit('let the project load a sibling package');
+    $sha = $monorepo['repo']->sha();
+
+    file_put_contents($monorepo['root'].'/123', "changed\n");
+    $monorepo['repo']->commit('add a file with a numeric name');
+
+    chdir($monorepo['project']);
+    ExternalSources::flush();
+
+    try {
+        $changedFiles = new ChangedFiles($monorepo['project']);
+        $changedFiles->since($sha);
+
+        $matched = ExternalSources::matching($monorepo['project'], $changedFiles->outsideProject());
+    } finally {
+        chdir($previous);
+        ExternalSources::flush();
+    }
+
+    expect($matched)->toBeEmpty();
 })->skipOnWindows();

@@ -6,6 +6,7 @@ namespace Pest\Plugins\Tia;
 
 use Pest\Exceptions\MissingDependency;
 use Pest\Exceptions\TiaGitFailed;
+use Pest\Support\Arr;
 use Pest\Support\Git;
 use Symfony\Component\Process\ExecutableFinder;
 
@@ -76,17 +77,17 @@ final class ChangedFiles
     /**
      * @return array<int, string>
      */
-    public function outsideProject(): array
+    public function outsideProjectDirty(): array
     {
-        return array_map(strval(...), array_keys($this->outsideProject));
+        return Arr::stringKeys($this->outsideProjectDirty);
     }
 
     /**
      * @return array<int, string>
      */
-    public function outsideProjectDirty(): array
+    public function outsideProject(): array
     {
-        return array_map(strval(...), array_keys($this->outsideProjectDirty));
+        return Arr::stringKeys($this->outsideProject);
     }
 
     /**
@@ -102,13 +103,13 @@ final class ChangedFiles
 
         $candidates = array_fill_keys($files, true);
 
-        foreach (array_keys($lastRunTree) as $snapshotted) {
+        foreach (Arr::stringKeys($lastRunTree) as $snapshotted) {
             $candidates[$snapshotted] = true;
         }
 
         $remaining = [];
 
-        foreach (array_keys($candidates) as $file) {
+        foreach (Arr::stringKeys($candidates) as $file) {
             $snapshot = $lastRunTree[$file] ?? null;
             $current = $this->currentHash($file);
 
@@ -189,7 +190,7 @@ final class ChangedFiles
             $unique[$file] = true;
         }
 
-        $candidates = array_keys($this->filterIgnored($unique));
+        $candidates = Arr::stringKeys($this->filterIgnored($unique));
 
         $this->filterIgnoredOutsideProject();
 
@@ -374,7 +375,7 @@ final class ChangedFiles
             }
         }
 
-        return array_keys($names);
+        return Arr::stringKeys($names);
     }
 
     public function hasRemote(): bool
