@@ -1326,6 +1326,7 @@
   ✓ init creates a suite when --init is not the first argument
   ✓ init creates a suite when --init is passed with a value
   ✓ a missing tests directory does not crash while resolving tia state
+  ✓ init writes the plain stubs when only a tool bundled in a PHAR installs Laravel
 
    PASS  Tests\Features\Issue
   ✓ it may be associated with an issue #1, #2
@@ -2440,6 +2441,14 @@
    PASS  Tests\Unit\Support\HigherOrderMessage
   ✓ undefined method exceptions
 
+   PASS  Tests\Unit\Support\InstalledPackages
+  ✓ it finds a package that the project installs
+  ✓ it ignores a package that only a tool bundled in a PHAR installs
+  ✓ it leaves out a development requirement when asked
+  ✓ it reads an installed set that has no install path
+  ✓ it reads the packages that Composer loaded
+  ✓ it is the only class of src that reads Composer packages
+
    PASS  Tests\Unit\Support\Reflection
   ✓ it gets file name from closure
   ✓ it gets property values
@@ -2680,4 +2689,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 39 skipped, 1969 passed (4458 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 39 skipped, 1976 passed (4472 assertions)

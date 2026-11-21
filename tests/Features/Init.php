@@ -74,6 +74,23 @@ test('a missing tests directory does not crash while resolving tia state', funct
     }
 });
 
+test('init writes the plain stubs when only a tool bundled in a PHAR installs Laravel', function (): void {
+    $root = makeInitProject();
+
+    try {
+        $toolLoader = makeLaravelToolPhar($root);
+
+        $process = runInitProjectWithPhpOptions(['-d', 'auto_prepend_file='.$toolLoader], $root, '--init');
+
+        expect($process->getExitCode())->toBe(0)
+            ->and(file_get_contents($root.DIRECTORY_SEPARATOR.'tests'.DIRECTORY_SEPARATOR.'Pest.php'))
+            ->toContain("require_once __DIR__.'/TestCase.php';")
+            ->not->toContain('RefreshDatabase');
+    } finally {
+        removeInitProject($root);
+    }
+})->skipOnWindows();
+
 function makeInitProject(): string
 {
     $root = sys_get_temp_dir().DIRECTORY_SEPARATOR.'pest-init-'.bin2hex(random_bytes(4));
@@ -134,10 +151,55 @@ PHP);
     return $root;
 }
 
+function makeLaravelToolPhar(string $root): string
+{
+    $phar = $root.DIRECTORY_SEPARATOR.'tool.phar';
+
+    $build = new Process([
+        PHP_BINARY,
+        '-d',
+        'phar.readonly=0',
+        '-r',
+        <<<'PHP'
+            $phar = new Phar($argv[1]);
+            $phar->addFromString('vendor/composer/installed.php', <<<'INSTALLED'
+                <?php
+
+                return [
+                    'root' => ['name' => 'tool/dumper', 'install_path' => __DIR__.'/../../'],
+                    'versions' => ['laravel/framework' => ['pretty_version' => 'v12.0.0', 'version' => '12.0.0.0', 'dev_requirement' => false]],
+                ];
+                INSTALLED);
+            $phar->setStub('<?php __HALT_COMPILER();');
+            PHP,
+        $phar,
+    ]);
+
+    $build->mustRun();
+
+    $loader = $root.DIRECTORY_SEPARATOR.'tool-loader.php';
+
+    file_put_contents($loader, sprintf(
+        "<?php\n\nrequire_once %s;\n\n(new Composer\\Autoload\\ClassLoader(%s))->register();\n",
+        var_export(dirname(__DIR__, 2).DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'composer'.DIRECTORY_SEPARATOR.'ClassLoader.php', true),
+        var_export('phar://'.$phar.'/vendor', true),
+    ));
+
+    return $loader;
+}
+
 function runInitProject(string $root, string ...$command): Process
 {
+    return runInitProjectWithPhpOptions([], $root, ...$command);
+}
+
+/**
+ * @param  array<int, string>  $phpOptions
+ */
+function runInitProjectWithPhpOptions(array $phpOptions, string $root, string ...$command): Process
+{
     $process = new Process(
-        [PHP_BINARY, 'run.php', ...$command],
+        [PHP_BINARY, ...$phpOptions, 'run.php', ...$command],
         $root,
         [
             'PEST_NO_SUPPORT' => 'true',
