@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use PHPUnit\Framework\TestStatus\TestStatus;
 use Tests\Fixtures\Tia\Project;
 
 afterEach(function (): void {
@@ -384,4 +385,26 @@ test('a full suite run without a coverage driver clears the tree it could not re
     expect($second->output)->not->toContain('no coverage driver is available')
         ->and($second->replayed())->toBe(Project::TOTAL_TESTS, $second->describe())
         ->and($delta->writtenCount())->toBe(0, $delta->summary());
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
+
+test('a full suite run without a coverage driver records the results it ran', function (array $arguments): void {
+    $project = Project::make('master');
+    $project->seed('master');
+
+    $id = Project::testId('tests/Unit/CalculatorTest.php', 'adds two numbers');
+
+    expect($project->graph()['baselines']['master']['results'][$id]['status'])->toBe(TestStatus::success()->asInt());
+
+    $project->write('app/Calculator.php', str_replace(
+        'return $a + $b;',
+        'return $a - $b;',
+        (string) file_get_contents($project->path().'/app/Calculator.php'),
+    ));
+    $project->git()->commit('break the adder');
+
+    $result = $project->pestWithEnvironment($project->path(), ['XDEBUG_MODE' => 'off'], '--tia', ...$arguments);
+
+    expect($result->exitCode)->toBe(1, $result->describe())
+        ->and($result->output)->toContain('no coverage driver is available')
+        ->and($project->graph()['baselines']['master']['results'][$id]['status'])->toBe(TestStatus::failure()->asInt());
 })->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();

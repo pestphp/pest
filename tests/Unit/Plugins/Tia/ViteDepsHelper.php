@@ -474,6 +474,18 @@ function tiaSfcFixtures(): array
             "<script setup>\nimport A from '@/A.vue'\nconst hint = 'export default'\n</script>",
             ['imports' => ['@/A.vue'], 'moduleType' => 'js'],
         ],
+        'generic-attribute' => [
+            "<script setup lang=\"ts\" generic=\"T extends Record<string, unknown>\">\nimport E from '@/E.vue'\n</script>",
+            ['imports' => ['@/E.vue'], 'moduleType' => 'ts'],
+        ],
+        'generic-attribute-single-quoted' => [
+            "<script setup lang='ts' generic='T extends Array<string>'>\nimport F from '@/F.vue'\n</script>",
+            ['imports' => ['@/F.vue'], 'moduleType' => 'ts'],
+        ],
+        'generic-attribute-before-lang' => [
+            "<script setup generic=\"K extends string, V extends Map<K, number>\" lang=\"ts\">\nimport G from '@/G.vue'\n</script>",
+            ['imports' => ['@/G.vue'], 'moduleType' => 'ts'],
+        ],
     ];
 }
 
@@ -684,6 +696,10 @@ it('always leaves a default export for importers to resolve against', function (
     expect(tiaSfcResults()[$name]['code'])->toMatch('/export\s+default\b/');
 })->with(array_keys(tiaSfcFixtures()));
 
+it('ends the opening script tag after a quoted attribute that holds a closing angle bracket', function (string $name): void {
+    expect(tiaSfcResults()[$name]['code'])->toStartWith("\nimport ");
+})->with(['generic-attribute', 'generic-attribute-single-quoted', 'generic-attribute-before-lang']);
+
 it('does not add a second default export when the block already has one', function (): void {
     preg_match_all('/export\s+default\b/', tiaSfcResults()['plain-script-with-default']['code'], $matches);
 
@@ -771,5 +787,52 @@ it('bundles a script setup component that mentions export default in a comment',
         ->and(json_decode($process->getOutput(), true, flags: JSON_THROW_ON_ERROR))->toMatchArray([
             'resources/js/components/Widget.vue' => ['Dashboard'],
             'resources/js/components/format.js' => ['Dashboard'],
+        ]);
+});
+
+it('bundles a generic component whose script tag holds a closing angle bracket', function (): void {
+    $rolldown = tiaRolldownPackageDir();
+    if ($rolldown === null) {
+        $this->markTestSkipped('rolldown is not resolvable.');
+    }
+
+    $root = sys_get_temp_dir().'/pest-tia-rolldown-generic-'.bin2hex(random_bytes(6));
+    mkdir($root.'/resources/js/pages', 0755, true);
+    mkdir($root.'/resources/js/components', 0755, true);
+    mkdir($root.'/node_modules', 0755, true);
+    $root = realpath($root);
+
+    symlink($rolldown, $root.'/node_modules/rolldown');
+    file_put_contents($root.'/package.json', '{}');
+    file_put_contents($root.'/resources/js/pages/Items.vue', <<<'VUE'
+    <script setup lang="ts">
+    import SortableList from '../components/SortableList.vue'
+    </script>
+    <template><SortableList :items="[]" /></template>
+    VUE);
+    file_put_contents($root.'/resources/js/components/SortableList.vue', <<<'VUE'
+    <script setup lang="ts" generic="T extends Record<string, unknown>">
+    import { label } from './label.ts'
+    defineProps<{ items: T[] }>()
+    </script>
+    <template><li v-for="item in items">{{ label(item) }}</li></template>
+    VUE);
+    file_put_contents($root.'/resources/js/components/label.ts', "export const label = (v: unknown): string => String(v)\n");
+
+    $process = new Process(['node', tiaViteHelperPath(), $root]);
+    $process->run();
+
+    unlink($root.'/node_modules/rolldown');
+    foreach (['resources/js/pages/Items.vue', 'resources/js/components/SortableList.vue', 'resources/js/components/label.ts', 'package.json'] as $file) {
+        @unlink($root.'/'.$file);
+    }
+    foreach (['node_modules', 'resources/js/pages', 'resources/js/components', 'resources/js', 'resources', ''] as $dir) {
+        @rmdir($root.'/'.$dir);
+    }
+
+    expect($process->getExitCode())->toBe(0, $process->getErrorOutput())
+        ->and(json_decode($process->getOutput(), true, flags: JSON_THROW_ON_ERROR))->toMatchArray([
+            'resources/js/components/SortableList.vue' => ['Items'],
+            'resources/js/components/label.ts' => ['Items'],
         ]);
 });
