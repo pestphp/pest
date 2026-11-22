@@ -912,6 +912,14 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             }
         }
 
+        $uncommittedPhpChanges = $this->uncommittedPhpChangesOutsideProject($projectRoot);
+
+        if ($uncommittedPhpChanges !== []) {
+            $this->recordNothingForUncommittedPhpChangesOutsideProject($uncommittedPhpChanges);
+
+            return $arguments;
+        }
+
         $coverageCacheOwned = $this->piggybackCoverage && $this->pestCoverageActive();
 
         if ($coverageCacheOwned) {
@@ -1093,6 +1101,12 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         $outsideProject = $changedFiles->outsideProject();
 
+        $phpChangesOutsideProject = $this->phpFiles($outsideProject);
+
+        if ($phpChangesOutsideProject !== []) {
+            return $this->runFullSuiteForPhpChangesOutsideProject($phpChangesOutsideProject, $arguments);
+        }
+
         $changed = $changedFiles->filterUnchangedSinceLastRun(
             $changed,
             $graph->lastRunTree($this->branch),
@@ -1268,6 +1282,103 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         }
 
         $this->reportChangesOutsideProject($outsideProject);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function uncommittedPhpChangesOutsideProject(string $projectRoot): array
+    {
+        $changedFiles = new ChangedFiles($projectRoot);
+
+        if ($changedFiles->gitPrefix() === '') {
+            return [];
+        }
+
+        try {
+            $changedFiles->since(null);
+        } catch (MissingDependency|TiaGitFailed) {
+            return [];
+        }
+
+        return $this->phpFiles($changedFiles->outsideProjectDirty());
+    }
+
+    /**
+     * @param  array<int, string>  $uncommittedPhpChanges
+     */
+    private function recordNothingForUncommittedPhpChangesOutsideProject(array $uncommittedPhpChanges): void
+    {
+        $this->writesSuppressed = true;
+
+        $this->renderPhpChangesOutsideProject($uncommittedPhpChanges);
+        $this->renderChild('Running the full suite, and recording nothing — the project may load that code, and git stops reporting an uncommitted edit once it is undone.');
+        $this->renderChild('Commit what you changed there to let a run leave a baseline behind.');
+    }
+
+    /**
+     * @param  array<int, string>  $phpChanges
+     * @param  array<int, string>  $arguments
+     * @return array<int, string>
+     */
+    private function runFullSuiteForPhpChangesOutsideProject(array $phpChanges, array $arguments): array
+    {
+        $this->renderPhpChangesOutsideProject($phpChanges);
+
+        if ($this->canRebuildGraph()) {
+            $this->deleteState(self::KEY_GRAPH);
+            $this->deleteState(self::KEY_COVERAGE_CACHE);
+
+            $this->freshGraphReason = 'a PHP file outside the project changed';
+
+            return $this->enterRecordMode($arguments);
+        }
+
+        $this->requestWorkerResults();
+
+        if ($this->piggybackCoverage) {
+            $this->renderChild('Running the full suite — the project may load that code, and a coverage run cannot refresh the dependency graph.');
+            $this->renderChild('Run --tia without --coverage to record a fresh dependency graph.');
+
+            return $arguments;
+        }
+
+        $this->fullSuiteFallbackRan = true;
+
+        $this->renderChild('Running the full suite — the project may load that code, and the dependency graph only reaches files under the project root.');
+        $this->renderChild('Install / enable pcov or xdebug (mode: coverage) so edges can be safely refreshed after changes outside the project root.');
+
+        return $arguments;
+    }
+
+    /**
+     * @param  array<int, string>  $files
+     * @return array<int, string>
+     */
+    private function phpFiles(array $files): array
+    {
+        return array_values(array_filter(
+            $files,
+            static fn (string $file): bool => str_ends_with($file, '.php'),
+        ));
+    }
+
+    /**
+     * @param  array<int, string>  $phpChanges
+     */
+    private function renderPhpChangesOutsideProject(array $phpChanges): void
+    {
+        $count = count($phpChanges);
+
+        $this->renderBadge('WARN', sprintf(
+            'Detected %d changed PHP file%s outside this project.',
+            $count,
+            $count === 1 ? '' : 's',
+        ));
+
+        foreach (array_slice($phpChanges, 0, $this->output->isVerbose() ? $count : 5) as $file) {
+            $this->output->writeln(sprintf('  <fg=gray>%s</>', $file));
+        }
     }
 
     /**

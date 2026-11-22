@@ -23,6 +23,11 @@ final class ChangedFiles
      */
     private array $outsideProject = [];
 
+    /**
+     * @var array<string, true>
+     */
+    private array $outsideProjectDirty = [];
+
     public function __construct(private readonly string $projectRoot)
     {
         $this->git = new Git($projectRoot);
@@ -37,7 +42,7 @@ final class ChangedFiles
      * @param  array<int, string>  $files  repository-relative paths, as printed by git.
      * @return array<int, string> project-relative paths; paths outside the project are dropped.
      */
-    private function toProjectRelative(array $files): array
+    private function toProjectRelative(array $files, bool $fromWorkingTree = false): array
     {
         $prefix = $this->gitPrefix();
 
@@ -59,6 +64,10 @@ final class ChangedFiles
             }
 
             $this->outsideProject[$file] = true;
+
+            if ($fromWorkingTree) {
+                $this->outsideProjectDirty[$file] = true;
+            }
         }
 
         return $projectFiles;
@@ -69,7 +78,15 @@ final class ChangedFiles
      */
     public function outsideProject(): array
     {
-        return array_keys($this->outsideProject);
+        return array_map(strval(...), array_keys($this->outsideProject));
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function outsideProjectDirty(): array
+    {
+        return array_map(strval(...), array_keys($this->outsideProjectDirty));
     }
 
     /**
@@ -149,6 +166,7 @@ final class ChangedFiles
     public function since(?string $sha): ?array
     {
         $this->outsideProject = [];
+        $this->outsideProjectDirty = [];
 
         $files = [];
 
@@ -235,6 +253,7 @@ final class ChangedFiles
         $git = new Git($repositoryRoot);
 
         $this->outsideProject = $this->filterIgnoredWith($git, $this->outsideProject);
+        $this->outsideProjectDirty = array_intersect_key($this->outsideProjectDirty, $this->outsideProject);
     }
 
     /**
@@ -458,7 +477,7 @@ final class ChangedFiles
             $files[] = $path;
         }
 
-        return $this->toProjectRelative($files);
+        return $this->toProjectRelative($files, fromWorkingTree: true);
     }
 
     public function currentSha(): ?string
