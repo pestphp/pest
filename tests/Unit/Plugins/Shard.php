@@ -2,6 +2,8 @@
 
 use Pest\Exceptions\InvalidOption;
 use Pest\Plugins\Shard;
+use Pest\Subscribers\EnsureShardTimingsAreCollected;
+use Pest\Support\Arr;
 use SebastianBergmann\CliParser\Parser;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -94,7 +96,7 @@ describe('buildFilterArgument', function (): void {
         expect($filter)->toBe('Tests\\\\(Unit\\\\FooTest::|Feature\\\\BarTest::)');
     });
 
-    it('returns empty string for empty test list', function (): void {
+    it('generates a filter that selects no tests for an empty test list', function (): void {
         $output = new BufferedOutput;
         $shard = new Shard($output);
 
@@ -103,7 +105,7 @@ describe('buildFilterArgument', function (): void {
 
         $filter = $method->invoke($shard, []);
 
-        expect($filter)->toBeEmpty();
+        expect('Tests\\Unit\\ExampleTest::testExample')->not->toMatch('/'.$filter.'/');
     });
 
     it('generates compact filter for deeply nested namespaces', function (): void {
@@ -622,5 +624,310 @@ describe('addOutput', function (): void {
 
         expect($exitCode)->toBe(1)
             ->and($outputText)->not->toContain('Shard:');
+    });
+});
+
+describe('timings file', function (): void {
+    afterEach(function (): void {
+        $reflection = new ReflectionClass(Shard::class);
+        $reflection->getProperty('timingsFilename')->setValue(null, null);
+        $reflection->getProperty('externalTimings')->setValue(null, null);
+        $reflection->getProperty('collectedTimings')->setValue(null, null);
+        $reflection->getProperty('knownTests')->setValue(null, null);
+        $reflection->getProperty('updateShards')->setValue(null, false);
+        $reflection->getProperty('shard')->setValue(null, null);
+
+        new ReflectionClass(EnsureShardTimingsAreCollected::class)
+            ->getProperty('timings')
+            ->setValue(null, []);
+    });
+
+    it('reads and writes shards.json until a plugin overrides the filename', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $method = new ReflectionClass($shard)->getMethod('shardsPath');
+
+        expect($method->invoke($shard))->toEndWith('.pest'.DIRECTORY_SEPARATOR.'shards.json');
+
+        Shard::useTimingsFile('mutation-shards.json');
+
+        expect($method->invoke($shard))->toEndWith('.pest'.DIRECTORY_SEPARATOR.'mutation-shards.json');
+    });
+
+    it('prefers timings supplied by a plugin over the ones collected from the test run', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        new ReflectionClass(EnsureShardTimingsAreCollected::class)
+            ->getProperty('timings')
+            ->setValue(null, ['Tests\\Unit\\CollectedTest' => 9.0]);
+
+        Shard::useTimings(['Tests\\Unit\\SuppliedTest' => 1.5]);
+
+        $method = new ReflectionClass($shard)->getMethod('collectTimings');
+
+        expect($method->invoke($shard))->toBe(['Tests\\Unit\\SuppliedTest' => 1.5]);
+    });
+
+    it('records known tests without supplied timings as zero', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $reflection->getProperty('knownTests')->setValue(null, ['Tests\\Unit\\MutatedTest', 'Tests\\Unit\\PlainTest']);
+
+        Shard::useTimingsFile('shards-fixture.json');
+        Shard::useTimings($timings = ['Tests\\Unit\\MutatedTest' => 4.5]);
+
+        $path = $reflection->getMethod('shardsPath')->invoke($shard);
+
+        try {
+            $reflection->getMethod('writeTimings')->invoke($shard, $timings);
+
+            expect(json_decode((string) file_get_contents($path), true)['timings'])->toEqual([
+                'Tests\\Unit\\MutatedTest' => 4.5,
+                'Tests\\Unit\\PlainTest' => 0.0,
+            ]);
+        } finally {
+            @unlink($path);
+        }
+    });
+
+    it('keeps timings supplied by a plugin even when the test suite did not pass', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        new ReflectionClass($shard)->getProperty('updateShards')->setValue(null, true);
+
+        Shard::useTimingsFile('mutation-shards.json');
+        Shard::useTimings(['Tests\\Unit\\SuppliedTest' => 1.5]);
+
+        $paratest = Arr::get($_SERVER, 'PARATEST');
+        unset($_SERVER['PARATEST']);
+
+        try {
+            expect($shard->addOutput(1))->toBe(1)
+                ->and($output->fetch())->toContain('mutation-shards.json updated with timings for 1 test class.');
+        } finally {
+            if ($paratest !== null) {
+                $_SERVER['PARATEST'] = $paratest;
+            }
+        }
+    });
+
+    it('strips coverage arguments when building the list-tests command', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $method = new ReflectionClass($shard)->getMethod('buildListTestsCommand');
+
+        $command = $method->invoke($shard, ['bin/pest', '--coverage-php=/tmp/coverage.php', '--update-shards'], 'tests');
+
+        expect($command)->toBe([
+            PHP_BINARY,
+            'bin/pest',
+            '--update-shards',
+            '--test-directory=tests',
+            '--list-tests',
+        ]);
+    });
+
+    it('strips the separate path of a coverage argument when building the list-tests command', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $method = new ReflectionClass($shard)->getMethod('buildListTestsCommand');
+
+        $command = $method->invoke($shard, ['bin/pest', '--coverage-php', '/tmp/coverage.php', '--update-shards'], 'tests');
+
+        expect($command)->toBe([
+            PHP_BINARY,
+            'bin/pest',
+            '--update-shards',
+            '--test-directory=tests',
+            '--list-tests',
+        ]);
+    });
+
+    it('strips the separate value of a coverage option when building the list-tests command', function (string $option): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $method = new ReflectionClass($shard)->getMethod('buildListTestsCommand');
+
+        $command = $method->invoke($shard, ['bin/pest', $option, '/tmp/value', '--update-shards'], 'tests');
+
+        expect($command)->toBe([
+            PHP_BINARY,
+            'bin/pest',
+            '--update-shards',
+            '--test-directory=tests',
+            '--list-tests',
+        ]);
+    })->with(['--coverage-jsonl', '--coverage-filter', '--min', '--exactly']);
+
+    it('strips the separate value of the parallel processes option when building the list-tests command', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $method = new ReflectionClass($shard)->getMethod('buildListTestsCommand');
+
+        $command = $method->invoke($shard, ['bin/pest', '--parallel', '--processes', '4', '--update-shards'], 'tests');
+
+        expect($command)->toBe([
+            PHP_BINARY,
+            'bin/pest',
+            '--update-shards',
+            '--test-directory=tests',
+            '--list-tests',
+        ]);
+    });
+
+    it('keeps a unit saved with no test classes, but drops one emptied by removed classes', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $method = new ReflectionClass($shard)->getMethod('withoutRemovedTests');
+
+        $units = [
+            'src/Explicit.php' => ['time' => 1.0, 'tests' => []],
+            'src/Emptied.php' => ['time' => 2.0, 'tests' => ['Tests\\Unit\\RemovedTest']],
+        ];
+
+        expect($method->invoke($shard, $units, ['Tests\\Unit\\AliveTest']))->toBe([
+            'src/Explicit.php' => ['time' => 1.0, 'tests' => []],
+        ]);
+    });
+
+    it('drops test classes that no longer exist from the stored units', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $method = new ReflectionClass($shard)->getMethod('withoutRemovedTests');
+
+        $units = [
+            'Tests\\Unit\\AliveTest' => ['time' => 1.0, 'tests' => ['Tests\\Unit\\AliveTest']],
+            'Tests\\Unit\\RemovedTest' => ['time' => 100.0, 'tests' => ['Tests\\Unit\\RemovedTest']],
+            'src/Bundle.php' => ['time' => 2.0, 'tests' => ['Tests\\Unit\\AliveTest', 'Tests\\Unit\\RemovedTest']],
+        ];
+
+        expect($method->invoke($shard, $units, ['Tests\\Unit\\AliveTest']))->toBe([
+            'Tests\\Unit\\AliveTest' => ['time' => 1.0, 'tests' => ['Tests\\Unit\\AliveTest']],
+            'src/Bundle.php' => ['time' => 2.0, 'tests' => ['Tests\\Unit\\AliveTest']],
+        ]);
+    });
+});
+
+describe('units', function (): void {
+    afterEach(function (): void {
+        $reflection = new ReflectionClass(Shard::class);
+        $reflection->getProperty('timingsFilename')->setValue(null, null);
+        $reflection->getProperty('externalTimings')->setValue(null, null);
+        $reflection->getProperty('collectedTimings')->setValue(null, null);
+        $reflection->getProperty('knownTests')->setValue(null, null);
+        $reflection->getProperty('ownership')->setValue(null, null);
+        $reflection->getProperty('shardsOutdated')->setValue(null, false);
+    });
+
+    it('treats a bare timing as a unit bundling only its own test class', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $method = new ReflectionClass($shard)->getMethod('normaliseUnits');
+
+        expect($method->invoke($shard, ['Tests\\Unit\\FooTest' => 1.5]))->toBe([
+            'Tests\\Unit\\FooTest' => ['time' => 1.5, 'tests' => ['Tests\\Unit\\FooTest']],
+        ]);
+    });
+
+    it('keeps the test classes a unit bundles together in one shard', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $method = new ReflectionClass($shard)->getMethod('partitionByTime');
+
+        $partitions = $method->invoke($shard, [
+            'app/Heavy.php' => ['time' => 10.0, 'tests' => ['Tests\\Unit\\OneTest', 'Tests\\Unit\\TwoTest']],
+            'app/Light.php' => ['time' => 1.0, 'tests' => ['Tests\\Unit\\ThreeTest']],
+            'app/Medium.php' => ['time' => 4.0, 'tests' => ['Tests\\Unit\\FourTest']],
+        ], 2);
+
+        expect(array_keys($partitions[0]))->toBe(['app/Heavy.php'])
+            ->and(array_keys($partitions[1]))->toBe(['app/Medium.php', 'app/Light.php']);
+    });
+
+    it('owns every unit when the run is not time-balanced', function (): void {
+        expect(Shard::owns('app/Anything.php'))->toBeTrue();
+    });
+
+    it('owns only the units allocated to the current shard', function (): void {
+        new ReflectionClass(Shard::class)->getProperty('ownership')->setValue(null, [
+            'app/Mine.php' => true,
+            'app/Theirs.php' => false,
+        ]);
+
+        expect(Shard::owns('app/Mine.php'))->toBeTrue()
+            ->and(Shard::owns('app/Theirs.php'))->toBeFalse()
+            ->and(new ReflectionClass(Shard::class)->getProperty('shardsOutdated')->getValue())->toBeFalse();
+    });
+
+    it('owns a unit the timings file does not know in every shard, and reports the file as out of date', function (): void {
+        $reflection = new ReflectionClass(Shard::class);
+        $reflection->getProperty('ownership')->setValue(null, ['app/Theirs.php' => false]);
+
+        expect(Shard::owns('app/New.php'))->toBeTrue()
+            ->and($reflection->getProperty('shardsOutdated')->getValue())->toBeTrue();
+    });
+
+    it('keeps a unit that bundles no test class when writing', function (): void {
+        $shard = new Shard(new BufferedOutput);
+
+        $reflection = new ReflectionClass($shard);
+        $reflection->getProperty('knownTests')->setValue(null, ['Tests\\Unit\\FooTest']);
+
+        expect(array_keys($reflection->getMethod('unitsToWrite')->invoke($shard, [
+            'app/Uncovered.php' => ['time' => 0.0, 'tests' => []],
+            'app/Gone.php' => ['time' => 1.0, 'tests' => ['Tests\\Unit\\GoneTest']],
+        ])))->toBe(['app/Uncovered.php', 'Tests\\Unit\\FooTest']);
+    });
+
+    it('collects every test class the given units bundle', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $method = new ReflectionClass($shard)->getMethod('testsOf');
+
+        expect($method->invoke($shard, [
+            'app/One.php' => ['time' => 1.0, 'tests' => ['Tests\\Unit\\FooTest', 'Tests\\Unit\\BarTest']],
+            'app/Two.php' => ['time' => 1.0, 'tests' => ['Tests\\Unit\\BarTest']],
+        ]))->toBe(['Tests\\Unit\\FooTest', 'Tests\\Unit\\BarTest']);
+    });
+
+    it('writes bundled units, and reads back both shapes', function (): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $reflection->getProperty('knownTests')->setValue(null, ['Tests\\Unit\\FooTest', 'Tests\\Unit\\BarTest']);
+
+        Shard::useTimingsFile('units-fixture.json');
+        Shard::useTimings($units = [
+            'app/One.php' => ['time' => 4.5, 'tests' => ['Tests\\Unit\\FooTest']],
+        ]);
+
+        $path = $reflection->getMethod('shardsPath')->invoke($shard);
+
+        try {
+            $reflection->getMethod('writeTimings')->invoke($shard, $units);
+
+            expect(json_decode((string) file_get_contents($path), true))->toHaveKey('units')
+                ->and($reflection->getMethod('loadShardsFile')->invoke($shard))->toEqual([
+                    'app/One.php' => ['time' => 4.5, 'tests' => ['Tests\\Unit\\FooTest']],
+                    'Tests\\Unit\\BarTest' => ['time' => 0.0, 'tests' => ['Tests\\Unit\\BarTest']],
+                ]);
+        } finally {
+            @unlink($path);
+        }
     });
 });

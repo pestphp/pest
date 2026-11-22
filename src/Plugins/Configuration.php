@@ -11,6 +11,7 @@ use Pest\Plugins\Concerns\HandleArguments;
 use PHPUnit\Event\Facade as EventFacade;
 use PHPUnit\TextUI\CliArguments\Builder as CliConfigurationBuilder;
 use PHPUnit\TextUI\CliArguments\XmlConfigurationFileFinder;
+use RuntimeException;
 
 /**
  * @internal
@@ -27,6 +28,9 @@ final class Configuration implements HandlesArguments, Terminable
         .DIRECTORY_SEPARATOR
         .'resources/base-phpunit.xml';
 
+    /** @var array{path: string, dev: int, ino: int}|null */
+    private ?array $generatedConfiguration = null;
+
     public function handleArguments(array $arguments): array
     {
         if ($this->hasArgument('--configuration', $arguments) || $this->hasArgument('-c', $arguments) || $this->hasCustomConfigurationFile()) {
@@ -40,19 +44,50 @@ final class Configuration implements HandlesArguments, Terminable
 
     private function fromGeneratedConfigurationFile(): string
     {
-        $path = $this->getTempPhpunitXmlPath();
-        if (file_exists($path)) {
-            unlink($path);
+        $directory = getcwd();
+
+        if ($directory === false) {
+            throw new RuntimeException('Unable to determine the working directory.');
         }
 
         $doc = new DOMDocument;
         $doc->load(self::BASE_PHPUNIT_FILE);
 
         $contents = $doc->saveXML();
+        assert(is_string($contents));
 
-        assert(is_int(file_put_contents($path, $contents)));
+        foreach (['.pest.xml', '.pest-fallback.xml', null] as $filename) {
+            $filename ??= '.pest-'.bin2hex(random_bytes(8)).'.xml';
+            $path = $directory.DIRECTORY_SEPARATOR.$filename;
+            $file = @fopen($path, 'xb');
 
-        return $path;
+            if ($file === false) {
+                continue;
+            }
+
+            try {
+                $stat = @fstat($file);
+
+                if ($stat === false) {
+                    throw new RuntimeException('Unable to identify the temporary PHPUnit configuration file.');
+                }
+
+                $this->generatedConfiguration = ['path' => $path, 'dev' => $stat['dev'], 'ino' => $stat['ino']];
+                $written = @fwrite($file, $contents);
+            } finally {
+                fclose($file);
+            }
+
+            if ($written !== strlen($contents)) {
+                $this->terminate();
+
+                throw new RuntimeException('Unable to write the temporary PHPUnit configuration file.');
+            }
+
+            return $path;
+        }
+
+        throw new RuntimeException('Unable to create a temporary PHPUnit configuration file.');
     }
 
     private function hasCustomConfigurationFile(): bool
@@ -63,17 +98,20 @@ final class Configuration implements HandlesArguments, Terminable
         return is_string($configurationFile);
     }
 
-    private function getTempPhpunitXmlPath(): string
-    {
-        return getcwd().'/.pest.xml';
-    }
-
     public function terminate(): void
     {
-        $path = $this->getTempPhpunitXmlPath();
+        $configuration = $this->generatedConfiguration;
+        $this->generatedConfiguration = null;
 
-        if (file_exists($path)) {
-            unlink($path);
+        if ($configuration === null) {
+            return;
+        }
+
+        clearstatcache();
+        $stat = @lstat($configuration['path']);
+
+        if ($stat !== false && $stat['dev'] === $configuration['dev'] && $stat['ino'] === $configuration['ino']) {
+            unlink($configuration['path']);
         }
     }
 }

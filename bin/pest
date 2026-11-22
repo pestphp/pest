@@ -6,6 +6,7 @@ declare(strict_types=1);
 use Pest\Contracts\Restarter;
 use Pest\Kernel;
 use Pest\Panic;
+use Pest\Support\ComposerProject;
 use Pest\Support\Container;
 use Pest\TestCaseFilters\GitDirtyTestCaseFilter;
 use Pest\TestCaseMethodFilters\AssigneeTestCaseFilter;
@@ -121,29 +122,78 @@ use Symfony\Component\Console\Output\ConsoleOutput;
             }
         }
 
-        if (str_contains($value, '--teamcity')) {
+        if ($value === '--teamcity') {
             unset($arguments[$key]);
             $arguments[] = '--no-output';
             unset($_SERVER['COLLISION_PRINTER']);
         }
     }
 
-    // Used when Pest is required using composer.
-    $vendorPath = dirname(__DIR__, 4).'/vendor/autoload.php';
+    $optionsWithSeparateValue = [
+        '-c', '-d', '--atleast-version', '--bootstrap', '--cache-directory', '--columns', '--configuration',
+        '--coverage-filter', '--coverage-clover', '--coverage-cobertura', '--coverage-crap4j', '--coverage-html',
+        '--coverage-jsonl', '--coverage-openclover', '--coverage-php', '--coverage-xml', '--default-time-limit',
+        '--diff-context', '--exclude-group', '--filter', '--exclude-filter', '--generate-baseline', '--use-baseline',
+        '--group', '--covers', '--uses', '--requires-php-extension', '--include-path', '--list-tests-xml',
+        '--log-junit', '--log-otr', '--log-teamcity', '--order-by', '--random-order-seed', '--repeat',
+        '--timeout', '--testdox-html', '--testdox-text', '--test-suffix', '--testsuite', '--exclude-testsuite',
+        '--test-files-file', '--test-id-filter-file', '--run-test-id', '--log-events-text',
+        '--log-events-verbose-text', '--extension',
+    ];
 
-    // Used when Pest maintainers are running Pest tests.
-    $localPath = dirname(__DIR__).'/vendor/autoload.php';
+    $isOptionValue = false;
 
-    if (file_exists($vendorPath)) {
-        include_once $vendorPath;
-        $autoloadPath = $vendorPath;
-    } else {
-        include_once $localPath;
-        $autoloadPath = $localPath;
+    // Convert namespace-style arguments (e.g. Tests\Unit\TestName) to file paths.
+    foreach ($arguments as $key => $value) {
+        if ($isOptionValue) {
+            $isOptionValue = false;
+
+            continue;
+        }
+
+        if (str_starts_with($value, '-')) {
+            $isOptionValue = in_array($value, $optionsWithSeparateValue, true);
+
+            continue;
+        }
+
+        if (! str_contains($value, '\\')) {
+            continue;
+        }
+
+        $path = str_replace('\\', DIRECTORY_SEPARATOR, $value);
+
+        if (! str_ends_with($path, '.php')) {
+            $path .= '.php';
+        }
+
+        if (file_exists($path)) {
+            $arguments[$key] = $path;
+
+            continue;
+        }
+
+        // Try lowercasing the first directory segment (e.g. Tests -> tests).
+        $segments = explode(DIRECTORY_SEPARATOR, $path);
+        $segments[0] = lcfirst($segments[0]);
+        $lowercasedPath = implode(DIRECTORY_SEPARATOR, $segments);
+
+        if (file_exists($lowercasedPath)) {
+            $arguments[$key] = $lowercasedPath;
+        }
     }
 
-    // Get $rootPath based on $autoloadPath
-    $rootPath = dirname($autoloadPath, 2);
+    // Used when Pest is required using composer.
+    $autoloadPath = $GLOBALS['_composer_autoload_path'] ?? dirname(__DIR__, 3).'/autoload.php';
+
+    if (! is_file($autoloadPath)) {
+        $autoloadPath = dirname(__DIR__).'/vendor/autoload.php';
+    }
+
+    include_once $autoloadPath;
+
+    $GLOBALS['_composer_bin_dir'] ??= dirname($autoloadPath).'/bin';
+    $rootPath = ComposerProject::rootPath($autoloadPath);
 
     $input = new ArgvInput;
 

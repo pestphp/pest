@@ -7,7 +7,6 @@ namespace Pest\PendingCalls;
 use Closure;
 use Pest\Exceptions\AfterBeforeTestFunction;
 use Pest\PendingCalls\Concerns\Describable;
-use Pest\Support\Arr;
 use Pest\Support\Backtrace;
 use Pest\Support\ChainableClosure;
 use Pest\Support\HigherOrderMessageCollection;
@@ -50,11 +49,9 @@ final class BeforeEachCall
         $beforeEachTestCall = function (TestCall $testCall) use ($describing): void {
 
             if ($this->describing !== []) {
-                if (Arr::last($describing) !== Arr::last($this->describing)) {
-                    return;
-                }
-
-                if (! in_array(Arr::last($describing), $testCall->describing, true)) {
+                $testCallDescribing = $testCall->describing;
+                if (count($describing) > count($testCallDescribing) ||
+                    array_slice($testCallDescribing, 0, count($describing)) !== $describing) {
                     return;
                 }
             }
@@ -63,7 +60,7 @@ final class BeforeEachCall
         };
 
         $beforeEachTestCase = ChainableClosure::boundWhen(
-            fn (): bool => $describing === [] || in_array(Arr::last($describing), $this->__describing, true),
+            fn (): bool => $describing === [] || (count($describing) <= count($this->__describing) && array_slice($this->__describing, 0, count($describing)) === $describing),
             ChainableClosure::bound(fn () => $testCaseProxies->chain($this), $this->closure)->bindTo($this, self::class),
         )->bindTo($this, self::class);
 

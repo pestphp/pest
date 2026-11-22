@@ -89,13 +89,16 @@ final class ReadCapture
 
     private static function disable(): void
     {
+        if (in_array(self::PROTOCOL, stream_get_wrappers(), true)) {
+            stream_wrapper_unregister(self::PROTOCOL);
+        }
+
         if (self::$previousWrapper === null) {
             stream_wrapper_restore(self::PROTOCOL);
 
             return;
         }
 
-        stream_wrapper_unregister(self::PROTOCOL);
         stream_wrapper_register(self::PROTOCOL, self::$previousWrapper);
     }
 
@@ -286,21 +289,13 @@ final class ReadCapture
     public function url_stat(string $path, int $flags): array|false
     {
         return $this->withOriginalWrapper(function () use ($path, $flags): array|false {
-            $isQuiet = ($flags & STREAM_URL_STAT_QUIET) !== 0;
+            set_error_handler(static fn (): bool => true);
 
-            if (($flags & STREAM_URL_STAT_LINK) !== 0) {
-                if ($isQuiet && ! is_link($path) && ! file_exists($path)) {
-                    return false;
-                }
-
-                return @lstat($path);
+            try {
+                return ($flags & STREAM_URL_STAT_LINK) !== 0 ? lstat($path) : stat($path);
+            } finally {
+                restore_error_handler();
             }
-
-            if ($isQuiet && ! file_exists($path)) {
-                return false;
-            }
-
-            return @stat($path);
         });
     }
 
