@@ -21,7 +21,7 @@ test('parallel', function () use ($run): void {
     $output = implode("\n", array_slice(explode("\n", (string) $output), -10));
     $profileOutput = $run('tests/Fixtures/Suites/SuccessOnly.php', '--profile');
 
-    $expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 30 skipped, 1792 passed (3849 assertions)';
+    $expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 30 skipped, 1810 passed (3880 assertions)';
 
     expect($output)
         ->toContain("Tests:    {$expected}")

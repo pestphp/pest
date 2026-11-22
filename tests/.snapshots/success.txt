@@ -1963,6 +1963,25 @@
   ✓ units → it collects every test class the given units bundle
   ✓ units → it writes bundled units, and reads back both shapes
 
+   PASS  Tests\Unit\Plugins\Tia\ChangedFiles
+  ✓ it resolves the project prefix inside the repository
+  ✓ it keeps a space that begins the name of the project directory
+  ✓ it keeps the character that ends the name of the repository root with dataset "a space"
+  ✓ it keeps the character that ends the name of the repository root with dataset "a carriage return"
+  ✓ it reports working tree changes relative to the project, dropping siblings
+  ✓ it reports committed changes relative to the project, dropping siblings
+  ✓ it drops a file whose content came back to its baseline across the prefix boundary
+  ✓ it honours a gitignore inside the project
+  ✓ it leaves a project at the repository root untouched
+  ✓ it reports the changes it left outside the project
+  ✓ it reports nothing outside the project for a project at the repository root
+  ✓ it ties a fingerprint to the project location inside the repository
+  ✓ it sees a committed non-ascii path that git would otherwise quote
+  ✓ it sees a committed non-ascii path at the repository root too
+  ✓ it keeps a tracked outside change and drops an untracked ignored one
+  ✓ it keeps a tracked project change that the ignore rules match
+  ✓ it reads committed paths from the repository root even when git is told to be relative
+
    PASS  Tests\Unit\Plugins\Tia\ConfigurationFile
   ✓ it fingerprints the path and the content of the configuration file
   ✓ it tells an identical copy under another name apart from the original
@@ -2140,6 +2159,7 @@
    PASS  Tests\Unit\Plugins\Tia\Storage
   ✓ it uses a project-relative configured directory
   ✓ it uses an absolute configured directory
+  ✓ it keeps the state directory of a project at the repository root
 
    PASS  Tests\Unit\Plugins\Tia\TableExtractor
   ✓ fromSql() → it extracts tables from plain DML
@@ -2627,4 +2647,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1919 passed (4374 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1937 passed (4405 assertions)

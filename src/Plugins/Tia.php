@@ -17,7 +17,6 @@ use Pest\Exceptions\TiaGitFailed;
 use Pest\Exceptions\TiaRequiresCommit;
 use Pest\Exceptions\TiaRequiresDefaultBranch;
 use Pest\Exceptions\TiaRequiresRemote;
-use Pest\Exceptions\TiaRequiresRepositoryRoot;
 use Pest\Panic;
 use Pest\Plugins\Concerns\HandleArguments;
 use Pest\Plugins\Tia\BaselineSync;
@@ -382,8 +381,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     }
 
     /**
-     * Mirrors {@see HandleArguments::hasArgument()} for
-     *
      * @param  array<int, string>  $arguments
      */
     private static function argumentPresent(string $argument, array $arguments): bool
@@ -465,17 +462,11 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         return $this->cachedAssertionsByTestId[$testId] ?? 0;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function handleOriginalArguments(array $arguments): void
     {
         $this->originalArguments = $arguments;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function handleArguments(array $arguments): array
     {
         if ($this->hasArgument(self::BASELINE_PATH_OPTION, $arguments)) {
@@ -865,12 +856,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     {
         $this->watchPatterns->useDefaults($projectRoot);
 
-        $subdirectoryPrefix = $this->gitSubdirectoryPrefix($projectRoot);
-
-        if ($subdirectoryPrefix !== null) {
-            Panic::with(new TiaRequiresRepositoryRoot($subdirectoryPrefix));
-        }
-
         try {
             $this->resolveBranch($projectRoot);
         } catch (MissingDependency|TiaGitFailed $missingGit) {
@@ -925,6 +910,14 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             if ($graph instanceof Graph) {
                 $graph = $this->reconcileFingerprint($graph, $fingerprint);
             }
+        }
+
+        $uncommittedPhpChanges = $this->uncommittedPhpChangesOutsideProject($projectRoot);
+
+        if ($uncommittedPhpChanges !== []) {
+            $this->recordNothingForUncommittedPhpChangesOutsideProject($uncommittedPhpChanges);
+
+            return $arguments;
         }
 
         $coverageCacheOwned = $this->piggybackCoverage && $this->pestCoverageActive();
@@ -1106,6 +1099,14 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             Panic::with(new TiaBaselineCommitMissing((string) $branchSha));
         }
 
+        $outsideProject = $changedFiles->outsideProject();
+
+        $phpChangesOutsideProject = $this->phpFiles($outsideProject);
+
+        if ($phpChangesOutsideProject !== []) {
+            return $this->runFullSuiteForPhpChangesOutsideProject($phpChangesOutsideProject, $arguments);
+        }
+
         $changed = $changedFiles->filterUnchangedSinceLastRun(
             $changed,
             $graph->lastRunTree($this->branch),
@@ -1143,7 +1144,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             ...$rerunFromCache,
         ]));
 
-        $this->reportAffectedSummary($changed, $affectedFromChanges, $rerunFromCache, $affected);
+        $this->reportAffectedSummary($changed, $affectedFromChanges, $rerunFromCache, $affected, $outsideProject);
 
         $affectedSet = array_fill_keys($affected, true);
         $canRefreshReplayEdges = $affected !== [] && $coverageAvailable;
@@ -1208,13 +1209,15 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
      * @param  array<int, string>  $affectedFromChanges
      * @param  array<int, string>  $rerunFromCache
      * @param  array<int, string>  $affected
+     * @param  array<int, string>  $outsideProject
      */
-    private function reportAffectedSummary(array $changedFiles, array $affectedFromChanges, array $rerunFromCache, array $affected): void
+    private function reportAffectedSummary(array $changedFiles, array $affectedFromChanges, array $rerunFromCache, array $affected, array $outsideProject = []): void
     {
         $this->output->writeln('');
 
         if ($affected === []) {
             $this->renderChild('Experimental TIA mode enabled.');
+            $this->reportChangesOutsideProject($outsideProject);
 
             return;
         }
@@ -1277,6 +1280,124 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         if ($remainder > 0) {
             $this->output->writeln(sprintf('  <fg=gray>… +%d more</>', $remainder));
         }
+
+        $this->reportChangesOutsideProject($outsideProject);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function uncommittedPhpChangesOutsideProject(string $projectRoot): array
+    {
+        $changedFiles = new ChangedFiles($projectRoot);
+
+        if ($changedFiles->gitPrefix() === '') {
+            return [];
+        }
+
+        try {
+            $changedFiles->since(null);
+        } catch (MissingDependency|TiaGitFailed) {
+            return [];
+        }
+
+        return $this->phpFiles($changedFiles->outsideProjectDirty());
+    }
+
+    /**
+     * @param  array<int, string>  $uncommittedPhpChanges
+     */
+    private function recordNothingForUncommittedPhpChangesOutsideProject(array $uncommittedPhpChanges): void
+    {
+        $this->writesSuppressed = true;
+
+        $this->renderPhpChangesOutsideProject($uncommittedPhpChanges);
+        $this->renderChild('Running the full suite, and recording nothing — the project may load that code, and git stops reporting an uncommitted edit once it is undone.');
+        $this->renderChild('Commit what you changed there to let a run leave a baseline behind.');
+    }
+
+    /**
+     * @param  array<int, string>  $phpChanges
+     * @param  array<int, string>  $arguments
+     * @return array<int, string>
+     */
+    private function runFullSuiteForPhpChangesOutsideProject(array $phpChanges, array $arguments): array
+    {
+        $this->renderPhpChangesOutsideProject($phpChanges);
+
+        if ($this->canRebuildGraph()) {
+            $this->deleteState(self::KEY_GRAPH);
+            $this->deleteState(self::KEY_COVERAGE_CACHE);
+
+            $this->freshGraphReason = 'a PHP file outside the project changed';
+
+            return $this->enterRecordMode($arguments);
+        }
+
+        $this->requestWorkerResults();
+
+        if ($this->piggybackCoverage) {
+            $this->renderChild('Running the full suite — the project may load that code, and a coverage run cannot refresh the dependency graph.');
+            $this->renderChild('Run --tia without --coverage to record a fresh dependency graph.');
+
+            return $arguments;
+        }
+
+        $this->fullSuiteFallbackRan = true;
+
+        $this->renderChild('Running the full suite — the project may load that code, and the dependency graph only reaches files under the project root.');
+        $this->renderChild('Install / enable pcov or xdebug (mode: coverage) so edges can be safely refreshed after changes outside the project root.');
+
+        return $arguments;
+    }
+
+    /**
+     * @param  array<int, string>  $files
+     * @return array<int, string>
+     */
+    private function phpFiles(array $files): array
+    {
+        return array_values(array_filter(
+            $files,
+            static fn (string $file): bool => str_ends_with($file, '.php'),
+        ));
+    }
+
+    /**
+     * @param  array<int, string>  $phpChanges
+     */
+    private function renderPhpChangesOutsideProject(array $phpChanges): void
+    {
+        $count = count($phpChanges);
+
+        $this->renderBadge('WARN', sprintf(
+            'Detected %d changed PHP file%s outside this project.',
+            $count,
+            $count === 1 ? '' : 's',
+        ));
+
+        foreach (array_slice($phpChanges, 0, $this->output->isVerbose() ? $count : 5) as $file) {
+            $this->output->writeln(sprintf('  <fg=gray>%s</>', $file));
+        }
+    }
+
+    /**
+     * @param  array<int, string>  $outsideProject  Repository-relative paths.
+     */
+    private function reportChangesOutsideProject(array $outsideProject): void
+    {
+        if ($outsideProject === []) {
+            return;
+        }
+
+        $count = count($outsideProject);
+
+        $this->renderChild(sprintf(
+            '%d changed file%s outside this project %s ignored — TIA only tracks files under the project root.',
+            $count,
+            $count === 1 ? '' : 's',
+            $count === 1 ? 'was' : 'were',
+        ));
     }
 
     /**
@@ -2246,6 +2367,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             'js_config' => 'JS/TS config',
             'pest_factory' => 'Pest internals',
             'pest_method_factory' => 'Pest internals',
+            'project_prefix' => 'project location in the repository',
         ];
 
         $seen = [];
@@ -2260,11 +2382,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         return implode(', ', array_keys($seen));
     }
 
-    private function gitSubdirectoryPrefix(string $projectRoot): ?string
-    {
-        return new Git($projectRoot)->subdirectoryPrefix();
-    }
-
     private function composerLockDelta(string $projectRoot, string $sha): string
     {
         $current = @file_get_contents($projectRoot.'/composer.lock');
@@ -2272,7 +2389,9 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return '';
         }
 
-        $baseline = new Git($projectRoot)->show($sha, 'composer.lock');
+        $git = new Git($projectRoot);
+
+        $baseline = $git->show($sha, $git->pathPrefix().'composer.lock');
 
         if ($baseline === null) {
             return '';

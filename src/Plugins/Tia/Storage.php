@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
+use Pest\Support\Git;
+
 /**
  * @internal
  */
@@ -92,15 +94,18 @@ final class Storage
         return null;
     }
 
-    /**
-     *      `git@github.com:foo/bar.git`, `ssh://git@github.com/foo/bar`
-     */
     private static function projectKey(string $projectRoot): string
     {
         $origin = self::originIdentity($projectRoot);
 
         $realpath = @realpath($projectRoot);
         $input = $origin ?? ($realpath === false ? $projectRoot : $realpath);
+
+        $prefix = $origin === null ? '' : self::gitPrefix($projectRoot);
+
+        if ($prefix !== '') {
+            $input .= '/'.$prefix;
+        }
 
         $hash = substr(hash('sha256', $input), 0, 16);
         $slug = self::slug(basename($projectRoot));
@@ -116,12 +121,10 @@ final class Storage
             return null;
         }
 
-        // git@host:org/repo(.git)
         if (preg_match('#^[\w.-]+@([\w.-]+):([\w./-]+?)(?:\.git)?/?$#', $url, $m) === 1) {
             return strtolower($m[1].'/'.$m[2]);
         }
 
-        // scheme://[user@]host[:port]/org/repo(.git)  — https, ssh, git, file
         if (preg_match('#^[a-z]+://(?:[^@/]+@)?([^/:]+)(?::\d+)?/([\w./-]+?)(?:\.git)?/?$#i', $url, $m) === 1) {
             return strtolower($m[1].'/'.$m[2]);
         }
@@ -131,23 +134,12 @@ final class Storage
 
     private static function rawOriginUrl(string $projectRoot): ?string
     {
-        $config = $projectRoot.DIRECTORY_SEPARATOR.'.git'.DIRECTORY_SEPARATOR.'config';
+        return new Git($projectRoot)->originUrl();
+    }
 
-        if (! is_file($config)) {
-            return null;
-        }
-
-        $raw = @file_get_contents($config);
-
-        if ($raw === false) {
-            return null;
-        }
-
-        if (preg_match('/\[remote "origin"\][^\[]*?url\s*=\s*(\S+)/s', $raw, $match) === 1) {
-            return trim($match[1]);
-        }
-
-        return null;
+    private static function gitPrefix(string $projectRoot): string
+    {
+        return new Git($projectRoot)->pathPrefix();
     }
 
     private static function slug(string $name): string
