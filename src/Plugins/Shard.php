@@ -607,7 +607,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             $share = $unit['time'] / count($unit['tests']);
 
             foreach ($unit['tests'] as $class) {
-                $timings[$class] = $share;
+                $timings[$class] = ($timings[$class] ?? 0.0) + $share;
             }
         }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Parallel\Support;
 
+use PHPUnit\Runner\TestSuiteSorter;
 use ReflectionClass;
 
 /**
@@ -15,6 +16,13 @@ final readonly class SlowestFirst
      * @param  array<string, float>  $timingsByFile
      */
     private function __construct(private array $timingsByFile, private float $unknownTiming) {}
+
+    public static function appliesTo(bool $orderGiven, int $executionOrder, int $executionOrderDefects): bool
+    {
+        return ! $orderGiven
+            && $executionOrder === TestSuiteSorter::ORDER_DEFAULT
+            && $executionOrderDefects === TestSuiteSorter::ORDER_DEFAULT;
+    }
 
     /**
      * @param  array<string, float>  $timingsByClass

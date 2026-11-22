@@ -26,7 +26,6 @@ use PHPUnit\Event\Test\AfterLastTestMethodFailed;
 use PHPUnit\Event\TestRunner\WarningTriggered;
 use PHPUnit\Runner\CodeCoverage;
 use PHPUnit\Runner\TestRunHistory\DefaultTestRunHistory;
-use PHPUnit\Runner\TestSuiteSorter;
 use PHPUnit\TestRunner\TestResult\Facade as TestResultFacade;
 use PHPUnit\TestRunner\TestResult\TestResult;
 use PHPUnit\TextUI\Configuration\CodeCoverageFilterRegistry;
@@ -236,7 +235,9 @@ final class WrapperRunner implements RunnerInterface
      */
     private function slowestFirst(array $groups): array
     {
-        if ($this->options->configuration->executionOrder() !== TestSuiteSorter::ORDER_DEFAULT) {
+        $configuration = $this->options->configuration;
+
+        if (! SlowestFirst::appliesTo(isset($this->options->phpunitOptions['order-by']), $configuration->executionOrder(), $configuration->executionOrderDefects())) {
             return $groups;
         }
 

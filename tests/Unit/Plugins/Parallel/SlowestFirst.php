@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Pest\Plugins\Parallel\Support\SlowestFirst;
 use Pest\Plugins\Shard;
 use Pest\TestSuite;
+use PHPUnit\Runner\TestSuiteSorter;
 
 function slowestFirstSourceFile(string $relative): string
 {
@@ -91,3 +92,15 @@ it('ignores a test class that is not loaded', function (): void {
 
     expect(SlowestFirst::fromClassTimings(['Tests\\Missing\\GoneTest' => 10.0])->order($groups))->toBe($groups);
 });
+
+it('orders the files only when the run has no execution order of its own', function (bool $orderGiven, int $executionOrder, int $executionOrderDefects, bool $applies): void {
+    expect(SlowestFirst::appliesTo($orderGiven, $executionOrder, $executionOrderDefects))->toBe($applies);
+})->with([
+    'default' => [false, TestSuiteSorter::ORDER_DEFAULT, TestSuiteSorter::ORDER_DEFAULT, true],
+    'random' => [false, TestSuiteSorter::ORDER_RANDOMIZED, TestSuiteSorter::ORDER_DEFAULT, false],
+    'reverse' => [false, TestSuiteSorter::ORDER_REVERSED, TestSuiteSorter::ORDER_DEFAULT, false],
+    'duration' => [false, TestSuiteSorter::ORDER_DURATION_DESCENDING, TestSuiteSorter::ORDER_DEFAULT, false],
+    'size' => [false, TestSuiteSorter::ORDER_SIZE_ASCENDING, TestSuiteSorter::ORDER_DEFAULT, false],
+    'defects' => [false, TestSuiteSorter::ORDER_DEFAULT, TestSuiteSorter::ORDER_DEFECTS_FIRST, false],
+    'explicit default' => [true, TestSuiteSorter::ORDER_DEFAULT, TestSuiteSorter::ORDER_DEFAULT, false],
+]);
