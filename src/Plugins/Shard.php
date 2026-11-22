@@ -41,6 +41,8 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
      */
     private static ?array $shard = null;
 
+    private static ?string $filter = null;
+
     private static bool $updateShards = false;
 
     private static ?string $timingsFilename = null;
@@ -107,6 +109,11 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     public static function metadata(): array
     {
         return self::$metadata;
+    }
+
+    public static function filter(): ?string
+    {
+        return self::$filter;
     }
 
     public static function owns(string $unit): bool
@@ -199,6 +206,8 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
         $filter = $this->buildFilterArgument($testsToRun);
 
         $this->ensureFilterLengthIsSafe($filter);
+
+        self::$filter = $filter;
 
         $arguments = [...$arguments, '--filter', $filter];
 
