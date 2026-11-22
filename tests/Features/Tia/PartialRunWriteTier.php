@@ -144,14 +144,15 @@ test('two partial runs each keep the other entry', function (): void {
         ->and($delta->isResultsOnly())->toBeTrue($delta->summary());
 })->skipOnWindows();
 
-test('a shard is a partial run', function (): void {
+test('a shard replays its slice and writes like a partial run', function (): void {
     $project = Project::make('master');
     $project->seed('master');
 
     $result = $project->pest('--tia', '--shard=1/2');
     $delta = $project->delta();
 
-    expect($result->output)->toContain('TIA does not apply to partial runs')
+    expect($result->output)->not->toContain('TIA does not apply to partial runs')
+        ->and($result->replayed())->toBeGreaterThan(0, $result->describe())
         ->and($delta->removed())->toBe(0, $delta->summary())
         ->and($delta->isResultsOnly())->toBeTrue($delta->summary());
 })->skipOnWindows();

@@ -200,6 +200,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     private bool $filteredMode = false;
 
+    private bool $sharded = false;
+
     private bool $writesSuppressed = false;
 
     private bool $resultsOnlyWrites = false;
@@ -505,7 +507,10 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         }
 
         $hasExplicitPath = $this->hasExplicitPathArgument($arguments);
-        $partial = ! $isWorker && ($hasExplicitPath || $this->hasPartialSelection($arguments));
+        $sharded = ! $isWorker && Shard::filter() !== null;
+        $partial = ! $isWorker && ($hasExplicitPath
+            || $this->hasPartialSelection($this->withoutShardFilter($arguments))
+            || ($sharded && $this->coverageReportActive()));
         $disabled = $disabled || $partial || $this->hasListingOption($arguments);
 
         $mutating = self::isMutationRun($this->originalArguments);
@@ -579,6 +584,11 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         if ($isWorker) {
             return $this->handleWorker($arguments, $projectRoot, $recordingGlobal, $replayingGlobal);
+        }
+
+        if ($sharded) {
+            $this->sharded = true;
+            $this->resultsOnlyWrites = true;
         }
 
         return $this->handleParent($arguments, $projectRoot, $forceRebuild);
@@ -927,6 +937,13 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             }
         }
 
+        if ($this->sharded && ! $graph instanceof Graph) {
+            $this->requestWorkerResults();
+            $this->emitShardScopedRecordSkipped();
+
+            return $arguments;
+        }
+
         $coverageCacheOwned = $this->piggybackCoverage && $this->pestCoverageActive();
 
         if ($coverageCacheOwned) {
@@ -1146,7 +1163,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $this->reportAffectedSummary($changed, $affectedFromChanges, $rerunFromCache, $affected);
 
         $affectedSet = array_fill_keys($affected, true);
-        $canRefreshReplayEdges = $affected !== [] && $coverageAvailable;
+        $canRefreshReplayEdges = $affected !== [] && $coverageAvailable && ! $this->sharded;
 
         $this->replayRan = true;
         $this->replayGraph = $graph;
@@ -1354,7 +1371,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     private function canRebuildGraph(): bool
     {
-        return ! $this->piggybackCoverage && $this->recorder->driverAvailable();
+        return ! $this->sharded && ! $this->piggybackCoverage && $this->recorder->driverAvailable();
     }
 
     private function renderFreshGraph(): void
@@ -1393,6 +1410,14 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         $this->renderChild('Running in TIA mode, however TIA is skipped as an active coverage report narrows the edges it could record.');
         $this->renderChild('Record the baseline with a plain --tia run first; coverage runs then reuse it.');
+    }
+
+    private function emitShardScopedRecordSkipped(): void
+    {
+        $this->output->writeln('');
+
+        $this->renderChild('Running in TIA mode, however TIA is skipped as a shard cannot record the dependency graph of the whole suite.');
+        $this->renderChild('Record the baseline with a plain --tia run first; sharded runs then replay it.');
     }
 
     private function emitMutationScopedRecordSkipped(): void
@@ -1997,6 +2022,29 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         }
 
         return false;
+    }
+
+    /**
+     * @param  array<int, string>  $arguments
+     * @return array<int, string>
+     */
+    private function withoutShardFilter(array $arguments): array
+    {
+        $filter = Shard::filter();
+
+        if ($filter === null) {
+            return $arguments;
+        }
+
+        foreach (array_reverse(array_keys($arguments, '--filter', true)) as $key) {
+            if (($arguments[$key + 1] ?? null) === $filter) {
+                unset($arguments[$key], $arguments[$key + 1]);
+
+                return array_values($arguments);
+            }
+        }
+
+        return $arguments;
     }
 
     /**
