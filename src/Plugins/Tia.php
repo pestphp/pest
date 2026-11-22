@@ -9,6 +9,7 @@ use Pest\Contracts\Plugins\AddsOutput;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Contracts\Plugins\HandlesOriginalArguments;
 use Pest\Contracts\Plugins\Terminable;
+use Pest\Exceptions\GitTimedOut;
 use Pest\Exceptions\InvalidOption;
 use Pest\Exceptions\MissingDependency;
 use Pest\Exceptions\NoAffectedTestsFound;
@@ -858,7 +859,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         try {
             $this->resolveBranch($projectRoot);
-        } catch (MissingDependency|TiaGitFailed $missingGit) {
+        } catch (MissingDependency|TiaGitFailed|GitTimedOut $missingGit) {
             $repository = new ChangedFiles($projectRoot);
 
             if ($repository->isRepository() && ! $repository->hasCommits()) {
@@ -1953,7 +1954,11 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $graph->pruneMissingTests();
         $graph->pruneResultsForMissingFiles($this->branch);
 
-        $branches = new ChangedFiles(TestSuite::getInstance()->rootPath)->branchNames();
+        try {
+            $branches = new ChangedFiles(TestSuite::getInstance()->rootPath)->branchNames();
+        } catch (GitTimedOut) {
+            return;
+        }
 
         if ($branches === null) {
             return;
@@ -1987,7 +1992,9 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         try {
             $this->resolveBranch($projectRoot);
-        } catch (MissingDependency|TiaGitFailed) {
+        } catch (MissingDependency) {
+        } catch (TiaGitFailed|GitTimedOut) {
+            return;
         }
 
         $graph->setFallbackBranch($this->fallbackBranch);
@@ -2148,8 +2155,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return;
         }
 
-        $this->branchResolved = true;
-
         $changedFiles = new ChangedFiles($projectRoot);
 
         $resolved = $this->resolveFallbackBranch($changedFiles);
@@ -2162,6 +2167,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $this->branch = $changedFiles->currentBranch()
             ?? CiBranch::detectCurrent()
             ?? $this->workspaceBranch($projectRoot);
+
+        $this->branchResolved = true;
     }
 
     private function workspaceBranch(string $projectRoot): string
@@ -2392,7 +2399,11 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         $git = new Git($projectRoot);
 
-        $baseline = $git->show($sha, $git->pathPrefix().'composer.lock');
+        try {
+            $baseline = $git->show($sha, $git->pathPrefix().'composer.lock');
+        } catch (GitTimedOut) {
+            return '';
+        }
 
         if ($baseline === null) {
             return '';

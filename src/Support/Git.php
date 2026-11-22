@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Support;
 
+use Pest\Exceptions\GitTimedOut;
 use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
 
@@ -13,8 +14,6 @@ use Symfony\Component\Process\Process;
 final readonly class Git
 {
     private const float TIMEOUT = 5.0;
-
-    public const int TIMED_OUT_EXIT_CODE = 124;
 
     public function __construct(
         private ?string $directory = null,
@@ -92,11 +91,7 @@ final readonly class Git
         try {
             $process->run();
         } catch (ProcessTimedOutException) {
-            return [
-                'exitCode' => self::TIMED_OUT_EXIT_CODE,
-                'output' => '',
-                'errorOutput' => sprintf('git %s timed out after %s seconds.', implode(' ', $arguments), $this->timeout),
-            ];
+            throw new GitTimedOut($arguments, $this->timeout);
         }
 
         return [

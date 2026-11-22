@@ -2,18 +2,12 @@
 
 declare(strict_types=1);
 
+use Pest\Exceptions\GitTimedOut;
 use Pest\Support\Git;
 
-it('reports a timed out command as a failure', function (): void {
+it('raises a timed out command instead of answering', function (string $method): void {
     $git = new Git(timeout: 0.2);
 
-    $result = $git->result(['-c', 'alias.slow=!sleep 5', 'slow']);
-
-    expect($result)->toBe([
-        'exitCode' => Git::TIMED_OUT_EXIT_CODE,
-        'output' => '',
-        'errorOutput' => 'git -c alias.slow=!sleep 5 slow timed out after 0.2 seconds.',
-    ])
-        ->and($git->raw(['-c', 'alias.slow=!sleep 5', 'slow']))->toBeNull()
-        ->and($git->succeeds(['-c', 'alias.slow=!sleep 5', 'slow']))->toBeFalse();
-})->skipOnWindows();
+    expect(fn (): mixed => $git->{$method}(['-c', 'alias.slow=!sleep 5', 'slow']))
+        ->toThrow(GitTimedOut::class, 'Git did not answer within 0.2 seconds: git -c alias.slow=!sleep 5 slow');
+})->with(['result', 'raw', 'output', 'succeeds'])->skipOnWindows();
