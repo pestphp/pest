@@ -1,5 +1,6 @@
 <?php
 
+use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 
@@ -567,6 +568,59 @@ function tiaBuildOptionResults(): array
     return $cache = json_decode($process->getOutput(), true, flags: JSON_THROW_ON_ERROR);
 }
 
+function tiaLoadRolldownResults(): array
+{
+    static $cache = null;
+    if ($cache !== null) {
+        return $cache;
+    }
+
+    $vitePlus = sys_get_temp_dir().'/pest-tia-vite-plus-'.bin2hex(random_bytes(6));
+    $missing = sys_get_temp_dir().'/pest-tia-no-rolldown-'.bin2hex(random_bytes(6));
+
+    mkdir($vitePlus.'/node_modules/vite', 0755, true);
+    mkdir($missing, 0755, true);
+    file_put_contents($vitePlus.'/package.json', '{}');
+    file_put_contents($vitePlus.'/node_modules/vite/package.json', tiaJson([
+        'name' => 'vite',
+        'type' => 'module',
+        'exports' => ['./package.json' => './package.json', './rolldown' => './rolldown.mjs'],
+    ]));
+    file_put_contents($vitePlus.'/node_modules/vite/rolldown.mjs', "export const rolldown = 'vite-plus-stub'\n");
+    file_put_contents($missing.'/package.json', '{}');
+
+    $helper = str_replace('\\', '/', tiaViteHelperPath());
+    $roots = tiaJson(['vite-plus' => str_replace('\\', '/', $vitePlus), 'missing' => str_replace('\\', '/', $missing)]);
+
+    $script = <<<JS
+    import { loadRolldown } from '{$helper}'
+    const out = {}
+    for (const [name, root] of Object.entries({$roots})) {
+      const loaded = await loadRolldown(root)
+      out[name] = loaded === null ? null : { rolldown: loaded.rolldown }
+    }
+    process.stdout.write(JSON.stringify(out))
+    JS;
+
+    $process = new Process(['node', '--input-type=module', '-e', $script]);
+    $process->run();
+
+    foreach (['node_modules/vite/rolldown.mjs', 'node_modules/vite/package.json', 'package.json'] as $file) {
+        @unlink($vitePlus.'/'.$file);
+    }
+    foreach (['node_modules/vite', 'node_modules', ''] as $dir) {
+        @rmdir($vitePlus.'/'.$dir);
+    }
+    @unlink($missing.'/package.json');
+    @rmdir($missing);
+
+    if (! $process->isSuccessful()) {
+        throw new ProcessFailedException($process);
+    }
+
+    return $cache = json_decode($process->getOutput(), true, flags: JSON_THROW_ON_ERROR);
+}
+
 beforeEach(function (): void {
     if ((new ExecutableFinder)->find('node') === null) {
         $this->markTestSkipped('node is not available.');
@@ -680,6 +734,14 @@ it('ignores a default export that only appears in a comment or string', function
     expect(tiaSfcResults()[$name]['code'])->toEndWith("\nexport default {}\n")
         ->and($matches[0])->toHaveCount(2);
 })->with(['default-export-in-line-comment', 'default-export-in-block-comment', 'default-export-in-string']);
+
+it('loads the rolldown that Vite+ exposes as vite/rolldown', function (): void {
+    expect(tiaLoadRolldownResults()['vite-plus'])->toBe(['rolldown' => 'vite-plus-stub']);
+});
+
+it('finds no rolldown when neither rolldown nor vite/rolldown resolves', function (): void {
+    expect(tiaLoadRolldownResults()['missing'])->toBeNull();
+});
 
 it('bundles a script setup component that mentions export default in a comment', function (): void {
     $rolldown = tiaRolldownPackageDir();
