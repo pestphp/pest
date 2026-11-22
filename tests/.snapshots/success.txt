@@ -2272,6 +2272,9 @@
   ✓ it keeps every import a single file component declares with ('default-export-in-line-comment')
   ✓ it keeps every import a single file component declares with ('default-export-in-block-comment')
   ✓ it keeps every import a single file component declares with ('default-export-in-string')
+  ✓ it keeps every import a single file component declares with ('generic-attribute')
+  ✓ it keeps every import a single file component declares with ('generic-attribute-single-quoted')
+  ✓ it keeps every import a single file component declares with ('generic-attribute-before-lang')
   ✓ it reports the script block language so the parser matches it with ('script-setup')
   ✓ it reports the script block language so the parser matches it with ('plain-script-with-default')
   ✓ it reports the script block language so the parser matches it with ('typescript-lang')
@@ -2286,6 +2289,9 @@
   ✓ it reports the script block language so the parser matches it with ('default-export-in-line-comment')
   ✓ it reports the script block language so the parser matches it with ('default-export-in-block-comment')
   ✓ it reports the script block language so the parser matches it with ('default-export-in-string')
+  ✓ it reports the script block language so the parser matches it with ('generic-attribute')
+  ✓ it reports the script block language so the parser matches it with ('generic-attribute-single-quoted')
+  ✓ it reports the script block language so the parser matches it with ('generic-attribute-before-lang')
   ✓ it always leaves a default export for importers to resolve against with ('script-setup')
   ✓ it always leaves a default export for importers to resolve against with ('plain-script-with-default')
   ✓ it always leaves a default export for importers to resolve against with ('typescript-lang')
@@ -2300,6 +2306,12 @@
   ✓ it always leaves a default export for importers to resolve against with ('default-export-in-line-comment')
   ✓ it always leaves a default export for importers to resolve against with ('default-export-in-block-comment')
   ✓ it always leaves a default export for importers to resolve against with ('default-export-in-string')
+  ✓ it always leaves a default export for importers to resolve against with ('generic-attribute')
+  ✓ it always leaves a default export for importers to resolve against with ('generic-attribute-single-quoted')
+  ✓ it always leaves a default export for importers to resolve against with ('generic-attribute-before-lang')
+  ✓ it ends the opening script tag after a quoted attribute that holds a closing angle bracket with ('generic-attribute')
+  ✓ it ends the opening script tag after a quoted attribute that holds a closing angle bracket with ('generic-attribute-single-quoted')
+  ✓ it ends the opening script tag after a quoted attribute that holds a closing angle bracket with ('generic-attribute-before-lang')
   ✓ it does not add a second default export when the block already has one
   ✓ it drops template and style markup that the parser would reject
   ✓ it stubs assets as JS modules so rolldown does not reject them as CSS with ('/app/resources/css/app.css')
@@ -2311,6 +2323,7 @@
   ✓ it ignores a default export that only appears in a comment or string with ('default-export-in-block-comment')
   ✓ it ignores a default export that only appears in a comment or string with ('default-export-in-string')
   - it bundles a script setup component that mentions export default in a comment → rolldown is not resolvable.
+  - it bundles a generic component whose script tag holds a closing angle bracket → rolldown is not resolvable.
 
    PASS  Tests\Unit\Plugins\Tia\WatchPatterns
   ✓ it keeps the built-in fallbacks enabled by default
@@ -2647,4 +2660,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 38 skipped, 1937 passed (4405 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 39 skipped, 1949 passed (4417 assertions)
