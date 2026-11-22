@@ -17,7 +17,6 @@ use Pest\Exceptions\TiaGitFailed;
 use Pest\Exceptions\TiaRequiresCommit;
 use Pest\Exceptions\TiaRequiresDefaultBranch;
 use Pest\Exceptions\TiaRequiresRemote;
-use Pest\Exceptions\TiaRequiresRepositoryRoot;
 use Pest\Panic;
 use Pest\Plugins\Concerns\HandleArguments;
 use Pest\Plugins\Tia\BaselineSync;
@@ -864,12 +863,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     private function handleParent(array $arguments, string $projectRoot, bool $forceRebuild): array
     {
         $this->watchPatterns->useDefaults($projectRoot);
-
-        $subdirectoryPrefix = $this->gitSubdirectoryPrefix($projectRoot);
-
-        if ($subdirectoryPrefix !== null) {
-            Panic::with(new TiaRequiresRepositoryRoot($subdirectoryPrefix));
-        }
 
         try {
             $this->resolveBranch($projectRoot);
@@ -2258,11 +2251,6 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         }
 
         return implode(', ', array_keys($seen));
-    }
-
-    private function gitSubdirectoryPrefix(string $projectRoot): ?string
-    {
-        return new Git($projectRoot)->subdirectoryPrefix();
     }
 
     private function composerLockDelta(string $projectRoot, string $sha): string
