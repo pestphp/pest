@@ -930,4 +930,51 @@ describe('units', function (): void {
             @unlink($path);
         }
     });
+
+    it('gives the time of each test class to the parallel runner, and splits a bundled unit between its classes', function (): void {
+        $shard = new Shard(new BufferedOutput);
+        $reflection = new ReflectionClass($shard);
+
+        Shard::useTimingsFile('parallel-fixture.json');
+
+        $path = $reflection->getMethod('shardsPath')->invoke($shard);
+
+        try {
+            file_put_contents($path, json_encode([
+                'units' => [
+                    'Tests\\Unit\\FooTest' => ['time' => 3.0, 'tests' => ['Tests\\Unit\\FooTest']],
+                    'app/Bundle.php' => ['time' => 4.0, 'tests' => ['Tests\\Unit\\BarTest', 'Tests\\Unit\\BazTest']],
+                    'app/Empty.php' => ['time' => 1.0, 'tests' => []],
+                ],
+                'metadata' => ['source' => 'fixture'],
+            ]));
+
+            expect($shard->timingsByClass())->toBe([
+                'Tests\\Unit\\FooTest' => 3.0,
+                'Tests\\Unit\\BarTest' => 2.0,
+                'Tests\\Unit\\BazTest' => 2.0,
+            ])->and(Shard::metadata())->toBeEmpty();
+        } finally {
+            @unlink($path);
+        }
+    });
+
+    it('gives no timings to the parallel runner when the shards file is missing or corrupt', function (): void {
+        $shard = new Shard(new BufferedOutput);
+        $reflection = new ReflectionClass($shard);
+
+        Shard::useTimingsFile('parallel-corrupt-fixture.json');
+
+        $path = $reflection->getMethod('shardsPath')->invoke($shard);
+
+        expect($shard->timingsByClass())->toBeEmpty();
+
+        try {
+            file_put_contents($path, '{not json');
+
+            expect($shard->timingsByClass())->toBeEmpty();
+        } finally {
+            @unlink($path);
+        }
+    });
 });

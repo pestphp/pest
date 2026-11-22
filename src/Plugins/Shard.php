@@ -583,9 +583,59 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     }
 
     /**
+     * @return array<string, float>
+     */
+    public function timingsByClass(): array
+    {
+        try {
+            $file = $this->readShardsFile();
+        } catch (InvalidOption) {
+            return [];
+        }
+
+        if ($file === null) {
+            return [];
+        }
+
+        $timings = [];
+
+        foreach ($file['units'] as $unit) {
+            if ($unit['tests'] === []) {
+                continue;
+            }
+
+            $share = $unit['time'] / count($unit['tests']);
+
+            foreach ($unit['tests'] as $class) {
+                $timings[$class] = $share;
+            }
+        }
+
+        return $timings;
+    }
+
+    /**
      * @return array<string, array{time: float, tests: list<string>}>|null
      */
     private function loadShardsFile(): ?array
+    {
+        $file = $this->readShardsFile();
+
+        if ($file === null) {
+            return null;
+        }
+
+        if ($file['metadata'] !== null) {
+            self::$metadata = $file['metadata'];
+        }
+
+        return $file['units'];
+    }
+
+    /**
+     * @return array{units: array<string, array{time: float, tests: list<string>}>, metadata: array<string, scalar>|null}|null
+     */
+    private function readShardsFile(): ?array
     {
         $path = $this->shardsPath();
 
@@ -611,11 +661,12 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
             throw new InvalidOption(sprintf('The [%s] file is corrupted. Delete it or run [--update-shards] to regenerate.', $this->relativeTimingsPath()));
         }
 
-        if (isset($data['metadata']) && is_array($data['metadata'])) {
-            self::$metadata = array_filter($data['metadata'], is_scalar(...));
-        }
-
-        return $this->normaliseUnits($units);
+        return [
+            'units' => $this->normaliseUnits($units),
+            'metadata' => isset($data['metadata']) && is_array($data['metadata'])
+                ? array_filter($data['metadata'], is_scalar(...))
+                : null,
+        ];
     }
 
     /**
