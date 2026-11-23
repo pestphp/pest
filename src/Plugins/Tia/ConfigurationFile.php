@@ -18,9 +18,16 @@ final readonly class ConfigurationFile
 
     private const array DEFAULT_NAMES = ['phpunit.xml', 'phpunit.dist.xml', 'phpunit.xml.dist'];
 
+    private const array VALUE_OPTIONS = ['--configuration', '--bootstrap', '--include-path'];
+
+    /**
+     * @param  list<string>|null  $includePaths
+     */
     private function __construct(
         private ?string $path,
         private bool $suppressed,
+        private ?string $bootstrap = null,
+        private ?array $includePaths = null,
     ) {}
 
     /**
@@ -34,18 +41,23 @@ final readonly class ConfigurationFile
             return self::projectDefault();
         }
 
+        $bootstrap = $configuration->hasBootstrap() ? self::resolved($configuration->bootstrap()) : null;
+        $includePaths = $configuration->hasIncludePath()
+            ? array_map(self::resolved(...), explode(PATH_SEPARATOR, $configuration->includePath()))
+            : null;
+
         if (! $configuration->hasConfigurationFile() && ! $configuration->useDefaultConfiguration()) {
-            return new self(null, true);
+            return new self(null, true, $bootstrap, $includePaths);
         }
 
         $file = new XmlConfigurationFileFinder()->find($configuration);
         $path = $file === false ? false : realpath($file);
 
         if ($path !== false && $generatedPath !== null && $path === realpath($generatedPath)) {
-            return self::projectDefault();
+            return new self(null, false, $bootstrap, $includePaths);
         }
 
-        return new self($path === false ? null : $path, false);
+        return new self($path === false ? null : $path, false, $bootstrap, $includePaths);
     }
 
     public static function at(string $path): self
@@ -56,6 +68,25 @@ final readonly class ConfigurationFile
     public static function projectDefault(): self
     {
         return new self(null, false);
+    }
+
+    public function bootstrapFingerprint(string $projectRoot): ?string
+    {
+        return $this->bootstrap === null ? null : $this->relativeTo($projectRoot, $this->bootstrap);
+    }
+
+    public function includePathFingerprint(string $projectRoot): ?string
+    {
+        if ($this->includePaths === null) {
+            return null;
+        }
+
+        $paths = array_map(
+            fn (string $path): string => $this->relativeTo($projectRoot, $path),
+            $this->includePaths,
+        );
+
+        return implode("\0", $paths);
     }
 
     public function fingerprint(string $projectRoot): ?string
@@ -88,10 +119,14 @@ final readonly class ConfigurationFile
 
     private function relativeTo(string $projectRoot, string $path): string
     {
-        $root = rtrim(str_replace('\\', '/', realpath($projectRoot) ?: $projectRoot), '/').'/';
-        $file = str_replace('\\', '/', realpath($path) ?: $path);
+        $root = rtrim($this->withForwardSlashes(realpath($projectRoot) ?: $projectRoot), '/').'/';
+        $resolvedPath = $this->withForwardSlashes(self::resolved($path));
 
-        return str_starts_with($file, $root) ? substr($file, strlen($root)) : $file;
+        if ($resolvedPath.'/' === $root) {
+            return '.';
+        }
+
+        return str_starts_with($resolvedPath, $root) ? substr($resolvedPath, strlen($root)) : $resolvedPath;
     }
 
     /**
@@ -106,20 +141,48 @@ final readonly class ConfigurationFile
         foreach ($arguments as $index => $argument) {
             if ($argument === '--no-configuration') {
                 $parameters[] = $argument;
-            } elseif ($argument === '--configuration' || $argument === '-c') {
-                if (isset($arguments[$index + 1])) {
-                    $parameters[] = '--configuration';
+
+                continue;
+            }
+
+            $option = self::withLongConfigurationOption($argument);
+
+            foreach (self::VALUE_OPTIONS as $name) {
+                if ($option === $name && isset($arguments[$index + 1])) {
+                    $parameters[] = $name;
                     $parameters[] = $arguments[$index + 1];
+                } elseif (str_starts_with($option, $name.'=')) {
+                    $parameters[] = $name;
+                    $parameters[] = substr($option, strlen($name.'='));
                 }
-            } elseif (str_starts_with($argument, '--configuration=')) {
-                $parameters[] = '--configuration';
-                $parameters[] = substr($argument, strlen('--configuration='));
-            } elseif (str_starts_with($argument, '-c') && ! str_starts_with($argument, '--')) {
-                $parameters[] = '--configuration';
-                $parameters[] = substr($argument, 2);
             }
         }
 
         return $parameters;
+    }
+
+    private static function withLongConfigurationOption(string $argument): string
+    {
+        if ($argument === '-c') {
+            return '--configuration';
+        }
+
+        if (str_starts_with($argument, '-c')) {
+            return '--configuration='.substr($argument, 2);
+        }
+
+        return $argument;
+    }
+
+    private function withForwardSlashes(string $path): string
+    {
+        return DIRECTORY_SEPARATOR === '\\' ? str_replace('\\', '/', $path) : $path;
+    }
+
+    private static function resolved(string $path): string
+    {
+        $real = $path === '' ? false : realpath($path);
+
+        return $real === false ? $path : $real;
     }
 }
