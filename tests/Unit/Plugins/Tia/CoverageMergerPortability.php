@@ -168,7 +168,7 @@ it('still merges a same-machine cache that stores absolute paths', function (): 
     $state->write(Tia::KEY_COVERAGE_MARKER, '');
 
     coverageMergerPortabilityReport($this->reportPath, coverageMergerPortabilityCoverage([
-        $localFile => [11 => ['fresh-test']],
+        $localFile => [10 => [], 11 => ['fresh-test'], 12 => []],
     ], ['fresh-test' => ['size' => 'unknown', 'status' => 'success']]));
 
     CoverageMerger::applyIfMarked($this->reportPath);

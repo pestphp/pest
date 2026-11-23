@@ -61,12 +61,11 @@ final class CoverageMerger
         $state->write(Tia::KEY_COVERAGE_CACHE, self::compress(self::serializeRelativeToProjectRoot($cached)));
     }
 
-    /**
-     * Reads the cached baseline coverage and maps it onto this machine's
-     * project root. An unreadable cache — or one recorded on another machine
-     * that cannot be mapped — is dropped so the current run can seed a fresh
-     * one, instead of poisoning the merged report with foreign paths.
-     */
+    public static function hasUsableCache(State $state): bool
+    {
+        return self::readCache($state) instanceof CodeCoverage;
+    }
+
     private static function readCache(State $state): ?CodeCoverage
     {
         $bytes = $state->read(Tia::KEY_COVERAGE_CACHE);
@@ -77,6 +76,7 @@ final class CoverageMerger
 
         $decoded = self::decompress($bytes);
         $cached = $decoded === null ? null : self::unserializeCoverage($decoded);
+        unset($decoded);
 
         if ($cached instanceof CodeCoverage) {
             $cached = self::rebaseOntoProjectRoot($cached);
@@ -91,15 +91,6 @@ final class CoverageMerger
         return $cached;
     }
 
-    /**
-     * The cache stores file paths relative to the project root so that a
-     * baseline recorded on one machine (e.g. CI) stays mergeable on another.
-     * Relative entries are mapped onto the local root here; absolute entries
-     * under the local root are kept (caches written by previous versions on
-     * this machine), while absolute entries of another machine make the whole
-     * cache unusable — a report built from mixed roots contains no resolvable
-     * file at all.
-     */
     private static function rebaseOntoProjectRoot(CodeCoverage $coverage): ?CodeCoverage
     {
         $root = self::projectRootPrefix();

@@ -25,6 +25,7 @@ use Pest\Plugins\Tia\CiBranch;
 use Pest\Plugins\Tia\ConfigurationFile;
 use Pest\Plugins\Tia\Contracts\State;
 use Pest\Plugins\Tia\CoverageCollector;
+use Pest\Plugins\Tia\CoverageMerger;
 use Pest\Plugins\Tia\Fingerprint;
 use Pest\Plugins\Tia\Graph;
 use Pest\Plugins\Tia\JsModuleGraph;
@@ -934,7 +935,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return $arguments;
         }
 
-        if ($coverageCacheOwned && ! $this->state->exists(self::KEY_COVERAGE_CACHE)) {
+        if ($coverageCacheOwned && ! CoverageMerger::hasUsableCache($this->state)) {
             if ($this->driftLabel === null) {
                 $this->freshGraphReason = 'recording a coverage baseline';
             }

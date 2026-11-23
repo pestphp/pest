@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Pest\Plugins\Tia;
 use Pest\Support\Coverage;
 use Tests\Fixtures\Tia\Project;
 
@@ -123,6 +124,39 @@ test('a coverage run drops the coverage cache when composer.lock drifts', functi
         ->and($project->graphExists())->toBeTrue($result->describe())
         ->and($result->output)->toContain('narrows the edges');
 })->skipOnWindows();
+
+test('a coverage cache that cannot be merged runs the full suite with coverage and rebuilds it', function (Closure $cache): void {
+    $project = Project::make('master');
+    $project->seed('master');
+
+    file_put_contents($project->graphDir().DIRECTORY_SEPARATOR.Tia::KEY_COVERAGE_CACHE, $cache());
+
+    $fallback = $project->pest('--tia', '--coverage');
+    $replay = $project->pest('--tia', '--coverage');
+
+    expect($fallback->exitCode)->toBe(0, $fallback->describe())
+        ->and($fallback->replayed())->toBe(0, $fallback->describe())
+        ->and($fallback->tally())->toContain(Project::TOTAL_TESTS.' passed')
+        ->and($fallback->output)->toContain('Total: 100.0 %')
+        ->and($replay->replayed())->toBe(Project::TOTAL_TESTS, $replay->describe())
+        ->and($replay->output)->toContain('Total: 100.0 %');
+})->with([
+    'unreadable' => fn (): string => 'stale-coverage',
+    'recorded in another checkout' => function (): string {
+        $checkout = Project::make('master');
+        $checkout->seed('master');
+        $checkout->pest('--tia', '--coverage');
+
+        $coverage = unserialize((string) gzdecode((string) file_get_contents($checkout->graphDir().DIRECTORY_SEPARATOR.Tia::KEY_COVERAGE_CACHE)));
+        $data = $coverage->getData(true);
+
+        foreach ($data->coveredFiles() as $file) {
+            $data->renameFile($file, $checkout->path($file));
+        }
+
+        return (string) gzencode(serialize($coverage));
+    },
+])->skipOnWindows()->skip(! Coverage::isAvailable(), 'Coverage is not available');
 
 test('a coverage report adds a new dependency to the edges of an existing graph', function (array $arguments): void {
     $project = Project::make('master');
