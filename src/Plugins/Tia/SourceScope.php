@@ -34,6 +34,14 @@ final class SourceScope
     ];
 
     /**
+     * @return list<string>
+     */
+    public static function noiseDirectories(): array
+    {
+        return [...self::TOP_LEVEL_NOISE, ...self::NESTED_NOISE];
+    }
+
+    /**
      * @param  list<string>  $includes  Absolute, normalised directory paths.
      * @param  list<array{path: string, prefix: string, suffix: string}>  $excludes  Absolute, normalised directory paths with the file name prefix and suffix they apply to.
      */

@@ -676,7 +676,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $graph->setRecordedAtSha($this->branch, $currentSha);
         $graph->setLastRunTree(
             $this->branch,
-            $changedFiles->snapshotTree($changedFiles->since($currentSha) ?? []),
+            $changedFiles->baselineTree($currentSha, ExternalSources::ignoredInputs($projectRoot, $this->originalArguments)),
         );
         $graph->replaceEdges($perTest, keepExisting: $this->piggybackCoverage);
         $graph->replaceTestTables($perTestTables);
@@ -784,7 +784,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $graph->setRecordedAtSha($this->branch, $currentSha);
         $graph->setLastRunTree(
             $this->branch,
-            $changedFiles->snapshotTree($changedFiles->since($currentSha) ?? []),
+            $changedFiles->baselineTree($currentSha, ExternalSources::ignoredInputs($projectRoot, $this->originalArguments)),
         );
 
         [$finalised, $finalisedTables, $finalisedInertia] = $this->consumePartials($partialKeys);
@@ -939,7 +939,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             }
         }
 
-        if ($this->holdsDirtyExternalSources($projectRoot)) {
+        if ($this->holdsDirtyExternalSources($projectRoot) || $this->holdsUnverifiableExternalSources($projectRoot)) {
             return $arguments;
         }
 
@@ -976,6 +976,32 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         }
 
         return $this->enterRecordMode($arguments);
+    }
+
+    private function holdsUnverifiableExternalSources(string $projectRoot): bool
+    {
+        $unverifiable = ExternalSources::unverifiable($projectRoot, $this->originalArguments);
+
+        if ($unverifiable === []) {
+            return false;
+        }
+
+        $this->writesSuppressed = true;
+
+        $this->renderBadge('WARN', sprintf(
+            'This project loads %d path%s whose changes git cannot report.',
+            count($unverifiable),
+            count($unverifiable) === 1 ? '' : 's',
+        ));
+
+        foreach (array_slice($unverifiable, 0, $this->output->isVerbose() ? count($unverifiable) : 5) as $path) {
+            $this->output->writeln(sprintf('  <fg=gray>%s</>', $path));
+        }
+
+        $this->renderChild('Running the full suite, and recording nothing — git reports no change there, so no result could stand behind a replay.');
+        $this->renderChild('Move what the project loads into the repository to let TIA select tests again.');
+
+        return true;
     }
 
     private function holdsDirtyExternalSources(string $projectRoot): bool
@@ -1210,31 +1236,16 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         $outsideProject = $changedFiles->outsideProject();
 
-        $changed = $changedFiles->filterUnchangedSinceLastRun(
+        [$changed, $changedExternalInputs] = $changedFiles->changedSinceLastRun(
             $changed,
+            ExternalSources::ignoredInputs($projectRoot, $this->originalArguments),
             $graph->lastRunTree($this->branch),
         );
 
-        $unverifiable = ExternalSources::unverifiable($projectRoot, $this->originalArguments);
-
-        if ($unverifiable !== []) {
-            $this->renderBadge('WARN', sprintf(
-                'This project loads %d path%s whose changes git cannot report.',
-                count($unverifiable),
-                count($unverifiable) === 1 ? '' : 's',
-            ));
-
-            foreach (array_slice($unverifiable, 0, $this->output->isVerbose() ? count($unverifiable) : 5) as $path) {
-                $this->output->writeln(sprintf('  <fg=gray>%s</>', $path));
-            }
-
-            $this->renderChild('Running the full suite — git reports no change there, so a replay could not stand behind its results.');
-            $this->renderChild('Keep what the project loads inside the repository, and not ignored by git, to let TIA select tests again.');
-
-            return $arguments;
-        }
-
-        $externalChanges = ExternalSources::matching($projectRoot, $outsideProject, $this->originalArguments);
+        $externalChanges = array_values(array_unique([
+            ...ExternalSources::matching($projectRoot, $outsideProject, $this->originalArguments),
+            ...$changedExternalInputs,
+        ]));
 
         if ($externalChanges !== []) {
             $this->renderBadge('WARN', sprintf(
@@ -2033,8 +2044,10 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             $graph->setRecordedAtSha($this->branch, $currentSha);
         }
 
-        $workingTreeFiles = $changedFiles->since($currentSha) ?? [];
-        $graph->setLastRunTree($this->branch, $changedFiles->snapshotTree($workingTreeFiles));
+        $graph->setLastRunTree(
+            $this->branch,
+            $changedFiles->baselineTree($currentSha, ExternalSources::ignoredInputs($projectRoot, $this->originalArguments)),
+        );
 
         $this->saveGraph($graph);
     }
@@ -2158,7 +2171,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return;
         }
 
-        if ($this->externalSourcesChangedDuringRun($projectRoot)) {
+        if ($this->externalSourcesChangedDuringRun($projectRoot)
+            || ExternalSources::unverifiable($projectRoot, $this->originalArguments) !== []) {
             $collector->reset();
 
             return;

@@ -259,7 +259,7 @@ final class Project
         $graph->setFingerprint(Fingerprint::compute($root, ConfigurationFile::fromArguments($arguments), $arguments));
         $graph->setRecordedAtSha($branch, $sha);
 
-        $graph->setLastRunTree($branch, $changedFiles->snapshotTree($changedFiles->since($sha) ?? []));
+        $graph->setLastRunTree($branch, $changedFiles->baselineTree($sha, ExternalSources::ignoredInputs($root, $arguments)));
 
         $graph->markKnownTestFiles(array_keys(self::EDGES));
 

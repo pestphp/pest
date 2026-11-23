@@ -604,7 +604,7 @@ XML_WRAP);
         ->toBe(['packages/shared/src/Service.php']);
 })->skipOnWindows();
 
-it('reports a root that the repository ignores as unverifiable', function (): void {
+it('lists the files of a root that the repository ignores as ignored inputs', function (): void {
     $repository = tiaExternalRepository([
         'autoload' => ['psr-4' => ['Generated\\' => '../packages/generated']],
     ]);
@@ -616,34 +616,67 @@ it('reports a root that the repository ignores as unverifiable', function (): vo
     ExternalSources::flush();
 
     expect(ExternalSources::rootsFor($repository['project']))->toBeEmpty()
-        ->and(ExternalSources::unverifiable($repository['project']))
-        ->toContain(str_replace(DIRECTORY_SEPARATOR, '/', (string) realpath($repository['root'])).'/packages/generated');
+        ->and(ExternalSources::unverifiable($repository['project']))->toBeEmpty()
+        ->and(ExternalSources::ignoredInputs($repository['project']))->toBe(['packages/generated/Model.php']);
 })->skipOnWindows();
 
-it('reports an ignored file under a declared root as unverifiable', function (): void {
+it('lists the ignored files under a declared root as ignored inputs', function (): void {
     $repository = tiaExternalRepository();
 
-    file_put_contents($repository['root'].'/.gitignore', "packages/shared/generated.php\n");
+    file_put_contents($repository['root'].'/.gitignore', "packages/shared/generated.php\npackages/shared/notes.txt\npackages/shared/vendor/\npackages/shared/node_modules/\npackages/shared/storage/\n");
     file_put_contents($repository['root'].'/packages/shared/generated.php', "<?php\n");
+    file_put_contents($repository['root'].'/packages/shared/notes.txt', "notes\n");
+    mkdir($repository['root'].'/packages/shared/vendor', 0755, true);
+    file_put_contents($repository['root'].'/packages/shared/vendor/autoload.php', "<?php\n");
+    mkdir($repository['root'].'/packages/shared/node_modules/tool', 0755, true);
+    file_put_contents($repository['root'].'/packages/shared/node_modules/tool/index.php', "<?php\n");
+    file_put_contents($repository['root'].'/packages/shared/.DS_Store', "finder\n");
+    mkdir($repository['root'].'/packages/shared/storage/logs', 0755, true);
+    file_put_contents($repository['root'].'/packages/shared/storage/logs/test.log', "log\n");
 
     ExternalSources::flush();
 
-    $root = str_replace(DIRECTORY_SEPARATOR, '/', (string) realpath($repository['root']));
-
-    expect(ExternalSources::rootsFor($repository['project'], ['--include-path', '../packages/shared']))->toBe(['packages/shared/'])
-        ->and(ExternalSources::unverifiable($repository['project'], ['--include-path', '../packages/shared']))->toBe([$root.'/packages/shared/generated.php']);
+    expect(ExternalSources::ignoredInputs($repository['project'], ['--include-path', '../packages/shared']))->toBe(['packages/shared/generated.php', 'packages/shared/notes.txt'])
+        ->and(ExternalSources::unverifiable($repository['project'], ['--include-path', '../packages/shared']))->toBeEmpty();
 })->skipOnWindows();
 
-it('reports no ignored file of the project itself as unverifiable', function (): void {
-    $repository = tiaExternalRepository();
+it('lists an ignored bootstrap file inside vendor as an ignored input', function (): void {
+    $repository = tiaExternalRepository([], <<<'XML_WRAP'
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="../vendor/autoload.php"/>
+XML_WRAP);
 
+    mkdir($repository['root'].'/vendor', 0755, true);
     file_put_contents($repository['root'].'/.gitignore', "vendor/\n");
-    mkdir($repository['root'].'/backend/vendor', 0755, true);
-    file_put_contents($repository['root'].'/backend/vendor/autoload.php', "<?php\n");
+    file_put_contents($repository['root'].'/vendor/autoload.php', "<?php\n");
 
     ExternalSources::flush();
 
-    expect(ExternalSources::unverifiable($repository['project'], ['--include-path', '..']))->toBeEmpty();
+    expect(ExternalSources::ignoredInputs($repository['project']))->toBe(['vendor/autoload.php']);
+})->skipOnWindows();
+
+it('lists the ignored files under a declared root inside a dot directory', function (): void {
+    $repository = tiaExternalRepository();
+
+    mkdir($repository['root'].'/.shared/.cache', 0755, true);
+    file_put_contents($repository['root'].'/.gitignore', ".shared/\n");
+    file_put_contents($repository['root'].'/.shared/Shared.php', "<?php\n");
+    file_put_contents($repository['root'].'/.shared/.cache/state', "cache\n");
+
+    ExternalSources::flush();
+
+    expect(ExternalSources::ignoredInputs($repository['project'], ['--include-path', '../.shared']))->toBe(['.shared/Shared.php']);
+})->skipOnWindows();
+
+it('lists no ignored file of the project itself as an ignored input', function (): void {
+    $repository = tiaExternalRepository();
+
+    file_put_contents($repository['root'].'/.gitignore', "backend/cache.php\n");
+    file_put_contents($repository['root'].'/backend/cache.php', "<?php\n");
+
+    ExternalSources::flush();
+
+    expect(ExternalSources::ignoredInputs($repository['project'], ['--include-path', '..']))->toBeEmpty();
 })->skipOnWindows();
 
 it('keeps the roots of the run when a test changes the working directory', function (): void {

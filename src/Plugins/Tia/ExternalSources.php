@@ -37,7 +37,7 @@ final class ExternalSources
     private const string NO_CONFIGURATION_FLAG = '--no-configuration';
 
     /**
-     * @var array<string, array{roots: array<int, string>, unverifiable: array<int, string>}>
+     * @var array<string, array{roots: array<int, string>, ignored: array<int, string>, unverifiable: array<int, string>}>
      */
     private static array $cache = [];
 
@@ -63,7 +63,87 @@ final class ExternalSources
 
     /**
      * @param  array<int, string>  $arguments
-     * @return array{roots: array<int, string>, unverifiable: array<int, string>}
+     * @return array<int, string>
+     */
+    public static function ignoredInputs(string $projectRoot, array $arguments = []): array
+    {
+        $resolved = self::resolved($projectRoot, $arguments);
+        $queries = [];
+        $files = [];
+
+        foreach ([...$resolved['roots'], ...$resolved['ignored']] as $root) {
+            if ($root === '' || str_ends_with($root, '/')) {
+                $queries[] = self::pathspecsUnder($root);
+            } elseif (in_array($root, $resolved['ignored'], true)) {
+                $files[] = ':(literal)'.$root;
+            }
+        }
+
+        if ($files !== []) {
+            $queries[] = $files;
+        }
+
+        if ($queries === []) {
+            return [];
+        }
+
+        $git = new Git($projectRoot);
+        $repositoryRoot = $git->repositoryRoot();
+
+        if ($repositoryRoot === null) {
+            return [];
+        }
+
+        $repository = new Git($repositoryRoot);
+        $projectPrefix = $git->pathPrefix();
+        $inputs = [];
+
+        foreach ($queries as $pathspecs) {
+            $result = $repository->result(['ls-files', '-z', '--others', '--ignored', '--exclude-standard', '--', ...$pathspecs]);
+
+            if ($result['exitCode'] !== 0) {
+                continue;
+            }
+
+            foreach (explode("\x00", rtrim($result['output'], "\x00")) as $path) {
+                if ($path !== '' && ! str_starts_with($path, $projectPrefix)) {
+                    $inputs[$path] = true;
+                }
+            }
+        }
+
+        $inputs = Arr::stringKeys($inputs);
+        sort($inputs);
+
+        return $inputs;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function pathspecsUnder(string $root): array
+    {
+        $under = self::escapeGlob($root);
+
+        return [
+            ':(glob)'.$under.'**',
+            ':(exclude,glob)'.$under.'**/.*',
+            ':(exclude,glob)'.$under.'**/.*/**',
+            ...array_map(
+                static fn (string $directory): string => ':(exclude,glob)'.$under.'**/'.$directory.'/**',
+                SourceScope::noiseDirectories(),
+            ),
+        ];
+    }
+
+    private static function escapeGlob(string $path): string
+    {
+        return addcslashes($path, '\\*?[');
+    }
+
+    /**
+     * @param  array<int, string>  $arguments
+     * @return array{roots: array<int, string>, ignored: array<int, string>, unverifiable: array<int, string>}
      */
     private static function resolved(string $projectRoot, array $arguments): array
     {
@@ -141,7 +221,7 @@ final class ExternalSources
     /**
      * @param  array<int, string>  $configurations
      * @param  array<int, string>  $arguments
-     * @return array{roots: array<int, string>, unverifiable: array<int, string>}
+     * @return array{roots: array<int, string>, ignored: array<int, string>, unverifiable: array<int, string>}
      */
     private static function resolve(string $projectRoot, array $configurations, array $arguments): array
     {
@@ -150,7 +230,7 @@ final class ExternalSources
         $project = self::realpath($projectRoot);
 
         if ($repositoryRoot === null || $project === null) {
-            return ['roots' => [], 'unverifiable' => []];
+            return ['roots' => [], 'ignored' => [], 'unverifiable' => []];
         }
 
         $roots = [];
@@ -178,21 +258,13 @@ final class ExternalSources
         $unverifiable = Arr::stringKeys($unverifiable);
 
         $ignoredRoots = self::ignoredRoots($repositoryRoot, $roots);
-
-        foreach ($ignoredRoots as $ignored) {
-            $unverifiable[] = $repositoryRoot.'/'.rtrim($ignored, '/');
-        }
-
         $roots = array_values(array_diff($roots, $ignoredRoots));
 
-        foreach (self::ignoredFilesUnder($repositoryRoot, $git->pathPrefix(), $roots) as $ignored) {
-            $unverifiable[] = $ignored;
-        }
-
         sort($roots);
+        sort($ignoredRoots);
         sort($unverifiable);
 
-        return ['roots' => $roots, 'unverifiable' => $unverifiable];
+        return ['roots' => $roots, 'ignored' => $ignoredRoots, 'unverifiable' => $unverifiable];
     }
 
     /**
@@ -239,55 +311,6 @@ final class ExternalSources
         }
 
         return $cache[$key] = $ignored;
-    }
-
-    /**
-     * @param  array<int, string>  $roots
-     * @return array<int, string>
-     */
-    private static function ignoredFilesUnder(string $repositoryRoot, string $projectPrefix, array $roots): array
-    {
-        $directories = [];
-
-        foreach ($roots as $root) {
-            if ($root === '') {
-                $directories[] = '.';
-            } elseif (str_ends_with($root, '/')) {
-                $directories[] = $root;
-            }
-        }
-
-        if ($directories === []) {
-            return [];
-        }
-
-        $result = new Git($repositoryRoot)->result([
-            '--literal-pathspecs',
-            'ls-files',
-            '-z',
-            '--others',
-            '--ignored',
-            '--exclude-standard',
-            '--directory',
-            '--',
-            ...$directories,
-        ]);
-
-        if ($result['exitCode'] !== 0) {
-            return [];
-        }
-
-        $ignored = [];
-
-        foreach (explode("\x00", rtrim($result['output'], "\x00")) as $path) {
-            if ($path === '' || ($projectPrefix !== '' && str_starts_with($path, $projectPrefix))) {
-                continue;
-            }
-
-            $ignored[] = $repositoryRoot.'/'.rtrim($path, '/');
-        }
-
-        return $ignored;
     }
 
     /**

@@ -345,3 +345,34 @@ it('matches no external root for a changed file whose name is a number', functio
 
     expect($matched)->toBeEmpty();
 })->skipOnWindows();
+
+it('hashes an external input without reading it into memory', function (): void {
+    $monorepo = tiaMonorepoRepository();
+
+    $handle = fopen($monorepo['root'].'/frontend/database.sqlite', 'wb');
+    ftruncate($handle, 64 * 1024 * 1024);
+    fclose($handle);
+
+    $changedFiles = new ChangedFiles($monorepo['project']);
+
+    memory_reset_peak_usage();
+    $before = memory_get_peak_usage();
+
+    $tree = $changedFiles->baselineTree($monorepo['sha'], ['frontend/database.sqlite']);
+
+    expect(memory_get_peak_usage() - $before)->toBeLessThan(8 * 1024 * 1024)
+        ->and($tree)->toHaveKey('../frontend/database.sqlite');
+})->skipOnWindows();
+
+it('sees a whitespace change inside an external input', function (): void {
+    $monorepo = tiaMonorepoRepository();
+
+    file_put_contents($monorepo['root'].'/frontend/data.js', "export default \"a b\";\n");
+
+    $changedFiles = new ChangedFiles($monorepo['project']);
+    $tree = $changedFiles->baselineTree($monorepo['sha'], ['frontend/data.js']);
+
+    file_put_contents($monorepo['root'].'/frontend/data.js', "export default \"a  b\";\n");
+
+    expect($changedFiles->changedSinceLastRun([], ['frontend/data.js'], $tree))->toBe([[], ['frontend/data.js']]);
+})->skipOnWindows();

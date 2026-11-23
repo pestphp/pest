@@ -14,6 +14,25 @@ afterEach(function (): void {
 /**
  * @return array{0: Project, 1: string}
  */
+function tiaMonorepoWithIgnoredInput(): array
+{
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('.gitignore', file_get_contents($project->path('.gitignore'))."packages/shared/generated.php\npackages/shared/generated.json\npackages/shared/vendor/\n.DS_Store\n");
+    $project->write('packages/shared/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->write('packages/shared/generated.php', "<?php\n\nreturn 1;\n");
+    $project->write('packages/shared/generated.json', "{\"version\": 1}\n");
+    $project->write('packages/shared/vendor/autoload.php', "<?php\n");
+    $project->write('packages/shared/.DS_Store', "finder\n");
+    $project->git()->commit('add a sibling package with a generated file');
+    $project->seedFor($nested, 'master', arguments: ['--include-path', '../packages/shared']);
+
+    return [$project, $nested];
+}
+
+/**
+ * @return array{0: Project, 1: string}
+ */
 function tiaMonorepo(string $directory = 'nested'): array
 {
     $project = Project::make('master');
@@ -676,14 +695,8 @@ test('a change under an include path that the command line names runs the full s
         ->and($result->replayed())->toBe(0, $result->describe());
 })->skipOnWindows();
 
-test('an ignored file under an include path that the command line names runs the full suite', function (): void {
-    [$project, $nested] = tiaMonorepo();
-
-    $project->write('.gitignore', "packages/shared/generated.php\n");
-    $project->write('packages/shared/Shared.php', "<?php\n\n\$shared = 1;\n");
-    $project->write('packages/shared/generated.php', "<?php\n\nreturn 1;\n");
-    $project->git()->commit('add a sibling package with a generated file');
-    $project->seedFor($nested, 'master', arguments: ['--include-path', '../packages/shared']);
+test('a change to an ignored file under an include path that the command line names runs the full suite', function (): void {
+    [$project, $nested] = tiaMonorepoWithIgnoredInput();
 
     $project->write('packages/shared/generated.php', "<?php\n\nreturn 2;\n");
     $project->snapshot();
@@ -691,10 +704,48 @@ test('an ignored file under an include path that the command line names runs the
     $result = $project->pestIn($nested, '--tia', '--include-path', '../packages/shared');
 
     expect($result->exitCode)->toBe(0, $result->describe())
-        ->and($result->output)->toContain('whose changes git cannot report')
+        ->and($result->output)->toContain('this project loads from outside its root')
         ->and($result->output)->toContain('packages/shared/generated.php')
         ->and($result->replayed())->toBe(0, $result->describe())
         ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed');
+})->skipOnWindows();
+
+test('a change to an ignored data file under an include path runs the full suite', function (): void {
+    [$project, $nested] = tiaMonorepoWithIgnoredInput();
+
+    $project->write('packages/shared/generated.json', "{\"version\": 2}\n");
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia', '--include-path', '../packages/shared');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('packages/shared/generated.json')
+        ->and($result->replayed())->toBe(0, $result->describe());
+})->skipOnWindows();
+
+test('an ignored file under an include path that does not change keeps the replay', function (): void {
+    [$project, $nested] = tiaMonorepoWithIgnoredInput();
+
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia', '--include-path', '../packages/shared');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->not->toContain('packages/shared/generated.php')
+        ->and($result->replayed())->toBe(Project::TOTAL_TESTS, $result->describe());
+})->skipOnWindows();
+
+test('deleting an ignored file under an include path runs the full suite', function (): void {
+    [$project, $nested] = tiaMonorepoWithIgnoredInput();
+
+    unlink($project->path('packages/shared/generated.php'));
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia', '--include-path', '../packages/shared');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('packages/shared/generated.php')
+        ->and($result->replayed())->toBe(0, $result->describe());
 })->skipOnWindows();
 
 test('a change under an include path that the configuration names runs the full suite', function (): void {
@@ -791,8 +842,30 @@ test('a project that loads from outside its repository never replays', function 
 
     expect($result->exitCode)->toBe(0, $result->describe())
         ->and($result->output)->toContain('whose changes git cannot report')
+        ->and($result->output)->toContain('recording nothing')
         ->and($result->replayed())->toBe(0, $result->describe())
-        ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed');
+        ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed')
+        ->and($project->delta()->baselineUntouched('master'))->toBeTrue($project->delta()->summary());
+})->skipOnWindows();
+
+test('a run without tia records no result while the project loads from outside its repository', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $outside = $project->path().'-outside';
+    mkdir($outside, 0755, true);
+    file_put_contents($outside.'/bootstrap.php', "<?php\n\nrequire '".$nested."/vendor/autoload.php';\n");
+
+    $manifest = json_decode((string) file_get_contents($nested.'/composer.json'), true);
+    $manifest['autoload']['files'][] = $outside.'/bootstrap.php';
+    $project->write('nested/composer.json', (string) json_encode($manifest, JSON_PRETTY_PRINT));
+    $project->git()->commit('load a file from outside the repository');
+    $project->seedFor($nested, 'master');
+    $project->snapshot();
+
+    $result = $project->pestIn($nested);
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($project->delta()->baselineUntouched('master'))->toBeTrue($project->delta()->summary());
 })->skipOnWindows();
 
 test('an uncommitted change outside the project records nothing', function (): void {
