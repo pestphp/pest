@@ -116,8 +116,8 @@ final readonly class ConfigurationFile
 
     private function relativeTo(string $projectRoot, string $path): string
     {
-        $root = rtrim(str_replace('\\', '/', realpath($projectRoot) ?: $projectRoot), '/').'/';
-        $resolvedPath = str_replace('\\', '/', self::resolved($path));
+        $root = rtrim($this->withForwardSlashes(realpath($projectRoot) ?: $projectRoot), '/').'/';
+        $resolvedPath = $this->withForwardSlashes(self::resolved($path));
 
         if ($resolvedPath.'/' === $root) {
             return '.';
@@ -169,6 +169,11 @@ final readonly class ConfigurationFile
         }
 
         return $argument;
+    }
+
+    private function withForwardSlashes(string $path): string
+    {
+        return DIRECTORY_SEPARATOR === '\\' ? str_replace('\\', '/', $path) : $path;
     }
 
     private static function resolved(string $path): string

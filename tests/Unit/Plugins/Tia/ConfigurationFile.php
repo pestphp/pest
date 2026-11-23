@@ -120,6 +120,14 @@ it('tells two bootstraps apart', function (): void {
         ->not->toBe(ConfigurationFile::fromArguments([...$configuration, '--bootstrap', 'two.php'])->bootstrapFingerprint($this->projectRoot));
 });
 
+it('tells a bootstrap with a backslash in its name apart from a bootstrap in a directory', function (): void {
+    $configuration = ['--configuration', $this->projectRoot.'/phpunit.xml'];
+
+    expect(ConfigurationFile::fromArguments([...$configuration, '--bootstrap', 'tests\\Boot.php'])->bootstrapFingerprint($this->projectRoot))
+        ->toBe('tests\\Boot.php')
+        ->not->toBe(ConfigurationFile::fromArguments([...$configuration, '--bootstrap', 'tests/Boot.php'])->bootstrapFingerprint($this->projectRoot));
+})->skipOnWindows();
+
 it('fingerprints each include path the command line sets relative to the project', function (): void {
     $includePath = $this->projectRoot.'/lib'.PATH_SEPARATOR.'/elsewhere';
 
