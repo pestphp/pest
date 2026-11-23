@@ -476,7 +476,9 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             exit(0);
         }
 
-        $this->configuration = ConfigurationFile::fromArguments($arguments);
+        $configurationPlugin = Container::getInstance()->get(Configuration::class);
+        assert($configurationPlugin instanceof Configuration);
+        $this->configuration = ConfigurationFile::fromArguments($arguments, $configurationPlugin->generatedConfigurationPath());
 
         $isWorker = Parallel::isWorker();
         $recordingGlobal = $isWorker && (string) Parallel::getGlobal(self::RECORDING_GLOBAL) === '1';
@@ -2373,6 +2375,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             'package_json' => 'package.json',
             'package_lock' => 'Node lockfile',
             'js_config' => 'JS/TS config',
+            'phpunit_bootstrap' => '--bootstrap',
+            'phpunit_include_path' => '--include-path',
             'pest_factory' => 'Pest internals',
             'pest_method_factory' => 'Pest internals',
             'project_prefix' => 'project location in the repository',

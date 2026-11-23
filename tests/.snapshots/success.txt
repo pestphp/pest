@@ -1987,6 +1987,22 @@
   ✓ it tells an identical copy under another name apart from the original
   ✓ it resolves a configuration directory the way PHPUnit does
   ✓ it gives a run with --no-configuration its own fingerprint
+  ✓ it fingerprints the configuration Pest generates the way the Xdebug restarter does with dataset "first name"
+  ✓ it fingerprints the configuration Pest generates the way the Xdebug restarter does with dataset "fallback name"
+  ✓ it fingerprints the configuration Pest generates the way the Xdebug restarter does with dataset "random name"
+  ✓ it fingerprints an explicit configuration apart from the one Pest generates
+  ✓ it keeps the bootstrap and the include path the command line sets with the configuration Pest generates
+  ✓ it keeps the fingerprint of a run that sets no bootstrap and no include path
+  ✓ it fingerprints the bootstrap the command line sets relative to the project with dataset "separate value"
+  ✓ it fingerprints the bootstrap the command line sets relative to the project with dataset "equals form"
+  ✓ it tells two bootstraps apart
+  ✓ it tells a bootstrap with a backslash in its name apart from a bootstrap in a directory
+  ✓ it fingerprints each include path the command line sets relative to the project
+  ✓ it fingerprints the bootstrap of a run with --no-configuration
+  ✓ it fingerprints an include path equal to the project root as the project root
+  ✓ it keeps an empty include path entry empty
+  ✓ it keeps the fingerprint of a relative bootstrap when the working directory changes during the run
+  ✓ it tells an include path through a symlink to a directory with a separator in its name apart from two include paths
 
    PASS  Tests\Unit\Plugins\Tia\ContentHash
   ✓ of() → it returns false when file does not exist
@@ -2040,6 +2056,8 @@
   ✓ compute() → it fingerprints tracked structural files in a regular clone
   ✓ compute() → it fingerprints tracked structural files inside a linked git worktree
   ✓ compute() → it excludes gitignored untracked files from the fingerprint
+  ✓ compute() → it keeps the command line bootstrap and include path out of a run that sets neither
+  ✓ compute() → it tells a bootstrap whose name looks like an include path apart from a bootstrap and an include path
 
    PASS  Tests\Unit\Plugins\Tia\Graph
   ✓ shouldRerunStatus() → it re-runs failures and errors, replays successes
@@ -2419,6 +2437,12 @@
   ✓ it ensures the given closures reports the correct class name
   ✓ it ensures the given closures reports the correct class name and suggests the [pest()] function
 
+   PASS  Tests\Unit\Support\Git
+  ✓ it raises a timed out command instead of answering with ('result')
+  ✓ it raises a timed out command instead of answering with ('raw')
+  ✓ it raises a timed out command instead of answering with ('output')
+  ✓ it raises a timed out command instead of answering with ('succeeds')
+
    PASS  Tests\Unit\Support\HigherOrderMessage
   ✓ undefined method exceptions
 
@@ -2662,4 +2686,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 39 skipped, 1951 passed (4419 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 39 skipped, 1973 passed (4466 assertions)
