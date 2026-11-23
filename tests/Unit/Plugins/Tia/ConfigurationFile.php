@@ -94,6 +94,25 @@ it('fingerprints an explicit configuration apart from the one Pest generates', f
     }
 });
 
+it('keeps the bootstrap and the include path the command line sets with the configuration Pest generates', function (): void {
+    $generatedPath = $this->projectRoot.'/.pest.xml';
+    file_put_contents($generatedPath, '');
+
+    $workingDirectory = (string) getcwd();
+    chdir($this->projectRoot);
+
+    try {
+        $configuration = ConfigurationFile::fromArguments(['--configuration', $generatedPath, '--bootstrap', 'phpunit.copy.xml', '--include-path', 'lib'], $generatedPath);
+
+        expect($configuration->fingerprint($this->projectRoot))->toBe(ConfigurationFile::projectDefault()->fingerprint($this->projectRoot))
+            ->and($configuration->bootstrapFingerprint($this->projectRoot))->toBe('phpunit.copy.xml')
+            ->and($configuration->includePathFingerprint($this->projectRoot))->toBe('lib');
+    } finally {
+        chdir($workingDirectory);
+        unlink($generatedPath);
+    }
+});
+
 it('keeps the fingerprint of a run that sets no bootstrap and no include path', function (): void {
     $configuration = ConfigurationFile::fromArguments(['--tia', '--parallel', '--configuration', $this->projectRoot.'/phpunit.xml']);
 
@@ -132,7 +151,7 @@ it('fingerprints each include path the command line sets relative to the project
     $includePath = $this->projectRoot.'/lib'.PATH_SEPARATOR.'/elsewhere';
 
     expect(ConfigurationFile::fromArguments(['--configuration', $this->projectRoot.'/phpunit.xml', '--include-path', $includePath])->includePathFingerprint($this->projectRoot))
-        ->toBe('lib'.PATH_SEPARATOR.'/elsewhere');
+        ->toBe("lib\0/elsewhere");
 });
 
 it('fingerprints the bootstrap of a run with --no-configuration', function (): void {
@@ -146,12 +165,12 @@ it('fingerprints an include path equal to the project root as the project root',
     $includePath = $this->projectRoot.PATH_SEPARATOR.$this->projectRoot.'/lib';
 
     expect(ConfigurationFile::fromArguments(['--configuration', $this->projectRoot.'/phpunit.xml', '--include-path', $includePath])->includePathFingerprint($this->projectRoot))
-        ->toBe('.'.PATH_SEPARATOR.'lib');
+        ->toBe(".\0lib");
 });
 
 it('keeps an empty include path entry empty', function (): void {
     expect(ConfigurationFile::fromArguments(['--configuration', $this->projectRoot.'/phpunit.xml', '--include-path', PATH_SEPARATOR.'lib'])->includePathFingerprint($this->projectRoot))
-        ->toBe(PATH_SEPARATOR.'lib');
+        ->toBe("\0lib");
 });
 
 it('keeps the fingerprint of a relative bootstrap when the working directory changes during the run', function (): void {
@@ -169,3 +188,30 @@ it('keeps the fingerprint of a relative bootstrap when the working directory cha
         chdir($workingDirectory);
     }
 });
+
+it('tells an include path through a symlink to a directory with a separator in its name apart from two include paths', function (): void {
+    $directories = ['lib-a', 'lib-b', 'lib-a'.PATH_SEPARATOR.'lib-b'];
+
+    foreach ($directories as $directory) {
+        mkdir($this->projectRoot.'/'.$directory);
+    }
+
+    symlink($this->projectRoot.'/lib-a'.PATH_SEPARATOR.'lib-b', $this->projectRoot.'/alias');
+
+    $workingDirectory = (string) getcwd();
+    chdir($this->projectRoot);
+
+    try {
+        $configuration = ['--configuration', 'phpunit.xml'];
+
+        expect(ConfigurationFile::fromArguments([...$configuration, '--include-path', 'alias'])->includePathFingerprint($this->projectRoot))
+            ->not->toBe(ConfigurationFile::fromArguments([...$configuration, '--include-path', 'lib-a'.PATH_SEPARATOR.'lib-b'])->includePathFingerprint($this->projectRoot));
+    } finally {
+        chdir($workingDirectory);
+        unlink($this->projectRoot.'/alias');
+
+        foreach ($directories as $directory) {
+            rmdir($this->projectRoot.'/'.$directory);
+        }
+    }
+})->skipOnWindows();

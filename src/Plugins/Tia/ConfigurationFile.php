@@ -20,11 +20,14 @@ final readonly class ConfigurationFile
 
     private const array VALUE_OPTIONS = ['--configuration', '--bootstrap', '--include-path'];
 
+    /**
+     * @param  list<string>|null  $includePaths
+     */
     private function __construct(
         private ?string $path,
         private bool $suppressed,
         private ?string $bootstrap = null,
-        private ?string $includePath = null,
+        private ?array $includePaths = null,
     ) {}
 
     /**
@@ -39,22 +42,22 @@ final readonly class ConfigurationFile
         }
 
         $bootstrap = $configuration->hasBootstrap() ? self::resolved($configuration->bootstrap()) : null;
-        $includePath = $configuration->hasIncludePath()
-            ? implode(PATH_SEPARATOR, array_map(self::resolved(...), explode(PATH_SEPARATOR, $configuration->includePath())))
+        $includePaths = $configuration->hasIncludePath()
+            ? array_map(self::resolved(...), explode(PATH_SEPARATOR, $configuration->includePath()))
             : null;
 
         if (! $configuration->hasConfigurationFile() && ! $configuration->useDefaultConfiguration()) {
-            return new self(null, true, $bootstrap, $includePath);
+            return new self(null, true, $bootstrap, $includePaths);
         }
 
         $file = new XmlConfigurationFileFinder()->find($configuration);
         $path = $file === false ? false : realpath($file);
 
         if ($path !== false && $generatedPath !== null && $path === realpath($generatedPath)) {
-            return new self(null, false, $bootstrap, $includePath);
+            return new self(null, false, $bootstrap, $includePaths);
         }
 
-        return new self($path === false ? null : $path, false, $bootstrap, $includePath);
+        return new self($path === false ? null : $path, false, $bootstrap, $includePaths);
     }
 
     public static function at(string $path): self
@@ -74,16 +77,16 @@ final readonly class ConfigurationFile
 
     public function includePathFingerprint(string $projectRoot): ?string
     {
-        if ($this->includePath === null) {
+        if ($this->includePaths === null) {
             return null;
         }
 
         $paths = array_map(
             fn (string $path): string => $this->relativeTo($projectRoot, $path),
-            explode(PATH_SEPARATOR, $this->includePath),
+            $this->includePaths,
         );
 
-        return implode(PATH_SEPARATOR, $paths);
+        return implode("\0", $paths);
     }
 
     public function fingerprint(string $projectRoot): ?string
