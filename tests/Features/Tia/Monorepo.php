@@ -676,6 +676,27 @@ test('a change under an include path that the command line names runs the full s
         ->and($result->replayed())->toBe(0, $result->describe());
 })->skipOnWindows();
 
+test('an ignored file under an include path that the command line names runs the full suite', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('.gitignore', "packages/shared/generated.php\n");
+    $project->write('packages/shared/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->write('packages/shared/generated.php', "<?php\n\nreturn 1;\n");
+    $project->git()->commit('add a sibling package with a generated file');
+    $project->seedFor($nested, 'master', arguments: ['--include-path', '../packages/shared']);
+
+    $project->write('packages/shared/generated.php', "<?php\n\nreturn 2;\n");
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia', '--include-path', '../packages/shared');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('whose changes git cannot report')
+        ->and($result->output)->toContain('packages/shared/generated.php')
+        ->and($result->replayed())->toBe(0, $result->describe())
+        ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed');
+})->skipOnWindows();
+
 test('a change under an include path that the configuration names runs the full suite', function (): void {
     [$project, $nested] = tiaMonorepo();
 
@@ -769,7 +790,7 @@ test('a project that loads from outside its repository never replays', function 
     $result = $project->pestIn($nested, '--tia');
 
     expect($result->exitCode)->toBe(0, $result->describe())
-        ->and($result->output)->toContain('from outside its repository')
+        ->and($result->output)->toContain('whose changes git cannot report')
         ->and($result->replayed())->toBe(0, $result->describe())
         ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed');
 })->skipOnWindows();

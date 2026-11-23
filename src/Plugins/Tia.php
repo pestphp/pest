@@ -1219,7 +1219,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
         if ($unverifiable !== []) {
             $this->renderBadge('WARN', sprintf(
-                'This project loads %d path%s from outside its repository.',
+                'This project loads %d path%s whose changes git cannot report.',
                 count($unverifiable),
                 count($unverifiable) === 1 ? '' : 's',
             ));
@@ -1229,7 +1229,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             }
 
             $this->renderChild('Running the full suite — git reports no change there, so a replay could not stand behind its results.');
-            $this->renderChild('Move what the project loads into the repository to let TIA select tests again.');
+            $this->renderChild('Keep what the project loads inside the repository, and not ignored by git, to let TIA select tests again.');
 
             return $arguments;
         }

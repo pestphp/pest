@@ -185,6 +185,10 @@ final class ExternalSources
 
         $roots = array_values(array_diff($roots, $ignoredRoots));
 
+        foreach (self::ignoredFilesUnder($repositoryRoot, $git->pathPrefix(), $roots) as $ignored) {
+            $unverifiable[] = $ignored;
+        }
+
         sort($roots);
         sort($unverifiable);
 
@@ -235,6 +239,55 @@ final class ExternalSources
         }
 
         return $cache[$key] = $ignored;
+    }
+
+    /**
+     * @param  array<int, string>  $roots
+     * @return array<int, string>
+     */
+    private static function ignoredFilesUnder(string $repositoryRoot, string $projectPrefix, array $roots): array
+    {
+        $directories = [];
+
+        foreach ($roots as $root) {
+            if ($root === '') {
+                $directories[] = '.';
+            } elseif (str_ends_with($root, '/')) {
+                $directories[] = $root;
+            }
+        }
+
+        if ($directories === []) {
+            return [];
+        }
+
+        $result = new Git($repositoryRoot)->result([
+            '--literal-pathspecs',
+            'ls-files',
+            '-z',
+            '--others',
+            '--ignored',
+            '--exclude-standard',
+            '--directory',
+            '--',
+            ...$directories,
+        ]);
+
+        if ($result['exitCode'] !== 0) {
+            return [];
+        }
+
+        $ignored = [];
+
+        foreach (explode("\x00", rtrim($result['output'], "\x00")) as $path) {
+            if ($path === '' || ($projectPrefix !== '' && str_starts_with($path, $projectPrefix))) {
+                continue;
+            }
+
+            $ignored[] = $repositoryRoot.'/'.rtrim($path, '/');
+        }
+
+        return $ignored;
     }
 
     /**

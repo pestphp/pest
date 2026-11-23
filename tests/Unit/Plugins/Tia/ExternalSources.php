@@ -620,6 +620,32 @@ it('reports a root that the repository ignores as unverifiable', function (): vo
         ->toContain(str_replace(DIRECTORY_SEPARATOR, '/', (string) realpath($repository['root'])).'/packages/generated');
 })->skipOnWindows();
 
+it('reports an ignored file under a declared root as unverifiable', function (): void {
+    $repository = tiaExternalRepository();
+
+    file_put_contents($repository['root'].'/.gitignore', "packages/shared/generated.php\n");
+    file_put_contents($repository['root'].'/packages/shared/generated.php', "<?php\n");
+
+    ExternalSources::flush();
+
+    $root = str_replace(DIRECTORY_SEPARATOR, '/', (string) realpath($repository['root']));
+
+    expect(ExternalSources::rootsFor($repository['project'], ['--include-path', '../packages/shared']))->toBe(['packages/shared/'])
+        ->and(ExternalSources::unverifiable($repository['project'], ['--include-path', '../packages/shared']))->toBe([$root.'/packages/shared/generated.php']);
+})->skipOnWindows();
+
+it('reports no ignored file of the project itself as unverifiable', function (): void {
+    $repository = tiaExternalRepository();
+
+    file_put_contents($repository['root'].'/.gitignore', "vendor/\n");
+    mkdir($repository['root'].'/backend/vendor', 0755, true);
+    file_put_contents($repository['root'].'/backend/vendor/autoload.php', "<?php\n");
+
+    ExternalSources::flush();
+
+    expect(ExternalSources::unverifiable($repository['project'], ['--include-path', '..']))->toBeEmpty();
+})->skipOnWindows();
+
 it('keeps the roots of the run when a test changes the working directory', function (): void {
     $repository = tiaExternalRepository([], <<<'XML_WRAP'
 <?xml version="1.0" encoding="UTF-8"?>
