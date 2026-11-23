@@ -13,7 +13,7 @@ const PAGE_EXTENSIONS = new Set([
   '.mts', '.cts', '.mjs', '.cjs',
 ])
 const SFC_RE = /\.(vue|svelte)$/i
-const SCRIPT_BLOCK_RE = /<script\b([^>]*)>([\s\S]*?)<\/script>/gi
+const SCRIPT_BLOCK_RE = /<script\b((?:[^>"']|"[^"]*"|'[^']*')*)>([\s\S]*?)<\/script>/gi
 const ASSET_EXT_RE = /\.(css|scss|sass|less|styl|stylus|svg|png|jpe?g|gif|webp|avif|ico|bmp|woff2?|ttf|eot|otf|md|mdx|txt|html|mp4|webm|mp3|wav|ogg|m4a|pdf|wasm|glsl|frag|vert)$/i
 const PROJECT_ROOT = resolve(process.argv[2] ?? process.cwd())
 const PAGE_DIR_CANDIDATES = [
@@ -25,8 +25,8 @@ const PAGE_DIR_CANDIDATES = [
   'assets/pages',
 ]
 
-async function loadRolldown() {
-  const projectRequire = createRequire(join(PROJECT_ROOT, 'package.json'))
+export async function loadRolldown(projectRoot = PROJECT_ROOT) {
+  const projectRequire = createRequire(join(projectRoot, 'package.json'))
   let path = null
 
   try { path = projectRequire.resolve('rolldown') } catch {}
@@ -38,6 +38,10 @@ async function loadRolldown() {
       const viteRequire = createRequire(projectRequire.resolve('vite/package.json'))
       path = viteRequire.resolve('rolldown')
     } catch {}
+  }
+
+  if (path === null) {
+    try { path = projectRequire.resolve('vite/rolldown') } catch {}
   }
 
   if (path === null) return null
