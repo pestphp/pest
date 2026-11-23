@@ -100,3 +100,34 @@ test('an identical copy of the configuration file under another name does not re
         ->and($result->replayed())->toBe(0, $result->describe())
         ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed');
 })->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
+
+function removeConfiguration(Project $project): void
+{
+    $project->git()->run(['rm', '--quiet', 'phpunit.xml']);
+    $project->write('.gitignore', file_get_contents($project->path('.gitignore'))."/.pest*.xml\n");
+    $project->git()->commit('use the configuration Pest generates');
+    $project->write('vendor/pestphp/pest/.temp/.gitkeep', '');
+}
+
+test('a project without a configuration file replays the graph', function (array $arguments): void {
+    $project = Project::make('master');
+    removeConfiguration($project);
+    $project->seed('master');
+
+    $result = $project->pest('--tia', ...$arguments);
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->replayed())->toBe(Project::TOTAL_TESTS, $result->describe());
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
+
+test('a leftover generated configuration file does not discard the graph', function (array $arguments): void {
+    $project = Project::make('master');
+    removeConfiguration($project);
+    $project->seed('master');
+    $project->write('.pest.xml', (string) file_get_contents($project->path('vendor/pestphp/pest/resources/base-phpunit.xml')));
+
+    $replayed = $project->pest('--tia', ...$arguments);
+
+    expect($replayed->exitCode)->toBe(0, $replayed->describe())
+        ->and($replayed->replayed())->toBe(Project::TOTAL_TESTS, $replayed->describe());
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();

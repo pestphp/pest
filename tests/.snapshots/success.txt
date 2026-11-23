@@ -1987,6 +1987,10 @@
   ✓ it tells an identical copy under another name apart from the original
   ✓ it resolves a configuration directory the way PHPUnit does
   ✓ it gives a run with --no-configuration its own fingerprint
+  ✓ it fingerprints the configuration Pest generates the way the Xdebug restarter does with dataset "first name"
+  ✓ it fingerprints the configuration Pest generates the way the Xdebug restarter does with dataset "fallback name"
+  ✓ it fingerprints the configuration Pest generates the way the Xdebug restarter does with dataset "random name"
+  ✓ it fingerprints an explicit configuration apart from the one Pest generates
 
    PASS  Tests\Unit\Plugins\Tia\ContentHash
   ✓ of() → it returns false when file does not exist
@@ -2662,4 +2666,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 39 skipped, 1951 passed (4419 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 39 skipped, 1955 passed (4433 assertions)

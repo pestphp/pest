@@ -475,7 +475,9 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             exit(0);
         }
 
-        $this->configuration = ConfigurationFile::fromArguments($arguments);
+        $configurationPlugin = Container::getInstance()->get(Configuration::class);
+        assert($configurationPlugin instanceof Configuration);
+        $this->configuration = ConfigurationFile::fromArguments($arguments, $configurationPlugin->generatedConfigurationPath());
 
         $isWorker = Parallel::isWorker();
         $recordingGlobal = $isWorker && (string) Parallel::getGlobal(self::RECORDING_GLOBAL) === '1';

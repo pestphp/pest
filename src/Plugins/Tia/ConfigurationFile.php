@@ -26,7 +26,7 @@ final readonly class ConfigurationFile
     /**
      * @param  array<int, string>  $arguments
      */
-    public static function fromArguments(array $arguments): self
+    public static function fromArguments(array $arguments, ?string $generatedPath = null): self
     {
         try {
             $configuration = new Builder(EventFacade::emitter())->fromParameters(self::configurationParameters($arguments));
@@ -40,6 +40,10 @@ final readonly class ConfigurationFile
 
         $file = new XmlConfigurationFileFinder()->find($configuration);
         $path = $file === false ? false : realpath($file);
+
+        if ($path !== false && $generatedPath !== null && $path === realpath($generatedPath)) {
+            return self::projectDefault();
+        }
 
         return new self($path === false ? null : $path, false);
     }
