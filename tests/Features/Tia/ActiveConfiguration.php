@@ -159,6 +159,22 @@ test('a graph recorded under the bootstrap the command line sets is replayed und
         ->and($result->replayed())->toBe(Project::TOTAL_TESTS, $result->describe());
 })->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows()->skip(! Coverage::isAvailable(), 'Coverage is not available');
 
+test('a graph recorded under a bootstrap whose name looks like an include path is not replayed under that bootstrap and include path', function (array $arguments): void {
+    $project = Project::make('master');
+    $bootstrap = "<?php\n\nrequire __DIR__.'/../vendor/autoload.php';\n";
+    $project->write('tests/Boot.php', $bootstrap);
+    $project->write('tests/Boot.php;include-path=app', $bootstrap);
+    $project->git()->commit('add two bootstraps');
+
+    $project->pest('--tia', '--bootstrap', 'tests/Boot.php;include-path=app', ...$arguments);
+
+    $result = $project->pest('--tia', '--bootstrap', 'tests/Boot.php', '--include-path', 'app');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->replayed())->toBe(0, $result->describe())
+        ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed');
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows()->skip(! Coverage::isAvailable(), 'Coverage is not available');
+
 test('a graph recorded without an include path is not replayed under the include path the command line sets', function (): void {
     $project = Project::make('master');
     $project->seed('master');

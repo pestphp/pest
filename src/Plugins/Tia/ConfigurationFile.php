@@ -67,42 +67,26 @@ final readonly class ConfigurationFile
         return new self(null, false);
     }
 
+    public function bootstrapFingerprint(string $projectRoot): ?string
+    {
+        return $this->bootstrap === null ? null : $this->relativeTo($projectRoot, $this->bootstrap);
+    }
+
+    public function includePathFingerprint(string $projectRoot): ?string
+    {
+        if ($this->includePath === null) {
+            return null;
+        }
+
+        $paths = array_map(
+            fn (string $path): string => $this->relativeTo($projectRoot, $path),
+            explode(PATH_SEPARATOR, $this->includePath),
+        );
+
+        return implode(PATH_SEPARATOR, $paths);
+    }
+
     public function fingerprint(string $projectRoot): ?string
-    {
-        $overrides = $this->commandLineOverrides($projectRoot);
-        $fileFingerprint = $this->fileFingerprint($projectRoot);
-
-        if ($overrides === []) {
-            return $fileFingerprint;
-        }
-
-        return implode(';', [$fileFingerprint ?? '', ...$overrides]);
-    }
-
-    /**
-     * @return list<string>
-     */
-    private function commandLineOverrides(string $projectRoot): array
-    {
-        $overrides = [];
-
-        if ($this->bootstrap !== null) {
-            $overrides[] = 'bootstrap='.$this->relativeTo($projectRoot, $this->bootstrap);
-        }
-
-        if ($this->includePath !== null) {
-            $paths = array_map(
-                fn (string $path): string => $this->relativeTo($projectRoot, $path),
-                explode(PATH_SEPARATOR, $this->includePath),
-            );
-
-            $overrides[] = 'include-path='.implode(PATH_SEPARATOR, $paths);
-        }
-
-        return $overrides;
-    }
-
-    private function fileFingerprint(string $projectRoot): ?string
     {
         if ($this->suppressed) {
             return self::SUPPRESSED;
