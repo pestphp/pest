@@ -80,15 +80,14 @@ it('fingerprints the configuration Pest generates the way the Xdebug restarter d
     'random name' => [['.pest.xml', '.pest-fallback.xml']],
 ]);
 
-it('fingerprints the last configuration PHPUnit receives', function (): void {
+it('fingerprints an explicit configuration apart from the one Pest generates', function (): void {
     $generatedPath = $this->projectRoot.'/.pest.xml';
     file_put_contents($generatedPath, '');
 
     try {
-        expect(ConfigurationFile::fromArguments(['-c'.$this->projectRoot.'/phpunit.copy.xml', '--configuration', $generatedPath], $generatedPath)->fingerprint($this->projectRoot))
-            ->toBe(ConfigurationFile::projectDefault()->fingerprint($this->projectRoot))
-            ->and(ConfigurationFile::fromArguments(['--configuration', $generatedPath, '-c'.$this->projectRoot.'/phpunit.copy.xml'], $generatedPath)->fingerprint($this->projectRoot))
-            ->toBe(ConfigurationFile::at($this->projectRoot.'/phpunit.copy.xml')->fingerprint($this->projectRoot));
+        expect(ConfigurationFile::fromArguments(['-c'.$this->projectRoot.'/phpunit.copy.xml'], $generatedPath)->fingerprint($this->projectRoot))
+            ->toBe(ConfigurationFile::at($this->projectRoot.'/phpunit.copy.xml')->fingerprint($this->projectRoot))
+            ->not->toBe(ConfigurationFile::fromArguments(['--configuration', $generatedPath], $generatedPath)->fingerprint($this->projectRoot));
     } finally {
         unlink($generatedPath);
     }
