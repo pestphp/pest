@@ -32,6 +32,21 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     private const string CLASS_END = "\0";
 
     /**
+     * @var array<string, bool>
+     */
+    private const array PARATEST_ONLY_OPTIONS = [
+        '--processes' => true,
+        '--runner' => true,
+        '--max-batch-size' => true,
+        '-m' => true,
+        '--max-processes' => true,
+        '--passthru-php' => true,
+        '--tmp-dir' => true,
+        '--functional' => false,
+        '--no-test-tokens' => false,
+    ];
+
+    /**
      * @var array{
      *     index: int,
      *     total: int,
@@ -270,19 +285,19 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
                 }
             }
 
-            if (in_array($argument, ['--runner', '--processes'], strict: true)) {
-                $skipNext = true;
+            if (in_array($argument, ['--parallel', '-p'], strict: true)) {
+                continue;
+            }
+
+            [$option] = explode('=', $argument, 2);
+
+            if (! array_key_exists($option, self::PARATEST_ONLY_OPTIONS)) {
+                $filtered[] = $argument;
 
                 continue;
             }
 
-            if (in_array($argument, ['--parallel', '-p'], strict: true)
-                || str_starts_with($argument, '--processes')
-                || str_starts_with($argument, '--runner=')) {
-                continue;
-            }
-
-            $filtered[] = $argument;
+            $skipNext = self::PARATEST_ONLY_OPTIONS[$option] && ! str_contains($argument, '=');
         }
 
         return $filtered;
