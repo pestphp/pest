@@ -330,7 +330,7 @@ final class ReadCapture
             $wrapper->context = $this->context;
         }
 
-        if (! method_exists($wrapper, 'stream_open') || $wrapper->stream_open($path, $mode, $options, $openedPath) !== true) {
+        if (! is_callable([$wrapper, 'stream_open']) || $wrapper->stream_open($path, $mode, $options, $openedPath) !== true) {
             return false;
         }
 
