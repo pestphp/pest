@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Pest\Support\Coverage;
 use Tests\Fixtures\Tia\Project;
 
 afterEach(function (): void {
@@ -100,3 +101,102 @@ test('an identical copy of the configuration file under another name does not re
         ->and($result->replayed())->toBe(0, $result->describe())
         ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed');
 })->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
+
+function removeConfiguration(Project $project): void
+{
+    $project->git()->run(['rm', '--quiet', 'phpunit.xml']);
+    $project->write('.gitignore', file_get_contents($project->path('.gitignore'))."/.pest*.xml\n");
+    $project->git()->commit('use the configuration Pest generates');
+    $project->write('vendor/pestphp/pest/.temp/.gitkeep', '');
+}
+
+test('a project without a configuration file replays the graph', function (array $arguments): void {
+    $project = Project::make('master');
+    removeConfiguration($project);
+    $project->seed('master');
+
+    $result = $project->pest('--tia', ...$arguments);
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->replayed())->toBe(Project::TOTAL_TESTS, $result->describe());
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
+
+test('a leftover generated configuration file does not discard the graph', function (array $arguments): void {
+    $project = Project::make('master');
+    removeConfiguration($project);
+    $project->seed('master');
+    $project->write('.pest.xml', (string) file_get_contents($project->path('vendor/pestphp/pest/resources/base-phpunit.xml')));
+
+    $replayed = $project->pest('--tia', ...$arguments);
+
+    expect($replayed->exitCode)->toBe(0, $replayed->describe())
+        ->and($replayed->replayed())->toBe(Project::TOTAL_TESTS, $replayed->describe());
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
+
+test('a graph recorded under one bootstrap is not replayed under the bootstrap the command line sets', function (array $arguments): void {
+    $project = Project::make('master');
+    $project->write('tests/AlternateBootstrap.php', "<?php\n\nrequire __DIR__.'/../vendor/autoload.php';\n");
+    $project->git()->commit('add an alternate bootstrap');
+    $project->seed('master');
+
+    $result = $project->pest('--tia', '--bootstrap', 'tests/AlternateBootstrap.php', ...$arguments);
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->replayed())->toBe(0, $result->describe())
+        ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed');
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
+
+test('a graph recorded under the bootstrap the command line sets is replayed under the same bootstrap', function (array $arguments): void {
+    $project = Project::make('master');
+    $project->write('tests/AlternateBootstrap.php', "<?php\n\nrequire __DIR__.'/../vendor/autoload.php';\n");
+    $project->git()->commit('add an alternate bootstrap');
+
+    $project->pest('--tia', '--bootstrap', 'tests/AlternateBootstrap.php', ...$arguments);
+
+    $result = $project->pest('--tia', '--bootstrap', 'tests/AlternateBootstrap.php', ...$arguments);
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->replayed())->toBe(Project::TOTAL_TESTS, $result->describe());
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows()->skip(! Coverage::isAvailable(), 'Coverage is not available');
+
+test('a graph recorded under a bootstrap whose name looks like an include path is not replayed under that bootstrap and include path', function (array $arguments): void {
+    $project = Project::make('master');
+    $bootstrap = "<?php\n\nrequire __DIR__.'/../vendor/autoload.php';\n";
+    $project->write('tests/Boot.php', $bootstrap);
+    $project->write('tests/Boot.php;include-path=app', $bootstrap);
+    $project->git()->commit('add two bootstraps');
+
+    $project->pest('--tia', '--bootstrap', 'tests/Boot.php;include-path=app', ...$arguments);
+
+    $result = $project->pest('--tia', '--bootstrap', 'tests/Boot.php', '--include-path', 'app');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->replayed())->toBe(0, $result->describe())
+        ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed');
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows()->skip(! Coverage::isAvailable(), 'Coverage is not available');
+
+test('a graph recorded under a bootstrap with a backslash in its name is not replayed under the bootstrap in a directory', function (array $arguments): void {
+    $project = Project::make('master');
+    $project->write('tests/Boot.php', "<?php\n\nrequire __DIR__.'/../vendor/autoload.php';\n");
+    $project->write('tests\\Boot.php', "<?php\n\nrequire __DIR__.'/vendor/autoload.php';\n");
+    $project->git()->commit('add two bootstraps');
+
+    $project->pest('--tia', '--bootstrap', 'tests\\Boot.php', ...$arguments);
+
+    $result = $project->pest('--tia', '--bootstrap', 'tests/Boot.php', ...$arguments);
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->replayed())->toBe(0, $result->describe())
+        ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed');
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows()->skip(! Coverage::isAvailable(), 'Coverage is not available');
+
+test('a graph recorded without an include path is not replayed under the include path the command line sets', function (): void {
+    $project = Project::make('master');
+    $project->seed('master');
+
+    $result = $project->pest('--tia', '--include-path', 'app');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->replayed())->toBe(0, $result->describe())
+        ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed');
+})->skipOnWindows();

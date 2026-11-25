@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Pest\Plugins\Tia\ConfigurationFile;
 use Pest\Plugins\Tia\Fingerprint;
 use Symfony\Component\Process\Process;
 
@@ -104,6 +105,32 @@ describe('compute()', function (): void {
                 ->and($fingerprint['structural']['phpunit_configuration'])->not->toBeNull();
         } finally {
             fingerprintRemoveDirectory($clone);
+        }
+    });
+    it('keeps the command line bootstrap and include path out of a run that sets neither', function (): void {
+        $root = fingerprintRepository();
+
+        try {
+            $structural = Fingerprint::compute($root, ConfigurationFile::fromArguments(['--tia']))['structural'];
+
+            expect($structural)->not->toHaveKey('phpunit_bootstrap')
+                ->and($structural)->not->toHaveKey('phpunit_include_path');
+        } finally {
+            fingerprintRemoveDirectory($root);
+        }
+    });
+
+    it('tells a bootstrap whose name looks like an include path apart from a bootstrap and an include path', function (): void {
+        $root = fingerprintRepository();
+
+        try {
+            $bootstrapOnly = Fingerprint::compute($root, ConfigurationFile::fromArguments(['--bootstrap', 'bootstrap.php;include-path=app']));
+            $bootstrapAndIncludePath = Fingerprint::compute($root, ConfigurationFile::fromArguments(['--bootstrap', 'bootstrap.php', '--include-path', 'app']));
+
+            expect(Fingerprint::structuralMatches($bootstrapOnly, $bootstrapAndIncludePath))->toBeFalse()
+                ->and(Fingerprint::structuralDrift($bootstrapOnly, $bootstrapAndIncludePath))->toBe(['phpunit_bootstrap', 'phpunit_include_path']);
+        } finally {
+            fingerprintRemoveDirectory($root);
         }
     });
 });
