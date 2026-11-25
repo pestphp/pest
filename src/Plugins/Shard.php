@@ -47,6 +47,11 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     ];
 
     /**
+     * @var list<string>
+     */
+    private const array PARATEST_ONLY_SHORT_OPTIONS_WITH_VALUE = ['-m'];
+
+    /**
      * @var array{
      *     index: int,
      *     total: int,
@@ -289,6 +294,10 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
                 continue;
             }
 
+            if (self::isAttachedParatestShortOption($argument)) {
+                continue;
+            }
+
             [$option] = explode('=', $argument, 2);
 
             if (! array_key_exists($option, self::PARATEST_ONLY_OPTIONS)) {
@@ -301,6 +310,15 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
         }
 
         return $filtered;
+    }
+
+    private static function isAttachedParatestShortOption(string $argument): bool
+    {
+        if (strlen($argument) <= 2 || str_starts_with($argument, '--')) {
+            return false;
+        }
+
+        return in_array(substr($argument, 0, 2), self::PARATEST_ONLY_SHORT_OPTIONS_WITH_VALUE, strict: true);
     }
 
     /**

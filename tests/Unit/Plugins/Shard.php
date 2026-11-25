@@ -587,6 +587,8 @@ describe('buildListTestsCommand', function (): void {
         '--max-batch-size=N' => [['--max-batch-size=100']],
         '--max-batch-size N' => [['--max-batch-size', '100']],
         '-m N' => [['-m', '100']],
+        '-mN' => [['-m100']],
+        '-m=N' => [['-m=100']],
         '--processes N' => [['--processes', '8']],
         '--max-processes=N' => [['--max-processes=8']],
         '--passthru-php' => [['--passthru-php=-d memory_limit=1G']],
