@@ -19,6 +19,7 @@
       <directory suffix=".php">./tests-external</directory>
       <exclude>./tests/.snapshots</exclude>
       <exclude>./tests/Fixtures/Inheritance</exclude>
+      <exclude>./tests/Fixtures/ParallelIncludePath</exclude>
       <exclude>./tests/Fixtures/Suites</exclude>
       <exclude>./tests/Fixtures/Tia</exclude>
     </testsuite>

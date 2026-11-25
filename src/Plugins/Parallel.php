@@ -151,7 +151,6 @@ final class Parallel implements HandlesArguments
         $command->setVersion(version());
 
         Parallel\Handlers\StopOn::configureOptions($command->find('paratest')->getDefinition());
-        Parallel\Handlers\IncludePath::configureOptions($command->find('paratest')->getDefinition());
 
         return $command;
     }

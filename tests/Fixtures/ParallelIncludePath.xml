@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="../../vendor/autoload.php">
+    <php>
+        <includePath>ParallelIncludePath/xml-lib</includePath>
+    </php>
+</phpunit>

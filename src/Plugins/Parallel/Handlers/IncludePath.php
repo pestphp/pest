@@ -7,8 +7,8 @@ namespace Pest\Plugins\Parallel\Handlers;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Plugins\Parallel as ParallelPlugin;
 use Pest\Plugins\Parallel\Contracts\HandlersWorkerArguments;
-use Symfony\Component\Console\Input\InputDefinition;
-use Symfony\Component\Console\Input\InputOption;
+use Pest\Subscribers\EnsureIncludePathIsPrepended;
+use PHPUnit\Event\Facade as EventFacade;
 
 final class IncludePath implements HandlersWorkerArguments, HandlesArguments
 {
@@ -18,11 +18,46 @@ final class IncludePath implements HandlersWorkerArguments, HandlesArguments
 
     public function handleArguments(array $arguments): array
     {
-        $includePath = $this->includePathFrom($arguments);
+        $arguments = array_values($arguments);
+        $includePath = null;
+        $argumentsForParatest = [];
+
+        for ($index = 0; $index < count($arguments); $index++) {
+            $argument = $arguments[$index];
+
+            if ($argument === '--') {
+                array_push($argumentsForParatest, ...array_slice($arguments, $index));
+
+                break;
+            }
+
+            if (str_starts_with($argument, self::OPTION.'=')) {
+                $includePath = substr($argument, strlen(self::OPTION) + 1);
+
+                continue;
+            }
+
+            if ($argument === self::OPTION) {
+                $next = $arguments[$index + 1] ?? null;
+
+                if ($next !== null && ! str_starts_with($next, '-')) {
+                    $includePath = $next;
+                    $index++;
+                }
+
+                continue;
+            }
+
+            $argumentsForParatest[] = $argument;
+        }
 
         ParallelPlugin::setGlobal(self::GLOBAL_KEY, $includePath === null ? false : base64_encode($includePath));
 
-        return $arguments;
+        if ($includePath !== null) {
+            EventFacade::instance()->registerSubscriber(new EnsureIncludePathIsPrepended($includePath));
+        }
+
+        return $argumentsForParatest;
     }
 
     public function handleWorkerArguments(array $arguments): array
@@ -35,44 +70,5 @@ final class IncludePath implements HandlersWorkerArguments, HandlesArguments
         }
 
         return [...$arguments, self::OPTION, $includePath];
-    }
-
-    public static function configureOptions(InputDefinition $definition): void
-    {
-        $definition->addOption(new InputOption(
-            substr(self::OPTION, 2),
-            null,
-            InputOption::VALUE_REQUIRED,
-            'Prepend PHP\'s include_path with given path(s)',
-        ));
-    }
-
-    /**
-     * @param  array<int, string>  $arguments
-     */
-    private function includePathFrom(array $arguments): ?string
-    {
-        $arguments = array_values($arguments);
-        $includePath = null;
-
-        foreach ($arguments as $index => $argument) {
-            if ($argument === '--') {
-                break;
-            }
-
-            if (str_starts_with($argument, self::OPTION.'=')) {
-                $includePath = substr($argument, strlen(self::OPTION) + 1);
-
-                continue;
-            }
-
-            $next = $arguments[$index + 1] ?? null;
-
-            if ($argument === self::OPTION && $next !== null && ! str_starts_with($next, '-')) {
-                $includePath = $next;
-            }
-        }
-
-        return $includePath;
     }
 }
