@@ -127,16 +127,22 @@ final class ReadCapture
 
     public function dir_closedir(): bool
     {
-        closedir($this->resource());
+        $this->forward('dir_closedir', function (mixed $resource): bool {
+            closedir($resource);
+
+            return true;
+        });
 
         return true;
     }
 
-    public function dir_opendir(string $path): bool
+    public function dir_opendir(string $path, int $options): bool
     {
-        $handle = $this->withOriginalWrapper(fn () => opendir($path, $this->context));
+        $handle = $this->withOriginalWrapper(fn (): mixed => self::$previousWrapper === null
+            ? opendir($path, $this->context)
+            : $this->openDirectoryThroughPreviousWrapper(self::$previousWrapper, $path, $options));
 
-        if (! is_resource($handle)) {
+        if ($handle === false) {
             return false;
         }
 
@@ -147,14 +153,18 @@ final class ReadCapture
 
     public function dir_readdir(): string|false
     {
-        return readdir($this->resource());
+        $entry = $this->forward('dir_readdir', fn (mixed $resource): string|false => readdir($resource));
+
+        return is_string($entry) ? $entry : false;
     }
 
     public function dir_rewinddir(): bool
     {
-        rewinddir($this->resource());
+        return $this->forward('dir_rewinddir', function (mixed $resource): bool {
+            rewinddir($resource);
 
-        return true;
+            return true;
+        }) === true;
     }
 
     public function mkdir(string $path, int $mode, int $options): bool
@@ -327,6 +337,24 @@ final class ReadCapture
         return $wrapper;
     }
 
+    /**
+     * @param  class-string  $wrapperClass
+     */
+    private function openDirectoryThroughPreviousWrapper(string $wrapperClass, string $path, int $options): object|false
+    {
+        $wrapper = new $wrapperClass;
+
+        if (property_exists($wrapper, 'context')) {
+            $wrapper->context = $this->context;
+        }
+
+        if (! is_callable([$wrapper, 'dir_opendir']) || $wrapper->dir_opendir($path, $options) !== true) {
+            return false;
+        }
+
+        return $wrapper;
+    }
+
     private function isRead(string $mode, int $options): bool
     {
         if (($options & self::STREAM_OPEN_FOR_INCLUDE) !== 0) {
@@ -334,16 +362,6 @@ final class ReadCapture
         }
 
         return str_contains($mode, 'r') || str_contains($mode, '+');
-    }
-
-    /**
-     * @return resource
-     */
-    private function resource(): mixed
-    {
-        assert(is_resource($this->handle));
-
-        return $this->handle;
     }
 
     /**
@@ -355,7 +373,7 @@ final class ReadCapture
             return $native($this->handle);
         }
 
-        if (! method_exists($this->handle, $method)) {
+        if (! is_callable([$this->handle, $method])) {
             return false;
         }
 
