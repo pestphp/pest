@@ -409,3 +409,54 @@ describe('branch baseline over the fallback', function (): void {
             ->and($graph->getTime('feature', 'Tests\BarTest::it passes', 'main'))->toBe(0.5);
     });
 });
+
+describe('encode() and decode()', function (): void {
+    it('round-trips paths that are not valid UTF-8', function (): void {
+        $root = sys_get_temp_dir();
+        $graph = new Graph($root);
+        $graph->link("tests/caf\xe9Test.php", "app/caf\xe9.php");
+        $graph->setLastRunTree('master', ["caf\xe9.txt" => 'hash']);
+        $graph->setResult('master', "P\\Tests\\caf\xe9Test::__pest_evaluable_it_works", 0, "caf\xe9", 0.1, 1, "tests/caf\xe9Test.php");
+
+        $decoded = Graph::decode($graph->encode(), $root);
+
+        expect($decoded)->toBeInstanceOf(Graph::class)
+            ->and($decoded->affected(["app/caf\xe9.php"]))->toBe(["tests/caf\xe9Test.php"])
+            ->and($decoded->lastRunTree('master'))->toBe(["caf\xe9.txt" => 'hash'])
+            ->and($decoded->getAssertions('master', "P\\Tests\\caf\xe9Test::__pest_evaluable_it_works"))->toBe(1)
+            ->and($decoded->testFilesToRerun('master'))->toBeEmpty();
+    });
+
+    it('lists a branch whose name is not valid UTF-8', function (): void {
+        $graph = new Graph(sys_get_temp_dir());
+        $graph->setRecordedAtSha("feature/caf\xe9", 'abc');
+
+        expect(Graph::branchesIn($graph->encode()))->toBe(["feature/caf\xe9"]);
+    });
+});
+
+describe('legacy schema', function (): void {
+    it('reads a graph of the previous schema without unescaping its strings', function (): void {
+        $root = sys_get_temp_dir();
+        $id = 'P\\Tests\\FooTest::__pest_evaluable_it_skips';
+        $legacy = json_encode([
+            'schema' => 1,
+            'baselines' => ['master' => [
+                'sha' => null,
+                'tree' => [],
+                'results' => [$id => ['status' => 1, 'message' => "\0base64:b2xk", 'time' => 0.1]],
+            ]],
+        ], JSON_UNESCAPED_SLASHES);
+
+        $graph = Graph::decode((string) $legacy, $root);
+
+        expect($graph)->toBeInstanceOf(Graph::class)
+            ->and($graph->getResult('master', $id)?->message())->toBe("\0base64:b2xk")
+            ->and(Graph::decode($graph->encode(), $root)?->getResult('master', $id)?->message())->toBe("\0base64:b2xk");
+    });
+
+    it('rebuilds a graph of an unknown schema but still lists its branches', function (): void {
+        expect(Graph::decode('{"schema":99}', sys_get_temp_dir()))->toBeNull()
+            ->and(Graph::branchesIn('{"schema":99,"baselines":{"master":{}}}'))->toBe(['master']);
+    });
+});

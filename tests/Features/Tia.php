@@ -34,10 +34,6 @@ it('does not run user hooks when replaying cached skipped and incomplete results
         $graph->setResult($branch, $id('replayed skip'), 1, 'cached skip', 0.01, 0, $fixture);
         $graph->setResult($branch, $id('replayed incomplete'), 2, 'cached incomplete', 0.01, 0, $fixture);
 
-        $json = $graph->encode();
-
-        expect($json)->not->toBeNull();
-
         $originalHome = getenv('HOME');
         putenv('HOME='.$home);
 
@@ -47,7 +43,7 @@ it('does not run user hooks when replaying cached skipped and incomplete results
             putenv($originalHome === false ? 'HOME' : 'HOME='.$originalHome);
         }
 
-        expect($storage->write(Tia::KEY_GRAPH, (string) $json))->toBeTrue();
+        expect($storage->write(Tia::KEY_GRAPH, $graph->encode()))->toBeTrue();
 
         $process = new Process(
             ['php', 'bin/pest', '--configuration', $configuration, '--tia'],

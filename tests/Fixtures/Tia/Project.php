@@ -6,6 +6,7 @@ namespace Tests\Fixtures\Tia;
 
 use FilesystemIterator;
 use Pest\Plugins\Tia;
+use Pest\Plugins\Tia\ByteSafeJson;
 use Pest\Plugins\Tia\ChangedFiles;
 use Pest\Plugins\Tia\ConfigurationFile;
 use Pest\Plugins\Tia\FileState;
@@ -248,13 +249,7 @@ final class Project
             }
         }
 
-        $json = $graph->encode();
-
-        if ($json === null) {
-            throw new RuntimeException('Unable to encode the seeded graph.');
-        }
-
-        if (! $this->state()->write(Tia::KEY_GRAPH, $json)) {
+        if (! $this->state()->write(Tia::KEY_GRAPH, $graph->encode())) {
             throw new RuntimeException('Unable to persist the seeded graph.');
         }
 
@@ -365,7 +360,7 @@ final class Project
             throw new RuntimeException('There is no graph to mutate.');
         }
 
-        $this->state()->write(Tia::KEY_GRAPH, (string) json_encode($callback($graph), JSON_UNESCAPED_SLASHES));
+        $this->state()->write(Tia::KEY_GRAPH, ByteSafeJson::encode($callback($graph)));
 
         $this->snapshot();
     }
@@ -381,7 +376,7 @@ final class Project
             return null;
         }
 
-        $graph = json_decode($json, true);
+        $graph = ByteSafeJson::decode($json);
 
         return is_array($graph) ? $graph : null;
     }
