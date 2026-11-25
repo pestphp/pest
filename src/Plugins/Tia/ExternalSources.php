@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
+use Composer\Autoload\ClassLoader;
+use Pest\Plugins\Configuration;
 use Pest\Support\Arr;
+use Pest\Support\ComposerProject;
 use Pest\Support\Git;
 use SimpleXMLElement;
 use Throwable;
@@ -67,55 +70,117 @@ final class ExternalSources
      */
     public static function ignoredInputs(string $projectRoot, array $arguments = []): array
     {
+        return self::ignoredState($projectRoot, $arguments)['inputs'];
+    }
+
+    /**
+     * @param  array<int, string>  $arguments
+     * @return array{inputs: array<int, string>, repositories: array<int, string>, failed: array<int, string>, unreadable: array<int, string>}
+     */
+    public static function ignoredState(string $projectRoot, array $arguments = []): array
+    {
         $resolved = self::resolved($projectRoot, $arguments);
-        $queries = [];
-        $files = [];
 
-        foreach ([...$resolved['roots'], ...$resolved['ignored']] as $root) {
-            if ($root === '' || str_ends_with($root, '/')) {
-                $queries[] = self::pathspecsUnder($root);
-            } elseif (in_array($root, $resolved['ignored'], true)) {
-                $files[] = ':(literal)'.$root;
-            }
-        }
-
-        if ($files !== []) {
-            $queries[] = $files;
-        }
-
-        if ($queries === []) {
-            return [];
+        if ($resolved['roots'] === [] && $resolved['ignored'] === []) {
+            return ['inputs' => [], 'repositories' => [], 'failed' => [], 'unreadable' => []];
         }
 
         $git = new Git($projectRoot);
         $repositoryRoot = $git->repositoryRoot();
 
         if ($repositoryRoot === null) {
-            return [];
+            return ['inputs' => [], 'repositories' => [], 'failed' => [], 'unreadable' => []];
         }
 
-        $repository = new Git($repositoryRoot);
-        $projectPrefix = $git->pathPrefix();
+        $listing = self::ignoredEntries($repositoryRoot, $git->pathPrefix(), $resolved['roots'], $resolved['ignored']);
         $inputs = [];
 
-        foreach ($queries as $pathspecs) {
-            $result = $repository->result(['ls-files', '-z', '--others', '--ignored', '--exclude-standard', '--', ...$pathspecs]);
-
-            if ($result['exitCode'] !== 0) {
-                continue;
-            }
-
-            foreach (explode("\x00", rtrim($result['output'], "\x00")) as $path) {
-                if ($path !== '' && ! str_starts_with($path, $projectPrefix)) {
-                    $inputs[$path] = true;
-                }
+        foreach ($listing['entries'] as $path) {
+            if (is_file($repositoryRoot.'/'.$path)) {
+                $inputs[$path] = true;
             }
         }
 
         $inputs = Arr::stringKeys($inputs);
         sort($inputs);
 
-        return $inputs;
+        return ['inputs' => $inputs, 'repositories' => $listing['repositories'], 'failed' => $listing['failed'], 'unreadable' => $listing['unreadable']];
+    }
+
+    /**
+     * @param  array<int, string>  $roots
+     * @param  array<int, string>  $ignoredRoots
+     * @return array{entries: array<int, string>, repositories: array<int, string>, failed: array<int, string>, unreadable: array<int, string>}
+     */
+    private static function ignoredEntries(string $repositoryRoot, string $projectPrefix, array $roots, array $ignoredRoots): array
+    {
+        $queries = [];
+        $files = [];
+
+        foreach ([...$roots, ...$ignoredRoots] as $root) {
+            if ($root === '' || str_ends_with($root, '/')) {
+                $queries[] = [[$root], self::pathspecsUnder($root)];
+            } elseif (in_array($root, $ignoredRoots, true)) {
+                $files[] = $root;
+            }
+        }
+
+        if ($files !== []) {
+            $queries[] = [$files, array_map(static fn (string $file): string => ':(literal)'.$file, $files)];
+        }
+
+        $repository = new Git($repositoryRoot);
+        $entries = [];
+        $repositories = [];
+        $failed = [];
+        $unreadable = [];
+
+        foreach ($queries as [$queried, $pathspecs]) {
+            $result = $repository->result(['ls-files', '-z', '--others', '--ignored', '--exclude-standard', '--', ...$pathspecs]);
+
+            if ($result['exitCode'] !== 0) {
+                array_push($failed, ...$queried);
+
+                continue;
+            }
+
+            foreach (explode("\x00", rtrim($result['output'], "\x00")) as $path) {
+                if ($path === '' || str_starts_with($path, $projectPrefix)) {
+                    continue;
+                }
+
+                if (preg_match('//u', $path) !== 1) {
+                    $unreadable[$path] = true;
+
+                    continue;
+                }
+
+                $entries[$path] = true;
+
+                if (str_ends_with($path, '/') && ! self::isNoiseBelow($queried[0], $path)) {
+                    $repositories[rtrim($path, '/')] = true;
+                }
+            }
+        }
+
+        $repositories = Arr::stringKeys($repositories);
+        $unreadable = Arr::stringKeys($unreadable);
+        sort($repositories);
+        sort($failed);
+        sort($unreadable);
+
+        return ['entries' => Arr::stringKeys($entries), 'repositories' => $repositories, 'failed' => $failed, 'unreadable' => $unreadable];
+    }
+
+    private static function isNoiseBelow(string $root, string $entry): bool
+    {
+        $below = '/'.substr($entry, strlen($root));
+
+        if (str_contains($below, '/.')) {
+            return true;
+        }
+
+        return array_any(SourceScope::noiseDirectories(), static fn (string $directory): bool => str_contains($below, '/'.$directory.'/'));
     }
 
     /**
@@ -149,7 +214,7 @@ final class ExternalSources
     {
         $configurations = self::configurations($projectRoot, $arguments);
 
-        $key = $projectRoot."\x00".implode("\x00", [...$configurations, ...$arguments]);
+        $key = $projectRoot."\x00".implode("\x00", [...array_map(static fn (array $configuration): string => $configuration[0]."\x00".$configuration[1], $configurations), ...$arguments]);
 
         return self::$cache[$key] ??= self::resolve($projectRoot, $configurations, $arguments);
     }
@@ -180,6 +245,52 @@ final class ExternalSources
         }
 
         return $matched;
+    }
+
+    /**
+     * @param  array<int, string>  $arguments
+     * @return array<int, string>
+     */
+    public static function includePaths(string $projectRoot, array $arguments): array
+    {
+        $values = self::includePathValues($arguments);
+
+        if ($values === []) {
+            return [];
+        }
+
+        $repositoryRoot = new Git($projectRoot)->repositoryRoot();
+        $paths = [];
+
+        foreach ($values as $value) {
+            if (! self::isAbsolute($value)) {
+                $paths[] = 'relative:'.self::normalisedRelativePath($value);
+
+                continue;
+            }
+
+            $resolved = self::commandLinePath($projectRoot, $value) ?? $value;
+
+            if ($repositoryRoot !== null && $resolved === $repositoryRoot) {
+                $resolved = '.';
+            } elseif ($repositoryRoot !== null && str_starts_with($resolved, $repositoryRoot.'/')) {
+                $resolved = substr($resolved, strlen($repositoryRoot) + 1);
+            }
+
+            $paths[] = 'absolute:'.$resolved;
+        }
+
+        return $paths;
+    }
+
+    private static function normalisedRelativePath(string $path): string
+    {
+        $segments = array_filter(
+            explode('/', str_replace(DIRECTORY_SEPARATOR, '/', $path)),
+            static fn (string $segment): bool => $segment !== '' && $segment !== '.',
+        );
+
+        return $segments === [] ? '.' : implode('/', $segments);
     }
 
     public static function flush(): void
@@ -219,7 +330,7 @@ final class ExternalSources
     }
 
     /**
-     * @param  array<int, string>  $configurations
+     * @param  array<int, array{0: string, 1: string, 2: bool}>  $configurations
      * @param  array<int, string>  $arguments
      * @return array{roots: array<int, string>, ignored: array<int, string>, unverifiable: array<int, string>}
      */
@@ -260,6 +371,20 @@ final class ExternalSources
         $ignoredRoots = self::ignoredRoots($repositoryRoot, $roots);
         $roots = array_values(array_diff($roots, $ignoredRoots));
 
+        $listing = self::ignoredEntries($repositoryRoot, $git->pathPrefix(), $roots, $ignoredRoots);
+
+        foreach ($listing['repositories'] as $nested) {
+            $unverifiable[] = $repositoryRoot.'/'.$nested;
+        }
+
+        foreach ($listing['failed'] as $root) {
+            $unverifiable[] = rtrim($repositoryRoot.'/'.$root, '/');
+        }
+
+        foreach ($listing['unreadable'] as $path) {
+            $unverifiable[] = rtrim($repositoryRoot.'/'.$path, '/');
+        }
+
         sort($roots);
         sort($ignoredRoots);
         sort($unverifiable);
@@ -287,9 +412,8 @@ final class ExternalSources
             return $cache[$key];
         }
 
-        $result = new Git($repositoryRoot)->result(
-            ['check-ignore', '-z', '--stdin'],
-            implode("\x00", array_map(static fn (string $root): string => rtrim($root, '/'), $candidates)),
+        $result = new Git($repositoryRoot)->checkIgnore(
+            array_map(static fn (string $root): string => rtrim($root, '/'), $candidates),
         );
 
         if ($result['exitCode'] !== 0 && $result['exitCode'] !== 1) {
@@ -298,11 +422,7 @@ final class ExternalSources
 
         $ignored = [];
 
-        foreach (explode("\x00", rtrim($result['output'], "\x00")) as $path) {
-            if ($path === '') {
-                continue;
-            }
-
+        foreach ($result['ignored'] as $path) {
             foreach ($candidates as $root) {
                 if (rtrim($root, '/') === $path) {
                     $ignored[] = $root;
@@ -315,7 +435,7 @@ final class ExternalSources
 
     /**
      * @param  array<int, string>  $arguments
-     * @return array<int, string>
+     * @return array<int, array{0: string, 1: string, 2: bool}>
      */
     private static function configurations(string $projectRoot, array $arguments): array
     {
@@ -326,16 +446,21 @@ final class ExternalSources
             $resolved = self::commandLinePath($projectRoot, $fromArguments);
             $file = $resolved === null ? null : self::configurationFileAt($resolved);
 
-            return $file === null ? [] : [$file];
+            return $file === null ? [] : [[$file, dirname($file), true]];
+        }
+
+        $workingDirectory = self::workingDirectory($projectRoot);
+        $file = self::configurationFileIn($workingDirectory);
+
+        if ($file === null) {
+            return [[Configuration::BASE_PHPUNIT_FILE, $workingDirectory, false]];
         }
 
         if (in_array(self::NO_CONFIGURATION_FLAG, $arguments, true)) {
             return [];
         }
 
-        $file = self::configurationFileIn(self::workingDirectory($projectRoot));
-
-        return $file === null ? [] : [$file];
+        return [[$file, dirname($file), true]];
     }
 
     private static function configurationFileAt(string $path): ?string
@@ -408,7 +533,7 @@ final class ExternalSources
     }
 
     /**
-     * @param  array<int, string>  $configurations
+     * @param  array<int, array{0: string, 1: string, 2: bool}>  $configurations
      * @param  array<int, string>  $arguments
      * @return array<int, array{0: string, 1: bool}>
      */
@@ -416,8 +541,8 @@ final class ExternalSources
     {
         $declarations = self::composerDeclarations($projectRoot);
 
-        foreach ($configurations as $configuration) {
-            $declarations = [...$declarations, ...self::phpunitDeclarations($configuration)];
+        foreach ($configurations as [$configuration, $base, $isWatched]) {
+            $declarations = [...$declarations, ...self::phpunitDeclarations($projectRoot, $configuration, $base, $isWatched)];
         }
 
         return [...$declarations, ...self::argumentDeclarations($projectRoot, $arguments)];
@@ -439,21 +564,49 @@ final class ExternalSources
             }
         }
 
+        foreach (self::includePathEntries($projectRoot, $arguments) as $resolved) {
+            $declarations[] = [$resolved, true];
+        }
+
+        return $declarations;
+    }
+
+    /**
+     * @param  array<int, string>  $arguments
+     * @return array<int, string>
+     */
+    private static function includePathEntries(string $projectRoot, array $arguments): array
+    {
+        $entries = [];
+
+        foreach (self::includePathValues($arguments) as $path) {
+            $resolved = self::commandLinePath($projectRoot, $path);
+
+            if ($resolved !== null) {
+                $entries[] = $resolved;
+            }
+        }
+
+        return $entries;
+    }
+
+    /**
+     * @param  array<int, string>  $arguments
+     * @return array<int, string>
+     */
+    private static function includePathValues(array $arguments): array
+    {
+        $values = [];
+
         foreach (self::argumentValues($arguments, self::INCLUDE_PATH_FLAGS) as $list) {
             foreach (explode(PATH_SEPARATOR, $list) as $path) {
-                if ($path === '') {
-                    continue;
-                }
-
-                $resolved = self::commandLinePath($projectRoot, $path);
-
-                if ($resolved !== null) {
-                    $declarations[] = [$resolved, true];
+                if ($path !== '') {
+                    $values[] = $path;
                 }
             }
         }
 
-        return $declarations;
+        return $values;
     }
 
     /**
@@ -461,7 +614,7 @@ final class ExternalSources
      */
     private static function composerDeclarations(string $projectRoot): array
     {
-        $manifest = self::decodeJson($projectRoot.DIRECTORY_SEPARATOR.'composer.json');
+        $manifest = self::decodeJson(self::composerManifest($projectRoot));
 
         if ($manifest === null) {
             return [];
@@ -469,6 +622,22 @@ final class ExternalSources
 
         $declarations = [];
 
+        self::declareAutoload($declarations, $projectRoot, $manifest);
+        self::declarePathRepositories($declarations, $projectRoot, $manifest);
+
+        foreach (self::installedPathUrls($projectRoot, $manifest) as $url) {
+            self::declareLiteral($declarations, $projectRoot, $url, true);
+        }
+
+        return $declarations;
+    }
+
+    /**
+     * @param  array<int, array{0: string, 1: bool}>  $declarations
+     * @param  array<mixed>  $manifest
+     */
+    private static function declareAutoload(array &$declarations, string $projectRoot, array $manifest): void
+    {
         foreach (['autoload', 'autoload-dev'] as $section) {
             $autoload = $manifest[$section] ?? null;
 
@@ -489,12 +658,23 @@ final class ExternalSources
                             continue;
                         }
 
-                        self::declare($declarations, $projectRoot, $path, $isDirectory);
+                        if ($kind === 'classmap') {
+                            self::declare($declarations, $projectRoot, $path, $isDirectory, self::braceFlag());
+                        } else {
+                            self::declareLiteral($declarations, $projectRoot, $path, $isDirectory);
+                        }
                     }
                 }
             }
         }
+    }
 
+    /**
+     * @param  array<int, array{0: string, 1: bool}>  $declarations
+     * @param  array<mixed>  $manifest
+     */
+    private static function declarePathRepositories(array &$declarations, string $projectRoot, array $manifest): void
+    {
         $repositories = $manifest['repositories'] ?? null;
 
         if (is_array($repositories)) {
@@ -506,18 +686,98 @@ final class ExternalSources
                 $url = $repository['url'] ?? null;
 
                 if (is_string($url) && $url !== '') {
-                    self::declare($declarations, $projectRoot, $url, true);
+                    self::declare($declarations, $projectRoot, $url, true, self::braceFlag() | GLOB_ONLYDIR);
                 }
             }
         }
+    }
 
-        return $declarations;
+    private static function composerManifest(string $projectRoot): string
+    {
+        $manifest = getenv('COMPOSER');
+        $manifest = is_string($manifest) ? trim($manifest) : '';
+        $manifest = $manifest !== '' ? $manifest : 'composer.json';
+
+        return self::isAbsolute($manifest) ? $manifest : $projectRoot.DIRECTORY_SEPARATOR.$manifest;
+    }
+
+    private static function composerLock(string $projectRoot): string
+    {
+        $manifest = self::composerManifest($projectRoot);
+
+        return str_ends_with($manifest, '.json') ? substr($manifest, 0, -5).'.lock' : $manifest.'.lock';
+    }
+
+    /**
+     * @param  array<mixed>  $manifest
+     * @return array<int, string>
+     */
+    private static function installedPathUrls(string $projectRoot, array $manifest): array
+    {
+        $lock = self::decodeJson(self::composerLock($projectRoot)) ?? [];
+
+        $packages = [
+            ...self::listOf($lock['packages'] ?? null),
+            ...self::listOf($lock['packages-dev'] ?? null),
+        ];
+
+        foreach (self::vendorDirectories($projectRoot, $manifest) as $vendorDirectory) {
+            $installed = self::decodeJson($vendorDirectory.DIRECTORY_SEPARATOR.'composer'.DIRECTORY_SEPARATOR.'installed.json') ?? [];
+
+            array_push($packages, ...self::listOf(array_key_exists('packages', $installed) ? $installed['packages'] : $installed));
+        }
+
+        $urls = [];
+
+        foreach ($packages as $package) {
+            $dist = is_array($package) ? ($package['dist'] ?? null) : null;
+
+            if (is_array($dist) && ($dist['type'] ?? null) === 'path' && is_string($dist['url'] ?? null) && $dist['url'] !== '') {
+                $urls[$dist['url']] = true;
+            }
+        }
+
+        return Arr::stringKeys($urls);
+    }
+
+    /**
+     * @param  array<mixed>  $manifest
+     * @return array<int, string>
+     */
+    private static function vendorDirectories(string $projectRoot, array $manifest): array
+    {
+        $project = self::realpath($projectRoot);
+        $loaded = [];
+
+        foreach (array_keys(ClassLoader::getRegisteredLoaders()) as $vendorDirectory) {
+            if ($project !== null && self::realpath(ComposerProject::rootPath($vendorDirectory.DIRECTORY_SEPARATOR.'autoload.php')) === $project) {
+                $loaded[] = $vendorDirectory;
+            }
+        }
+
+        if ($loaded !== []) {
+            return $loaded;
+        }
+
+        $config = $manifest['config'] ?? null;
+        $configured = is_array($config) ? ($config['vendor-dir'] ?? null) : null;
+        $directory = is_string($configured) && $configured !== '' ? $configured : 'vendor';
+
+        return [self::isAbsolute($directory) ? $directory : $projectRoot.DIRECTORY_SEPARATOR.$directory];
+    }
+
+    /**
+     * @return array<int, mixed>
+     */
+    private static function listOf(mixed $value): array
+    {
+        return is_array($value) ? array_values($value) : [];
     }
 
     /**
      * @return array<int, array{0: string, 1: bool}>
      */
-    private static function phpunitDeclarations(string $configuration): array
+    private static function phpunitDeclarations(string $projectRoot, string $configuration, string $base, bool $isWatched): array
     {
         $xml = self::parseXml($configuration);
 
@@ -525,13 +785,12 @@ final class ExternalSources
             return [];
         }
 
-        $base = dirname($configuration);
-        $declarations = [[str_replace(DIRECTORY_SEPARATOR, '/', $configuration), false]];
+        $declarations = $isWatched ? [[str_replace(DIRECTORY_SEPARATOR, '/', $configuration), false]] : [];
 
         $bootstrap = trim((string) ($xml['bootstrap'] ?? ''));
 
         if ($bootstrap !== '') {
-            self::declare($declarations, $base, $bootstrap, false);
+            self::declareLiteral($declarations, $base, $bootstrap, false);
         }
 
         $sections = ['source/include', 'coverage/include', 'testsuites/testsuite'];
@@ -541,8 +800,14 @@ final class ExternalSources
                 foreach ($xml->xpath($section.'/'.$node) ?: [] as $element) {
                     $value = trim((string) $element);
 
-                    if ($value !== '') {
-                        self::declare($declarations, $base, $value, $isDirectory);
+                    if ($value === '') {
+                        continue;
+                    }
+
+                    if ($isDirectory) {
+                        self::declare($declarations, $base, $value, true, GLOB_ONLYDIR, true);
+                    } else {
+                        self::declareLiteral($declarations, $base, $value, false);
                     }
                 }
             }
@@ -552,15 +817,13 @@ final class ExternalSources
             $suiteBootstrap = trim((string) ($suite['bootstrap'] ?? ''));
 
             if ($suiteBootstrap !== '') {
-                self::declare($declarations, $base, $suiteBootstrap, false);
+                self::declareLiteral($declarations, $base, $suiteBootstrap, false);
             }
         }
 
         foreach ($xml->xpath('php/includePath') ?: [] as $element) {
-            $value = trim((string) $element);
-
-            if ($value !== '') {
-                self::declare($declarations, $base, $value, true);
+            if ((string) $element !== '') {
+                self::declareIncludePath($declarations, $projectRoot, $base, trim((string) $element));
             }
         }
 
@@ -570,15 +833,66 @@ final class ExternalSources
     /**
      * @param  array<int, array{0: string, 1: bool}>  $declarations
      */
-    private static function declare(array &$declarations, string $base, string $path, ?bool $isDirectory): void
+    private static function declareIncludePath(array &$declarations, string $projectRoot, string $base, string $includePath): void
     {
-        $literal = self::beforeWildcard($path);
+        foreach (explode(PATH_SEPARATOR, $includePath) as $index => $path) {
+            if ($index === 0) {
+                self::declareLiteral($declarations, $base, $path === '' ? '.' : $path, true);
 
-        if ($literal !== $path) {
-            $path = $literal;
-            $isDirectory = true;
+                continue;
+            }
+
+            if ($path === '') {
+                continue;
+            }
+
+            $resolved = self::commandLinePath($projectRoot, $path);
+
+            if ($resolved !== null) {
+                $declarations[] = [$resolved, true];
+            }
+        }
+    }
+
+    private static function braceFlag(): int
+    {
+        return defined('GLOB_BRACE') ? GLOB_BRACE : 0;
+    }
+
+    /**
+     * @param  array<int, array{0: string, 1: bool}>  $declarations
+     */
+    private static function declare(array &$declarations, string $base, string $path, ?bool $isDirectory, int $globFlags, bool $globstar = false): void
+    {
+        $literal = self::beforeWildcard($path, $globFlags);
+
+        if ($literal === $path) {
+            self::declareLiteral($declarations, $base, $path, $isDirectory);
+
+            return;
         }
 
+        $pattern = self::isAbsolute($path) ? $path : $base.DIRECTORY_SEPARATOR.$path;
+        $matches = $globstar ? self::globstar($pattern) : (glob($pattern, $globFlags) ?: []);
+
+        if ($matches === [] && file_exists($pattern)) {
+            self::declareLiteral($declarations, $base, $path, $isDirectory);
+
+            return;
+        }
+
+        self::declareLiteral($declarations, $base, $literal, true);
+
+        foreach ($matches as $match) {
+            self::declareLiteral($declarations, $base, $match, $isDirectory);
+        }
+    }
+
+    /**
+     * @param  array<int, array{0: string, 1: bool}>  $declarations
+     */
+    private static function declareLiteral(array &$declarations, string $base, string $path, ?bool $isDirectory): void
+    {
         if ($path === '') {
             return;
         }
@@ -602,23 +916,62 @@ final class ExternalSources
             ?? self::lexicalPath(self::realpath($base) ?? $base, $path);
     }
 
-    private static function isAbsolute(string $path): bool
+    /**
+     * @return array<int, string>
+     */
+    private static function globstar(string $pattern): array
     {
-        return str_starts_with($path, '/') || preg_match('/^[a-z]:[\\\\\/]/i', $path) === 1;
+        $position = strpos($pattern, '**');
+
+        if ($position === false) {
+            return glob($pattern, GLOB_ONLYDIR) ?: [];
+        }
+
+        $root = substr($pattern, 0, $position);
+        $rest = substr($pattern, $position + 2);
+        $patterns = [$root.ltrim($rest, '/'.DIRECTORY_SEPARATOR)];
+        $root .= '*';
+
+        while (($directories = glob($root, GLOB_ONLYDIR)) !== false && $directories !== []) {
+            $root .= '/*';
+
+            foreach ($directories as $directory) {
+                $patterns[] = $directory.$rest;
+            }
+        }
+
+        $matches = [];
+
+        foreach ($patterns as $nested) {
+            array_push($matches, ...self::globstar($nested));
+        }
+
+        return array_values(array_unique($matches));
     }
 
-    private static function beforeWildcard(string $path): string
+    private static function isAbsolute(string $path): bool
+    {
+        if (str_starts_with($path, '/')) {
+            return true;
+        }
+
+        return PHP_OS_FAMILY === 'Windows'
+            && (str_starts_with($path, '\\') || preg_match('/^[a-z]:[\\\\\/]/i', $path) === 1);
+    }
+
+    private static function beforeWildcard(string $path, int $globFlags): string
     {
         $normalised = str_replace(DIRECTORY_SEPARATOR, '/', $path);
+        $wildcards = ($globFlags & self::braceFlag()) !== 0 ? '*?[\\{' : '*?[\\';
 
-        if (! str_contains($normalised, '*') && ! str_contains($normalised, '?')) {
+        if (strpbrk($normalised, $wildcards) === false) {
             return $path;
         }
 
         $segments = [];
 
         foreach (explode('/', $normalised) as $segment) {
-            if (str_contains($segment, '*') || str_contains($segment, '?')) {
+            if (strpbrk($segment, $wildcards) !== false) {
                 break;
             }
 
@@ -672,8 +1025,12 @@ final class ExternalSources
     {
         $relative = str_replace(DIRECTORY_SEPARATOR, '/', $relative);
         $joined = self::isAbsolute($relative) ? $relative : str_replace(DIRECTORY_SEPARATOR, '/', $base).'/'.$relative;
-        $rootPattern = PHP_OS_FAMILY === 'Windows' ? '#^(?:[a-z]:|//[^/]+/[^/]+)#i' : '#^[a-z]:#i';
-        $prefix = preg_match($rootPattern, $joined, $root) === 1 ? $root[0] : '';
+
+        if (PHP_OS_FAMILY === 'Windows' && preg_match('#^/(?!/)#', $joined) === 1 && preg_match('#^[a-z]:#i', (string) getcwd(), $drive) === 1) {
+            $joined = $drive[0].$joined;
+        }
+
+        $prefix = PHP_OS_FAMILY === 'Windows' && preg_match('#^(?:[a-z]:|//[^/]+/[^/]+)#i', $joined, $root) === 1 ? $root[0] : '';
         $joined = substr($joined, strlen($prefix));
 
         $segments = [];

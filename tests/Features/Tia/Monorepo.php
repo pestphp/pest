@@ -1160,6 +1160,170 @@ PHP_WRAP);
         ->and($project->graph()['baselines']['master']['sha'] ?? null)->toBe($recorded);
 })->skipOnWindows();
 
+test('an edit to an ignored file outside the project during the run keeps the baseline from before the run', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('.gitignore', file_get_contents($project->path('.gitignore'))."packages/shared/generated.php\n");
+    $project->write('packages/shared/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->write('packages/shared/generated.php', "<?php\n\nreturn 1;\n");
+    $project->write('nested/tests/Unit/GeneratedEditTest.php', <<<'PHP_WRAP'
+<?php
+
+declare(strict_types=1);
+
+test('reads and then rewrites the generated file', function (): void {
+    $generated = dirname(__DIR__, 3).'/packages/shared/generated.php';
+
+    expect(require $generated)->toBe(1);
+
+    file_put_contents($generated, "<?php\n\nreturn 2;\n");
+});
+PHP_WRAP);
+    $project->git()->commit('add a sibling package with a generated file');
+    $project->seedFor($nested, 'master', failing: ['adds two numbers'], arguments: ['--include-path', '../packages/shared']);
+    $recorded = $project->git()->sha();
+    $project->snapshot();
+
+    $first = $project->pestWithEnvironment($nested, ['XDEBUG_MODE' => 'off'], '--tia', '--include-path', '../packages/shared');
+    $afterFirst = $project->graph()['baselines']['master']['sha'] ?? null;
+    $delta = $project->delta();
+    $second = $project->pestWithEnvironment($nested, ['XDEBUG_MODE' => 'off'], '--tia', '--include-path', '../packages/shared');
+
+    expect($first->output)->toContain('changed during the run — keeping the baseline from before the run')
+        ->and($first->output)->toContain('packages/shared/generated.php')
+        ->and($first->output)->toContain('Keep what the run writes out of the paths this project loads')
+        ->and($delta->writtenCount())->toBe(0, $delta->summary())
+        ->and($afterFirst)->toBe($recorded)
+        ->and($second->output)->toContain('packages/shared/generated.php')
+        ->and($second->replayed())->toBe(0, $second->describe());
+})->skipOnWindows();
+
+test('an edit to a tracked and an ignored file outside the project during the run names the ignored file', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('.gitignore', file_get_contents($project->path('.gitignore'))."packages/shared/generated.php\n");
+    $project->write('packages/shared/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->write('packages/shared/generated.php', "<?php\n\nreturn 1;\n");
+    $project->write('nested/tests/Unit/BothEditTest.php', <<<'PHP_WRAP'
+<?php
+
+declare(strict_types=1);
+
+test('rewrites a tracked and an ignored file', function (): void {
+    $shared = dirname(__DIR__, 3).'/packages/shared';
+
+    file_put_contents($shared.'/Shared.php', "<?php\n\n\$shared = 2;\n");
+    file_put_contents($shared.'/generated.php', "<?php\n\nreturn 2;\n");
+
+    expect(true)->toBeTrue();
+});
+PHP_WRAP);
+    $project->git()->commit('add a sibling package with a generated file');
+    $project->seedFor($nested, 'master', arguments: ['--include-path', '../packages/shared']);
+
+    $result = $project->pestWithEnvironment($nested, ['XDEBUG_MODE' => 'off'], '--tia', '--include-path', '../packages/shared');
+
+    expect($result->output)->toContain('changed during the run')
+        ->and($result->output)->toContain('packages/shared/generated.php')
+        ->and($result->output)->toContain('Keep what the run writes out of the paths this project loads')
+        ->and($result->output)->toContain('Re-run --tia after your edits settle');
+})->skipOnWindows();
+
+test('an ignored repository created outside the project during the run keeps the baseline from before the run', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('.gitignore', file_get_contents($project->path('.gitignore'))."packages/shared/checkout/\n");
+    $project->write('packages/shared/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->write('nested/tests/Unit/CheckoutTest.php', <<<'PHP_WRAP'
+<?php
+
+declare(strict_types=1);
+
+test('initializes a repository next to the shared package', function (): void {
+    $checkout = dirname(__DIR__, 3).'/packages/shared/checkout';
+
+    mkdir($checkout, 0755, true);
+    exec('git -C '.escapeshellarg($checkout).' init --quiet');
+
+    expect(is_dir($checkout.'/.git'))->toBeTrue();
+});
+PHP_WRAP);
+    $project->git()->commit('add a sibling package');
+    $project->seedFor($nested, 'master', failing: ['adds two numbers'], arguments: ['--include-path', '../packages/shared']);
+    $recorded = $project->git()->sha();
+    $project->snapshot();
+
+    $result = $project->pestWithEnvironment($nested, ['XDEBUG_MODE' => 'off'], '--tia', '--include-path', '../packages/shared');
+    $delta = $project->delta();
+
+    expect($result->output)->toContain('changed during the run — keeping the baseline from before the run')
+        ->and($result->output)->toContain('packages/shared/checkout')
+        ->and($delta->writtenCount())->toBe(0, $delta->summary())
+        ->and($project->graph()['baselines']['master']['sha'] ?? null)->toBe($recorded);
+})->skipOnWindows();
+
+test('an ignored file whose name is not utf-8 created outside the project during the run keeps the baseline from before the run', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('.gitignore', file_get_contents($project->path('.gitignore'))."packages/shared/*.txt\n");
+    $project->write('packages/shared/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->write('nested/tests/Unit/NameTest.php', <<<'PHP_WRAP'
+<?php
+
+declare(strict_types=1);
+
+test('writes a file next to the shared package', function (): void {
+    $file = dirname(__DIR__, 3)."/packages/shared/caf\xe9.txt";
+
+    file_put_contents($file, "x\n");
+
+    expect(is_file($file))->toBeTrue();
+});
+PHP_WRAP);
+    $project->git()->commit('add a sibling package');
+    $project->seedFor($nested, 'master', failing: ['adds two numbers'], arguments: ['--include-path', '../packages/shared']);
+    $recorded = $project->git()->sha();
+    $project->snapshot();
+
+    $result = $project->pestWithEnvironment($nested, ['XDEBUG_MODE' => 'off'], '--tia', '--include-path', '../packages/shared');
+    $delta = $project->delta();
+
+    expect($result->output)->toContain('changed during the run — keeping the baseline from before the run')
+        ->and($delta->writtenCount())->toBe(0, $delta->summary())
+        ->and($project->graph()['baselines']['master']['sha'] ?? null)->toBe($recorded);
+})->skip(PHP_OS_FAMILY !== 'Linux', 'Only Linux file systems accept names that are not utf-8.');
+
+test('an ignored repository created around a declared path during the run keeps the baseline from before the run', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('.gitignore', file_get_contents($project->path('.gitignore'))."packages/shared/checkout/\n");
+    mkdir($project->path('packages/shared/checkout/src'), 0755, true);
+    $project->write('nested/tests/Unit/CheckoutAroundTest.php', <<<'PHP_WRAP'
+<?php
+
+declare(strict_types=1);
+
+test('initializes a repository around the declared path', function (): void {
+    $checkout = dirname(__DIR__, 3).'/packages/shared/checkout';
+
+    exec('git -C '.escapeshellarg($checkout).' init --quiet');
+
+    expect(is_dir($checkout.'/.git'))->toBeTrue();
+});
+PHP_WRAP);
+    $project->git()->commit('add a sibling package');
+    $project->seedFor($nested, 'master', failing: ['adds two numbers'], arguments: ['--include-path', '../packages/shared/checkout/src']);
+    $recorded = $project->git()->sha();
+    $project->snapshot();
+
+    $result = $project->pestWithEnvironment($nested, ['XDEBUG_MODE' => 'off'], '--tia', '--include-path', '../packages/shared/checkout/src');
+    $delta = $project->delta();
+
+    expect($result->output)->toContain('changed during the run — keeping the baseline from before the run')
+        ->and($delta->writtenCount())->toBe(0, $delta->summary())
+        ->and($project->graph()['baselines']['master']['sha'] ?? null)->toBe($recorded);
+})->skipOnWindows();
+
 test('a run without tia stores no result when a hook leaves the configuration directory and the phpunit bootstrap outside the project is dirty', function (): void {
     [$project, $nested] = tiaMonorepo();
 

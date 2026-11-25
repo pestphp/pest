@@ -376,3 +376,41 @@ it('sees a whitespace change inside an external input', function (): void {
 
     expect($changedFiles->changedSinceLastRun([], ['frontend/data.js'], $tree))->toBe([[], ['frontend/data.js']]);
 })->skipOnWindows();
+
+it('reports a changed file whose name looks like a pathspec', function (): void {
+    $monorepo = tiaMonorepoRepository();
+
+    file_put_contents($monorepo['project'].'/:(fixtures).php', "<?php\n");
+
+    expect(new ChangedFiles($monorepo['project'])->since($monorepo['sha']))->toContain(':(fixtures).php');
+})->skipOnWindows();
+
+it('reports an external input that the listing no longer names', function (): void {
+    $monorepo = tiaMonorepoRepository();
+
+    file_put_contents($monorepo['root'].'/frontend/generated.php', "<?php\n");
+
+    $changedFiles = new ChangedFiles($monorepo['project']);
+    $before = $changedFiles->externalInputHashes(['frontend/generated.php']);
+
+    expect($changedFiles->changedExternalInputs($before, $changedFiles->externalInputHashes([])))->toBe(['frontend/generated.php'])
+        ->and($changedFiles->changedExternalInputs($before, $changedFiles->externalInputHashes(['frontend/generated.php'])))->toBeEmpty();
+})->skipOnWindows();
+
+it('reports no change for an external input it cannot read', function (): void {
+    $monorepo = tiaMonorepoRepository();
+
+    file_put_contents($monorepo['root'].'/frontend/secret.php', "<?php\n");
+    chmod($monorepo['root'].'/frontend/secret.php', 0000);
+
+    try {
+        $changedFiles = new ChangedFiles($monorepo['project']);
+
+        expect($changedFiles->changedExternalInputs(
+            $changedFiles->externalInputHashes(['frontend/secret.php']),
+            $changedFiles->externalInputHashes(['frontend/secret.php']),
+        ))->toBeEmpty();
+    } finally {
+        chmod($monorepo['root'].'/frontend/secret.php', 0644);
+    }
+})->skipOnWindows()->skip(function_exists('posix_geteuid') && posix_geteuid() === 0, 'root reads every file.');

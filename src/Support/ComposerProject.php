@@ -20,9 +20,14 @@ final class ComposerProject
             return $rootPath;
         }
 
-        /** @var array{root: array{install_path: string}} $installed */
         $installed = require $metadataPath;
+        $root = is_array($installed) ? ($installed['root'] ?? null) : null;
+        $installPath = is_array($root) ? ($root['install_path'] ?? null) : null;
 
-        return realpath($installed['root']['install_path']) ?: $rootPath;
+        if (! is_string($installPath)) {
+            return $rootPath;
+        }
+
+        return realpath($installPath) ?: $rootPath;
     }
 }

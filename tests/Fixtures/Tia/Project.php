@@ -199,6 +199,7 @@ final class Project
                 'GITHUB_REF_NAME' => false,
                 'GITLAB_CI' => false,
                 'CIRCLECI' => false,
+                'COMPOSER' => false,
                 ...$environment,
             ],
         );
@@ -252,6 +253,8 @@ final class Project
      */
     private function seedGraphFor(string $root, string $branch, bool $sentinel, array $failing, array $arguments): void
     {
+        putenv('COMPOSER');
+
         $changedFiles = new ChangedFiles($root);
         $sha = new GitRepo($root)->sha();
 

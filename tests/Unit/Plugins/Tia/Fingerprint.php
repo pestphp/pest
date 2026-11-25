@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Pest\Plugins\Tia\ConfigurationFile;
+use Pest\Plugins\Tia\ExternalSources;
 use Pest\Plugins\Tia\Fingerprint;
 use Symfony\Component\Process\Process;
 
@@ -107,6 +108,7 @@ describe('compute()', function (): void {
             fingerprintRemoveDirectory($clone);
         }
     });
+
     it('keeps the command line bootstrap and include path out of a run that sets neither', function (): void {
         $root = fingerprintRepository();
 
@@ -129,6 +131,61 @@ describe('compute()', function (): void {
 
             expect(Fingerprint::structuralMatches($bootstrapOnly, $bootstrapAndIncludePath))->toBeFalse()
                 ->and(Fingerprint::structuralDrift($bootstrapOnly, $bootstrapAndIncludePath))->toBe(['phpunit_bootstrap', 'phpunit_include_path']);
+        } finally {
+            fingerprintRemoveDirectory($root);
+        }
+    });
+
+    it('tells a relative include path from the absolute path it names', function (): void {
+        $root = (string) realpath(fingerprintRepository());
+        $previous = getcwd();
+        chdir($root);
+
+        try {
+            $relativeFirst = Fingerprint::compute($root, null, ['--include-path', '.'.PATH_SEPARATOR.$root]);
+            $absoluteFirst = Fingerprint::compute($root, null, ['--include-path', $root.PATH_SEPARATOR.'.']);
+
+            expect(Fingerprint::structuralMatches($relativeFirst, $absoluteFirst))->toBeFalse();
+        } finally {
+            chdir((string) $previous);
+            fingerprintRemoveDirectory($root);
+        }
+    });
+
+    it('stores an include path whose name is not utf-8 as text json can encode', function (): void {
+        $root = (string) realpath(fingerprintRepository());
+        mkdir($root.'/app');
+        file_put_contents($root.'/app/composer.json', '{}');
+        fingerprintGit($root, 'add', '-A');
+        fingerprintGit($root, 'commit', '-q', '-m', 'init');
+        $previous = getcwd();
+        chdir($root.'/app');
+        ExternalSources::flush();
+
+        try {
+            $fingerprint = Fingerprint::compute($root.'/app', null, ['--include-path', "../optional-\xff"]);
+
+            expect($fingerprint['structural'])->toHaveKeys(['external_roots', 'include_path'])
+                ->and(json_encode($fingerprint))->toBeString();
+        } finally {
+            chdir((string) $previous);
+            ExternalSources::flush();
+            fingerprintRemoveDirectory($root);
+        }
+    });
+
+    it('changes when the order of the include path changes and not when its spelling does', function (): void {
+        $root = (string) realpath(fingerprintRepository());
+        mkdir($root.'/a');
+        mkdir($root.'/b');
+
+        try {
+            $forward = Fingerprint::compute($root, null, ['--include-path', $root.'/a'.PATH_SEPARATOR.$root.'/b']);
+            $respelled = Fingerprint::compute($root, null, ['--include-path', $root.'/./a/'.PATH_SEPARATOR.$root.'/b']);
+            $reversed = Fingerprint::compute($root, null, ['--include-path', $root.'/b'.PATH_SEPARATOR.$root.'/a']);
+
+            expect(Fingerprint::structuralMatches($forward, $respelled))->toBeTrue()
+                ->and(Fingerprint::structuralMatches($forward, $reversed))->toBeFalse();
         } finally {
             fingerprintRemoveDirectory($root);
         }

@@ -131,6 +131,48 @@ final class ChangedFiles
     }
 
     /**
+     * @param  array<int, string>  $repositoryRelativeInputs
+     * @param  array<int, string>  $repositoryRelativeRepositories
+     * @param  array<int, string>  $repositoryRelativeUnlisted
+     * @return array<string, string>
+     */
+    public function externalInputHashes(array $repositoryRelativeInputs, array $repositoryRelativeRepositories = [], array $repositoryRelativeUnlisted = []): array
+    {
+        $hashes = $this->snapshotTree($this->externalKeys($repositoryRelativeInputs));
+
+        foreach ($this->externalKeys($repositoryRelativeRepositories) as $key) {
+            $hashes[$key] = 'repository';
+        }
+
+        foreach ($this->externalKeys($repositoryRelativeUnlisted) as $key) {
+            $hashes[$key] = 'unlisted';
+        }
+
+        return $hashes;
+    }
+
+    /**
+     * @param  array<string, string>  $before
+     * @param  array<string, string>  $after
+     * @return array<int, string>
+     */
+    public function changedExternalInputs(array $before, array $after): array
+    {
+        $parent = $this->parentPath();
+        $changed = [];
+
+        foreach (Arr::stringKeys([...$before, ...$after]) as $key) {
+            if (($before[$key] ?? null) !== ($after[$key] ?? null)) {
+                $changed[] = $parent !== '' && str_starts_with($key, $parent) ? substr($key, strlen($parent)) : $key;
+            }
+        }
+
+        sort($changed);
+
+        return $changed;
+    }
+
+    /**
      * @param  array<int, string>  $files
      * @param  array<int, string>  $repositoryRelativeInputs
      * @param  array<string, string>  $lastRunTree
@@ -339,25 +381,14 @@ final class ChangedFiles
             return $candidates;
         }
 
-        $result = $git->result(
-            ['check-ignore', '-z', '--stdin'],
-            implode("\x00", array_keys($candidates)),
-        );
+        $result = $git->checkIgnore(Arr::stringKeys($candidates));
 
         if ($result['exitCode'] !== 0 && $result['exitCode'] !== 1) {
-            throw $this->gitFailure($result);
+            throw $this->gitFailure(['exitCode' => $result['exitCode'], 'output' => '', 'errorOutput' => $result['errorOutput']]);
         }
 
-        $output = $result['output'];
-
-        if ($output === '') {
-            return $candidates;
-        }
-
-        foreach (explode("\x00", rtrim($output, "\x00")) as $ignored) {
-            if ($ignored !== '') {
-                unset($candidates[$ignored]);
-            }
+        foreach ($result['ignored'] as $ignored) {
+            unset($candidates[$ignored]);
         }
 
         return $candidates;

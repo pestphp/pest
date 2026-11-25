@@ -190,6 +190,16 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     private ?string $startSha = null;
 
+    /**
+     * @var array<string, string>|null
+     */
+    private ?array $ignoredInputsAtStart = null;
+
+    /**
+     * @var array<int, string>
+     */
+    private array $ignoredInputsChangedDuringRun = [];
+
     private bool $piggybackCoverage = false;
 
     private bool $recordingActive = false;
@@ -904,6 +914,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $fingerprint = Fingerprint::compute($projectRoot, $this->configuration, $this->originalArguments);
         $this->startFingerprint = $fingerprint;
         $this->startSha = new ChangedFiles($projectRoot)->currentSha();
+        $this->ignoredInputsAtStart = $this->ignoredInputHashes($projectRoot);
 
         if ($forceRebuild && $this->canRebuildGraph()) {
             $this->purgeState();
@@ -1040,14 +1051,38 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     private function externalSourcesChangedDuringRun(string $projectRoot): bool
     {
         $this->dirtyExternalSourcesResolved = false;
+        $this->ignoredInputsChangedDuringRun = $this->ignoredInputsAtStart === null
+            ? []
+            : new ChangedFiles($projectRoot)->changedExternalInputs($this->ignoredInputsAtStart, $this->ignoredInputHashes($projectRoot));
 
-        return $this->dirtyExternalSources($projectRoot) !== [];
+        return $this->dirtyExternalSources($projectRoot) !== [] || $this->ignoredInputsChangedDuringRun !== [];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function ignoredInputHashes(string $projectRoot): array
+    {
+        $ignored = ExternalSources::ignoredState($projectRoot, $this->originalArguments);
+
+        return new ChangedFiles($projectRoot)->externalInputHashes($ignored['inputs'], $ignored['repositories'], [...$ignored['failed'], ...$ignored['unreadable']]);
     }
 
     private function renderExternalSourcesChangedDuringRun(string $consequence): void
     {
         $this->renderBadge('WARN', 'Code this project loads from outside its root changed during the run — '.$consequence.'.');
-        $this->renderChild('Re-run --tia after your edits settle to record a fresh dependency graph.');
+
+        if ($this->ignoredInputsChangedDuringRun !== []) {
+            foreach (array_slice($this->ignoredInputsChangedDuringRun, 0, $this->output->isVerbose() ? count($this->ignoredInputsChangedDuringRun) : 5) as $file) {
+                $this->output->writeln(sprintf('  <fg=gray>%s</>', $file));
+            }
+
+            $this->renderChild('These files changed during the run, or git stopped ignoring them. Keep what the run writes out of the paths this project loads to let TIA record again.');
+        }
+
+        if ($this->ignoredInputsChangedDuringRun === [] || $this->dirtyExternalSources !== []) {
+            $this->renderChild('Re-run --tia after your edits settle to record a fresh dependency graph.');
+        }
     }
 
     /**
@@ -2565,6 +2600,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             'pest_method_factory' => 'Pest internals',
             'project_prefix' => 'project location in the repository',
             'external_roots' => 'the roots this project loads from outside itself',
+            'include_path' => 'the include path',
         ];
 
         $seen = [];

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Composer\Autoload\ClassLoader;
 use Pest\Plugins\Tia\ExternalSources;
 use Symfony\Component\Process\Process;
 use Tests\Fixtures\Tia\GitRepo;
@@ -105,6 +106,7 @@ function tiaUnverifiableFrom(string $workingDirectory, string $projectRoot, arra
 }
 
 beforeEach(function (): void {
+    putenv('COMPOSER');
     ExternalSources::flush();
     tiaExternalCwd((string) getcwd());
 });
@@ -286,7 +288,7 @@ it('keeps the directory before a wildcard in a path repository', function (): vo
         'repositories' => [['type' => 'path', 'url' => '../packages/*/src']],
     ]);
 
-    expect(ExternalSources::rootsFor($repository['project']))->toBe(['packages/'])
+    expect(ExternalSources::rootsFor($repository['project']))->toBe(['packages/', 'packages/shared/src/'])
         ->and(ExternalSources::matching($repository['project'], ['packages/foo/src/Service.php']))
         ->toBe(['packages/foo/src/Service.php']);
 })->skipOnWindows();
@@ -317,7 +319,7 @@ it('covers the whole repository when a declaration reaches its root', function (
         'repositories' => [['type' => 'path', 'url' => '../*']],
     ]);
 
-    expect(ExternalSources::rootsFor($repository['project']))->toBe([''])
+    expect(ExternalSources::rootsFor($repository['project']))->toBe(['', 'packages/'])
         ->and(ExternalSources::matching($repository['project'], ['packages/shared/src/Shared.php']))
         ->toBe(['packages/shared/src/Shared.php']);
 })->skipOnWindows();
@@ -433,7 +435,27 @@ it('keeps a declaration that a commit deleted under the directory the command ra
     new Process(['rm', '-rf', $repository['root'].'/packages'])->mustRun();
 
     expect(tiaRootsFrom($repository['root'], $repository['project'], ['--bootstrap', 'packages/shared/bootstrap.php']))
-        ->toBe(['packages/shared/bootstrap.php']);
+        ->toBe(['app/', 'packages/shared/bootstrap.php', 'src/', 'tests/', 'vendor/autoload.php']);
+})->skipOnWindows();
+
+it('watches the paths of the configuration Pest generates in the directory the command ran in', function (): void {
+    $repository = tiaExternalRepository();
+
+    mkdir($repository['root'].'/vendor', 0755, true);
+    file_put_contents($repository['root'].'/.gitignore', "/vendor/\n");
+    file_put_contents($repository['root'].'/vendor/autoload.php', "<?php\n");
+
+    $previous = getcwd();
+    chdir($repository['root']);
+
+    try {
+        ExternalSources::flush();
+        $inputs = ExternalSources::ignoredInputs($repository['project']);
+    } finally {
+        chdir((string) $previous);
+    }
+
+    expect($inputs)->toBe(['vendor/autoload.php']);
 })->skipOnWindows();
 
 it('treats a classmap directory that carries a dot as a directory', function (): void {
@@ -599,7 +621,7 @@ XML_WRAP);
 
     $roots = tiaRootsFrom($repository['project'], $repository['project'], []);
 
-    expect($roots)->toBe(['packages/'])
+    expect($roots)->toBe(['packages/', 'packages/shared/src/'])
         ->and(ExternalSources::matching($repository['project'], ['packages/shared/src/Service.php']))
         ->toBe(['packages/shared/src/Service.php']);
 })->skipOnWindows();
@@ -668,6 +690,494 @@ it('lists the ignored files under a declared root inside a dot directory', funct
     expect(ExternalSources::ignoredInputs($repository['project'], ['--include-path', '../.shared']))->toBe(['.shared/Shared.php']);
 })->skipOnWindows();
 
+it('lists an ignored link to a file but no ignored link to a directory or to nothing', function (): void {
+    $repository = tiaExternalRepository();
+
+    mkdir($repository['root'].'/packages/shared/storage', 0755, true);
+    file_put_contents($repository['root'].'/.gitignore', "packages/shared/public/\n");
+    mkdir($repository['root'].'/packages/shared/public', 0755, true);
+    symlink('../storage', $repository['root'].'/packages/shared/public/storage');
+    symlink('../missing', $repository['root'].'/packages/shared/public/dangling');
+    symlink('../src/Shared.php', $repository['root'].'/packages/shared/public/shared.php');
+
+    ExternalSources::flush();
+
+    expect(ExternalSources::ignoredInputs($repository['project'], ['--include-path', '../packages/shared']))->toBe(['packages/shared/public/shared.php']);
+})->skipOnWindows();
+
+it('watches the path that composer resolved for a path repository', function (): void {
+    $repository = tiaExternalRepository([
+        'repositories' => [['type' => 'path', 'url' => '$PEST_TIA_SHARED']],
+    ]);
+
+    file_put_contents($repository['project'].'/composer.lock', (string) json_encode([
+        'packages' => [['name' => 'acme/shared', 'dist' => ['type' => 'path', 'url' => '../packages/shared']]],
+        'packages-dev' => [],
+    ]));
+
+    ExternalSources::flush();
+
+    expect(ExternalSources::rootsFor($repository['project']))->toBe(['packages/shared/']);
+})->skipOnWindows();
+
+it('watches the path that composer installed when the project has no lock file', function (): void {
+    $repository = tiaExternalRepository([
+        'repositories' => [['type' => 'path', 'url' => '../packages/{shared,other}']],
+    ]);
+
+    mkdir($repository['project'].'/vendor/composer', 0755, true);
+    file_put_contents($repository['project'].'/vendor/composer/installed.json', (string) json_encode([
+        'packages' => [['name' => 'acme/shared', 'dist' => ['type' => 'path', 'url' => '../packages/shared']]],
+    ]));
+
+    ExternalSources::flush();
+
+    expect(ExternalSources::rootsFor($repository['project']))->toContain('packages/shared/');
+})->skipOnWindows();
+
+it('watches the path that composer installed into a custom vendor directory', function (): void {
+    $repository = tiaExternalRepository([
+        'config' => ['vendor-dir' => 'deps'],
+        'repositories' => [['type' => 'path', 'url' => '$PEST_TIA_SHARED']],
+    ]);
+
+    mkdir($repository['project'].'/deps/composer', 0755, true);
+    file_put_contents($repository['project'].'/deps/composer/installed.json', (string) json_encode([
+        'packages' => [['name' => 'acme/shared', 'dist' => ['type' => 'path', 'url' => '../packages/shared']]],
+    ]));
+
+    ExternalSources::flush();
+
+    expect(ExternalSources::rootsFor($repository['project']))->toBe(['packages/shared/']);
+})->skipOnWindows();
+
+it('watches the path that composer installed into the vendor directory the run loaded', function (): void {
+    $repository = tiaExternalRepository();
+
+    $vendor = $repository['project'].'/lib/deps';
+    mkdir($vendor.'/composer', 0755, true);
+    file_put_contents($vendor.'/composer/installed.php', "<?php\n\nreturn ['root' => ['install_path' => ".var_export($repository['project'], true)."]];\n");
+    file_put_contents($vendor.'/composer/installed.json', (string) json_encode([
+        'packages' => [['name' => 'acme/shared', 'dist' => ['type' => 'path', 'url' => '../packages/shared']]],
+    ]));
+
+    $loader = new ClassLoader($vendor);
+    $loader->register();
+
+    try {
+        ExternalSources::flush();
+
+        expect(ExternalSources::rootsFor($repository['project']))->toBe(['packages/shared/']);
+    } finally {
+        $loader->unregister();
+    }
+})->skipOnWindows();
+
+it('watches the installed path and the locked path when they differ', function (): void {
+    $repository = tiaExternalRepository();
+
+    mkdir($repository['root'].'/packages/old', 0755, true);
+    mkdir($repository['project'].'/vendor/composer', 0755, true);
+    file_put_contents($repository['project'].'/composer.lock', (string) json_encode([
+        'packages' => [['name' => 'acme/shared', 'dist' => ['type' => 'path', 'url' => '../packages/shared']]],
+    ]));
+    file_put_contents($repository['project'].'/vendor/composer/installed.json', (string) json_encode([
+        'packages' => [['name' => 'acme/shared', 'dist' => ['type' => 'path', 'url' => '../packages/old']]],
+    ]));
+
+    ExternalSources::flush();
+
+    expect(ExternalSources::rootsFor($repository['project']))->toBe(['packages/old/', 'packages/shared/']);
+})->skipOnWindows();
+
+it('reads a path that composer resolved as a literal path', function (): void {
+    $repository = tiaExternalRepository();
+
+    mkdir($repository['root'].'/packages/odd?', 0755, true);
+    file_put_contents($repository['project'].'/composer.lock', (string) json_encode([
+        'packages' => [['name' => 'acme/odd', 'dist' => ['type' => 'path', 'url' => '../packages/odd?']]],
+    ]));
+
+    ExternalSources::flush();
+
+    expect(ExternalSources::rootsFor($repository['project']))->toBe(['packages/odd?/']);
+})->skipOnWindows();
+
+it('reads the manifest and the lock file that the COMPOSER variable names', function (): void {
+    $repository = tiaExternalRepository();
+
+    file_put_contents($repository['project'].'/composer.app.json', (string) json_encode([
+        'autoload' => ['psr-4' => ['Shared\\' => '../packages/shared/src']],
+    ]));
+    file_put_contents($repository['project'].'/composer.app.lock', (string) json_encode([
+        'packages' => [['name' => 'acme/odd', 'dist' => ['type' => 'path', 'url' => '../packages/odd']]],
+    ]));
+    mkdir($repository['root'].'/packages/odd', 0755, true);
+
+    putenv('COMPOSER= composer.app.json ');
+
+    try {
+        ExternalSources::flush();
+
+        expect(ExternalSources::rootsFor($repository['project']))->toBe(['packages/odd/', 'packages/shared/src/']);
+    } finally {
+        putenv('COMPOSER');
+    }
+})->skipOnWindows();
+
+it('lists the ignored files when git is told to read every pathspec literally', function (): void {
+    $repository = tiaExternalRepository();
+
+    file_put_contents($repository['root'].'/.gitignore', "packages/shared/generated.php\n");
+    file_put_contents($repository['root'].'/packages/shared/generated.php', "<?php\n");
+
+    putenv('GIT_LITERAL_PATHSPECS=1');
+    $_SERVER['GIT_LITERAL_PATHSPECS'] = '1';
+
+    try {
+        ExternalSources::flush();
+
+        expect(ExternalSources::ignoredInputs($repository['project'], ['--include-path', '../packages/shared']))->toBe(['packages/shared/generated.php']);
+    } finally {
+        putenv('GIT_LITERAL_PATHSPECS');
+        unset($_SERVER['GIT_LITERAL_PATHSPECS']);
+    }
+})->skipOnWindows();
+
+it('treats a network path as absolute on Windows', function (): void {
+    $isAbsolute = new ReflectionMethod(ExternalSources::class, 'isAbsolute');
+
+    expect($isAbsolute->invoke(null, '\\\\server\\share\\composer.app.json'))->toBeTrue();
+})->skip(PHP_OS_FAMILY !== 'Windows', 'Network paths only exist on Windows.');
+
+it('reports an ignored repository under a declared root as unverifiable', function (): void {
+    $repository = tiaExternalRepository();
+
+    file_put_contents($repository['root'].'/.gitignore', "packages/shared/checkout/\n");
+    mkdir($repository['root'].'/packages/shared/checkout', 0755, true);
+    new GitRepo($repository['root'].'/packages/shared/checkout')->init('master');
+
+    ExternalSources::flush();
+
+    $root = str_replace(DIRECTORY_SEPARATOR, '/', (string) realpath($repository['root']));
+
+    expect(ExternalSources::unverifiable($repository['project'], ['--include-path', '../packages/shared']))->toBe([$root.'/packages/shared/checkout']);
+})->skipOnWindows();
+
+it('reports an ignored file under a declared root whose name is not utf-8 as unverifiable', function (): void {
+    $repository = tiaExternalRepository();
+
+    file_put_contents($repository['root'].'/.gitignore', "packages/shared/*.txt\n");
+
+    file_put_contents($repository['root']."/packages/shared/caf\xe9.txt", "x\n");
+    file_put_contents($repository['root'].'/packages/shared/notes.txt', "x\n");
+
+    ExternalSources::flush();
+
+    $root = str_replace(DIRECTORY_SEPARATOR, '/', (string) realpath($repository['root']));
+
+    expect(ExternalSources::ignoredInputs($repository['project'], ['--include-path', '../packages/shared']))->toBe(['packages/shared/notes.txt'])
+        ->and(ExternalSources::unverifiable($repository['project'], ['--include-path', '../packages/shared']))->toBe([$root."/packages/shared/caf\xe9.txt"]);
+})->skip(PHP_OS_FAMILY !== 'Linux', 'Only Linux file systems accept names that are not utf-8.');
+
+it('finds a root that the repository ignores next to a file whose name looks like a pathspec', function (): void {
+    $repository = tiaExternalRepository([
+        'autoload' => ['files' => ['../:(fixtures).php', '../packages/generated.php']],
+    ]);
+
+    file_put_contents($repository['root'].'/.gitignore', "packages/generated.php\n");
+    file_put_contents($repository['root'].'/:(fixtures).php', "<?php\n");
+    file_put_contents($repository['root'].'/packages/generated.php', "<?php\n");
+
+    ExternalSources::flush();
+
+    expect(ExternalSources::ignoredInputs($repository['project']))->toBe(['packages/generated.php']);
+})->skipOnWindows();
+
+it('reports no repository that sits in a noise directory under a declared root as unverifiable', function (): void {
+    $repository = tiaExternalRepository();
+
+    file_put_contents($repository['root'].'/.gitignore', "vendor/\n.tools/\n");
+    mkdir($repository['root'].'/packages/shared/vendor/acme/pkg', 0755, true);
+    mkdir($repository['root'].'/packages/shared/.tools/tool', 0755, true);
+    new GitRepo($repository['root'].'/packages/shared/vendor/acme/pkg')->init('master');
+    new GitRepo($repository['root'].'/packages/shared/.tools/tool')->init('master');
+
+    ExternalSources::flush();
+
+    expect(ExternalSources::unverifiable($repository['project'], ['--include-path', '../packages/shared']))->toBeEmpty();
+})->skipOnWindows();
+
+it('reports a repository under an inner declared root even when an outer root counts it as noise', function (): void {
+    $repository = tiaExternalRepository();
+
+    file_put_contents($repository['root'].'/.gitignore', "vendor/\n");
+    mkdir($repository['root'].'/packages/shared/vendor/acme/pkg', 0755, true);
+    new GitRepo($repository['root'].'/packages/shared/vendor/acme/pkg')->init('master');
+
+    ExternalSources::flush();
+
+    $root = str_replace(DIRECTORY_SEPARATOR, '/', (string) realpath($repository['root']));
+
+    expect(ExternalSources::unverifiable($repository['project'], ['--include-path', '../packages/shared'.PATH_SEPARATOR.'../packages/shared/vendor']))
+        ->toBe([$root.'/packages/shared/vendor/acme/pkg']);
+})->skipOnWindows();
+
+it('reports a root inside an ignored repository as unverifiable', function (): void {
+    $repository = tiaExternalRepository();
+
+    file_put_contents($repository['root'].'/.gitignore', "packages/shared/checkout/\n");
+    mkdir($repository['root'].'/packages/shared/checkout/src', 0755, true);
+    file_put_contents($repository['root'].'/packages/shared/checkout/src/Shared.php', "<?php\n");
+    new GitRepo($repository['root'].'/packages/shared/checkout')->init('master');
+
+    ExternalSources::flush();
+
+    $root = str_replace(DIRECTORY_SEPARATOR, '/', (string) realpath($repository['root']));
+
+    expect(ExternalSources::unverifiable($repository['project'], ['--include-path', '../packages/shared/checkout/src']))->toBe([$root.'/packages/shared/checkout/src']);
+})->skipOnWindows();
+
+it('reads a bootstrap whose name holds a wildcard character as a literal file', function (): void {
+    $repository = tiaExternalRepository([], <<<'XML_WRAP'
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="../packages/shared/.bootstrap?.php"/>
+XML_WRAP);
+
+    file_put_contents($repository['root'].'/.gitignore', "packages/shared/.bootstrap?.php\n");
+    file_put_contents($repository['root'].'/packages/shared/.bootstrap?.php', "<?php\n");
+
+    ExternalSources::flush();
+
+    expect(ExternalSources::ignoredInputs($repository['project']))->toBe(['packages/shared/.bootstrap?.php']);
+})->skipOnWindows();
+
+it('reads a psr-4 directory whose name holds a wildcard character as a literal directory', function (): void {
+    $repository = tiaExternalRepository([
+        'autoload' => ['psr-4' => ['Shared\\' => '../packages/shared/.lib?/']],
+    ]);
+
+    mkdir($repository['root'].'/packages/shared/.lib?', 0755, true);
+    file_put_contents($repository['root'].'/.gitignore', "packages/shared/.lib?/Generated.php\n");
+    file_put_contents($repository['root'].'/packages/shared/.lib?/Generated.php', "<?php\n");
+
+    ExternalSources::flush();
+
+    expect(ExternalSources::rootsFor($repository['project']))->toBe(['packages/shared/.lib?/'])
+        ->and(ExternalSources::ignoredInputs($repository['project']))->toBe(['packages/shared/.lib?/Generated.php']);
+})->skipOnWindows();
+
+it('reads an include path whose name holds a wildcard character as a literal directory', function (): void {
+    $repository = tiaExternalRepository([], <<<'XML_WRAP'
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit>
+  <php>
+    <includePath>../packages/shared/lib?</includePath>
+  </php>
+</phpunit>
+XML_WRAP);
+
+    mkdir($repository['root'].'/packages/shared/lib?', 0755, true);
+    file_put_contents($repository['root'].'/packages/shared/lib?/Helper.php', "<?php\n");
+
+    ExternalSources::flush();
+
+    expect(ExternalSources::rootsFor($repository['project']))->toBe(['packages/shared/lib?/']);
+})->skipOnWindows();
+
+it('reads every path of an include path list', function (): void {
+    $repository = tiaExternalRepository([], <<<'XML_WRAP'
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit>
+  <php>
+    <includePath>../packages/shared/lib?:../packages/fallback</includePath>
+  </php>
+</phpunit>
+XML_WRAP);
+
+    mkdir($repository['root'].'/packages/shared/lib?', 0755, true);
+    mkdir($repository['root'].'/packages/fallback', 0755, true);
+
+    expect(tiaRootsFrom($repository['project'], $repository['project'], []))->toBe(['packages/fallback/', 'packages/shared/lib?/']);
+})->skipOnWindows();
+
+it('watches the configuration directory when an include path list starts with a separator', function (): void {
+    $repository = tiaExternalRepository();
+
+    mkdir($repository['root'].'/config', 0755, true);
+    file_put_contents($repository['root'].'/config/phpunit.xml', <<<'XML_WRAP'
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit>
+  <php>
+    <includePath>:../packages/fallback</includePath>
+  </php>
+</phpunit>
+XML_WRAP);
+    mkdir($repository['root'].'/packages/fallback', 0755, true);
+
+    expect(tiaRootsFrom($repository['project'], $repository['project'], ['--configuration', '../config/phpunit.xml']))->toContain('config/');
+})->skipOnWindows();
+
+it('watches nothing for an empty include path, as PHPUnit adds nothing', function (): void {
+    $repository = tiaExternalRepository();
+
+    mkdir($repository['root'].'/config', 0755, true);
+    file_put_contents($repository['root'].'/config/phpunit.xml', <<<'XML_WRAP'
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit>
+  <php>
+    <includePath></includePath>
+  </php>
+</phpunit>
+XML_WRAP);
+
+    expect(tiaRootsFrom($repository['project'], $repository['project'], ['--configuration', '../config/phpunit.xml']))->toBe(['config/phpunit.xml']);
+})->skipOnWindows();
+
+it('resolves every path of an include path list after the first one from the working directory', function (): void {
+    $repository = tiaExternalRepository();
+
+    mkdir($repository['project'].'/config', 0755, true);
+    file_put_contents($repository['project'].'/config/phpunit.xml', <<<'XML_WRAP'
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit>
+  <php>
+    <includePath>../../packages/shared:../packages/fallback</includePath>
+  </php>
+</phpunit>
+XML_WRAP);
+    mkdir($repository['root'].'/packages/fallback', 0755, true);
+
+    expect(tiaRootsFrom($repository['project'], $repository['project'], ['--configuration', 'config/phpunit.xml']))->toBe(['packages/fallback/', 'packages/shared/']);
+})->skipOnWindows();
+
+it('watches the directory before a bracket and a brace path as it is', function (): void {
+    $repository = tiaExternalRepository([], <<<'XML_WRAP'
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit>
+  <source>
+    <include>
+      <directory suffix=".php">../packages/[st]hared/src</directory>
+      <directory suffix=".php">../libraries/{a,b}</directory>
+    </include>
+  </source>
+</phpunit>
+XML_WRAP);
+
+    mkdir($repository['root'].'/libraries', 0755, true);
+
+    expect(tiaRootsFrom($repository['project'], $repository['project'], []))->toBe(['libraries/{a,b}/', 'packages/', 'packages/shared/src/']);
+})->skipOnWindows();
+
+it('watches the directory an escaped brace names', function (): void {
+    $repository = tiaExternalRepository([], <<<'XML_WRAP'
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit>
+  <source>
+    <include>
+      <directory suffix=".php">../packages/\{local}/src</directory>
+    </include>
+  </source>
+</phpunit>
+XML_WRAP);
+
+    mkdir($repository['root'].'/packages/{local}/src', 0755, true);
+
+    expect(tiaRootsFrom($repository['project'], $repository['project'], []))->toBe(['packages/', 'packages/{local}/src/']);
+})->skipOnWindows();
+
+it('watches every directory a double star pattern reaches like PHPUnit', function (): void {
+    $repository = tiaExternalRepository([], <<<'XML_WRAP'
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit>
+  <source>
+    <include>
+      <directory suffix=".php">../packages/**/.generated/src</directory>
+    </include>
+  </source>
+</phpunit>
+XML_WRAP);
+
+    mkdir($repository['root'].'/packages/one/.generated/src', 0755, true);
+    mkdir($repository['root'].'/packages/team/lib/.generated/src', 0755, true);
+    file_put_contents($repository['root'].'/.gitignore', ".generated/\n");
+    file_put_contents($repository['root'].'/packages/one/.generated/src/One.php', "<?php\n");
+    file_put_contents($repository['root'].'/packages/team/lib/.generated/src/Helper.php', "<?php\n");
+
+    expect(ExternalSources::ignoredInputs($repository['project']))->toBe([
+        'packages/one/.generated/src/One.php',
+        'packages/team/lib/.generated/src/Helper.php',
+    ]);
+})->skipOnWindows();
+
+it('also watches a directory whose real name looks like a pattern', function (): void {
+    $repository = tiaExternalRepository([], <<<'XML_WRAP'
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit>
+  <source>
+    <include>
+      <directory suffix=".php">../packages/.generated{local}/src</directory>
+    </include>
+  </source>
+</phpunit>
+XML_WRAP);
+
+    mkdir($repository['root'].'/packages/.generated{local}/src', 0755, true);
+    file_put_contents($repository['root'].'/.gitignore', "packages/.generated{local}/src/Helper.php\n");
+    file_put_contents($repository['root'].'/packages/.generated{local}/src/Helper.php', "<?php\n");
+
+    expect(tiaRootsFrom($repository['project'], $repository['project'], []))->toBe(['packages/.generated{local}/src/']);
+
+    ExternalSources::flush();
+
+    expect(ExternalSources::ignoredInputs($repository['project']))->toBe(['packages/.generated{local}/src/Helper.php']);
+})->skipOnWindows();
+
+it('keeps an existing absolute directory with brackets in its path as it is', function (): void {
+    $repository = tiaExternalRepository();
+
+    $shared = str_replace(DIRECTORY_SEPARATOR, '/', (string) realpath($repository['root'])).'/mono[dev]/shared';
+    mkdir($shared, 0755, true);
+    file_put_contents($repository['project'].'/phpunit.xml', <<<XML_WRAP
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit>
+  <testsuites>
+    <testsuite name="shared">
+      <directory>{$shared}</directory>
+    </testsuite>
+  </testsuites>
+</phpunit>
+XML_WRAP);
+
+    expect(tiaRootsFrom($repository['project'], $repository['project'], []))->toBe(['mono[dev]/shared/'])
+        ->and(ExternalSources::unverifiable($repository['project']))->toBeEmpty();
+})->skipOnWindows();
+
+it('watches the directories a bracket pattern matches even when its literal name also exists', function (): void {
+    $repository = tiaExternalRepository([], <<<'XML_WRAP'
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit>
+  <source>
+    <include>
+      <directory suffix=".php">../packages/[st]hared/src</directory>
+    </include>
+  </source>
+</phpunit>
+XML_WRAP);
+
+    mkdir($repository['root'].'/packages/[st]hared/src', 0755, true);
+
+    expect(tiaRootsFrom($repository['project'], $repository['project'], []))->toBe(['packages/', 'packages/shared/src/']);
+})->skipOnWindows();
+
+it('cuts a path at a brace only when the glob of its reader expands braces', function (): void {
+    $beforeWildcard = new ReflectionMethod(ExternalSources::class, 'beforeWildcard');
+
+    expect($beforeWildcard->invoke(null, '../repo{dev,ci}/shared/Helper.php', 0))->toBe('../repo{dev,ci}/shared/Helper.php')
+        ->and($beforeWildcard->invoke(null, '../repo{dev,ci}/shared/Helper.php', GLOB_BRACE))->toBe('..')
+        ->and($beforeWildcard->invoke(null, '../packages/[st]hared/src', 0))->toBe('../packages');
+})->skip(! defined('GLOB_BRACE'), 'This platform has no brace expansion.');
+
 it('lists no ignored file of the project itself as an ignored input', function (): void {
     $repository = tiaExternalRepository();
 
@@ -697,7 +1207,28 @@ it('keeps the drive letter when it resolves a missing directory against a Window
     $lexicalPath = new ReflectionMethod(ExternalSources::class, 'lexicalPath');
 
     expect($lexicalPath->invoke(null, 'C:/mono/backend', '../shared/src'))->toBe('C:/mono/shared/src');
-});
+})->skip(PHP_OS_FAMILY !== 'Windows', 'Drive letters exist only on Windows.');
+
+it('resolves a path that starts with a drive letter against its base outside Windows', function (): void {
+    $isAbsolute = new ReflectionMethod(ExternalSources::class, 'isAbsolute');
+    $lexicalPath = new ReflectionMethod(ExternalSources::class, 'lexicalPath');
+
+    expect($isAbsolute->invoke(null, 'C:/fixture/bootstrap.php'))->toBeFalse()
+        ->and($lexicalPath->invoke(null, '/repo/backend/config', 'C:/fixture/bootstrap.php'))->toBe('/repo/backend/config/C:/fixture/bootstrap.php');
+})->skipOnWindows();
+
+it('treats a path from the root of the current drive as absolute on Windows', function (): void {
+    $isAbsolute = new ReflectionMethod(ExternalSources::class, 'isAbsolute');
+
+    expect($isAbsolute->invoke(null, '\\mono\\shared\\src'))->toBeTrue();
+})->skip(PHP_OS_FAMILY !== 'Windows', 'Paths from the root of the current drive exist only on Windows.');
+
+it('keeps the current drive when it resolves a missing path from the root of that drive', function (): void {
+    $lexicalPath = new ReflectionMethod(ExternalSources::class, 'lexicalPath');
+    $drive = substr((string) getcwd(), 0, 2);
+
+    expect($lexicalPath->invoke(null, $drive.'/mono/backend', '\\mono\\shared\\src'))->toBe($drive.'/mono/shared/src');
+})->skip(PHP_OS_FAMILY !== 'Windows', 'Paths from the root of the current drive exist only on Windows.');
 
 it('keeps the network share when it resolves a missing directory against a UNC base', function (): void {
     $lexicalPath = new ReflectionMethod(ExternalSources::class, 'lexicalPath');
