@@ -1963,6 +1963,15 @@
   ✓ units → it collects every test class the given units bundle
   ✓ units → it writes bundled units, and reads back both shapes
 
+   PASS  Tests\Unit\Plugins\Tia\ByteSafeJson
+  ✓ it round-trips keys and values that are not valid UTF-8
+  ✓ it keeps valid UTF-8 as plain JSON
+  ✓ it does not confuse a real string with an escaped one
+  ✓ it leaves a malformed escape untouched
+  ✓ it returns null for invalid JSON
+  ✓ it throws with the reason when a value cannot be encoded
+  ✓ it carries a string that is not valid UTF-8 through a parallel global
+
    PASS  Tests\Unit\Plugins\Tia\ChangedFiles
   ✓ it resolves the project prefix inside the repository
   ✓ it keeps a space that begins the name of the project directory
@@ -2090,6 +2099,10 @@
   ✓ Laravel boot files → it watches the config and bootstrap files in the Laravel defaults
   ✓ clearResults() → it drops the results of the fallback branch too
   ✓ branch baseline over the fallback → it reads results written after an earlier read
+  ✓ encode() and decode() → it round-trips paths that are not valid UTF-8
+  ✓ encode() and decode() → it lists a branch whose name is not valid UTF-8
+  ✓ legacy schema → it reads a graph of the previous schema without unescaping its strings
+  ✓ legacy schema → it rebuilds a graph of an unknown schema but still lists its branches
 
    PASS  Tests\Unit\Plugins\Tia\IsEnabledForRun
   ✓ does not throw when an integer --random-order-seed is passed as a separate argv element
@@ -2680,4 +2693,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 39 skipped, 1969 passed (4458 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 39 skipped, 1980 passed (4476 assertions)
