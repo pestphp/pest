@@ -27,6 +27,7 @@ test('parallel resolves requires through the include path', function (array $arg
     'several paths' => [['--include-path=tests/Fixtures/Inheritance'.PATH_SEPARATOR.'tests/Fixtures/ParallelIncludePath/lib']],
     'directory name with an equals sign' => [['--include-path', 'tests/Fixtures/ParallelIncludePath/include=path']],
     'absolute directory name with an equals sign' => [['--include-path', __DIR__.'/../Fixtures/ParallelIncludePath/include=path']],
+    'require in the bootstrap file' => [['--bootstrap=tests/Fixtures/ParallelIncludePath/bootstrap.inc', '--include-path=tests/Fixtures/ParallelIncludePath/lib']],
     'command line before the XML include path' => [['--configuration=tests/Fixtures/ParallelIncludePath.xml', '--include-path=tests/Fixtures/ParallelIncludePath/lib']],
 ])->skipOnWindows();
 

@@ -7,7 +7,7 @@ namespace Pest\Plugins\Parallel\Handlers;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Plugins\Parallel as ParallelPlugin;
 use Pest\Plugins\Parallel\Contracts\HandlersWorkerArguments;
-use Pest\Subscribers\EnsureIncludePathIsPrepended;
+use Pest\Subscribers\EnsureCommandLineIncludePathComesFirst;
 use PHPUnit\Event\Facade as EventFacade;
 
 final class IncludePath implements HandlersWorkerArguments, HandlesArguments
@@ -54,7 +54,10 @@ final class IncludePath implements HandlersWorkerArguments, HandlesArguments
         ParallelPlugin::setGlobal(self::GLOBAL_KEY, $includePath === null ? false : base64_encode($includePath));
 
         if ($includePath !== null) {
-            EventFacade::instance()->registerSubscriber(new EnsureIncludePathIsPrepended($includePath));
+            $commandLineIncludePathComesFirst = new EnsureCommandLineIncludePathComesFirst($includePath);
+            $commandLineIncludePathComesFirst->apply();
+
+            EventFacade::instance()->registerSubscriber($commandLineIncludePathComesFirst);
         }
 
         return $argumentsForParatest;
