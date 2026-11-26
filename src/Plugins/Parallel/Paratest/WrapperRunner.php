@@ -15,8 +15,11 @@ use ParaTest\WrapperRunner\MissingResultsException;
 use ParaTest\WrapperRunner\SuiteLoader;
 use ParaTest\WrapperRunner\WrapperWorker;
 use Pest\Plugins\Parallel;
+use Pest\Plugins\Parallel\Support\SlowestFirst;
+use Pest\Plugins\Shard;
 use Pest\Plugins\Tia;
 use Pest\Result;
+use Pest\Support\Container;
 use Pest\TestSuite;
 use PHPUnit\Event\Facade as EventFacade;
 use PHPUnit\Event\Test\AfterLastTestMethodFailed;
@@ -169,7 +172,7 @@ final class WrapperRunner implements RunnerInterface
             $this->output,
             $this->codeCoverageFilterRegistry,
         );
-        $this->pending = $this->getTestFiles($suiteLoader);
+        $this->pending = $this->slowestFirst($this->getTestFiles($suiteLoader));
 
         $result = TestResultFacade::result();
 
@@ -224,6 +227,24 @@ final class WrapperRunner implements RunnerInterface
         }
 
         return $runTmpDir;
+    }
+
+    /**
+     * @param  list<non-empty-list<non-empty-string>>  $groups
+     * @return list<non-empty-list<non-empty-string>>
+     */
+    private function slowestFirst(array $groups): array
+    {
+        $configuration = $this->options->configuration;
+
+        if (! SlowestFirst::appliesTo(isset($this->options->phpunitOptions['order-by']), $configuration->executionOrder(), $configuration->executionOrderDefects())) {
+            return $groups;
+        }
+
+        $shard = Container::getInstance()->get(Shard::class);
+        assert($shard instanceof Shard);
+
+        return SlowestFirst::fromClassTimings($shard->timingsByClass())->order($groups);
     }
 
     private function startWorkers(): void

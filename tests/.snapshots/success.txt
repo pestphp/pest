@@ -1883,6 +1883,21 @@
   ✓ environment is set to CI when --ci option is used
   ✓ environment is set to Local when --ci option is not used
 
+   PASS  Tests\Unit\Plugins\Parallel\SlowestFirst
+  ✓ it keeps the order of the suite when there are no timings
+  ✓ it sends the files of the slowest test classes first
+  ✓ it gives the median time to a file without a timing
+  ✓ it sorts a group of files by the sum of their times
+  ✓ it finds the file of a pest test class without its P prefix
+  ✓ it ignores a test class that is not loaded
+  ✓ it orders the files only when the run has no execution order of its own with dataset "default"
+  ✓ it orders the files only when the run has no execution order of its own with dataset "random"
+  ✓ it orders the files only when the run has no execution order of its own with dataset "reverse"
+  ✓ it orders the files only when the run has no execution order of its own with dataset "duration"
+  ✓ it orders the files only when the run has no execution order of its own with dataset "size"
+  ✓ it orders the files only when the run has no execution order of its own with dataset "defects"
+  ✓ it orders the files only when the run has no execution order of its own with dataset "explicit default"
+
    PASS  Tests\Unit\Plugins\Retry
   ✓ it orders by defects and stop on defects if when --retry is used
   ✓ it rejects retry with a parallel flag with ('--parallel')
@@ -1962,6 +1977,8 @@
   ✓ units → it keeps a unit that bundles no test class when writing
   ✓ units → it collects every test class the given units bundle
   ✓ units → it writes bundled units, and reads back both shapes
+  ✓ units → it gives the time of each test class to the parallel runner, splits a bundled unit between its classes, and adds the shares of a class in several units
+  ✓ units → it gives no timings to the parallel runner when the shards file is missing or corrupt
 
    PASS  Tests\Unit\Plugins\Tia\ChangedFiles
   ✓ it resolves the project prefix inside the repository
@@ -2680,4 +2697,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 39 skipped, 1969 passed (4458 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 39 skipped, 1984 passed (4475 assertions)
