@@ -7,7 +7,6 @@ namespace Pest\Plugins\Tia;
 use Pest\Plugins\Tia\Contracts\Lockfile;
 use Pest\Support\Git;
 use Symfony\Component\Process\Exception\ExceptionInterface as ProcessException;
-use Symfony\Component\Process\Process;
 
 /**
  * @internal
@@ -302,16 +301,11 @@ final readonly class Fingerprint
             return $cache[$key] = true;
         }
 
-        $process = new Process(['git', 'check-ignore', '-q', '--', $relativePath], $projectRoot);
-        $process->setTimeout(5.0);
-
         try {
-            $process->run();
+            return $cache[$key] = ! new Git($projectRoot)->succeeds(['check-ignore', '-q', '--', $relativePath]);
         } catch (ProcessException) {
             return $cache[$key] = true;
         }
-
-        return $cache[$key] = $process->getExitCode() !== 0;
     }
 
     private static function projectPrefix(string $projectRoot): string
