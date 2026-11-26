@@ -179,6 +179,19 @@ test('tia still requires git', function (): void {
         ->and($result->exitCode)->not->toBe(0);
 })->skipOnWindows();
 
+test('tia still requires git when git speaks another language', function (): void {
+    $project = Project::withoutGit();
+
+    $result = $project->pestWithEnvironment($project->path(), [
+        'LC_ALL' => 'es_ES.UTF-8',
+        'LANG' => 'es_ES.UTF-8',
+        'LANGUAGE' => 'es',
+    ], '--tia');
+
+    expect($result->output)->toContain('The [Tia mode] feature requires [git].')
+        ->and($result->exitCode)->toBe(1, $result->describe());
+})->skipOnWindows();
+
 test('a failing git shows its own error instead of asking for git', function (): void {
     $project = Project::make('master');
 

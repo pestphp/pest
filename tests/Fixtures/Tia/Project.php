@@ -423,12 +423,12 @@ final class Project
 
     public function scaffoldVendor(string $directory): void
     {
-        self::scaffoldPest($directory.'/vendor/pestphp/pest', $directory.'/vendor', '/pestphp/pest/src');
+        $this->scaffoldPest($directory.'/vendor/pestphp/pest', $directory.'/vendor', '/pestphp/pest/src');
     }
 
     public function scaffoldCheckout(string $directory): void
     {
-        self::scaffoldPest($directory, $directory.'/vendor', '/../src');
+        $this->scaffoldPest($directory, $directory.'/vendor', '/../src');
     }
 
     public function destroy(): void
@@ -495,7 +495,7 @@ final class Project
         return $project;
     }
 
-    private static function scaffoldPest(string $pest, string $vendor, string $sourceFromVendor): void
+    private function scaffoldPest(string $pest, string $vendor, string $sourceFromVendor): void
     {
         $pestRoot = dirname(__DIR__, 3);
 

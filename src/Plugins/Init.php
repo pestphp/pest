@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Pest\Plugins;
 
-use Composer\InstalledVersions;
 use Pest\Console\Thanks;
 use Pest\Contracts\Plugins\HandlesArguments;
+use Pest\Support\InstalledPackages;
 use Pest\Support\View;
 use Pest\TestSuite;
 use Symfony\Component\Console\Input\InputInterface;
@@ -96,11 +96,11 @@ final readonly class Init implements HandlesArguments
 
         View::render('components.new-line');
 
-        (new Thanks($this->input, $this->output))();
+        new Thanks($this->input, $this->output)();
     }
 
     private function isLaravelInstalled(): bool
     {
-        return InstalledVersions::isInstalled('laravel/framework');
+        return InstalledPackages::has('laravel/framework');
     }
 }
