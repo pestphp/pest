@@ -2437,6 +2437,12 @@
   ✓ it ensures the given closures reports the correct class name
   ✓ it ensures the given closures reports the correct class name and suggests the [pest()] function
 
+   PASS  Tests\Unit\Support\Git
+  ✓ it raises a timed out command instead of answering with ('result')
+  ✓ it raises a timed out command instead of answering with ('raw')
+  ✓ it raises a timed out command instead of answering with ('output')
+  ✓ it raises a timed out command instead of answering with ('succeeds')
+
    PASS  Tests\Unit\Support\HigherOrderMessage
   ✓ undefined method exceptions
 
@@ -2680,4 +2686,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 39 skipped, 1969 passed (4458 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 39 skipped, 1973 passed (4466 assertions)

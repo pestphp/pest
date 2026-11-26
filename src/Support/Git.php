@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pest\Support;
 
+use Pest\Exceptions\GitTimedOut;
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
 
 /**
@@ -86,7 +88,11 @@ final readonly class Git
             $process->setInput($input);
         }
 
-        $process->run();
+        try {
+            $process->run();
+        } catch (ProcessTimedOutException) {
+            throw new GitTimedOut($arguments, $this->timeout);
+        }
 
         return [
             'exitCode' => $process->getExitCode() ?? 1,
