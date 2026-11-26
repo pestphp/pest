@@ -238,6 +238,40 @@ describe('the file wrapper', function (): void {
         ]);
     });
 
+    it('reports why an include failed as plain PHP does while a test records', function (): void {
+        $missing = sys_get_temp_dir().DIRECTORY_SEPARATOR.'pest-read-capture-missing-'.bin2hex(random_bytes(8)).'.php';
+        $results = [];
+        $errorReporting = error_reporting(E_ALL);
+
+        set_error_handler(function (int $level, string $message, string $file, int $line): bool {
+            if ((error_reporting() & $level) === 0) {
+                return false;
+            }
+
+            throw new ErrorException($message, 0, $level, $file, $line);
+        });
+
+        try {
+            tiaReadCaptureLinks(function () use ($missing, &$results): void {
+                try {
+                    include $missing;
+                } catch (ErrorException $exception) {
+                    $results['include'] = str_contains($exception->getMessage(), 'No such file or directory');
+                }
+
+                $results['silenced include'] = @include $missing;
+            });
+        } finally {
+            restore_error_handler();
+            error_reporting($errorReporting);
+        }
+
+        expect($results)->toBe([
+            'include' => true,
+            'silenced include' => false,
+        ]);
+    });
+
     it('keeps no memory for each filesystem call while a test records', function (): void {
         $growth = 0;
 
