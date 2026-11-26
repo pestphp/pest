@@ -192,6 +192,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
     include_once $autoloadPath;
 
+    $GLOBALS['_composer_autoload_path'] = $autoloadPath;
     $GLOBALS['_composer_bin_dir'] ??= dirname($autoloadPath).'/bin';
     $rootPath = ComposerProject::rootPath($autoloadPath);
 
