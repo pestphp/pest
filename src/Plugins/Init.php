@@ -96,7 +96,7 @@ final readonly class Init implements HandlesArguments
 
         View::render('components.new-line');
 
-        (new Thanks($this->input, $this->output))();
+        new Thanks($this->input, $this->output)();
     }
 
     private function isLaravelInstalled(): bool
