@@ -1981,6 +1981,14 @@
   ✓ it keeps a tracked outside change and drops an untracked ignored one
   ✓ it keeps a tracked project change that the ignore rules match
   ✓ it reads committed paths from the repository root even when git is told to be relative
+  ✓ it tells a working tree change outside the project from a committed one
+  ✓ it keeps a changed file whose name is a number as a string
+  ✓ it matches no external root for a changed file whose name is a number
+  ✓ it hashes an external input without reading it into memory
+  ✓ it sees a whitespace change inside an external input
+  ✓ it reports a changed file whose name looks like a pathspec
+  ✓ it reports an external input that the listing no longer names
+  ✓ it reports no change for an external input it cannot read
 
    PASS  Tests\Unit\Plugins\Tia\ConfigurationFile
   ✓ it fingerprints the path and the content of the configuration file
@@ -2048,6 +2056,89 @@
    WARN  Tests\Unit\Plugins\Tia\DeletedTestCoverage
   - cached hits of a deleted test are dropped while a replayed test stays → Coverage is not available
 
+   WARN  Tests\Unit\Plugins\Tia\ExternalSources
+  ✓ it finds a psr-4 root that escapes the project
+  ✓ it finds a path repository
+  ✓ it finds a phpunit source directory outside the project
+  ✓ it finds nothing when the project only loads its own code
+  ✓ it finds nothing for a project at the repository root
+  ✓ it reports a root that sits outside the repository as unverifiable
+  ✓ it reports nothing unverifiable when every declaration stays inside the repository
+  ✓ it reports a bootstrap outside the repository as unverifiable
+  ✓ it matches only the changes that fall under an external root
+  ✓ it finds an autoload file that escapes the project and matches it exactly
+  ✓ it finds a phpunit bootstrap that escapes the project
+  ✓ it keeps a declared root that no longer exists on disk
+  ✓ it treats a classmap entry as a file only when it names one
+  ✓ it finds a testsuite directory outside the project
+  ✓ it keeps the directory before a wildcard in a path repository
+  ✓ it keeps the directory before a single character wildcard
+  ✓ it matches a deleted package that a wildcard declared
+  ✓ it covers the whole repository when a declaration reaches its root
+  ✓ it reads the configuration that the command line selects
+  ✓ it accepts the configuration argument in its joined form
+  ✓ it resolves a configuration path against its own directory
+  ✓ it follows a symlink that leaves the project
+  ✓ it keeps a real directory inside the project out of the roots
+  ✓ it finds a bootstrap file that the command line names
+  ✓ it finds every directory that an include path names
+  ✓ it resolves a command line path against the directory the command ran in
+  ✓ it keeps a declaration that a commit deleted under the directory the command ran in
+  ✓ it watches the paths of the configuration Pest generates in the directory the command ran in
+  ✓ it treats a classmap directory that carries a dot as a directory
+  ✓ it accepts the configuration argument attached to its short flag
+  ✓ it reads no configuration when the run asks for none
+  ✓ it reads no default configuration when the command line names one
+  ✓ it finds an include path that the configuration names
+  ✓ it matches a submodule that a commit moved
+  ✓ it matches a submodule that holds a declared file
+  ✓ it reads the configuration of the directory the command ran in
+  ✓ it reads a configuration that a directory argument names
+  ✓ it reads the dist name that phpunit tries before the older one
+  ✓ it finds a bootstrap that a single test suite names
+  ✓ it watches the directory before a wildcard that a configuration names
+  ✓ it lists the files of a root that the repository ignores as ignored inputs
+  ✓ it lists the ignored files under a declared root as ignored inputs
+  ✓ it lists an ignored bootstrap file inside vendor as an ignored input
+  ✓ it lists the ignored files under a declared root inside a dot directory
+  ✓ it lists an ignored link to a file but no ignored link to a directory or to nothing
+  ✓ it watches the path that composer resolved for a path repository
+  ✓ it watches the path that composer installed when the project has no lock file
+  ✓ it watches the path that composer installed into a custom vendor directory
+  ✓ it watches the path that composer installed into the vendor directory the run loaded
+  ✓ it watches the installed path and the locked path when they differ
+  ✓ it reads a path that composer resolved as a literal path
+  ✓ it reads the manifest and the lock file that the COMPOSER variable names
+  ✓ it lists the ignored files when git is told to read every pathspec literally
+  - it treats a network path as absolute on Windows → Network paths only exist on Windows.
+  ✓ it reports an ignored repository under a declared root as unverifiable
+  ✓ it finds a root that the repository ignores next to a file whose name looks like a pathspec
+  ✓ it reports no repository that sits in a noise directory under a declared root as unverifiable
+  ✓ it reports a repository under an inner declared root even when an outer root counts it as noise
+  ✓ it reports a root inside an ignored repository as unverifiable
+  ✓ it reads a bootstrap whose name holds a wildcard character as a literal file
+  ✓ it reads a psr-4 directory whose name holds a wildcard character as a literal directory
+  ✓ it reads an include path whose name holds a wildcard character as a literal directory
+  ✓ it reads every path of an include path list
+  ✓ it watches the configuration directory when an include path list starts with a separator
+  ✓ it watches nothing for an empty include path, as PHPUnit adds nothing
+  ✓ it resolves every path of an include path list after the first one from the working directory
+  ✓ it watches the directory before a bracket and a brace path as it is
+  ✓ it watches the directory an escaped brace names
+  ✓ it watches every directory a double star pattern reaches like PHPUnit
+  ✓ it also watches a directory whose real name looks like a pattern
+  ✓ it keeps an existing absolute directory with brackets in its path as it is
+  ✓ it watches the directories a bracket pattern matches even when its literal name also exists
+  ✓ it cuts a path at a brace only when the glob of its reader expands braces
+  ✓ it lists no ignored file of the project itself as an ignored input
+  ✓ it keeps the roots of the run when a test changes the working directory
+  - it keeps the drive letter when it resolves a missing directory against a Windows base → Drive letters exist only on Windows.
+  ✓ it resolves a path that starts with a drive letter against its base outside Windows
+  - it treats a path from the root of the current drive as absolute on Windows → Paths from the root of the current drive exist only on Windows.
+  - it keeps the current drive when it resolves a missing path from the root of that drive → Paths from the root of the current drive exist only on Windows.
+  - it keeps the network share when it resolves a missing directory against a UNC base → UNC paths exist only on Windows.
+  ✓ it reads a leading double slash as the root outside Windows
+
    PASS  Tests\Unit\Plugins\Tia\FileState
   ✓ keysWithPrefix() → it lists keys matching the prefix
   ✓ keysWithPrefix() → it ignores in-flight temporary files from concurrent writes
@@ -2058,6 +2149,9 @@
   ✓ compute() → it excludes gitignored untracked files from the fingerprint
   ✓ compute() → it keeps the command line bootstrap and include path out of a run that sets neither
   ✓ compute() → it tells a bootstrap whose name looks like an include path apart from a bootstrap and an include path
+  ✓ compute() → it tells a relative include path from the absolute path it names
+  ✓ compute() → it stores an include path whose name is not utf-8 as text json can encode
+  ✓ compute() → it changes when the order of the include path changes and not when its spelling does
 
    PASS  Tests\Unit\Plugins\Tia\Graph
   ✓ shouldRerunStatus() → it re-runs failures and errors, replays successes
@@ -2090,6 +2184,8 @@
   ✓ Laravel boot files → it watches the config and bootstrap files in the Laravel defaults
   ✓ clearResults() → it drops the results of the fallback branch too
   ✓ branch baseline over the fallback → it reads results written after an earlier read
+  ✓ pruneMissingBranches() → it keeps a branch whose name is a number
+  ✓ decode() → it keeps a file of the last run tree whose name is a number
 
    PASS  Tests\Unit\Plugins\Tia\IsEnabledForRun
   ✓ does not throw when an integer --random-order-seed is passed as a separate argv element
@@ -2389,9 +2485,14 @@
   ✓ last → it should return the last element for an array without changing the internal pointer
   ✓ last → it should return the last element for an associative array without changing the internal pointer
   ✓ last → it should return the last element for an mixed key array without changing the internal pointer
+  ✓ stringKeys → it returns every key as a string
 
    PASS  Tests\Unit\Support\Backtrace
   ✓ it gets file name from called file
+
+   PASS  Tests\Unit\Support\ComposerProject
+  ✓ it reads the project root that composer recorded
+  ✓ it falls back to the parent of the vendor directory when composer recorded no install path
 
    PASS  Tests\Unit\Support\Container
   ✓ it exists
@@ -2680,4 +2781,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 39 skipped, 1969 passed (4458 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 44 skipped, 2061 passed (4581 assertions)

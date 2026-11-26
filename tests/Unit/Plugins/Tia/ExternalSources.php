@@ -878,7 +878,7 @@ it('reports an ignored file under a declared root whose name is not utf-8 as unv
 
     expect(ExternalSources::ignoredInputs($repository['project'], ['--include-path', '../packages/shared']))->toBe(['packages/shared/notes.txt'])
         ->and(ExternalSources::unverifiable($repository['project'], ['--include-path', '../packages/shared']))->toBe([$root."/packages/shared/caf\xe9.txt"]);
-})->skip(PHP_OS_FAMILY !== 'Linux', 'Only Linux file systems accept names that are not utf-8.');
+})->group('integration', 'tia')->skip(PHP_OS_FAMILY !== 'Linux', 'Only Linux file systems accept names that are not utf-8.');
 
 it('finds a root that the repository ignores next to a file whose name looks like a pathspec', function (): void {
     $repository = tiaExternalRepository([
