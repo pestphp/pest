@@ -30,13 +30,16 @@ final readonly class Fingerprint
      */
     public static function compute(string $projectRoot, ?ConfigurationFile $configuration = null): array
     {
+        $configuration ??= ConfigurationFile::projectDefault();
+
         $structural = [
             'schema' => self::SCHEMA_VERSION,
             'composer_lock' => self::composerLockHash($projectRoot),
-            'phpunit_configuration' => ($configuration ?? ConfigurationFile::projectDefault())->fingerprint($projectRoot),
+            'phpunit_configuration' => $configuration->fingerprint($projectRoot),
             'vite_config' => self::viteConfigHash($projectRoot),
             'package_lock' => self::packageLockHash($projectRoot),
             'js_config' => self::jsConfigHash($projectRoot),
+            ...self::commandLineOverrides($projectRoot, $configuration),
         ];
 
         $prefix = self::projectPrefix($projectRoot);
@@ -52,6 +55,17 @@ final readonly class Fingerprint
 
             ],
         ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function commandLineOverrides(string $projectRoot, ConfigurationFile $configuration): array
+    {
+        return array_filter([
+            'phpunit_bootstrap' => $configuration->bootstrapFingerprint($projectRoot),
+            'phpunit_include_path' => $configuration->includePathFingerprint($projectRoot),
+        ], fn (?string $value): bool => $value !== null);
     }
 
     /**
