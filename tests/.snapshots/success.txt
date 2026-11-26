@@ -2148,6 +2148,7 @@
   ✓ a wrapper already registered for file:// → it opens reads through it and still links them
   ✓ a wrapper already registered for file:// → it keeps the include flag for the files a test includes
   ✓ a wrapper already registered for file:// → it is registered again after the test
+  ✓ a __call wrapper already registered for file:// → it passes reads, includes and directory listings through it
   ✓ withoutReadCapture() → it does not link a file matching an excluded glob
   ✓ withoutReadCapture() → it still links a file outside the excluded globs
   ✓ withoutReadCapture() → it keeps the file wrapper registered while globs are excluded
@@ -2689,4 +2690,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 39 skipped, 1976 passed (4472 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 39 skipped, 1977 passed (4474 assertions)

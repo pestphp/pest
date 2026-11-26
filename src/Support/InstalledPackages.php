@@ -33,7 +33,7 @@ final readonly class InstalledPackages
     public function contains(string $package, bool $includeDevRequirements = true): bool
     {
         foreach ($this->installedSets as $installedSet) {
-            if (self::isBundledInPhar($installedSet)) {
+            if ($this->isBundledInPhar($installedSet)) {
                 continue;
             }
 
@@ -48,7 +48,7 @@ final readonly class InstalledPackages
     /**
      * @param  array{root: array{install_path?: string}}  $installedSet
      */
-    private static function isBundledInPhar(array $installedSet): bool
+    private function isBundledInPhar(array $installedSet): bool
     {
         return str_starts_with($installedSet['root']['install_path'] ?? '', 'phar://');
     }
