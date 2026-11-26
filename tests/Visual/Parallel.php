@@ -59,6 +59,31 @@ test('parallel lets extensions register event subscribers', function (): void {
         ->toContain('Parallel: 2 processes');
 })->skipOnWindows();
 
+test('sets Laravel parallel flags', function (array $options, array $databaseFlags): void {
+    $process = new Process(
+        [PHP_BINARY, '-d', 'auto_prepend_file=', 'tests/Fixtures/Suites/ParallelLaravelFlags.php', '--parallel', ...$options],
+        dirname(__DIR__, 2),
+        [
+            'LARAVEL_PARALLEL_TESTING' => false,
+            'LARAVEL_PARALLEL_TESTING_RECREATE_DATABASES' => false,
+            'LARAVEL_PARALLEL_TESTING_DROP_DATABASES' => false,
+        ],
+    );
+
+    $process->mustRun();
+
+    $expectedFlags = ['LARAVEL_PARALLEL_TESTING', ...$databaseFlags];
+
+    expect(json_decode($process->getOutput(), true, flags: JSON_THROW_ON_ERROR))->toBe([
+        'server' => $expectedFlags,
+        'env' => $expectedFlags,
+    ]);
+})->with([
+    'without database options' => [[], []],
+    'recreate databases' => [['--recreate-databases'], ['LARAVEL_PARALLEL_TESTING_RECREATE_DATABASES']],
+    'drop databases' => [['--drop-databases'], ['LARAVEL_PARALLEL_TESTING_DROP_DATABASES']],
+]);
+
 test('parallel can have multiple exclude-groups', function () use ($run): void {
     $singleExclude = $run('--exclude-group=integration');
     $doubleExclude = $run('--exclude-group=integration', '--exclude-group=container');
