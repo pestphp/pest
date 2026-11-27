@@ -314,7 +314,7 @@ final class ReadCapture
      */
     private function openNatively(string $path, string $mode, int $options): mixed
     {
-        return ($options & STREAM_REPORT_ERRORS) !== 0
+        return ($options & (STREAM_REPORT_ERRORS | self::STREAM_OPEN_FOR_INCLUDE)) !== 0
             ? fopen($path, $mode, ($options & STREAM_USE_PATH) !== 0, $this->context)
             : @fopen($path, $mode, ($options & STREAM_USE_PATH) !== 0, $this->context);
     }
