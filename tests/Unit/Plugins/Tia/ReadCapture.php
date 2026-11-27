@@ -7,6 +7,7 @@ use Pest\Plugins\Tia\ReadCapture;
 use Pest\Plugins\Tia\Recorder;
 use Pest\Plugins\Tia\WatchPatterns;
 use Pest\Support\Container;
+use Tests\Fixtures\Tia\CallForwardingFileWrapper;
 use Tests\Fixtures\Tia\LoggingFileWrapper;
 
 /**
@@ -400,6 +401,40 @@ describe('a wrapper already registered for file://', function (): void {
 
         expect($during)->toBe(ReadCapture::class)
             ->and(tiaReadCaptureWrapperClass())->toBe(LoggingFileWrapper::class);
+    });
+});
+
+describe('a __call wrapper already registered for file://', function (): void {
+    beforeEach(function (): void {
+        CallForwardingFileWrapper::enable();
+    });
+
+    afterEach(function (): void {
+        CallForwardingFileWrapper::disable();
+    });
+
+    it('passes reads, includes and directory listings through it', function (): void {
+        $source = (string) realpath(dirname(__DIR__, 4).'/src/Plugins/Tia/ReadCapture.php');
+        $path = __DIR__.'/read-capture-'.bin2hex(random_bytes(8)).'.php';
+        file_put_contents($path, "<?php\n\nreturn 1;\n");
+
+        $results = [];
+
+        try {
+            $links = tiaReadCaptureLinks(function () use ($source, $path, &$results): void {
+                $results['read'] = file_get_contents($source) !== '';
+                $results['include'] = require $path;
+                $results['scandir'] = in_array(basename($path), (array) scandir(__DIR__), true);
+            });
+        } finally {
+            @unlink($path);
+        }
+
+        expect($results)->toBe([
+            'read' => true,
+            'include' => 1,
+            'scandir' => true,
+        ])->and($links)->toBe([$source]);
     });
 });
 

@@ -1326,6 +1326,7 @@
   ✓ init creates a suite when --init is not the first argument
   ✓ init creates a suite when --init is passed with a value
   ✓ a missing tests directory does not crash while resolving tia state
+  ✓ init writes the plain stubs when only a tool bundled in a PHAR installs Laravel
 
    PASS  Tests\Features\Issue
   ✓ it may be associated with an issue #1, #2
@@ -1938,6 +1939,17 @@
   ✓ buildListTestsCommand → it strips --processes N (space-separated) when building the list-tests command
   ✓ buildListTestsCommand → it strips --runner when building the list-tests command
   ✓ buildListTestsCommand → it strips a space-separated --runner and its value when building the list-tests command
+  ✓ buildListTestsCommand → it strips paratest-only options when building the list-tests command with dataset "--max-batch-size=N"
+  ✓ buildListTestsCommand → it strips paratest-only options when building the list-tests command with dataset "--max-batch-size N"
+  ✓ buildListTestsCommand → it strips paratest-only options when building the list-tests command with dataset "-m N"
+  ✓ buildListTestsCommand → it strips paratest-only options when building the list-tests command with dataset "-mN"
+  ✓ buildListTestsCommand → it strips paratest-only options when building the list-tests command with dataset "-m=N"
+  ✓ buildListTestsCommand → it strips paratest-only options when building the list-tests command with dataset "--processes N"
+  ✓ buildListTestsCommand → it strips paratest-only options when building the list-tests command with dataset "--max-processes=N"
+  ✓ buildListTestsCommand → it strips paratest-only options when building the list-tests command with dataset "--passthru-php"
+  ✓ buildListTestsCommand → it strips paratest-only options when building the list-tests command with dataset "--tmp-dir"
+  ✓ buildListTestsCommand → it strips paratest-only options when building the list-tests command with dataset "--functional"
+  ✓ buildListTestsCommand → it strips paratest-only options when building the list-tests command with dataset "--no-test-tokens"
   ✓ addOutput → it displays shard information after test execution
   ✓ addOutput → it uses singular form for single test file
   ✓ addOutput → it returns original exit code when shard is not set
@@ -2160,6 +2172,7 @@
   ✓ a wrapper already registered for file:// → it opens reads through it and still links them
   ✓ a wrapper already registered for file:// → it keeps the include flag for the files a test includes
   ✓ a wrapper already registered for file:// → it is registered again after the test
+  ✓ a __call wrapper already registered for file:// → it passes reads, includes and directory listings through it
   ✓ withoutReadCapture() → it does not link a file matching an excluded glob
   ✓ withoutReadCapture() → it still links a file outside the excluded globs
   ✓ withoutReadCapture() → it keeps the file wrapper registered while globs are excluded
@@ -2453,6 +2466,14 @@
    PASS  Tests\Unit\Support\HigherOrderMessage
   ✓ undefined method exceptions
 
+   PASS  Tests\Unit\Support\InstalledPackages
+  ✓ it finds a package that the project installs
+  ✓ it ignores a package that only a tool bundled in a PHAR installs
+  ✓ it leaves out a development requirement when asked
+  ✓ it reads an installed set that has no install path
+  ✓ it reads the packages that Composer loaded
+  ✓ it is the only class of src that reads Composer packages
+
    PASS  Tests\Unit\Support\Reflection
   ✓ it gets file name from closure
   ✓ it gets property values
@@ -2649,6 +2670,9 @@
   ✓ parallel counts a shared issue only once across recycled workers with ('notice', 'shares notice', 'notice')
   ✓ parallel combines stop-on counts from different workers and cleans up their files
 
+   PASS  Tests\Visual\ParallelWorkerAutoload
+  ✓ loads the autoloader of the parent process in a parallel worker
+
    PASS  Tests\Visual\Shard
   ✓ an empty shard runs no tests with dataset "sequential"
   ✓ an empty shard runs no tests with dataset "parallel"
@@ -2693,4 +2717,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 39 skipped, 1980 passed (4476 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 39 skipped, 2000 passed (4505 assertions)

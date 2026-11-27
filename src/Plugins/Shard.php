@@ -32,6 +32,26 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
     private const string CLASS_END = "\0";
 
     /**
+     * @var array<string, bool>
+     */
+    private const array PARATEST_ONLY_OPTIONS = [
+        '--processes' => true,
+        '--runner' => true,
+        '--max-batch-size' => true,
+        '-m' => true,
+        '--max-processes' => true,
+        '--passthru-php' => true,
+        '--tmp-dir' => true,
+        '--functional' => false,
+        '--no-test-tokens' => false,
+    ];
+
+    /**
+     * @var list<string>
+     */
+    private const array PARATEST_ONLY_SHORT_OPTIONS_WITH_VALUE = ['-m'];
+
+    /**
      * @var array{
      *     index: int,
      *     total: int,
@@ -270,22 +290,35 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
                 }
             }
 
-            if (in_array($argument, ['--runner', '--processes'], strict: true)) {
-                $skipNext = true;
+            if (in_array($argument, ['--parallel', '-p'], strict: true)) {
+                continue;
+            }
+
+            if ($this->isAttachedParatestShortOption($argument)) {
+                continue;
+            }
+
+            [$option] = explode('=', $argument, 2);
+
+            if (! array_key_exists($option, self::PARATEST_ONLY_OPTIONS)) {
+                $filtered[] = $argument;
 
                 continue;
             }
 
-            if (in_array($argument, ['--parallel', '-p'], strict: true)
-                || str_starts_with($argument, '--processes')
-                || str_starts_with($argument, '--runner=')) {
-                continue;
-            }
-
-            $filtered[] = $argument;
+            $skipNext = self::PARATEST_ONLY_OPTIONS[$option] && ! str_contains($argument, '=');
         }
 
         return $filtered;
+    }
+
+    private function isAttachedParatestShortOption(string $argument): bool
+    {
+        if (strlen($argument) <= 2 || str_starts_with($argument, '--')) {
+            return false;
+        }
+
+        return in_array(substr($argument, 0, 2), self::PARATEST_ONLY_SHORT_OPTIONS_WITH_VALUE, strict: true);
     }
 
     /**

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pest\Plugins\Parallel\Handlers;
 
 use Closure;
-use Composer\InstalledVersions;
 use Illuminate\Testing\ParallelRunner;
 use Orchestra\Testbench\TestCase;
 use ParaTest\Options;
@@ -13,6 +12,7 @@ use ParaTest\RunnerInterface;
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Plugins\Concerns\HandleArguments;
 use Pest\Plugins\Parallel\Paratest\WrapperRunner;
+use Pest\Support\InstalledPackages;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -43,7 +43,7 @@ final class Laravel implements HandlesArguments
      */
     private function whenUsingLaravel(array $arguments, Closure $closure): array
     {
-        $isLaravelApplication = InstalledVersions::isInstalled('laravel/framework', false);
+        $isLaravelApplication = InstalledPackages::has('laravel/framework', false);
         $isLaravelPackage = class_exists(TestCase::class);
 
         if ($isLaravelApplication && ! $isLaravelPackage) {
