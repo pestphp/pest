@@ -565,6 +565,37 @@ describe('buildListTestsCommand', function (): void {
             '--list-tests',
         ]);
     });
+
+    it('strips paratest-only options when building the list-tests command', function (array $arguments): void {
+        $output = new BufferedOutput;
+        $shard = new Shard($output);
+
+        $reflection = new ReflectionClass($shard);
+        $method = $reflection->getMethod('buildListTestsCommand');
+
+        $command = $method->invoke($shard, ['vendor/bin/pest', '--parallel', ...$arguments, '--stop-on-failure', '--update-shards'], 'tests');
+
+        expect($command)->toBe([
+            PHP_BINARY,
+            'vendor/bin/pest',
+            '--stop-on-failure',
+            '--update-shards',
+            '--test-directory=tests',
+            '--list-tests',
+        ]);
+    })->with([
+        '--max-batch-size=N' => [['--max-batch-size=100']],
+        '--max-batch-size N' => [['--max-batch-size', '100']],
+        '-m N' => [['-m', '100']],
+        '-mN' => [['-m100']],
+        '-m=N' => [['-m=100']],
+        '--processes N' => [['--processes', '8']],
+        '--max-processes=N' => [['--max-processes=8']],
+        '--passthru-php' => [['--passthru-php=-d memory_limit=1G']],
+        '--tmp-dir' => [['--tmp-dir', '/tmp/paratest']],
+        '--functional' => [['--functional']],
+        '--no-test-tokens' => [['--no-test-tokens']],
+    ]);
 });
 
 describe('addOutput', function (): void {

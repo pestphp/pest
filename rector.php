@@ -7,9 +7,7 @@ use Pest\Rector\Set\PestSetList;
 use Rector\CodeQuality\Rector\Isset_\IssetOnPropertyObjectToPropertyExistsRector;
 use Rector\CodingStyle\Rector\ArrowFunction\ArrowFunctionDelegatingCallToFirstClassCallableRector;
 use Rector\Config\RectorConfig;
-use Rector\DeadCode\Rector\ClassMethod\RemoveDuplicatedReturnSelfDocblockRector;
 use Rector\DeadCode\Rector\ClassMethod\RemoveEmptyClassMethodRector;
-use Rector\DeadCode\Rector\ClassMethod\RemoveParentDelegatingConstructorRector;
 use Rector\DeadCode\Rector\ClassMethod\RemoveReturnTagIncompatibleWithNativeTypeRector;
 use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedConstructorParamRector;
 use Rector\DeadCode\Rector\ClassMethod\RemoveUselessUnionReturnDocblockRector;
@@ -33,8 +31,6 @@ return RectorConfig::configure()
         ReturnNeverTypeRector::class,
         ArrowFunctionDelegatingCallToFirstClassCallableRector::class,
         NarrowObjectReturnTypeRector::class,
-        RemoveParentDelegatingConstructorRector::class,
-        RemoveDuplicatedReturnSelfDocblockRector::class,
         RemoveUselessUnionReturnDocblockRector::class,
         RemoveReturnTagIncompatibleWithNativeTypeRector::class => [
             __DIR__.'/src/Expectations/HigherOrderExpectation.php',
