@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Plugins;
 
+use JsonException;
 use NunoMaduro\Collision\Adapters\Phpunit\Printers\DefaultPrinter;
 use Pest\Contracts\Plugins\AddsOutput;
 use Pest\Contracts\Plugins\HandlesArguments;
@@ -20,6 +21,7 @@ use Pest\Exceptions\TiaRequiresRemote;
 use Pest\Panic;
 use Pest\Plugins\Concerns\HandleArguments;
 use Pest\Plugins\Tia\BaselineSync;
+use Pest\Plugins\Tia\ByteSafeJson;
 use Pest\Plugins\Tia\ChangedFiles;
 use Pest\Plugins\Tia\CiBranch;
 use Pest\Plugins\Tia\ConfigurationFile;
@@ -35,6 +37,7 @@ use Pest\Plugins\Tia\SourceScope;
 use Pest\Plugins\Tia\Storage;
 use Pest\Plugins\Tia\TableExtractor;
 use Pest\Plugins\Tia\WatchPatterns;
+use Pest\Support\Arr;
 use Pest\Support\Ci;
 use Pest\Support\Container;
 use Pest\Support\Git;
@@ -238,6 +241,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     private ?string $freshGraphReason = null;
 
+    private ?string $graphEncodeError = null;
+
     public function __construct(
         private readonly OutputInterface $output,
         private readonly Recorder $recorder,
@@ -326,13 +331,24 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     private function saveGraph(Graph $graph): bool
     {
-        $json = $graph->encode();
+        try {
+            $json = $graph->encode();
+        } catch (JsonException $exception) {
+            $this->graphEncodeError = $exception->getMessage();
 
-        if ($json === null) {
             return false;
         }
 
+        $this->graphEncodeError = null;
+
         return $this->state->write(self::KEY_GRAPH, $json);
+    }
+
+    private function renderGraphWriteFailure(): void
+    {
+        $this->renderBadge('ERROR', $this->graphEncodeError === null
+            ? 'Could not write the dependency graph.'
+            : sprintf('Could not write the dependency graph: %s.', $this->graphEncodeError));
     }
 
     /**
@@ -696,7 +712,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $this->seedResultsInto($graph);
 
         if (! $this->saveGraph($graph)) {
-            $this->renderBadge('ERROR', 'Could not write the dependency graph.');
+            $this->renderGraphWriteFailure();
             $recorder->reset();
 
             return;
@@ -818,7 +834,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $graph->replaceJsFileToComponents(JsModuleGraph::build($projectRoot));
 
         if (! $this->saveGraph($graph)) {
-            $this->renderBadge('ERROR', 'Could not write the dependency graph.');
+            $this->renderGraphWriteFailure();
 
             return $exitCode;
         }
@@ -1200,7 +1216,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return;
         }
 
-        $decoded = json_decode($raw, true);
+        $decoded = ByteSafeJson::decode($raw);
 
         if (! is_array($decoded)) {
             return;
@@ -1619,9 +1635,9 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
      */
     private function persistAffectedSet(array $affected): bool
     {
-        $json = json_encode(array_values($affected), JSON_UNESCAPED_SLASHES);
-
-        if ($json === false) {
+        try {
+            $json = ByteSafeJson::encode(array_values($affected));
+        } catch (JsonException) {
             return false;
         }
 
@@ -1745,13 +1761,13 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
      */
     private function flushWorkerPartial(array $perTestFiles, array $perTestTables, array $perTestInertiaComponents): void
     {
-        $json = json_encode([
-            'files' => $perTestFiles,
-            'tables' => $perTestTables,
-            'inertia' => $perTestInertiaComponents,
-        ], JSON_UNESCAPED_SLASHES);
-
-        if ($json === false) {
+        try {
+            $json = ByteSafeJson::encode([
+                'files' => $perTestFiles,
+                'tables' => $perTestTables,
+                'inertia' => $perTestInertiaComponents,
+            ]);
+        } catch (JsonException) {
             return;
         }
 
@@ -1825,15 +1841,15 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             $results[$testId] = $this->replayedAsRecorded($testId, $result);
         }
 
-        $json = json_encode([
-            'results' => $results,
-            'replayed' => $this->replayedCount,
-            'affected' => $this->affectedCount,
-            'executed' => $this->executedCount,
-            'truncated' => $this->stoppedEarly() || $collector->hasUnfinishedTest(),
-        ], JSON_UNESCAPED_SLASHES);
-
-        if ($json === false) {
+        try {
+            $json = ByteSafeJson::encode([
+                'results' => $results,
+                'replayed' => $this->replayedCount,
+                'affected' => $this->affectedCount,
+                'executed' => $this->executedCount,
+                'truncated' => $this->stoppedEarly() || $collector->hasUnfinishedTest(),
+            ]);
+        } catch (JsonException) {
             return;
         }
 
@@ -1861,7 +1877,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
                 continue;
             }
 
-            $decoded = json_decode($raw, true);
+            $decoded = ByteSafeJson::decode($raw);
 
             if (! is_array($decoded)) {
                 continue;
@@ -1961,7 +1977,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         return [
             array_map(array_keys(...), $merged['files']),
             array_map(static fn (array $tables): array => array_map(strval(...), array_keys($tables)), $merged['tables']),
-            array_map(array_keys(...), $merged['inertia']),
+            array_map(Arr::stringKeys(...), $merged['inertia']),
         ];
     }
 
@@ -1976,7 +1992,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             return null;
         }
 
-        $data = json_decode($raw, true);
+        $data = ByteSafeJson::decode($raw);
 
         if (! is_array($data)) {
             return null;
@@ -2385,7 +2401,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         $this->fallbackBranchResolved = $resolved !== null;
         $this->fallbackBranch = $resolved ?? self::DEFAULT_BRANCH;
 
-        Parallel::setGlobal(self::FALLBACK_BRANCH_GLOBAL, $this->fallbackBranch);
+        Parallel::setGlobal(self::FALLBACK_BRANCH_GLOBAL, ByteSafeJson::encode($this->fallbackBranch));
 
         $this->branch = $changedFiles->currentBranch()
             ?? CiBranch::detectCurrent()
@@ -2403,9 +2419,10 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     private function resolveFallbackBranch(ChangedFiles $changedFiles): ?string
     {
         $inherited = Parallel::getGlobal(self::FALLBACK_BRANCH_GLOBAL);
+        $inheritedBranch = is_string($inherited) ? ByteSafeJson::decode($inherited) : null;
 
-        if (is_string($inherited) && $inherited !== '') {
-            return $inherited;
+        if (is_string($inheritedBranch) && $inheritedBranch !== '') {
+            return $inheritedBranch;
         }
 
         return $this->watchPatterns->defaultBranch()

@@ -101,7 +101,7 @@ final readonly class Git
      */
     public function result(array $arguments, ?string $input = null): array
     {
-        $process = new Process(['git', ...$arguments], $this->directory, ['GIT_LITERAL_PATHSPECS' => '0']);
+        $process = new Process(['git', ...$arguments], $this->directory, ['GIT_LITERAL_PATHSPECS' => '0', 'LC_ALL' => 'C', 'LANGUAGE' => '']);
         $process->setTimeout($this->timeout);
 
         if ($input !== null) {

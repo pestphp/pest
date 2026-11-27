@@ -7,6 +7,7 @@ use Pest\Plugins\Tia\ExternalSources;
 use Pest\Plugins\Tia\Fingerprint;
 use Symfony\Component\Process\Process;
 use Tests\Fixtures\Tia\GitRepo;
+use Tests\Fixtures\Tia\Project;
 
 /**
  * @return array<int, string>
@@ -52,6 +53,8 @@ afterEach(function (): void {
     foreach (tiaMonorepoRoots() as $root) {
         new Process(['rm', '-rf', $root])->run();
     }
+
+    Project::destroyAll();
 });
 
 it('resolves the project prefix inside the repository', function (): void {
@@ -303,6 +306,16 @@ it('tells a working tree change outside the project from a committed one', funct
 })->skipOnWindows();
 
 it('keeps a changed file whose name is a number as a string', function (): void {
+    $project = Project::make();
+    $sha = $project->git()->sha();
+
+    file_put_contents($project->path('123'), "changed\n");
+    $project->git()->commit('add a file with a numeric name');
+
+    expect(new ChangedFiles($project->path())->since($sha))->toBe(['123']);
+})->skipOnWindows();
+
+it('keeps a changed file outside the project whose name is a number as a string', function (): void {
     $monorepo = tiaMonorepoRepository();
 
     file_put_contents($monorepo['root'].'/123', "outside\n");
@@ -414,3 +427,18 @@ it('reports no change for an external input it cannot read', function (): void {
         chmod($monorepo['root'].'/frontend/secret.php', 0644);
     }
 })->skipOnWindows()->skip(function_exists('posix_geteuid') && posix_geteuid() === 0, 'root reads every file.');
+
+it('keeps a snapshotted file whose name is a number as a string', function (): void {
+    $project = Project::make();
+
+    file_put_contents($project->path('123'), "changed\n");
+
+    expect(new ChangedFiles($project->path())->filterUnchangedSinceLastRun([], ['123' => 'stale']))->toBe(['123']);
+});
+
+it('keeps a branch whose name is a number as a string', function (): void {
+    $project = Project::make();
+    $project->git()->switchTo('123', new: true);
+
+    expect(new ChangedFiles($project->path())->branchNames())->toBe(['123', 'master']);
+});

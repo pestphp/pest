@@ -1326,6 +1326,7 @@
   ✓ init creates a suite when --init is not the first argument
   ✓ init creates a suite when --init is passed with a value
   ✓ a missing tests directory does not crash while resolving tia state
+  ✓ init writes the plain stubs when only a tool bundled in a PHAR installs Laravel
 
    PASS  Tests\Features\Issue
   ✓ it may be associated with an issue #1, #2
@@ -1938,6 +1939,17 @@
   ✓ buildListTestsCommand → it strips --processes N (space-separated) when building the list-tests command
   ✓ buildListTestsCommand → it strips --runner when building the list-tests command
   ✓ buildListTestsCommand → it strips a space-separated --runner and its value when building the list-tests command
+  ✓ buildListTestsCommand → it strips paratest-only options when building the list-tests command with dataset "--max-batch-size=N"
+  ✓ buildListTestsCommand → it strips paratest-only options when building the list-tests command with dataset "--max-batch-size N"
+  ✓ buildListTestsCommand → it strips paratest-only options when building the list-tests command with dataset "-m N"
+  ✓ buildListTestsCommand → it strips paratest-only options when building the list-tests command with dataset "-mN"
+  ✓ buildListTestsCommand → it strips paratest-only options when building the list-tests command with dataset "-m=N"
+  ✓ buildListTestsCommand → it strips paratest-only options when building the list-tests command with dataset "--processes N"
+  ✓ buildListTestsCommand → it strips paratest-only options when building the list-tests command with dataset "--max-processes=N"
+  ✓ buildListTestsCommand → it strips paratest-only options when building the list-tests command with dataset "--passthru-php"
+  ✓ buildListTestsCommand → it strips paratest-only options when building the list-tests command with dataset "--tmp-dir"
+  ✓ buildListTestsCommand → it strips paratest-only options when building the list-tests command with dataset "--functional"
+  ✓ buildListTestsCommand → it strips paratest-only options when building the list-tests command with dataset "--no-test-tokens"
   ✓ addOutput → it displays shard information after test execution
   ✓ addOutput → it uses singular form for single test file
   ✓ addOutput → it returns original exit code when shard is not set
@@ -1963,6 +1975,15 @@
   ✓ units → it collects every test class the given units bundle
   ✓ units → it writes bundled units, and reads back both shapes
 
+   PASS  Tests\Unit\Plugins\Tia\ByteSafeJson
+  ✓ it round-trips keys and values that are not valid UTF-8
+  ✓ it keeps valid UTF-8 as plain JSON
+  ✓ it does not confuse a real string with an escaped one
+  ✓ it leaves a malformed escape untouched
+  ✓ it returns null for invalid JSON
+  ✓ it throws with the reason when a value cannot be encoded
+  ✓ it carries a string that is not valid UTF-8 through a parallel global
+
    PASS  Tests\Unit\Plugins\Tia\ChangedFiles
   ✓ it resolves the project prefix inside the repository
   ✓ it keeps a space that begins the name of the project directory
@@ -1983,12 +2004,15 @@
   ✓ it reads committed paths from the repository root even when git is told to be relative
   ✓ it tells a working tree change outside the project from a committed one
   ✓ it keeps a changed file whose name is a number as a string
+  ✓ it keeps a changed file outside the project whose name is a number as a string
   ✓ it matches no external root for a changed file whose name is a number
   ✓ it hashes an external input without reading it into memory
   ✓ it sees a whitespace change inside an external input
   ✓ it reports a changed file whose name looks like a pathspec
   ✓ it reports an external input that the listing no longer names
   ✓ it reports no change for an external input it cannot read
+  ✓ it keeps a snapshotted file whose name is a number as a string
+  ✓ it keeps a branch whose name is a number as a string
 
    PASS  Tests\Unit\Plugins\Tia\ConfigurationFile
   ✓ it fingerprints the path and the content of the configuration file
@@ -2186,6 +2210,10 @@
   ✓ branch baseline over the fallback → it reads results written after an earlier read
   ✓ pruneMissingBranches() → it keeps a branch whose name is a number
   ✓ decode() → it keeps a file of the last run tree whose name is a number
+  ✓ encode() and decode() → it round-trips paths that are not valid UTF-8
+  ✓ encode() and decode() → it lists a branch whose name is not valid UTF-8
+  ✓ legacy schema → it reads a graph of the previous schema without unescaping its strings
+  ✓ legacy schema → it rebuilds a graph of an unknown schema but still lists its branches
 
    PASS  Tests\Unit\Plugins\Tia\IsEnabledForRun
   ✓ does not throw when an integer --random-order-seed is passed as a separate argv element
@@ -2213,11 +2241,25 @@
   ✓ it detects an added or removed non-platform dependency
   ✓ it is independent of package ordering
 
+   PASS  Tests\Unit\Plugins\Tia\NumericInertiaPages
+  ✓ it selects the tests of a changed Inertia page whose name is a number
+  ✓ it keeps an Inertia page whose name is a number after the graph is decoded
+  ✓ it records an Inertia page whose name is a number as a string
+  ✓ it selects the tests of a shared module of an Inertia page whose name is a number
+
+   PASS  Tests\Unit\Plugins\Tia\NumericSourceFileNames
+  ✓ it selects the tests of a changed source file whose name is a number
+  ✓ it selects the tests of a numeric source file after the graph is decoded
+
    PASS  Tests\Unit\Plugins\Tia\NumericTableDependencies
   ✓ it exports numeric table dependencies from the recorder as strings
   ✓ it persists numeric tables as JSON strings and selects only their migration readers after reload
   ✓ it preserves numeric worker tables through payload cleaning union and graph reload
   ✓ it preserves observed and migration added numeric tables when augmenting database tests
+
+   PASS  Tests\Unit\Plugins\Tia\NumericWatchPatterns
+  ✓ it matches a watch pattern whose key is a number
+  ✓ it selects the tests under a watch target whose name is a number
 
    PASS  Tests\Unit\Plugins\Tia\ReadCapture
   ✓ reads → it links a project file the test reads with dataset "file_get_contents"
@@ -2234,6 +2276,7 @@
   ✓ the file wrapper → it passes filesystem operations through while a test records
   ✓ the file wrapper → it writes with LOCK_EX while a test records
   ✓ the file wrapper → it reports a missing path to the error handler as plain PHP does while a test records
+  ✓ the file wrapper → it reports why an include failed as plain PHP does while a test records
   ✓ the file wrapper → it keeps no memory for each filesystem call while a test records
   ✓ the file wrapper → it keeps no memory for each test it records
   ✓ the file wrapper → it is restored quietly when the test already restored it
@@ -2243,6 +2286,7 @@
   ✓ a wrapper already registered for file:// → it opens reads through it and still links them
   ✓ a wrapper already registered for file:// → it keeps the include flag for the files a test includes
   ✓ a wrapper already registered for file:// → it is registered again after the test
+  ✓ a __call wrapper already registered for file:// → it passes reads, includes and directory listings through it
   ✓ withoutReadCapture() → it does not link a file matching an excluded glob
   ✓ withoutReadCapture() → it still links a file outside the excluded globs
   ✓ withoutReadCapture() → it keeps the file wrapper registered while globs are excluded
@@ -2541,6 +2585,14 @@
    PASS  Tests\Unit\Support\HigherOrderMessage
   ✓ undefined method exceptions
 
+   PASS  Tests\Unit\Support\InstalledPackages
+  ✓ it finds a package that the project installs
+  ✓ it ignores a package that only a tool bundled in a PHAR installs
+  ✓ it leaves out a development requirement when asked
+  ✓ it reads an installed set that has no install path
+  ✓ it reads the packages that Composer loaded
+  ✓ it is the only class of src that reads Composer packages
+
    PASS  Tests\Unit\Support\Reflection
   ✓ it gets file name from closure
   ✓ it gets property values
@@ -2655,6 +2707,9 @@
   ✓ a parallel test can extend another test with same name
   ✓ parallel reports invalid datasets as failures
   ✓ parallel lets extensions register event subscribers
+  ✓ sets Laravel parallel flags with dataset "without database options"
+  ✓ sets Laravel parallel flags with dataset "recreate databases"
+  ✓ sets Laravel parallel flags with dataset "drop databases"
   ✓ parallel can have multiple exclude-groups
   ✓ parallel can have multiple groups
   ✓ parallel accepts the options that the workers ignore with ('--no-results')
@@ -2737,6 +2792,9 @@
   ✓ parallel counts a shared issue only once across recycled workers with ('notice', 'shares notice', 'notice')
   ✓ parallel combines stop-on counts from different workers and cleans up their files
 
+   PASS  Tests\Visual\ParallelWorkerAutoload
+  ✓ loads the autoloader of the parent process in a parallel worker
+
    PASS  Tests\Visual\Shard
   ✓ an empty shard runs no tests with dataset "sequential"
   ✓ an empty shard runs no tests with dataset "parallel"
@@ -2781,4 +2839,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 44 skipped, 2061 passed (4581 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 44 skipped, 2107 passed (4644 assertions)
