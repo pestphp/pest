@@ -105,13 +105,9 @@ abstract readonly class BaseRemote // @pest-arch-ignore-line
             return $configured;
         }
 
-        $process = new Process(['git', 'symbolic-ref', 'refs/remotes/origin/HEAD']);
-        $process->setTimeout(5.0);
-        $process->run();
+        $ref = new Git()->output(['symbolic-ref', 'refs/remotes/origin/HEAD']);
 
-        if ($process->isSuccessful()) {
-            $ref = trim($process->getOutput());
-
+        if ($ref !== null) {
             $branch = str_replace('refs/remotes/origin/', '', $ref);
 
             if ($branch !== '') {

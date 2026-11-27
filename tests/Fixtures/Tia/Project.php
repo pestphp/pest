@@ -6,6 +6,7 @@ namespace Tests\Fixtures\Tia;
 
 use FilesystemIterator;
 use Pest\Plugins\Tia;
+use Pest\Plugins\Tia\ByteSafeJson;
 use Pest\Plugins\Tia\ChangedFiles;
 use Pest\Plugins\Tia\ConfigurationFile;
 use Pest\Plugins\Tia\FileState;
@@ -248,13 +249,7 @@ final class Project
             }
         }
 
-        $json = $graph->encode();
-
-        if ($json === null) {
-            throw new RuntimeException('Unable to encode the seeded graph.');
-        }
-
-        if (! $this->state()->write(Tia::KEY_GRAPH, $json)) {
+        if (! $this->state()->write(Tia::KEY_GRAPH, $graph->encode())) {
             throw new RuntimeException('Unable to persist the seeded graph.');
         }
 
@@ -365,7 +360,7 @@ final class Project
             throw new RuntimeException('There is no graph to mutate.');
         }
 
-        $this->state()->write(Tia::KEY_GRAPH, (string) json_encode($callback($graph), JSON_UNESCAPED_SLASHES));
+        $this->state()->write(Tia::KEY_GRAPH, ByteSafeJson::encode($callback($graph)));
 
         $this->snapshot();
     }
@@ -381,7 +376,7 @@ final class Project
             return null;
         }
 
-        $graph = json_decode($json, true);
+        $graph = ByteSafeJson::decode($json);
 
         return is_array($graph) ? $graph : null;
     }
@@ -423,29 +418,12 @@ final class Project
 
     public function scaffoldVendor(string $directory): void
     {
-        $pestRoot = dirname(__DIR__, 3);
-        $pest = $directory.'/vendor/pestphp/pest';
+        $this->scaffoldPest($directory.'/vendor/pestphp/pest', $directory.'/vendor', '/pestphp/pest/src');
+    }
 
-        foreach (['src', 'overrides', 'resources', 'stubs'] as $tree) {
-            self::mirror($pestRoot.'/'.$tree, $pest.'/'.$tree);
-        }
-
-        foreach (['pest', 'worker.php'] as $binary) {
-            self::mirror($pestRoot.'/bin/'.$binary, $pest.'/bin/'.$binary);
-        }
-
-        self::mirror($pestRoot.'/composer.json', $pest.'/composer.json');
-
-        file_put_contents($directory.'/vendor/autoload.php', sprintf(
-            "<?php\n\n\$loader = require %s;\n\$loader->addPsr4('Pest\\\\', __DIR__.'/pestphp/pest/src', true);\n\nreturn \$loader;\n",
-            var_export($pestRoot.'/vendor/autoload.php', true),
-        ));
-
-        if (! is_dir($directory.'/vendor/bin') && ! @mkdir($directory.'/vendor/bin', 0755, true)) {
-            throw new RuntimeException(sprintf('Unable to create [%s].', $directory.'/vendor/bin'));
-        }
-
-        self::mirror($pestRoot.'/vendor/pest-plugins.json', $directory.'/vendor/pest-plugins.json');
+    public function scaffoldCheckout(string $directory): void
+    {
+        $this->scaffoldPest($directory, $directory.'/vendor', '/../src');
     }
 
     public function destroy(): void
@@ -510,6 +488,33 @@ final class Project
         @mkdir($project->home(), 0755, true);
 
         return $project;
+    }
+
+    private function scaffoldPest(string $pest, string $vendor, string $sourceFromVendor): void
+    {
+        $pestRoot = dirname(__DIR__, 3);
+
+        foreach (['src', 'overrides', 'resources', 'stubs'] as $tree) {
+            self::mirror($pestRoot.'/'.$tree, $pest.'/'.$tree);
+        }
+
+        foreach (['pest', 'worker.php'] as $binary) {
+            self::mirror($pestRoot.'/bin/'.$binary, $pest.'/bin/'.$binary);
+        }
+
+        self::mirror($pestRoot.'/composer.json', $pest.'/composer.json');
+
+        if (! is_dir($vendor.'/bin') && ! @mkdir($vendor.'/bin', 0755, true)) {
+            throw new RuntimeException(sprintf('Unable to create [%s].', $vendor.'/bin'));
+        }
+
+        file_put_contents($vendor.'/autoload.php', sprintf(
+            "<?php\n\n\$loader = require %s;\n\$loader->addPsr4('Pest\\\\', __DIR__.%s, true);\n\nreturn \$loader;\n",
+            var_export($pestRoot.'/vendor/autoload.php', true),
+            var_export($sourceFromVendor, true),
+        ));
+
+        self::mirror($pestRoot.'/vendor/pest-plugins.json', $vendor.'/pest-plugins.json');
     }
 
     private static function mirror(string $from, string $to): void
