@@ -2589,6 +2589,9 @@
   ✓ a parallel test can extend another test with same name
   ✓ parallel reports invalid datasets as failures
   ✓ parallel lets extensions register event subscribers
+  ✓ sets Laravel parallel flags with dataset "without database options"
+  ✓ sets Laravel parallel flags with dataset "recreate databases"
+  ✓ sets Laravel parallel flags with dataset "drop databases"
   ✓ parallel can have multiple exclude-groups
   ✓ parallel can have multiple groups
   ✓ parallel accepts the options that the workers ignore with ('--no-results')
@@ -2718,4 +2721,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 39 skipped, 2001 passed (4506 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 39 skipped, 2004 passed (4509 assertions)
