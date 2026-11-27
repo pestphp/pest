@@ -179,7 +179,7 @@ test('a graph from a schema this build does not know is rebuilt, not read', func
     $project->seed('master');
 
     $project->mutateGraph(function (array $graph): array {
-        $graph['schema'] = 2;
+        $graph['schema'] = 99;
 
         return $graph;
     });

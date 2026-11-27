@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Plugins\Tia;
 
+use JsonException;
 use Pest\Factories\TestCaseFactory;
 use Pest\Factories\TestCaseMethodFactory;
 use Pest\Support\Container;
@@ -19,6 +20,10 @@ use PHPUnit\TextUI\Configuration\Registry;
 final class Graph
 {
     public const string WORKSPACE_BRANCH_PREFIX = '@workspace:';
+
+    private const int LEGACY_SCHEMA = 1;
+
+    private const int SCHEMA = 2;
 
     /**
      * @var array<string, string>
@@ -1698,7 +1703,7 @@ final class Graph
      */
     public static function branchesIn(string $json): array
     {
-        $data = json_decode($json, true);
+        $data = ByteSafeJson::decode($json);
 
         if (! is_array($data) || ! is_array($data['baselines'] ?? null)) {
             return [];
@@ -1715,11 +1720,35 @@ final class Graph
         return $branches;
     }
 
-    public static function decode(string $json, string $projectRoot): ?self
+    /**
+     * @return array<array-key, mixed>|null
+     */
+    private static function payload(string $json): ?array
     {
         $data = json_decode($json, true);
 
-        if (! is_array($data) || ($data['schema'] ?? null) !== 1) {
+        if (! is_array($data)) {
+            return null;
+        }
+
+        if (($data['schema'] ?? null) === self::LEGACY_SCHEMA) {
+            return $data;
+        }
+
+        if (($data['schema'] ?? null) !== self::SCHEMA) {
+            return null;
+        }
+
+        $restored = ByteSafeJson::restore($data, $json);
+
+        return is_array($restored) ? $restored : null;
+    }
+
+    public static function decode(string $json, string $projectRoot): ?self
+    {
+        $data = self::payload($json);
+
+        if ($data === null) {
             return null;
         }
 
@@ -1922,10 +1951,13 @@ final class Graph
         return $out;
     }
 
-    public function encode(): ?string
+    /**
+     * @throws JsonException
+     */
+    public function encode(): string
     {
         $payload = [
-            'schema' => 1,
+            'schema' => self::SCHEMA,
             'fingerprint' => $this->fingerprint,
             'files' => $this->files,
             'edges' => $this->edges,
@@ -1935,9 +1967,7 @@ final class Graph
             'js_file_to_components' => $this->jsFileToComponents,
         ];
 
-        $json = json_encode($payload, JSON_UNESCAPED_SLASHES);
-
-        return $json === false ? null : $json;
+        return ByteSafeJson::encode($payload);
     }
 
     private function relative(string $path): ?string
