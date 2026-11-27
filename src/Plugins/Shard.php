@@ -294,7 +294,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
                 continue;
             }
 
-            if (self::isAttachedParatestShortOption($argument)) {
+            if ($this->isAttachedParatestShortOption($argument)) {
                 continue;
             }
 
@@ -312,7 +312,7 @@ final class Shard implements AddsOutput, HandlesArguments, Terminable
         return $filtered;
     }
 
-    private static function isAttachedParatestShortOption(string $argument): bool
+    private function isAttachedParatestShortOption(string $argument): bool
     {
         if (strlen($argument) <= 2 || str_starts_with($argument, '--')) {
             return false;

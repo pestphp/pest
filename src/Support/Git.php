@@ -79,7 +79,7 @@ final readonly class Git
      */
     public function result(array $arguments, ?string $input = null): array
     {
-        $process = new Process(['git', ...$arguments], $this->directory);
+        $process = new Process(['git', ...$arguments], $this->directory, ['LC_ALL' => 'C', 'LANGUAGE' => '']);
         $process->setTimeout($this->timeout);
 
         if ($input !== null) {
