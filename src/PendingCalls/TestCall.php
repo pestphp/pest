@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\PendingCalls;
 
+use AllowDynamicProperties;
 use Closure;
 use Pest\Concerns\Testable;
 use Pest\Exceptions\InvalidArgumentException;
@@ -34,7 +35,8 @@ use PHPUnit\Framework\TestCase;
  *
  * @mixin HigherOrderCallables|TestCase|Testable
  */
-final class TestCall // @phpstan-ignore-line
+#[AllowDynamicProperties] // @phpstan-ignore-line
+final class TestCall
 {
     use Describable;
 
