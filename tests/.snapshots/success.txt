@@ -2002,6 +2002,10 @@
   ✓ it keeps a tracked outside change and drops an untracked ignored one
   ✓ it keeps a tracked project change that the ignore rules match
   ✓ it reads committed paths from the repository root even when git is told to be relative
+  ✓ it keeps a changed file whose name is a number as a string
+  ✓ it keeps a changed file outside the project whose name is a number as a string
+  ✓ it keeps a snapshotted file whose name is a number as a string
+  ✓ it keeps a branch whose name is a number as a string
 
    PASS  Tests\Unit\Plugins\Tia\ConfigurationFile
   ✓ it fingerprints the path and the content of the configuration file
@@ -2111,6 +2115,8 @@
   ✓ Laravel boot files → it watches the config and bootstrap files in the Laravel defaults
   ✓ clearResults() → it drops the results of the fallback branch too
   ✓ branch baseline over the fallback → it reads results written after an earlier read
+  ✓ pruneMissingBranches() → it keeps a branch whose name is a number
+  ✓ decode() → it keeps a file of the last run tree whose name is a number
   ✓ encode() and decode() → it round-trips paths that are not valid UTF-8
   ✓ encode() and decode() → it lists a branch whose name is not valid UTF-8
   ✓ legacy schema → it reads a graph of the previous schema without unescaping its strings
@@ -2142,11 +2148,25 @@
   ✓ it detects an added or removed non-platform dependency
   ✓ it is independent of package ordering
 
+   PASS  Tests\Unit\Plugins\Tia\NumericInertiaPages
+  ✓ it selects the tests of a changed Inertia page whose name is a number
+  ✓ it keeps an Inertia page whose name is a number after the graph is decoded
+  ✓ it records an Inertia page whose name is a number as a string
+  ✓ it selects the tests of a shared module of an Inertia page whose name is a number
+
+   PASS  Tests\Unit\Plugins\Tia\NumericSourceFileNames
+  ✓ it selects the tests of a changed source file whose name is a number
+  ✓ it selects the tests of a numeric source file after the graph is decoded
+
    PASS  Tests\Unit\Plugins\Tia\NumericTableDependencies
   ✓ it exports numeric table dependencies from the recorder as strings
   ✓ it persists numeric tables as JSON strings and selects only their migration readers after reload
   ✓ it preserves numeric worker tables through payload cleaning union and graph reload
   ✓ it preserves observed and migration added numeric tables when augmenting database tests
+
+   PASS  Tests\Unit\Plugins\Tia\NumericWatchPatterns
+  ✓ it matches a watch pattern whose key is a number
+  ✓ it selects the tests under a watch target whose name is a number
 
    PASS  Tests\Unit\Plugins\Tia\ReadCapture
   ✓ reads → it links a project file the test reads with dataset "file_get_contents"
@@ -2416,6 +2436,7 @@
   ✓ last → it should return the last element for an array without changing the internal pointer
   ✓ last → it should return the last element for an associative array without changing the internal pointer
   ✓ last → it should return the last element for an mixed key array without changing the internal pointer
+  ✓ stringKeys → it returns every key as a string
 
    PASS  Tests\Unit\Support\Backtrace
   ✓ it gets file name from called file
@@ -2721,4 +2742,4 @@
   ✓ pass with dataset with ('my-datas-set-value')
   ✓ within describe → pass with dataset with ('my-datas-set-value')
 
-  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 39 skipped, 2004 passed (4509 assertions)
+  Tests:    2 deprecated, 4 warnings, 5 incomplete, 2 notices, 40 todos, 39 skipped, 2019 passed (4528 assertions)

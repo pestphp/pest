@@ -36,6 +36,7 @@ use Pest\Plugins\Tia\SourceScope;
 use Pest\Plugins\Tia\Storage;
 use Pest\Plugins\Tia\TableExtractor;
 use Pest\Plugins\Tia\WatchPatterns;
+use Pest\Support\Arr;
 use Pest\Support\Ci;
 use Pest\Support\Container;
 use Pest\Support\Git;
@@ -1765,7 +1766,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
         return [
             array_map(array_keys(...), $merged['files']),
             array_map(static fn (array $tables): array => array_map(strval(...), array_keys($tables)), $merged['tables']),
-            array_map(array_keys(...), $merged['inertia']),
+            array_map(Arr::stringKeys(...), $merged['inertia']),
         ];
     }
 

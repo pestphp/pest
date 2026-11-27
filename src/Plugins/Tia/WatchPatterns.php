@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Plugins\Tia;
 
 use Pest\Plugins\Tia\Contracts\WatchDefault;
+use Pest\Support\Arr;
 use Pest\TestSuite;
 
 /**
@@ -173,7 +174,7 @@ final class WatchPatterns
             }
         }
 
-        return array_keys($matched);
+        return Arr::stringKeys($matched);
     }
 
     /**
@@ -184,17 +185,17 @@ final class WatchPatterns
     {
         $matched = [];
 
-        foreach ($patterns as $key => $dirs) {
+        foreach (Arr::stringKeys($patterns) as $key) {
             if (! $this->keyMatches($key, $file)) {
                 continue;
             }
 
-            foreach ($dirs as $dir) {
+            foreach ($patterns[$key] as $dir) {
                 $matched[$dir] = true;
             }
         }
 
-        return array_keys($matched);
+        return Arr::stringKeys($matched);
     }
 
     private function usesDefaultsFor(string $file): bool

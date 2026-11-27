@@ -11,6 +11,15 @@ final class Arr
 {
     /**
      * @param  array<array-key, mixed>  $array
+     * @return list<string>
+     */
+    public static function stringKeys(array $array): array
+    {
+        return array_map(strval(...), array_keys($array));
+    }
+
+    /**
+     * @param  array<array-key, mixed>  $array
      */
     public static function has(array $array, string|int $key): bool
     {
