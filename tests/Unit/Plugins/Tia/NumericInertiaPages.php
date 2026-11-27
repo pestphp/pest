@@ -33,7 +33,7 @@ it('keeps an Inertia page whose name is a number after the graph is decoded', fu
         $root.'/tests/Feature/NumericPageTest.php' => ['123'],
     ]);
 
-    $decoded = Graph::decode((string) $graph->encode(), $root);
+    $decoded = Graph::decode($graph->encode(), $root);
 
     expect($decoded?->affected(['resources/js/Pages/123.vue']))->toBe(['tests/Feature/NumericPageTest.php']);
 });

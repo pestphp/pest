@@ -21,7 +21,7 @@ test('parallel', function () use ($run): void {
     $output = implode("\n", array_slice(explode("\n", (string) $output), -10));
     $profileOutput = $run('tests/Fixtures/Suites/SuccessOnly.php', '--profile');
 
-    $expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 31 skipped, 1842 passed (3933 assertions)';
+    $expected = '2 deprecated, 4 warnings, 5 incomplete, 3 notices, 40 todos, 31 skipped, 1888 passed (3998 assertions)';
 
     expect($output)
         ->toContain("Tests:    {$expected}")
@@ -58,6 +58,31 @@ test('parallel lets extensions register event subscribers', function (): void {
         ->not->toContain('failed')
         ->toContain('Parallel: 2 processes');
 })->skipOnWindows();
+
+test('sets Laravel parallel flags', function (array $options, array $databaseFlags): void {
+    $process = new Process(
+        [PHP_BINARY, '-d', 'auto_prepend_file=', 'tests/Fixtures/Suites/ParallelLaravelFlags.php', '--parallel', ...$options],
+        dirname(__DIR__, 2),
+        [
+            'LARAVEL_PARALLEL_TESTING' => false,
+            'LARAVEL_PARALLEL_TESTING_RECREATE_DATABASES' => false,
+            'LARAVEL_PARALLEL_TESTING_DROP_DATABASES' => false,
+        ],
+    );
+
+    $process->mustRun();
+
+    $expectedFlags = ['LARAVEL_PARALLEL_TESTING', ...$databaseFlags];
+
+    expect(json_decode($process->getOutput(), true, flags: JSON_THROW_ON_ERROR))->toBe([
+        'server' => $expectedFlags,
+        'env' => $expectedFlags,
+    ]);
+})->with([
+    'without database options' => [[], []],
+    'recreate databases' => [['--recreate-databases'], ['LARAVEL_PARALLEL_TESTING_RECREATE_DATABASES']],
+    'drop databases' => [['--drop-databases'], ['LARAVEL_PARALLEL_TESTING_DROP_DATABASES']],
+]);
 
 test('parallel can have multiple exclude-groups', function () use ($run): void {
     $singleExclude = $run('--exclude-group=integration');

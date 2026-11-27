@@ -26,7 +26,7 @@ it('selects the tests of a numeric source file after the graph is decoded', func
     $graph = new Graph(sys_get_temp_dir());
     $graph->link('tests/Feature/NumericTest.php', '123');
 
-    $decoded = Graph::decode((string) $graph->encode(), sys_get_temp_dir());
+    $decoded = Graph::decode($graph->encode(), sys_get_temp_dir());
 
     expect($decoded?->affected(['123']))->toBe(['tests/Feature/NumericTest.php']);
 });
