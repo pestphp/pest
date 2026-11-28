@@ -10,6 +10,52 @@ use Pest\Plugins\Tia\Storage;
 use Pest\Support\Str;
 use Symfony\Component\Process\Process;
 
+it('does not write a TIA graph on a plain run', function (): void {
+    $projectRoot = dirname(__DIR__, 2);
+    $home = sys_get_temp_dir().'/pest-tia-plain-'.bin2hex(random_bytes(8));
+
+    mkdir($home, 0755, true);
+
+    try {
+        $process = new Process(
+            ['php', 'bin/pest', '--configuration', 'tests/Fixtures/Suites/CoversNothing.xml'],
+            $projectRoot,
+            [
+                'COLLISION_PRINTER' => 'DefaultPrinter',
+                'COLLISION_IGNORE_DURATION' => 'true',
+                'PARATEST' => 0,
+                'PAO_DISABLE' => '1',
+                'HOME' => $home,
+            ],
+        );
+
+        $process->run();
+
+        $written = [];
+
+        if (is_dir($home)) {
+            foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($home, FilesystemIterator::SKIP_DOTS)) as $path) {
+                if ($path->getFilename() === Tia::KEY_GRAPH) {
+                    $written[] = $path->getPathname();
+                }
+            }
+        }
+
+        expect($written)->toBe([]);
+    } finally {
+        $paths = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($home, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST,
+        );
+
+        foreach ($paths as $path) {
+            $path->isDir() ? @rmdir($path->getPathname()) : @unlink($path->getPathname());
+        }
+
+        @rmdir($home);
+    }
+})->skipOnWindows();
+
 it('does not run user hooks when replaying cached skipped and incomplete results', function (): void {
     $projectRoot = dirname(__DIR__, 2);
     $home = sys_get_temp_dir().'/pest-tia-'.bin2hex(random_bytes(8));
