@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Pest\Plugins\Tia\ChangedFiles;
+use Pest\Plugins\Tia\ExternalSources;
 use Pest\Plugins\Tia\Fingerprint;
 use Symfony\Component\Process\Process;
 use Tests\Fixtures\Tia\GitRepo;
@@ -289,6 +290,21 @@ it('reads committed paths from the repository root even when git is told to be r
         ->and($changedFiles->outsideProject())->toBe(['frontend/widget.php']);
 })->skipOnWindows();
 
+it('tells a working tree change outside the project from a committed one', function (): void {
+    $monorepo = tiaMonorepoRepository();
+
+    file_put_contents($monorepo['root'].'/frontend/widget.php', "<?php\n\$widget = 2;\n");
+    $monorepo['repo']->commit('rework the widget');
+
+    file_put_contents($monorepo['root'].'/frontend/other.php', "<?php\n\$other = 1;\n");
+
+    $changedFiles = new ChangedFiles($monorepo['project']);
+    $changedFiles->since($monorepo['sha']);
+
+    expect($changedFiles->outsideProject())->toBe(['frontend/widget.php', 'frontend/other.php'])
+        ->and($changedFiles->outsideProjectDirty())->toBe(['frontend/other.php']);
+})->skipOnWindows();
+
 it('keeps a changed file whose name is a number as a string', function (): void {
     $project = Project::make();
     $sha = $project->git()->sha();
@@ -311,6 +327,106 @@ it('keeps a changed file outside the project whose name is a number as a string'
     expect($changedFiles->since($monorepo['sha']))->toBe(['123'])
         ->and($changedFiles->outsideProject())->toBe(['123']);
 })->skipOnWindows();
+
+it('matches no external root for a changed file whose name is a number', function (): void {
+    $monorepo = tiaMonorepoRepository();
+    $previous = (string) getcwd();
+
+    mkdir($monorepo['root'].'/packages/shared/src', 0755, true);
+    file_put_contents($monorepo['root'].'/packages/shared/src/Shared.php', "<?php\n\$shared = 1;\n");
+    file_put_contents($monorepo['project'].'/composer.json', (string) json_encode([
+        'autoload' => ['psr-4' => ['Shared\\' => '../packages/shared/src']],
+    ], JSON_PRETTY_PRINT));
+    $monorepo['repo']->commit('let the project load a sibling package');
+    $sha = $monorepo['repo']->sha();
+
+    file_put_contents($monorepo['root'].'/123', "changed\n");
+    $monorepo['repo']->commit('add a file with a numeric name');
+
+    chdir($monorepo['project']);
+    ExternalSources::flush();
+
+    try {
+        $changedFiles = new ChangedFiles($monorepo['project']);
+        $changedFiles->since($sha);
+
+        $matched = ExternalSources::matching($monorepo['project'], $changedFiles->outsideProject());
+    } finally {
+        chdir($previous);
+        ExternalSources::flush();
+    }
+
+    expect($matched)->toBeEmpty();
+})->skipOnWindows();
+
+it('hashes an external input without reading it into memory', function (): void {
+    $monorepo = tiaMonorepoRepository();
+
+    $handle = fopen($monorepo['root'].'/frontend/database.sqlite', 'wb');
+    ftruncate($handle, 64 * 1024 * 1024);
+    fclose($handle);
+
+    $changedFiles = new ChangedFiles($monorepo['project']);
+
+    memory_reset_peak_usage();
+    $before = memory_get_peak_usage();
+
+    $tree = $changedFiles->baselineTree($monorepo['sha'], ['frontend/database.sqlite']);
+
+    expect(memory_get_peak_usage() - $before)->toBeLessThan(8 * 1024 * 1024)
+        ->and($tree)->toHaveKey('../frontend/database.sqlite');
+})->skipOnWindows();
+
+it('sees a whitespace change inside an external input', function (): void {
+    $monorepo = tiaMonorepoRepository();
+
+    file_put_contents($monorepo['root'].'/frontend/data.js', "export default \"a b\";\n");
+
+    $changedFiles = new ChangedFiles($monorepo['project']);
+    $tree = $changedFiles->baselineTree($monorepo['sha'], ['frontend/data.js']);
+
+    file_put_contents($monorepo['root'].'/frontend/data.js', "export default \"a  b\";\n");
+
+    expect($changedFiles->changedSinceLastRun([], ['frontend/data.js'], $tree))->toBe([[], ['frontend/data.js']]);
+})->skipOnWindows();
+
+it('reports a changed file whose name looks like a pathspec', function (): void {
+    $monorepo = tiaMonorepoRepository();
+
+    file_put_contents($monorepo['project'].'/:(fixtures).php', "<?php\n");
+
+    expect(new ChangedFiles($monorepo['project'])->since($monorepo['sha']))->toContain(':(fixtures).php');
+})->skipOnWindows();
+
+it('reports an external input that the listing no longer names', function (): void {
+    $monorepo = tiaMonorepoRepository();
+
+    file_put_contents($monorepo['root'].'/frontend/generated.php', "<?php\n");
+
+    $changedFiles = new ChangedFiles($monorepo['project']);
+    $before = $changedFiles->externalInputHashes(['frontend/generated.php']);
+
+    expect($changedFiles->changedExternalInputs($before, $changedFiles->externalInputHashes([])))->toBe(['frontend/generated.php'])
+        ->and($changedFiles->changedExternalInputs($before, $changedFiles->externalInputHashes(['frontend/generated.php'])))->toBeEmpty();
+})->skipOnWindows();
+
+it('reports no change for an external input it cannot read', function (): void {
+    $monorepo = tiaMonorepoRepository();
+
+    file_put_contents($monorepo['root'].'/frontend/secret.php', "<?php\n");
+    chmod($monorepo['root'].'/frontend/secret.php', 0000);
+
+    try {
+        $changedFiles = new ChangedFiles($monorepo['project']);
+
+        expect($changedFiles->changedExternalInputs(
+            $changedFiles->externalInputHashes(['frontend/secret.php']),
+            $changedFiles->externalInputHashes(['frontend/secret.php']),
+        ))->toBeEmpty();
+    } finally {
+        chmod($monorepo['root'].'/frontend/secret.php', 0644);
+    }
+})->skipOnWindows()->skip(function_exists('posix_geteuid') && posix_geteuid() === 0, 'root reads every file.');
 
 it('keeps a snapshotted file whose name is a number as a string', function (): void {
     $project = Project::make();

@@ -74,12 +74,34 @@ final readonly class Git
     }
 
     /**
+     * @param  array<int, string>  $paths
+     * @return array{exitCode: int, ignored: array<int, string>, errorOutput: string}
+     */
+    public function checkIgnore(array $paths): array
+    {
+        $result = $this->result(
+            ['check-ignore', '-z', '--stdin'],
+            implode("\x00", array_map(static fn (string $path): string => './'.$path, $paths)),
+        );
+
+        $ignored = [];
+
+        foreach (explode("\x00", rtrim($result['output'], "\x00")) as $path) {
+            if ($path !== '') {
+                $ignored[] = str_starts_with($path, './') ? substr($path, 2) : $path;
+            }
+        }
+
+        return ['exitCode' => $result['exitCode'], 'ignored' => $ignored, 'errorOutput' => $result['errorOutput']];
+    }
+
+    /**
      * @param  array<int, string>  $arguments
      * @return array{exitCode: int, output: string, errorOutput: string}
      */
     public function result(array $arguments, ?string $input = null): array
     {
-        $process = new Process(['git', ...$arguments], $this->directory, ['LC_ALL' => 'C', 'LANGUAGE' => '']);
+        $process = new Process(['git', ...$arguments], $this->directory, ['GIT_LITERAL_PATHSPECS' => '0', 'LC_ALL' => 'C', 'LANGUAGE' => '']);
         $process->setTimeout($this->timeout);
 
         if ($input !== null) {

@@ -9,6 +9,7 @@ use Pest\Plugins\Tia;
 use Pest\Plugins\Tia\ByteSafeJson;
 use Pest\Plugins\Tia\ChangedFiles;
 use Pest\Plugins\Tia\ConfigurationFile;
+use Pest\Plugins\Tia\ExternalSources;
 use Pest\Plugins\Tia\FileState;
 use Pest\Plugins\Tia\Fingerprint;
 use Pest\Plugins\Tia\Graph;
@@ -161,14 +162,28 @@ final class Project
         return $this->pestWithEnvironment($directory, [], ...$arguments);
     }
 
+    public function pestFrom(string $directory, string $workingDirectory, string ...$arguments): PestResult
+    {
+        return $this->run($directory, $workingDirectory, [], array_values($arguments));
+    }
+
     /**
      * @param  array<string, string|false>  $environment
      */
     public function pestWithEnvironment(string $directory, array $environment, string ...$arguments): PestResult
     {
+        return $this->run($directory, $directory, $environment, array_values($arguments));
+    }
+
+    /**
+     * @param  array<string, string|false>  $environment
+     * @param  array<int, string>  $arguments
+     */
+    private function run(string $directory, string $workingDirectory, array $environment, array $arguments): PestResult
+    {
         $process = new Process(
             [PHP_BINARY, $directory.'/vendor/pestphp/pest/bin/pest', ...$arguments],
-            $directory,
+            $workingDirectory,
             [
                 ...GitRepo::ENV,
                 'COLLISION_PRINTER' => 'DefaultPrinter',
@@ -185,6 +200,7 @@ final class Project
                 'GITHUB_REF_NAME' => false,
                 'GITLAB_CI' => false,
                 'CIRCLECI' => false,
+                'COMPOSER' => false,
                 ...$environment,
             ],
         );
@@ -193,7 +209,7 @@ final class Project
         $process->run();
 
         return new PestResult(
-            array_values($arguments),
+            $arguments,
             $process->getOutput().$process->getErrorOutput(),
             (int) $process->getExitCode(),
         );
@@ -204,24 +220,50 @@ final class Project
      */
     public function seed(string $branch, bool $sentinel = true, array $failing = [], ?string $configuration = null): void
     {
-        $this->seedFor($this->path, $branch, $sentinel, $failing, $configuration);
+        $this->seedFor($this->path, $branch, $sentinel, $failing, $configuration === null ? [] : ['--configuration', $configuration]);
     }
 
     /**
      * @param  array<int, string>  $failing
+     * @param  array<int, string>  $arguments
      */
-    public function seedFor(string $root, string $branch, bool $sentinel = true, array $failing = [], ?string $configuration = null): void
+    public function seedFor(string $root, string $branch, bool $sentinel = true, array $failing = [], array $arguments = []): void
     {
         $this->graphRoot = $root;
+
+        ExternalSources::flush();
+
+        $previous = getcwd();
+
+        if ($previous !== false) {
+            chdir($root);
+        }
+
+        try {
+            $this->seedGraphFor($root, $branch, $sentinel, $failing, $arguments);
+        } finally {
+            if ($previous !== false) {
+                chdir($previous);
+            }
+        }
+    }
+
+    /**
+     * @param  array<int, string>  $failing
+     * @param  array<int, string>  $arguments
+     */
+    private function seedGraphFor(string $root, string $branch, bool $sentinel, array $failing, array $arguments): void
+    {
+        putenv('COMPOSER');
 
         $changedFiles = new ChangedFiles($root);
         $sha = new GitRepo($root)->sha();
 
         $graph = new Graph($root);
-        $graph->setFingerprint(Fingerprint::compute($root, $configuration === null ? null : ConfigurationFile::at($root.DIRECTORY_SEPARATOR.$configuration)));
+        $graph->setFingerprint(Fingerprint::compute($root, ConfigurationFile::fromArguments($arguments), $arguments));
         $graph->setRecordedAtSha($branch, $sha);
 
-        $graph->setLastRunTree($branch, $changedFiles->snapshotTree($changedFiles->since($sha) ?? []));
+        $graph->setLastRunTree($branch, $changedFiles->baselineTree($sha, ExternalSources::ignoredInputs($root, $arguments)));
 
         $graph->markKnownTestFiles(array_keys(self::EDGES));
 

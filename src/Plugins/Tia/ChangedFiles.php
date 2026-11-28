@@ -77,17 +77,17 @@ final class ChangedFiles
     /**
      * @return array<int, string>
      */
-    public function outsideProject(): array
+    public function outsideProjectDirty(): array
     {
-        return Arr::stringKeys($this->outsideProject);
+        return Arr::stringKeys($this->outsideProjectDirty);
     }
 
     /**
      * @return array<int, string>
      */
-    public function outsideProjectDirty(): array
+    public function outsideProject(): array
     {
-        return Arr::stringKeys($this->outsideProjectDirty);
+        return Arr::stringKeys($this->outsideProject);
     }
 
     /**
@@ -121,6 +121,100 @@ final class ChangedFiles
         return $remaining;
     }
 
+    /**
+     * @param  array<int, string>  $repositoryRelativeInputs
+     * @return array<string, string>
+     */
+    public function baselineTree(?string $sha, array $repositoryRelativeInputs): array
+    {
+        return $this->snapshotTree([...($this->since($sha) ?? []), ...$this->externalKeys($repositoryRelativeInputs)]);
+    }
+
+    /**
+     * @param  array<int, string>  $repositoryRelativeInputs
+     * @param  array<int, string>  $repositoryRelativeRepositories
+     * @param  array<int, string>  $repositoryRelativeUnlisted
+     * @return array<string, string>
+     */
+    public function externalInputHashes(array $repositoryRelativeInputs, array $repositoryRelativeRepositories = [], array $repositoryRelativeUnlisted = []): array
+    {
+        $hashes = $this->snapshotTree($this->externalKeys($repositoryRelativeInputs));
+
+        foreach ($this->externalKeys($repositoryRelativeRepositories) as $key) {
+            $hashes[$key] = 'repository';
+        }
+
+        foreach ($this->externalKeys($repositoryRelativeUnlisted) as $key) {
+            $hashes[$key] = 'unlisted';
+        }
+
+        return $hashes;
+    }
+
+    /**
+     * @param  array<string, string>  $before
+     * @param  array<string, string>  $after
+     * @return array<int, string>
+     */
+    public function changedExternalInputs(array $before, array $after): array
+    {
+        $parent = $this->parentPath();
+        $changed = [];
+
+        foreach (Arr::stringKeys([...$before, ...$after]) as $key) {
+            if (($before[$key] ?? null) !== ($after[$key] ?? null)) {
+                $changed[] = $parent !== '' && str_starts_with($key, $parent) ? substr($key, strlen($parent)) : $key;
+            }
+        }
+
+        sort($changed);
+
+        return $changed;
+    }
+
+    /**
+     * @param  array<int, string>  $files
+     * @param  array<int, string>  $repositoryRelativeInputs
+     * @param  array<string, string>  $lastRunTree
+     * @return array{0: array<int, string>, 1: array<int, string>}
+     */
+    public function changedSinceLastRun(array $files, array $repositoryRelativeInputs, array $lastRunTree): array
+    {
+        $parent = $this->parentPath();
+        $projectFiles = [];
+        $externalInputsChanged = [];
+
+        foreach ($this->filterUnchangedSinceLastRun([...$files, ...$this->externalKeys($repositoryRelativeInputs)], $lastRunTree) as $file) {
+            if ($parent !== '' && str_starts_with($file, $parent)) {
+                $externalInputsChanged[] = substr($file, strlen($parent));
+            } else {
+                $projectFiles[] = $file;
+            }
+        }
+
+        return [$projectFiles, $externalInputsChanged];
+    }
+
+    /**
+     * @param  array<int, string>  $repositoryRelativeInputs
+     * @return array<int, string>
+     */
+    private function externalKeys(array $repositoryRelativeInputs): array
+    {
+        $parent = $this->parentPath();
+
+        if ($parent === '') {
+            return [];
+        }
+
+        return array_map(static fn (string $input): string => $parent.$input, $repositoryRelativeInputs);
+    }
+
+    private function parentPath(): string
+    {
+        return str_repeat('../', substr_count($this->gitPrefix(), '/'));
+    }
+
     private function currentHash(string $relativePath): ?string
     {
         $absolute = $this->projectRoot.DIRECTORY_SEPARATOR.$relativePath;
@@ -129,9 +223,20 @@ final class ChangedFiles
             return null;
         }
 
-        $hash = ContentHash::of($absolute);
+        $hash = $this->hashOf($relativePath, $absolute);
 
         return $hash === false ? null : $hash;
+    }
+
+    private function hashOf(string $relativePath, string $absolute): string|false
+    {
+        $parent = $this->parentPath();
+
+        if ($parent !== '' && str_starts_with($relativePath, $parent)) {
+            return @hash_file('xxh128', $absolute);
+        }
+
+        return ContentHash::of($absolute);
     }
 
     /**
@@ -151,7 +256,7 @@ final class ChangedFiles
                 continue;
             }
 
-            $hash = ContentHash::of($absolute);
+            $hash = $this->hashOf($file, $absolute);
 
             if ($hash !== false) {
                 $out[$file] = $hash;
@@ -276,25 +381,14 @@ final class ChangedFiles
             return $candidates;
         }
 
-        $result = $git->result(
-            ['check-ignore', '-z', '--stdin'],
-            implode("\x00", array_keys($candidates)),
-        );
+        $result = $git->checkIgnore(Arr::stringKeys($candidates));
 
         if ($result['exitCode'] !== 0 && $result['exitCode'] !== 1) {
-            throw $this->gitFailure($result);
+            throw $this->gitFailure(['exitCode' => $result['exitCode'], 'output' => '', 'errorOutput' => $result['errorOutput']]);
         }
 
-        $output = $result['output'];
-
-        if ($output === '') {
-            return $candidates;
-        }
-
-        foreach (explode("\x00", rtrim($output, "\x00")) as $ignored) {
-            if ($ignored !== '') {
-                unset($candidates[$ignored]);
-            }
+        foreach ($result['ignored'] as $ignored) {
+            unset($candidates[$ignored]);
         }
 
         return $candidates;

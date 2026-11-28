@@ -4,11 +4,31 @@ declare(strict_types=1);
 
 use Pest\Plugins\Tia;
 use Pest\Support\Coverage;
+use Tests\Fixtures\Tia\GitRepo;
 use Tests\Fixtures\Tia\Project;
 
 afterEach(function (): void {
     Project::destroyAll();
 });
+
+/**
+ * @return array{0: Project, 1: string}
+ */
+function tiaMonorepoWithIgnoredInput(): array
+{
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('.gitignore', file_get_contents($project->path('.gitignore'))."packages/shared/generated.php\npackages/shared/generated.json\npackages/shared/vendor/\n.DS_Store\n");
+    $project->write('packages/shared/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->write('packages/shared/generated.php', "<?php\n\nreturn 1;\n");
+    $project->write('packages/shared/generated.json', "{\"version\": 1}\n");
+    $project->write('packages/shared/vendor/autoload.php', "<?php\n");
+    $project->write('packages/shared/.DS_Store', "finder\n");
+    $project->git()->commit('add a sibling package with a generated file');
+    $project->seedFor($nested, 'master', arguments: ['--include-path', '../packages/shared']);
+
+    return [$project, $nested];
+}
 
 /**
  * @return array{0: Project, 1: string}
@@ -353,4 +373,988 @@ test('it says when changes outside the project were ignored', function (): void 
 
     expect($result->exitCode)->toBe(0, $result->describe())
         ->and($result->output)->toContain('1 changed file outside this project was ignored');
+})->skipOnWindows();
+
+test('a change in a sibling package the project autoloads runs the full suite', function (array $arguments): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $manifest = json_decode((string) file_get_contents($nested.'/composer.json'), true);
+    $manifest['autoload']['psr-4']['Shared\\'] = '../packages/shared/src';
+    $project->write('nested/composer.json', (string) json_encode($manifest, JSON_PRETTY_PRINT));
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->git()->commit('let the project load a sibling package');
+    $project->seedFor($nested, 'master');
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 2;\n");
+    $project->git()->commit('rework the sibling package');
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia', ...$arguments);
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('this project loads from outside its root')
+        ->and($result->replayed())->toBe(0, $result->describe())
+        ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed');
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
+
+test('a non-php change in a sibling package the project does not load still replays', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('packages/shared/resources/shared.json', "{\"shared\": 2}\n");
+    $project->git()->commit('rework an unrelated sibling package');
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->not->toContain('this project loads from outside its root')
+        ->and($result->replayed())->toBe(Project::TOTAL_TESTS, $result->describe());
+})->skipOnWindows();
+
+test('a change in an autoload file outside the project runs the full suite', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $manifest = json_decode((string) file_get_contents($nested.'/composer.json'), true);
+    $manifest['autoload']['files'][] = '../packages/shared/bootstrap.php';
+    $project->write('nested/composer.json', (string) json_encode($manifest, JSON_PRETTY_PRINT));
+
+    $project->write('packages/shared/bootstrap.php', "<?php\n\n\$booted = 1;\n");
+    $project->git()->commit('let the project load a sibling bootstrap file');
+    $project->seedFor($nested, 'master');
+
+    $project->write('packages/shared/bootstrap.php', "<?php\n\n\$booted = 2;\n");
+    $project->git()->commit('rework the sibling bootstrap file');
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('this project loads from outside its root')
+        ->and($result->replayed())->toBe(0, $result->describe());
+})->skipOnWindows();
+
+test('a change in the phpunit bootstrap outside the project runs the full suite', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('packages/shared/bootstrap.php', "<?php\n\nrequire __DIR__.'/../../nested/vendor/autoload.php';\n");
+    $project->write('nested/phpunit.xml', str_replace(
+        'bootstrap="vendor/autoload.php"',
+        'bootstrap="../packages/shared/bootstrap.php"',
+        (string) file_get_contents($nested.'/phpunit.xml'),
+    ));
+    $project->git()->commit('point the project at a sibling bootstrap file');
+    $project->seedFor($nested, 'master');
+
+    $project->write('packages/shared/bootstrap.php', "<?php\n\nrequire __DIR__.'/../../nested/vendor/autoload.php';\n\n\$booted = 2;\n");
+    $project->git()->commit('rework the sibling bootstrap file');
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('this project loads from outside its root')
+        ->and($result->replayed())->toBe(0, $result->describe());
+})->skipOnWindows();
+
+test('deleting a declared external package runs the full suite', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $manifest = json_decode((string) file_get_contents($nested.'/composer.json'), true);
+    $manifest['autoload']['psr-4']['Shared\\'] = '../packages/shared/src';
+    $project->write('nested/composer.json', (string) json_encode($manifest, JSON_PRETTY_PRINT));
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->git()->commit('let the project load a sibling package');
+    $project->seedFor($nested, 'master');
+
+    $project->git()->run(['rm', '-r', '--quiet', 'packages/shared']);
+    $project->git()->commit('delete the sibling package');
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('this project loads from outside its root')
+        ->and($result->replayed())->toBe(0, $result->describe());
+})->skipOnWindows();
+
+test('a change in an external test suite runs the full suite', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('shared-tests/support.php', "<?php\n\n\$support = 1;\n");
+
+    $project->write('nested/phpunit.xml', str_replace(
+        '<directory suffix="Test.php">./tests</directory>',
+        '<directory suffix="Test.php">./tests</directory>'."\n".'      <directory suffix="Test.php">../shared-tests</directory>',
+        (string) file_get_contents($nested.'/phpunit.xml'),
+    ));
+    $project->git()->commit('add an external test suite');
+    $project->seedFor($nested, 'master');
+
+    $project->write('shared-tests/support.php', "<?php\n\n\$support = 2;\n");
+    $project->git()->commit('rework the external test suite');
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('this project loads from outside its root')
+        ->and($result->replayed())->toBe(0, $result->describe());
+})->skipOnWindows();
+
+test('a change under a wildcard path repository runs the full suite', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $manifest = json_decode((string) file_get_contents($nested.'/composer.json'), true);
+    $manifest['repositories'][] = ['type' => 'path', 'url' => '../packages/*/src'];
+    $project->write('nested/composer.json', (string) json_encode($manifest, JSON_PRETTY_PRINT));
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->git()->commit('declare a wildcard path repository');
+    $project->seedFor($nested, 'master');
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 2;\n");
+    $project->git()->commit('rework the wildcard package');
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('this project loads from outside its root')
+        ->and($result->replayed())->toBe(0, $result->describe());
+})->skipOnWindows();
+
+test('a change under a symlink that leaves the project runs the full suite', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $manifest = json_decode((string) file_get_contents($nested.'/composer.json'), true);
+    $manifest['autoload']['psr-4']['Shared\\'] = 'shared';
+    $project->write('nested/composer.json', (string) json_encode($manifest, JSON_PRETTY_PRINT));
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 1;\n");
+    symlink($project->path('packages/shared/src'), $nested.'/shared');
+    $project->git()->commit('link a sibling package into the project');
+    $project->seedFor($nested, 'master');
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 2;\n");
+    $project->git()->commit('rework the linked package');
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('this project loads from outside its root')
+        ->and($result->replayed())->toBe(0, $result->describe());
+})->skipOnWindows();
+
+test('a change declared only by the configuration argument runs the full suite', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('packages/shared/bootstrap.php', "<?php\n\nrequire __DIR__.'/../../nested/vendor/autoload.php';\n");
+    $project->write('nested/phpunit.ci.xml', str_replace(
+        'bootstrap="vendor/autoload.php"',
+        'bootstrap="../packages/shared/bootstrap.php"',
+        (string) file_get_contents($nested.'/phpunit.xml'),
+    ));
+    $project->git()->commit('add a second configuration');
+    $project->seedFor($nested, 'master', arguments: ['-c', 'phpunit.ci.xml']);
+
+    $project->write('packages/shared/bootstrap.php', "<?php\n\nrequire __DIR__.'/../../nested/vendor/autoload.php';\n\n\$booted = 2;\n");
+    $project->git()->commit('rework the sibling bootstrap file');
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia', '-c', 'phpunit.ci.xml');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('this project loads from outside its root')
+        ->and($result->replayed())->toBe(0, $result->describe());
+})->skipOnWindows();
+
+test('a run under a different configuration does not reuse the baseline', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('nested/phpunit.ci.xml', str_replace(
+        'failOnRisky="true"',
+        'failOnRisky="false"',
+        (string) file_get_contents($nested.'/phpunit.xml'),
+    ));
+    $project->git()->commit('add a second configuration');
+    $project->seedFor($nested, 'master');
+    $project->snapshot();
+
+    $replayed = $project->pestIn($nested, '--tia');
+    $selected = $project->pestIn($nested, '--tia', '-c', 'phpunit.ci.xml');
+
+    expect($replayed->replayed())->toBe(Project::TOTAL_TESTS, $replayed->describe())
+        ->and($selected->replayed())->toBe(0, $selected->describe())
+        ->and($selected->tally())->toContain(Project::TOTAL_TESTS.' passed');
+})->skipOnWindows();
+
+test('removing an external declaration with its package does not replay', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $manifest = json_decode((string) file_get_contents($nested.'/composer.json'), true);
+    $manifest['autoload']['psr-4']['Shared\\'] = '../packages/shared/src';
+    $project->write('nested/composer.json', (string) json_encode($manifest, JSON_PRETTY_PRINT));
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->git()->commit('let the project load a sibling package');
+    $project->seedFor($nested, 'master');
+
+    unset($manifest['autoload']['psr-4']['Shared\\']);
+    $project->write('nested/composer.json', (string) json_encode($manifest, JSON_PRETTY_PRINT));
+    $project->git()->run(['rm', '-r', '--quiet', 'packages/shared']);
+    $project->git()->commit('drop the sibling package and its mapping');
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia');
+
+    expect($result->replayed())->toBe(0, $result->describe())
+        ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed');
+})->skipOnWindows();
+
+test('an external change runs the full suite once', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $manifest = json_decode((string) file_get_contents($nested.'/composer.json'), true);
+    $manifest['autoload']['psr-4']['Shared\\'] = '../packages/shared/src';
+    $project->write('nested/composer.json', (string) json_encode($manifest, JSON_PRETTY_PRINT));
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->git()->commit('let the project load a sibling package');
+    $project->seedFor($nested, 'master');
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 2;\n");
+    $project->git()->commit('rework the sibling package');
+
+    $first = $project->pestIn($nested, '--tia');
+    $second = $project->pestIn($nested, '--tia');
+
+    expect($first->output)->toContain('this project loads from outside its root')
+        ->and($first->replayed())->toBe(0, $first->describe())
+        ->and($second->replayed())->toBe(Project::TOTAL_TESTS, $second->describe());
+})->skipOnWindows();
+
+test('a relative configuration path resolves against the directory the command ran in', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('packages/shared/bootstrap.php', "<?php\n\nrequire __DIR__.'/../../nested/vendor/autoload.php';\n");
+    $project->write('nested/phpunit.ci.xml', str_replace(
+        'bootstrap="vendor/autoload.php"',
+        'bootstrap="../packages/shared/bootstrap.php"',
+        (string) file_get_contents($nested.'/phpunit.xml'),
+    ));
+    $project->git()->commit('add a second configuration');
+    $project->seedFor($nested, 'master', arguments: ['-c', $project->path('nested/phpunit.ci.xml')]);
+
+    $project->write('packages/shared/bootstrap.php', "<?php\n\nrequire __DIR__.'/../../nested/vendor/autoload.php';\n\n\$booted = 2;\n");
+    $project->git()->commit('rework the sibling bootstrap file');
+    $project->snapshot();
+
+    $result = $project->pestFrom($nested, $project->path(), '--tia', '-c', 'nested/phpunit.ci.xml');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('this project loads from outside its root')
+        ->and($result->replayed())->toBe(0, $result->describe());
+})->skipOnWindows();
+
+test('a change in a bootstrap file that the command line names runs the full suite', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('packages/shared/bootstrap.php', "<?php\n\nrequire __DIR__.'/../../nested/vendor/autoload.php';\n");
+    $project->git()->commit('add a sibling bootstrap file');
+    $project->seedFor($nested, 'master', arguments: ['--bootstrap', '../packages/shared/bootstrap.php']);
+
+    $project->write('packages/shared/bootstrap.php', "<?php\n\nrequire __DIR__.'/../../nested/vendor/autoload.php';\n\n\$booted = 2;\n");
+    $project->git()->commit('rework the sibling bootstrap file');
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia', '--bootstrap', '../packages/shared/bootstrap.php');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('this project loads from outside its root')
+        ->and($result->replayed())->toBe(0, $result->describe());
+})->skipOnWindows();
+
+test('a change under an include path that the command line names runs the full suite', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->git()->commit('add a sibling package');
+    $project->seedFor($nested, 'master', arguments: ['--include-path', '../packages/shared/src']);
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 2;\n");
+    $project->git()->commit('rework the sibling package');
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia', '--include-path', '../packages/shared/src');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('this project loads from outside its root')
+        ->and($result->replayed())->toBe(0, $result->describe());
+})->skipOnWindows();
+
+test('a change to an ignored file under an include path that the command line names runs the full suite', function (): void {
+    [$project, $nested] = tiaMonorepoWithIgnoredInput();
+
+    $project->write('packages/shared/generated.php', "<?php\n\nreturn 2;\n");
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia', '--include-path', '../packages/shared');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('this project loads from outside its root')
+        ->and($result->output)->toContain('packages/shared/generated.php')
+        ->and($result->replayed())->toBe(0, $result->describe())
+        ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed');
+})->skipOnWindows();
+
+test('a change to an ignored data file under an include path runs the full suite', function (): void {
+    [$project, $nested] = tiaMonorepoWithIgnoredInput();
+
+    $project->write('packages/shared/generated.json', "{\"version\": 2}\n");
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia', '--include-path', '../packages/shared');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('packages/shared/generated.json')
+        ->and($result->replayed())->toBe(0, $result->describe());
+})->skipOnWindows();
+
+test('an ignored file under an include path that does not change keeps the replay', function (): void {
+    [$project, $nested] = tiaMonorepoWithIgnoredInput();
+
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia', '--include-path', '../packages/shared');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->not->toContain('packages/shared/generated.php')
+        ->and($result->replayed())->toBe(Project::TOTAL_TESTS, $result->describe());
+})->skipOnWindows();
+
+test('deleting an ignored file under an include path runs the full suite', function (): void {
+    [$project, $nested] = tiaMonorepoWithIgnoredInput();
+
+    unlink($project->path('packages/shared/generated.php'));
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia', '--include-path', '../packages/shared');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('packages/shared/generated.php')
+        ->and($result->replayed())->toBe(0, $result->describe());
+})->skipOnWindows();
+
+test('a change under an include path that the configuration names runs the full suite', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->write('nested/phpunit.xml', str_replace(
+        '</phpunit>',
+        "  <php>\n    <includePath>../packages/shared/src</includePath>\n  </php>\n</phpunit>",
+        (string) file_get_contents($nested.'/phpunit.xml'),
+    ));
+    $project->git()->commit('point the configuration at a sibling include path');
+    $project->seedFor($nested, 'master');
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 2;\n");
+    $project->git()->commit('rework the sibling package');
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('this project loads from outside its root')
+        ->and($result->replayed())->toBe(0, $result->describe());
+})->skipOnWindows();
+
+test('a submodule that a commit moves runs the full suite', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $library = $project->path().'-library';
+    mkdir($library, 0755, true);
+    $libraryRepo = new GitRepo($library);
+    file_put_contents($library.'/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $libraryRepo->init('master');
+
+    $manifest = json_decode((string) file_get_contents($nested.'/composer.json'), true);
+    $manifest['autoload']['psr-4']['Shared\\'] = '../packages/shared';
+    $project->write('nested/composer.json', (string) json_encode($manifest, JSON_PRETTY_PRINT));
+
+    $project->git()->run(['-c', 'protocol.file.allow=always', 'submodule', 'add', '--quiet', $library, 'packages/shared']);
+    $project->git()->commit('add the library as a submodule');
+    $project->seedFor($nested, 'master');
+
+    file_put_contents($library.'/Shared.php', "<?php\n\n\$shared = 2;\n");
+    $libraryRepo->commit('rework the library');
+
+    new GitRepo($project->path('packages/shared'))->run(['-c', 'protocol.file.allow=always', 'pull', '--quiet', 'origin', 'master']);
+    $project->git()->commit('bump the submodule');
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('this project loads from outside its root')
+        ->and($result->replayed())->toBe(0, $result->describe());
+})->skipOnWindows();
+
+test('a run from the repository root reads the configuration it finds there', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('packages/shared/bootstrap.php', "<?php\n\nrequire __DIR__.'/../../nested/vendor/autoload.php';\n");
+    $project->write('phpunit.xml', str_replace(
+        'bootstrap="vendor/autoload.php"',
+        'bootstrap="packages/shared/bootstrap.php"',
+        (string) file_get_contents($nested.'/phpunit.xml'),
+    ));
+    $project->git()->commit('add a configuration at the repository root');
+    $project->seedFor($nested, 'master', arguments: ['-c', $project->path('phpunit.xml')]);
+
+    $project->write('packages/shared/bootstrap.php', "<?php\n\nrequire __DIR__.'/../../nested/vendor/autoload.php';\n\n\$booted = 2;\n");
+    $project->git()->commit('rework the sibling bootstrap file');
+    $project->snapshot();
+
+    $result = $project->pestFrom($nested, $project->path(), '--tia');
+
+    expect($result->output)->toContain('this project loads from outside its root')
+        ->and($result->replayed())->toBe(0, $result->describe());
+})->skipOnWindows();
+
+test('a project that loads from outside its repository never replays', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $outside = $project->path().'-outside';
+    mkdir($outside, 0755, true);
+    file_put_contents($outside.'/bootstrap.php', "<?php\n\nrequire '".$nested."/vendor/autoload.php';\n");
+
+    $manifest = json_decode((string) file_get_contents($nested.'/composer.json'), true);
+    $manifest['autoload']['files'][] = $outside.'/bootstrap.php';
+    $project->write('nested/composer.json', (string) json_encode($manifest, JSON_PRETTY_PRINT));
+    $project->git()->commit('load a file from outside the repository');
+    $project->seedFor($nested, 'master');
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('whose changes git cannot report')
+        ->and($result->output)->toContain('recording nothing')
+        ->and($result->replayed())->toBe(0, $result->describe())
+        ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed')
+        ->and($project->delta()->baselineUntouched('master'))->toBeTrue($project->delta()->summary());
+})->skipOnWindows();
+
+test('a run without tia records no result while the project loads from outside its repository', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $outside = $project->path().'-outside';
+    mkdir($outside, 0755, true);
+    file_put_contents($outside.'/bootstrap.php', "<?php\n\nrequire '".$nested."/vendor/autoload.php';\n");
+
+    $manifest = json_decode((string) file_get_contents($nested.'/composer.json'), true);
+    $manifest['autoload']['files'][] = $outside.'/bootstrap.php';
+    $project->write('nested/composer.json', (string) json_encode($manifest, JSON_PRETTY_PRINT));
+    $project->git()->commit('load a file from outside the repository');
+    $project->seedFor($nested, 'master');
+    $project->snapshot();
+
+    $result = $project->pestIn($nested);
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($project->delta()->baselineUntouched('master'))->toBeTrue($project->delta()->summary());
+})->skipOnWindows();
+
+test('an uncommitted change outside the project records nothing', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $manifest = json_decode((string) file_get_contents($nested.'/composer.json'), true);
+    $manifest['autoload']['psr-4']['Shared\\'] = '../packages/shared/src';
+    $project->write('nested/composer.json', (string) json_encode($manifest, JSON_PRETTY_PRINT));
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->git()->commit('let the project load a sibling package');
+    $project->seedFor($nested, 'master');
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 2;\n");
+    $project->snapshot();
+
+    $dirty = $project->pestIn($nested, '--tia');
+    $delta = $project->delta();
+
+    expect($dirty->output)->toContain('recording nothing')
+        ->and($dirty->replayed())->toBe(0, $dirty->describe())
+        ->and($delta->writtenCount())->toBe(0, $delta->summary());
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 1;\n");
+
+    $restored = $project->pestIn($nested, '--tia');
+
+    expect($restored->replayed())->toBe(Project::TOTAL_TESTS, $restored->describe());
+})->skipOnWindows();
+
+test('a committed change under a wildcard source directory runs the full suite', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('nested/phpunit.xml', str_replace(
+        '<directory suffix=".php">./app</directory>',
+        '<directory suffix=".php">./app</directory>'."\n".'      <directory suffix=".php">../packages/*/src</directory>',
+        (string) file_get_contents($nested.'/phpunit.xml'),
+    ));
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->git()->commit('watch every package source directory');
+    $project->seedFor($nested, 'master');
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 2;\n");
+    $project->git()->commit('rework the package');
+    $project->snapshot();
+
+    $result = $project->pestIn($nested, '--tia');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('this project loads from outside its root')
+        ->and($result->replayed())->toBe(0, $result->describe());
+})->skipOnWindows();
+
+test('an uncommitted change outside the project records nothing on a first run', function (array $arguments): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $manifest = json_decode((string) file_get_contents($nested.'/composer.json'), true);
+    $manifest['autoload']['psr-4']['Shared\\'] = '../packages/shared/src';
+    $project->write('nested/composer.json', (string) json_encode($manifest, JSON_PRETTY_PRINT));
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->git()->commit('let the project load a sibling package');
+
+    $project->detachGraph();
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 2;\n");
+
+    $result = $project->pestIn($nested, '--tia', ...$arguments);
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('recording nothing')
+        ->and($project->graphExists())->toBeFalse();
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
+
+test('an uncommitted change outside the project records nothing on a fresh run', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $manifest = json_decode((string) file_get_contents($nested.'/composer.json'), true);
+    $manifest['autoload']['psr-4']['Shared\\'] = '../packages/shared/src';
+    $project->write('nested/composer.json', (string) json_encode($manifest, JSON_PRETTY_PRINT));
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->git()->commit('let the project load a sibling package');
+    $project->seedFor($nested, 'master');
+    $project->snapshot();
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 2;\n");
+
+    $result = $project->pestIn($nested, '--tia', '--fresh');
+    $delta = $project->delta();
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('recording nothing')
+        ->and($delta->writtenCount())->toBe(0, $delta->summary());
+})->skipOnWindows();
+
+test('an uncommitted change outside the project records no result on a partial run', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $manifest = json_decode((string) file_get_contents($nested.'/composer.json'), true);
+    $manifest['autoload']['psr-4']['Shared\\'] = '../packages/shared/src';
+    $project->write('nested/composer.json', (string) json_encode($manifest, JSON_PRETTY_PRINT));
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->git()->commit('let the project load a sibling package');
+    $project->seedFor($nested, 'master', failing: ['adds two numbers']);
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 2;\n");
+    $project->snapshot();
+
+    $dirty = $project->pestIn($nested, '--tia', '--filter=adds two numbers');
+    $delta = $project->delta();
+
+    expect($dirty->tally())->toContain('1 passed')
+        ->and($delta->writtenCount())->toBe(0, $delta->summary());
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->snapshot();
+
+    $clean = $project->pestIn($nested, '--tia', '--filter=adds two numbers');
+    $delta = $project->delta();
+
+    expect($clean->tally())->toContain('1 passed')
+        ->and($delta->writtenCount())->toBe(1, $delta->summary());
+})->skipOnWindows();
+
+test('editing a configuration that git ignores stops the replay', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('nested/.gitignore', "phpunit.xml\n");
+    $project->git()->run(['rm', '--cached', '--quiet', 'nested/phpunit.xml']);
+    $project->git()->commit('stop tracking the configuration');
+    $project->seedFor($nested, 'master');
+    $project->snapshot();
+
+    $replayed = $project->pestIn($nested, '--tia');
+
+    $project->write('nested/phpunit.xml', str_replace(
+        'failOnRisky="true"',
+        'failOnRisky="false"',
+        (string) file_get_contents($nested.'/phpunit.xml'),
+    ));
+
+    $edited = $project->pestIn($nested, '--tia');
+
+    expect($replayed->replayed())->toBe(Project::TOTAL_TESTS, $replayed->describe())
+        ->and($edited->replayed())->toBe(0, $edited->describe())
+        ->and($edited->tally())->toContain(Project::TOTAL_TESTS.' passed');
+})->skipOnWindows();
+
+test('a run with --no-configuration does not replay a graph recorded with one', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->seedFor($nested, 'master');
+    $project->snapshot();
+
+    $replayed = $project->pestIn($nested, '--tia');
+    $suppressed = $project->pestIn($nested, '--tia', '--no-configuration');
+
+    expect($replayed->replayed())->toBe(Project::TOTAL_TESTS, $replayed->describe())
+        ->and($suppressed->replayed())->toBe(0, $suppressed->describe());
+})->skipOnWindows();
+
+test('a run without tia finishes when git cannot read the working tree of a project that loads from outside its root', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $manifest = json_decode((string) file_get_contents($nested.'/composer.json'), true);
+    $manifest['autoload']['psr-4']['Shared\\'] = '../packages/shared/src';
+    $project->write('nested/composer.json', (string) json_encode($manifest, JSON_PRETTY_PRINT));
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->git()->commit('let the project load a sibling package');
+    $project->seedFor($nested, 'master');
+
+    file_put_contents($project->path('.git/index'), 'not an index');
+
+    $result = $project->pestIn($nested);
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->not->toContain('could not read the git repository')
+        ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed');
+})->skipOnWindows();
+
+test('a committed change outside the project without a coverage driver stores the results of the full suite', function (array $arguments): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $manifest = json_decode((string) file_get_contents($nested.'/composer.json'), true);
+    $manifest['autoload']['psr-4']['Shared\\'] = '../packages/shared/src';
+    $project->write('nested/composer.json', (string) json_encode($manifest, JSON_PRETTY_PRINT));
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->git()->commit('let the project load a sibling package');
+    $project->seedFor($nested, 'master', failing: ['adds two numbers']);
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 2;\n");
+    $project->git()->commit('rework the sibling package');
+
+    $result = $project->pestWithEnvironment($nested, ['XDEBUG_MODE' => 'off'], '--tia', ...$arguments);
+
+    $testId = Project::testId('tests/Unit/CalculatorTest.php', 'adds two numbers');
+    $stored = $project->graph()['baselines']['master']['results'][$testId]['status'] ?? null;
+
+    expect($result->output)->toContain('this project loads from outside its root')
+        ->and($result->output)->toContain('so edges can be safely refreshed after changes outside the project root')
+        ->and($result->tally())->toContain(Project::TOTAL_TESTS.' passed')
+        ->and($stored)->toBe(0, $result->describe());
+})->with(Project::SEQUENTIAL_AND_PARALLEL)->skipOnWindows();
+
+test('a run without tia stores no result when git cannot read the working tree of a project that loads from outside its root', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $manifest = json_decode((string) file_get_contents($nested.'/composer.json'), true);
+    $manifest['autoload']['psr-4']['Shared\\'] = '../packages/shared/src';
+    $project->write('nested/composer.json', (string) json_encode($manifest, JSON_PRETTY_PRINT));
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->git()->commit('let the project load a sibling package');
+    $project->seedFor($nested, 'master', failing: ['adds two numbers']);
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 2;\n");
+    file_put_contents($project->path('.git/index'), 'not an index');
+    $project->snapshot();
+
+    $result = $project->pestIn($nested);
+    $delta = $project->delta();
+
+    expect($result->tally())->toContain(Project::TOTAL_TESTS.' passed')
+        ->and($delta->writtenCount())->toBe(0, $delta->summary());
+})->skipOnWindows();
+
+test('an edit outside the project during the run records no result', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $manifest = json_decode((string) file_get_contents($nested.'/composer.json'), true);
+    $manifest['autoload']['psr-4']['Shared\\'] = '../packages/shared/src';
+    $project->write('nested/composer.json', (string) json_encode($manifest, JSON_PRETTY_PRINT));
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->write('nested/tests/Unit/SharedEditTest.php', <<<'PHP_WRAP'
+<?php
+
+declare(strict_types=1);
+
+test('edits the shared package', function (): void {
+    file_put_contents(dirname(__DIR__, 3).'/packages/shared/src/Shared.php', "<?php\n\n\$shared = 2;\n");
+
+    expect(true)->toBeTrue();
+});
+PHP_WRAP);
+    $project->git()->commit('let the project load a sibling package');
+    $project->seedFor($nested, 'master', failing: ['adds two numbers']);
+    $project->snapshot();
+
+    $result = $project->pestWithEnvironment($nested, ['XDEBUG_MODE' => 'off'], '--tia');
+    $delta = $project->delta();
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and((string) file_get_contents($project->path('packages/shared/src/Shared.php')))->toContain('$shared = 2;')
+        ->and($delta->writtenCount())->toBe(0, $delta->summary());
+})->skipOnWindows();
+
+test('an edit outside the project during the run keeps the recorded commit', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $manifest = json_decode((string) file_get_contents($nested.'/composer.json'), true);
+    $manifest['autoload']['psr-4']['Shared\\'] = '../packages/shared/src';
+    $project->write('nested/composer.json', (string) json_encode($manifest, JSON_PRETTY_PRINT));
+
+    $project->write('packages/shared/src/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->write('nested/tests/Unit/SharedEditTest.php', <<<'PHP_WRAP'
+<?php
+
+declare(strict_types=1);
+
+test('edits the shared package', function (): void {
+    file_put_contents(dirname(__DIR__, 3).'/packages/shared/src/Shared.php', "<?php\n\n\$shared = 2;\n");
+
+    expect(true)->toBeTrue();
+});
+PHP_WRAP);
+    $project->git()->commit('let the project load a sibling package');
+    $project->seedFor($nested, 'master');
+    $recorded = $project->git()->sha();
+
+    $project->write('nested/app/Greeter.php', file_get_contents($nested.'/app/Greeter.php')."\n");
+    $project->git()->commit('touch the greeter');
+
+    $result = $project->pestWithEnvironment($nested, ['XDEBUG_MODE' => 'off'], '--tia');
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($result->output)->toContain('changed during the run — keeping the baseline from before the run')
+        ->and($project->graph()['baselines']['master']['sha'] ?? null)->toBe($recorded);
+})->skipOnWindows();
+
+test('an edit to an ignored file outside the project during the run keeps the baseline from before the run', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('.gitignore', file_get_contents($project->path('.gitignore'))."packages/shared/generated.php\n");
+    $project->write('packages/shared/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->write('packages/shared/generated.php', "<?php\n\nreturn 1;\n");
+    $project->write('nested/tests/Unit/GeneratedEditTest.php', <<<'PHP_WRAP'
+<?php
+
+declare(strict_types=1);
+
+test('reads and then rewrites the generated file', function (): void {
+    $generated = dirname(__DIR__, 3).'/packages/shared/generated.php';
+
+    expect(require $generated)->toBe(1);
+
+    file_put_contents($generated, "<?php\n\nreturn 2;\n");
+});
+PHP_WRAP);
+    $project->git()->commit('add a sibling package with a generated file');
+    $project->seedFor($nested, 'master', failing: ['adds two numbers'], arguments: ['--include-path', '../packages/shared']);
+    $recorded = $project->git()->sha();
+    $project->snapshot();
+
+    $first = $project->pestWithEnvironment($nested, ['XDEBUG_MODE' => 'off'], '--tia', '--include-path', '../packages/shared');
+    $afterFirst = $project->graph()['baselines']['master']['sha'] ?? null;
+    $delta = $project->delta();
+    $second = $project->pestWithEnvironment($nested, ['XDEBUG_MODE' => 'off'], '--tia', '--include-path', '../packages/shared');
+
+    expect($first->output)->toContain('changed during the run — keeping the baseline from before the run')
+        ->and($first->output)->toContain('packages/shared/generated.php')
+        ->and($first->output)->toContain('Keep what the run writes out of the paths this project loads')
+        ->and($delta->writtenCount())->toBe(0, $delta->summary())
+        ->and($afterFirst)->toBe($recorded)
+        ->and($second->output)->toContain('packages/shared/generated.php')
+        ->and($second->replayed())->toBe(0, $second->describe());
+})->skipOnWindows();
+
+test('an edit to a tracked and an ignored file outside the project during the run names the ignored file', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('.gitignore', file_get_contents($project->path('.gitignore'))."packages/shared/generated.php\n");
+    $project->write('packages/shared/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->write('packages/shared/generated.php', "<?php\n\nreturn 1;\n");
+    $project->write('nested/tests/Unit/BothEditTest.php', <<<'PHP_WRAP'
+<?php
+
+declare(strict_types=1);
+
+test('rewrites a tracked and an ignored file', function (): void {
+    $shared = dirname(__DIR__, 3).'/packages/shared';
+
+    file_put_contents($shared.'/Shared.php', "<?php\n\n\$shared = 2;\n");
+    file_put_contents($shared.'/generated.php', "<?php\n\nreturn 2;\n");
+
+    expect(true)->toBeTrue();
+});
+PHP_WRAP);
+    $project->git()->commit('add a sibling package with a generated file');
+    $project->seedFor($nested, 'master', arguments: ['--include-path', '../packages/shared']);
+
+    $result = $project->pestWithEnvironment($nested, ['XDEBUG_MODE' => 'off'], '--tia', '--include-path', '../packages/shared');
+
+    expect($result->output)->toContain('changed during the run')
+        ->and($result->output)->toContain('packages/shared/generated.php')
+        ->and($result->output)->toContain('Keep what the run writes out of the paths this project loads')
+        ->and($result->output)->toContain('Re-run --tia after your edits settle');
+})->skipOnWindows();
+
+test('an ignored repository created outside the project during the run keeps the baseline from before the run', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('.gitignore', file_get_contents($project->path('.gitignore'))."packages/shared/checkout/\n");
+    $project->write('packages/shared/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->write('nested/tests/Unit/CheckoutTest.php', <<<'PHP_WRAP'
+<?php
+
+declare(strict_types=1);
+
+test('initializes a repository next to the shared package', function (): void {
+    $checkout = dirname(__DIR__, 3).'/packages/shared/checkout';
+
+    mkdir($checkout, 0755, true);
+    exec('git -C '.escapeshellarg($checkout).' init --quiet');
+
+    expect(is_dir($checkout.'/.git'))->toBeTrue();
+});
+PHP_WRAP);
+    $project->git()->commit('add a sibling package');
+    $project->seedFor($nested, 'master', failing: ['adds two numbers'], arguments: ['--include-path', '../packages/shared']);
+    $recorded = $project->git()->sha();
+    $project->snapshot();
+
+    $result = $project->pestWithEnvironment($nested, ['XDEBUG_MODE' => 'off'], '--tia', '--include-path', '../packages/shared');
+    $delta = $project->delta();
+
+    expect($result->output)->toContain('changed during the run — keeping the baseline from before the run')
+        ->and($result->output)->toContain('packages/shared/checkout')
+        ->and($delta->writtenCount())->toBe(0, $delta->summary())
+        ->and($project->graph()['baselines']['master']['sha'] ?? null)->toBe($recorded);
+})->skipOnWindows();
+
+test('an ignored file whose name is not utf-8 created outside the project during the run keeps the baseline from before the run', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('.gitignore', file_get_contents($project->path('.gitignore'))."packages/shared/*.txt\n");
+    $project->write('packages/shared/Shared.php', "<?php\n\n\$shared = 1;\n");
+    $project->write('nested/tests/Unit/NameTest.php', <<<'PHP_WRAP'
+<?php
+
+declare(strict_types=1);
+
+test('writes a file next to the shared package', function (): void {
+    $file = dirname(__DIR__, 3)."/packages/shared/caf\xe9.txt";
+
+    file_put_contents($file, "x\n");
+
+    expect(is_file($file))->toBeTrue();
+});
+PHP_WRAP);
+    $project->git()->commit('add a sibling package');
+    $project->seedFor($nested, 'master', failing: ['adds two numbers'], arguments: ['--include-path', '../packages/shared']);
+    $recorded = $project->git()->sha();
+    $project->snapshot();
+
+    $result = $project->pestWithEnvironment($nested, ['XDEBUG_MODE' => 'off'], '--tia', '--include-path', '../packages/shared');
+    $delta = $project->delta();
+
+    expect($result->output)->toContain('changed during the run — keeping the baseline from before the run')
+        ->and($delta->writtenCount())->toBe(0, $delta->summary())
+        ->and($project->graph()['baselines']['master']['sha'] ?? null)->toBe($recorded);
+})->skip(PHP_OS_FAMILY !== 'Linux', 'Only Linux file systems accept names that are not utf-8.');
+
+test('an ignored repository created around a declared path during the run keeps the baseline from before the run', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('.gitignore', file_get_contents($project->path('.gitignore'))."packages/shared/checkout/\n");
+    mkdir($project->path('packages/shared/checkout/src'), 0755, true);
+    $project->write('nested/tests/Unit/CheckoutAroundTest.php', <<<'PHP_WRAP'
+<?php
+
+declare(strict_types=1);
+
+test('initializes a repository around the declared path', function (): void {
+    $checkout = dirname(__DIR__, 3).'/packages/shared/checkout';
+
+    exec('git -C '.escapeshellarg($checkout).' init --quiet');
+
+    expect(is_dir($checkout.'/.git'))->toBeTrue();
+});
+PHP_WRAP);
+    $project->git()->commit('add a sibling package');
+    $project->seedFor($nested, 'master', failing: ['adds two numbers'], arguments: ['--include-path', '../packages/shared/checkout/src']);
+    $recorded = $project->git()->sha();
+    $project->snapshot();
+
+    $result = $project->pestWithEnvironment($nested, ['XDEBUG_MODE' => 'off'], '--tia', '--include-path', '../packages/shared/checkout/src');
+    $delta = $project->delta();
+
+    expect($result->output)->toContain('changed during the run — keeping the baseline from before the run')
+        ->and($delta->writtenCount())->toBe(0, $delta->summary())
+        ->and($project->graph()['baselines']['master']['sha'] ?? null)->toBe($recorded);
+})->skipOnWindows();
+
+test('a run without tia stores no result when a hook leaves the configuration directory and the phpunit bootstrap outside the project is dirty', function (): void {
+    [$project, $nested] = tiaMonorepo();
+
+    $project->write('packages/shared/bootstrap.php', "<?php\n\nrequire __DIR__.'/../../nested/vendor/autoload.php';\n");
+    $project->write('nested/phpunit.xml', str_replace(
+        'bootstrap="vendor/autoload.php"',
+        'bootstrap="../packages/shared/bootstrap.php"',
+        (string) file_get_contents($nested.'/phpunit.xml'),
+    ));
+    $project->write('nested/tests/Unit/LeavesDirectoryTest.php', <<<'PHP_WRAP'
+<?php
+
+declare(strict_types=1);
+
+afterAll(function (): void {
+    chdir(dirname(__DIR__, 2).'/app');
+});
+
+test('leaves the configuration directory', function (): void {
+    expect(true)->toBeTrue();
+});
+PHP_WRAP);
+    $project->git()->commit('point the project at a sibling bootstrap file');
+    $project->seedFor($nested, 'master', failing: ['adds two numbers']);
+
+    $project->write('packages/shared/bootstrap.php', "<?php\n\nrequire __DIR__.'/../../nested/vendor/autoload.php';\n\n\$booted = 2;\n");
+    $project->snapshot();
+
+    $result = $project->pestIn($nested);
+    $delta = $project->delta();
+
+    expect($result->exitCode)->toBe(0, $result->describe())
+        ->and($delta->writtenCount())->toBe(0, $delta->summary());
 })->skipOnWindows();

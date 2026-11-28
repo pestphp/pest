@@ -23,12 +23,13 @@ final readonly class Fingerprint
     ];
 
     /**
+     * @param  array<int, string>  $arguments
      * @return array{
      *     structural: array<string, int|string|null>,
      *     environmental: array<string, int|string|null>,
      * }
      */
-    public static function compute(string $projectRoot, ?ConfigurationFile $configuration = null): array
+    public static function compute(string $projectRoot, ?ConfigurationFile $configuration = null, array $arguments = []): array
     {
         $configuration ??= ConfigurationFile::projectDefault();
 
@@ -46,6 +47,18 @@ final readonly class Fingerprint
 
         if ($prefix !== '') {
             $structural['project_prefix'] = $prefix;
+        }
+
+        $externalRoots = ExternalSources::rootsFor($projectRoot, $arguments);
+
+        if ($externalRoots !== []) {
+            $structural['external_roots'] = hash('xxh128', serialize($externalRoots));
+        }
+
+        $includePaths = ExternalSources::includePaths($projectRoot, $arguments);
+
+        if ($includePaths !== []) {
+            $structural['include_path'] = hash('xxh128', serialize($includePaths));
         }
 
         return [
@@ -302,10 +315,12 @@ final readonly class Fingerprint
         }
 
         try {
-            return $cache[$key] = ! new Git($projectRoot)->succeeds(['check-ignore', '-q', '--', $relativePath]);
+            $result = new Git($projectRoot)->checkIgnore([$relativePath]);
         } catch (ProcessException) {
             return $cache[$key] = true;
         }
+
+        return $cache[$key] = $result['exitCode'] !== 0;
     }
 
     private static function projectPrefix(string $projectRoot): string
