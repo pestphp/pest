@@ -28,6 +28,7 @@ return RectorConfig::configure()
         __DIR__.'/src/Plugins/Parallel/Paratest/WrapperRunner.php',
         __DIR__.'/tests/Fixtures/Arch',
         __DIR__.'/tests/Fixtures/Suites',
+        __DIR__.'/tests/Fixtures/ParallelIncludePath',
         ReturnNeverTypeRector::class,
         ArrowFunctionDelegatingCallToFirstClassCallableRector::class,
         NarrowObjectReturnTypeRector::class,

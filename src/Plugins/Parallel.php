@@ -26,6 +26,7 @@ final class Parallel implements HandlesArguments
     private const string GLOBAL_PREFIX = 'PEST_PARALLEL_GLOBAL_';
 
     private const array HANDLERS = [
+        Parallel\Handlers\IncludePath::class,
         Parallel\Handlers\Parallel::class,
         Parallel\Handlers\Pest::class,
         Parallel\Handlers\Laravel::class,
@@ -150,6 +151,7 @@ final class Parallel implements HandlesArguments
         $command->setVersion(version());
 
         Parallel\Handlers\StopOn::configureOptions($command->find('paratest')->getDefinition());
+        Parallel\Handlers\IncludePath::configureOptions($command->find('paratest')->getDefinition());
 
         return $command;
     }
