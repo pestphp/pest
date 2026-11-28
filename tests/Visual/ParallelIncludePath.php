@@ -29,7 +29,20 @@ test('parallel resolves requires through the include path', function (array $arg
     'absolute directory name with an equals sign' => [['--include-path', __DIR__.'/../Fixtures/ParallelIncludePath/include=path']],
     'require in the bootstrap file' => [['--bootstrap=tests/Fixtures/ParallelIncludePath/bootstrap.inc', '--include-path=tests/Fixtures/ParallelIncludePath/lib']],
     'command line before the XML include path' => [['--configuration=tests/Fixtures/ParallelIncludePath.xml', '--include-path=tests/Fixtures/ParallelIncludePath/lib']],
+    'command line before the XML include path in the bootstrap file' => [['--configuration=tests/Fixtures/ParallelIncludePath.xml', '--bootstrap=tests/Fixtures/ParallelIncludePath/bootstrap.inc', '--include-path=tests/Fixtures/ParallelIncludePath/lib']],
 ])->skipOnWindows();
+
+test('parallel places the include path before the argument separator', function (): void {
+    $process = new Process(
+        ['php', '-r', 'require "vendor/autoload.php"; echo json_encode((new Pest\\Plugins\\Parallel\\Handlers\\IncludePath)->handleArguments(["--include-path", "lib", "--", "tests/Foo"]));'],
+        dirname(__DIR__, 2),
+    );
+
+    $process->run();
+
+    expect($process->getExitCode())->toBe(0, $process->getErrorOutput())
+        ->and(json_decode($process->getOutput(), true))->toBe(['--include-path=lib', '--', 'tests/Foo']);
+});
 
 test('parallel fails to resolve requires without the include path', function () use ($run): void {
     $process = $run([]);

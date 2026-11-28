@@ -9,6 +9,11 @@ use Pest\Plugins\Parallel as ParallelPlugin;
 use Pest\Plugins\Parallel\Contracts\HandlersWorkerArguments;
 use Pest\Subscribers\EnsureCommandLineIncludePathComesFirst;
 use PHPUnit\Event\Facade as EventFacade;
+use PHPUnit\TextUI\CliArguments\Builder;
+use PHPUnit\TextUI\CliArguments\Configuration;
+use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Console\Input\InputOption;
+use Throwable;
 
 final class IncludePath implements HandlersWorkerArguments, HandlesArguments
 {
@@ -16,39 +21,33 @@ final class IncludePath implements HandlersWorkerArguments, HandlesArguments
 
     private const string GLOBAL_KEY = 'INCLUDE_PATH';
 
+    private const string PROGRAM = 'pest';
+
     public function handleArguments(array $arguments): array
     {
         $arguments = array_values($arguments);
         $includePath = null;
         $argumentsForParatest = [];
+        $separatorAndArgumentsAfterIt = [];
 
         for ($index = 0; $index < count($arguments); $index++) {
-            $argument = $arguments[$index];
+            $argument = trim($arguments[$index]);
 
             if ($argument === '--') {
-                array_push($argumentsForParatest, ...array_slice($arguments, $index));
+                $separatorAndArgumentsAfterIt = array_slice($arguments, $index);
 
                 break;
             }
 
-            if (str_starts_with($argument, self::OPTION.'=')) {
-                $includePath = substr($argument, strlen(self::OPTION) + 1);
+            if ($argument === self::OPTION || str_starts_with($argument, self::OPTION.'=')) {
+                $optionArguments = $this->optionArgumentsPhpunitReads($arguments, $index);
+                $includePath = $this->includePathPhpunitReads($optionArguments);
+                $index += count($optionArguments) - 1;
 
                 continue;
             }
 
-            if ($argument === self::OPTION) {
-                $next = $arguments[$index + 1] ?? null;
-
-                if ($next !== null && ! str_starts_with($next, '-')) {
-                    $includePath = $next;
-                    $index++;
-                }
-
-                continue;
-            }
-
-            $argumentsForParatest[] = $argument;
+            $argumentsForParatest[] = $arguments[$index];
         }
 
         ParallelPlugin::setGlobal(self::GLOBAL_KEY, $includePath === null ? false : base64_encode($includePath));
@@ -60,7 +59,16 @@ final class IncludePath implements HandlersWorkerArguments, HandlesArguments
             EventFacade::instance()->registerSubscriber($commandLineIncludePathComesFirst);
         }
 
-        return $argumentsForParatest;
+        if ($includePath !== null && $this->survivesThePhpunitParser($includePath)) {
+            array_push($argumentsForParatest, ...$this->argumentsPhpunitReadsAs($includePath));
+        }
+
+        return [...$argumentsForParatest, ...$separatorAndArgumentsAfterIt];
+    }
+
+    public static function configureOptions(InputDefinition $definition): void
+    {
+        $definition->addOption(new InputOption(substr(self::OPTION, 2), null, InputOption::VALUE_REQUIRED));
     }
 
     public function handleWorkerArguments(array $arguments): array
@@ -72,6 +80,63 @@ final class IncludePath implements HandlersWorkerArguments, HandlesArguments
             return $arguments;
         }
 
-        return [...$arguments, self::OPTION, $includePath];
+        return [...$arguments, ...$this->argumentsPhpunitReadsAs($includePath)];
+    }
+
+    /**
+     * @param  list<string>  $arguments
+     * @return list<string>
+     */
+    private function optionArgumentsPhpunitReads(array $arguments, int $index): array
+    {
+        if ($this->phpunitConfiguration([$arguments[$index]]) instanceof Configuration) {
+            return [$arguments[$index]];
+        }
+
+        return array_slice($arguments, $index, 2);
+    }
+
+    /**
+     * @param  list<string>  $optionArguments
+     */
+    private function includePathPhpunitReads(array $optionArguments): ?string
+    {
+        $configuration = $this->phpunitConfiguration($optionArguments);
+
+        return $configuration instanceof Configuration && $configuration->hasIncludePath() ? $configuration->includePath() : null;
+    }
+
+    /**
+     * @param  list<string>  $parameters
+     */
+    private function phpunitConfiguration(array $parameters): ?Configuration
+    {
+        try {
+            return new Builder(EventFacade::emitter())->fromParameters([self::PROGRAM, ...$parameters]);
+        } catch (Throwable) {
+            return null;
+        }
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function argumentsPhpunitReadsAs(string $includePath): array
+    {
+        if (! $this->survivesThePhpunitParser($includePath)) {
+            return [self::OPTION, $includePath];
+        }
+
+        return [self::OPTION.'='.$includePath.$this->closingEqualsSignThatStopsTheTrim($includePath)];
+    }
+
+    private function closingEqualsSignThatStopsTheTrim(string $includePath): string
+    {
+        return rtrim($includePath) === $includePath ? '' : '=';
+    }
+
+    private function survivesThePhpunitParser(string $includePath): bool
+    {
+        return $includePath !== '' && ! str_contains($includePath, '=');
     }
 }
