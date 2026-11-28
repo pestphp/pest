@@ -215,6 +215,8 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
 
     private bool $writesSuppressed = false;
 
+    private bool $tiaEnabled = false;
+
     private bool $dirtyExternalSourcesResolved = false;
 
     /** @var array<int, string>|null */
@@ -540,6 +542,7 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
             $this->writesSuppressed = true;
         }
         $enabled = ! $disabled && ($cliEnabled || $alwaysEnabled);
+        $this->tiaEnabled = $enabled;
         $this->filteredMode = ($this->hasArgument(self::FILTERED_OPTION, $arguments) || self::envFlagEnabled(self::ENV_FILTERED) || $watchPatterns->isFiltered())
             && ! $hasExplicitPath
             && ! $this->coverageReportActive();
@@ -725,6 +728,13 @@ final class Tia implements AddsOutput, HandlesArguments, HandlesOriginalArgument
     public function addOutput(int $exitCode): int
     {
         if (Parallel::isWorker()) {
+            return $exitCode;
+        }
+
+        if (! $this->tiaEnabled
+            && ! $this->forceRefetch
+            && (string) Parallel::getGlobal(self::RECORDING_GLOBAL) !== '1'
+            && (string) Parallel::getGlobal(self::REPLAYING_GLOBAL) !== '1') {
             return $exitCode;
         }
 
